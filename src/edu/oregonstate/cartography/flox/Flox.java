@@ -1,9 +1,6 @@
 package edu.oregonstate.cartography.flox;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 import edu.oregonstate.cartography.utils.FileUtils;
 import edu.oregonstate.cartography.gui.ErrorDialog;
 import java.io.FileOutputStream;
@@ -29,8 +26,7 @@ public class Flox {
             public void run() {
                 try {
                     // ask for import file
-                    //String inFilePath = "/Users/jennyb/Desktop/test.wkt";
-                    String inFilePath = FileUtils.askFile("WKT File", true);
+                    String inFilePath = FileUtils.askFile("Shapefile", true);
                     if (inFilePath == null) {
                         // user canceled
                         System.exit(0);
@@ -40,7 +36,6 @@ public class Flox {
                     GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
 
                     // ask for export file
-                    // String outFilePath = "/Users/jennyb/Desktop/out.svg";
                     String outFilePath = FileUtils.askFile("SVG File", false);
                     if (outFilePath == null) {
                         // user canceled

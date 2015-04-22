@@ -7,8 +7,6 @@ package edu.oregonstate.cartography.utils;
  *
  */
 
-
-
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -17,7 +15,7 @@ import java.io.UTFDataFormatException;
 
 /**
  * MixedEndianDataInputStream can be used to read little endian and big endian data
- * from one single stream.
+ * from one stream.
  * Based on O'Reilly's "Java I/O" second edition, chapter 8, page 137,
  * LittleEndianInputStream class.
  * 
@@ -29,9 +27,7 @@ public class MixedEndianDataInputStream extends DataInputStream {
      * Creates a new instance of MixedEndianDataInputStream
      */
     public MixedEndianDataInputStream(InputStream i) {
-        
         super(i);
-        
     }
     
     /**

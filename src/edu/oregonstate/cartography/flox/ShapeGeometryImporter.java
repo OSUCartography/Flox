@@ -8,17 +8,14 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.operation.polygonize.Polygonizer;
 import edu.oregonstate.cartography.utils.URLUtils;
 import java.io.BufferedInputStream;
 import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * An importer for ESRI shape files. This importer only reads geometry from .shp
@@ -368,7 +365,6 @@ public class ShapeGeometryImporter {
                 }
             }
         }
-
     }
 
     private int[] readSHXFile(java.net.URL shapeURL) {
@@ -392,12 +388,6 @@ public class ShapeGeometryImporter {
                 recOffsets[i] = is.readInt() * 2;
                 // skip length
                 is.readInt();
-
-                /*
-                 System.out.println("Shape " + i);
-                 System.out.println("Offset: " + is.readInt() * 2);
-                 System.out.println("Content Length: " + is.readInt() * 2);
-                 */
             }
 
             return recOffsets;

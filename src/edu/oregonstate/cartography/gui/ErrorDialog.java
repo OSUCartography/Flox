@@ -44,6 +44,7 @@ public class ErrorDialog {
             final Component component = parentComponent;
 
             Runnable r = new Runnable() {
+                @Override
                 public void run() {
                     String message = msg;
                     if (e != null && e.getMessage() != null) {

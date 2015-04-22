@@ -4,7 +4,7 @@
  * Created on May 16, 2005, 8:47 PM
  */
 
-package ika.utils;
+package edu.oregonstate.cartography.utils;
 
 import java.awt.*;
 
@@ -22,7 +22,7 @@ public class ColorUtils {
      * @return The CSS string.
      */
     public static String colorToCSSString(Color color) {
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         str.append("rgb(");
         str.append(color.getRed());
         str.append(",");
@@ -61,20 +61,4 @@ public class ColorUtils {
         return highlightColor;
     }
     
-    /**
-     * @param alpha 0: completely transparent; 255: completely opaque.
-     */
-    public static final Color transparentColor (Color color, int alpha) {
-        if (color == null)
-            return null;
-        
-        /*
-        int rgba = color.getRGB();
-        rgba |= 0x000000ff;
-        alpha |= 0xffffff00;
-        rgba &= alpha;
-        return new Color (rgba, true);
-         */
-        return new Color (color.getRed(), color.getGreen(), color.getBlue(), alpha);
-    }
 }
