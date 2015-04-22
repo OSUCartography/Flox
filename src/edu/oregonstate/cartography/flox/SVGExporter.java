@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.DecimalFormat;
+import java.util.Collection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -32,12 +33,7 @@ import org.w3c.dom.Element;
  */
 public class SVGExporter {
 
-    /**
-     * rounding of coordinates
-     */
-    private final DecimalFormat df = new DecimalFormat("#.##");
-
-    private static final String SVGNAMESPACE = "http://www.w3.org/2000/svg";
+    protected static final String SVGNAMESPACE = "http://www.w3.org/2000/svg";
     private static final String XLINKNAMESPACE = "http://www.w3.org/1999/xlink";
     private static final String XMLEVENTSNAMESPACE = "http://www.w3.org/2001/xml-events";
 
@@ -46,6 +42,11 @@ public class SVGExporter {
      */
     private static final double MM2PX = 72. / 2.54 / 10.;
 
+    /**
+     * rounding of coordinates
+     */
+    protected final DecimalFormat df = new DecimalFormat("#.##");
+    
     /**
      * Name of the author creating the SVG document
      */
@@ -70,17 +71,17 @@ public class SVGExporter {
      * Scale factor to fit geometry to SVG canvas.
      */
     private double scale;
-    
+
     /**
      * Width of the SVG canvas in pixel.
      */
     private double canvasWidth;
-    
+
     /**
      * Height of the SVG canvas in pixel.
      */
     private double canvasHeight;
-
+    
     /**
      * Creates a new SVGExporter.
      *
@@ -88,10 +89,11 @@ public class SVGExporter {
      * @param authorName Name of the author creating the SVG document.
      * @param applicationName Name of the application creating the SVG document.
      */
-    public SVGExporter(GeometryCollection collection, String authorName, String applicationName) {
+    public SVGExporter(GeometryCollection collection,
+            String authorName, String applicationName) {
+        this.collection = collection;
         this.authorName = authorName;
         this.applicationName = applicationName;
-        this.collection = collection;
         bb = collection.getEnvelopeInternal();
         if (bb == null) {
             throw new IllegalArgumentException("SVG export: Empty bounding box.");
@@ -130,6 +132,8 @@ public class SVGExporter {
 
             // convert GeoSet to SVG DOM
             appendGeometryCollection(this.collection, svgRootElement, document);
+
+            append(svgRootElement, document);
 
             // Prepare the output file
             OutputStreamWriter outputStreamWriter
@@ -346,7 +350,7 @@ public class SVGExporter {
      *
      * @param element
      */
-    private void setVectorStyle(Element element) {
+    protected void setVectorStyle(Element element) {
         String strokeColor = ColorUtils.colorToCSSString(Color.BLACK);
         element.setAttribute("stroke", strokeColor);
         String fillColor = "none";
@@ -377,6 +381,15 @@ public class SVGExporter {
     protected double yToPagePx(double y) {
         double north = bb.getMaxY();
         return (north - y) / scale * 1000 * MM2PX;
+    }
+
+    /**
+     * Give derived classes opportunity to add custom data.
+     * @param svgRootElement
+     * @param document 
+     */
+    protected void append(Element svgRootElement, Document document) {
+        
     }
 
 }

@@ -6,6 +6,8 @@ import edu.oregonstate.cartography.gui.ErrorDialog;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,9 +44,13 @@ public class Flox {
                         System.exit(0);
                     }
                     outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
-
+                    Collection<BezierFlow> flows = new ArrayList<BezierFlow>();
+                    BezierFlow flow = new BezierFlow(0,0, 0, 100, 100, 100, 200, 0);
+                    flows.add(flow);
+                    
                     // export to SVG
-                    SVGExporter exporter = new SVGExporter(collection, "OSU Cartography Group", "Flox");
+                    SVGFlowExporter exporter = new SVGFlowExporter(collection, flows,
+                            "OSU Cartography Group", "Flox");
                     exporter.setSVGCanvasSize(800, 550);
                     OutputStream outputStream = new FileOutputStream(outFilePath);
                     exporter.export(outputStream);

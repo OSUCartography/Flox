@@ -3,10 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/utils/URLUtils.java</file>
             <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/utils/FileUtils.java</file>
             <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/flox/Flox.java</file>
             <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/utils/ColorUtils.java</file>
+            <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/gui/ErrorDialog.java</file>
+            <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/utils/MixedEndianDataInputStream.java</file>
+            <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/flox/ShapeGeometryImporter.java</file>
             <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/flox/SVGExporter.java</file>
+            <file>file:/Users/jennyb/Documents/Java/Flox/src/edu/oregonstate/cartography/gui/GUIUtil.java</file>
         </group>
     </open-files>
 </project-private>
