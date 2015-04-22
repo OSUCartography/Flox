@@ -46,9 +46,11 @@ public class Flox {
                         // user canceled
                         System.exit(0);
                     }
+                    outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
 
                     // export to SVG
                     SVGExporter exporter = new SVGExporter(collection, "OSU Cartography Group", "Flox");
+                    exporter.setSVGCanvasSize(800, 550);
                     OutputStream outputStream = new FileOutputStream(outFilePath);
                     exporter.export(outputStream);
                     

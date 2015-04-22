@@ -9,6 +9,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import ika.utils.ColorUtils;
 import java.awt.Color;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -64,13 +65,22 @@ public class SVGExporter {
     /**
      * Bounding box of the geometry collection that is exported.
      */
-    private final Envelope collectionBoundingBox;
+    private final Envelope bb;
 
     /**
-     * Denominator of the representative fraction of the map, e.g. 25000 for a
-     * scale of 1:25,000
+     * Scale factor to fit geometry to SVG canvas.
      */
-    private double mapScale = 1000;
+    private double scale;
+    
+    /**
+     * Width of the SVG canvas in pixel.
+     */
+    private double canvasWidth;
+    
+    /**
+     * Height of the SVG canvas in pixel.
+     */
+    private double canvasHeight;
 
     /**
      * Creates a new SVGExporter.
@@ -83,7 +93,19 @@ public class SVGExporter {
         this.authorName = authorName;
         this.applicationName = applicationName;
         this.collection = collection;
-        collectionBoundingBox = collection.getEnvelopeInternal();
+        bb = collection.getEnvelopeInternal();
+        if (bb == null) {
+            throw new IllegalArgumentException("SVG export: Empty bounding box.");
+        }
+        setSVGCanvasSize(600, 450);
+    }
+
+    public final void setSVGCanvasSize(double width, double height) {
+        canvasWidth = width;
+        canvasHeight = height;
+        double vScale = bb.getHeight() / (height / 1000 / MM2PX);
+        double hScale = bb.getWidth() / (width / 1000 / MM2PX);
+        scale = vScale > hScale ? vScale : hScale;
     }
 
     /**
@@ -173,18 +195,14 @@ public class SVGExporter {
         svg.setAttribute("version", "1.0");
         svg.setAttribute("preserveAspectRatio", "xMinYMin");
 
-        /*
-         FIXME
-         final double wWC = pageFormat.getPageWidthWorldCoordinates();
-         final double hWC = pageFormat.getPageHeightWorldCoordinates();
-         final double w = dimToPageRoundedPx((float) wWC);
-         final double h = dimToPageRoundedPx((float) hWC);
-         svg.setAttribute("width", Double.toString(w));
-         svg.setAttribute("height", Double.toString(h));
+        String wStr = df.format(canvasWidth);
+        String hStr = df.format(canvasHeight);
+        svg.setAttribute("width", wStr);
+        svg.setAttribute("height", hStr);
 
-         // Define the viewBox.
-         String viewBoxStr = "0 0 " + w + " " + h;
-         svg.setAttribute("viewBox", viewBoxStr);*/
+        // Define the viewBox.
+        String viewBoxStr = "0 0 " + wStr + " " + hStr;
+        svg.setAttribute("viewBox", viewBoxStr);
         return svg;
     }
 
@@ -346,8 +364,8 @@ public class SVGExporter {
      * @return Returns the coordinate in pixels.
      */
     protected double xToPagePx(double x) {
-        double west = collectionBoundingBox.getMinX();
-        return (x - west) / mapScale * 1000 * MM2PX;
+        double west = bb.getMinX();
+        return (x - west) / scale * 1000 * MM2PX;
     }
 
     /**
@@ -358,8 +376,8 @@ public class SVGExporter {
      * @return Returns the coordinate in the page coordinate system.
      */
     protected double yToPagePx(double y) {
-        double north = collectionBoundingBox.getMaxY();
-        return (north - y) / mapScale * 1000 * MM2PX;
+        double north = bb.getMaxY();
+        return (north - y) / scale * 1000 * MM2PX;
     }
 
 }
