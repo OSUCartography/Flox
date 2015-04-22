@@ -29,45 +29,33 @@ public class Flox {
             public void run() {
                 try {
                     // ask for import file
-                    String inFilePath = "/Users/jennyb/Desktop/test.wkt";
-                    // String inFilePath = FileUtils.askFile("WKT File", true);
+                    //String inFilePath = "/Users/jennyb/Desktop/test.wkt";
+                    String inFilePath = FileUtils.askFile("WKT File", true);
                     if (inFilePath == null) {
                         // user canceled
                         System.exit(0);
                     }
 
-                    // read WKT file
-                    CharSequence chars = FileUtils.charSequenceFromFile(inFilePath);
-                    String wktString = /*"GEOMETRYCOLLECTION(LINESTRING (0 0, 1000 1000, 1000 2000))"; */ chars.toString();
-                    Geometry geometry = new WKTReader().read(wktString);
-                    GeometryCollection collection;
-                    if (geometry instanceof GeometryCollection) {
-                        collection = (GeometryCollection)geometry;
-                    } else {
-                        collection = new GeometryCollection(new Geometry[] {geometry}, null);
-                    }
-                    
+                    // read shapefile
+                    GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
+
                     // ask for export file
-                    String outFilePath = "/Users/jennyb/Desktop/out.svg";
-                    // String outFilePath = FileUtils.askFile("SVG File", false);
+                    // String outFilePath = "/Users/jennyb/Desktop/out.svg";
+                    String outFilePath = FileUtils.askFile("SVG File", false);
                     if (outFilePath == null) {
                         // user canceled
                         System.exit(0);
                     }
-                    
-                    System.out.println(inFilePath);
-                    System.out.println(outFilePath);
-                    
+
                     // export to SVG
                     SVGExporter exporter = new SVGExporter(collection, "OSU Cartography Group", "Flox");
                     OutputStream outputStream = new FileOutputStream(outFilePath);
                     exporter.export(outputStream);
-
-                } catch (IOException | ParseException ex) {
+                    
+                    System.exit(0);
+                } catch (IOException ex) {
                     Logger.getLogger(Flox.class.getName()).log(Level.SEVERE, null, ex);
                     ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
-                } finally {
-                    System.exit(0);
                 }
             }
         });

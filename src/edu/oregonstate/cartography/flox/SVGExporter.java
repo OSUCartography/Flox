@@ -4,7 +4,9 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import ika.utils.ColorUtils;
 import java.awt.Color;
 import java.io.IOException;
@@ -232,38 +234,32 @@ public class SVGExporter {
         if (g == null) {
             return;
         }
-        setVectorSymbol(g);
+        setVectorStyle(g);
         parent.appendChild(g);
 
         final int nbrObj = collection.getNumGeometries();
         for (int i = 0; i < nbrObj; i++) {
             Geometry geometry = collection.getGeometryN(i);
-
-            if (geometry instanceof GeometryCollection) {
+            String svgPath = null;
+            if (geometry instanceof LineString) {
+                svgPath = convertToSVGPath((LineString) geometry);
+            } else if (geometry instanceof Polygon) {
+                svgPath = convertToSVGPath((Polygon) geometry);
+            } else if (geometry instanceof MultiPolygon) {
+                svgPath = convertToSVGPath((MultiPolygon) geometry);
+            } else if (geometry instanceof Point) {
+                System.out.println("SVG export of points not supported yet");
+            } else if (geometry instanceof GeometryCollection) {
                 appendGeometryCollection((GeometryCollection) geometry, g, document);
             } else {
-                if (geometry instanceof LineString) {
-                    appendLineString((LineString) geometry, g, document);
-                } /* else if (geometry instanceof GeoText) {
-                 writeGeoText((GeoText) geometry, parent, doc);
-                 }*/
-
+                System.out.println("SVG export found unsupported geometry type");
+            }
+            if (svgPath != null) {
+                Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
+                pathElement.setAttribute("d", svgPath);
+                g.appendChild(pathElement);
             }
         }
-    }
-
-    /**
-     * Append a LineString geometry to an SVG document
-     *
-     * @param lineString The geometry.
-     * @param parent The destination element.
-     * @param document The SVG document.
-     */
-    private void appendLineString(LineString lineString, Element parent, Document document) {
-        String svgPath = convertLineStringToSVGString(lineString);
-        Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-        pathElement.setAttribute("d", svgPath);
-        parent.appendChild(pathElement);
     }
 
     /**
@@ -273,7 +269,7 @@ public class SVGExporter {
      * @param lineString The LineString to convert.
      * @return A string for the d attribute of a SVG path element.
      */
-    private String convertLineStringToSVGString(LineString lineString) {
+    private String convertToSVGPath(LineString lineString) {
         StringBuilder str = new StringBuilder();
         Point startPoint = lineString.getStartPoint();
         str.append("M");
@@ -294,10 +290,46 @@ public class SVGExporter {
     }
 
     /**
-     * append vector style to element
-     * @param element 
+     * Converts a Polygon to a SVG string for the d attribute of a path element.
+     *
+     * @param polygon The geometry to convert.
+     * @return A string for the d attribute of a SVG path element.
      */
-    private void setVectorSymbol(Element element) {
+    private String convertToSVGPath(Polygon polygon) {
+        String svgPath = convertToSVGPath(polygon.getExteriorRing());
+        int numInteriorRings = polygon.getNumInteriorRing();
+        for (int i = 0; i < numInteriorRings; i++) {
+            LineString interiorRing = polygon.getInteriorRingN(i);
+            svgPath += " ";
+            svgPath += convertToSVGPath(interiorRing);
+        }
+        return svgPath;
+    }
+
+    /**
+     * Converts a MultiPolygon to a SVG string for the d attribute of a path
+     * element.
+     *
+     * @param multiPolygon The geometry to convert.
+     * @return A string for the d attribute of a SVG path element.
+     */
+    private String convertToSVGPath(MultiPolygon multiPolygon) {
+        int numPolygons = multiPolygon.getNumGeometries();
+        String svgPath = "";
+        for (int i = 0; i < numPolygons; i++) {
+            Polygon polygon = (Polygon) multiPolygon.getGeometryN(i);
+            svgPath += " ";
+            svgPath += convertToSVGPath(polygon);
+        }
+        return svgPath;
+    }
+
+    /**
+     * add vector style to element
+     *
+     * @param element
+     */
+    private void setVectorStyle(Element element) {
         String strokeColor = ColorUtils.colorToCSSString(Color.BLACK);
         element.setAttribute("stroke", strokeColor);
         String fillColor = "none";
@@ -306,9 +338,10 @@ public class SVGExporter {
         element.setAttribute("stroke-width", Double.toString(strokeWidth));
     }
 
-     /**
-     * Transforms a horizontal x coordinate (usually in meters) to pixels. Takes 
+    /**
+     * Transforms a horizontal x coordinate (usually in meters) to pixels. Takes
      * the scale and bounding box defined by the PageFormat into account.
+     *
      * @param x The horizontal coordinate.
      * @return Returns the coordinate in pixels.
      */
@@ -316,10 +349,11 @@ public class SVGExporter {
         double west = collectionBoundingBox.getMinX();
         return (x - west) / mapScale * 1000 * MM2PX;
     }
-    
+
     /**
-     * Transforms a vertical y coordinate to the scale 
-     * and bounding box defined by the PageFormat.
+     * Transforms a vertical y coordinate to the scale and bounding box defined
+     * by the PageFormat.
+     *
      * @param y The vertical coordinate.
      * @return Returns the coordinate in the page coordinate system.
      */
@@ -327,5 +361,5 @@ public class SVGExporter {
         double north = collectionBoundingBox.getMaxY();
         return (north - y) / mapScale * 1000 * MM2PX;
     }
-   
+
 }
