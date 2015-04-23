@@ -46,7 +46,9 @@ public class Flox {
                     outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
                     Collection<BezierFlow> flows = new ArrayList<BezierFlow>();
                     BezierFlow flow = new BezierFlow(0,0, 0, 100, 100, 100, 200, 0);
+                    BezierFlow flow2 = new BezierFlow(10, 10, 10, 110, 110, 110, 210, 10);
                     flows.add(flow);
+                    flows.add(flow2);
                     
                     // export to SVG
                     SVGFlowExporter exporter = new SVGFlowExporter(collection, flows,

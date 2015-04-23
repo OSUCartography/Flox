@@ -45,10 +45,12 @@ public class SVGFlowExporter extends SVGExporter {
             str.append(df.format(xToPagePx(flow.getcPt1().x)));
             str.append(" ");
             str.append(df.format(yToPagePx(flow.getcPt1().y)));
+            str.append(", ");
             
             str.append(df.format(xToPagePx(flow.getcPt2().x)));
-            str.append(", ");
+            str.append(" ");
             str.append(df.format(yToPagePx(flow.getcPt2().y)));
+            str.append(", ");
             
             str.append(df.format(xToPagePx(flow.getEndPt().x)));
             str.append(", ");
