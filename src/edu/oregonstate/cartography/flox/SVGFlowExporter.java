@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox;
 
+import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import java.util.Collection;
 import org.w3c.dom.Document;

@@ -5,8 +5,8 @@
  */
 package edu.oregonstate.cartography.utils;
 
-import edu.oregonstate.cartography.gui.ErrorDialog;
-import edu.oregonstate.cartography.gui.GUIUtil;
+import edu.oregonstate.cartography.flow.gui.ErrorDialog;
+import edu.oregonstate.cartography.flow.gui.GUIUtil;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.FileChannel;

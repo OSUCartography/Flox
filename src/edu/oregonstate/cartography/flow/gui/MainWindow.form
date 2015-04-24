@@ -53,7 +53,7 @@
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
   <SubComponents>
-    <Container class="edu.oregonstate.cartography.gui.MapComponent" name="mapComponent">
+    <Container class="edu.oregonstate.cartography.simplefeature.SimpleFeatureMapComponent" name="mapComponent">
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
           <BorderConstraints direction="Center"/>

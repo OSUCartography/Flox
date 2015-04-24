@@ -1,4 +1,4 @@
-package edu.oregonstate.cartography.flox;
+package edu.oregonstate.cartography.simplefeature;
 
 import edu.oregonstate.cartography.utils.MixedEndianDataInputStream;
 import com.vividsolutions.jts.geom.Coordinate;

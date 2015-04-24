@@ -1,4 +1,4 @@
-package edu.oregonstate.cartography.gui;
+package edu.oregonstate.cartography.simplefeature;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -8,7 +8,6 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
@@ -19,21 +18,19 @@ import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 
 /**
+ * Abstract base class for a map component that draws JTS simple features.
+ * Concrete implementations must implement getBoundingBox and override
+ * paintComponent.
  *
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
-public class MapComponent extends JComponent {
+public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
 
     /**
      * image buffer
      */
-    private BufferedImage bufferImage = null;
-
-    /**
-     * Geometry to draw
-     */
-    private Geometry geometry;
+    protected BufferedImage bufferImage = null;
 
     /**
      * western most point in geometry
@@ -49,18 +46,18 @@ public class MapComponent extends JComponent {
      * Drawing offset from left border in pixel.
      */
     private double xOffsetPx;
-    
+
     /**
      * Drawing offset from top border in pixel.
      */
     private double yOffsetPx;
-    
+
     /**
      * scale factor for drawing geometry
      */
     private double scale;
 
-    public MapComponent() {
+    public AbstractSimpleFeatureMapComponent() {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -69,22 +66,33 @@ public class MapComponent extends JComponent {
         });
     }
 
+    /**
+     * Returns the bounding box of the geometry that is drawn by the map.
+     *
+     * @return The bounding box.
+     */
+    public abstract Envelope getBoundingBox();
+
+    /**
+     * Returns a Graphics2D context for a buffer window. Geometry should be
+     * rendered to this context.
+     *
+     * @return The Graphics2D context to draw to.
+     */
     protected Graphics2D initBufferImage() {
 
         Insets insets = getInsets();
         int w = getWidth() - insets.left - insets.right;
         int h = getHeight() - insets.top - insets.bottom;
 
+        Graphics2D g2d;
         // make sure the bufferImage image is allocated and has same size
         if (bufferImage == null
                 || bufferImage.getWidth() != w
                 || bufferImage.getHeight() != h) {
             bufferImage = (BufferedImage) createImage(w, h);
 
-            Graphics2D g2d = (Graphics2D) bufferImage.getGraphics();
-
-            g2d.setBackground(Color.WHITE);
-            g2d.clearRect(0, 0, w, h);
+            g2d = (Graphics2D) bufferImage.getGraphics();
 
             // enable antialiasing
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -99,12 +107,23 @@ public class MapComponent extends JComponent {
             g2d.setStroke(new BasicStroke(1));
             g2d.setColor(Color.black);
 
-            return g2d;
         } else {
-            return (Graphics2D) bufferImage.getGraphics();
+            g2d = (Graphics2D) bufferImage.getGraphics();
         }
+
+        // erase background
+        g2d.setBackground(Color.WHITE);
+        g2d.clearRect(0, 0, w, h);
+        
+        return g2d;
     }
 
+    /**
+     * Draw an OGC Simple Feature.
+     *
+     * @param geometry The geometry to draw.
+     * @param g2d The graphics context to draw to.
+     */
     protected void draw(Geometry geometry, Graphics2D g2d) {
         if (geometry instanceof LineString) {
             draw((LineString) geometry, g2d);
@@ -117,6 +136,12 @@ public class MapComponent extends JComponent {
         }
     }
 
+    /**
+     * Draw an OGC Simple Feature geometry collection.
+     *
+     * @param collection The geometry to draw.
+     * @param g2d The graphics context to draw to.
+     */
     protected void draw(GeometryCollection collection, Graphics2D g2d) {
         int nbrObj = collection.getNumGeometries();
         for (int i = 0; i < nbrObj; i++) {
@@ -125,9 +150,23 @@ public class MapComponent extends JComponent {
         }
     }
 
+    /**
+     * Draw an OGC Simple Feature point.
+     *
+     * @param point The geometry to draw.
+     * @param g2d The graphics context to draw to.
+     */
     protected void draw(Point point, Graphics2D g2d) {
+        // TODO
+        throw new InternalError();
     }
 
+    /**
+     * Draw an OGC Simple Feature line string.
+     *
+     * @param lineString The geometry to draw.
+     * @param g2d The graphics context to draw to.
+     */
     protected void draw(LineString lineString, Graphics2D g2d) {
         int nPts = lineString.getNumPoints();
         if (nPts < 2) {
@@ -146,6 +185,12 @@ public class MapComponent extends JComponent {
         g2d.draw(path);
     }
 
+    /**
+     * Draw an OGC Simple Feature polygon.
+     *
+     * @param polygon The geometry to draw.
+     * @param g2d The graphics context to draw to.
+     */
     protected void draw(Polygon polygon, Graphics2D g2d) {
         LineString exteriorRing = polygon.getExteriorRing();
         draw(exteriorRing, g2d);
@@ -174,23 +219,6 @@ public class MapComponent extends JComponent {
     }
 
     /**
-     * Override paintComponent of JComponent for custom drawing.
-     *
-     * @param g The destination to draw to.
-     */
-    @Override
-    protected void paintComponent(Graphics g) {
-        if (geometry != null) {
-            Graphics2D g2d = initBufferImage();
-            draw(geometry, g2d);
-            g2d.dispose();
-
-            Insets insets = getInsets();
-            ((Graphics2D) g).drawImage(bufferImage, insets.left, insets.top, this);
-        }
-    }
-
-    /**
      * Inform Swing that this JComponent is opaque, i.e. we are drawing the
      * whole area of this Component. This accelerates the drawing of the
      * component.
@@ -203,28 +231,13 @@ public class MapComponent extends JComponent {
     }
 
     /**
-     * @return the geometry
-     */
-    public Geometry getGeometry() {
-        return geometry;
-    }
-
-    /**
-     * @param geometry the geometry to set
-     */
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
-        showAll();
-        bufferImage = null;
-        repaint();
-    }
-
-    /**
      * Adjust scale and offset to show the entire geometry in the available
-     * space.
+     * canvas space, and repaint the map.
      */
     public void showAll() {
-        if (geometry == null) {
+        Envelope bb = getBoundingBox();
+
+        if (bb == null) {
             scale = 1;
             west = 0;
             north = 0;
@@ -234,7 +247,6 @@ public class MapComponent extends JComponent {
             Insets insets = getInsets();
             int w = getWidth() - insets.left - insets.right;
             int h = getHeight() - insets.top - insets.bottom;
-            Envelope bb = geometry.getEnvelopeInternal();
             double vScale = bb.getHeight() / h;
             double hScale = bb.getWidth() / w;
             scale = vScale > hScale ? vScale : hScale;
@@ -243,6 +255,7 @@ public class MapComponent extends JComponent {
             xOffsetPx = (w - bb.getWidth() / scale) / 2;
             yOffsetPx = (h - bb.getHeight() / scale) / 2;
         }
+        repaint();
     }
 
 }

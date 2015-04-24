@@ -1,8 +1,9 @@
-package edu.oregonstate.cartography.gui;
+package edu.oregonstate.cartography.flow.gui;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
-import edu.oregonstate.cartography.flox.SVGExporter;
-import edu.oregonstate.cartography.flox.ShapeGeometryImporter;
+import edu.oregonstate.cartography.flox.Model;
+import edu.oregonstate.cartography.simplefeature.SVGExporter;
+import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,14 +19,24 @@ import java.util.logging.Logger;
 public class MainWindow extends javax.swing.JFrame {
 
     /**
+     * the model of this application
+     */
+    private Model model;
+    
+    /**
      * Creates new form MainWindow
      */
     public MainWindow() {
         initComponents();
     }
-
-    public MapComponent getMap() {
-        return mapComponent;
+    
+    /**
+     * Set the model for this application.
+     * @param model 
+     */
+    public void setModel(Model model) {
+        this.model = model;
+        mapComponent.setGeometry(model.getGeometry());
     }
 
     /**
@@ -37,7 +48,7 @@ public class MainWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        mapComponent = new edu.oregonstate.cartography.gui.MapComponent();
+        mapComponent = new edu.oregonstate.cartography.simplefeature.SimpleFeatureMapComponent();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -82,7 +93,7 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
             outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
-            SVGExporter exporter = new SVGExporter((GeometryCollection) mapComponent.getGeometry(),
+            SVGExporter exporter = new SVGExporter(model.getGeometryCollection(),
                     "OSU Cartography Group", "Flox");
             exporter.setSVGCanvasSize(800, 550);
             outputStream = new FileOutputStream(outFilePath);
@@ -116,6 +127,7 @@ public class MainWindow extends javax.swing.JFrame {
             
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
+            model.setGeometry(collection);
             mapComponent.setGeometry(collection);
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -130,7 +142,7 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
-    private edu.oregonstate.cartography.gui.MapComponent mapComponent;
+    private edu.oregonstate.cartography.simplefeature.SimpleFeatureMapComponent mapComponent;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openShapefileMenuItem;
     // End of variables declaration//GEN-END:variables

@@ -1,4 +1,4 @@
-package edu.oregonstate.cartography.flox;
+package edu.oregonstate.cartography.simplefeature;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
