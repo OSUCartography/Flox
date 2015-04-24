@@ -100,7 +100,8 @@ public class Model {
         Envelope env = geometry.getEnvelopeInternal();
         Rectangle2D bb = new Rectangle2D.Double(env.getMinX(), env.getMinY(),
                 env.getWidth(), env.getHeight());
-        return bb.createUnion(getFlowsBoundingBox());
+        Rectangle2D flowsBB = getFlowsBoundingBox();
+        return flowsBB == null ? bb : bb.createUnion(flowsBB);
     }
 
     /**

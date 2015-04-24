@@ -31,6 +31,11 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * image buffer
      */
     protected BufferedImage bufferImage = null;
+    
+    /**
+     * cached Graphics2D context for bufferImage
+     */
+    private Graphics2D g2dBuffer;
 
     /**
      * western most point in geometry
@@ -75,47 +80,49 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
 
     /**
      * Returns a Graphics2D context for a buffer window. Geometry should be
-     * rendered to this context.
+     * rendered to this context. The returned canvas is cleared.
      *
-     * @return The Graphics2D context to draw to.
+     * @return The Graphics2D context to draw to. This is cached, so do not dispose it.
      */
-    protected Graphics2D initBufferImage() {
+    protected Graphics2D getGraphics2DBuffer() {
 
         Insets insets = getInsets();
         int w = getWidth() - insets.left - insets.right;
         int h = getHeight() - insets.top - insets.bottom;
 
-        Graphics2D g2d;
         // make sure the bufferImage image is allocated and has same size
         if (bufferImage == null
                 || bufferImage.getWidth() != w
                 || bufferImage.getHeight() != h) {
+            
+            if (g2dBuffer != null) {
+                g2dBuffer.dispose();
+            }
+            
             bufferImage = (BufferedImage) createImage(w, h);
-
-            g2d = (Graphics2D) bufferImage.getGraphics();
+            g2dBuffer = bufferImage.createGraphics();
 
             // enable antialiasing
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+            g2dBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
             // enable high quality rendering
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
+            g2dBuffer.setRenderingHint(RenderingHints.KEY_RENDERING,
                     RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+            g2dBuffer.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                     RenderingHints.VALUE_STROKE_PURE);
-
+            // enable bicubic interpolation of images
+            g2dBuffer.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                    RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             // set default appearance of vector elements
-            g2d.setStroke(new BasicStroke(1));
-            g2d.setColor(Color.black);
-
-        } else {
-            g2d = (Graphics2D) bufferImage.getGraphics();
+            g2dBuffer.setStroke(new BasicStroke(1));
+            g2dBuffer.setColor(Color.black);
+            g2dBuffer.setBackground(Color.WHITE);
         }
 
         // erase background
-        g2d.setBackground(Color.WHITE);
-        g2d.clearRect(0, 0, w, h);
-        
-        return g2d;
+        g2dBuffer.clearRect(0, 0, w, h);
+
+        return g2dBuffer;
     }
 
     /**
@@ -165,18 +172,17 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
-     * Draw an OGC Simple Feature line string.
+     * Add a OGC Simple Feature line string to a Swing path.
      *
-     * @param lineString The geometry to draw.
-     * @param g2d The graphics context to draw to.
+     * @param lineString The line string to add.
+     * @param path The Swing path.
      */
-    protected void draw(LineString lineString, Graphics2D g2d) {
+    private void addLineStringToGeneralPath(LineString lineString, GeneralPath path) {
         int nPts = lineString.getNumPoints();
         if (nPts < 2) {
             return;
         }
 
-        GeneralPath path = new GeneralPath();
         Point point = lineString.getStartPoint();
         path.moveTo(xToPx(point.getX()), yToPx(point.getY()));
 
@@ -184,7 +190,17 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
             point = lineString.getPointN(i);
             path.lineTo(xToPx(point.getX()), yToPx(point.getY()));
         }
+    }
 
+    /**
+     * Draw an OGC Simple Feature line string.
+     *
+     * @param lineString The geometry to draw.
+     * @param g2d The graphics context to draw to.
+     */
+    protected void draw(LineString lineString, Graphics2D g2d) {
+        GeneralPath path = new GeneralPath();
+        addLineStringToGeneralPath(lineString, path);
         g2d.draw(path);
     }
 
@@ -196,7 +212,14 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      */
     protected void draw(Polygon polygon, Graphics2D g2d) {
         LineString exteriorRing = polygon.getExteriorRing();
-        draw(exteriorRing, g2d);
+        GeneralPath path = new GeneralPath();
+        addLineStringToGeneralPath(exteriorRing, path);
+
+        int nbrInteriorRings = polygon.getNumInteriorRing();
+        for (int i = 0; i < nbrInteriorRings; i++) {
+            addLineStringToGeneralPath(polygon.getInteriorRingN(i), path);
+        }
+        g2d.draw(path);
     }
 
     /**

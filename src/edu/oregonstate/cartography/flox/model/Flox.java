@@ -18,8 +18,8 @@ public class Flox {
         Model model = new Model();
         BezierFlow flow = new BezierFlow(0, 0, 0, 100, 100, 100, 200, 0);
         BezierFlow flow2 = new BezierFlow(10, 10, 10, 110, 110, 110, 210, 10);
-        model.addFlow(flow);
-        model.addFlow(flow2);
+        //model.addFlow(flow);
+        //model.addFlow(flow2);
         return model;
     }
 

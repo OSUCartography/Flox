@@ -44,12 +44,10 @@ public class SimpleFeatureMapComponent extends AbstractSimpleFeatureMapComponent
     @Override
     protected void paintComponent(Graphics g) {
         if (geometry != null) {
-            Graphics2D g2d = initBufferImage();
+            Graphics2D g2d = getGraphics2DBuffer();
             draw(geometry, g2d);
-            g2d.dispose();
-
             Insets insets = getInsets();
-            ((Graphics2D) g).drawImage(bufferImage, insets.left, insets.top, this);
+            g.drawImage(bufferImage, insets.left, insets.top, null);
         }
     }
 

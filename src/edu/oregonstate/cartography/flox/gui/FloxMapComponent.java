@@ -4,6 +4,7 @@ import edu.oregonstate.cartography.flox.model.BezierFlow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -47,10 +48,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             return;
         }
 
-        Graphics2D g2d = initBufferImage();
+        Graphics2D g2d = getGraphics2DBuffer();
+        g2d.setColor(Color.LIGHT_GRAY);
         draw(model.getGeometry(), g2d);
+        g2d.setColor(Color.BLACK);
         drawFlows(g2d);
-        g2d.dispose();
 
         // copy double buffer image to JComponent
         Insets insets = getInsets();
