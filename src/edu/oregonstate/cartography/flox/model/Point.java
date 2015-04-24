@@ -1,4 +1,4 @@
-package edu.oregonstate.cartography.flox;
+package edu.oregonstate.cartography.flox.model;
 
 /**
  *

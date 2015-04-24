@@ -1,4 +1,6 @@
-package edu.oregonstate.cartography.flox;
+package edu.oregonstate.cartography.flox.model;
+
+import java.awt.geom.Rectangle2D;
 
 /**
  *
@@ -18,6 +20,15 @@ public class BezierFlow extends Flow {
         this.endPt = new Point(endX, endY);
     }
 
+    @Override
+    public Rectangle2D.Double getBoundingBox() {
+        Rectangle2D.Double bb = new Rectangle2D.Double(startPt.x, startPt.y, 0, 0);
+        bb.add(endPt.x, endPt.y);
+        bb.add(cPt1.x, cPt1.y);
+        bb.add(cPt2.x, cPt2.y);
+        return bb;
+    }
+    
     /**
      * @return the cPt1
      */
@@ -45,4 +56,5 @@ public class BezierFlow extends Flow {
     public void setcPt2(Point cPt2) {
         this.cPt2 = cPt2;
     }
+
 }

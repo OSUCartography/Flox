@@ -1,4 +1,4 @@
-package edu.oregonstate.cartography.flox;
+package edu.oregonstate.cartography.flox.model;
 
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import com.vividsolutions.jts.geom.GeometryCollection;

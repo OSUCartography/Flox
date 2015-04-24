@@ -4,7 +4,7 @@
  * Created on September 11, 2007, 10:54 PM
  *
  */
-package edu.oregonstate.cartography.flow.gui;
+package edu.oregonstate.cartography.flox.gui;
 
 import java.awt.Component;
 import java.awt.Dimension;

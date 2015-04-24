@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.geom.Rectangle2D;
 
 /**
  *
@@ -24,11 +25,15 @@ public class SimpleFeatureMapComponent extends AbstractSimpleFeatureMapComponent
     /**
      * Returns the bounding box of the geometry to draw.
      *
-     * @return The bounding box.
+     * @return The bounding box, null if no geometry is defined.
      */
     @Override
-    public Envelope getBoundingBox() {
-        return geometry != null ? geometry.getEnvelopeInternal() : null;
+    protected Rectangle2D getBoundingBox() {
+        if (geometry == null) {
+            return null;
+        }
+        Envelope e = geometry.getEnvelopeInternal();
+        return new Rectangle2D.Double(e.getMinX(), e.getMinY(), e.getWidth(), e.getHeight());
     }
 
     /**

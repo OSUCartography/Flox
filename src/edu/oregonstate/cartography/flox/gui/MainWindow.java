@@ -1,7 +1,7 @@
-package edu.oregonstate.cartography.flow.gui;
+package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
-import edu.oregonstate.cartography.flox.Model;
+import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
@@ -36,7 +36,7 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public void setModel(Model model) {
         this.model = model;
-        mapComponent.setGeometry(model.getGeometry());
+        mapComponent.setModel(model);
     }
 
     /**
@@ -48,7 +48,7 @@ public class MainWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        mapComponent = new edu.oregonstate.cartography.simplefeature.SimpleFeatureMapComponent();
+        mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -128,7 +128,7 @@ public class MainWindow extends javax.swing.JFrame {
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
             model.setGeometry(collection);
-            mapComponent.setGeometry(collection);
+            mapComponent.showAll();
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
@@ -142,7 +142,7 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
-    private edu.oregonstate.cartography.simplefeature.SimpleFeatureMapComponent mapComponent;
+    private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openShapefileMenuItem;
     // End of variables declaration//GEN-END:variables

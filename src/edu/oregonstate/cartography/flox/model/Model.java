@@ -1,9 +1,12 @@
-package edu.oregonstate.cartography.flox;
+package edu.oregonstate.cartography.flox.model;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Model for Flox.
@@ -69,5 +72,42 @@ public class Model {
             return new GeometryFactory().createGeometryCollection(geometries);
         }
     }
+    
+    /**
+     * Returns the bounding box of all flows, excluding the other geometry.
+     * @return 
+     */
+    public Rectangle2D getFlowsBoundingBox() {
+        int nFlows = flows.size();
+        if (nFlows == 0) {
+            return null;
+        }
+        Rectangle2D bb = flows.get(0).getBoundingBox();
+        for (int i = 0; i< nFlows; i++) {
+            bb = bb.createUnion(flows.get(i).getBoundingBox());
+        }
+        return bb;
+    }
+    
+    /**
+     * Compute the bounding box for all map geometry, including the flows.
+     * @return The bounding box.
+     */
+    public Rectangle2D getBoundingBox() {
+        if (geometry == null) {
+            return getFlowsBoundingBox();
+        }
+        Envelope env = geometry.getEnvelopeInternal();
+        Rectangle2D bb = new Rectangle2D.Double(env.getMinX(), env.getMinY(),
+                env.getWidth(), env.getHeight());
+        return bb.createUnion(getFlowsBoundingBox());
+    }
 
+    /**
+     * Returns an iterator for the flows.
+     * @return The iterator.
+     */
+    public Iterator<BezierFlow> flowIterator() {
+        return flows.iterator();
+    }
 }

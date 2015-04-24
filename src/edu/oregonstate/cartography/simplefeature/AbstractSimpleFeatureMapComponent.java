@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.simplefeature;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
@@ -14,6 +13,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 
@@ -71,7 +71,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @return The bounding box.
      */
-    public abstract Envelope getBoundingBox();
+    protected abstract Rectangle2D getBoundingBox();
 
     /**
      * Returns a Graphics2D context for a buffer window. Geometry should be
@@ -125,6 +125,9 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * @param g2d The graphics context to draw to.
      */
     protected void draw(Geometry geometry, Graphics2D g2d) {
+        if (geometry == null) {
+            return;
+        }
         if (geometry instanceof LineString) {
             draw((LineString) geometry, g2d);
         } else if (geometry instanceof Polygon) {
@@ -235,7 +238,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * canvas space, and repaint the map.
      */
     public void showAll() {
-        Envelope bb = getBoundingBox();
+        Rectangle2D bb = getBoundingBox();
 
         if (bb == null) {
             scale = 1;

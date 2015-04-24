@@ -1,4 +1,6 @@
-package edu.oregonstate.cartography.flox;
+package edu.oregonstate.cartography.flox.model;
+
+import java.awt.geom.Rectangle2D;
 
 /**
  *
@@ -6,10 +8,25 @@ package edu.oregonstate.cartography.flox;
  * University
  */
 public abstract class Flow {
+    
+    /**
+     * start point of flow.
+     */
     protected Point startPt;
+    
+    /**
+     * end point of flow
+     */
     protected Point endPt;
 
     /**
+     * Return bounding box of this flow.
+     * @return 
+     */
+    public abstract Rectangle2D.Double getBoundingBox();
+    
+    /**
+     * Returns the start point of the flow.
      * @return the startPt
      */
     public Point getStartPt() {
@@ -17,6 +34,7 @@ public abstract class Flow {
     }
 
     /**
+     * Set the start point of the flow.
      * @param startPt the startPt to set
      */
     public void setStartPt(Point startPt) {
@@ -24,6 +42,7 @@ public abstract class Flow {
     }
 
     /**
+     * Returns the end point of the flow.
      * @return the endPt
      */
     public Point getEndPt() {
@@ -31,6 +50,7 @@ public abstract class Flow {
     }
 
     /**
+     * Set the end point of the flow.
      * @param endPt the endPt to set
      */
     public void setEndPt(Point endPt) {

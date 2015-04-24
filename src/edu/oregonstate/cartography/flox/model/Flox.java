@@ -1,7 +1,6 @@
-package edu.oregonstate.cartography.flox;
+package edu.oregonstate.cartography.flox.model;
 
-import edu.oregonstate.cartography.flow.gui.MainWindow;
-import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import edu.oregonstate.cartography.flox.gui.MainWindow;
 import javax.swing.UIManager;
 
 /**
@@ -36,13 +35,17 @@ public class Flox {
         } catch (Exception ex) {
         }
 
+        // initialize model
+        Model model = initModel();
+        
+        // initialize GUI
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
                 MainWindow window = new MainWindow();
                 window.setSize(800, 600);
                 window.setVisible(true);
-                window.setModel(initModel());
+                window.setModel(model);
                 window.openShapefile();
             }
         });

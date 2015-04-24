@@ -3,7 +3,7 @@
  *
  * Created on January 9, 2006, 10:37 AM
  */
-package edu.oregonstate.cartography.flow.gui;
+package edu.oregonstate.cartography.flox.gui;
 
 import javax.swing.*;
 import java.awt.*;
