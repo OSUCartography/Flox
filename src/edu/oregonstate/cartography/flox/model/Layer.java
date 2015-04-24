@@ -15,6 +15,8 @@ import java.awt.geom.Rectangle2D;
  */
 public class Layer {
 
+    private static int layerCounter = 0;
+    
     /**
      * layer geometry
      */
@@ -25,6 +27,8 @@ public class Layer {
      */
     private final VectorSymbol vectorSymbol = new VectorSymbol();
 
+    private String name = "Layer " + ++layerCounter;
+    
     /**
      * Constructor
      */
@@ -35,10 +39,10 @@ public class Layer {
      * Constructor
      * @param geometry The geometry for the layer.
      */
-    Layer(Geometry geometry) {
+    public Layer(Geometry geometry) {
         this.geometry = geometry;
     }
-
+    
     /**
      * @return the geometry
      */
@@ -88,4 +92,22 @@ public class Layer {
         return vectorSymbol;
     }
     
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    @Override
+    public String toString() {
+        return name;
+    }
 }

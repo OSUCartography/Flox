@@ -17,7 +17,7 @@ public class VectorSymbol {
     /**
      * If true geometry is stroked.
      */
-    private boolean stroked = false;
+    private boolean stroked = true;
     
     /**
      * color of filling
@@ -27,7 +27,7 @@ public class VectorSymbol {
     /**
      * If true, geometry is filled.
      */
-    private boolean filled = true;
+    private boolean filled = false;
 
     /**
      * @return the strokeColor

@@ -3,6 +3,7 @@ package edu.oregonstate.cartography.flox.model;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -90,11 +91,33 @@ public class Model {
         return map.layerIterator();
     }
 
-    public void addLayer(GeometryCollection collection) {
-        map.addLayer(collection);
+    public Collection<Layer> getLayers() {
+        return map.getLayers();
+    }
+    
+    /**
+     * Returns a layer specified by an id.
+     * @param id
+     * @return 
+     */
+    public Layer getLayer(int id) {
+        return map.getLayer(id);
+    }
+    
+    /**
+     * Add a layer to the map.
+     * @param collection Geometry for the layer.
+     * @return The new layer.
+     */
+    public Layer addLayer(GeometryCollection collection) {
+        return map.addLayer(collection);
     }
 
     public void removeAllLayers() {
         map.removeAllLayers();
+    }
+
+    public void removeLayer(int id) {
+        map.removeLayer(id);
     }
 }

@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -24,10 +25,23 @@ public class Map {
     }
 
     /**
+     * Add a layer to the map.
      * @param geometry the geometry to set
+     * @return The new layer.
      */
-    public void addLayer(Geometry geometry) {
-        layers.add(new Layer(geometry));
+    public Layer addLayer(Geometry geometry) {
+        Layer layer = new Layer(geometry);
+        layers.add(layer);
+        return layer;
+    }
+    
+    /**
+     * Returns a layer specified by an id.
+     * @param id
+     * @return 
+     */
+    public Layer getLayer(int id) {
+        return layers.get(id);
     }
 
     /**
@@ -43,6 +57,14 @@ public class Map {
      */
     public Iterator<Layer> layerIterator() {
         return layers.iterator();
+    }
+    
+    public Collection<Layer> getLayers() {
+        return layers;
+    }
+    
+    void removeLayer(int id) {
+        layers.remove(id);
     }
 
     /**
@@ -72,11 +94,12 @@ public class Map {
                 if (bb == null) {
                     bb = layerBB;
                 } else {
-                    bb.createUnion(layerBB);
+                    bb = bb.createUnion(layerBB);
                 }
             }
         }
         return bb;
     }
+
 
 }

@@ -1,7 +1,9 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
+import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
+import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
@@ -10,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -22,21 +25,29 @@ public class MainWindow extends javax.swing.JFrame {
      * the model of this application
      */
     private Model model;
-    
+
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
         initComponents();
     }
-    
+
     /**
      * Set the model for this application.
-     * @param model 
+     *
+     * @param model
      */
     public void setModel(Model model) {
         this.model = model;
         mapComponent.setModel(model);
+    }
+
+    private void updateLayerList() {
+        assert SwingUtilities.isEventDispatchThread();
+        int selectedID = layerList.getSelectedIndex();
+        layerList.setListData(model.getLayers().toArray());
+        layerList.setSelectedIndex(selectedID);
     }
 
     /**
@@ -47,19 +58,94 @@ public class MainWindow extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
+        leftPanel = new javax.swing.JPanel();
+        layerListScrollPane = new javax.swing.JScrollPane();
+        layerList = new edu.oregonstate.cartography.flox.gui.DraggableList();
+        symbolPanel = new javax.swing.JPanel();
+        fillCheckBox = new javax.swing.JCheckBox();
+        strokeCheckBox = new javax.swing.JCheckBox();
+        fillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
+        openShapefileMenuItem = new javax.swing.JMenuItem();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
-        openShapefileMenuItem = new javax.swing.JMenuItem();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
+        removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
 
+        leftPanel.setPreferredSize(new java.awt.Dimension(120, 100));
+        leftPanel.setLayout(new java.awt.GridLayout(2, 1));
+
+        layerList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                layerListValueChanged(evt);
+            }
+        });
+        layerListScrollPane.setViewportView(layerList);
+
+        leftPanel.add(layerListScrollPane);
+
+        symbolPanel.setLayout(new java.awt.GridBagLayout());
+
+        fillCheckBox.setText("Fill");
+        fillCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fillCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        symbolPanel.add(fillCheckBox, gridBagConstraints);
+
+        strokeCheckBox.setText("Stroke");
+        strokeCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                strokeCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        symbolPanel.add(strokeCheckBox, gridBagConstraints);
+
+        fillColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fillColorButtonActionPerformed(evt);
+            }
+        });
+        symbolPanel.add(fillColorButton, new java.awt.GridBagConstraints());
+
+        strokeColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                strokeColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        symbolPanel.add(strokeColorButton, gridBagConstraints);
+
+        leftPanel.add(symbolPanel);
+
+        getContentPane().add(leftPanel, java.awt.BorderLayout.WEST);
+
         fileMenu.setText("File");
+
+        openShapefileMenuItem.setText("Add Shapefile Layer…");
+        openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openShapefileMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(openShapefileMenuItem);
 
         exportSVGMenuItem.setText("Export SVG…");
         exportSVGMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -73,14 +159,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapMenu.setText("Map");
 
-        openShapefileMenuItem.setText("Add Shapefile Layer…");
-        openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openShapefileMenuItemActionPerformed(evt);
-            }
-        });
-        mapMenu.add(openShapefileMenuItem);
-
         removeAllLayersMenuItem.setText("Remove All Layers");
         removeAllLayersMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -88,6 +166,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         mapMenu.add(removeAllLayersMenuItem);
+
+        removeSelectedLayerMenuItem.setText("Remove Selected Layer");
+        removeSelectedLayerMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeSelectedLayerMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(removeSelectedLayerMenuItem);
 
         menuBar.add(mapMenu);
 
@@ -138,17 +224,71 @@ public class MainWindow extends javax.swing.JFrame {
                 // user canceled
                 return;
             }
-            
+
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
             model.addLayer(collection);
             mapComponent.showAll();
+            updateLayerList();
+            writeSymbolGUI();
+
+            int layerID = this.layerList.getSelectedIndex() + 1;
+            layerList.setSelectedIndex(layerID);
+
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
         }
     }
-    
+
+    /**
+     * Returns the layer currently selected by the user.
+     *
+     * @return The selected map layer or null if none is selected.
+     */
+    private Layer getSelectedMapLayer() {
+        assert SwingUtilities.isEventDispatchThread();
+        int index = layerList.getSelectedIndex();
+        return index == -1 ? null : model.getLayer(index);
+    }
+
+    private VectorSymbol getSelectedVectorSymbol() {
+        Layer selectedLayer = getSelectedMapLayer();
+        VectorSymbol vectorSymbol = null;
+        if (selectedLayer != null) {
+            vectorSymbol = selectedLayer.getVectorSymbol();
+        }
+        return vectorSymbol;
+    }
+
+    private void writeSymbolGUI() {
+        VectorSymbol vectorSymbol = getSelectedVectorSymbol();
+
+        boolean enable = vectorSymbol != null;
+        fillCheckBox.setEnabled(enable);
+        strokeCheckBox.setEnabled(enable);
+        fillColorButton.setEnabled(enable);
+        strokeColorButton.setEnabled(enable);
+
+        if (vectorSymbol != null) {
+            fillCheckBox.setSelected(vectorSymbol.isFilled());
+            strokeCheckBox.setSelected(vectorSymbol.isStroked());
+            fillColorButton.setColor(vectorSymbol.getFillColor());
+            strokeColorButton.setColor(vectorSymbol.getStrokeColor());
+        }
+    }
+
+    private void readSymbolGUI() {
+        VectorSymbol vectorSymbol = getSelectedVectorSymbol();
+        if (vectorSymbol == null) {
+            return;
+        }
+        vectorSymbol.setFilled(fillCheckBox.isSelected());
+        vectorSymbol.setStroked(strokeCheckBox.isSelected());
+        vectorSymbol.setFillColor(fillColorButton.getColor());
+        vectorSymbol.setStrokeColor(strokeColorButton.getColor());
+    }
+
     private void openShapefileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openShapefileMenuItemActionPerformed
         openShapefile();
     }//GEN-LAST:event_openShapefileMenuItemActionPerformed
@@ -157,15 +297,70 @@ public class MainWindow extends javax.swing.JFrame {
         model.removeAllLayers();
         mapComponent.showAll();
         mapComponent.repaint();
+        updateLayerList();
     }//GEN-LAST:event_removeAllLayersMenuItemActionPerformed
+
+    private void layerListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_layerListValueChanged
+        if (!evt.getValueIsAdjusting()) {
+            writeSymbolGUI();
+        }
+    }//GEN-LAST:event_layerListValueChanged
+
+    private void fillCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillCheckBoxActionPerformed
+        readSymbolGUI();
+        mapComponent.repaint();
+    }//GEN-LAST:event_fillCheckBoxActionPerformed
+
+    private void strokeCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeCheckBoxActionPerformed
+        readSymbolGUI();
+        mapComponent.repaint();
+    }//GEN-LAST:event_strokeCheckBoxActionPerformed
+
+    private void fillColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillColorButtonActionPerformed
+        if (!fillCheckBox.isSelected()) {
+            fillCheckBox.setSelected(true);
+        }
+        readSymbolGUI();
+        mapComponent.repaint();
+    }//GEN-LAST:event_fillColorButtonActionPerformed
+
+    private void strokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeColorButtonActionPerformed
+        if (!strokeCheckBox.isSelected()) {
+            strokeCheckBox.setSelected(true);
+        }
+        readSymbolGUI();
+        mapComponent.repaint();
+    }//GEN-LAST:event_strokeColorButtonActionPerformed
+
+    private void removeSelectedLayerMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeSelectedLayerMenuItemActionPerformed
+        int selectedLayerID = layerList.getSelectedIndex();
+        if (selectedLayerID < 0) {
+            return;
+        }
+        model.removeLayer(selectedLayerID);
+        updateLayerList();
+        layerList.setSelectedIndex(--selectedLayerID);
+        writeSymbolGUI();
+        mapComponent.repaint();
+    }//GEN-LAST:event_removeSelectedLayerMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JCheckBox fillCheckBox;
+    private edu.oregonstate.cartography.flox.gui.ColorButton fillColorButton;
+    private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
+    private javax.swing.JScrollPane layerListScrollPane;
+    private javax.swing.JPanel leftPanel;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
     private javax.swing.JMenu mapMenu;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openShapefileMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
+    private javax.swing.JMenuItem removeSelectedLayerMenuItem;
+    private javax.swing.JCheckBox strokeCheckBox;
+    private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
+    private javax.swing.JPanel symbolPanel;
     // End of variables declaration//GEN-END:variables
+
 }
