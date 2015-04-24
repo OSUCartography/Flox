@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 
 /**
@@ -31,6 +32,14 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public MainWindow() {
         initComponents();
+        new ListAction(layerList, new EditListAction() {
+            @Override
+            protected void applyValueToModel(String value, ListModel model, int row) {
+                DnDListModel m = (DnDListModel) model;
+                Layer layer = (Layer) m.get(row);
+                layer.setName(value);
+            }
+        });
     }
 
     /**
