@@ -46,6 +46,16 @@ public class MapComponent extends JComponent {
     private double north;
 
     /**
+     * Drawing offset from left border in pixel.
+     */
+    private double xOffsetPx;
+    
+    /**
+     * Drawing offset from top border in pixel.
+     */
+    private double yOffsetPx;
+    
+    /**
      * scale factor for drawing geometry
      */
     private double scale;
@@ -149,7 +159,7 @@ public class MapComponent extends JComponent {
      * @return Returns the coordinate in pixels.
      */
     protected double xToPx(double x) {
-        return (x - west) / scale;
+        return (x - west) / scale + xOffsetPx;
     }
 
     /**
@@ -160,7 +170,7 @@ public class MapComponent extends JComponent {
      * @return Returns the coordinate in the page coordinate system.
      */
     protected double yToPx(double y) {
-        return (north - y) / scale;
+        return (north - y) / scale + yOffsetPx;
     }
 
     /**
@@ -170,12 +180,14 @@ public class MapComponent extends JComponent {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        Graphics2D g2d = initBufferImage();
-        draw(geometry, g2d);
-        g2d.dispose();
+        if (geometry != null) {
+            Graphics2D g2d = initBufferImage();
+            draw(geometry, g2d);
+            g2d.dispose();
 
-        Insets insets = getInsets();
-        ((Graphics2D) g).drawImage(bufferImage, insets.left, insets.top, this);
+            Insets insets = getInsets();
+            ((Graphics2D) g).drawImage(bufferImage, insets.left, insets.top, this);
+        }
     }
 
     /**
@@ -216,6 +228,8 @@ public class MapComponent extends JComponent {
             scale = 1;
             west = 0;
             north = 0;
+            xOffsetPx = 0;
+            yOffsetPx = 0;
         } else {
             Insets insets = getInsets();
             int w = getWidth() - insets.left - insets.right;
@@ -226,6 +240,8 @@ public class MapComponent extends JComponent {
             scale = vScale > hScale ? vScale : hScale;
             west = bb.getMinX();
             north = bb.getMaxY();
+            xOffsetPx = (w - bb.getWidth() / scale) / 2;
+            yOffsetPx = (h - bb.getHeight() / scale) / 2;
         }
     }
 
