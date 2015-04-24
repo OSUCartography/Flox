@@ -236,7 +236,8 @@ public class MainWindow extends javax.swing.JFrame {
 
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
-            model.addLayer(collection);
+            Layer layer = model.addLayer(collection);
+            layer.setName(FileUtils.getFileNameWithoutExtension(inFilePath));
             mapComponent.showAll();
             updateLayerList();
             writeSymbolGUI();
