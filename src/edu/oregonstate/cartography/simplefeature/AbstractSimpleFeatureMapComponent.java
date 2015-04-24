@@ -31,7 +31,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * image buffer
      */
     protected BufferedImage bufferImage = null;
-    
+
     /**
      * cached Graphics2D context for bufferImage
      */
@@ -62,6 +62,14 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      */
     private double scale;
 
+    /**
+     * Stroke and fill flag for drawing geometry.
+     */
+    public enum Draw {
+
+        STROKE, FILL
+    };
+
     public AbstractSimpleFeatureMapComponent() {
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -82,7 +90,8 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * Returns a Graphics2D context for a buffer window. Geometry should be
      * rendered to this context. The returned canvas is cleared.
      *
-     * @return The Graphics2D context to draw to. This is cached, so do not dispose it.
+     * @return The Graphics2D context to draw to. This is cached, so do not
+     * dispose it.
      */
     protected Graphics2D getGraphics2DBuffer() {
 
@@ -94,11 +103,11 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         if (bufferImage == null
                 || bufferImage.getWidth() != w
                 || bufferImage.getHeight() != h) {
-            
+
             if (g2dBuffer != null) {
                 g2dBuffer.dispose();
             }
-            
+
             bufferImage = (BufferedImage) createImage(w, h);
             g2dBuffer = bufferImage.createGraphics();
 
@@ -130,19 +139,20 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param geometry The geometry to draw.
      * @param g2d The graphics context to draw to.
+     * @param drawMode Fill or stroke drawing flag
      */
-    protected void draw(Geometry geometry, Graphics2D g2d) {
+    protected void draw(Geometry geometry, Graphics2D g2d, Draw drawMode) {
         if (geometry == null) {
             return;
         }
         if (geometry instanceof LineString) {
-            draw((LineString) geometry, g2d);
+            draw((LineString) geometry, g2d, drawMode);
         } else if (geometry instanceof Polygon) {
-            draw((Polygon) geometry, g2d);
+            draw((Polygon) geometry, g2d, drawMode);
         } else if (geometry instanceof Point) {
-            draw((Point) geometry, g2d);
+            draw((Point) geometry, g2d, drawMode);
         } else if (geometry instanceof GeometryCollection) {
-            draw((GeometryCollection) geometry, g2d);
+            draw((GeometryCollection) geometry, g2d, drawMode);
         }
     }
 
@@ -151,12 +161,13 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param collection The geometry to draw.
      * @param g2d The graphics context to draw to.
+     * @param drawMode Fill or stroke drawing flag
      */
-    protected void draw(GeometryCollection collection, Graphics2D g2d) {
+    protected void draw(GeometryCollection collection, Graphics2D g2d, Draw drawMode) {
         int nbrObj = collection.getNumGeometries();
         for (int i = 0; i < nbrObj; i++) {
             Geometry geom = collection.getGeometryN(i);
-            draw(geom, g2d);
+            draw(geom, g2d, drawMode);
         }
     }
 
@@ -165,8 +176,9 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param point The geometry to draw.
      * @param g2d The graphics context to draw to.
+     * @param drawMode Fill or stroke drawing flag
      */
-    protected void draw(Point point, Graphics2D g2d) {
+    protected void draw(Point point, Graphics2D g2d, Draw drawMode) {
         // TODO
         throw new InternalError();
     }
@@ -197,11 +209,16 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param lineString The geometry to draw.
      * @param g2d The graphics context to draw to.
+     * @param drawMode Fill or stroke drawing flag
      */
-    protected void draw(LineString lineString, Graphics2D g2d) {
+    protected void draw(LineString lineString, Graphics2D g2d, Draw drawMode) {
         GeneralPath path = new GeneralPath();
         addLineStringToGeneralPath(lineString, path);
-        g2d.draw(path);
+        if (drawMode == Draw.STROKE) {
+            g2d.draw(path);
+        } else {
+            g2d.fill(path);
+        }
     }
 
     /**
@@ -209,8 +226,9 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param polygon The geometry to draw.
      * @param g2d The graphics context to draw to.
+     * @param drawMode Fill or stroke drawing flag
      */
-    protected void draw(Polygon polygon, Graphics2D g2d) {
+    protected void draw(Polygon polygon, Graphics2D g2d, Draw drawMode) {
         LineString exteriorRing = polygon.getExteriorRing();
         GeneralPath path = new GeneralPath();
         addLineStringToGeneralPath(exteriorRing, path);
@@ -219,7 +237,11 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         for (int i = 0; i < nbrInteriorRings; i++) {
             addLineStringToGeneralPath(polygon.getInteriorRingN(i), path);
         }
-        g2d.draw(path);
+        if (drawMode == Draw.STROKE) {
+            g2d.draw(path);
+        } else {
+            g2d.fill(path);
+        }
     }
 
     /**

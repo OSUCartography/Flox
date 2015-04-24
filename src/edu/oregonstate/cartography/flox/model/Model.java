@@ -1,9 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,11 +18,9 @@ public class Model {
      */
     private final ArrayList<BezierFlow> flows = new ArrayList<>();
 
-    /**
-     * map geometry
-     */
-    private Geometry geometry;
-
+    private final Map map = new Map();
+    
+    
     public Model() {
     }
 
@@ -46,31 +41,12 @@ public class Model {
     }
 
     /**
-     * @return the geometry
-     */
-    public Geometry getGeometry() {
-        return geometry;
-    }
-
-    /**
-     * @param geometry the geometry to set
-     */
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
-    }
-
-    /**
      * Returns the geometry if it is a GeometryCollection. Otherwise creates
      * and returns a new GeometryCollection containing the geometry.
      * @return the geometry
      */
     public GeometryCollection getGeometryCollection() {
-        if (geometry instanceof GeometryCollection) {
-            return (GeometryCollection) geometry;
-        } else {
-            Geometry[] geometries = new Geometry[]{geometry};
-            return new GeometryFactory().createGeometryCollection(geometries);
-        }
+        return map.getGeometryCollection();
     }
     
     /**
@@ -94,14 +70,12 @@ public class Model {
      * @return The bounding box.
      */
     public Rectangle2D getBoundingBox() {
-        if (geometry == null) {
-            return getFlowsBoundingBox();
-        }
-        Envelope env = geometry.getEnvelopeInternal();
-        Rectangle2D bb = new Rectangle2D.Double(env.getMinX(), env.getMinY(),
-                env.getWidth(), env.getHeight());
+        Rectangle2D mapBB = map.getBoundingBox();      
         Rectangle2D flowsBB = getFlowsBoundingBox();
-        return flowsBB == null ? bb : bb.createUnion(flowsBB);
+        if (mapBB != null) {
+            return flowsBB == null ? mapBB : mapBB.createUnion(flowsBB);
+        }
+        return flowsBB;
     }
 
     /**
@@ -110,5 +84,17 @@ public class Model {
      */
     public Iterator<BezierFlow> flowIterator() {
         return flows.iterator();
+    }
+
+    public Iterator<Layer> layerIterator() {
+        return map.layerIterator();
+    }
+
+    public void addLayer(GeometryCollection collection) {
+        map.addLayer(collection);
+    }
+
+    public void removeAllLayers() {
+        map.removeAllLayers();
     }
 }

@@ -45,7 +45,7 @@ public class SimpleFeatureMapComponent extends AbstractSimpleFeatureMapComponent
     protected void paintComponent(Graphics g) {
         if (geometry != null) {
             Graphics2D g2d = getGraphics2DBuffer();
-            draw(geometry, g2d);
+            draw(geometry, g2d, Draw.STROKE);
             Insets insets = getInsets();
             g.drawImage(bufferImage, insets.left, insets.top, null);
         }

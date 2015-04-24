@@ -51,21 +51,15 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
-        openShapefileMenuItem = new javax.swing.JMenuItem();
         exportSVGMenuItem = new javax.swing.JMenuItem();
+        mapMenu = new javax.swing.JMenu();
+        openShapefileMenuItem = new javax.swing.JMenuItem();
+        removeAllLayersMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
 
         fileMenu.setText("File");
-
-        openShapefileMenuItem.setText("Open Shapefile…");
-        openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openShapefileMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(openShapefileMenuItem);
 
         exportSVGMenuItem.setText("Export SVG…");
         exportSVGMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -76,6 +70,26 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(exportSVGMenuItem);
 
         menuBar.add(fileMenu);
+
+        mapMenu.setText("Map");
+
+        openShapefileMenuItem.setText("Add Shapefile Layer…");
+        openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openShapefileMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(openShapefileMenuItem);
+
+        removeAllLayersMenuItem.setText("Remove All Layers");
+        removeAllLayersMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeAllLayersMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(removeAllLayersMenuItem);
+
+        menuBar.add(mapMenu);
 
         setJMenuBar(menuBar);
 
@@ -127,7 +141,7 @@ public class MainWindow extends javax.swing.JFrame {
             
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
-            model.setGeometry(collection);
+            model.addLayer(collection);
             mapComponent.showAll();
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -139,11 +153,19 @@ public class MainWindow extends javax.swing.JFrame {
         openShapefile();
     }//GEN-LAST:event_openShapefileMenuItemActionPerformed
 
+    private void removeAllLayersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAllLayersMenuItemActionPerformed
+        model.removeAllLayers();
+        mapComponent.showAll();
+        mapComponent.repaint();
+    }//GEN-LAST:event_removeAllLayersMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
+    private javax.swing.JMenu mapMenu;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openShapefileMenuItem;
+    private javax.swing.JMenuItem removeAllLayersMenuItem;
     // End of variables declaration//GEN-END:variables
 }

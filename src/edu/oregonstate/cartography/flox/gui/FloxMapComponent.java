@@ -1,8 +1,11 @@
 package edu.oregonstate.cartography.flox.gui;
 
+import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.BezierFlow;
+import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
+import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -49,8 +52,24 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         }
 
         Graphics2D g2d = getGraphics2DBuffer();
-        g2d.setColor(Color.LIGHT_GRAY);
-        draw(model.getGeometry(), g2d);
+        
+        // draw background map
+        Iterator<Layer> iter = model.layerIterator();
+        while (iter.hasNext()) {
+            Layer layer = iter.next();
+            GeometryCollection geometry = layer.getGeometryCollection();
+            VectorSymbol symbol = layer.getVectorSymbol();
+            if (symbol.isFilled()) {
+                g2d.setColor(symbol.getFillColor());
+                draw(geometry, g2d, Draw.FILL);
+            }
+            if (symbol.isStroked()) {
+                g2d.setColor(symbol.getStrokeColor());
+                draw(geometry, g2d, Draw.STROKE);
+            }
+        }
+        
+        // draw flows
         g2d.setColor(Color.BLACK);
         drawFlows(g2d);
 
