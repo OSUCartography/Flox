@@ -128,8 +128,7 @@ public class ShapeGeometryImporter {
             // magic code is 9994
             int fileCode = is.readInt();
             if (fileCode != FILE_CODE) {
-                throw new IOException("File is not an ESRI Shape file. "
-                        + "Found file code: " + fileCode);
+                return null;
             }
 
             is.skipBytes(5 * 4);

@@ -268,6 +268,10 @@ public class MainWindow extends javax.swing.JFrame {
 
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
+            if (collection == null) {
+                ErrorDialog.showErrorDialog("The selected file is not a shapefile.", "Flox Error");
+                return;
+            }
             Layer layer = model.addLayer(collection);
             layer.setName(FileUtils.getFileNameWithoutExtension(inFilePath));
             mapComponent.showAll();

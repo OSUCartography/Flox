@@ -15,6 +15,9 @@ import java.awt.geom.Rectangle2D;
  */
 public class Layer {
 
+    /**
+     * counts created layers
+     */
     private static int layerCounter = 0;
     
     /**
@@ -23,10 +26,13 @@ public class Layer {
     private Geometry geometry;
 
     /**
-     * Symbol for drawing the layer geometry
+     * symbol for drawing the layer geometry
      */
     private final VectorSymbol vectorSymbol = new VectorSymbol();
 
+    /**
+     * layer name
+     */
     private String name = "Layer " + ++layerCounter;
     
     /**
@@ -66,7 +72,7 @@ public class Layer {
         if (geometry instanceof GeometryCollection) {
             return (GeometryCollection) geometry;
         } else {
-            Geometry[] geometries = new Geometry[]{geometry};
+            Geometry[] geometries = geometry != null ? new Geometry[]{geometry} : null;
             return new GeometryFactory().createGeometryCollection(geometries);
         }
     }
@@ -77,6 +83,9 @@ public class Layer {
      * @return
      */
     Rectangle2D getBoundingBox() {
+        if (geometry == null) {
+            return null;
+        }
         Envelope env = geometry.getEnvelopeInternal();
         if (env == null) {
             return null;
