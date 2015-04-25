@@ -113,6 +113,14 @@ public class Model {
         return map.addLayer(collection);
     }
 
+    /**
+     * Add a layer to the map.
+     * @param layer The layer to add.
+     */
+    public void addLayer(Layer layer) {
+        map.addLayer(layer);
+    }
+    
     public void removeAllLayers() {
         map.removeAllLayers();
     }

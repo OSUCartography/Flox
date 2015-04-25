@@ -7,6 +7,8 @@ import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,6 +34,8 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public MainWindow() {
         initComponents();
+        
+        // change the name of a layer
         new ListAction(layerList, new EditListAction() {
             @Override
             protected void applyValueToModel(String value, ListModel model, int row) {
@@ -40,6 +44,22 @@ public class MainWindow extends javax.swing.JFrame {
                 layer.setName(value);
             }
         });
+        
+        // reorder layers
+        layerList.addPropertyChangeListener(DraggableList.MODEL_PROPERTY, 
+                new PropertyChangeListener() {
+
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                model.removeAllLayers();
+                DnDListModel m = (DnDListModel) layerList.getModel();
+                int n = m.getSize();
+                for (int i = 0; i < n; i++) {
+                    model.addLayer((Layer)m.get(i));
+                }
+                mapComponent.repaint();
+            }
+        }) ;
     }
 
     /**

@@ -36,6 +36,14 @@ public class Map {
     }
     
     /**
+     * Add a layer to the map.
+     * @param layer The layer to add.
+     */
+    public void addLayer(Layer layer) {
+        layers.add(layer);
+    }
+    
+    /**
      * Returns a layer specified by an id.
      * @param id
      * @return 
