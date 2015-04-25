@@ -28,20 +28,25 @@ public class BezierFlow extends Flow {
      */
     public BezierFlow(Point startPt, Point endPt) {
 
-        double x1 = startPt.x;
-        double x2 = endPt.x;
-        double y1 = startPt.y;
-        double y2 = endPt.y;
-
+        this.startPt = startPt;
+        this.endPt = endPt;
+        
         // Angle between the straight line connecting start and end point and 
         // the line connecting the start/end point with the corresponding Bezier 
         // control point.
-        double alpha = 0.3;
+        double alpha = .5;
         
         // Distance between startPt and endPt
+        double x1 = startPt.x;
+        double y1 = startPt.y;
+        double x2 = endPt.x;
+        double y2 = endPt.y;
         double dist = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
+        double shortDist = dist * .33;
         
+        cPt1 = computeStartCtrlPt(alpha, shortDist);
+        cPt2 = computeEndCtrlPt(alpha, shortDist);
     }
 
     /**
@@ -55,14 +60,32 @@ public class BezierFlow extends Flow {
     }
 
     // Need the distance between the points
-    private void computeStartCtrlPt(double alpha, double dist) {
+    private Point computeStartCtrlPt(double alpha, double dist) {
         final double lineOrientation = getBaselineAzimuth();
         final double azimuth1 = lineOrientation + alpha;
         final double dx1 = Math.sin(azimuth1) * dist;
         final double dy1 = Math.cos(azimuth1) * dist;
-        //this.cPt1 = this. + dx1;
+        
+        double cPt1X = startPt.x + dx1;
+        double cPt1Y = startPt.y + dy1;
+        
+        Point startCtrlPt = new Point(cPt1X, cPt1Y);
+        return startCtrlPt;
     }
 
+    private Point computeEndCtrlPt(double alpha, double dist) {
+        final double lineOrientation = getBaselineAzimuth();
+        final double azimuth2 = lineOrientation + Math.PI - alpha;
+        final double dx2 = Math.sin(azimuth2) * dist;
+        final double dy2 = Math.cos(azimuth2) * dist;
+        
+        double cPt2X = endPt.x + dx2;
+        double cPt2Y = endPt.y + dy2;
+        
+        Point endCtrlPt = new Point(cPt2X, cPt2Y);
+        return endCtrlPt;
+    }
+    
     @Override
     public Rectangle2D.Double getBoundingBox() {
         Rectangle2D.Double bb = new Rectangle2D.Double(startPt.x, startPt.y, 0, 0);
