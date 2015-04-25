@@ -35,7 +35,7 @@ public class Map {
      */
     public Layer addLayer(Geometry geometry) {
         Layer layer = new Layer(geometry);
-        layers.add(layer);
+        layers.add(0, layer);
         return layer;
     }
     

@@ -260,11 +260,8 @@ public class MainWindow extends javax.swing.JFrame {
             layer.setName(FileUtils.getFileNameWithoutExtension(inFilePath));
             mapComponent.showAll();
             updateLayerList();
+            layerList.setSelectedIndex(0);
             writeSymbolGUI();
-
-            int layerID = this.layerList.getSelectedIndex() + 1;
-            layerList.setSelectedIndex(layerID);
-
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
