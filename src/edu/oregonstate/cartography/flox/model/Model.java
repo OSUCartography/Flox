@@ -17,7 +17,7 @@ public class Model {
     /**
      * Flows
      */
-    private final ArrayList<BezierFlow> flows = new ArrayList<>();
+    private ArrayList<BezierFlow> flows = new ArrayList<>();
 
     private final Map map = new Map();
     
@@ -25,6 +25,14 @@ public class Model {
     public Model() {
     }
 
+    /**
+     * Set the flows
+     * @param flows The new flows.
+     */
+    public void setFlows(ArrayList<BezierFlow> flows) {
+        this.flows = flows;        
+    }
+    
     /**
      * Add a flow.
      *

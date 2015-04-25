@@ -1,6 +1,8 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
+import edu.oregonstate.cartography.flox.model.BezierFlow;
+import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
@@ -12,6 +14,7 @@ import java.beans.PropertyChangeListener;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ListModel;
@@ -34,7 +37,7 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public MainWindow() {
         initComponents();
-        
+
         // change the name of a layer
         new ListAction(layerList, new EditListAction() {
             @Override
@@ -44,22 +47,22 @@ public class MainWindow extends javax.swing.JFrame {
                 layer.setName(value);
             }
         });
-        
+
         // reorder layers
-        layerList.addPropertyChangeListener(DraggableList.MODEL_PROPERTY, 
+        layerList.addPropertyChangeListener(DraggableList.MODEL_PROPERTY,
                 new PropertyChangeListener() {
 
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                model.removeAllLayers();
-                DnDListModel m = (DnDListModel) layerList.getModel();
-                int n = m.getSize();
-                for (int i = 0; i < n; i++) {
-                    model.addLayer((Layer)m.get(i));
-                }
-                mapComponent.repaint();
-            }
-        }) ;
+                    @Override
+                    public void propertyChange(PropertyChangeEvent evt) {
+                        model.removeAllLayers();
+                        DnDListModel m = (DnDListModel) layerList.getModel();
+                        int n = m.getSize();
+                        for (int i = 0; i < n; i++) {
+                            model.addLayer((Layer) m.get(i));
+                        }
+                        mapComponent.repaint();
+                    }
+                });
     }
 
     /**
@@ -102,6 +105,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
         exportSVGMenuItem = new javax.swing.JMenuItem();
+        importFlowsMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
@@ -183,6 +187,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(exportSVGMenuItem);
+
+        importFlowsMenuItem.setText("Open FlowsÉ");
+        importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(importFlowsMenuItem);
 
         menuBar.add(fileMenu);
 
@@ -371,11 +383,32 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_removeSelectedLayerMenuItemActionPerformed
 
+    private void importFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFlowsMenuItemActionPerformed
+        try {
+            // ask for import file
+            String inFilePath = FileUtils.askFile("Shapefile", true);
+            if (inFilePath == null) {
+                // user canceled
+                return;
+            }
+            
+            ArrayList<BezierFlow> flows = FlowImporter.readFlows(inFilePath);
+            if (flows != null) {
+                model.setFlows(flows);
+                mapComponent.showAll();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
+        }
+    }//GEN-LAST:event_importFlowsMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton fillColorButton;
+    private javax.swing.JMenuItem importFlowsMenuItem;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JPanel leftPanel;
