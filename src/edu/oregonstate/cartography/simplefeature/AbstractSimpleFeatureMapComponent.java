@@ -13,6 +13,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
@@ -184,7 +185,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
-     * Add a OGC Simple Feature line string to a Swing path.
+     * Add a OGC Simple Feature line string to a Swing path. The path is not closed.
      *
      * @param lineString The line string to add.
      * @param path The Swing path.
@@ -232,10 +233,12 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         LineString exteriorRing = polygon.getExteriorRing();
         GeneralPath path = new GeneralPath();
         addLineStringToGeneralPath(exteriorRing, path);
-
+        path.closePath();
+        
         int nbrInteriorRings = polygon.getNumInteriorRing();
         for (int i = 0; i < nbrInteriorRings; i++) {
             addLineStringToGeneralPath(polygon.getInteriorRingN(i), path);
+            path.closePath();
         }
         if (drawMode == Draw.STROKE) {
             g2d.draw(path);

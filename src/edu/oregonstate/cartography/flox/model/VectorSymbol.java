@@ -22,7 +22,7 @@ public class VectorSymbol {
     /**
      * color of filling
      */
-    private Color fillColor = Color.BLUE;
+    private Color fillColor = Color.decode("#BAD8F5");
     
     /**
      * If true, geometry is filled.

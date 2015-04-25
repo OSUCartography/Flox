@@ -278,7 +278,7 @@ public class ShapeGeometryImporter {
         }
 
         LineString[] lineStrings = new LineString[numParts];
-        
+
         for (int partID = 0; partID < numParts; partID++) {
 
             int firstPtID = pointIds[partID];
@@ -302,7 +302,7 @@ public class ShapeGeometryImporter {
         } else {
             MultiLineString multiLineString = geometryFactory.createMultiLineString(lineStrings);
             geometries.add(multiLineString);
-        }        
+        }
     }
 
     private int readPolyline(MixedEndianDataInputStream is,
@@ -312,11 +312,11 @@ public class ShapeGeometryImporter {
         int numParts = is.readLittleEndianInt();
         int numPoints = is.readLittleEndianInt();
         readLineStrings(is, numParts, numPoints, geometries);
-        
+
         return 4 * 8 + 4 + 4 + numParts * 4 + numPoints * 2 * 8;
     }
 
-    private int readPolygon(MixedEndianDataInputStream is, 
+    private int readPolygon(MixedEndianDataInputStream is,
             ArrayList<Geometry> geometries) throws IOException {
 
         is.skipBytes(4 * 8); // skip bounding box
@@ -326,11 +326,9 @@ public class ShapeGeometryImporter {
 
         ArrayList<Geometry> lineStrings = new ArrayList<>();
         readLineStrings(is, numParts, numPoints, lineStrings);
-        Polygonizer polygonizer = new Polygonizer();
-        polygonizer.add(lineStrings);
-        Collection polys = polygonizer.getPolygons();
-        geometries.addAll(polys);
-        
+        PolygonBuilder pb = new PolygonBuilder(lineStrings);
+        geometries.add(pb.getResult());
+
         return 4 * 8 + 4 + 4 + numParts * 4 + numPoints * 2 * 8;
     }
 
