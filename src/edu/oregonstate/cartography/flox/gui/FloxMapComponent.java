@@ -13,6 +13,7 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -54,9 +55,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         Graphics2D g2d = getGraphics2DBuffer();
         
         // draw background map
-        Iterator<Layer> iter = model.layerIterator();
-        while (iter.hasNext()) {
-            Layer layer = iter.next();
+        int nbrLayers = model.getNbrLayers();
+        for (int i = nbrLayers - 1; i >= 0; i--) {
+            Layer layer = model.getLayer(i);
             GeometryCollection geometry = layer.getGeometryCollection();
             VectorSymbol symbol = layer.getVectorSymbol();
             if (symbol.isFilled()) {

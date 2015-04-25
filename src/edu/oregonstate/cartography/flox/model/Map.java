@@ -24,6 +24,10 @@ public class Map {
     public Map() {
     }
 
+    int getNbrLayers() {
+        return layers.size();
+    }
+    
     /**
      * Add a layer to the map.
      * @param geometry the geometry to set
@@ -108,6 +112,5 @@ public class Map {
         }
         return bb;
     }
-
 
 }

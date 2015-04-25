@@ -128,4 +128,8 @@ public class Model {
     public void removeLayer(int id) {
         map.removeLayer(id);
     }
+
+    public int getNbrLayers() {
+        return map.getNbrLayers();
+    }
 }
