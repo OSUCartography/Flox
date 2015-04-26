@@ -15,6 +15,7 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -37,6 +38,11 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      */
     private static final double ZOOM_STEP = 1. / 3.;
     private static final double MIN_SCALE = 0.0000001;
+
+    /**
+     * Radius of a point symbol.
+     */
+    private static final double POINT_R = 1;
 
     /**
      * Stroke and fill flag for drawing geometry.
@@ -89,8 +95,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
-     * Returns the bounding box of the geometry that is drawn by the
-     * map.
+     * Returns the bounding box of the geometry that is drawn by the map.
      *
      * @return The bounding boundingBox.
      */
@@ -256,7 +261,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     public void zoomOnRectangle(Rectangle2D r) {
         // an empty border on each side of the map as a percentage of the map size
         final double BORDER_PERCENTAGE = 2;
-        
+
         if (r == null || r.getWidth() <= 0 || r.getHeight() <= 0) {
             scale = 1;
             west = 0;
@@ -281,9 +286,9 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         }
         centerOnPoint(r.getCenterX(), r.getCenterY());
     }
-    
+
     /**
-     * Adjust scale and center of the map to show the entire geometry in the 
+     * Adjust scale and center of the map to show the entire geometry in the
      * available canvas space, and repaint the map.
      */
     public void showAll() {
@@ -409,8 +414,14 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * @param drawMode Fill or stroke drawing flag
      */
     protected void draw(Point point, Graphics2D g2d, Draw drawMode) {
-        // TODO
-        throw new InternalError();
+        double d = 2 * POINT_R;
+        Ellipse2D circle = new Ellipse2D.Double(xToPx(point.getX()) - POINT_R, 
+                yToPx(point.getY()) - POINT_R, d, d);
+        if (drawMode == Draw.STROKE) {
+            g2d.draw(circle);
+        } else {
+            g2d.fill(circle);
+        }
     }
 
     /**
