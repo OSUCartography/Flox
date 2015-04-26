@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.gui;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.BezierFlow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
@@ -9,6 +10,7 @@ import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
+import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileOutputStream;
@@ -109,6 +111,12 @@ public class MainWindow extends javax.swing.JFrame {
         mapMenu = new javax.swing.JMenu();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
+        viewMenu = new javax.swing.JMenu();
+        showAllMenuItem = new javax.swing.JMenuItem();
+        zoomOnSelectedLayerMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator viewSeparator = new javax.swing.JPopupMenu.Separator();
+        viewZoomInMenuItem = new javax.swing.JMenuItem();
+        viewZoomOutMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
@@ -172,6 +180,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         fileMenu.setText("File");
 
+        openShapefileMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         openShapefileMenuItem.setText("Add Shapefile Layer…");
         openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -217,6 +226,46 @@ public class MainWindow extends javax.swing.JFrame {
         mapMenu.add(removeSelectedLayerMenuItem);
 
         menuBar.add(mapMenu);
+
+        viewMenu.setText("View");
+
+        showAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        showAllMenuItem.setText("Show All");
+        showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showAllMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(showAllMenuItem);
+
+        zoomOnSelectedLayerMenuItem.setText("Zoom on Selected Layer");
+        zoomOnSelectedLayerMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                zoomOnSelectedLayerMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(zoomOnSelectedLayerMenuItem);
+        viewMenu.add(viewSeparator);
+
+        viewZoomInMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_PLUS,    java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        viewZoomInMenuItem.setText("Zoom In");
+        viewZoomInMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewZoomInMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(viewZoomInMenuItem);
+
+        viewZoomOutMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_MINUS,    java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        viewZoomOutMenuItem.setText("Zoom Out");
+        viewZoomOutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewZoomOutMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(viewZoomOutMenuItem);
+
+        menuBar.add(viewMenu);
 
         setJMenuBar(menuBar);
 
@@ -407,6 +456,29 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_importFlowsMenuItemActionPerformed
 
+    private void showAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllMenuItemActionPerformed
+        mapComponent.showAll();
+    }//GEN-LAST:event_showAllMenuItemActionPerformed
+
+    private void viewZoomInMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewZoomInMenuItemActionPerformed
+        mapComponent.zoomIn();
+    }//GEN-LAST:event_viewZoomInMenuItemActionPerformed
+
+    private void viewZoomOutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewZoomOutMenuItemActionPerformed
+        mapComponent.zoomOut();
+    }//GEN-LAST:event_viewZoomOutMenuItemActionPerformed
+
+    private void zoomOnSelectedLayerMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOnSelectedLayerMenuItemActionPerformed
+        Layer layer = getSelectedMapLayer();
+        if (layer == null) {
+            return;
+        }
+        Envelope bb = layer.getGeometry().getEnvelopeInternal();
+        Rectangle2D bbRect = new Rectangle2D.Double(bb.getMinX(), bb.getMinY(),
+                bb.getWidth(), bb.getHeight());
+        mapComponent.zoomOnRectangle(bbRect);
+    }//GEN-LAST:event_zoomOnSelectedLayerMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
@@ -422,9 +494,14 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem openShapefileMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
+    private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;
+    private javax.swing.JMenu viewMenu;
+    private javax.swing.JMenuItem viewZoomInMenuItem;
+    private javax.swing.JMenuItem viewZoomOutMenuItem;
+    private javax.swing.JMenuItem zoomOnSelectedLayerMenuItem;
     // End of variables declaration//GEN-END:variables
 
 }

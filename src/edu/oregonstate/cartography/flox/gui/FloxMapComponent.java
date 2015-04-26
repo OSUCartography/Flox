@@ -13,7 +13,6 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
-import java.util.Collection;
 import java.util.Iterator;
 
 /**
