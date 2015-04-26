@@ -52,23 +52,20 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         }
 
         Graphics2D g2d = getGraphics2DBuffer();
-        
+
         // draw background map
         int nbrLayers = model.getNbrLayers();
         for (int i = nbrLayers - 1; i >= 0; i--) {
             Layer layer = model.getLayer(i);
             GeometryCollection geometry = layer.getGeometryCollection();
             VectorSymbol symbol = layer.getVectorSymbol();
-            if (symbol.isFilled()) {
-                g2d.setColor(symbol.getFillColor());
-                draw(geometry, g2d, Draw.FILL);
-            }
-            if (symbol.isStroked()) {
-                g2d.setColor(symbol.getStrokeColor());
-                draw(geometry, g2d, Draw.STROKE);
+            Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
+            Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
+            if (fillColor != null || strokeColor != null) {
+                draw(geometry, g2d, fillColor, strokeColor);
             }
         }
-        
+
         // draw flows
         g2d.setColor(Color.BLACK);
         drawFlows(g2d);

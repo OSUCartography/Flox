@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.Ellipse2D;
@@ -37,20 +38,16 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * zoom-out command without specifying the exact new scale factor.
      */
     private static final double ZOOM_STEP = 1. / 3.;
+    
+    /**
+     * minimum scale for map
+     */
     private static final double MIN_SCALE = 0.0000001;
 
     /**
      * Radius of a point symbol.
      */
     private static final double POINT_R = 1;
-
-    /**
-     * Stroke and fill flag for drawing geometry.
-     */
-    public enum Draw {
-
-        STROKE, FILL
-    };
 
     /**
      * image buffer
@@ -370,24 +367,45 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
+     * Fill and stroke a Graphics2D shape
+     * @param g2d Drawing destination.
+     * @param shape Shape to draw.
+     * @param fillColor Color to fill shape. If null, shape is not filled.
+     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
+     */
+    protected final void fillStroke(Graphics2D g2d, Shape shape, 
+            Color fillColor, Color strokeColor) {
+        if (fillColor != null) {
+            g2d.setColor(fillColor);
+            g2d.fill(shape);
+        }
+        if (strokeColor != null) {
+            g2d.setColor(strokeColor);
+            g2d.draw(shape);
+        }
+    }
+
+    /**
      * Draw an OGC Simple Feature.
      *
      * @param geometry The geometry to draw.
      * @param g2d The graphics context to draw to.
-     * @param drawMode Fill or stroke drawing flag
+     * @param fillColor Color to fill shape. If null, shape is not filled.
+     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
      */
-    protected void draw(Geometry geometry, Graphics2D g2d, Draw drawMode) {
+    protected void draw(Geometry geometry, Graphics2D g2d,
+            Color fillColor, Color strokeColor) {
         if (geometry == null) {
             return;
         }
         if (geometry instanceof LineString) {
-            draw((LineString) geometry, g2d, drawMode);
+            draw((LineString) geometry, g2d, fillColor, strokeColor);
         } else if (geometry instanceof Polygon) {
-            draw((Polygon) geometry, g2d, drawMode);
+            draw((Polygon) geometry, g2d, fillColor, strokeColor);
         } else if (geometry instanceof Point) {
-            draw((Point) geometry, g2d, drawMode);
+            draw((Point) geometry, g2d, fillColor, strokeColor);
         } else if (geometry instanceof GeometryCollection) {
-            draw((GeometryCollection) geometry, g2d, drawMode);
+            draw((GeometryCollection) geometry, g2d, fillColor, strokeColor);
         }
     }
 
@@ -396,13 +414,15 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param collection The geometry to draw.
      * @param g2d The graphics context to draw to.
-     * @param drawMode Fill or stroke drawing flag
+     * @param fillColor Color to fill shape. If null, shape is not filled.
+     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
      */
-    protected void draw(GeometryCollection collection, Graphics2D g2d, Draw drawMode) {
+    protected void draw(GeometryCollection collection, Graphics2D g2d,
+            Color fillColor, Color strokeColor) {
         int nbrObj = collection.getNumGeometries();
         for (int i = 0; i < nbrObj; i++) {
             Geometry geom = collection.getGeometryN(i);
-            draw(geom, g2d, drawMode);
+            draw(geom, g2d, fillColor, strokeColor);
         }
     }
 
@@ -411,17 +431,14 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param point The geometry to draw.
      * @param g2d The graphics context to draw to.
-     * @param drawMode Fill or stroke drawing flag
+     * @param fillColor Color to fill shape. If null, shape is not filled.
+     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
      */
-    protected void draw(Point point, Graphics2D g2d, Draw drawMode) {
+    protected void draw(Point point, Graphics2D g2d, Color fillColor, Color strokeColor) {
         double d = 2 * POINT_R;
-        Ellipse2D circle = new Ellipse2D.Double(xToPx(point.getX()) - POINT_R, 
+        Ellipse2D circle = new Ellipse2D.Double(xToPx(point.getX()) - POINT_R,
                 yToPx(point.getY()) - POINT_R, d, d);
-        if (drawMode == Draw.STROKE) {
-            g2d.draw(circle);
-        } else {
-            g2d.fill(circle);
-        }
+        fillStroke(g2d, circle, fillColor, strokeColor);
     }
 
     /**
@@ -451,16 +468,14 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param lineString The geometry to draw.
      * @param g2d The graphics context to draw to.
-     * @param drawMode Fill or stroke drawing flag
+     * @param fillColor Color to fill shape. If null, shape is not filled.
+     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
      */
-    protected void draw(LineString lineString, Graphics2D g2d, Draw drawMode) {
+    protected void draw(LineString lineString, Graphics2D g2d,
+            Color fillColor, Color strokeColor) {
         GeneralPath path = new GeneralPath();
         addLineStringToGeneralPath(lineString, path);
-        if (drawMode == Draw.STROKE) {
-            g2d.draw(path);
-        } else {
-            g2d.fill(path);
-        }
+        fillStroke(g2d, path, fillColor, strokeColor);
     }
 
     /**
@@ -468,9 +483,11 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      *
      * @param polygon The geometry to draw.
      * @param g2d The graphics context to draw to.
-     * @param drawMode Fill or stroke drawing flag
+     * @param fillColor Color to fill shape. If null, shape is not filled.
+     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
      */
-    protected void draw(Polygon polygon, Graphics2D g2d, Draw drawMode) {
+    protected void draw(Polygon polygon, Graphics2D g2d,
+            Color fillColor, Color strokeColor) {
         LineString exteriorRing = polygon.getExteriorRing();
         GeneralPath path = new GeneralPath();
         addLineStringToGeneralPath(exteriorRing, path);
@@ -481,11 +498,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
             addLineStringToGeneralPath(polygon.getInteriorRingN(i), path);
             path.closePath();
         }
-        if (drawMode == Draw.STROKE) {
-            g2d.draw(path);
-        } else {
-            g2d.fill(path);
-        }
+        fillStroke(g2d, path, fillColor, strokeColor);
     }
 
     /**

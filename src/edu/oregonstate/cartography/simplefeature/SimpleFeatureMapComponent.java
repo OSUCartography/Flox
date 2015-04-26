@@ -2,6 +2,7 @@ package edu.oregonstate.cartography.simplefeature;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -45,7 +46,7 @@ public class SimpleFeatureMapComponent extends AbstractSimpleFeatureMapComponent
     protected void paintComponent(Graphics g) {
         if (geometry != null) {
             Graphics2D g2d = getGraphics2DBuffer();
-            draw(geometry, g2d, Draw.STROKE);
+            draw(geometry, g2d, null, Color.BLACK);
             Insets insets = getInsets();
             g.drawImage(bufferImage, insets.left, insets.top, null);
         }
