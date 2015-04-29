@@ -18,6 +18,11 @@ public abstract class Flow {
      * end point of flow
      */
     protected Point endPt;
+    
+    /**
+     * mapped value
+     */
+    protected double value;
 
     /**
      * Return bounding box of this flow.
@@ -55,5 +60,19 @@ public abstract class Flow {
      */
     public void setEndPt(Point endPt) {
         this.endPt = endPt;
+    }
+
+    /**
+     * @return the value
+     */
+    public double getValue() {
+        return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(double value) {
+        this.value = value;
     }
 }

@@ -30,7 +30,10 @@ public class FlowImporter {
                 double y1 = Double.parseDouble(tokenizer.nextToken());
                 double x2 = Double.parseDouble(tokenizer.nextToken());
                 double y2 = Double.parseDouble(tokenizer.nextToken());
-                flows.add(new BezierFlow(new Point(x1, y1), new Point(x2, y2)));
+                double value = Double.parseDouble(tokenizer.nextToken());
+                BezierFlow flow = new BezierFlow(new Point(x1, y1), new Point(x2, y2));
+                flow.setValue(value);
+                flows.add(flow);
             }
         }
 

@@ -7,10 +7,12 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
@@ -102,6 +104,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             path.curveTo(xToPx(cPt1.x), yToPx(cPt1.y),
                     xToPx(cPt2.x), yToPx(cPt2.y),
                     xToPx(endPt.x), yToPx(endPt.y));
+            float strokeWidt = (float)Math.abs(flow.getValue()) / 100f;
+            g2d.setStroke(new BasicStroke(strokeWidt));
             g2d.draw(path);
         }
     }
