@@ -54,7 +54,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         }
 
         Graphics2D g2d = getGraphics2DBuffer();
-
+        g2d.setStroke(new BasicStroke(1));
+        
         // draw background map
         int nbrLayers = model.getNbrLayers();
         for (int i = nbrLayers - 1; i >= 0; i--) {
@@ -104,8 +105,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             path.curveTo(xToPx(cPt1.x), yToPx(cPt1.y),
                     xToPx(cPt2.x), yToPx(cPt2.y),
                     xToPx(endPt.x), yToPx(endPt.y));
-            float strokeWidt = (float)Math.abs(flow.getValue()) / 100f;
-            g2d.setStroke(new BasicStroke(strokeWidt));
+            double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
+            g2d.setStroke(new BasicStroke((float)strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.draw(path);
         }
     }

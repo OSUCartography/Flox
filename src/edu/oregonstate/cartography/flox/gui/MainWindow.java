@@ -103,6 +103,10 @@ public class MainWindow extends javax.swing.JFrame {
         strokeCheckBox = new javax.swing.JCheckBox();
         fillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        rightPanel = new javax.swing.JPanel();
+        flowWidthPanel = new javax.swing.JPanel();
+        javax.swing.JLabel flowWidthLabel = new javax.swing.JLabel();
+        flowScaleFormattedTextField = new javax.swing.JFormattedTextField();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -177,6 +181,30 @@ public class MainWindow extends javax.swing.JFrame {
         leftPanel.add(symbolPanel);
 
         getContentPane().add(leftPanel, java.awt.BorderLayout.WEST);
+
+        flowWidthPanel.setLayout(new java.awt.GridBagLayout());
+
+        flowWidthLabel.setText("Flow Width Scale");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(flowWidthLabel, gridBagConstraints);
+
+        flowScaleFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
+        flowScaleFormattedTextField.setPreferredSize(new java.awt.Dimension(120, 28));
+        flowScaleFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                flowScaleFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(flowScaleFormattedTextField, gridBagConstraints);
+
+        rightPanel.add(flowWidthPanel);
+
+        getContentPane().add(rightPanel, java.awt.BorderLayout.EAST);
 
         fileMenu.setText("File");
 
@@ -326,10 +354,11 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.showAll();
             updateLayerList();
             layerList.setSelectedIndex(0);
-            writeSymbolGUI();
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
+        } finally {
+            writeSymbolGUI();
         }
     }
 
@@ -444,10 +473,13 @@ public class MainWindow extends javax.swing.JFrame {
                 // user canceled
                 return;
             }
-            
+
             ArrayList<BezierFlow> flows = FlowImporter.readFlows(inFilePath);
             if (flows != null) {
                 model.setFlows(flows);
+                double maxFlowValue = model.getMaxFlowValue();
+                model.setFlowWidthScale(20 / maxFlowValue);
+                flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
                 mapComponent.showAll();
             }
         } catch (IOException ex) {
@@ -479,11 +511,21 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.zoomOnRectangle(bbRect);
     }//GEN-LAST:event_zoomOnSelectedLayerMenuItemActionPerformed
 
+    private void flowScaleFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowScaleFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName())) {
+            double s = ((Number) flowScaleFormattedTextField.getValue()).doubleValue();
+            model.setFlowWidthScale(s);
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_flowScaleFormattedTextFieldPropertyChange
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton fillColorButton;
+    private javax.swing.JFormattedTextField flowScaleFormattedTextField;
+    private javax.swing.JPanel flowWidthPanel;
     private javax.swing.JMenuItem importFlowsMenuItem;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
@@ -494,6 +536,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem openShapefileMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
+    private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;

@@ -19,6 +19,14 @@ public class Model {
      */
     private ArrayList<BezierFlow> flows = new ArrayList<>();
 
+    /**
+     * Scale factor to transform flow values to flow stroke widths
+     */
+    private double flowWidthScale = 1;
+    
+    /**
+     * A reference to the map with layers and geometry.
+     */
     private final Map map = new Map();
     
     
@@ -95,6 +103,21 @@ public class Model {
         return flows.iterator();
     }
 
+    /**
+     * Returns the maximum flow value.
+     * @return The maximum flow value.
+     */
+    public double getMaxFlowValue() {
+        double max = flows.size() > 0 ? flows.get(0).getValue() : 0;
+        for (Flow flow : flows) {
+            double v = flow.getValue();
+            if (v > max) {
+                max = v;
+            }
+        }
+        return max;
+    }
+    
     public Iterator<Layer> layerIterator() {
         return map.layerIterator();
     }
@@ -139,5 +162,19 @@ public class Model {
 
     public int getNbrLayers() {
         return map.getNbrLayers();
+    }
+
+    /**
+     * @return the flowWidthScale
+     */
+    public double getFlowWidthScale() {
+        return flowWidthScale;
+    }
+
+    /**
+     * @param flowWidthScale the flowWidthScale to set
+     */
+    public void setFlowWidthScale(double flowWidthScale) {
+        this.flowWidthScale = flowWidthScale;
     }
 }
