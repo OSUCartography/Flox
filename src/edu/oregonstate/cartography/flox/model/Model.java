@@ -39,13 +39,34 @@ public class Model {
      * @param flow The flow to add.
      */
     public void addFlow(BezierFlow flow) {
-        Point sourceVertex = flow.getStartPt();
-        Point targetVertex = flow.getEndPt();
+        Point sourceVertex = findNodeInGraph(flow.getStartPt());
+        Point targetVertex = findNodeInGraph(flow.getEndPt());
         graph.addVertex(sourceVertex);
         graph.addVertex(targetVertex);
         graph.addEdge(sourceVertex, targetVertex, flow);
     }
 
+    /**
+     * Searches for a point in the graph with the specified coordinates
+     * @param target A point with the coordinates to search.
+     * @return The point with coordinates x and y in the graph or the passed 
+     * point if no point with the same coordinates exist in the graph.
+     */
+    private Point findNodeInGraph(Point target) {
+        Iterator<Point> iter = graph.vertexSet().iterator();
+        while (iter.hasNext()) {
+            Point pt = iter.next();
+            if (pt.x == target.x && pt.y == target.y) {
+                return pt;
+            }
+        }
+        return target;
+    }
+    
+    /**
+     * Replace the current flows with new flows.
+     * @param flows The new flows.
+     */
     public void setFlows(Collection<BezierFlow> flows) {
         clearFlows();
         for (BezierFlow flow : flows) {
