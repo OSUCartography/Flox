@@ -12,7 +12,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
@@ -24,6 +24,11 @@ import java.util.Iterator;
  */
 public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
+    /**
+     * Radius of circles
+     */
+    private final double R = 10;
+    
     /**
      * The model to draw.
      */
@@ -69,9 +74,10 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
         }
 
-        // draw flows
+        // draw flows and nodes
         g2d.setColor(Color.BLACK);
         drawFlows(g2d);
+        drawNodes(g2d);
 
         // copy double buffer image to JComponent
         Insets insets = getInsets();
@@ -88,7 +94,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     }
 
     /**
-     * Draw all flow lines to a Graphics2D context.
+     * Draw all pt lines to a Graphics2D context.
      *
      * @param g2d The graphics context.
      */
@@ -108,6 +114,24 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float)strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.draw(path);
+        }
+    }
+    
+    /**
+     * Draw all nodes to a Graphics2D context.
+     *
+     * @param g2d The graphics context.
+     */
+    private void drawNodes(Graphics2D g2d) {
+        g2d.setStroke(new BasicStroke(2));
+        Iterator<Point> iter = model.nodeIterator();
+        while (iter.hasNext()) {
+            Point pt = iter.next();
+            Ellipse2D circle = new Ellipse2D.Double(xToPx(pt.x) - R, yToPx(pt.y) - R, 2 * R, 2 * R);
+            g2d.setColor(Color.WHITE);
+            g2d.fill(circle);
+            g2d.setColor(Color.BLACK);
+            g2d.draw(circle);
         }
     }
 }
