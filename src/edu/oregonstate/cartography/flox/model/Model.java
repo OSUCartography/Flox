@@ -30,6 +30,9 @@ public class Model {
      */
     private final Map map = new Map();
 
+    /**
+     * Constructor of the model.
+     */
     public Model() {
     }
 
@@ -48,8 +51,9 @@ public class Model {
 
     /**
      * Searches for a point in the graph with the specified coordinates
+     *
      * @param target A point with the coordinates to search.
-     * @return The point with coordinates x and y in the graph or the passed 
+     * @return The point with coordinates x and y in the graph or the passed
      * point if no point with the same coordinates exist in the graph.
      */
     private Point findNodeInGraph(Point target) {
@@ -62,16 +66,17 @@ public class Model {
         }
         return target;
     }
-    
+
     /**
      * Replace the current flows with new flows.
+     *
      * @param flows The new flows.
      */
     public void setFlows(Collection<BezierFlow> flows) {
         clearFlows();
-        for (BezierFlow flow : flows) {
+        flows.stream().forEach((flow) -> {
             addFlow(flow);
-        }
+        });
     }
 
     /**
@@ -131,7 +136,7 @@ public class Model {
     public Iterator<BezierFlow> flowIterator() {
         return graph.edgeSet().iterator();
     }
-    
+
     /**
      * Returns an iterator for the nodes.
      *
@@ -140,7 +145,7 @@ public class Model {
     public Iterator<Point> nodeIterator() {
         return graph.vertexSet().iterator();
     }
-    
+
     /**
      * Returns the maximum flow value.
      *
@@ -162,18 +167,18 @@ public class Model {
         return max;
     }
 
-    public Iterator<Layer> layerIterator() {
-        return map.layerIterator();
-    }
-
+    /**
+     * Returns all map layers.
+     * @return
+     */
     public Collection<Layer> getLayers() {
         return map.getLayers();
     }
 
     /**
-     * Returns a layer specified by an id.
+     * Returns a layer specified by an index.
      *
-     * @param id
+     * @param id The index of the layer to return.
      * @return
      */
     public Layer getLayer(int id) {
@@ -199,19 +204,31 @@ public class Model {
         map.addLayer(layer);
     }
 
+    /**
+     * Remove all layers from the map. This does not remove flows.
+     */
     public void removeAllLayers() {
         map.removeAllLayers();
     }
 
+    /**
+     * Remove a layer.
+     * @param id Index of the layer to remove.
+     */
     public void removeLayer(int id) {
         map.removeLayer(id);
     }
 
+    /**
+     * Returns the number of map layers.
+     * @return 
+     */
     public int getNbrLayers() {
         return map.getNbrLayers();
     }
 
     /**
+     * Returns the scale factor applied to flow values when drawing the flows.
      * @return the flowWidthScale
      */
     public double getFlowWidthScale() {
@@ -219,6 +236,7 @@ public class Model {
     }
 
     /**
+     * Sets the scale factor applied to flow values when drawing the flows.
      * @param flowWidthScale the flowWidthScale to set
      */
     public void setFlowWidthScale(double flowWidthScale) {
