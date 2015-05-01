@@ -107,6 +107,10 @@ public class MainWindow extends javax.swing.JFrame {
         flowWidthPanel = new javax.swing.JPanel();
         javax.swing.JLabel flowWidthLabel = new javax.swing.JLabel();
         flowScaleFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel1 = new javax.swing.JLabel();
+        flowAngleSlider = new javax.swing.JSlider();
+        jLabel2 = new javax.swing.JLabel();
+        flowLengthSlider = new javax.swing.JSlider();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -186,6 +190,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         flowWidthLabel.setText("Flow Width Scale");
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(flowWidthLabel, gridBagConstraints);
 
@@ -199,8 +205,50 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(flowScaleFormattedTextField, gridBagConstraints);
+
+        jLabel1.setText("Flow Angle");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(10, 3, 3, 3);
+        flowWidthPanel.add(jLabel1, gridBagConstraints);
+
+        flowAngleSlider.setMaximum(90);
+        flowAngleSlider.setValue(30);
+        flowAngleSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                flowAngleSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(flowAngleSlider, gridBagConstraints);
+
+        jLabel2.setText("Flow Lenght");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        flowWidthPanel.add(jLabel2, gridBagConstraints);
+
+        flowLengthSlider.setValue(33);
+        flowLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                flowLengthSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(flowLengthSlider, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -519,14 +567,48 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_flowScaleFormattedTextFieldPropertyChange
 
+    private void layoutFlows() {
+        int angleDeg = flowAngleSlider.getValue();
+        int distPerc = flowLengthSlider.getValue();
+        
+        // construct a FlowLayouter
+        
+        // configure FlowLayouter
+        // 
+        
+        // have FlowLayouter lay out the flows
+        /*
+        Iterator<BezierFlow> iter = model.flowIterator();
+        while (iter.hasNext()) {
+            BezierFlow flow = iter.next();
+            // modify flow
+        }
+        */
+        
+        // repaint the map
+        mapComponent.repaint();
+    }
+    
+    private void flowAngleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowAngleSliderStateChanged
+        layoutFlows();
+    }//GEN-LAST:event_flowAngleSliderStateChanged
+
+    private void flowLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowLengthSliderStateChanged
+        layoutFlows();
+    }//GEN-LAST:event_flowLengthSliderStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton fillColorButton;
+    private javax.swing.JSlider flowAngleSlider;
+    private javax.swing.JSlider flowLengthSlider;
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JPanel flowWidthPanel;
     private javax.swing.JMenuItem importFlowsMenuItem;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JPanel leftPanel;
