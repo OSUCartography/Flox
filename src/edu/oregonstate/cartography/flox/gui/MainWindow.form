@@ -299,9 +299,15 @@
             </Component>
             <Component class="javax.swing.JSlider" name="flowAngleSlider">
               <Properties>
+                <Property name="majorTickSpacing" type="int" value="45"/>
                 <Property name="maximum" type="int" value="90"/>
                 <Property name="minimum" type="int" value="-90"/>
+                <Property name="paintLabels" type="boolean" value="true"/>
+                <Property name="paintTicks" type="boolean" value="true"/>
                 <Property name="value" type="int" value="30"/>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[190, 37]"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="flowAngleSliderStateChanged"/>
@@ -324,7 +330,13 @@
             </Component>
             <Component class="javax.swing.JSlider" name="flowLengthSlider">
               <Properties>
+                <Property name="majorTickSpacing" type="int" value="25"/>
+                <Property name="paintLabels" type="boolean" value="true"/>
+                <Property name="paintTicks" type="boolean" value="true"/>
                 <Property name="value" type="int" value="33"/>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[190, 37]"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="flowLengthSliderStateChanged"/>

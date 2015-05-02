@@ -220,9 +220,13 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(10, 3, 0, 3);
         flowWidthPanel.add(jLabel1, gridBagConstraints);
 
+        flowAngleSlider.setMajorTickSpacing(45);
         flowAngleSlider.setMaximum(90);
         flowAngleSlider.setMinimum(-90);
+        flowAngleSlider.setPaintLabels(true);
+        flowAngleSlider.setPaintTicks(true);
         flowAngleSlider.setValue(30);
+        flowAngleSlider.setPreferredSize(new java.awt.Dimension(190, 37));
         flowAngleSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 flowAngleSliderStateChanged(evt);
@@ -242,7 +246,11 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(10, 3, 0, 3);
         flowWidthPanel.add(jLabel2, gridBagConstraints);
 
+        flowLengthSlider.setMajorTickSpacing(25);
+        flowLengthSlider.setPaintLabels(true);
+        flowLengthSlider.setPaintTicks(true);
         flowLengthSlider.setValue(33);
+        flowLengthSlider.setPreferredSize(new java.awt.Dimension(190, 37));
         flowLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 flowLengthSliderStateChanged(evt);
@@ -571,6 +579,9 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_flowScaleFormattedTextFieldPropertyChange
 
+    /**
+     * Change the flow layout based on current GUI parameters
+     */
     private void layoutFlows() {
         int angleDeg = flowAngleSlider.getValue();
         int distPerc = flowLengthSlider.getValue();
@@ -588,7 +599,7 @@ public class MainWindow extends javax.swing.JFrame {
             
             flows.add(flow);
         }
-        model.clearFlows();
+        
         model.setFlows(flows);
         
         // repaint the map

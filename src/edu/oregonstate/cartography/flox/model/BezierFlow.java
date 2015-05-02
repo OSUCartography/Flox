@@ -37,11 +37,7 @@ public class BezierFlow extends Flow {
         double alpha = .5;
         
         // Distance between startPt and endPt
-        double x1 = startPt.x;
-        double y1 = startPt.y;
-        double x2 = endPt.x;
-        double y2 = endPt.y;
-        double dist = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        double dist = getDistance(startPt, endPt);
 
         double tangentLength = dist * .33;
         
@@ -50,25 +46,21 @@ public class BezierFlow extends Flow {
     }
 
     /**
-     * Construct a BezierFlow from 2 Point objects, a tangent angle, and
-     * a tangent length
+     * Construct a BezierFlow from 2 Point objects, a tangent angle,
+     * a tangent length, and a value
      * @param startPt
      * @param endPt
      * @param alpha angle (in radians) between a line drawn from startPt to endPt, and the 
      * line drawn to the control point.
-     * @param tangentLength A percentage of the distance from startPt to endPt
+     * @param distPerc A percentage of the distance from startPt to endPt
+     * @value Flow volume, determines width of flow
      */
     public BezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
         this.startPt = startPt;
         this.endPt = endPt;
         this.value = value;
         
-        // Distance between startPt and endPt
-        double x1 = startPt.x;
-        double y1 = startPt.y;
-        double x2 = endPt.x;
-        double y2 = endPt.y;
-        double dist = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        double dist = getDistance(startPt, endPt);
         
         double tangentLength = dist * ((double)distPerc / 100);
         
@@ -76,6 +68,16 @@ public class BezierFlow extends Flow {
         cPt2 = computeEndCtrlPt(alpha, tangentLength);
     }
     
+    private double getDistance (Point startPt, Point endPt) {
+        
+        double x1 = startPt.x;
+        double y1 = startPt.y;
+        double x2 = endPt.x;
+        double y2 = endPt.y;
+        double dist = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        
+        return dist;
+    }
     
     /**
      * Computes the azimuthal angle for a line between a start and end point
