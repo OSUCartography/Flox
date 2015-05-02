@@ -6,12 +6,33 @@ import java.awt.geom.Rectangle2D;
  *
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
+ * @author Dan Stephen, Cartography and Geovisualization Group, Oregon State
+ * University
  */
 public class BezierFlow extends Flow {
 
+    /**
+     * First control point.
+     */
     private Point cPt1;
+
+    /**
+     * Second control point.
+     */
     private Point cPt2;
 
+    /**
+     * Construct a BezierFlow.
+     *
+     * @param startX Start of flow, x
+     * @param startY Start of flow, y
+     * @param c1x First control point, x
+     * @param c1y First control point, y
+     * @param c2x Second control point, x
+     * @param c2y Second control point, y
+     * @param endX End point, x
+     * @param endY End point, y
+     */
     public BezierFlow(double startX, double startY, double c1x, double c1y,
             double c2x, double c2y, double endX, double endY) {
         this.startPt = new Point(startX, startY);
@@ -23,101 +44,92 @@ public class BezierFlow extends Flow {
     /**
      * Construct a simple BezierFlow from 2 Point objects
      *
-     * @param startPt
-     * @param endPt
+     * @param startPt Start point
+     * @param endPt End point
      */
     public BezierFlow(Point startPt, Point endPt) {
 
         this.startPt = startPt;
         this.endPt = endPt;
-        
+
         // Angle between the straight line connecting start and end point and 
         // the line connecting the start/end point with the corresponding Bezier 
         // control point.
         double alpha = .5;
-        
-        // Distance between startPt and endPt
-        double dist = getDistance(startPt, endPt);
 
+        // Distance between startPt and endPt
+        double dist = getBaselineLength();
         double tangentLength = dist * .33;
-        
-        cPt1 = computeStartCtrlPt(alpha, tangentLength);
-        cPt2 = computeEndCtrlPt(alpha, tangentLength);
+        computeStartCtrlPt(alpha, tangentLength);
+        computeEndCtrlPt(alpha, tangentLength);
     }
 
     /**
-     * Construct a BezierFlow from 2 Point objects, a tangent angle,
-     * a tangent length, and a value
-     * @param startPt
-     * @param endPt
-     * @param alpha angle (in radians) between a line drawn from startPt to endPt, and the 
-     * line drawn to the control point.
+     * Construct a BezierFlow from 2 Point objects, a tangent angle, a tangent
+     * length, and a value
+     *
+     * @param startPt Start point of line
+     * @param endPt End point of line
+     * @param alpha Angle (in radians) between a line drawn from startPt to
+     * endPt, and the line drawn to the control point.
      * @param distPerc A percentage of the distance from startPt to endPt
+     * @param value Value for changing flow width
      * @value Flow volume, determines width of flow
      */
     public BezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
         this.startPt = startPt;
         this.endPt = endPt;
         this.value = value;
-        
-        double dist = getDistance(startPt, endPt);
-        
-        double tangentLength = dist * ((double)distPerc / 100);
-        
-        cPt1 = computeStartCtrlPt(alpha, tangentLength);
-        cPt2 = computeEndCtrlPt(alpha, tangentLength);
-    }
-    
-    private double getDistance (Point startPt, Point endPt) {
-        
-        double x1 = startPt.x;
-        double y1 = startPt.y;
-        double x2 = endPt.x;
-        double y2 = endPt.y;
-        double dist = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-        
-        return dist;
-    }
-    
-    /**
-     * Computes the azimuthal angle for a line between a start and end point
-     * @return Angle in radians
-     */
-    private double getBaselineAzimuth() {
-        final double dx = endPt.x- startPt.x;
-        final double dy = endPt.y - startPt.y;
-        return Math.atan2(dx, dy);
+        double dist = getBaselineLength();
+        double tangentLength = dist * distPerc / 100d;
+        computeStartCtrlPt(alpha, tangentLength);
+        computeEndCtrlPt(alpha, tangentLength);
     }
 
-    // Need the distance between the points
-    private Point computeStartCtrlPt(double alpha, double dist) {
+    /**
+     * Compute first control point from orientation of base line
+     *
+     * @param alpha angle between the base line and the line connecting the
+     * start point with the first control point.
+     * @param dist Distance between start point and first control point.
+     */
+    private void computeStartCtrlPt(double alpha, double dist) {
         final double lineOrientation = getBaselineAzimuth();
-        final double azimuth1 = lineOrientation + alpha;
-        final double dx1 = Math.sin(azimuth1) * dist;
-        final double dy1 = Math.cos(azimuth1) * dist;
-        
+        final double azimuth = lineOrientation + alpha;
+        final double dx1 = Math.sin(azimuth) * dist;
+        final double dy1 = Math.cos(azimuth) * dist;
         double cPt1X = startPt.x + dx1;
         double cPt1Y = startPt.y + dy1;
-        
-        Point startCtrlPt = new Point(cPt1X, cPt1Y);
-        return startCtrlPt;
+        cPt1 = new Point(cPt1X, cPt1Y);
     }
 
-    private Point computeEndCtrlPt(double alpha, double dist) {
+    /**
+     * Compute second control point from orientation of base line
+     *
+     * @param alpha angle between the base line and the line connecting the end
+     * point with the second control point.
+     * @param dist Distance between end point and second control point.
+     */
+    private void computeEndCtrlPt(double alpha, double dist) {
         final double lineOrientation = getBaselineAzimuth();
-        final double azimuth2 = lineOrientation + Math.PI - alpha;
-        final double dx2 = Math.sin(azimuth2) * dist;
-        final double dy2 = Math.cos(azimuth2) * dist;
-        
+        final double azimuth = lineOrientation + Math.PI - alpha;
+        final double dx2 = Math.sin(azimuth) * dist;
+        final double dy2 = Math.cos(azimuth) * dist;
         double cPt2X = endPt.x + dx2;
         double cPt2Y = endPt.y + dy2;
-        
-        Point endCtrlPt = new Point(cPt2X, cPt2Y);
-        return endCtrlPt;
+        cPt2 = new Point(cPt2X, cPt2Y);
     }
-    
+
+    /**
+     * Returns a bounding box, which is usually larger than the actual curve.
+     * Does not take the line width into account.
+     *
+     * @return Bounding box.
+     */
     @Override
     public Rectangle2D.Double getBoundingBox() {
+        // Bezier curve is guaranteed to be within the convex hull defined by 
+        // the four points.
         Rectangle2D.Double bb = new Rectangle2D.Double(startPt.x, startPt.y, 0, 0);
         bb.add(endPt.x, endPt.y);
         bb.add(cPt1.x, cPt1.y);
@@ -126,6 +138,8 @@ public class BezierFlow extends Flow {
     }
 
     /**
+     * Returns the first control point.
+     *
      * @return the cPt1
      */
     public Point getcPt1() {
@@ -133,6 +147,8 @@ public class BezierFlow extends Flow {
     }
 
     /**
+     * Sets the first control point.
+     *
      * @param cPt1 the cPt1 to set
      */
     public void setcPt1(Point cPt1) {
@@ -140,6 +156,8 @@ public class BezierFlow extends Flow {
     }
 
     /**
+     * Returns the second control point.
+     *
      * @return the cPt2
      */
     public Point getcPt2() {
@@ -147,6 +165,8 @@ public class BezierFlow extends Flow {
     }
 
     /**
+     * Set the second control point.
+     *
      * @param cPt2 the cPt2 to set
      */
     public void setcPt2(Point cPt2) {
