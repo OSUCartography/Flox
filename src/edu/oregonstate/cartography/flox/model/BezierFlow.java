@@ -21,7 +21,7 @@ public class BezierFlow extends Flow {
     }
 
     /**
-     * Construct a simple BesierFlow from 2 Point objects
+     * Construct a simple BezierFlow from 2 Point objects
      *
      * @param startPt
      * @param endPt
@@ -43,12 +43,40 @@ public class BezierFlow extends Flow {
         double y2 = endPt.y;
         double dist = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
-        double shortDist = dist * .33;
+        double tangentLength = dist * .33;
         
-        cPt1 = computeStartCtrlPt(alpha, shortDist);
-        cPt2 = computeEndCtrlPt(alpha, shortDist);
+        cPt1 = computeStartCtrlPt(alpha, tangentLength);
+        cPt2 = computeEndCtrlPt(alpha, tangentLength);
     }
 
+    /**
+     * Construct a BezierFlow from 2 Point objects, a tangent angle, and
+     * a tangent length
+     * @param startPt
+     * @param endPt
+     * @param alpha angle (in radians) between a line drawn from startPt to endPt, and the 
+     * line drawn to the control point.
+     * @param tangentLength A percentage of the distance from startPt to endPt
+     */
+    public BezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
+        this.startPt = startPt;
+        this.endPt = endPt;
+        this.value = value;
+        
+        // Distance between startPt and endPt
+        double x1 = startPt.x;
+        double y1 = startPt.y;
+        double x2 = endPt.x;
+        double y2 = endPt.y;
+        double dist = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        
+        double tangentLength = dist * ((double)distPerc / 100);
+        
+        cPt1 = computeStartCtrlPt(alpha, tangentLength);
+        cPt2 = computeEndCtrlPt(alpha, tangentLength);
+    }
+    
+    
     /**
      * Computes the azimuthal angle for a line between a start and end point
      * @return Angle in radians

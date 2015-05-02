@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.BezierFlow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
+import edu.oregonstate.cartography.flox.model.FlowLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
@@ -17,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ListModel;
@@ -193,6 +195,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
         flowWidthPanel.add(flowWidthLabel, gridBagConstraints);
 
         flowScaleFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
@@ -214,10 +217,11 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(10, 3, 3, 3);
+        gridBagConstraints.insets = new java.awt.Insets(10, 3, 0, 3);
         flowWidthPanel.add(jLabel1, gridBagConstraints);
 
         flowAngleSlider.setMaximum(90);
+        flowAngleSlider.setMinimum(-90);
         flowAngleSlider.setValue(30);
         flowAngleSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -230,12 +234,12 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(flowAngleSlider, gridBagConstraints);
 
-        jLabel2.setText("Flow Lenght");
+        jLabel2.setText("Flow Length");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(10, 3, 0, 3);
         flowWidthPanel.add(jLabel2, gridBagConstraints);
 
         flowLengthSlider.setValue(33);
@@ -571,19 +575,21 @@ public class MainWindow extends javax.swing.JFrame {
         int angleDeg = flowAngleSlider.getValue();
         int distPerc = flowLengthSlider.getValue();
         
-        // construct a FlowLayouter
+        ArrayList<BezierFlow> flows = new ArrayList<>();
         
-        // configure FlowLayouter
-        // 
-        
-        // have FlowLayouter lay out the flows
-        /*
         Iterator<BezierFlow> iter = model.flowIterator();
         while (iter.hasNext()) {
+            
             BezierFlow flow = iter.next();
-            // modify flow
+            
+            FlowLayouter flowLayouter = new FlowLayouter();
+
+            flow = flowLayouter.bendFlow(flow, angleDeg, distPerc);
+            
+            flows.add(flow);
         }
-        */
+        model.clearFlows();
+        model.setFlows(flows);
         
         // repaint the map
         mapComponent.repaint();
