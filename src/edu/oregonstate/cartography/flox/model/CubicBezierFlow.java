@@ -9,7 +9,7 @@ import java.awt.geom.Rectangle2D;
  * @author Dan Stephen, Cartography and Geovisualization Group, Oregon State
  * University
  */
-public class BezierFlow extends Flow {
+public class CubicBezierFlow extends Flow {
 
     /**
      * First control point.
@@ -33,7 +33,7 @@ public class BezierFlow extends Flow {
      * @param endX End point, x
      * @param endY End point, y
      */
-    public BezierFlow(double startX, double startY, double c1x, double c1y,
+    public CubicBezierFlow(double startX, double startY, double c1x, double c1y,
             double c2x, double c2y, double endX, double endY) {
         this.startPt = new Point(startX, startY);
         cPt1 = new Point(c1x, c1y);
@@ -47,7 +47,7 @@ public class BezierFlow extends Flow {
      * @param startPt Start point
      * @param endPt End point
      */
-    public BezierFlow(Point startPt, Point endPt) {
+    public CubicBezierFlow(Point startPt, Point endPt) {
 
         this.startPt = startPt;
         this.endPt = endPt;
@@ -76,7 +76,7 @@ public class BezierFlow extends Flow {
      * @param value Value for changing flow width
      * @value Flow volume, determines width of flow
      */
-    public BezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
+    public CubicBezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
         this.startPt = startPt;
         this.endPt = endPt;
         this.value = value;

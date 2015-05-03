@@ -16,9 +16,9 @@ public class SVGFlowExporter extends SVGExporter {
     /**
      * The Flow objects to export.
      */
-    private final Collection<BezierFlow> flows;
+    private final Collection<CubicBezierFlow> flows;
     
-    public SVGFlowExporter(GeometryCollection collection, Collection<BezierFlow> flows, String authorName, String applicationName) {
+    public SVGFlowExporter(GeometryCollection collection, Collection<CubicBezierFlow> flows, String authorName, String applicationName) {
         super(collection,  authorName, applicationName);
         this.flows = flows;
     }
@@ -35,7 +35,7 @@ public class SVGFlowExporter extends SVGExporter {
         setVectorStyle(g);
         svgRootElement.appendChild(g);
         
-        for (BezierFlow flow : flows) {
+        for (CubicBezierFlow flow : flows) {
             StringBuilder str = new StringBuilder();
             str.append("M");
             str.append(df.format(xToPagePx(flow.getStartPt().x)));

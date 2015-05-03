@@ -6,7 +6,7 @@ package edu.oregonstate.cartography.flox.model;
  */
 public class FlowLayouter {
     
-    public static BezierFlow bendCubicFlow (Flow flow, int angleDeg, int distPerc) {
+    public static CubicBezierFlow bendCubicFlow (Flow flow, int angleDeg, int distPerc) {
         
         // Convert angleDeg into radians
         double radians = angleDeg * (Math.PI / 180);
@@ -16,7 +16,7 @@ public class FlowLayouter {
         Point endPt = flow.getEndPt();
         double value = flow.getValue();
         
-        return new BezierFlow(startPt, endPt, radians, distPerc, value);
+        return new CubicBezierFlow(startPt, endPt, radians, distPerc, value);
     }
     
     public static QuadraticBezierFlow bendQuadraticFlow (Flow flow, int angleDeg, int distPerc) {

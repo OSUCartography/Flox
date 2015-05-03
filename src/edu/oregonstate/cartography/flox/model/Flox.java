@@ -20,7 +20,7 @@ public class Flox {
         Point p1 = new Point(0, 0);
         Point p2 = new Point(100, 30);
         
-        BezierFlow flow = new BezierFlow(p1, p2);
+        CubicBezierFlow flow = new CubicBezierFlow(p1, p2);
         flow.setValue(1);
         //model.addFlow(flow);
         return model;

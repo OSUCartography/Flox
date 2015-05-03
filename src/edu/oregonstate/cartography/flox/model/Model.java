@@ -21,7 +21,7 @@ public class Model {
     }
     
     /**
-     * Graph of edges (BezierFlow) and nodes (Point)
+     * Graph of edges (CubicBezierFlow) and nodes (Point)
      */
     private UndirectedGraph<Point, Flow> graph = new SimpleGraph<>(Flow.class);
 
@@ -98,7 +98,7 @@ public class Model {
      * Remove all flows.
      */
     public void clearFlows() {
-        graph = new SimpleGraph<>(BezierFlow.class);
+        graph = new SimpleGraph<>(CubicBezierFlow.class);
     }
 
     /**

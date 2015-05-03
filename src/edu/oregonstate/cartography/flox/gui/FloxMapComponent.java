@@ -1,7 +1,7 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
-import edu.oregonstate.cartography.flox.model.BezierFlow;
+import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -109,7 +109,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * @param flow The flow to convert.
      * @return A GeneralPath for drawing.
      */
-    private GeneralPath flowToPath(BezierFlow flow) {
+    private GeneralPath flowToPath(CubicBezierFlow flow) {
         GeneralPath path = new GeneralPath();
         Point startPt = flow.getStartPt();
         path.moveTo(xToPx(startPt.x), yToPx(startPt.y));
@@ -147,8 +147,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         while (iter.hasNext()) {
             Flow flow = iter.next();
             GeneralPath path;
-            if (flow instanceof BezierFlow) {
-                path = flowToPath((BezierFlow) flow);
+            if (flow instanceof CubicBezierFlow) {
+                path = flowToPath((CubicBezierFlow) flow);
             } else {
                 path = flowToGeneralPath((QuadraticBezierFlow) flow);
             }
@@ -184,9 +184,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             Flow flow = iter.next();
             Point startPt = flow.getStartPt();
             Point endPt = flow.getEndPt();
-            if (flow instanceof BezierFlow) {
-                Point cpt1 = ((BezierFlow) flow).getcPt1();
-                Point cpt2 = ((BezierFlow) flow).getcPt2();
+            if (flow instanceof CubicBezierFlow) {
+                Point cpt1 = ((CubicBezierFlow) flow).getcPt1();
+                Point cpt2 = ((CubicBezierFlow) flow).getcPt2();
                 g2d.setColor(Color.GRAY);        
                 Line2D line1 = new Line2D.Double(xToPx(startPt.x), yToPx(startPt.y), xToPx(cpt1.x), yToPx(cpt1.y));
                 g2d.draw(line1);
