@@ -1,6 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 
 /**
  *
@@ -111,4 +114,25 @@ public class QuadraticBezierFlow extends Flow {
         this.cPt = cPt;
     }
 
+    /**
+    * Converts this Bezier curve to straight line segments.
+    * @param flatness The maximum distance between the curve and the straight
+    * line segments.
+    * @return An list of points, including copies of the start point and the end point.
+    */
+    @Override
+    public ArrayList<Point> toStraightLineSegments(double flatness) {
+        ArrayList<Point> points = new ArrayList<>();
+        GeneralPath path = new GeneralPath();
+        path.moveTo(startPt.x, startPt.y);
+        path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
+        PathIterator iter = path.getPathIterator(null, flatness);
+        double[] coords = new double[6];
+        while (!iter.isDone()) {
+            iter.currentSegment(coords);
+            points.add(new Point(coords[0], coords[1]));
+            iter.next();
+        }
+        return points;
+    }
 }

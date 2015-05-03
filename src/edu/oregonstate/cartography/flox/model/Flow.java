@@ -1,6 +1,7 @@
 package edu.oregonstate.cartography.flox.model;
 
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 
 /**
  *
@@ -101,4 +102,12 @@ public abstract class Flow {
     public void setValue(double value) {
         this.value = value;
     }
+    
+    /**
+    * Converts this Bezier curve to straight line segments.
+    * @param flatness The maximum distance between the curve and the straight
+    * line segments.
+    * @return An list of points, including copies of the start point and the end point.
+    */
+    public abstract ArrayList<Point> toStraightLineSegments(double flatness);
 }

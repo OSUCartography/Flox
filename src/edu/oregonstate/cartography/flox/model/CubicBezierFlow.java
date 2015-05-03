@@ -1,6 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 
 /**
  *
@@ -95,7 +98,7 @@ public class CubicBezierFlow extends Flow {
      */
     private void computeStartCtrlPt(double alpha, double dist) {
         final double lineOrientation = getBaselineAzimuth();
-        final double azimuth = Math.PI / 2 -lineOrientation - alpha;
+        final double azimuth = Math.PI / 2 - lineOrientation - alpha;
         final double dx1 = Math.sin(azimuth) * dist;
         final double dy1 = Math.cos(azimuth) * dist;
         double cPt1X = startPt.x + dx1;
@@ -173,4 +176,25 @@ public class CubicBezierFlow extends Flow {
         this.cPt2 = cPt2;
     }
 
+   /**
+    * Converts this Bezier curve to straight line segments.
+    * @param flatness The maximum distance between the curve and the straight
+    * line segments.
+    * @return An list of points, including copies of the start point and the end point.
+    */
+    @Override
+    public ArrayList<Point> toStraightLineSegments(double flatness) {
+        ArrayList<Point> points = new ArrayList<>();
+        GeneralPath path = new GeneralPath();
+        path.moveTo(startPt.x, startPt.y);
+        path.curveTo(cPt1.x, cPt1.y, cPt2.x, cPt2.y, endPt.x, endPt.y);
+        PathIterator iter = path.getPathIterator(null, flatness);
+        double[] coords = new double[6];
+        while (!iter.isDone()) {
+            iter.currentSegment(coords);
+            points.add(new Point(coords[0], coords[1]));
+            iter.next();
+        }
+        return points;
+    }
 }
