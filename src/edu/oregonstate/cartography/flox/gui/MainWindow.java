@@ -3,6 +3,7 @@ package edu.oregonstate.cartography.flox.gui;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.BezierFlow;
+import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.FlowLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
@@ -534,7 +535,7 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
 
-            ArrayList<BezierFlow> flows = FlowImporter.readFlows(inFilePath);
+            ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             if (flows != null) {
                 model.setFlows(flows);
                 double maxFlowValue = model.getMaxFlowValue();
@@ -585,27 +586,23 @@ public class MainWindow extends javax.swing.JFrame {
     private void layoutFlows() {
         int angleDeg = flowAngleSlider.getValue();
         int distPerc = flowLengthSlider.getValue();
-        
-        ArrayList<BezierFlow> flows = new ArrayList<>();
-        
-        Iterator<BezierFlow> iter = model.flowIterator();
-        while (iter.hasNext()) {
-            
-            BezierFlow flow = iter.next();
-            
-            FlowLayouter flowLayouter = new FlowLayouter();
 
+        ArrayList<Flow> flows = new ArrayList<>();
+
+        Iterator<Flow> iter = model.flowIterator();
+        while (iter.hasNext()) {
+            Flow flow = iter.next();
+            FlowLayouter flowLayouter = new FlowLayouter();
             flow = flowLayouter.bendFlow(flow, angleDeg, distPerc);
-            
             flows.add(flow);
         }
-        
+
         model.setFlows(flows);
-        
+
         // repaint the map
         mapComponent.repaint();
     }
-    
+
     private void flowAngleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowAngleSliderStateChanged
         layoutFlows();
     }//GEN-LAST:event_flowAngleSliderStateChanged

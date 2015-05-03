@@ -19,8 +19,8 @@ public class FlowImporter {
     private FlowImporter() {
     }
 
-    public static ArrayList<BezierFlow> readFlows(String filePath) throws IOException {
-        ArrayList<BezierFlow> flows = new ArrayList<>();
+    public static ArrayList<Flow> readFlows(String filePath) throws IOException {
+        ArrayList<Flow> flows = new ArrayList<>();
 
         try (BufferedReader inputStream = new BufferedReader(new FileReader(filePath))) {
             String l;
@@ -31,7 +31,7 @@ public class FlowImporter {
                 double x2 = Double.parseDouble(tokenizer.nextToken());
                 double y2 = Double.parseDouble(tokenizer.nextToken());
                 double value = Double.parseDouble(tokenizer.nextToken());
-                BezierFlow flow = new BezierFlow(new Point(x1, y1), new Point(x2, y2));
+                Flow flow = new BezierFlow(new Point(x1, y1), new Point(x2, y2));
                 flow.setValue(value);
                 flows.add(flow);
             }

@@ -18,7 +18,7 @@ public class Model {
     /**
      * Graph of edges (BezierFlow) and nodes (Point)
      */
-    private UndirectedGraph<Point, BezierFlow> graph = new SimpleGraph<>(BezierFlow.class);
+    private UndirectedGraph<Point, Flow> graph = new SimpleGraph<>(Flow.class);
 
     /**
      * Scale factor to transform flow values to flow stroke widths
@@ -41,7 +41,7 @@ public class Model {
      *
      * @param flow The flow to add.
      */
-    public void addFlow(BezierFlow flow) {
+    public void addFlow(Flow flow) {
         Point sourceVertex = findNodeInGraph(flow.getStartPt());
         Point targetVertex = findNodeInGraph(flow.getEndPt());
         graph.addVertex(sourceVertex);
@@ -72,7 +72,7 @@ public class Model {
      *
      * @param flows The new flows.
      */
-    public void setFlows(Collection<BezierFlow> flows) {
+    public void setFlows(Collection<Flow> flows) {
         clearFlows();
         flows.stream().forEach((flow) -> {
             addFlow(flow);
@@ -106,7 +106,7 @@ public class Model {
         if (nFlows < 1) {
             return null;
         }
-        Iterator<BezierFlow> iter = graph.edgeSet().iterator();
+        Iterator<Flow> iter = graph.edgeSet().iterator();
         Rectangle2D bb = iter.next().getBoundingBox();
         while (iter.hasNext()) {
             bb = bb.createUnion(iter.next().getBoundingBox());
@@ -133,7 +133,7 @@ public class Model {
      *
      * @return The iterator.
      */
-    public Iterator<BezierFlow> flowIterator() {
+    public Iterator<Flow> flowIterator() {
         return graph.edgeSet().iterator();
     }
 
@@ -156,7 +156,7 @@ public class Model {
         if (nFlows < 1) {
             return 0;
         }
-        Iterator<BezierFlow> iter = graph.edgeSet().iterator();
+        Iterator<Flow> iter = graph.edgeSet().iterator();
         double max = iter.next().value;
         while (iter.hasNext()) {
             double v = iter.next().getValue();
