@@ -15,7 +15,7 @@ public class QuadraticBezierFlow extends Flow {
     private Point cPt;
 
     /**
-     * Construct a simple BezierFlow from 2 Point objects
+     * Construct a QuadraticBezierFlow from 2 points
      *
      * @param startPt Start point
      * @param endPt End point
@@ -36,19 +36,30 @@ public class QuadraticBezierFlow extends Flow {
         computeCtrlPt(alpha, tangentLength);
     }
 
+    /**
+     * Construct a QuadraticBezierFlow
+     * @param startPt Start point
+     * @param endPt End point
+     * @param alpha Angle around the point between the start point and the end 
+     * point, relative to the normal on the line connecting start point and end point.
+     * 0 is perpendicular to this line. +/-PI/2 or is on the line.
+     * @param distPerc The distance of the control point to the point between
+     * the start and the end point (percentage).
+     * @param value Value for line width.
+     */
     public QuadraticBezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
         this.startPt = startPt;
         this.endPt = endPt;
         this.value = value;
-        double dist = getBaselineLength();
-        dist *= distPerc / 100d;
-        double lineOrientation = getBaselineAzimuth();
-        double azimuth = lineOrientation + alpha;
-        double dx = Math.sin(azimuth) * dist;
-        double dy = Math.cos(azimuth) * dist;
-        cPt = new Point(startPt.x + dx, startPt.y + dy);
+        double dist = getBaselineLength() * distPerc / 100d;
+        double beta = getBaselineAzimuth();
+        double dx = dist * Math.cos(Math.PI / 2 - alpha + beta);
+        double dy = dist * Math.sin(Math.PI / 2 - alpha + beta);
+        double x = (startPt.x + endPt.x) / 2 + dx;
+        double y = (startPt.y + endPt.y) / 2 + dy;
+        cPt = new Point(x, y);
     }
-    
+
     /**
      * Compute first control point from orientation of base line
      *

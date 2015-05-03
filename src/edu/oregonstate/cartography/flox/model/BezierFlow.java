@@ -95,7 +95,7 @@ public class BezierFlow extends Flow {
      */
     private void computeStartCtrlPt(double alpha, double dist) {
         final double lineOrientation = getBaselineAzimuth();
-        final double azimuth = lineOrientation + alpha;
+        final double azimuth = Math.PI / 2 -lineOrientation - alpha;
         final double dx1 = Math.sin(azimuth) * dist;
         final double dy1 = Math.cos(azimuth) * dist;
         double cPt1X = startPt.x + dx1;
@@ -113,8 +113,8 @@ public class BezierFlow extends Flow {
     private void computeEndCtrlPt(double alpha, double dist) {
         final double lineOrientation = getBaselineAzimuth();
         final double azimuth = lineOrientation + Math.PI - alpha;
-        final double dx2 = Math.sin(azimuth) * dist;
-        final double dy2 = Math.cos(azimuth) * dist;
+        final double dx2 = Math.cos(azimuth) * dist;
+        final double dy2 = Math.sin(azimuth) * dist;
         double cPt2X = endPt.x + dx2;
         double cPt2Y = endPt.y + dy2;
         cPt2 = new Point(cPt2X, cPt2Y);

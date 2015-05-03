@@ -85,7 +85,7 @@ public abstract class Flow {
     public double getBaselineAzimuth() {
         final double dx = endPt.x - startPt.x;
         final double dy = endPt.y - startPt.y;
-        return Math.atan2(dx, dy);
+        return Math.atan2(dy, dx);
     }
 
     /**

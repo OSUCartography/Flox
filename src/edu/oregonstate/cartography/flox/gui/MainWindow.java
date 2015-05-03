@@ -468,6 +468,32 @@ public class MainWindow extends javax.swing.JFrame {
             writeSymbolGUI();
         }
     }
+    
+    /**
+     * Open a CSV file with flows
+     */
+    public void openFlowsCSVFile() {
+        try {
+            // ask for import file
+            String inFilePath = FileUtils.askFile("Shapefile", true);
+            if (inFilePath == null) {
+                // user canceled
+                return;
+            }
+
+            ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
+            if (flows != null) {
+                model.setFlows(flows);
+                double maxFlowValue = model.getMaxFlowValue();
+                model.setFlowWidthScale(20 / maxFlowValue);
+                flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
+                mapComponent.showAll();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
+        }
+    }
 
     /**
      * Returns the layer currently selected by the user.
@@ -573,26 +599,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_removeSelectedLayerMenuItemActionPerformed
 
     private void importFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFlowsMenuItemActionPerformed
-        try {
-            // ask for import file
-            String inFilePath = FileUtils.askFile("Shapefile", true);
-            if (inFilePath == null) {
-                // user canceled
-                return;
-            }
-
-            ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
-            if (flows != null) {
-                model.setFlows(flows);
-                double maxFlowValue = model.getMaxFlowValue();
-                model.setFlowWidthScale(20 / maxFlowValue);
-                flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
-                mapComponent.showAll();
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
-        }
+        openFlowsCSVFile();
     }//GEN-LAST:event_importFlowsMenuItemActionPerformed
 
     private void showAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllMenuItemActionPerformed

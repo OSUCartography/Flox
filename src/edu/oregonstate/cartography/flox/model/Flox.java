@@ -17,15 +17,12 @@ public class Flox {
     private static final Model initModel() {
         Model model = new Model();
         
-        Point portugal = new Point(-9.064032, 39.53378);
-        Point austria = new Point(14.542151, 47.11053);
-        Point ireland = new Point(-7.314226, 53.521577);
+        Point p1 = new Point(0, 0);
+        Point p2 = new Point(100, 30);
         
-        BezierFlow flow = new BezierFlow(austria, portugal);
-        BezierFlow flow2 = new BezierFlow(austria, ireland);
-        
-        // model.addFlow(flow);
-        // model.addFlow(flow2);
+        BezierFlow flow = new BezierFlow(p1, p2);
+        flow.setValue(1);
+        //model.addFlow(flow);
         return model;
     }
 
@@ -52,7 +49,7 @@ public class Flox {
                 window.setSize(800, 600);
                 window.setVisible(true);
                 window.setModel(model);
-                window.openShapefile();
+                window.openFlowsCSVFile();
             }
         });
 
