@@ -28,12 +28,12 @@ import java.util.Iterator;
 public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
     /**
-     * Radius of circles for start and end points
+     * Radius of circles for start and end points (in pixels)
      */
     private final double R = 10;
 
     /**
-     * Radius of circles for control points
+     * Radius of circles for control points (in pixels)
      */
     private final double CR = 3;
 
@@ -102,6 +102,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         this.model = model;
     }
 
+    /**
+     * Constructs a GeneralPath object for drawing from a flow
+     * @param flow The flow to convert.
+     * @return A GeneralPath for drawing.
+     */
     private GeneralPath flowToPath(BezierFlow flow) {
         GeneralPath path = new GeneralPath();
         Point startPt = flow.getStartPt();
@@ -115,7 +120,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         return path;
     }
 
-    private GeneralPath flowToPath(QuadraticBezierFlow flow) {
+    /**
+     * Constructs a GeneralPath object for drawing from a flow
+     * @param flow The flow to convert.
+     * @return A GeneralPath for drawing.
+     */
+    private GeneralPath flowToGeneralPath(QuadraticBezierFlow flow) {
         GeneralPath path = new GeneralPath();
         Point startPt = flow.getStartPt();
         path.moveTo(xToPx(startPt.x), yToPx(startPt.y));
@@ -138,7 +148,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             if (flow instanceof BezierFlow) {
                 path = flowToPath((BezierFlow) flow);
             } else {
-                path = flowToPath((QuadraticBezierFlow) flow);
+                path = flowToGeneralPath((QuadraticBezierFlow) flow);
             }
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
@@ -194,6 +204,15 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         }
     }
 
+    /**
+     * Draws a circle
+     * @param g2d The graphics context
+     * @param x X coordinate of center
+     * @param y Y coordinate of center
+     * @param r Radius.
+     * @param fill Fill color
+     * @param stroke Stroke color
+     */
     private static void drawCircle(Graphics2D g2d, double x, double y, double r,
             Color fill, Color stroke) {
         Ellipse2D circle = new Ellipse2D.Double(x - r, y - r, r * 2, r * 2);

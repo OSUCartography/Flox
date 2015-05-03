@@ -36,6 +36,19 @@ public class QuadraticBezierFlow extends Flow {
         computeCtrlPt(alpha, tangentLength);
     }
 
+    public QuadraticBezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
+        this.startPt = startPt;
+        this.endPt = endPt;
+        this.value = value;
+        double dist = getBaselineLength();
+        dist *= distPerc / 100d;
+        double lineOrientation = getBaselineAzimuth();
+        double azimuth = lineOrientation + alpha;
+        double dx = Math.sin(azimuth) * dist;
+        double dy = Math.cos(azimuth) * dist;
+        cPt = new Point(startPt.x + dx, startPt.y + dy);
+    }
+    
     /**
      * Compute first control point from orientation of base line
      *

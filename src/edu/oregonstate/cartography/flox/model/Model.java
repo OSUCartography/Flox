@@ -15,6 +15,11 @@ import org.jgrapht.graph.SimpleGraph;
  */
 public class Model {
 
+    public enum CurveType {
+        CUBIC,
+        QUADRATIC
+    }
+    
     /**
      * Graph of edges (BezierFlow) and nodes (Point)
      */
@@ -30,6 +35,11 @@ public class Model {
      */
     private final Map map = new Map();
 
+    /**
+     * Either work with cubic or quadratic curves
+     */
+    private CurveType curveType = CurveType.CUBIC;
+    
     /**
      * Constructor of the model.
      */
@@ -241,5 +251,19 @@ public class Model {
      */
     public void setFlowWidthScale(double flowWidthScale) {
         this.flowWidthScale = flowWidthScale;
+    }
+    
+    /**
+     * @return the curveType
+     */
+    public CurveType getCurveType() {
+        return curveType;
+    }
+
+    /**
+     * @param curveType the curveType to set
+     */
+    public void setCurveType(CurveType curveType) {
+        this.curveType = curveType;
     }
 }

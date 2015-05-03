@@ -97,6 +97,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        curvesButtonGroup = new javax.swing.ButtonGroup();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         leftPanel = new javax.swing.JPanel();
         layerListScrollPane = new javax.swing.JScrollPane();
@@ -114,6 +115,8 @@ public class MainWindow extends javax.swing.JFrame {
         flowAngleSlider = new javax.swing.JSlider();
         jLabel2 = new javax.swing.JLabel();
         flowLengthSlider = new javax.swing.JSlider();
+        cubicCurvesRadioButton = new javax.swing.JRadioButton();
+        quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -261,7 +264,35 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         flowWidthPanel.add(flowLengthSlider, gridBagConstraints);
+
+        curvesButtonGroup.add(cubicCurvesRadioButton);
+        cubicCurvesRadioButton.setSelected(true);
+        cubicCurvesRadioButton.setText("Cubic Curves");
+        cubicCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cubicCurvesRadioButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(cubicCurvesRadioButton, gridBagConstraints);
+
+        curvesButtonGroup.add(quadraticCurvesRadioButton);
+        quadraticCurvesRadioButton.setText("Quadratic Curves");
+        quadraticCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                quadraticCurvesRadioButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(quadraticCurvesRadioButton, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -586,14 +617,17 @@ public class MainWindow extends javax.swing.JFrame {
     private void layoutFlows() {
         int angleDeg = flowAngleSlider.getValue();
         int distPerc = flowLengthSlider.getValue();
-
         ArrayList<Flow> flows = new ArrayList<>();
-
+        Model.CurveType curveType = model.getCurveType();
+        
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            FlowLayouter flowLayouter = new FlowLayouter();
-            flow = flowLayouter.bendFlow(flow, angleDeg, distPerc);
+            if (curveType == Model.CurveType.CUBIC) {
+                flow = FlowLayouter.bendCubicFlow(flow, angleDeg, distPerc);
+            } else {
+                flow = FlowLayouter.bendQuadraticFlow(flow, angleDeg, distPerc);
+            }
             flows.add(flow);
         }
 
@@ -611,7 +645,19 @@ public class MainWindow extends javax.swing.JFrame {
         layoutFlows();
     }//GEN-LAST:event_flowLengthSliderStateChanged
 
+    private void cubicCurvesRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cubicCurvesRadioButtonActionPerformed
+        model.setCurveType(Model.CurveType.CUBIC);
+        layoutFlows();
+    }//GEN-LAST:event_cubicCurvesRadioButtonActionPerformed
+
+    private void quadraticCurvesRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quadraticCurvesRadioButtonActionPerformed
+        model.setCurveType(Model.CurveType.QUADRATIC);
+        layoutFlows();
+    }//GEN-LAST:event_quadraticCurvesRadioButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton cubicCurvesRadioButton;
+    private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
@@ -630,6 +676,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu mapMenu;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openShapefileMenuItem;
+    private javax.swing.JRadioButton quadraticCurvesRadioButton;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JPanel rightPanel;
