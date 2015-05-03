@@ -117,6 +117,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowLengthSlider = new javax.swing.JSlider();
         cubicCurvesRadioButton = new javax.swing.JRadioButton();
         quadraticCurvesRadioButton = new javax.swing.JRadioButton();
+        drawControlPointsCheckBox = new javax.swing.JCheckBox();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -293,6 +294,20 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 9;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(quadraticCurvesRadioButton, gridBagConstraints);
+
+        drawControlPointsCheckBox.setText("Draw Control Points");
+        drawControlPointsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawControlPointsCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        flowWidthPanel.add(drawControlPointsCheckBox, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -655,9 +670,15 @@ public class MainWindow extends javax.swing.JFrame {
         layoutFlows();
     }//GEN-LAST:event_quadraticCurvesRadioButtonActionPerformed
 
+    private void drawControlPointsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawControlPointsCheckBoxActionPerformed
+        model.setDrawControlPoints(drawControlPointsCheckBox.isSelected());
+        mapComponent.repaint();
+    }//GEN-LAST:event_drawControlPointsCheckBoxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
+    private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;

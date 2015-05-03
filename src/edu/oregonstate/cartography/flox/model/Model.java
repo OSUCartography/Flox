@@ -31,6 +31,11 @@ public class Model {
     private double flowWidthScale = 1;
 
     /**
+     * flag for drawing control points
+     */
+    private boolean drawControlPoints;
+    
+    /**
      * A reference to the map with layers and geometry.
      */
     private final Map map = new Map();
@@ -266,4 +271,20 @@ public class Model {
     public void setCurveType(CurveType curveType) {
         this.curveType = curveType;
     }
+    
+     /**
+     * @return the drawControlPoints
+     */
+    public boolean isDrawControlPoints() {
+        return drawControlPoints;
+    }
+
+    /**
+     * 
+     * @param drawControlPoint the drawControlPoints to set
+     */
+    public void setDrawControlPoints(boolean drawControlPoints) {
+        this.drawControlPoints = drawControlPoints;
+    }
+    
 }

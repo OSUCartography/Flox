@@ -86,7 +86,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         g2d.setColor(Color.BLACK);
         drawFlows(g2d);
         drawNodes(g2d);
-        drawControlPoints(g2d);
+        if (model.isDrawControlPoints()) {
+            drawControlPoints(g2d);
+        }
 
         // copy double buffer image to JComponent
         Insets insets = getInsets();
