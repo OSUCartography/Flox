@@ -96,7 +96,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             drawControlPoints(g2d);
         }
         drawStraightLinesSegments(g2d);
-        drawRebuiltBezierCurve(g2d);
+        //drawRebuiltBezierCurve(g2d);
 
         // copy double buffer image to JComponent
         Insets insets = getInsets();

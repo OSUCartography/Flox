@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import java.util.ArrayList;
 
@@ -46,9 +47,21 @@ public class LayoutGrader {
         for (int i = 0; i < flowPolylines.size(); i++) {
 
             for (int j = i + 1; j < flowPolylines.size(); j++) {
-                if (flowPolylines.get(i).intersects(flowPolylines.get(j))) {
+
+                Geometry flow1 = flowPolylines.get(i);
+                Geometry flow2 = flowPolylines.get(j);
+
+                Geometry intersects = flow1.intersection(flow2);
+                int theLength = intersects.getNumGeometries();
+
+                if (flow1.crosses(flow2)) {
                     intersections++;
                 }
+
+                if (theLength > 1) {
+                    intersections = intersections + (theLength - 1);
+                }
+
             }
 
         }
