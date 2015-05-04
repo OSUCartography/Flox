@@ -7,6 +7,7 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.FlowLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
+import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
@@ -118,6 +119,7 @@ public class MainWindow extends javax.swing.JFrame {
         cubicCurvesRadioButton = new javax.swing.JRadioButton();
         quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
+        countIntersectionsButton = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -308,6 +310,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
         flowWidthPanel.add(drawControlPointsCheckBox, gridBagConstraints);
+
+        countIntersectionsButton.setText("Count Intersections");
+        countIntersectionsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                countIntersectionsButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+        flowWidthPanel.add(countIntersectionsButton, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -659,6 +673,16 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }
 
+    private void countIntersections() {
+        ArrayList<Flow> flows = new ArrayList<>();
+        Iterator<Flow> iter = model.flowIterator();
+        while (iter.hasNext()) {
+            Flow flow = iter.next();
+            flows.add(flow);
+        }
+        System.out.println(LayoutGrader.countFlowIntersections(flows));
+    }
+    
     private void flowAngleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowAngleSliderStateChanged
         layoutFlows();
     }//GEN-LAST:event_flowAngleSliderStateChanged
@@ -682,7 +706,12 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawControlPointsCheckBoxActionPerformed
 
+    private void countIntersectionsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_countIntersectionsButtonActionPerformed
+        countIntersections();
+    }//GEN-LAST:event_countIntersectionsButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton countIntersectionsButton;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
