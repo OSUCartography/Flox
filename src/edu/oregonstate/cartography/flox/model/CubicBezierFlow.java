@@ -197,4 +197,17 @@ public class CubicBezierFlow extends Flow {
         }
         return points;
     }
+    
+    public static CubicBezierFlow bendCubicFlow (Flow flow, int angleDeg, int distPerc) {
+        
+        // Convert angleDeg into radians
+        double radians = angleDeg * (Math.PI / 180);
+        
+        //get the start and end points
+        Point startPt = flow.getStartPt();
+        Point endPt = flow.getEndPt();
+        double value = flow.getValue();
+        
+        return new CubicBezierFlow(startPt, endPt, radians, distPerc, value);
+    }
 }

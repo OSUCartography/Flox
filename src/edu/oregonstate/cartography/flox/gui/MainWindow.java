@@ -3,12 +3,13 @@ package edu.oregonstate.cartography.flox.gui;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
+import static edu.oregonstate.cartography.flox.model.CubicBezierFlow.bendCubicFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
-import edu.oregonstate.cartography.flox.model.FlowLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
+import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
@@ -660,9 +661,9 @@ public class MainWindow extends javax.swing.JFrame {
         while (iter.hasNext()) {
             Flow flow = iter.next();
             if (curveType == Model.CurveType.CUBIC) {
-                flow = FlowLayouter.bendCubicFlow(flow, angleDeg, distPerc);
+                flow = bendCubicFlow(flow, angleDeg, distPerc);
             } else {
-                flow = FlowLayouter.bendQuadraticFlow(flow, angleDeg, distPerc);
+                flow = bendQuadraticFlow(flow, angleDeg, distPerc);
             }
             flows.add(flow);
         }
