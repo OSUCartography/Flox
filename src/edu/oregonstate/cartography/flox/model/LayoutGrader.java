@@ -52,14 +52,23 @@ public class LayoutGrader {
                 Geometry flow2 = flowPolylines.get(j);
 
                 Geometry intersects = flow1.intersection(flow2);
-                int theLength = intersects.getNumGeometries();
+                int numberOfIntersections = intersects.getNumGeometries();
 
-                if (flow1.crosses(flow2)) {
+                if (flow1.crosses(flow2) && numberOfIntersections > 1) {
+
+                    Coordinate start1 = flow1.getCoordinates()[0];
+                    Coordinate start2 = flow2.getCoordinates()[0];
+                    Coordinate end1 = flow1.getCoordinates()[flow1.getNumPoints() - 1];
+                    Coordinate end2 = flow2.getCoordinates()[flow2.getNumPoints() - 1];
+
+                    if (start1.equals(start2) || start1.equals(end2) || end1.equals(start2) || end1.equals(end2)) {
+                        intersections = intersections + (numberOfIntersections - 1);
+                    } else {
+                        intersections = intersections + numberOfIntersections;
+                    }
+
+                } else if (flow1.crosses(flow2)) {
                     intersections++;
-                }
-
-                if (theLength > 1) {
-                    intersections = intersections + (theLength - 1);
                 }
 
             }
