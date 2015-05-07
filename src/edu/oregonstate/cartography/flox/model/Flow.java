@@ -89,6 +89,9 @@ public abstract class Flow {
         return Math.atan2(dy, dx);
     }
 
+    public Point getBaseLineMidPoint() {
+        return new Point((endPt.x + startPt.x) / 2, (endPt.y + startPt.y) / 2);
+    }
     /**
      * @return the value
      */

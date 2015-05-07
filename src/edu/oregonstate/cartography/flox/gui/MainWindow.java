@@ -6,9 +6,12 @@ import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import static edu.oregonstate.cartography.flox.model.CubicBezierFlow.bendCubicFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
+import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
+import edu.oregonstate.cartography.flox.model.Point;
+import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
@@ -121,6 +124,7 @@ public class MainWindow extends javax.swing.JFrame {
         quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
         countIntersectionsButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -324,6 +328,17 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         flowWidthPanel.add(countIntersectionsButton, gridBagConstraints);
 
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 16;
+        flowWidthPanel.add(jButton1, gridBagConstraints);
+
         rightPanel.add(flowWidthPanel);
 
         getContentPane().add(rightPanel, java.awt.BorderLayout.EAST);
@@ -483,7 +498,7 @@ public class MainWindow extends javax.swing.JFrame {
             writeSymbolGUI();
         }
     }
-    
+
     /**
      * Open a CSV file with flows
      */
@@ -656,7 +671,7 @@ public class MainWindow extends javax.swing.JFrame {
         int distPerc = flowLengthSlider.getValue();
         ArrayList<Flow> flows = new ArrayList<>();
         Model.CurveType curveType = model.getCurveType();
-        
+
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
@@ -683,7 +698,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         System.out.println(LayoutGrader.countFlowIntersections(flows));
     }
-    
+
     private void flowAngleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowAngleSliderStateChanged
         layoutFlows();
     }//GEN-LAST:event_flowAngleSliderStateChanged
@@ -711,6 +726,27 @@ public class MainWindow extends javax.swing.JFrame {
         countIntersections();
     }//GEN-LAST:event_countIntersectionsButtonActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        ForceLayouter layouter = new ForceLayouter(model);
+        for (int i = 0; i < 10; i++) {
+
+            Iterator<Flow> iterator = model.flowIterator();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                Point basePt = flow.getBaseLineMidPoint();
+                if (flow instanceof QuadraticBezierFlow) {
+                    QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
+                    layouter.computeTotalForce(qFlow.getcPt(), basePt);
+                } else {
+                    CubicBezierFlow cFlow = (CubicBezierFlow) flow;
+                    layouter.computeTotalForce(cFlow.getcPt1(), basePt);
+                    layouter.computeTotalForce(cFlow.getcPt2(), basePt);
+                }
+            }
+        }
+        mapComponent.repaint();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton countIntersectionsButton;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
@@ -725,6 +761,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JPanel flowWidthPanel;
     private javax.swing.JMenuItem importFlowsMenuItem;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;

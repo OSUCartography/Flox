@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.flox.model;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -9,13 +8,16 @@ import java.util.Iterator;
  */
 public class ForceLayouter {
 
-    // Stores the model
-    Model model;
+    private static final double K = 0.5;
+    private static final double B = 4;
 
-    // Sets the model
-    public void setModel(Model model) {
+    // Stores the model
+    private Model model;
+    
+    public ForceLayouter(Model model) {
         this.model = model;
     }
+    
 
     /**
      * Computes the total acting force on a point as applied by neighboring
@@ -24,7 +26,7 @@ public class ForceLayouter {
      * @param targetPoint The point upon which forces will be applied
      * @return
      */
-    public double[] computeTotalForce(Point targetPoint) {
+    public void computeTotalForce(Point targetPoint, Point referencePoint) {
 
         Iterator<Point> nodeIterator = model.nodeIterator();
 
@@ -34,31 +36,41 @@ public class ForceLayouter {
 
         while (nodeIterator.hasNext()) {
             Point node = nodeIterator.next();
-            
+
             double xDist = targetPoint.x - node.x; // x distance from node to target
             double yDist = targetPoint.y - node.y; // y distance from node to target
-            double L = Math.sqrt( (xDist * xDist) + (yDist * yDist) ); // euclidean distance from node to target
-            double w = 1/L; // weight of the distance?
-            
-            double fx = xDist / L; //normalized x distance
-            double fy = yDist / L; //normalized y distance
-            
+            double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
+            // FIXME length of 0 causes division by 0
+            double w = Math.pow(l, -B); // weight of the distance?
+
+            double fx = xDist / l; //normalized x distance
+            double fy = yDist / l; //normalized y distance
+
             // weight force
             fx *= w;
             fy *= w;
-            
+
             // sum force
             fxTotal += fx;
             fyTotal += fy;
             wTotal += w;
         }
 
-        double fxFinal = fxTotal/wTotal;
-        double fyFinal = fyTotal/wTotal;
+        double fxFinal = fxTotal / wTotal;
+        double fyFinal = fyTotal / wTotal;
+
+        double springLengthX = referencePoint.x - targetPoint.x;
+        double springLengthY = referencePoint.y - targetPoint.y;
+        double springForceX = K * springLengthX;
+        double springForceY = K * springLengthY;
         
-        double[] totalForce = {fxFinal, fyFinal};
+        double totalForceX = fxFinal + springForceX;
+        double totalForceY = fyFinal + springForceY;
         
-        return  totalForce;
+        double dx = totalForceX;
+        double dy = totalForceY;
+        targetPoint.x += dx;
+        targetPoint.y += dy;
     }
 
 }
