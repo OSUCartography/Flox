@@ -16,10 +16,10 @@ public class Flox {
      */
     private static final Model initModel() {
         Model model = new Model();
-        
+
         Point p1 = new Point(0, 0);
         Point p2 = new Point(100, 30);
-        
+
         CubicBezierFlow flow = new CubicBezierFlow(p1, p2);
         flow.setValue(1);
         //model.addFlow(flow);
@@ -40,7 +40,7 @@ public class Flox {
 
         // initialize model
         Model model = initModel();
-        
+
         // initialize GUI
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override

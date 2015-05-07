@@ -17,6 +17,8 @@ import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -25,11 +27,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 /**
  *
@@ -130,8 +132,6 @@ public class MainWindow extends javax.swing.JFrame {
         bSlider = new javax.swing.JSlider();
         jLabel4 = new javax.swing.JLabel();
         kSlider = new javax.swing.JSlider();
-        jLabel5 = new javax.swing.JLabel();
-        iterationsSlider = new javax.swing.JSlider();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -379,24 +379,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 14;
         flowWidthPanel.add(kSlider, gridBagConstraints);
-
-        jLabel5.setText("Number of iterations");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 17;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        flowWidthPanel.add(jLabel5, gridBagConstraints);
-
-        iterationsSlider.setMajorTickSpacing(1);
-        iterationsSlider.setMaximum(10);
-        iterationsSlider.setMinimum(1);
-        iterationsSlider.setPaintLabels(true);
-        iterationsSlider.setPaintTicks(true);
-        iterationsSlider.setSnapToTicks(true);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
-        flowWidthPanel.add(iterationsSlider, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -786,10 +768,26 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_countIntersectionsButtonActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+
         ForceLayouter layouter = new ForceLayouter(model);
-        layouter.setK((double)kSlider.getValue()/100);
-        layouter.setB((double)bSlider.getValue());
-        for (int i = 0; i < iterationsSlider.getValue(); i++) {
+        layouter.setK((double) kSlider.getValue() / 100);
+        layouter.setB((double) bSlider.getValue());
+
+        Timer timer = new Timer(100, new MyTimerActionListener(layouter));
+
+        timer.start();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    class MyTimerActionListener implements ActionListener {
+
+        ForceLayouter layouter;
+
+        public MyTimerActionListener(ForceLayouter layouter) {
+            this.layouter = layouter;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
 
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
@@ -804,10 +802,11 @@ public class MainWindow extends javax.swing.JFrame {
                     layouter.computeTotalForce(cFlow.getcPt2(), basePt);
                 }
             }
-            
+
+            mapComponent.repaint();
         }
-        mapComponent.repaint();
-    }//GEN-LAST:event_jButton1ActionPerformed
+
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSlider bSlider;
@@ -824,13 +823,11 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JPanel flowWidthPanel;
     private javax.swing.JMenuItem importFlowsMenuItem;
-    private javax.swing.JSlider iterationsSlider;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
