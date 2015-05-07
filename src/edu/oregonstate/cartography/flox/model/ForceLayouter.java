@@ -24,7 +24,7 @@ public class ForceLayouter {
      * @param idwExponent the idwExponent to set
      */
     public void setIDWExponent(double idwExponent) {
-        idwExponent = idwExponent;
+        this.idwExponent = idwExponent;
     }
 
     public ForceLayouter(Model model) {
