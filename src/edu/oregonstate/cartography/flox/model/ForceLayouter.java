@@ -8,30 +8,28 @@ import java.util.Iterator;
  */
 public class ForceLayouter {
 
-    private static double K = 0.5; // Spring stiffness
-    private static double B = 4; // 
-
-    /**
-     * @param aK the K to set
-     */
-    public static void setK(double newK) {
-        K = newK;
-    }
-
-    /**
-     * @param aB the B to set
-     */
-    public static void setB(double newB) {
-        B = newB;
-    }
-
+    private double maxFlowLengthSpringConstant = 0.5; // Spring stiffness of longest flow
+    private double minFlowLengthSpringConstant = 0.5; // Spring stiffness of zero-length flow
+    private double idwExponent = 4; // 
+    
     // Stores the model
     private Model model;
-    
+
+    public void setSpringConstants(double maxFlowLengthSpringConstant, double minFlowLengthSpringConstant) {
+        this.maxFlowLengthSpringConstant = maxFlowLengthSpringConstant;
+        this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
+    }
+
+    /**
+     * @param idwExponent the idwExponent to set
+     */
+    public void setIDWExponent(double idwExponent) {
+        idwExponent = idwExponent;
+    }
+
     public ForceLayouter(Model model) {
         this.model = model;
     }
-    
 
     /**
      * Computes the total acting force on a point as applied by neighboring
@@ -40,8 +38,10 @@ public class ForceLayouter {
      * @param targetPoint The point upon which forces will be applied
      * @return
      */
-    public void computeTotalForce(Point targetPoint, Point referencePoint) {
-
+    public void computeTotalForce(Point targetPoint, Point startPoint, 
+            Point endPoint, Point referencePoint, double maxFlowLength, double flowBaseLength) {
+        
+        
         Iterator<Point> nodeIterator = model.nodeIterator();
 
         double fxTotal = 0;
@@ -55,7 +55,7 @@ public class ForceLayouter {
             double yDist = targetPoint.y - node.y; // y distance from node to target
             double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
             // FIXME length of 0 causes division by 0
-            double w = Math.pow(l, -B); // distance weight
+            double w = Math.pow(l, -idwExponent); // distance weight
 
             double fx = xDist / l; //normalized x distance
             double fy = yDist / l; //normalized y distance
@@ -75,12 +75,13 @@ public class ForceLayouter {
 
         double springLengthX = referencePoint.x - targetPoint.x;
         double springLengthY = referencePoint.y - targetPoint.y;
-        double springForceX = K * springLengthX;
-        double springForceY = K * springLengthY;
-        
+        double flowSpringConstant = (-minFlowLengthSpringConstant + maxFlowLengthSpringConstant) / maxFlowLength * flowBaseLength + minFlowLengthSpringConstant;
+        double springForceX = flowSpringConstant * springLengthX;
+        double springForceY = flowSpringConstant * springLengthY;
+
         double totalForceX = fxFinal + springForceX;
         double totalForceY = fyFinal + springForceY;
-        
+
         double dx = totalForceX;
         double dy = totalForceY;
         targetPoint.x += dx;

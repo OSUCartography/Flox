@@ -16,10 +16,11 @@ import org.jgrapht.graph.SimpleGraph;
 public class Model {
 
     public enum CurveType {
+
         CUBIC,
         QUADRATIC
     }
-    
+
     /**
      * Graph of edges (CubicBezierFlow) and nodes (Point)
      */
@@ -34,7 +35,7 @@ public class Model {
      * flag for drawing control points
      */
     private boolean drawControlPoints;
-    
+
     /**
      * A reference to the map with layers and geometry.
      */
@@ -44,7 +45,7 @@ public class Model {
      * Either work with cubic or quadratic curves
      */
     private CurveType curveType = CurveType.CUBIC;
-    
+
     /**
      * Constructor of the model.
      */
@@ -183,7 +184,25 @@ public class Model {
     }
 
     /**
+     * Returns the length of the longest flow base line.
+     * @return The length of the longest base line.
+     */
+    public double getLongestFlowLength() {
+        double maxLength = 0;
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            double l = flow.getBaselineLength();
+            if (l > maxLength) {
+                maxLength = l;
+            }
+        }
+        return maxLength;
+    }
+
+    /**
      * Returns all map layers.
+     *
      * @return
      */
     public Collection<Layer> getLayers() {
@@ -228,6 +247,7 @@ public class Model {
 
     /**
      * Remove a layer.
+     *
      * @param id Index of the layer to remove.
      */
     public void removeLayer(int id) {
@@ -236,7 +256,8 @@ public class Model {
 
     /**
      * Returns the number of map layers.
-     * @return 
+     *
+     * @return
      */
     public int getNbrLayers() {
         return map.getNbrLayers();
@@ -244,6 +265,7 @@ public class Model {
 
     /**
      * Returns the scale factor applied to flow values when drawing the flows.
+     *
      * @return the flowWidthScale
      */
     public double getFlowWidthScale() {
@@ -252,12 +274,13 @@ public class Model {
 
     /**
      * Sets the scale factor applied to flow values when drawing the flows.
+     *
      * @param flowWidthScale the flowWidthScale to set
      */
     public void setFlowWidthScale(double flowWidthScale) {
         this.flowWidthScale = flowWidthScale;
     }
-    
+
     /**
      * @return the curveType
      */
@@ -271,8 +294,8 @@ public class Model {
     public void setCurveType(CurveType curveType) {
         this.curveType = curveType;
     }
-    
-     /**
+
+    /**
      * @return the drawControlPoints
      */
     public boolean isDrawControlPoints() {
@@ -280,11 +303,11 @@ public class Model {
     }
 
     /**
-     * 
+     *
      * @param drawControlPoint the drawControlPoints to set
      */
     public void setDrawControlPoints(boolean drawControlPoints) {
         this.drawControlPoints = drawControlPoints;
     }
-    
+
 }

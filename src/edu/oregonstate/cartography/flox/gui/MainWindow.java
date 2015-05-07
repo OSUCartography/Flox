@@ -132,6 +132,8 @@ public class MainWindow extends javax.swing.JFrame {
         bSlider = new javax.swing.JSlider();
         jLabel4 = new javax.swing.JLabel();
         kSlider = new javax.swing.JSlider();
+        zeroLengthStiffnessSlider = new javax.swing.JSlider();
+        jLabel5 = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -343,42 +345,71 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridy = 21;
         flowWidthPanel.add(jButton1, gridBagConstraints);
 
-        jLabel3.setText("Spring Stiffness (K)");
+        jLabel3.setText("Spring Stiffness of Longest Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(jLabel3, gridBagConstraints);
 
-        bSlider.setMajorTickSpacing(1);
-        bSlider.setMaximum(6);
-        bSlider.setMinimum(1);
+        bSlider.setMajorTickSpacing(10);
+        bSlider.setMaximum(60);
+        bSlider.setMinimum(10);
         bSlider.setPaintLabels(true);
         bSlider.setPaintTicks(true);
-        bSlider.setSnapToTicks(true);
-        bSlider.setValue(4);
+        bSlider.setValue(40);
+        bSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                bSliderStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 19;
         flowWidthPanel.add(bSlider, gridBagConstraints);
 
-        jLabel4.setText("Rate of weight loss? (B)");
+        jLabel4.setText("IDW Exponent");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 18;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(jLabel4, gridBagConstraints);
 
         kSlider.setMajorTickSpacing(20);
         kSlider.setPaintLabels(true);
         kSlider.setPaintTicks(true);
+        kSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                kSliderStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 14;
         flowWidthPanel.add(kSlider, gridBagConstraints);
+
+        zeroLengthStiffnessSlider.setMajorTickSpacing(20);
+        zeroLengthStiffnessSlider.setPaintLabels(true);
+        zeroLengthStiffnessSlider.setPaintTicks(true);
+        zeroLengthStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                zeroLengthStiffnessSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 16;
+        flowWidthPanel.add(zeroLengthStiffnessSlider, gridBagConstraints);
+
+        jLabel5.setText("Spring Stiffness of Zero-Length Flow");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 15;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(jLabel5, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -768,19 +799,46 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_countIntersectionsButtonActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        forceLayout();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void bSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_bSliderStateChanged
+        if (bSlider.getValueIsAdjusting() == false) {
+            forceLayout();
+        }
+    }//GEN-LAST:event_bSliderStateChanged
+
+    private void kSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_kSliderStateChanged
+        if (kSlider.getValueIsAdjusting() == false) {
+            forceLayout();
+        }
+    }//GEN-LAST:event_kSliderStateChanged
+
+    private void zeroLengthStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_zeroLengthStiffnessSliderStateChanged
+        if (zeroLengthStiffnessSlider.getValueIsAdjusting() == false) {
+            forceLayout();
+        }
+    }//GEN-LAST:event_zeroLengthStiffnessSliderStateChanged
+
+    
+    private void forceLayout() {
+       
         ForceLayouter layouter = new ForceLayouter(model);
-        layouter.setK((double) kSlider.getValue() / 100);
-        layouter.setB((double) bSlider.getValue());
+        layouter.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
+        layouter.setIDWExponent((double) bSlider.getValue() / 10);
 
-        Timer timer = new Timer(100, new MyTimerActionListener(layouter));
+        MyTimerActionListener listener = new MyTimerActionListener(layouter);
+        Timer timer = new Timer(100, listener);
+        listener.setTimer(timer);
 
         timer.start();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }
 
     class MyTimerActionListener implements ActionListener {
 
-        ForceLayouter layouter;
+        private Timer timer;
+        private ForceLayouter layouter;
+        private final long startTime = System.currentTimeMillis();
 
         public MyTimerActionListener(ForceLayouter layouter) {
             this.layouter = layouter;
@@ -789,21 +847,34 @@ public class MainWindow extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
 
+            double maxFlowLength = model.getLongestFlowLength();
+            
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
+                double flowBaseLength = flow.getBaselineLength();
                 Point basePt = flow.getBaseLineMidPoint();
                 if (flow instanceof QuadraticBezierFlow) {
                     QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                    layouter.computeTotalForce(qFlow.getcPt(), basePt);
+                    layouter.computeTotalForce(qFlow.getcPt(), flow.getStartPt(), 
+                            flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
                 } else {
                     CubicBezierFlow cFlow = (CubicBezierFlow) flow;
-                    layouter.computeTotalForce(cFlow.getcPt1(), basePt);
-                    layouter.computeTotalForce(cFlow.getcPt2(), basePt);
+                    layouter.computeTotalForce(cFlow.getcPt1(), flow.getStartPt(), 
+                            flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
+                    layouter.computeTotalForce(cFlow.getcPt2(), flow.getStartPt(), 
+                            flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
                 }
             }
 
             mapComponent.repaint();
+            if (System.currentTimeMillis() - startTime > 3000) {
+                timer.stop();
+            }
+        }
+
+        private void setTimer(Timer timer) {
+            this.timer = timer;
         }
 
     }
@@ -828,6 +899,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
@@ -847,6 +919,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;
+    private javax.swing.JSlider zeroLengthStiffnessSlider;
     private javax.swing.JMenuItem zoomOnSelectedLayerMenuItem;
     // End of variables declaration//GEN-END:variables
 
