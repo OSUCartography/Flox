@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ListModel;
@@ -125,6 +126,12 @@ public class MainWindow extends javax.swing.JFrame {
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
         countIntersectionsButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        bSlider = new javax.swing.JSlider();
+        jLabel4 = new javax.swing.JLabel();
+        kSlider = new javax.swing.JSlider();
+        jLabel5 = new javax.swing.JLabel();
+        iterationsSlider = new javax.swing.JSlider();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -328,7 +335,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         flowWidthPanel.add(countIntersectionsButton, gridBagConstraints);
 
-        jButton1.setText("jButton1");
+        jButton1.setText("Force Layout");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -336,8 +343,60 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 19;
         flowWidthPanel.add(jButton1, gridBagConstraints);
+
+        jLabel3.setText("Spring Stiffness (K)");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(jLabel3, gridBagConstraints);
+
+        bSlider.setMajorTickSpacing(1);
+        bSlider.setMaximum(6);
+        bSlider.setMinimum(1);
+        bSlider.setPaintLabels(true);
+        bSlider.setPaintTicks(true);
+        bSlider.setSnapToTicks(true);
+        bSlider.setValue(4);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 16;
+        flowWidthPanel.add(bSlider, gridBagConstraints);
+
+        jLabel4.setText("Rate of weight loss? (B)");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 15;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(jLabel4, gridBagConstraints);
+
+        kSlider.setMajorTickSpacing(20);
+        kSlider.setPaintLabels(true);
+        kSlider.setPaintTicks(true);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 14;
+        flowWidthPanel.add(kSlider, gridBagConstraints);
+
+        jLabel5.setText("Number of iterations");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 17;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(jLabel5, gridBagConstraints);
+
+        iterationsSlider.setMajorTickSpacing(1);
+        iterationsSlider.setMaximum(10);
+        iterationsSlider.setMinimum(1);
+        iterationsSlider.setPaintLabels(true);
+        iterationsSlider.setPaintTicks(true);
+        iterationsSlider.setSnapToTicks(true);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 18;
+        flowWidthPanel.add(iterationsSlider, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -728,7 +787,9 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         ForceLayouter layouter = new ForceLayouter(model);
-        for (int i = 0; i < 10; i++) {
+        layouter.setK((double)kSlider.getValue()/100);
+        layouter.setB((double)bSlider.getValue());
+        for (int i = 0; i < iterationsSlider.getValue(); i++) {
 
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
@@ -743,11 +804,13 @@ public class MainWindow extends javax.swing.JFrame {
                     layouter.computeTotalForce(cFlow.getcPt2(), basePt);
                 }
             }
+            
         }
         mapComponent.repaint();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JSlider bSlider;
     private javax.swing.JButton countIntersectionsButton;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
@@ -761,9 +824,14 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JPanel flowWidthPanel;
     private javax.swing.JMenuItem importFlowsMenuItem;
+    private javax.swing.JSlider iterationsSlider;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JPanel leftPanel;

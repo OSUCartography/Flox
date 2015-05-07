@@ -8,8 +8,22 @@ import java.util.Iterator;
  */
 public class ForceLayouter {
 
-    private static final double K = 0.5;
-    private static final double B = 4;
+    private static double K = 0.5; // Spring stiffness
+    private static double B = 4; // 
+
+    /**
+     * @param aK the K to set
+     */
+    public static void setK(double newK) {
+        K = newK;
+    }
+
+    /**
+     * @param aB the B to set
+     */
+    public static void setB(double newB) {
+        B = newB;
+    }
 
     // Stores the model
     private Model model;
@@ -41,7 +55,7 @@ public class ForceLayouter {
             double yDist = targetPoint.y - node.y; // y distance from node to target
             double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
             // FIXME length of 0 causes division by 0
-            double w = Math.pow(l, -B); // weight of the distance?
+            double w = Math.pow(l, -B); // distance weight
 
             double fx = xDist / l; //normalized x distance
             double fy = yDist / l; //normalized y distance
