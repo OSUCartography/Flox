@@ -892,8 +892,9 @@ public class MainWindow extends javax.swing.JFrame {
                 Point basePt = flow.getBaseLineMidPoint();
                 if (flow instanceof QuadraticBezierFlow) {
                     QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                    layouter.computeTotalForce(qFlow.getcPt(), flow.getStartPt(), 
-                            flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
+                    //layouter.computeTotalForce(qFlow.getcPt(), flow.getStartPt(), 
+                    //        flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
+                    layouter.applyForces(qFlow, maxFlowLength);
                 } else {
                     CubicBezierFlow cFlow = (CubicBezierFlow) flow;
                     layouter.computeTotalForce(cFlow.getcPt1(), flow.getStartPt(), 

@@ -103,7 +103,7 @@ public class ForceLayouter {
                 double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
                 // avoid division by zero
                 if (l == 0) {
-                    return;
+                    continue;
                 }
                 double w = Math.pow(l, -idwExponent); // distance weight
 
@@ -151,6 +151,38 @@ public class ForceLayouter {
         double dy = totalForceY;
         targetPoint.x += dx;
         targetPoint.y += dy;
+    }
+
+    /**
+     * Apply forces onto a quadratic BŽzier flow. The BŽzier curve is split
+     * into small segments. The force exerted onto each node in the segmented 
+     * flow is computed and then these forces are summed. The summed force is then
+     * applied onto the control point of the BŽzier curve.
+     * @param flow
+     * @param maxFlowLength 
+     */
+    public void applyForces(QuadraticBezierFlow flow, double maxFlowLength) {
+        double flowBaseLength = flow.getBaselineLength();
+        Point basePt = flow.getBaseLineMidPoint();
+        ArrayList<Point> flowPoints = flow.toStraightLineSegments(0.01);
+        double fxSum = 0;
+        double fySum = 0;
+        for (Point pt : flowPoints) {
+            // a hack to compute the force applied on pt
+            double x = pt.x;
+            double y = pt.y;
+            computeTotalForce(pt, flow.getStartPt(),
+                    flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
+            // force applied to the point
+            double fx = pt.x - x;
+            double fy = pt.y - y;
+            fxSum += fx;
+            fySum += fy;
+        }
+        
+        // move the control point by the total force
+        flow.getcPt().x +=fxSum / flowPoints.size();
+        flow.getcPt().y +=fySum / flowPoints.size();
     }
 
 }
