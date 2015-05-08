@@ -83,8 +83,7 @@ public class ForceLayouter {
      * @param flowBaseLength The distance between the start and end points of a
      * flow
      */
-    public void computeTotalForce(Point targetPoint, Point startPoint,
-            Point endPoint, Point referencePoint, double maxFlowLength, double flowBaseLength) {
+    public void computeTotalForce(Point targetPoint, Flow targetFlow, Point referencePoint, double maxFlowLength, double flowBaseLength) {
 
         Iterator<Flow> flowIterator = model.flowIterator();
 
@@ -100,7 +99,9 @@ public class ForceLayouter {
             int nPoints = points.size();
             for (int ptID = 0; ptID < nPoints; ptID++) {
                 Point point = points.get(ptID);
-
+                if (targetFlow == flow) {
+                    continue;
+                }
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
                 double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
@@ -184,8 +185,7 @@ public class ForceLayouter {
             // a hack to compute the force applied on pt
             double x = pt.x;
             double y = pt.y;
-            computeTotalForce(pt, flow.getStartPt(),
-                    flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
+            computeTotalForce(pt, flow, basePt, maxFlowLength, flowBaseLength);
             // force applied to the point
             double fx = pt.x - x;
             double fy = pt.y - y;
