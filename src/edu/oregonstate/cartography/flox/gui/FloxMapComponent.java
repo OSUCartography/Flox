@@ -1,9 +1,9 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
-import edu.oregonstate.cartography.flox.model.Bezier;
-import edu.oregonstate.cartography.flox.model.BezierPath;
-import edu.oregonstate.cartography.flox.model.BezierPath.Node;
+import edu.oregonstate.cartography.flox.model.bezier.Bezier;
+import edu.oregonstate.cartography.flox.model.bezier.BezierPath;
+import edu.oregonstate.cartography.flox.model.bezier.BezierPath.Node;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Layer;
@@ -99,7 +99,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             drawStraightLinesSegments(g2d);
         }
         
-        //drawRebuiltBezierCurve(g2d);
+        if (model.isDrawReconstructedBezier()) {
+            drawRebuiltBezierCurve(g2d);
+        }
 
         // copy double buffer image to JComponent
         Insets insets = getInsets();

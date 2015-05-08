@@ -8,7 +8,7 @@
  * license agreement you entered into with the copyright holders. For details
  * see accompanying license terms.
  */
-package edu.oregonstate.cartography.flox.model;
+package edu.oregonstate.cartography.flox.model.bezier;
 
 import java.awt.*;
 import java.awt.geom.*;

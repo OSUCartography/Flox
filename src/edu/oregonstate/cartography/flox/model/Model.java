@@ -42,6 +42,11 @@ public class Model {
     private boolean drawLineSegments;
     
     /**
+     * flag for drawing reconstructed BŽzier curves
+     */
+    private boolean drawReconstructedBezier;
+    
+    /**
      * A reference to the map with layers and geometry.
      */
     private final Map map = new Map();
@@ -324,5 +329,19 @@ public class Model {
     
     public void setDrawLineSegments(boolean drawLineSegments) {
         this.drawLineSegments = drawLineSegments;
+    }
+
+    /**
+     * @return the drawReconstructedBezier
+     */
+    public boolean isDrawReconstructedBezier() {
+        return drawReconstructedBezier;
+    }
+
+    /**
+     * @param drawReconstructedBezier the drawReconstructedBezier to set
+     */
+    public void setDrawReconstructedBezier(boolean drawReconstructedBezier) {
+        this.drawReconstructedBezier = drawReconstructedBezier;
     }
 }

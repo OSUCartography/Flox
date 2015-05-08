@@ -135,6 +135,7 @@ public class MainWindow extends javax.swing.JFrame {
         zeroLengthStiffnessSlider = new javax.swing.JSlider();
         jLabel5 = new javax.swing.JLabel();
         drawLineSegmentsCheckBox = new javax.swing.JCheckBox();
+        drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -423,6 +424,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 12;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(drawLineSegmentsCheckBox, gridBagConstraints);
+
+        drawReconstructedBezierCheckBox.setText("Draw Reconstructed BŽzier");
+        drawReconstructedBezierCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawReconstructedBezierCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -838,6 +851,11 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawLineSegmentsCheckBoxActionPerformed
 
+    private void drawReconstructedBezierCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawReconstructedBezierCheckBoxActionPerformed
+        model.setDrawReconstructedBezier(drawReconstructedBezierCheckBox.isSelected());
+        mapComponent.repaint();
+    }//GEN-LAST:event_drawReconstructedBezierCheckBoxActionPerformed
+
     
     private void forceLayout() {
        
@@ -904,6 +922,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
+    private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;

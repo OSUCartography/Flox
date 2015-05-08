@@ -9,8 +9,9 @@
  * see accompanying license terms.
  */
 
-package edu.oregonstate.cartography.flox.model;
+package edu.oregonstate.cartography.flox.model.bezier;
 
+import edu.oregonstate.cartography.flox.model.bezier.BezierPath;
 import java.awt.geom.*;
 
 /**
