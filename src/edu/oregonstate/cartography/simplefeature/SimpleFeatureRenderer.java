@@ -19,32 +19,32 @@ import java.awt.geom.GeneralPath;
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
-public final class SimpleFeatureRenderer {
+public class SimpleFeatureRenderer {
 
     /**
      * Radius of a point symbol.
      */
-    private static final double POINT_R = 1;
+    protected static final double POINT_R = 1;
 
     /**
      * cached Graphics2D context for bufferImage
      */
-    private final Graphics2D g2d;
+    protected final Graphics2D g2d;
 
     /**
      * western most point in geometry
      */
-    private final double west;
+    protected final double west;
 
     /**
      * northernmost point in geometry
      */
-    private final double north;
+    protected final double north;
 
     /**
      * scale factor for drawing geometry pixels = world_coordinates * scale;
      */
-    private final double scale;
+    protected final double scale;
 
     /**
      *
@@ -82,15 +82,18 @@ public final class SimpleFeatureRenderer {
     }
 
     /**
-     * Sets the stroke of the graphics context to aBasicStroke with a specified width.
+     * Sets the stroke of the graphics context to aBasicStroke with a specified
+     * width.
+     *
      * @param strokeWidth The new stroke width
      */
     public void setStrokeWidth(float strokeWidth) {
         g2d.setStroke(new BasicStroke(strokeWidth));
     }
-    
+
     /**
      * Sets the color of the graphics context.
+     *
      * @param color The new color.
      */
     public void setColor(Color color) {

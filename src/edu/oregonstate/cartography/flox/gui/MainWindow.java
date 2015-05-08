@@ -16,10 +16,13 @@ import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQua
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
+import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
 import edu.oregonstate.cartography.utils.FileUtils;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileOutputStream;
@@ -150,6 +153,8 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator viewSeparator = new javax.swing.JPopupMenu.Separator();
         viewZoomInMenuItem = new javax.swing.JMenuItem();
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        renderToImageMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
@@ -527,6 +532,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         viewMenu.add(viewZoomOutMenuItem);
+        viewMenu.add(jSeparator1);
+
+        renderToImageMenuItem.setText("Render to Image");
+        renderToImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                renderToImageMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(renderToImageMenuItem);
 
         menuBar.add(viewMenu);
 
@@ -856,6 +870,17 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawReconstructedBezierCheckBoxActionPerformed
 
+    private void renderToImageMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_renderToImageMenuItemActionPerformed
+        BufferedImage image = FloxRenderer.renderToImage(model, 500, false);
+        // Use a JLabel in a JFrame to display the image
+        javax.swing.JFrame frame = new javax.swing.JFrame();
+        javax.swing.JLabel label = new javax.swing.JLabel(
+                new javax.swing.ImageIcon(image));
+        frame.getContentPane().add(label, BorderLayout.CENTER);
+        frame.pack();
+        frame.setVisible(true);      
+    }//GEN-LAST:event_renderToImageMenuItemActionPerformed
+
     
     private void forceLayout() {
        
@@ -939,6 +964,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
@@ -950,6 +976,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JRadioButton quadraticCurvesRadioButton;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
+    private javax.swing.JMenuItem renderToImageMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
