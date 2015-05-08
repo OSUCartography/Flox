@@ -37,6 +37,11 @@ public class Model {
     private boolean drawControlPoints;
 
     /**
+     * flag for drawing line segments
+     */
+    private boolean drawLineSegments;
+    
+    /**
      * A reference to the map with layers and geometry.
      */
     private final Map map = new Map();
@@ -304,10 +309,20 @@ public class Model {
 
     /**
      *
-     * @param drawControlPoint the drawControlPoints to set
+     * @param drawControlPoints
      */
     public void setDrawControlPoints(boolean drawControlPoints) {
         this.drawControlPoints = drawControlPoints;
     }
 
+    /**
+     * @return the drawLineSegments
+     */
+    public boolean isDrawLineSegments() {
+        return drawLineSegments;
+    }
+    
+    public void setDrawLineSegments(boolean drawLineSegments) {
+        this.drawLineSegments = drawLineSegments;
+    }
 }

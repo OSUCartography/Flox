@@ -95,7 +95,10 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         if (model.isDrawControlPoints()) {
             drawControlPoints(g2d);
         }
-        //drawStraightLinesSegments(g2d);
+        if (model.isDrawLineSegments()) {
+            drawStraightLinesSegments(g2d);
+        }
+        
         //drawRebuiltBezierCurve(g2d);
 
         // copy double buffer image to JComponent

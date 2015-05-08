@@ -134,6 +134,7 @@ public class MainWindow extends javax.swing.JFrame {
         kSlider = new javax.swing.JSlider();
         zeroLengthStiffnessSlider = new javax.swing.JSlider();
         jLabel5 = new javax.swing.JLabel();
+        drawLineSegmentsCheckBox = new javax.swing.JCheckBox();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -333,7 +334,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         flowWidthPanel.add(countIntersectionsButton, gridBagConstraints);
 
@@ -345,13 +346,13 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
+        gridBagConstraints.gridy = 24;
         flowWidthPanel.add(jButton1, gridBagConstraints);
 
         jLabel3.setText("Spring Stiffness of Longest Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 16;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(jLabel3, gridBagConstraints);
 
@@ -368,13 +369,13 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridy = 22;
         flowWidthPanel.add(bSlider, gridBagConstraints);
 
         jLabel4.setText("IDW Exponent");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridy = 21;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(jLabel4, gridBagConstraints);
 
@@ -388,7 +389,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 17;
         flowWidthPanel.add(kSlider, gridBagConstraints);
 
         zeroLengthStiffnessSlider.setMajorTickSpacing(20);
@@ -401,15 +402,27 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 20;
         flowWidthPanel.add(zeroLengthStiffnessSlider, gridBagConstraints);
 
         jLabel5.setText("Spring Stiffness of Zero-Length Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 19;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(jLabel5, gridBagConstraints);
+
+        drawLineSegmentsCheckBox.setText("Draw Line Segments");
+        drawLineSegmentsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawLineSegmentsCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(drawLineSegmentsCheckBox, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -820,6 +833,11 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_zeroLengthStiffnessSliderStateChanged
 
+    private void drawLineSegmentsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawLineSegmentsCheckBoxActionPerformed
+        model.setDrawLineSegments(drawLineSegmentsCheckBox.isSelected());
+        mapComponent.repaint();
+    }//GEN-LAST:event_drawLineSegmentsCheckBoxActionPerformed
+
     
     private void forceLayout() {
        
@@ -885,6 +903,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
+    private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
