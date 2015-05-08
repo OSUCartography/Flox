@@ -45,11 +45,6 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     private static final double MIN_SCALE = 0.0000001;
 
     /**
-     * Radius of a point symbol.
-     */
-    private static final double POINT_R = 1;
-
-    /**
      * image buffer
      */
     protected BufferedImage bufferImage = null;
@@ -62,17 +57,17 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     /**
      * western most point in geometry
      */
-    private double west;
+    protected double west;
 
     /**
      * northernmost point in geometry
      */
-    private double north;
+    protected double north;
 
     /**
      * scale factor for drawing geometry pixels = world_coordinates * scale;
      */
-    private double scale;
+    protected double scale;
 
     /**
      * The MapEventHandler is responsible for treating all key and mouse events
@@ -126,10 +121,10 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
-     * Returns the widthPx of the currently visible area in world coordinates
+     * Returns the width of the currently visible area in world coordinates
      * (the coordinate system used by the GeoObjects).
      *
-     * @return The widthPx of the currently visible area in world coordinates.
+     * @return The width of the currently visible area in world coordinates.
      */
     public double getVisibleWidth() {
         Insets insets = getInsets();
@@ -138,10 +133,10 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
-     * Returns the heightPx of the currently visible area in world coordinates
+     * Returns the height of the currently visible area in world coordinates
      * (the coordinate system used by the GeoObjects).
      *
-     * @return The heightPx of the currently visible area in world coordinates.
+     * @return The height of the currently visible area in world coordinates.
      */
     public double getVisibleHeight() {
         Insets insets = getInsets();
@@ -366,163 +361,6 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         return g2dBuffer;
     }
 
-    /**
-     * Fill and stroke a Graphics2D shape
-     * @param g2d Drawing destination.
-     * @param shape Shape to draw.
-     * @param fillColor Color to fill shape. If null, shape is not filled.
-     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
-     */
-    protected final void fillStroke(Graphics2D g2d, Shape shape, 
-            Color fillColor, Color strokeColor) {
-        if (fillColor != null) {
-            g2d.setColor(fillColor);
-            g2d.fill(shape);
-        }
-        if (strokeColor != null) {
-            g2d.setColor(strokeColor);
-            g2d.draw(shape);
-        }
-    }
-
-    /**
-     * Draw an OGC Simple Feature.
-     *
-     * @param geometry The geometry to draw.
-     * @param g2d The graphics context to draw to.
-     * @param fillColor Color to fill shape. If null, shape is not filled.
-     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
-     */
-    protected void draw(Geometry geometry, Graphics2D g2d,
-            Color fillColor, Color strokeColor) {
-        if (geometry == null) {
-            return;
-        }
-        if (geometry instanceof LineString) {
-            draw((LineString) geometry, g2d, fillColor, strokeColor);
-        } else if (geometry instanceof Polygon) {
-            draw((Polygon) geometry, g2d, fillColor, strokeColor);
-        } else if (geometry instanceof Point) {
-            draw((Point) geometry, g2d, fillColor, strokeColor);
-        } else if (geometry instanceof GeometryCollection) {
-            draw((GeometryCollection) geometry, g2d, fillColor, strokeColor);
-        }
-    }
-
-    /**
-     * Draw an OGC Simple Feature geometry collection.
-     *
-     * @param collection The geometry to draw.
-     * @param g2d The graphics context to draw to.
-     * @param fillColor Color to fill shape. If null, shape is not filled.
-     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
-     */
-    protected void draw(GeometryCollection collection, Graphics2D g2d,
-            Color fillColor, Color strokeColor) {
-        int nbrObj = collection.getNumGeometries();
-        for (int i = 0; i < nbrObj; i++) {
-            Geometry geom = collection.getGeometryN(i);
-            draw(geom, g2d, fillColor, strokeColor);
-        }
-    }
-
-    /**
-     * Draw an OGC Simple Feature point.
-     *
-     * @param point The geometry to draw.
-     * @param g2d The graphics context to draw to.
-     * @param fillColor Color to fill shape. If null, shape is not filled.
-     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
-     */
-    protected void draw(Point point, Graphics2D g2d, Color fillColor, Color strokeColor) {
-        double d = 2 * POINT_R;
-        Ellipse2D circle = new Ellipse2D.Double(xToPx(point.getX()) - POINT_R,
-                yToPx(point.getY()) - POINT_R, d, d);
-        fillStroke(g2d, circle, fillColor, strokeColor);
-    }
-
-    /**
-     * Add a OGC Simple Feature line string to a Swing path. The path is not
-     * closed.
-     *
-     * @param lineString The line string to add.
-     * @param path The Swing path.
-     */
-    private void addLineStringToGeneralPath(LineString lineString, GeneralPath path) {
-        int nPts = lineString.getNumPoints();
-        if (nPts < 2) {
-            return;
-        }
-
-        Point point = lineString.getStartPoint();
-        path.moveTo(xToPx(point.getX()), yToPx(point.getY()));
-
-        for (int i = 1; i < nPts; i++) {
-            point = lineString.getPointN(i);
-            path.lineTo(xToPx(point.getX()), yToPx(point.getY()));
-        }
-    }
-
-    /**
-     * Draw an OGC Simple Feature line string.
-     *
-     * @param lineString The geometry to draw.
-     * @param g2d The graphics context to draw to.
-     * @param fillColor Color to fill shape. If null, shape is not filled.
-     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
-     */
-    protected void draw(LineString lineString, Graphics2D g2d,
-            Color fillColor, Color strokeColor) {
-        GeneralPath path = new GeneralPath();
-        addLineStringToGeneralPath(lineString, path);
-        fillStroke(g2d, path, fillColor, strokeColor);
-    }
-
-    /**
-     * Draw an OGC Simple Feature polygon.
-     *
-     * @param polygon The geometry to draw.
-     * @param g2d The graphics context to draw to.
-     * @param fillColor Color to fill shape. If null, shape is not filled.
-     * @param strokeColor Color to stroke shape. If null, shape is not stroked.
-     */
-    protected void draw(Polygon polygon, Graphics2D g2d,
-            Color fillColor, Color strokeColor) {
-        LineString exteriorRing = polygon.getExteriorRing();
-        GeneralPath path = new GeneralPath();
-        addLineStringToGeneralPath(exteriorRing, path);
-        path.closePath();
-
-        int nbrInteriorRings = polygon.getNumInteriorRing();
-        for (int i = 0; i < nbrInteriorRings; i++) {
-            addLineStringToGeneralPath(polygon.getInteriorRingN(i), path);
-            path.closePath();
-        }
-        fillStroke(g2d, path, fillColor, strokeColor);
-    }
-
-    /**
-     * Transforms a horizontal x coordinate (usually in meters) to pixels. Takes
-     * the scale and bounding boundingBox defined by the PageFormat into
-     * account.
-     *
-     * @param x The horizontal coordinate.
-     * @return Returns the coordinate in pixels.
-     */
-    protected double xToPx(double x) {
-        return (x - west) * scale;
-    }
-
-    /**
-     * Transforms a vertical y coordinate to the scale and bounding boundingBox
-     * defined by the PageFormat.
-     *
-     * @param y The vertical coordinate.
-     * @return Returns the coordinate in the page coordinate system.
-     */
-    protected double yToPx(double y) {
-        return (north - y) * scale;
-    }
 
     /**
      * Inform Swing that this JComponent is opaque, i.e. we are drawing the

@@ -3,7 +3,6 @@ package edu.oregonstate.cartography.flox.gui;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.bezier.Bezier;
 import edu.oregonstate.cartography.flox.model.bezier.BezierPath;
-import edu.oregonstate.cartography.flox.model.bezier.BezierPath.Node;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Layer;
@@ -12,6 +11,7 @@ import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -73,8 +73,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         }
 
         Graphics2D g2d = getGraphics2DBuffer();
-        g2d.setStroke(new BasicStroke(1));
-
+        SimpleFeatureRenderer renderer = new SimpleFeatureRenderer(g2d, west, north, scale);
+        renderer.setStrokeWidth(1f);
+        
         // draw background map
         int nbrLayers = model.getNbrLayers();
         for (int i = nbrLayers - 1; i >= 0; i--) {
@@ -84,23 +85,22 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
             Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
             if (fillColor != null || strokeColor != null) {
-                draw(geometry, g2d, fillColor, strokeColor);
+                renderer.draw(geometry, fillColor, strokeColor);
             }
         }
 
         // draw flows and nodes
-        g2d.setColor(Color.BLACK);
-        drawFlows(g2d);
-        drawNodes(g2d);
+        drawFlows(renderer);
+        drawNodes(renderer);
         if (model.isDrawControlPoints()) {
-            drawControlPoints(g2d);
+            drawControlPoints(renderer);
         }
         if (model.isDrawLineSegments()) {
-            drawStraightLinesSegments(g2d);
+            drawStraightLinesSegments(renderer);
         }
-        
+
         if (model.isDrawReconstructedBezier()) {
-            drawRebuiltBezierCurve(g2d);
+            drawRebuiltBezierCurve(renderer);
         }
 
         // copy double buffer image to JComponent
@@ -123,16 +123,16 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * @param flow The flow to convert.
      * @return A GeneralPath for drawing.
      */
-    private GeneralPath flowToGeneralPath(CubicBezierFlow flow) {
+    private GeneralPath flowToGeneralPath(CubicBezierFlow flow, SimpleFeatureRenderer renderer) {
         GeneralPath path = new GeneralPath();
         Point startPt = flow.getStartPt();
-        path.moveTo(xToPx(startPt.x), yToPx(startPt.y));
+        path.moveTo(renderer.xToPx(startPt.x), renderer.yToPx(startPt.y));
         Point cPt1 = flow.getcPt1();
         Point cPt2 = flow.getcPt2();
         Point endPt = flow.getEndPt();
-        path.curveTo(xToPx(cPt1.x), yToPx(cPt1.y),
-                xToPx(cPt2.x), yToPx(cPt2.y),
-                xToPx(endPt.x), yToPx(endPt.y));
+        path.curveTo(renderer.xToPx(cPt1.x), renderer.yToPx(cPt1.y),
+                renderer.xToPx(cPt2.x), renderer.yToPx(cPt2.y),
+                renderer.xToPx(endPt.x), renderer.yToPx(endPt.y));
         return path;
     }
 
@@ -142,13 +142,14 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * @param flow The flow to convert.
      * @return A GeneralPath for drawing.
      */
-    private GeneralPath flowToGeneralPath(QuadraticBezierFlow flow) {
+    private GeneralPath flowToGeneralPath(QuadraticBezierFlow flow, SimpleFeatureRenderer renderer) {
         GeneralPath path = new GeneralPath();
         Point startPt = flow.getStartPt();
-        path.moveTo(xToPx(startPt.x), yToPx(startPt.y));
+        path.moveTo(renderer.xToPx(startPt.x), renderer.yToPx(startPt.y));
         Point cPt = flow.getcPt();
         Point endPt = flow.getEndPt();
-        path.quadTo(xToPx(cPt.x), yToPx(cPt.y), xToPx(endPt.x), yToPx(endPt.y));
+        path.quadTo(renderer.xToPx(cPt.x), renderer.yToPx(cPt.y),
+                renderer.xToPx(endPt.x), renderer.yToPx(endPt.y));
         return path;
     }
 
@@ -157,15 +158,17 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      *
      * @param g2d The graphics context.
      */
-    private void drawFlows(Graphics2D g2d) {
+    private void drawFlows(SimpleFeatureRenderer renderer) {
+        Graphics2D g2d = renderer.getGraphics2D();
+        g2d.setColor(Color.BLACK);
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
             GeneralPath path;
             if (flow instanceof CubicBezierFlow) {
-                path = flowToGeneralPath((CubicBezierFlow) flow);
+                path = flowToGeneralPath((CubicBezierFlow) flow, renderer);
             } else {
-                path = flowToGeneralPath((QuadraticBezierFlow) flow);
+                path = flowToGeneralPath((QuadraticBezierFlow) flow, renderer);
             }
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
@@ -178,12 +181,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      *
      * @param g2d The graphics context.
      */
-    private void drawNodes(Graphics2D g2d) {
-        g2d.setStroke(new BasicStroke(2));
+    private void drawNodes(SimpleFeatureRenderer renderer) {
         Iterator<Point> iter = model.nodeIterator();
         while (iter.hasNext()) {
             Point pt = iter.next();
-            drawCircle(g2d, xToPx(pt.x), yToPx(pt.y), R, Color.WHITE, Color.BLACK);
+            renderer.drawCircle(pt.x, pt.y, R, Color.WHITE, Color.BLACK);
         }
     }
 
@@ -193,7 +195,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      *
      * @param g2d
      */
-    private void drawControlPoints(Graphics2D g2d) {
+    private void drawControlPoints(SimpleFeatureRenderer renderer) {
+        Graphics2D g2d = renderer.getGraphics2D();
         g2d.setStroke(new BasicStroke(1f));
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
@@ -204,41 +207,26 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 Point cpt1 = ((CubicBezierFlow) flow).getcPt1();
                 Point cpt2 = ((CubicBezierFlow) flow).getcPt2();
                 g2d.setColor(Color.GRAY);
-                Line2D line1 = new Line2D.Double(xToPx(startPt.x), yToPx(startPt.y), xToPx(cpt1.x), yToPx(cpt1.y));
+                Line2D line1 = new Line2D.Double(renderer.xToPx(startPt.x),
+                        renderer.yToPx(startPt.y), renderer.xToPx(cpt1.x), renderer.yToPx(cpt1.y));
                 g2d.draw(line1);
-                Line2D line2 = new Line2D.Double(xToPx(endPt.x), yToPx(endPt.y), xToPx(cpt2.x), yToPx(cpt2.y));
+                Line2D line2 = new Line2D.Double(renderer.xToPx(endPt.x),
+                        renderer.yToPx(endPt.y), renderer.xToPx(cpt2.x), renderer.yToPx(cpt2.y));
                 g2d.draw(line2);
-                drawCircle(g2d, xToPx(cpt1.x), yToPx(cpt1.y), CR, Color.ORANGE, Color.GRAY);
-                drawCircle(g2d, xToPx(cpt2.x), yToPx(cpt2.y), CR, Color.ORANGE, Color.GRAY);
+                renderer.drawCircle(cpt1.x, cpt1.y, CR, Color.ORANGE, Color.GRAY);
+                renderer.drawCircle(cpt2.x, cpt2.y, CR, Color.ORANGE, Color.GRAY);
             } else {
                 Point cpt = ((QuadraticBezierFlow) flow).getcPt();
                 g2d.setColor(Color.GRAY);
-                Line2D line1 = new Line2D.Double(xToPx(startPt.x), yToPx(startPt.y), xToPx(cpt.x), yToPx(cpt.y));
+                Line2D line1 = new Line2D.Double(renderer.xToPx(startPt.x),
+                        renderer.yToPx(startPt.y), renderer.xToPx(cpt.x), renderer.yToPx(cpt.y));
                 g2d.draw(line1);
-                Line2D line2 = new Line2D.Double(xToPx(endPt.x), yToPx(endPt.y), xToPx(cpt.x), yToPx(cpt.y));
+                Line2D line2 = new Line2D.Double(renderer.xToPx(endPt.x),
+                        renderer.yToPx(endPt.y), renderer.xToPx(cpt.x), renderer.yToPx(cpt.y));
                 g2d.draw(line2);
-                drawCircle(g2d, xToPx(cpt.x), yToPx(cpt.y), CR, Color.ORANGE, Color.GRAY);
+                renderer.drawCircle(cpt.x, cpt.y, CR, Color.ORANGE, Color.GRAY);
             }
         }
-    }
-
-    /**
-     * Draws a circle
-     *
-     * @param g2d The graphics context
-     * @param x X coordinate of center
-     * @param y Y coordinate of center
-     * @param r Radius.
-     * @param fill Fill color
-     * @param stroke Stroke color
-     */
-    private static void drawCircle(Graphics2D g2d, double x, double y, double r,
-            Color fill, Color stroke) {
-        Ellipse2D circle = new Ellipse2D.Double(x - r, y - r, r * 2, r * 2);
-        g2d.setColor(fill);
-        g2d.fill(circle);
-        g2d.setColor(stroke);
-        g2d.draw(circle);
     }
 
     /**
@@ -246,23 +234,24 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      *
      * @param g2d
      */
-    private void drawStraightLinesSegments(Graphics2D g2d) {
-        g2d.setStroke(new BasicStroke(2f));
+    private void drawStraightLinesSegments(SimpleFeatureRenderer renderer) {
+        renderer.setStrokeWidth(2f);
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
             ArrayList<Point> points = flow.toStraightLineSegments(0.01);
             for (Point point : points) {
-                drawCircle(g2d, xToPx(point.x), yToPx(point.y), CR, Color.pink, Color.white);
+                renderer.drawCircle(point.x, point.y, CR, Color.pink, Color.white);
             }
         }
     }
 
-    private void drawRebuiltBezierCurve(Graphics2D g2d) {
+    private void drawRebuiltBezierCurve(SimpleFeatureRenderer renderer) {
+        // FIXME
         double tol = 0.3;
 
-        g2d.setStroke(new BasicStroke(1f));
-        g2d.setColor(Color.red);
+        renderer.setStrokeWidth(1f);
+        renderer.setColor(Color.RED);
 
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
@@ -274,7 +263,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
             BezierPath rebuilt = Bezier.fitBezierPath(points2D, tol);
             PathIterator pathIterator = rebuilt.getPathIterator(null);
-            
+
             GeneralPath generalPath = new GeneralPath();
             double[] coords = new double[6];
             int counter = 0;
@@ -285,10 +274,10 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                         generalPath.closePath();
                         break;
                     case PathIterator.SEG_LINETO:
-                        generalPath.lineTo(xToPx(coords[0]), yToPx(coords[1]));
+                        generalPath.lineTo(renderer.xToPx(coords[0]), renderer.yToPx(coords[1]));
                         break;
                     case PathIterator.SEG_MOVETO:
-                        generalPath.moveTo(xToPx(coords[0]), yToPx(coords[1]));
+                        generalPath.moveTo(renderer.xToPx(coords[0]), renderer.yToPx(coords[1]));
                         break;
                     /*case PathIterator.SEG_QUADTO:
                      generalPath.quadTo(coords[0], coords[1],
@@ -296,9 +285,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                      break;
                      */
                     case PathIterator.SEG_CUBICTO:
-                        generalPath.curveTo(xToPx(coords[0]), yToPx(coords[1]),
-                                xToPx(coords[2]), yToPx(coords[3]),
-                                xToPx(coords[4]), yToPx(coords[5]));
+                        generalPath.curveTo(renderer.xToPx(coords[0]), renderer.yToPx(coords[1]),
+                                renderer.xToPx(coords[2]), renderer.yToPx(coords[3]),
+                                renderer.xToPx(coords[4]), renderer.yToPx(coords[5]));
                         break;
 
                 }
@@ -306,13 +295,13 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 pathIterator.next();
                 counter++;
             }
-            
+
             if (counter != 2) {
                 System.out.println("total: " + counter);
             }
             System.out.println();
-            
-            g2d.draw(generalPath);
+
+            renderer.getGraphics2D().draw(generalPath);
         }
     }
 }
