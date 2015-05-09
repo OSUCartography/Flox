@@ -24,7 +24,7 @@ public class ForceLayouter {
     // This determines the amount of force that objects far away from the target
     // can apply to the target.  The lower the idwExponent, the more force distant
     // objects are permitted to apply.
-    private double idwExponent = 4; // 
+    private double idwExponent = 4;
 
     // Stores the model, which contains all map features.
     private final Model model;
@@ -73,8 +73,7 @@ public class ForceLayouter {
      * closer together.
      *
      * @param targetPoint The point that will be moved.
-     * @param startPoint The start point of a BezierFlow
-     * @param endPoint The end point of a BezierFlow
+     * @param targetFlow The flow that receives the forces.
      * @param referencePoint The center point of a line drawn from the start
      * point to the end point
      * @param maxFlowLength The distance between the start and end point of the
@@ -83,7 +82,8 @@ public class ForceLayouter {
      * @param flowBaseLength The distance between the start and end points of a
      * flow
      */
-    public void computeTotalForce(Point targetPoint, Flow targetFlow, Point referencePoint, double maxFlowLength, double flowBaseLength) {
+    public void computeTotalForce(Point targetPoint, Flow targetFlow,
+            Point referencePoint, double maxFlowLength, double flowBaseLength) {
 
         Iterator<Flow> flowIterator = model.flowIterator();
 
@@ -91,17 +91,18 @@ public class ForceLayouter {
         double fyTotal = 0; // total force along the y axis 
         double wTotal = 0; // sum of the weight of all forces
 
-        // Iterate through the nodes. The forces of each node on the target is
+        // Iterate through the flows. The forces of each flow on the target is
         // calculated and added to the total force
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
+            if (!model.isFlowExertingForcesOnItself() && targetFlow == flow) {
+                continue;
+            }
             ArrayList<Point> points = flow.toStraightLineSegments(0.01);
             int nPoints = points.size();
             for (int ptID = 0; ptID < nPoints; ptID++) {
                 Point point = points.get(ptID);
-                if (targetFlow == flow) {
-                    continue;
-                }
+
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
                 double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
@@ -117,16 +118,15 @@ public class ForceLayouter {
                 // Apply the weight to each focre
                 fx *= w; // The force along the x-axis after weighting
                 fy *= w; // The force along the y-axix after weighting
-/*
-                if (ptID == 0 || ptID == nPoints - 1) {
-                    if (flow.getEndPt() != endPoint && flow.getStartPt() != startPoint) {
-                        fx *= 1;
-                        fy *= 1;
-                    } else {
-                        System.out.println("start or end force not applied");
-                    }
-                }
-*/
+
+                // start and end points have bigger weight
+//                if (ptID == 0 || ptID == nPoints - 1) {
+//                    if (flow.getEndPt() != endPoint && flow.getStartPt() != startPoint) {
+//                        fx *= 10;
+//                        fy *= 10;
+//                    }
+//                }
+
                 // Add forces to the totals
                 fxTotal += fx;
                 fyTotal += fy;

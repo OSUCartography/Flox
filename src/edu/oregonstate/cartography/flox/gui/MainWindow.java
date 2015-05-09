@@ -139,6 +139,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         drawLineSegmentsCheckBox = new javax.swing.JCheckBox();
         drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
+        selfForcesCheckBox = new javax.swing.JCheckBox();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -340,7 +341,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         flowWidthPanel.add(countIntersectionsButton, gridBagConstraints);
 
@@ -399,6 +400,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowWidthPanel.add(kSlider, gridBagConstraints);
 
         zeroLengthStiffnessSlider.setMajorTickSpacing(20);
+        zeroLengthStiffnessSlider.setMaximum(200);
         zeroLengthStiffnessSlider.setPaintLabels(true);
         zeroLengthStiffnessSlider.setPaintTicks(true);
         zeroLengthStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -441,6 +443,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
+
+        selfForcesCheckBox.setText("Flow Exerts Forces on Itself");
+        selfForcesCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selfForcesCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 14;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(selfForcesCheckBox, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -881,6 +895,11 @@ public class MainWindow extends javax.swing.JFrame {
         frame.setVisible(true);      
     }//GEN-LAST:event_renderToImageMenuItemActionPerformed
 
+    private void selfForcesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selfForcesCheckBoxActionPerformed
+        model.setFlowExertingForcesOnItself(selfForcesCheckBox.isSelected());
+        forceLayout();
+    }//GEN-LAST:event_selfForcesCheckBoxActionPerformed
+
     
     private void forceLayout() {
        
@@ -976,6 +995,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JMenuItem renderToImageMenuItem;
     private javax.swing.JPanel rightPanel;
+    private javax.swing.JCheckBox selfForcesCheckBox;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;

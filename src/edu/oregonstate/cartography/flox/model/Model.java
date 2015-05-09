@@ -47,6 +47,11 @@ public class Model {
     private boolean drawReconstructedBezier;
     
     /**
+     * if true, a flow exerts forces on itself
+     */
+    private boolean flowExertingForcesOnItself;
+    
+    /**
      * A reference to the map with layers and geometry.
      */
     private final Map map = new Map();
@@ -343,5 +348,19 @@ public class Model {
      */
     public void setDrawReconstructedBezier(boolean drawReconstructedBezier) {
         this.drawReconstructedBezier = drawReconstructedBezier;
+    }
+
+    /**
+     * @return the flowExertingForcesOnItself
+     */
+    public boolean isFlowExertingForcesOnItself() {
+        return flowExertingForcesOnItself;
+    }
+
+    /**
+     * @param flowExertingForcesOnItself the flowExertingForcesOnItself to set
+     */
+    public void setFlowExertingForcesOnItself(boolean flowExertingForcesOnItself) {
+        this.flowExertingForcesOnItself = flowExertingForcesOnItself;
     }
 }
