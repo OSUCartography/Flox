@@ -197,5 +197,13 @@ public class ForceLayouter {
         flow.getcPt().x += fxSum / flowPoints.size();
         flow.getcPt().y += fySum / flowPoints.size();
     }
+    
+    public void straightenFlows() {
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            flow.bend(0, 0);
+        }
+    }
 
 }

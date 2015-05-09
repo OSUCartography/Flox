@@ -399,7 +399,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 17;
         flowWidthPanel.add(kSlider, gridBagConstraints);
 
-        zeroLengthStiffnessSlider.setMajorTickSpacing(20);
+        zeroLengthStiffnessSlider.setMajorTickSpacing(50);
         zeroLengthStiffnessSlider.setMaximum(200);
         zeroLengthStiffnessSlider.setPaintLabels(true);
         zeroLengthStiffnessSlider.setPaintTicks(true);
@@ -904,11 +904,12 @@ public class MainWindow extends javax.swing.JFrame {
     private void forceLayout() {
        
         ForceLayouter layouter = new ForceLayouter(model);
+        layouter.straightenFlows();
         layouter.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         layouter.setIDWExponent((double) bSlider.getValue() / 10);
 
         MyTimerActionListener listener = new MyTimerActionListener(layouter);
-        Timer timer = new Timer(100, listener);
+        Timer timer = new Timer(10, listener);
         listener.setTimer(timer);
 
         timer.start();
@@ -947,7 +948,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
 
             mapComponent.repaint();
-            if (System.currentTimeMillis() - startTime > 3000) {
+            if (System.currentTimeMillis() - startTime > 5000) {
                 timer.stop();
             }
         }

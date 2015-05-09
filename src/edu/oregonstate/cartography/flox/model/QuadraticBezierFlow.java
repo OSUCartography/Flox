@@ -54,15 +54,25 @@ public class QuadraticBezierFlow extends Flow {
         this.startPt = startPt;
         this.endPt = endPt;
         this.value = value;
+        cPt = new Point(0, 0);
+        bend(alpha, distPerc);
+    }
+
+    /**
+     * Bend flow
+     * @param alpha Angle relative to perpendicular line on base line.
+     * @param distPerc Distance from base point.
+     */
+    @Override
+    public final void bend(double alpha, int distPerc) {
         double dist = getBaselineLength() * distPerc / 100d;
         double beta = getBaselineAzimuth();
         double dx = dist * Math.cos(Math.PI / 2 - alpha + beta);
         double dy = dist * Math.sin(Math.PI / 2 - alpha + beta);
-        double x = (startPt.x + endPt.x) / 2 + dx;
-        double y = (startPt.y + endPt.y) / 2 + dy;
-        cPt = new Point(x, y);
+        cPt.x = (startPt.x + endPt.x) / 2 + dx;
+        cPt.y = (startPt.y + endPt.y) / 2 + dy;
     }
-
+    
     /**
      * Compute first control point from orientation of base line
      *
@@ -136,6 +146,7 @@ public class QuadraticBezierFlow extends Flow {
         return points;
     }
     
+    // FIXME
     public static QuadraticBezierFlow bendQuadraticFlow (Flow flow, int angleDeg, int distPerc) {
         
         // Convert angleDeg into radians
