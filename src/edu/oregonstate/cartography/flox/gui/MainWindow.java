@@ -366,8 +366,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowWidthPanel.add(jLabel3, gridBagConstraints);
 
         bSlider.setMajorTickSpacing(10);
-        bSlider.setMaximum(60);
-        bSlider.setMinimum(10);
+        bSlider.setMaximum(500);
         bSlider.setPaintLabels(true);
         bSlider.setPaintTicks(true);
         bSlider.setValue(40);
@@ -382,7 +381,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowWidthPanel.add(bSlider, gridBagConstraints);
 
-        jLabel4.setText("IDW Exponent");
+        jLabel4.setText("Weight Exponent");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 21;
@@ -984,7 +983,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             
             mapComponent.repaint();
-            if (System.currentTimeMillis() - startTime > 5000) {
+            if (System.currentTimeMillis() - startTime > 10000) {
                 timer.stop();
             }
         }

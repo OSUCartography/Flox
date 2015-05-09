@@ -101,6 +101,8 @@ public class ForceLayouter {
             ArrayList<Point> points = flow.toStraightLineSegments(0.01);
             int nPoints = points.size();
             for (int ptID = 0; ptID < nPoints; ptID++) {
+                boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
+                double nodeWeight = startOrEndPoint? model.getNodeWeightFactor() : 1;
                 Point point = points.get(ptID);
 
                 double xDist = targetPoint.x - point.x; // x distance from node to target
@@ -110,8 +112,9 @@ public class ForceLayouter {
                 if (l == 0) {
                     continue;
                 }
-                double w = Math.pow(l, -idwExponent); // distance weight
-
+                
+                //double w = Math.pow(l, -idwExponent); // distance weight
+                double w = gaussianWeight(l, maxFlowLength);
                 double fx = xDist / l; //normalized x distance
                 double fy = yDist / l; //normalized y distance
 
@@ -120,9 +123,9 @@ public class ForceLayouter {
                 fy *= w; // The force along the y-axix after weighting
 
                 // start and end points have bigger weight
-                if (ptID == 0 || ptID == nPoints - 1) {
-                    fx *= model.getNodeWeightFactor();
-                    fy *= model.getNodeWeightFactor();
+                if (startOrEndPoint) {
+                    fx *= nodeWeight;
+                    fy *= nodeWeight;
                 }
 
                 // Add forces to the totals
@@ -162,6 +165,15 @@ public class ForceLayouter {
         double dy = totalForceY;
         targetPoint.x += dx;
         targetPoint.y += dy;
+    }
+    
+    private double gaussianWeight(double d, double maxFlowLength) {
+        double K = idwExponent / maxFlowLength;
+        return Math.exp(-K * d * d);
+    }
+
+    private double inverseDistanceWeight(double d) {
+        return 1. / Math.pow(d, idwExponent);
     }
 
     /**
