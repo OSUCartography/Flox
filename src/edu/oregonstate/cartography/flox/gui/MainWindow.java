@@ -365,7 +365,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(jLabel3, gridBagConstraints);
 
-        bSlider.setMajorTickSpacing(10);
+        bSlider.setMajorTickSpacing(100);
         bSlider.setMaximum(500);
         bSlider.setPaintLabels(true);
         bSlider.setPaintTicks(true);
@@ -461,7 +461,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(selfForcesCheckBox, gridBagConstraints);
 
-        jLabel6.setText("Node Weight");
+        jLabel6.setText("Repulsion of Start and End Nodes");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 24;
