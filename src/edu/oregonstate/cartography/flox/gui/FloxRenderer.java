@@ -22,7 +22,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- *
+ * A renderer for the Flox data model
+ * 
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
@@ -42,6 +43,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
     /**
      * Renders the flows to an image.
+     *
      * @param model The flows to render.
      * @param maxDim The width or the height of the image will have this size.
      * @param antialias If true anti-aliasing is applied.
@@ -54,9 +56,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         int w, h;
         if (bb.getWidth() > bb.getHeight()) {
             w = maxDim;
-            h = (int)Math.ceil(bb.getHeight() * scale);
+            h = (int) Math.ceil(bb.getHeight() * scale);
         } else {
-            w = (int)Math.ceil(bb.getWidth() * scale);
+            w = (int) Math.ceil(bb.getWidth() * scale);
             h = maxDim;
         }
 
@@ -92,10 +94,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
     /**
      * Creates a new renderer.
+     *
      * @param model The model to render.
      * @param g2d The graphics context to render to.
-     * @param west The left image border corresponds to this world coordinate position.
-     * @param north The top image border corresponds to this world coordinate position.
+     * @param west The left image border corresponds to this world coordinate
+     * position.
+     * @param north The top image border corresponds to this world coordinate
+     * position.
      * @param scale The scale factor to apply when drawing.
      */
     public FloxRenderer(Model model, Graphics2D g2d, double west, double north, double scale) {
@@ -223,6 +228,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
 
+    /**
+     * Testing algorithm for reconstructing Bezier curves from straight line segments.
+     */
     public void drawRebuiltBezierCurve() {
         // FIXME
         double tol = 0.3;
@@ -255,11 +263,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                     case PathIterator.SEG_MOVETO:
                         generalPath.moveTo(xToPx(coords[0]), yToPx(coords[1]));
                         break;
-                    /*case PathIterator.SEG_QUADTO:
-                     generalPath.quadTo(coords[0], coords[1],
-                     coords[2], coords[3]);
-                     break;
-                     */
+                    case PathIterator.SEG_QUADTO:
+                        generalPath.quadTo(xToPx(coords[0]), yToPx(coords[1]),
+                                xToPx(coords[2]), yToPx(coords[3]));
+                        break;
                     case PathIterator.SEG_CUBICTO:
                         generalPath.curveTo(xToPx(coords[0]), yToPx(coords[1]),
                                 xToPx(coords[2]), yToPx(coords[3]),
