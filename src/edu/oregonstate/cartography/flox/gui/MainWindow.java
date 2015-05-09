@@ -142,6 +142,8 @@ public class MainWindow extends javax.swing.JFrame {
         selfForcesCheckBox = new javax.swing.JCheckBox();
         jLabel6 = new javax.swing.JLabel();
         nodeWeightSlider = new javax.swing.JSlider();
+        jLabel7 = new javax.swing.JLabel();
+        antiTorsionSlider = new javax.swing.JSlider();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -355,7 +357,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 27;
+        gridBagConstraints.gridy = 28;
         flowWidthPanel.add(jButton1, gridBagConstraints);
 
         jLabel3.setText("Stiffness of Longest Flow");
@@ -484,6 +486,29 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 25;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowWidthPanel.add(nodeWeightSlider, gridBagConstraints);
+
+        jLabel7.setText("Anti-Torsion Forces");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 26;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(jLabel7, gridBagConstraints);
+
+        antiTorsionSlider.setMajorTickSpacing(10);
+        antiTorsionSlider.setMinorTickSpacing(5);
+        antiTorsionSlider.setPaintLabels(true);
+        antiTorsionSlider.setPaintTicks(true);
+        antiTorsionSlider.setValue(100);
+        antiTorsionSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                antiTorsionSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 27;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        flowWidthPanel.add(antiTorsionSlider, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -934,6 +959,12 @@ public class MainWindow extends javax.swing.JFrame {
             forceLayout();
         }
     }//GEN-LAST:event_nodeWeightSliderStateChanged
+
+    private void antiTorsionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_antiTorsionSliderStateChanged
+        if (antiTorsionSlider.getValueIsAdjusting() == false) {
+            forceLayout();
+        }
+    }//GEN-LAST:event_antiTorsionSliderStateChanged
     
     private void forceLayout() {
         
@@ -942,6 +973,7 @@ public class MainWindow extends javax.swing.JFrame {
         layouter.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         layouter.setIDWExponent((double) bSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
+        model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
         
         MyTimerActionListener listener = new MyTimerActionListener(layouter);
         Timer timer = new Timer(10, listener);
@@ -995,6 +1027,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JSlider bSlider;
     private javax.swing.JButton countIntersectionsButton;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
@@ -1018,6 +1051,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;

@@ -188,7 +188,11 @@ public class ForceLayouter {
     public void applyForces(QuadraticBezierFlow flow, double maxFlowLength) {
         double flowBaseLength = flow.getBaselineLength();
         Point basePt = flow.getBaseLineMidPoint();
+        Point cPt = flow.getcPt();
         ArrayList<Point> flowPoints = flow.toStraightLineSegments(0.01);
+        
+        // compute the sum of all force vectors that are applied on each 
+        // flow segment
         double fxSum = 0;
         double fySum = 0;
         for (Point pt : flowPoints) {
@@ -199,13 +203,25 @@ public class ForceLayouter {
             // force applied to the point
             double fx = pt.x - x;
             double fy = pt.y - y;
+            // add to the total force
             fxSum += fx;
             fySum += fy;
         }
 
+        // compute the anti-torsion force
+        double dx = basePt.x - cPt.x;
+        double dy = basePt.y - cPt.y;
+        double l = Math.sqrt(dx * dx + dy * dy);
+        double alpha = Math.atan2(dy, dx);
+        double baseLineAzimuth = flow.getBaselineAzimuth();
+        double diffToBaseNormal = Math.PI / 2 - baseLineAzimuth + alpha;
+        double torsionF = Math.sin(diffToBaseNormal) * l;
+        double torsionFx = Math.cos(baseLineAzimuth) * torsionF;
+        double torsionFy = Math.sin(baseLineAzimuth) * torsionF;
+        
         // move the control point by the total force
-        flow.getcPt().x += fxSum / flowPoints.size();
-        flow.getcPt().y += fySum / flowPoints.size();
+        cPt.x += fxSum / flowPoints.size() + torsionFx * model.getAntiTorsionWeight();
+        cPt.y += fySum / flowPoints.size() + torsionFy * model.getAntiTorsionWeight();
     }
 
     public void straightenFlows() {

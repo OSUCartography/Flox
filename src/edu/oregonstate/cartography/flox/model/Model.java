@@ -57,6 +57,11 @@ public class Model {
     private double nodeWeightFactor = 10;
     
     /**
+     * Weight for the anti-torsion force
+     */
+    private double antiTorsionWeight = 1;
+    
+    /**
      * A reference to the map with layers and geometry.
      */
     private final Map map = new Map();
@@ -381,5 +386,20 @@ public class Model {
      */
     public void setNodeWeightFactor(double nodeWeightFactor) {
         this.nodeWeightFactor = nodeWeightFactor;
+    }
+
+    /**
+     * @return the antiTorsionWeight
+     */
+    public double getAntiTorsionWeight() {
+        return antiTorsionWeight;
+    }
+
+    /**
+     * @param antiTorsionWeight the antiTorsionWeight to set
+     */
+    public void setAntiTorsionWeight(double antiTorsionWeight) {
+        assert(antiTorsionWeight >= 0 && antiTorsionWeight <= 1);
+        this.antiTorsionWeight = antiTorsionWeight;
     }
 }
