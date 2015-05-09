@@ -67,7 +67,7 @@ public class MainWindow extends javax.swing.JFrame {
         // reorder layers
         layerList.addPropertyChangeListener(DraggableList.MODEL_PROPERTY,
                 new PropertyChangeListener() {
-
+                    
                     @Override
                     public void propertyChange(PropertyChangeEvent evt) {
                         model.removeAllLayers();
@@ -90,7 +90,7 @@ public class MainWindow extends javax.swing.JFrame {
         this.model = model;
         mapComponent.setModel(model);
     }
-
+    
     private void updateLayerList() {
         assert SwingUtilities.isEventDispatchThread();
         int selectedID = layerList.getSelectedIndex();
@@ -140,6 +140,8 @@ public class MainWindow extends javax.swing.JFrame {
         drawLineSegmentsCheckBox = new javax.swing.JCheckBox();
         drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
         selfForcesCheckBox = new javax.swing.JCheckBox();
+        jLabel6 = new javax.swing.JLabel();
+        nodeWeightSlider = new javax.swing.JSlider();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -353,10 +355,10 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 24;
+        gridBagConstraints.gridy = 27;
         flowWidthPanel.add(jButton1, gridBagConstraints);
 
-        jLabel3.setText("Spring Stiffness of Longest Flow");
+        jLabel3.setText("Stiffness of Longest Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 16;
@@ -377,6 +379,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 22;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowWidthPanel.add(bSlider, gridBagConstraints);
 
         jLabel4.setText("IDW Exponent");
@@ -397,10 +400,12 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 17;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowWidthPanel.add(kSlider, gridBagConstraints);
 
-        zeroLengthStiffnessSlider.setMajorTickSpacing(50);
-        zeroLengthStiffnessSlider.setMaximum(200);
+        zeroLengthStiffnessSlider.setMajorTickSpacing(100);
+        zeroLengthStiffnessSlider.setMaximum(500);
+        zeroLengthStiffnessSlider.setMinorTickSpacing(50);
         zeroLengthStiffnessSlider.setPaintLabels(true);
         zeroLengthStiffnessSlider.setPaintTicks(true);
         zeroLengthStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -411,9 +416,10 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 20;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowWidthPanel.add(zeroLengthStiffnessSlider, gridBagConstraints);
 
-        jLabel5.setText("Spring Stiffness of Zero-Length Flow");
+        jLabel5.setText("Stiffness of Zero-Length Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 19;
@@ -444,7 +450,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
 
-        selfForcesCheckBox.setText("Flow Exerts Forces on Itself");
+        selfForcesCheckBox.setText("Flows Exert Forces on Themselves");
         selfForcesCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selfForcesCheckBoxActionPerformed(evt);
@@ -455,6 +461,30 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 14;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(selfForcesCheckBox, gridBagConstraints);
+
+        jLabel6.setText("Node Weight");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 24;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(jLabel6, gridBagConstraints);
+
+        nodeWeightSlider.setMajorTickSpacing(50);
+        nodeWeightSlider.setMaximum(200);
+        nodeWeightSlider.setMinorTickSpacing(10);
+        nodeWeightSlider.setPaintLabels(true);
+        nodeWeightSlider.setPaintTicks(true);
+        nodeWeightSlider.setValue(0);
+        nodeWeightSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                nodeWeightSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 25;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        flowWidthPanel.add(nodeWeightSlider, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -564,7 +594,7 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exportSVGMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportSVGMenuItemActionPerformed
-
+        
         OutputStream outputStream = null;
         try {
             // ask for export file
@@ -636,7 +666,7 @@ public class MainWindow extends javax.swing.JFrame {
                 // user canceled
                 return;
             }
-
+            
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             if (flows != null) {
                 model.setFlows(flows);
@@ -661,7 +691,7 @@ public class MainWindow extends javax.swing.JFrame {
         int index = layerList.getSelectedIndex();
         return index == -1 ? null : model.getLayer(index);
     }
-
+    
     private VectorSymbol getSelectedVectorSymbol() {
         Layer selectedLayer = getSelectedMapLayer();
         VectorSymbol vectorSymbol = null;
@@ -670,16 +700,16 @@ public class MainWindow extends javax.swing.JFrame {
         }
         return vectorSymbol;
     }
-
+    
     private void writeSymbolGUI() {
         VectorSymbol vectorSymbol = getSelectedVectorSymbol();
-
+        
         boolean enable = vectorSymbol != null;
         fillCheckBox.setEnabled(enable);
         strokeCheckBox.setEnabled(enable);
         fillColorButton.setEnabled(enable);
         strokeColorButton.setEnabled(enable);
-
+        
         if (vectorSymbol != null) {
             fillCheckBox.setSelected(vectorSymbol.isFilled());
             strokeCheckBox.setSelected(vectorSymbol.isStroked());
@@ -687,7 +717,7 @@ public class MainWindow extends javax.swing.JFrame {
             strokeColorButton.setColor(vectorSymbol.getStrokeColor());
         }
     }
-
+    
     private void readSymbolGUI() {
         VectorSymbol vectorSymbol = getSelectedVectorSymbol();
         if (vectorSymbol == null) {
@@ -797,7 +827,7 @@ public class MainWindow extends javax.swing.JFrame {
         int distPerc = flowLengthSlider.getValue();
         ArrayList<Flow> flows = new ArrayList<>();
         Model.CurveType curveType = model.getCurveType();
-
+        
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
@@ -808,13 +838,13 @@ public class MainWindow extends javax.swing.JFrame {
             }
             flows.add(flow);
         }
-
+        
         model.setFlows(flows);
 
         // repaint the map
         mapComponent.repaint();
     }
-
+    
     private void countIntersections() {
         ArrayList<Flow> flows = new ArrayList<>();
         Iterator<Flow> iter = model.flowIterator();
@@ -892,7 +922,7 @@ public class MainWindow extends javax.swing.JFrame {
                 new javax.swing.ImageIcon(image));
         frame.getContentPane().add(label, BorderLayout.CENTER);
         frame.pack();
-        frame.setVisible(true);      
+        frame.setVisible(true);        
     }//GEN-LAST:event_renderToImageMenuItemActionPerformed
 
     private void selfForcesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selfForcesCheckBoxActionPerformed
@@ -900,34 +930,40 @@ public class MainWindow extends javax.swing.JFrame {
         forceLayout();
     }//GEN-LAST:event_selfForcesCheckBoxActionPerformed
 
+    private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
+        if (nodeWeightSlider.getValueIsAdjusting() == false) {
+            forceLayout();
+        }
+    }//GEN-LAST:event_nodeWeightSliderStateChanged
     
     private void forceLayout() {
-       
+        
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
         layouter.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         layouter.setIDWExponent((double) bSlider.getValue() / 10);
-
+        model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
+        
         MyTimerActionListener listener = new MyTimerActionListener(layouter);
         Timer timer = new Timer(10, listener);
         listener.setTimer(timer);
-
+        
         timer.start();
     }
-
+    
     class MyTimerActionListener implements ActionListener {
-
+        
         private Timer timer;
         private ForceLayouter layouter;
         private final long startTime = System.currentTimeMillis();
-
+        
         public MyTimerActionListener(ForceLayouter layouter) {
             this.layouter = layouter;
         }
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            
             double maxFlowLength = model.getLongestFlowLength();
             
             Iterator<Flow> iterator = model.flowIterator();
@@ -946,17 +982,17 @@ public class MainWindow extends javax.swing.JFrame {
                     layouter.computeTotalForce(cFlow.getcPt2(), cFlow, basePt, maxFlowLength, flowBaseLength);
                 }
             }
-
+            
             mapComponent.repaint();
             if (System.currentTimeMillis() - startTime > 5000) {
                 timer.stop();
             }
         }
-
+        
         private void setTimer(Timer timer) {
             this.timer = timer;
         }
-
+        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -982,6 +1018,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
@@ -990,6 +1027,7 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
     private javax.swing.JMenu mapMenu;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openShapefileMenuItem;
     private javax.swing.JRadioButton quadraticCurvesRadioButton;
     private javax.swing.JMenuItem removeAllLayersMenuItem;

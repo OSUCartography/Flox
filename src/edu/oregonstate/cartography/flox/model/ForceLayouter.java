@@ -115,17 +115,15 @@ public class ForceLayouter {
                 double fx = xDist / l; //normalized x distance
                 double fy = yDist / l; //normalized y distance
 
-                // Apply the weight to each focre
+                // Apply the distance weight to each focre
                 fx *= w; // The force along the x-axis after weighting
                 fy *= w; // The force along the y-axix after weighting
 
                 // start and end points have bigger weight
-//                if (ptID == 0 || ptID == nPoints - 1) {
-//                    if (flow.getEndPt() != endPoint && flow.getStartPt() != startPoint) {
-//                        fx *= 10;
-//                        fy *= 10;
-//                    }
-//                }
+                if (ptID == 0 || ptID == nPoints - 1) {
+                    fx *= model.getNodeWeightFactor();
+                    fy *= model.getNodeWeightFactor();
+                }
 
                 // Add forces to the totals
                 fxTotal += fx;
@@ -197,7 +195,7 @@ public class ForceLayouter {
         flow.getcPt().x += fxSum / flowPoints.size();
         flow.getcPt().y += fySum / flowPoints.size();
     }
-    
+
     public void straightenFlows() {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {

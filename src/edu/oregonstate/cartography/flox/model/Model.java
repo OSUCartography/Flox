@@ -34,22 +34,27 @@ public class Model {
     /**
      * flag for drawing control points
      */
-    private boolean drawControlPoints;
+    private boolean drawControlPoints = false;
 
     /**
      * flag for drawing line segments
      */
-    private boolean drawLineSegments;
+    private boolean drawLineSegments = false;
     
     /**
      * flag for drawing reconstructed BŽzier curves
      */
-    private boolean drawReconstructedBezier;
+    private boolean drawReconstructedBezier = false;
     
     /**
      * if true, a flow exerts forces on itself
      */
-    private boolean flowExertingForcesOnItself;
+    private boolean flowExertingForcesOnItself = false;
+    
+    /**
+     * Start and end node exert a larger force than points along flow lines
+     */
+    private double nodeWeightFactor = 10;
     
     /**
      * A reference to the map with layers and geometry.
@@ -362,5 +367,19 @@ public class Model {
      */
     public void setFlowExertingForcesOnItself(boolean flowExertingForcesOnItself) {
         this.flowExertingForcesOnItself = flowExertingForcesOnItself;
+    }
+
+    /**
+     * @return the nodeWeightFactor
+     */
+    public double getNodeWeightFactor() {
+        return nodeWeightFactor;
+    }
+
+    /**
+     * @param nodeWeightFactor the nodeWeightFactor to set
+     */
+    public void setNodeWeightFactor(double nodeWeightFactor) {
+        this.nodeWeightFactor = nodeWeightFactor;
     }
 }
