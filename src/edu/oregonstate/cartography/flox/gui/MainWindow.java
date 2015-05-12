@@ -995,43 +995,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            double maxFlowLength = model.getLongestFlowLength();
-            
-            // compute force for each flow for current configuration
-            ArrayList<Force> forces = new ArrayList<>();
-            Iterator<Flow> iterator = model.flowIterator();
-            while (iterator.hasNext()) {
-                Flow flow = iterator.next();
-                if (flow instanceof QuadraticBezierFlow) {
-                    QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                    //layouter.computeTotalForce(qFlow.getCtrlPt(), flow.getStartPt(), 
-                    //        flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
-                    Force f = layouter.computeForceOnFlow(qFlow, maxFlowLength);
-                    forces.add(f);
-                } else {
-                    //CubicBezierFlow cFlow = (CubicBezierFlow) flow;
-                    //double flowBaseLength = flow.getBaselineLength();
-                    //Point basePt = flow.getBaseLineMidPoint();
-                    //layouter.computeTotalForce(cFlow.getcPt1(), cFlow, basePt, maxFlowLength, flowBaseLength);
-                    //layouter.computeTotalForce(cFlow.getcPt2(), cFlow, basePt, maxFlowLength, flowBaseLength);
-                }
-            }
-
-            iterator = model.flowIterator();
-
-            // apply forces onto control points of flows
-            int i = 0;
-            while (iterator.hasNext()) {
-                Flow flow = iterator.next();
-                if (flow instanceof QuadraticBezierFlow) {
-                    QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                    Point ctrlPt = qFlow.getCtrlPt();
-                    Force f = forces.get(i++);
-                    ctrlPt.x += f.fx;
-                    ctrlPt.y += f.fy;
-                }
-            }
-            
+            layouter.layoutAllFlows();            
             mapComponent.repaint();
             if (System.currentTimeMillis() - startTime > 10000) {
                 timer.stop();

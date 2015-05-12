@@ -44,7 +44,8 @@ public class ForceLayouter {
     }
 
     /**
-     * Sets the distanceWeightExponent. This is currently set by the slider bar in the GUI.
+     * Sets the distanceWeightExponent. This is currently set by the slider bar
+     * in the GUI.
      *
      * @param idwExponent The distanceWeightExponent to set
      */
@@ -92,7 +93,7 @@ public class ForceLayouter {
         double wTotal = 0; // sum of the weight of all forces
 
         double nodeWeight = model.getNodeWeightFactor();
-        
+
         // Iterate through the flows. The forces of each flow on the target is
         // calculated and added to the total force
         while (flowIterator.hasNext()) {
@@ -104,7 +105,7 @@ public class ForceLayouter {
             int nPoints = points.size();
             for (int ptID = 0; ptID < nPoints; ptID++) {
                 boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
-                
+
                 Point point = points.get(ptID);
 
                 double xDist = targetPoint.x - point.x; // x distance from node to target
@@ -114,7 +115,7 @@ public class ForceLayouter {
                 if (l == 0) {
                     continue;
                 }
-                
+
                 // double w = gaussianWeight(l, maxFlowLength);
                 double w = inverseDistanceWeight(l);
                 double fx = xDist / l; //normalized x distance
@@ -167,7 +168,7 @@ public class ForceLayouter {
         double dy = totalForceY;
         return new Force(dx, dy);
     }
-    
+
     /**
      * S-shaped smooth function using cubic Hermite interpolation
      * http://en.wikipedia.org/wiki/Smoothstep
@@ -186,7 +187,7 @@ public class ForceLayouter {
         // alternative smootherstep
         // return x * x * x * (x * (x * 6 - 15) + 10);
     }
-    
+
     private double gaussianWeight(double d, double maxFlowLength) {
         double K = distanceWeightExponent / maxFlowLength;
         return Math.exp(-K * d * d);
@@ -197,10 +198,10 @@ public class ForceLayouter {
     }
 
     /**
-     * Compute forces onto a quadratic BŽzier flow. The BŽzier curve is split into
-     * small segments. The force exerted onto each node in the segmented flow is
-     * computed and then these forces are summed. The summed force is then
-     * applied onto the control point of the BŽzier curve.
+     * Compute forces onto a quadratic BŽzier flow. The BŽzier curve is split
+     * into small segments. The force exerted onto each node in the segmented
+     * flow is computed and then these forces are summed. The summed force is
+     * then applied onto the control point of the BŽzier curve.
      *
      * @param flow
      * @param maxFlowLength
@@ -211,7 +212,7 @@ public class ForceLayouter {
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
         ArrayList<Point> flowPoints = flow.toStraightLineSegments(0.01);
-        
+
         // compute the sum of all force vectors that are applied on each 
         // flow segment
         double fxSum = 0;
@@ -233,11 +234,50 @@ public class ForceLayouter {
         double torsionF = Math.sin(diffToBaseNormal) * l;
         double torsionFx = Math.cos(baseLineAzimuth) * torsionF;
         double torsionFy = Math.sin(baseLineAzimuth) * torsionF;
-        
+
         // move the control point by the total force
         double fx = fxSum / flowPoints.size() + torsionFx * model.getAntiTorsionWeight();
         double fy = fySum / flowPoints.size() + torsionFy * model.getAntiTorsionWeight();
         return new Force(fx, fy);
+    }
+
+    public void layoutAllFlows() {
+        double maxFlowLength = model.getLongestFlowLength();
+        
+        // compute force for each flow for current configuration
+        ArrayList<Force> forces = new ArrayList<>();
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow instanceof QuadraticBezierFlow) {
+                QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
+                    //layouter.computeTotalForce(qFlow.getCtrlPt(), flow.getStartPt(), 
+                //        flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
+                Force f = computeForceOnFlow(qFlow, maxFlowLength);
+                forces.add(f);
+            } else {
+                    //CubicBezierFlow cFlow = (CubicBezierFlow) flow;
+                //double flowBaseLength = flow.getBaselineLength();
+                //Point basePt = flow.getBaseLineMidPoint();
+                //layouter.computeTotalForce(cFlow.getcPt1(), cFlow, basePt, maxFlowLength, flowBaseLength);
+                //layouter.computeTotalForce(cFlow.getcPt2(), cFlow, basePt, maxFlowLength, flowBaseLength);
+            }
+        }
+
+        iterator = model.flowIterator();
+
+        // apply forces onto control points of flows
+        int i = 0;
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow instanceof QuadraticBezierFlow) {
+                QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
+                Point ctrlPt = qFlow.getCtrlPt();
+                Force f = forces.get(i++);
+                ctrlPt.x += f.fx;
+                ctrlPt.y += f.fy;
+            }
+        }
     }
 
     public void straightenFlows() {
