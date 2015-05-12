@@ -6,6 +6,7 @@ import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import static edu.oregonstate.cartography.flox.model.CubicBezierFlow.bendCubicFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
+import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
@@ -67,7 +68,7 @@ public class MainWindow extends javax.swing.JFrame {
         // reorder layers
         layerList.addPropertyChangeListener(DraggableList.MODEL_PROPERTY,
                 new PropertyChangeListener() {
-                    
+
                     @Override
                     public void propertyChange(PropertyChangeEvent evt) {
                         model.removeAllLayers();
@@ -90,7 +91,7 @@ public class MainWindow extends javax.swing.JFrame {
         this.model = model;
         mapComponent.setModel(model);
     }
-    
+
     private void updateLayerList() {
         assert SwingUtilities.isEventDispatchThread();
         int selectedID = layerList.getSelectedIndex();
@@ -618,7 +619,7 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exportSVGMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportSVGMenuItemActionPerformed
-        
+
         OutputStream outputStream = null;
         try {
             // ask for export file
@@ -690,7 +691,7 @@ public class MainWindow extends javax.swing.JFrame {
                 // user canceled
                 return;
             }
-            
+
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             if (flows != null) {
                 model.setFlows(flows);
@@ -715,7 +716,7 @@ public class MainWindow extends javax.swing.JFrame {
         int index = layerList.getSelectedIndex();
         return index == -1 ? null : model.getLayer(index);
     }
-    
+
     private VectorSymbol getSelectedVectorSymbol() {
         Layer selectedLayer = getSelectedMapLayer();
         VectorSymbol vectorSymbol = null;
@@ -724,16 +725,16 @@ public class MainWindow extends javax.swing.JFrame {
         }
         return vectorSymbol;
     }
-    
+
     private void writeSymbolGUI() {
         VectorSymbol vectorSymbol = getSelectedVectorSymbol();
-        
+
         boolean enable = vectorSymbol != null;
         fillCheckBox.setEnabled(enable);
         strokeCheckBox.setEnabled(enable);
         fillColorButton.setEnabled(enable);
         strokeColorButton.setEnabled(enable);
-        
+
         if (vectorSymbol != null) {
             fillCheckBox.setSelected(vectorSymbol.isFilled());
             strokeCheckBox.setSelected(vectorSymbol.isStroked());
@@ -741,7 +742,7 @@ public class MainWindow extends javax.swing.JFrame {
             strokeColorButton.setColor(vectorSymbol.getStrokeColor());
         }
     }
-    
+
     private void readSymbolGUI() {
         VectorSymbol vectorSymbol = getSelectedVectorSymbol();
         if (vectorSymbol == null) {
@@ -851,7 +852,7 @@ public class MainWindow extends javax.swing.JFrame {
         int distPerc = flowLengthSlider.getValue();
         ArrayList<Flow> flows = new ArrayList<>();
         Model.CurveType curveType = model.getCurveType();
-        
+
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
@@ -862,13 +863,13 @@ public class MainWindow extends javax.swing.JFrame {
             }
             flows.add(flow);
         }
-        
+
         model.setFlows(flows);
 
         // repaint the map
         mapComponent.repaint();
     }
-    
+
     private void countIntersections() {
         ArrayList<Flow> flows = new ArrayList<>();
         Iterator<Flow> iter = model.flowIterator();
@@ -946,7 +947,7 @@ public class MainWindow extends javax.swing.JFrame {
                 new javax.swing.ImageIcon(image));
         frame.getContentPane().add(label, BorderLayout.CENTER);
         frame.pack();
-        frame.setVisible(true);        
+        frame.setVisible(true);
     }//GEN-LAST:event_renderToImageMenuItemActionPerformed
 
     private void selfForcesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selfForcesCheckBoxActionPerformed
@@ -965,52 +966,69 @@ public class MainWindow extends javax.swing.JFrame {
             forceLayout();
         }
     }//GEN-LAST:event_antiTorsionSliderStateChanged
-    
+
     private void forceLayout() {
-        
+
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
         layouter.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
-        layouter.setIDWExponent((double) bSlider.getValue() / 10);
+        layouter.setDistanceWeightExponent((double) bSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
         model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
-        
+
         MyTimerActionListener listener = new MyTimerActionListener(layouter);
         Timer timer = new Timer(10, listener);
         listener.setTimer(timer);
-        
+
         timer.start();
     }
-    
+
     class MyTimerActionListener implements ActionListener {
-        
+
         private Timer timer;
         private ForceLayouter layouter;
         private final long startTime = System.currentTimeMillis();
-        
+
         public MyTimerActionListener(ForceLayouter layouter) {
             this.layouter = layouter;
         }
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
-            
             double maxFlowLength = model.getLongestFlowLength();
             
+            // compute force for each flow for current configuration
+            ArrayList<Force> forces = new ArrayList<>();
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                double flowBaseLength = flow.getBaselineLength();
-                Point basePt = flow.getBaseLineMidPoint();
                 if (flow instanceof QuadraticBezierFlow) {
                     QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                    //layouter.computeTotalForce(qFlow.getcPt(), flow.getStartPt(), 
+                    //layouter.computeTotalForce(qFlow.getCtrlPt(), flow.getStartPt(), 
                     //        flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
-                    layouter.applyForces(qFlow, maxFlowLength);
+                    Force f = layouter.computeForceOnFlow(qFlow, maxFlowLength);
+                    forces.add(f);
                 } else {
-                    CubicBezierFlow cFlow = (CubicBezierFlow) flow;
-                    layouter.computeTotalForce(cFlow.getcPt1(), cFlow, basePt, maxFlowLength, flowBaseLength);
-                    layouter.computeTotalForce(cFlow.getcPt2(), cFlow, basePt, maxFlowLength, flowBaseLength);
+                    //CubicBezierFlow cFlow = (CubicBezierFlow) flow;
+                    //double flowBaseLength = flow.getBaselineLength();
+                    //Point basePt = flow.getBaseLineMidPoint();
+                    //layouter.computeTotalForce(cFlow.getcPt1(), cFlow, basePt, maxFlowLength, flowBaseLength);
+                    //layouter.computeTotalForce(cFlow.getcPt2(), cFlow, basePt, maxFlowLength, flowBaseLength);
+                }
+            }
+
+            iterator = model.flowIterator();
+
+            // apply forces onto control points of flows
+            int i = 0;
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                if (flow instanceof QuadraticBezierFlow) {
+                    QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
+                    Point ctrlPt = qFlow.getCtrlPt();
+                    Force f = forces.get(i++);
+                    ctrlPt.x += f.fx;
+                    ctrlPt.y += f.fy;
                 }
             }
             
@@ -1019,11 +1037,11 @@ public class MainWindow extends javax.swing.JFrame {
                 timer.stop();
             }
         }
-        
+
         private void setTimer(Timer timer) {
             this.timer = timer;
         }
-        
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

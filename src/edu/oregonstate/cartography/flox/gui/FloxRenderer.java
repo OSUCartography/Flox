@@ -137,7 +137,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         GeneralPath path = new GeneralPath();
         Point startPt = flow.getStartPt();
         path.moveTo(xToPx(startPt.x), yToPx(startPt.y));
-        Point cPt = flow.getcPt();
+        Point cPt = flow.getCtrlPt();
         Point endPt = flow.getEndPt();
         path.quadTo(xToPx(cPt.x), yToPx(cPt.y),
                 xToPx(endPt.x), yToPx(endPt.y));
@@ -200,7 +200,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 drawCircle(cpt1.x, cpt1.y, CR, Color.ORANGE, Color.GRAY);
                 drawCircle(cpt2.x, cpt2.y, CR, Color.ORANGE, Color.GRAY);
             } else {
-                Point cpt = ((QuadraticBezierFlow) flow).getcPt();
+                Point cpt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 g2d.setColor(Color.GRAY);
                 Line2D line1 = new Line2D.Double(xToPx(startPt.x),
                         yToPx(startPt.y), xToPx(cpt.x), yToPx(cpt.y));

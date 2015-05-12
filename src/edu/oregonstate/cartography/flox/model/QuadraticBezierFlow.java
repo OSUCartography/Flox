@@ -115,7 +115,7 @@ public class QuadraticBezierFlow extends Flow {
      *
      * @return the control point
      */
-    public Point getcPt() {
+    public Point getCtrlPt() {
         return cPt;
     }
 

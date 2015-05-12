@@ -22,9 +22,9 @@ public class ForceLayouter {
     private double minFlowLengthSpringConstant = 0.5;
 
     // This determines the amount of force that objects far away from the target
-    // can apply to the target.  The lower the idwExponent, the more force distant
+    // can apply to the target.  The lower the distanceWeightExponent, the more force distant
     // objects are permitted to apply.
-    private double idwExponent = 4;
+    private double distanceWeightExponent = 4;
 
     // Stores the model, which contains all map features.
     private final Model model;
@@ -44,12 +44,12 @@ public class ForceLayouter {
     }
 
     /**
-     * Sets the idwExponent. This is currently set by the slider bar in the GUI.
+     * Sets the distanceWeightExponent. This is currently set by the slider bar in the GUI.
      *
-     * @param idwExponent The idwExponent to set
+     * @param idwExponent The distanceWeightExponent to set
      */
-    public void setIDWExponent(double idwExponent) {
-        this.idwExponent = idwExponent;
+    public void setDistanceWeightExponent(double idwExponent) {
+        this.distanceWeightExponent = idwExponent;
     }
 
     /**
@@ -65,7 +65,7 @@ public class ForceLayouter {
     /**
      * Computes the total acting force on a point as applied by neighboring
      * points. This is currently used to calculate the forces applied to the
-     * control point(s) of a bezier flow. There are two forces that will be
+     * control point(s) of a BŽzier flow. There are two forces that will be
      * calculated for each control point: The combined force of all nodes on the
      * target node, and the force of the spring that pulls the target node
      * towards the center point between the start/end points of the flow. The
@@ -82,7 +82,7 @@ public class ForceLayouter {
      * @param flowBaseLength The distance between the start and end points of a
      * flow
      */
-    public void computeTotalForce(Point targetPoint, Flow targetFlow,
+    public Force computeTotalForce(Point targetPoint, Flow targetFlow,
             Point referencePoint, double maxFlowLength, double flowBaseLength) {
 
         Iterator<Flow> flowIterator = model.flowIterator();
@@ -91,6 +91,8 @@ public class ForceLayouter {
         double fyTotal = 0; // total force along the y axis 
         double wTotal = 0; // sum of the weight of all forces
 
+        double nodeWeight = model.getNodeWeightFactor();
+        
         // Iterate through the flows. The forces of each flow on the target is
         // calculated and added to the total force
         while (flowIterator.hasNext()) {
@@ -102,7 +104,7 @@ public class ForceLayouter {
             int nPoints = points.size();
             for (int ptID = 0; ptID < nPoints; ptID++) {
                 boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
-                double nodeWeight = startOrEndPoint? model.getNodeWeightFactor() : 1;
+                
                 Point point = points.get(ptID);
 
                 double xDist = targetPoint.x - point.x; // x distance from node to target
@@ -113,8 +115,8 @@ public class ForceLayouter {
                     continue;
                 }
                 
-                //double w = Math.pow(l, -idwExponent); // distance weight
-                double w = gaussianWeight(l, maxFlowLength);
+                // double w = gaussianWeight(l, maxFlowLength);
+                double w = inverseDistanceWeight(l);
                 double fx = xDist / l; //normalized x distance
                 double fy = yDist / l; //normalized y distance
 
@@ -163,32 +165,51 @@ public class ForceLayouter {
         // Moves the target point by the sum total of all forces
         double dx = totalForceX;
         double dy = totalForceY;
-        targetPoint.x += dx;
-        targetPoint.y += dy;
+        return new Force(dx, dy);
+    }
+    
+    /**
+     * S-shaped smooth function using cubic Hermite interpolation
+     * http://en.wikipedia.org/wiki/Smoothstep
+     *
+     * @param edge0 interpolated values for x below edge0 will be 0.
+     * @param edge1 interpolated values for x above edge1 will be 1.
+     * @param x The x value to interpolate a value for.
+     * @return
+     */
+    private static double smoothstep(double edge0, double edge1, double x) {
+        // scale, bias and saturate x to 0..1 range
+        x = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+        // evaluate polynomial
+        return x * x * (3 - 2 * x);
+
+        // alternative smootherstep
+        // return x * x * x * (x * (x * 6 - 15) + 10);
     }
     
     private double gaussianWeight(double d, double maxFlowLength) {
-        double K = idwExponent / maxFlowLength;
+        double K = distanceWeightExponent / maxFlowLength;
         return Math.exp(-K * d * d);
     }
 
     private double inverseDistanceWeight(double d) {
-        return 1. / Math.pow(d, idwExponent);
+        return 1. / Math.pow(d, distanceWeightExponent);
     }
 
     /**
-     * Apply forces onto a quadratic BŽzier flow. The BŽzier curve is split into
+     * Compute forces onto a quadratic BŽzier flow. The BŽzier curve is split into
      * small segments. The force exerted onto each node in the segmented flow is
      * computed and then these forces are summed. The summed force is then
      * applied onto the control point of the BŽzier curve.
      *
      * @param flow
      * @param maxFlowLength
+     * @return The force that is exerted onto the control point
      */
-    public void applyForces(QuadraticBezierFlow flow, double maxFlowLength) {
+    public Force computeForceOnFlow(QuadraticBezierFlow flow, double maxFlowLength) {
         double flowBaseLength = flow.getBaselineLength();
         Point basePt = flow.getBaseLineMidPoint();
-        Point cPt = flow.getcPt();
+        Point cPt = flow.getCtrlPt();
         ArrayList<Point> flowPoints = flow.toStraightLineSegments(0.01);
         
         // compute the sum of all force vectors that are applied on each 
@@ -196,16 +217,10 @@ public class ForceLayouter {
         double fxSum = 0;
         double fySum = 0;
         for (Point pt : flowPoints) {
-            // a hack to compute the force applied on pt
-            double x = pt.x;
-            double y = pt.y;
-            computeTotalForce(pt, flow, basePt, maxFlowLength, flowBaseLength);
-            // force applied to the point
-            double fx = pt.x - x;
-            double fy = pt.y - y;
+            Force f = computeTotalForce(pt, flow, basePt, maxFlowLength, flowBaseLength);
             // add to the total force
-            fxSum += fx;
-            fySum += fy;
+            fxSum += f.fx;
+            fySum += f.fy;
         }
 
         // compute the anti-torsion force
@@ -220,8 +235,9 @@ public class ForceLayouter {
         double torsionFy = Math.sin(baseLineAzimuth) * torsionF;
         
         // move the control point by the total force
-        cPt.x += fxSum / flowPoints.size() + torsionFx * model.getAntiTorsionWeight();
-        cPt.y += fySum / flowPoints.size() + torsionFy * model.getAntiTorsionWeight();
+        double fx = fxSum / flowPoints.size() + torsionFx * model.getAntiTorsionWeight();
+        double fy = fySum / flowPoints.size() + torsionFy * model.getAntiTorsionWeight();
+        return new Force(fx, fy);
     }
 
     public void straightenFlows() {
