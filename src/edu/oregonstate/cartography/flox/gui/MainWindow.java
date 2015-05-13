@@ -986,7 +986,7 @@ public class MainWindow extends javax.swing.JFrame {
     class MyTimerActionListener implements ActionListener {
 
         private Timer timer;
-        private ForceLayouter layouter;
+        private final ForceLayouter layouter;
         private final long startTime = System.currentTimeMillis();
 
         public MyTimerActionListener(ForceLayouter layouter) {

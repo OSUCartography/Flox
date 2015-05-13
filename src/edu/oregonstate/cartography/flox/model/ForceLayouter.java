@@ -75,16 +75,9 @@ public class ForceLayouter {
      *
      * @param targetPoint The point that will be moved.
      * @param targetFlow The flow that receives the forces.
-     * @param referencePoint The center point of a line drawn from the start
-     * point to the end point
-     * @param maxFlowLength The distance between the start and end point of the
-     * flow who's start and end points are the furthest apart of all flows in
-     * the model.
-     * @param flowBaseLength The distance between the start and end points of a
-     * flow
+     * @return The force exerted on the targetPoint.
      */
-    public Force computeTotalForce(Point targetPoint, Flow targetFlow,
-            Point referencePoint, double maxFlowLength, double flowBaseLength) {
+    private Force computeForceOnPoint(Point targetPoint, Flow targetFlow) {
 
         Iterator<Flow> flowIterator = model.flowIterator();
 
@@ -142,31 +135,39 @@ public class ForceLayouter {
         double fxFinal = fxTotal / wTotal;
         double fyFinal = fyTotal / wTotal;
 
-        // Calculates the length of the spring.  The spring is a vector connecting
-        // the reference point to the control point.
-        double springLengthX = referencePoint.x - targetPoint.x; // x-length of the spring
-        double springLengthY = referencePoint.y - targetPoint.y; // y-length of the spring
+        return new Force(fxFinal, fyFinal);
+    }
 
-        // Calculates the stiffness of the spring based on the distance between
-        // the start and end nodes. The closer together the nodes are, the 
-        // stiffer the spring is.
-        double flowSpringConstant = (-minFlowLengthSpringConstant
-                + maxFlowLengthSpringConstant) / maxFlowLength
-                * flowBaseLength + minFlowLengthSpringConstant;
+    private Force computeSpringForce(Point startPt, Point endPt, double springConstant) {
+        // Calculates the length of the spring.  The spring is a vector connecting
+        // the two points.
+        double springLengthX = startPt.x - endPt.x; // x-length of the spring
+        double springLengthY = startPt.y - endPt.y; // y-length of the spring
 
         // Calculates the total spring force as determined by the
         // distance between start/end points.
-        double springForceX = flowSpringConstant * springLengthX;
-        double springForceY = flowSpringConstant * springLengthY;
+        double springForceX = springConstant * springLengthX;
+        double springForceY = springConstant * springLengthY;
 
-        // Adds the force of the spring to the force of all nodes
-        double totalForceX = fxFinal + springForceX;
-        double totalForceY = fyFinal + springForceY;
+        return new Force(springForceX, springForceY);
+    }
 
-        // Moves the target point by the sum total of all forces
-        double dx = totalForceX;
-        double dy = totalForceY;
-        return new Force(dx, dy);
+    /**
+     * Calculates the stiffness of the spring based on the distance between the 
+     * start and end nodes. The closer together the nodes are, the stiffer the 
+     * spring usually is.
+     * @param flow
+     * @param maxFlowLength
+     * @return 
+     */
+    private double computeSpringConstant(QuadraticBezierFlow flow, double maxFlowLength) {
+       
+        double flowBaseLength = flow.getBaselineLength();
+        double relativeFlowLength = flowBaseLength / maxFlowLength;
+        double flowSpringConstant = (-minFlowLengthSpringConstant
+                + maxFlowLengthSpringConstant) * relativeFlowLength
+                + minFlowLengthSpringConstant;
+        return flowSpringConstant;
     }
 
     /**
@@ -208,20 +209,23 @@ public class ForceLayouter {
      * @return The force that is exerted onto the control point
      */
     public Force computeForceOnFlow(QuadraticBezierFlow flow, double maxFlowLength) {
-        double flowBaseLength = flow.getBaselineLength();
+
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
         ArrayList<Point> flowPoints = flow.toStraightLineSegments(0.01);
-
+        double flowSpringConstant = computeSpringConstant(flow, maxFlowLength);
+        
         // compute the sum of all force vectors that are applied on each 
         // flow segment
-        double fxSum = 0;
-        double fySum = 0;
+        Force fSum = new Force();
         for (Point pt : flowPoints) {
-            Force f = computeTotalForce(pt, flow, basePt, maxFlowLength, flowBaseLength);
-            // add to the total force
-            fxSum += f.fx;
-            fySum += f.fy;
+            // compute force applied by nodes and flows
+            Force externalF = computeForceOnPoint(pt, flow);
+            // compute spring force of flow
+            Force springF = computeSpringForce(basePt, cPt, flowSpringConstant);
+            // Adds the force of the spring to the force of all nodes
+            Force localForce = Force.add(externalF, springF);
+            fSum.add(localForce);
         }
 
         // compute the anti-torsion force
@@ -236,14 +240,14 @@ public class ForceLayouter {
         double torsionFy = Math.sin(baseLineAzimuth) * torsionF;
 
         // move the control point by the total force
-        double fx = fxSum / flowPoints.size() + torsionFx * model.getAntiTorsionWeight();
-        double fy = fySum / flowPoints.size() + torsionFy * model.getAntiTorsionWeight();
+        double fx = fSum.fx / flowPoints.size() + torsionFx * model.getAntiTorsionWeight();
+        double fy = fSum.fy / flowPoints.size() + torsionFy * model.getAntiTorsionWeight();
         return new Force(fx, fy);
     }
 
     public void layoutAllFlows() {
         double maxFlowLength = model.getLongestFlowLength();
-        
+
         // compute force for each flow for current configuration
         ArrayList<Force> forces = new ArrayList<>();
         Iterator<Flow> iterator = model.flowIterator();
@@ -251,16 +255,16 @@ public class ForceLayouter {
             Flow flow = iterator.next();
             if (flow instanceof QuadraticBezierFlow) {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                    //layouter.computeTotalForce(qFlow.getCtrlPt(), flow.getStartPt(), 
+                //layouter.computeForceOnPoint(qFlow.getCtrlPt(), flow.getStartPt(), 
                 //        flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
                 Force f = computeForceOnFlow(qFlow, maxFlowLength);
                 forces.add(f);
             } else {
-                    //CubicBezierFlow cFlow = (CubicBezierFlow) flow;
+                //CubicBezierFlow cFlow = (CubicBezierFlow) flow;
                 //double flowBaseLength = flow.getBaselineLength();
                 //Point basePt = flow.getBaseLineMidPoint();
-                //layouter.computeTotalForce(cFlow.getcPt1(), cFlow, basePt, maxFlowLength, flowBaseLength);
-                //layouter.computeTotalForce(cFlow.getcPt2(), cFlow, basePt, maxFlowLength, flowBaseLength);
+                //layouter.computeForceOnPoint(cFlow.getcPt1(), cFlow, basePt, maxFlowLength, flowBaseLength);
+                //layouter.computeForceOnPoint(cFlow.getcPt2(), cFlow, basePt, maxFlowLength, flowBaseLength);
             }
         }
 
