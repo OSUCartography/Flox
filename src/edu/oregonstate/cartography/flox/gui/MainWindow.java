@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -145,6 +146,7 @@ public class MainWindow extends javax.swing.JFrame {
         nodeWeightSlider = new javax.swing.JSlider();
         jLabel7 = new javax.swing.JLabel();
         antiTorsionSlider = new javax.swing.JSlider();
+        progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -510,6 +512,11 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 27;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowWidthPanel.add(antiTorsionSlider, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 29;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        flowWidthPanel.add(progressBar, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -877,7 +884,9 @@ public class MainWindow extends javax.swing.JFrame {
             Flow flow = iter.next();
             flows.add(flow);
         }
-        System.out.println(LayoutGrader.countFlowIntersections(flows));
+        int nbrIntersections = LayoutGrader.countFlowIntersections(flows);
+        String message = nbrIntersections + " intersections";
+        JOptionPane.showMessageDialog(mapComponent, message, "Flox", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void flowAngleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowAngleSliderStateChanged
@@ -968,7 +977,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_antiTorsionSliderStateChanged
 
     private Timer timer = null;
-    
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -987,9 +996,9 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     class LayoutActionListener implements ActionListener {
+
         private static final int NBR_ITERATIONS = 100;
         private final ForceLayouter layouter;
-        private final long startTime = System.currentTimeMillis();
         private int counter = 0;
 
         public LayoutActionListener(ForceLayouter layouter) {
@@ -998,11 +1007,13 @@ public class MainWindow extends javax.swing.JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            layouter.layoutAllFlows(1 - counter / (double)NBR_ITERATIONS);            
+            layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
             mapComponent.repaint();
             if (++counter == NBR_ITERATIONS) {
                 timer.stop();
+
             }
+            progressBar.setValue(counter);
         }
     }
 
@@ -1042,6 +1053,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openShapefileMenuItem;
+    private javax.swing.JProgressBar progressBar;
     private javax.swing.JRadioButton quadraticCurvesRadioButton;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
