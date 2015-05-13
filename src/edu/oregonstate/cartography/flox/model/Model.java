@@ -62,6 +62,11 @@ public class Model {
     private double antiTorsionWeight = 1;
     
     /**
+     * Stiffness factor for peripheral flows
+     */
+    private double peripheralStiffnessFactor = 1;
+    
+    /**
      * A reference to the map with layers and geometry.
      */
     private final Map map = new Map();
@@ -401,5 +406,19 @@ public class Model {
     public void setAntiTorsionWeight(double antiTorsionWeight) {
         assert(antiTorsionWeight >= 0 && antiTorsionWeight <= 1);
         this.antiTorsionWeight = antiTorsionWeight;
+    }
+
+    /**
+     * @return the peripheralStiffnessFactor
+     */
+    public double getPeripheralStiffnessFactor() {
+        return peripheralStiffnessFactor;
+    }
+
+    /**
+     * @param peripheralStiffnessFactor the peripheralStiffnessFactor to set
+     */
+    public void setPeripheralStiffnessFactor(double peripheralStiffnessFactor) {
+        this.peripheralStiffnessFactor = peripheralStiffnessFactor;
     }
 }

@@ -22,6 +22,11 @@ public class Force {
         return Math.sqrt(fx * fx + fy * fy);
     }
     
+    public void scale(double scale) {
+        fx *= scale;
+        fy *= scale;
+    }
+    
     public void add(Force f) {
         fx += f.fx;
         fy += f.fy;

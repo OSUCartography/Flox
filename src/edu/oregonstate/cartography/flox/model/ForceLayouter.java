@@ -96,6 +96,13 @@ public class ForceLayouter {
             }
             ArrayList<Point> points = flow.toStraightLineSegments(0.01);
             int nPoints = points.size();
+            
+            // FIXME
+            if (nPoints > 200) {
+                System.err.println("flow lines with too many points");
+                return new Force();
+            }
+
             for (int ptID = 0; ptID < nPoints; ptID++) {
                 boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
 
@@ -189,6 +196,29 @@ public class ForceLayouter {
         // return x * x * x * (x * (x * 6 - 15) + 10);
     }
 
+    /**
+     * Computes the anti-torsion force for a quadratic BŽzier flow
+     * @param flow
+     * @return A force pulling the control point towards a perpendicular line on
+     * the base line.
+     */
+     private Force computeAntiTorsionForce(QuadraticBezierFlow flow) {
+        Point basePt = flow.getBaseLineMidPoint();
+        Point cPt = flow.getCtrlPt();
+        double dx = basePt.x - cPt.x;
+        double dy = basePt.y - cPt.y;
+        double l = Math.sqrt(dx * dx + dy * dy);
+        double alpha = Math.atan2(dy, dx);
+        double baseLineAzimuth = flow.getBaselineAzimuth();
+        double diffToBaseNormal = Math.PI / 2 - baseLineAzimuth + alpha;
+        double torsionF = Math.sin(diffToBaseNormal) * l;
+        double antiTorsionW = model.getAntiTorsionWeight();
+        double torsionFx = Math.cos(baseLineAzimuth) * torsionF * antiTorsionW;
+        double torsionFy = Math.sin(baseLineAzimuth) * torsionF * antiTorsionW;
+        return new Force(torsionFx, torsionFy);
+    }
+
+     
     private double gaussianWeight(double d, double maxFlowLength) {
         double K = distanceWeightExponent / maxFlowLength;
         return Math.exp(-K * d * d);
@@ -213,35 +243,43 @@ public class ForceLayouter {
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
         ArrayList<Point> flowPoints = flow.toStraightLineSegments(0.01);
-        double flowSpringConstant = computeSpringConstant(flow, maxFlowLength);
         
         // compute the sum of all force vectors that are applied on each 
         // flow segment
-        Force fSum = new Force();
+        Force externalF = new Force();
+        double lengthOfForceVectorsSum = 0;
         for (Point pt : flowPoints) {
             // compute force applied by nodes and flows
-            Force externalF = computeForceOnPoint(pt, flow);
-            // compute spring force of flow
-            Force springF = computeSpringForce(basePt, cPt, flowSpringConstant);
-            // Adds the force of the spring to the force of all nodes
-            Force localForce = Force.add(externalF, springF);
-            fSum.add(localForce);
+            Force f = computeForceOnPoint(pt, flow);
+            // add to totals
+            externalF.add(f);
+            lengthOfForceVectorsSum += f.length();
         }
+        // compute ratio between length of total vector and the summed
+        // length of the shorter forces. This is a measure of how peripheral the 
+        // flow is.
+        double forceRatio = externalF.length() / lengthOfForceVectorsSum;
 
-        // compute the anti-torsion force
-        double dx = basePt.x - cPt.x;
-        double dy = basePt.y - cPt.y;
-        double l = Math.sqrt(dx * dx + dy * dy);
-        double alpha = Math.atan2(dy, dx);
-        double baseLineAzimuth = flow.getBaselineAzimuth();
-        double diffToBaseNormal = Math.PI / 2 - baseLineAzimuth + alpha;
-        double torsionF = Math.sin(diffToBaseNormal) * l;
-        double torsionFx = Math.cos(baseLineAzimuth) * torsionF;
-        double torsionFy = Math.sin(baseLineAzimuth) * torsionF;
+        externalF.fx /= flowPoints.size();
+        externalF.fy /= flowPoints.size();
+    
+        // compute anti-torsion force of flow
+        Force antiTorsionF = computeAntiTorsionForce(flow);
 
-        // move the control point by the total force
-        double fx = fSum.fx / flowPoints.size() + torsionFx * model.getAntiTorsionWeight();
-        double fy = fSum.fy / flowPoints.size() + torsionFy * model.getAntiTorsionWeight();
+        // compute spring force of flow
+        double flowSpringConstant = computeSpringConstant(flow, maxFlowLength);
+        flowSpringConstant *= forceRatio * forceRatio * model.getPeripheralStiffnessFactor() + 1;
+        Force springF = computeSpringForce(basePt, cPt, flowSpringConstant);
+        double springFLength = springF.length();
+        double externalFLength = externalF.length();
+        // FIXME
+        final double K = 10;
+        if (springFLength > externalFLength * K) {
+            springF.scale(K * externalFLength / springFLength);
+        }
+         // compute total force: external forces + spring force + anti-torsion force
+        double fx = externalF.fx + springF.fx + antiTorsionF.fx;
+        double fy = externalF.fy + springF.fy + antiTorsionF.fy;
         return new Force(fx, fy);
     }
 

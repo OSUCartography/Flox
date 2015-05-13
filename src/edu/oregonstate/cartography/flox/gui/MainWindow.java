@@ -2,22 +2,17 @@ package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryCollection;
-import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import static edu.oregonstate.cartography.flox.model.CubicBezierFlow.bendCubicFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
-import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
-import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
-import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
 import edu.oregonstate.cartography.utils.FileUtils;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -50,6 +45,11 @@ public class MainWindow extends javax.swing.JFrame {
      */
     private Model model;
 
+    /**
+     * timer for animated drawing of layout process
+     */
+    private Timer timer = null;
+    
     /**
      * Creates new form MainWindow
      */
@@ -132,7 +132,6 @@ public class MainWindow extends javax.swing.JFrame {
         quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
         countIntersectionsButton = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         bSlider = new javax.swing.JSlider();
         jLabel4 = new javax.swing.JLabel();
@@ -147,6 +146,8 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         antiTorsionSlider = new javax.swing.JSlider();
         progressBar = new javax.swing.JProgressBar();
+        jLabel8 = new javax.swing.JLabel();
+        peripheralStiffnessSlider = new javax.swing.JSlider();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -352,17 +353,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         flowWidthPanel.add(countIntersectionsButton, gridBagConstraints);
 
-        jButton1.setText("Force Layout");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 28;
-        flowWidthPanel.add(jButton1, gridBagConstraints);
-
         jLabel3.setText("Stiffness of Longest Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -394,6 +384,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowWidthPanel.add(jLabel4, gridBagConstraints);
 
         kSlider.setMajorTickSpacing(20);
+        kSlider.setMinorTickSpacing(10);
         kSlider.setPaintLabels(true);
         kSlider.setPaintTicks(true);
         kSlider.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -514,9 +505,34 @@ public class MainWindow extends javax.swing.JFrame {
         flowWidthPanel.add(antiTorsionSlider, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 30;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
+        flowWidthPanel.add(progressBar, gridBagConstraints);
+
+        jLabel8.setText("Stiffness Factor for Peripheral Flows");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 28;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(jLabel8, gridBagConstraints);
+
+        peripheralStiffnessSlider.setMajorTickSpacing(250);
+        peripheralStiffnessSlider.setMaximum(1000);
+        peripheralStiffnessSlider.setMinorTickSpacing(50);
+        peripheralStiffnessSlider.setPaintLabels(true);
+        peripheralStiffnessSlider.setPaintTicks(true);
+        peripheralStiffnessSlider.setValue(0);
+        peripheralStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                peripheralStiffnessSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 29;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        flowWidthPanel.add(progressBar, gridBagConstraints);
+        flowWidthPanel.add(peripheralStiffnessSlider, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -916,10 +932,6 @@ public class MainWindow extends javax.swing.JFrame {
         countIntersections();
     }//GEN-LAST:event_countIntersectionsButtonActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        forceLayout();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void bSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_bSliderStateChanged
         if (bSlider.getValueIsAdjusting() == false) {
             forceLayout();
@@ -976,7 +988,11 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_antiTorsionSliderStateChanged
 
-    private Timer timer = null;
+    private void peripheralStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_peripheralStiffnessSliderStateChanged
+        if (peripheralStiffnessSlider.getValueIsAdjusting() == false) {
+            forceLayout();
+        }
+    }//GEN-LAST:event_peripheralStiffnessSliderStateChanged
 
     private void forceLayout() {
 
@@ -986,7 +1002,8 @@ public class MainWindow extends javax.swing.JFrame {
         layouter.setDistanceWeightExponent((double) bSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
         model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
-
+        model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
+        
         if (timer != null) {
             timer.stop();
         }
@@ -1035,7 +1052,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JPanel flowWidthPanel;
     private javax.swing.JMenuItem importFlowsMenuItem;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -1043,6 +1059,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
@@ -1053,6 +1070,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openShapefileMenuItem;
+    private javax.swing.JSlider peripheralStiffnessSlider;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JRadioButton quadraticCurvesRadioButton;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
