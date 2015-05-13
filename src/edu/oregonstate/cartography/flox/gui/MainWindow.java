@@ -131,7 +131,6 @@ public class MainWindow extends javax.swing.JFrame {
         cubicCurvesRadioButton = new javax.swing.JRadioButton();
         quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
-        countIntersectionsButton = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         bSlider = new javax.swing.JSlider();
         jLabel4 = new javax.swing.JLabel();
@@ -153,9 +152,6 @@ public class MainWindow extends javax.swing.JFrame {
         openShapefileMenuItem = new javax.swing.JMenuItem();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         importFlowsMenuItem = new javax.swing.JMenuItem();
-        mapMenu = new javax.swing.JMenu();
-        removeAllLayersMenuItem = new javax.swing.JMenuItem();
-        removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
         zoomOnSelectedLayerMenuItem = new javax.swing.JMenuItem();
@@ -164,6 +160,11 @@ public class MainWindow extends javax.swing.JFrame {
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         renderToImageMenuItem = new javax.swing.JMenuItem();
+        mapMenu = new javax.swing.JMenu();
+        removeAllLayersMenuItem = new javax.swing.JMenuItem();
+        removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
+        floxMenu = new javax.swing.JMenu();
+        floxReportMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
@@ -340,18 +341,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
         flowWidthPanel.add(drawControlPointsCheckBox, gridBagConstraints);
-
-        countIntersectionsButton.setText("Count Intersections");
-        countIntersectionsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                countIntersectionsButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-        flowWidthPanel.add(countIntersectionsButton, gridBagConstraints);
 
         jLabel3.setText("Stiffness of Longest Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -567,26 +556,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(fileMenu);
 
-        mapMenu.setText("Map");
-
-        removeAllLayersMenuItem.setText("Remove All Layers");
-        removeAllLayersMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeAllLayersMenuItemActionPerformed(evt);
-            }
-        });
-        mapMenu.add(removeAllLayersMenuItem);
-
-        removeSelectedLayerMenuItem.setText("Remove Selected Layer");
-        removeSelectedLayerMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeSelectedLayerMenuItemActionPerformed(evt);
-            }
-        });
-        mapMenu.add(removeSelectedLayerMenuItem);
-
-        menuBar.add(mapMenu);
-
         viewMenu.setText("View");
 
         showAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -635,6 +604,38 @@ public class MainWindow extends javax.swing.JFrame {
         viewMenu.add(renderToImageMenuItem);
 
         menuBar.add(viewMenu);
+
+        mapMenu.setText("Map");
+
+        removeAllLayersMenuItem.setText("Remove All Layers");
+        removeAllLayersMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeAllLayersMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(removeAllLayersMenuItem);
+
+        removeSelectedLayerMenuItem.setText("Remove Selected Layer");
+        removeSelectedLayerMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeSelectedLayerMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(removeSelectedLayerMenuItem);
+
+        menuBar.add(mapMenu);
+
+        floxMenu.setText("Flox");
+
+        floxReportMenuItem.setText("Report…");
+        floxReportMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                floxReportMenuItemActionPerformed(evt);
+            }
+        });
+        floxMenu.add(floxReportMenuItem);
+
+        menuBar.add(floxMenu);
 
         setJMenuBar(menuBar);
 
@@ -893,7 +894,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }
 
-    private void countIntersections() {
+    private void showReport() {
         ArrayList<Flow> flows = new ArrayList<>();
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
@@ -901,8 +902,17 @@ public class MainWindow extends javax.swing.JFrame {
             flows.add(flow);
         }
         int nbrIntersections = LayoutGrader.countFlowIntersections(flows);
-        String message = nbrIntersections + " intersections";
-        JOptionPane.showMessageDialog(mapComponent, message, "Flox", JOptionPane.INFORMATION_MESSAGE);
+        int nbrFlows = model.getNbrFlows();
+        int nbrNodes = model.getNbrNodes();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("Flows: ");
+        sb.append(nbrFlows);
+        sb.append("\nNodes: ");
+        sb.append(nbrNodes);
+        sb.append("\nIntersections: ");
+        sb.append(nbrIntersections);
+        JOptionPane.showMessageDialog(mapComponent, sb.toString(), "Flox", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void flowAngleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowAngleSliderStateChanged
@@ -927,10 +937,6 @@ public class MainWindow extends javax.swing.JFrame {
         model.setDrawControlPoints(drawControlPointsCheckBox.isSelected());
         mapComponent.repaint();
     }//GEN-LAST:event_drawControlPointsCheckBoxActionPerformed
-
-    private void countIntersectionsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_countIntersectionsButtonActionPerformed
-        countIntersections();
-    }//GEN-LAST:event_countIntersectionsButtonActionPerformed
 
     private void bSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_bSliderStateChanged
         if (bSlider.getValueIsAdjusting() == false) {
@@ -994,6 +1000,10 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_peripheralStiffnessSliderStateChanged
 
+    private void floxReportMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_floxReportMenuItemActionPerformed
+        showReport();
+    }//GEN-LAST:event_floxReportMenuItemActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1037,7 +1047,6 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JSlider bSlider;
-    private javax.swing.JButton countIntersectionsButton;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
@@ -1051,6 +1060,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider flowLengthSlider;
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JPanel flowWidthPanel;
+    private javax.swing.JMenu floxMenu;
+    private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

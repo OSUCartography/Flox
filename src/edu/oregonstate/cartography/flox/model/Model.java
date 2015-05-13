@@ -83,6 +83,22 @@ public class Model {
     }
 
     /**
+     * Returns the number of flows.
+     * @return The number of flows.
+     */
+    public int getNbrFlows() {
+        return graph.edgeSet().size();
+    }
+    
+    /**
+     * Returns the number of nodes in the graph. This is different from 
+     * getNbrFlows() * 2.
+     * @return The number of nodes.
+     */
+    public int getNbrNodes() {
+        return graph.vertexSet().size();
+    }
+    /**
      * Add a flow.
      *
      * @param flow The flow to add.
