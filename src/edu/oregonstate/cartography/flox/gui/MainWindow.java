@@ -967,6 +967,8 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_antiTorsionSliderStateChanged
 
+    private Timer timer = null;
+    
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -976,36 +978,32 @@ public class MainWindow extends javax.swing.JFrame {
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
         model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
 
-        MyTimerActionListener listener = new MyTimerActionListener(layouter);
-        Timer timer = new Timer(10, listener);
-        listener.setTimer(timer);
-
+        if (timer != null) {
+            timer.stop();
+        }
+        LayoutActionListener listener = new LayoutActionListener(layouter);
+        timer = new Timer(0, listener);
         timer.start();
     }
 
-    class MyTimerActionListener implements ActionListener {
-
-        private Timer timer;
+    class LayoutActionListener implements ActionListener {
+        private static final int NBR_ITERATIONS = 100;
         private final ForceLayouter layouter;
         private final long startTime = System.currentTimeMillis();
+        private int counter = 0;
 
-        public MyTimerActionListener(ForceLayouter layouter) {
+        public LayoutActionListener(ForceLayouter layouter) {
             this.layouter = layouter;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            layouter.layoutAllFlows();            
+            layouter.layoutAllFlows(1 - counter / (double)NBR_ITERATIONS);            
             mapComponent.repaint();
-            if (System.currentTimeMillis() - startTime > 10000) {
+            if (++counter == NBR_ITERATIONS) {
                 timer.stop();
             }
         }
-
-        private void setTimer(Timer timer) {
-            this.timer = timer;
-        }
-
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

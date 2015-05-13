@@ -245,7 +245,7 @@ public class ForceLayouter {
         return new Force(fx, fy);
     }
 
-    public void layoutAllFlows() {
+    public void layoutAllFlows(double weight) {
         double maxFlowLength = model.getLongestFlowLength();
 
         // compute force for each flow for current configuration
@@ -278,8 +278,8 @@ public class ForceLayouter {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
                 Point ctrlPt = qFlow.getCtrlPt();
                 Force f = forces.get(i++);
-                ctrlPt.x += f.fx;
-                ctrlPt.y += f.fy;
+                ctrlPt.x += weight * f.fx;
+                ctrlPt.y += weight * f.fy;
             }
         }
     }
