@@ -19,6 +19,16 @@ public class QuadraticBezierFlow extends Flow {
      */
     private Point cPt;
 
+    /*
+    These fields define a rectangular field where the control point is
+    permitted to go.
+    It is currently only on one side of the baseLine. Needs to be extended to
+    both sides.
+    */
+    protected Point b1;
+    protected Point b2;
+    protected double rangeBoxHeight = 1.25;
+    
     /**
      * Construct a QuadraticBezierFlow from 2 irregularPoints
      *
@@ -207,5 +217,21 @@ public class QuadraticBezierFlow extends Flow {
         double value = flow.getValue();
 
         return new QuadraticBezierFlow(startPt, endPt, radians, distPerc, value);
+    }
+    
+    
+    
+    public void computeRangeBox() {
+        
+        double baseDist = this.getBaselineLength();
+        double baseAzimuth = this.getBaselineAzimuth();
+        Point bPt = new Point(startPt.x + baseDist, startPt.y);
+        
+        Point b1Temp = new Point(startPt.x, startPt.y + (baseDist * rangeBoxHeight));
+        Point b2Temp = new Point(bPt.x, bPt.y + (baseDist * rangeBoxHeight));
+        
+        b1 = b1Temp.rotatePoint(startPt, baseAzimuth);
+        b2 = b2Temp.rotatePoint(startPt, baseAzimuth);
+        
     }
 }
