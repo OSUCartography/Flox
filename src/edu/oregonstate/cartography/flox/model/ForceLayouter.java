@@ -11,6 +11,12 @@ import java.util.Iterator;
  */
 public class ForceLayouter {
 
+    private boolean enforceRangebox = true;
+    
+    public void setEnforceRangebox(boolean enforceRangebox) {
+        this.enforceRangebox = enforceRangebox;
+    }
+    
     /**
      * spring stiffness of longest flow
      */
@@ -322,10 +328,13 @@ public class ForceLayouter {
                 ctrlPt.x += weight * f.fx;
                 ctrlPt.y += weight * f.fy;
                 
-                Point tempPoint = RangeboxEnforcer.enforceRange(qFlow);
-                
-                ctrlPt.x = tempPoint.x;
-                ctrlPt.y = tempPoint.y;
+                // Enforce control point range if enforceRangebox
+                // is true
+                if(enforceRangebox) {
+                    Point tempPoint = RangeboxEnforcer.enforceRange(qFlow);
+                    ctrlPt.x = tempPoint.x;
+                    ctrlPt.y = tempPoint.y;
+                }
             }
 
         }

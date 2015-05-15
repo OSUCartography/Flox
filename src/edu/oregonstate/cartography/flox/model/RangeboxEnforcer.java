@@ -11,6 +11,25 @@ package edu.oregonstate.cartography.flox.model;
  */
 public class RangeboxEnforcer {
 
+    /**
+     * Copied from here:
+     * http://www.java-gaming.org/index.php?topic=22590.0
+     * 
+     * The coordinates below are the endpoints of two line segments.
+     * The method returns true if the line segments intersect.
+     * Points 1 & 2 are a line segment
+     * Points 3 & 4 are a line segment
+     * 
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param x3
+     * @param y3
+     * @param x4
+     * @param y4
+     * @return 
+     */
     public static boolean linesIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
         // Return false if either of the lines have zero length
         if (x1 == x2 && y1 == y2
@@ -70,6 +89,25 @@ public class RangeboxEnforcer {
         return true;
     }
 
+    /**
+     * Copied from here:
+     * http://www.java-gaming.org/index.php?topic=22590.0
+     * 
+     * Finds the intersection between two infinite lines.
+     * Returns null if they are parallel.
+     * The coordinates below define two infinite lines.
+     * Points 1 & 2 are along one line
+     * Points 3 & 4 are along a second line
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param x3
+     * @param y3
+     * @param x4
+     * @param y4
+     * @return 
+     */
     public static Point getLineLineIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
         double det1And2 = det(x1, y1, x2, y2);
         double det3And4 = det(x3, y3, x4, y4);
@@ -95,6 +133,15 @@ public class RangeboxEnforcer {
         return a * d - b * c;
     }
 
+    /**
+     * If the control point of a flow falls outside of the flow's range box, 
+     * this returns the intersection between a line connecting the control point
+     * to the midpoint of the baseline, and the location along the rangebox's
+     * border where the line crosses.
+     * Checks each side of the range rectangle one at a time.
+     * @param flow A QuadraticBezierFlow
+     * @return 
+     */
     public static Point enforceRange(QuadraticBezierFlow flow) {
 
         Point cPt = flow.getCtrlPt();

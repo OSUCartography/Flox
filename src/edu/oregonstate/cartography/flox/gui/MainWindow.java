@@ -147,6 +147,7 @@ public class MainWindow extends javax.swing.JFrame {
         progressBar = new javax.swing.JProgressBar();
         jLabel8 = new javax.swing.JLabel();
         peripheralStiffnessSlider = new javax.swing.JSlider();
+        enforceRangeboxCheckbox = new javax.swing.JCheckBox();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -336,7 +337,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
@@ -418,7 +419,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(drawLineSegmentsCheckBox, gridBagConstraints);
 
@@ -430,7 +431,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 12;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
 
@@ -442,7 +443,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(selfForcesCheckBox, gridBagConstraints);
 
@@ -522,6 +523,19 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 29;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowWidthPanel.add(peripheralStiffnessSlider, gridBagConstraints);
+
+        enforceRangeboxCheckbox.setSelected(true);
+        enforceRangeboxCheckbox.setText("Enforce Control Point Range");
+        enforceRangeboxCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                enforceRangeboxCheckboxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 14;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowWidthPanel.add(enforceRangeboxCheckbox, gridBagConstraints);
 
         rightPanel.add(flowWidthPanel);
 
@@ -1004,9 +1018,14 @@ public class MainWindow extends javax.swing.JFrame {
         showReport();
     }//GEN-LAST:event_floxReportMenuItemActionPerformed
 
+    private void enforceRangeboxCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enforceRangeboxCheckboxActionPerformed
+        forceLayout();
+    }//GEN-LAST:event_enforceRangeboxCheckboxActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
+        layouter.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
         layouter.straightenFlows();
         layouter.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         layouter.setDistanceWeightExponent((double) bSlider.getValue() / 10);
@@ -1052,6 +1071,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
+    private javax.swing.JCheckBox enforceRangeboxCheckbox;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
