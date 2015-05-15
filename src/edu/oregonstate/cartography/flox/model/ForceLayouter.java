@@ -96,7 +96,7 @@ public class ForceLayouter {
             }
             ArrayList<Point> points = flow.toStraightLineSegments(0.01);
             int nPoints = points.size();
-            
+
             // FIXME
             if (nPoints > 200) {
                 System.err.println("flow lines with too many points");
@@ -160,15 +160,16 @@ public class ForceLayouter {
     }
 
     /**
-     * Calculates the stiffness of the spring based on the distance between the 
-     * start and end nodes. The closer together the nodes are, the stiffer the 
+     * Calculates the stiffness of the spring based on the distance between the
+     * start and end nodes. The closer together the nodes are, the stiffer the
      * spring usually is.
+     *
      * @param flow
      * @param maxFlowLength
-     * @return 
+     * @return
      */
     private double computeSpringConstant(QuadraticBezierFlow flow, double maxFlowLength) {
-       
+
         double flowBaseLength = flow.getBaselineLength();
         double relativeFlowLength = flowBaseLength / maxFlowLength;
         double flowSpringConstant = (-minFlowLengthSpringConstant
@@ -198,11 +199,12 @@ public class ForceLayouter {
 
     /**
      * Computes the anti-torsion force for a quadratic BŽzier flow
+     *
      * @param flow
      * @return A force pulling the control point towards a perpendicular line on
      * the base line.
      */
-     private Force computeAntiTorsionForce(QuadraticBezierFlow flow) {
+    private Force computeAntiTorsionForce(QuadraticBezierFlow flow) {
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
         double dx = basePt.x - cPt.x;
@@ -218,7 +220,6 @@ public class ForceLayouter {
         return new Force(torsionFx, torsionFy);
     }
 
-     
     private double gaussianWeight(double d, double maxFlowLength) {
         double K = distanceWeightExponent / maxFlowLength;
         return Math.exp(-K * d * d);
@@ -243,7 +244,7 @@ public class ForceLayouter {
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
         ArrayList<Point> flowPoints = flow.toStraightLineSegments(0.01);
-        
+
         // compute the sum of all force vectors that are applied on each 
         // flow segment
         Force externalF = new Force();
@@ -262,7 +263,7 @@ public class ForceLayouter {
 
         externalF.fx /= flowPoints.size();
         externalF.fy /= flowPoints.size();
-    
+
         // compute anti-torsion force of flow
         Force antiTorsionF = computeAntiTorsionForce(flow);
 
@@ -277,7 +278,7 @@ public class ForceLayouter {
         if (springFLength > externalFLength * K) {
             springF.scale(K * externalFLength / springFLength);
         }
-         // compute total force: external forces + spring force + anti-torsion force
+        // compute total force: external forces + spring force + anti-torsion force
         double fx = externalF.fx + springF.fx + antiTorsionF.fx;
         double fy = externalF.fy + springF.fy + antiTorsionF.fy;
         return new Force(fx, fy);
@@ -316,9 +317,61 @@ public class ForceLayouter {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
                 Point ctrlPt = qFlow.getCtrlPt();
                 Force f = forces.get(i++);
+                
+                // Move the control point by the total force
                 ctrlPt.x += weight * f.fx;
                 ctrlPt.y += weight * f.fy;
+                
+                Point refPt = qFlow.getBaseLineMidPoint();
+                if (LayoutGrader.linesIntersect(
+                        refPt.x, refPt.y,
+                        ctrlPt.x, ctrlPt.y,
+                        qFlow.b1.x, qFlow.b1.y,
+                        qFlow.b2.x, qFlow.b2.y)) {
+                    ctrlPt = LayoutGrader.getLineLineIntersection(
+                            refPt.x, refPt.y,
+                            ctrlPt.x, ctrlPt.y,
+                            qFlow.b1.x, qFlow.b1.y,
+                            qFlow.b2.x, qFlow.b2.y);
+                }
+
+                if (LayoutGrader.linesIntersect(
+                        refPt.x, refPt.y,
+                        ctrlPt.x, ctrlPt.y,
+                        qFlow.b3.x, qFlow.b3.y,
+                        qFlow.b4.x, qFlow.b4.y)) {
+                    ctrlPt = LayoutGrader.getLineLineIntersection(
+                            refPt.x, refPt.y,
+                            ctrlPt.x, ctrlPt.y,
+                            qFlow.b3.x, qFlow.b3.y,
+                            qFlow.b4.x, qFlow.b4.y);
+                }
+
+                if (LayoutGrader.linesIntersect(
+                        refPt.x, refPt.y,
+                        ctrlPt.x, ctrlPt.y,
+                        qFlow.b1.x, qFlow.b1.y,
+                        qFlow.b3.x, qFlow.b3.y)) {
+                    ctrlPt = LayoutGrader.getLineLineIntersection(
+                            refPt.x, refPt.y,
+                            ctrlPt.x, ctrlPt.y,
+                            qFlow.b1.x, qFlow.b1.y,
+                            qFlow.b3.x, qFlow.b3.y);
+                }
+
+                if (LayoutGrader.linesIntersect(
+                        refPt.x, refPt.y,
+                        ctrlPt.x, ctrlPt.y,
+                        qFlow.b2.x, qFlow.b2.y,
+                        qFlow.b4.x, qFlow.b4.y)) {
+                    ctrlPt = LayoutGrader.getLineLineIntersection(
+                            refPt.x, refPt.y,
+                            ctrlPt.x, ctrlPt.y,
+                            qFlow.b2.x, qFlow.b2.y,
+                            qFlow.b4.x, qFlow.b4.y);
+                }
             }
+
         }
     }
 

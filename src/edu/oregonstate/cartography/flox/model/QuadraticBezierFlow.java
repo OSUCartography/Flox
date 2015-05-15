@@ -27,6 +27,8 @@ public class QuadraticBezierFlow extends Flow {
     */
     protected Point b1;
     protected Point b2;
+    protected Point b3;
+    protected Point b4;
     protected double rangeBoxHeight = 1.25;
     
     /**
@@ -49,6 +51,7 @@ public class QuadraticBezierFlow extends Flow {
         double dist = getBaselineLength();
         double tangentLength = dist * .33;
         computeCtrlPt(alpha, tangentLength);
+        computeRangeBox();
     }
 
     /**
@@ -69,6 +72,7 @@ public class QuadraticBezierFlow extends Flow {
         this.value = value;
         cPt = new Point(0, 0);
         bend(alpha, distPerc);
+        computeRangeBox();
     }
 
     /**
@@ -227,11 +231,14 @@ public class QuadraticBezierFlow extends Flow {
         double baseAzimuth = this.getBaselineAzimuth();
         Point bPt = new Point(startPt.x + baseDist, startPt.y);
         
-        Point b1Temp = new Point(startPt.x, startPt.y + (baseDist * rangeBoxHeight));
-        Point b2Temp = new Point(bPt.x, bPt.y + (baseDist * rangeBoxHeight));
-        
-        b1 = b1Temp.rotatePoint(startPt, baseAzimuth);
-        b2 = b2Temp.rotatePoint(startPt, baseAzimuth);
+        b1 = (new Point(startPt.x, startPt.y + (baseDist * rangeBoxHeight)))
+                .rotatePoint(startPt, baseAzimuth);
+        b2 = (new Point(bPt.x, bPt.y + (baseDist * rangeBoxHeight)))
+                .rotatePoint(startPt, baseAzimuth);
+        b3 = (new Point(startPt.x, startPt.y - (baseDist * rangeBoxHeight)))
+                .rotatePoint(startPt, baseAzimuth);
+        b4 = (new Point(bPt.x, bPt.y - (baseDist * rangeBoxHeight)))
+                .rotatePoint(startPt, baseAzimuth);
         
     }
 }

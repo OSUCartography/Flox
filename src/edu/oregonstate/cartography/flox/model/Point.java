@@ -21,9 +21,9 @@ public class Point {
      * clockwise, negative numbers will rotate clockwise
      * @return 
      */
-    public Point rotatePoint(Point origin, double angle) {
+    public Point rotatePoint(Point origin, double radians) {
         
-        double radians = angle * (Math.PI / 180);
+        //double radians = angle * (Math.PI / 180);
         
         double tempX = x - origin.x;
         double tempY = y - origin.y;
