@@ -322,54 +322,10 @@ public class ForceLayouter {
                 ctrlPt.x += weight * f.fx;
                 ctrlPt.y += weight * f.fy;
                 
-                Point refPt = qFlow.getBaseLineMidPoint();
-                if (LayoutGrader.linesIntersect(
-                        refPt.x, refPt.y,
-                        ctrlPt.x, ctrlPt.y,
-                        qFlow.b1.x, qFlow.b1.y,
-                        qFlow.b2.x, qFlow.b2.y)) {
-                    ctrlPt = LayoutGrader.getLineLineIntersection(
-                            refPt.x, refPt.y,
-                            ctrlPt.x, ctrlPt.y,
-                            qFlow.b1.x, qFlow.b1.y,
-                            qFlow.b2.x, qFlow.b2.y);
-                }
-
-                if (LayoutGrader.linesIntersect(
-                        refPt.x, refPt.y,
-                        ctrlPt.x, ctrlPt.y,
-                        qFlow.b3.x, qFlow.b3.y,
-                        qFlow.b4.x, qFlow.b4.y)) {
-                    ctrlPt = LayoutGrader.getLineLineIntersection(
-                            refPt.x, refPt.y,
-                            ctrlPt.x, ctrlPt.y,
-                            qFlow.b3.x, qFlow.b3.y,
-                            qFlow.b4.x, qFlow.b4.y);
-                }
-
-                if (LayoutGrader.linesIntersect(
-                        refPt.x, refPt.y,
-                        ctrlPt.x, ctrlPt.y,
-                        qFlow.b1.x, qFlow.b1.y,
-                        qFlow.b3.x, qFlow.b3.y)) {
-                    ctrlPt = LayoutGrader.getLineLineIntersection(
-                            refPt.x, refPt.y,
-                            ctrlPt.x, ctrlPt.y,
-                            qFlow.b1.x, qFlow.b1.y,
-                            qFlow.b3.x, qFlow.b3.y);
-                }
-
-                if (LayoutGrader.linesIntersect(
-                        refPt.x, refPt.y,
-                        ctrlPt.x, ctrlPt.y,
-                        qFlow.b2.x, qFlow.b2.y,
-                        qFlow.b4.x, qFlow.b4.y)) {
-                    ctrlPt = LayoutGrader.getLineLineIntersection(
-                            refPt.x, refPt.y,
-                            ctrlPt.x, ctrlPt.y,
-                            qFlow.b2.x, qFlow.b2.y,
-                            qFlow.b4.x, qFlow.b4.y);
-                }
+                Point tempPoint = RangeboxEnforcer.enforceRange(qFlow);
+                
+                ctrlPt.x = tempPoint.x;
+                ctrlPt.y = tempPoint.y;
             }
 
         }
