@@ -207,14 +207,14 @@ public class RangeboxEnforcer {
         
         // Outer padding of the canvas bounding box
         // Is a percentage of the canvas size
-        //double xPadding = cWidth * 0.05;
-        //double yPadding = cHeight * 0.05;
+        double xPadding = cWidth * 0.1;
+        double yPadding = cHeight * 0.1;
         
         // Get the corner points of the canvas
-        Point b1 = new Point(canvas.getX(), canvas.getY());
-        Point b2 = new Point(canvas.getX() + cWidth, canvas.getY());
-        Point b3 = new Point(canvas.getX(), canvas.getY() + cHeight);
-        Point b4 = new Point(canvas.getX() + cWidth, canvas.getY() + cHeight);
+        Point b1 = new Point(canvas.getX() - xPadding, canvas.getY() - yPadding);
+        Point b2 = new Point(canvas.getX() + cWidth + xPadding, canvas.getY() - yPadding);
+        Point b3 = new Point(canvas.getX() - xPadding, canvas.getY() + cHeight + yPadding);
+        Point b4 = new Point(canvas.getX() + cWidth + xPadding, canvas.getY() + cHeight + yPadding);
         
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();

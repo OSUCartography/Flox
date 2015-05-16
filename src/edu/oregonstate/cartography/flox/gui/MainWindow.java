@@ -1027,8 +1027,8 @@ public class MainWindow extends javax.swing.JFrame {
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
         // Place for getting/setting checkbox info for enforceCanvasRange
-        layouter.setCanvas(model.getFlowsBoundingBox());
         layouter.straightenFlows();
+        layouter.setCanvas(model.getFlowsBoundingBox());
         layouter.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         layouter.setDistanceWeightExponent((double) bSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
