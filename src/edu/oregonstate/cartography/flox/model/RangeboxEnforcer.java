@@ -5,6 +5,8 @@
  */
 package edu.oregonstate.cartography.flox.model;
 
+import java.awt.geom.Rectangle2D;
+
 /**
  *
  * @author Maccabee
@@ -142,7 +144,7 @@ public class RangeboxEnforcer {
      * @param flow A QuadraticBezierFlow
      * @return 
      */
-    public static Point enforceRange(QuadraticBezierFlow flow) {
+    public static Point enforceFlowControlPointRange(QuadraticBezierFlow flow) {
 
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();
@@ -198,4 +200,74 @@ public class RangeboxEnforcer {
         return cPt;
     }
 
+    public static Point enforceCanvasBoundingBox(QuadraticBezierFlow flow, Rectangle2D canvas) {
+        
+        double cWidth = canvas.getWidth();
+        double cHeight = canvas.getHeight();
+        
+        // Outer padding of the canvas bounding box
+        // Is a percentage of the canvas size
+        //double xPadding = cWidth * 0.05;
+        //double yPadding = cHeight * 0.05;
+        
+        // Get the corner points of the canvas
+        Point b1 = new Point(canvas.getX(), canvas.getY());
+        Point b2 = new Point(canvas.getX() + cWidth, canvas.getY());
+        Point b3 = new Point(canvas.getX(), canvas.getY() + cHeight);
+        Point b4 = new Point(canvas.getX() + cWidth, canvas.getY() + cHeight);
+        
+        Point cPt = flow.getCtrlPt();
+        Point refPt = flow.getBaseLineMidPoint();
+        
+        if (linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                b1.x, b1.y,
+                b2.x, b2.y)) {
+            return getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    b1.x, b1.y,
+                    b2.x, b2.y);
+        }
+        
+        if (linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                b3.x, b3.y,
+                b4.x, b4.y)) {
+            return getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    b3.x, b3.y,
+                    b4.x, b4.y);
+        }
+        
+        if (linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                b1.x, b1.y,
+                b3.x, b3.y)) {
+            return getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    b1.x, b1.y,
+                    b3.x, b3.y);
+        }
+        
+        if (linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                b2.x, b2.y,
+                b4.x, b4.y)) {
+            return getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    b2.x, b2.y,
+                    b4.x, b4.y);
+        }
+        
+        return cPt;
+    }
+    
 }

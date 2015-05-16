@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -16,6 +17,18 @@ public class ForceLayouter {
     public void setEnforceRangebox(boolean enforceRangebox) {
         this.enforceRangebox = enforceRangebox;
     }
+    
+    private boolean enforceCanvasRange = true;
+    
+    public void setEnforceCanvasRange(boolean enforceCanvasRange) {
+        this.enforceCanvasRange = enforceCanvasRange;
+    }
+    
+    private Rectangle2D canvas;
+    
+   public void setCanvas(Rectangle2D canvas) {
+       this.canvas = canvas;
+   }
     
     /**
      * spring stiffness of longest flow
@@ -331,9 +344,16 @@ public class ForceLayouter {
                 // Enforce control point range if enforceRangebox
                 // is true
                 if(enforceRangebox) {
-                    Point tempPoint = RangeboxEnforcer.enforceRange(qFlow);
+                    Point tempPoint = RangeboxEnforcer.enforceFlowControlPointRange(qFlow);
                     ctrlPt.x = tempPoint.x;
                     ctrlPt.y = tempPoint.y;
+                }
+                
+                if(enforceCanvasRange) {
+                    Point tempPoint = RangeboxEnforcer.enforceCanvasBoundingBox(qFlow, canvas);
+                    ctrlPt.x = tempPoint.x;
+                    ctrlPt.y = tempPoint.y;
+                    
                 }
             }
 
