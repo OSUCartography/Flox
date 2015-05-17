@@ -155,6 +155,7 @@ public class MainWindow extends javax.swing.JFrame {
         importFlowsMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
+        showAllMenuItem1 = new javax.swing.JMenuItem();
         zoomOnSelectedLayerMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator viewSeparator = new javax.swing.JPopupMenu.Separator();
         viewZoomInMenuItem = new javax.swing.JMenuItem();
@@ -572,7 +573,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         viewMenu.setText("View");
 
-        showAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         showAllMenuItem.setText("Show All");
         showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -580,6 +580,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         viewMenu.add(showAllMenuItem);
+
+        showAllMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        showAllMenuItem1.setText("Zoom on Flows");
+        showAllMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showAllMenuItem1ActionPerformed(evt);
+            }
+        });
+        viewMenu.add(showAllMenuItem1);
 
         zoomOnSelectedLayerMenuItem.setText("Zoom on Selected Layer");
         zoomOnSelectedLayerMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1022,6 +1031,10 @@ public class MainWindow extends javax.swing.JFrame {
         forceLayout();
     }//GEN-LAST:event_enforceRangeboxCheckboxActionPerformed
 
+    private void showAllMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllMenuItem1ActionPerformed
+        mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
+    }//GEN-LAST:event_showAllMenuItem1ActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1112,6 +1125,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel rightPanel;
     private javax.swing.JCheckBox selfForcesCheckBox;
     private javax.swing.JMenuItem showAllMenuItem;
+    private javax.swing.JMenuItem showAllMenuItem1;
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;
