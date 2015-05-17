@@ -113,6 +113,11 @@ public class MainWindow extends javax.swing.JFrame {
         java.awt.GridBagConstraints gridBagConstraints;
 
         curvesButtonGroup = new javax.swing.ButtonGroup();
+        flowLayoutPanel = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        flowAngleSlider = new javax.swing.JSlider();
+        jLabel2 = new javax.swing.JLabel();
+        flowLengthSlider = new javax.swing.JSlider();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         leftPanel = new javax.swing.JPanel();
         layerListScrollPane = new javax.swing.JScrollPane();
@@ -126,10 +131,6 @@ public class MainWindow extends javax.swing.JFrame {
         flowWidthPanel = new javax.swing.JPanel();
         javax.swing.JLabel flowWidthLabel = new javax.swing.JLabel();
         flowScaleFormattedTextField = new javax.swing.JFormattedTextField();
-        jLabel1 = new javax.swing.JLabel();
-        flowAngleSlider = new javax.swing.JSlider();
-        jLabel2 = new javax.swing.JLabel();
-        flowLengthSlider = new javax.swing.JSlider();
         cubicCurvesRadioButton = new javax.swing.JRadioButton();
         quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -158,6 +159,11 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
+        mapMenu = new javax.swing.JMenu();
+        removeAllLayersMenuItem = new javax.swing.JMenuItem();
+        removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        geometricLayoutMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
         showAllMenuItem1 = new javax.swing.JMenuItem();
@@ -165,13 +171,88 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator viewSeparator = new javax.swing.JPopupMenu.Separator();
         viewZoomInMenuItem = new javax.swing.JMenuItem();
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
-        mapMenu = new javax.swing.JMenu();
-        removeAllLayersMenuItem = new javax.swing.JMenuItem();
-        removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         infoMenu = new javax.swing.JMenu();
         floxReportMenuItem = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
+
+        flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
+
+        jLabel1.setText("Flow Angle");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowLayoutPanel.add(jLabel1, gridBagConstraints);
+
+        flowAngleSlider.setMajorTickSpacing(45);
+        flowAngleSlider.setMaximum(90);
+        flowAngleSlider.setMinimum(-90);
+        flowAngleSlider.setPaintLabels(true);
+        flowAngleSlider.setPaintTicks(true);
+        flowAngleSlider.setValue(30);
+        flowAngleSlider.setPreferredSize(new java.awt.Dimension(250, 37));
+        {
+            java.util.Hashtable labels = flowAngleSlider.createStandardLabels(flowAngleSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "\u00b0");
+                }
+            }
+            flowAngleSlider.setLabelTable(labels);
+        }
+        flowAngleSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                flowAngleSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
+        flowLayoutPanel.add(flowAngleSlider, gridBagConstraints);
+
+        jLabel2.setText("Flow Length");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowLayoutPanel.add(jLabel2, gridBagConstraints);
+
+        flowLengthSlider.setMajorTickSpacing(25);
+        flowLengthSlider.setPaintLabels(true);
+        flowLengthSlider.setPaintTicks(true);
+        flowLengthSlider.setValue(33);
+        flowLengthSlider.setPreferredSize(new java.awt.Dimension(190, 37));
+        {
+            java.util.Hashtable labels = flowLengthSlider.createStandardLabels(flowLengthSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            flowLengthSlider.setLabelTable(labels);
+        }
+        flowLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                flowLengthSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        flowLayoutPanel.add(flowLengthSlider, gridBagConstraints);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
@@ -256,57 +337,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(flowScaleFormattedTextField, gridBagConstraints);
-
-        jLabel1.setText("Flow Angle");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(10, 3, 0, 3);
-        flowWidthPanel.add(jLabel1, gridBagConstraints);
-
-        flowAngleSlider.setMajorTickSpacing(45);
-        flowAngleSlider.setMaximum(90);
-        flowAngleSlider.setMinimum(-90);
-        flowAngleSlider.setPaintLabels(true);
-        flowAngleSlider.setPaintTicks(true);
-        flowAngleSlider.setValue(30);
-        flowAngleSlider.setPreferredSize(new java.awt.Dimension(190, 37));
-        flowAngleSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                flowAngleSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        flowWidthPanel.add(flowAngleSlider, gridBagConstraints);
-
-        jLabel2.setText("Flow Length");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(10, 3, 0, 3);
-        flowWidthPanel.add(jLabel2, gridBagConstraints);
-
-        flowLengthSlider.setMajorTickSpacing(25);
-        flowLengthSlider.setPaintLabels(true);
-        flowLengthSlider.setPaintTicks(true);
-        flowLengthSlider.setValue(33);
-        flowLengthSlider.setPreferredSize(new java.awt.Dimension(190, 37));
-        flowLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                flowLengthSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
-        flowWidthPanel.add(flowLengthSlider, gridBagConstraints);
 
         curvesButtonGroup.add(cubicCurvesRadioButton);
         cubicCurvesRadioButton.setSelected(true);
@@ -586,6 +616,35 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(fileMenu);
 
+        mapMenu.setText("Map");
+
+        removeAllLayersMenuItem.setText("Remove All Layers");
+        removeAllLayersMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeAllLayersMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(removeAllLayersMenuItem);
+
+        removeSelectedLayerMenuItem.setText("Remove Selected Layer");
+        removeSelectedLayerMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeSelectedLayerMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(removeSelectedLayerMenuItem);
+        mapMenu.add(jSeparator1);
+
+        geometricLayoutMenuItem.setText("Geometric Flow Layout…");
+        geometricLayoutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                geometricLayoutMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(geometricLayoutMenuItem);
+
+        menuBar.add(mapMenu);
+
         viewMenu.setText("View");
 
         showAllMenuItem.setText("Show All");
@@ -633,26 +692,6 @@ public class MainWindow extends javax.swing.JFrame {
         viewMenu.add(viewZoomOutMenuItem);
 
         menuBar.add(viewMenu);
-
-        mapMenu.setText("Map");
-
-        removeAllLayersMenuItem.setText("Remove All Layers");
-        removeAllLayersMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeAllLayersMenuItemActionPerformed(evt);
-            }
-        });
-        mapMenu.add(removeAllLayersMenuItem);
-
-        removeSelectedLayerMenuItem.setText("Remove Selected Layer");
-        removeSelectedLayerMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeSelectedLayerMenuItemActionPerformed(evt);
-            }
-        });
-        mapMenu.add(removeSelectedLayerMenuItem);
-
-        menuBar.add(mapMenu);
 
         infoMenu.setText("Info");
 
@@ -1076,6 +1115,11 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exportImageMenuItemActionPerformed
 
+    private void geometricLayoutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_geometricLayoutMenuItemActionPerformed
+        String title = "Geometric Layout";
+        JOptionPane.showOptionDialog(this, flowLayoutPanel, title, JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+    }//GEN-LAST:event_geometricLayoutMenuItemActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1135,10 +1179,12 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox fillCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton fillColorButton;
     private javax.swing.JSlider flowAngleSlider;
+    private javax.swing.JPanel flowLayoutPanel;
     private javax.swing.JSlider flowLengthSlider;
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JPanel flowWidthPanel;
     private javax.swing.JMenuItem floxReportMenuItem;
+    private javax.swing.JMenuItem geometricLayoutMenuItem;
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
