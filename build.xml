@@ -70,4 +70,42 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <taskdef name="macbundleapp"
+              classname="com.oracle.appbundler.AppBundlerTask"   
+              classpath="mac/appbundler-1.0.jar" />
+
+    <target name="run.macappbundler">
+        <macbundleapp outputdirectory="mac/"
+                      name="Flox"
+                      displayname="Flox"
+                      identifier="${main.class}"
+                      mainclassname="${main.class}"
+                      icon="mac/icon.icns"
+                      shortversion="0.1.0"
+                      copyright="© Oregon State University"
+                      applicationCategory="public.app-category.graphics-design">
+            
+            <classpath file="${dist.jar}" />
+            <classpath file="./lib/acme.jar"/>
+            <classpath file="./lib/jdom.jar"/>
+            <classpath file="./lib/jts-1.13.jar"/>
+            <classpath file="./lib/jtsio-1.13.jar"/>
+            <classpath file="./lib/xerces.jar"/>
+            <classpath file="./lib/jgrapht-0.9.1/lib/jgrapht-core-0.9.1.jar"/>
+        </macbundleapp>
+        <zip destfile="mac/Flox.zip" level="9">
+            <zipfileset filemode="755" dir="mac/Flox.app" prefix="Flox.app" />
+        </zip>
+    </target>
+    
+    <target name="-post-jar">
+        <antcall target="run.macappbundler"/>
+    </target>
+    
+    <target name="-post-clean">
+        <delete dir="mac/Flox.app"/>
+        <delete file="mac/Flox.zip"/>
+    </target>
+    
 </project>

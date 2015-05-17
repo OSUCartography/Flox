@@ -3,3 +3,7 @@
 .DS_Store
 
 nbproject/private/*
+
+mac/Flox.app/
+
+mac/Flox.zip

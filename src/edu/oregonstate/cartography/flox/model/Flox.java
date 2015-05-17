@@ -1,6 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
 import edu.oregonstate.cartography.flox.gui.MainWindow;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 /**
@@ -14,7 +17,7 @@ public class Flox {
     /**
      * Flox model
      */
-    private static final Model initModel() {
+    private static Model initModel() {
         Model model = new Model();
 
         Point p1 = new Point(0, 0);
@@ -46,9 +49,15 @@ public class Flox {
             @Override
             public void run() {
                 MainWindow window = new MainWindow();
-                window.setSize(800, 600);
-                window.setVisible(true);
                 window.setModel(model);
+                
+                // find available screen real estate (without taskbar, etc.)
+                Rectangle screen = GraphicsEnvironment.
+                        getLocalGraphicsEnvironment().getMaximumWindowBounds();
+                window.setSize((int)screen.getWidth(), (int) screen.getHeight());
+                window.setLocation((int) screen.getMinX(), (int) screen.getMinY());
+                window.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
+                window.setVisible(true);
                 window.openFlowsCSVFile();
             }
         });

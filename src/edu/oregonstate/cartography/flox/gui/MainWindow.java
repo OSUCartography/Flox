@@ -744,7 +744,7 @@ public class MainWindow extends javax.swing.JFrame {
     public void openFlowsCSVFile() {
         try {
             // ask for import file
-            String inFilePath = FileUtils.askFile("CSV Flows Files", true);
+            String inFilePath = FileUtils.askFile("CSV Flows File", true);
             if (inFilePath == null) {
                 // user canceled
                 return;
