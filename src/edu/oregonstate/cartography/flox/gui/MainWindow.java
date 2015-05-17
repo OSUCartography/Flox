@@ -167,6 +167,8 @@ public class MainWindow extends javax.swing.JFrame {
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         floxMenu = new javax.swing.JMenu();
         floxReportMenuItem = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        infoMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
@@ -657,6 +659,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         floxMenu.add(floxReportMenuItem);
+        floxMenu.add(jSeparator2);
+
+        infoMenuItem.setText("Info…");
+        infoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                infoMenuItemActionPerformed(evt);
+            }
+        });
+        floxMenu.add(infoMenuItem);
 
         menuBar.add(floxMenu);
 
@@ -1035,6 +1046,10 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
     }//GEN-LAST:event_showAllMenuItem1ActionPerformed
 
+    private void infoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoMenuItemActionPerformed
+        ProgramInfoPanel.showApplicationInfo(this);
+    }//GEN-LAST:event_infoMenuItemActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1098,6 +1113,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu floxMenu;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JMenuItem importFlowsMenuItem;
+    private javax.swing.JMenuItem infoMenuItem;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -1107,6 +1123,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
