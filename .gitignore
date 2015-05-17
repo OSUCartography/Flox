@@ -6,4 +6,8 @@ nbproject/private/*
 
 mac/Flox.app/
 
-mac/Flox.zip
+mac/FloxMac.zip
+
+win/Flox.exe
+
+win/FloxWin.zip

@@ -94,18 +94,54 @@
             <classpath file="./lib/xerces.jar"/>
             <classpath file="./lib/jgrapht-0.9.1/lib/jgrapht-core-0.9.1.jar"/>
         </macbundleapp>
-        <zip destfile="mac/Flox.zip" level="9">
+        <zip destfile="mac/FloxMac.zip" level="9">
             <zipfileset filemode="755" dir="mac/Flox.app" prefix="Flox.app" />
         </zip>
     </target>
     
+    
     <target name="-post-jar">
         <antcall target="run.macappbundler"/>
+        
+        <!-- Combine JAR files needed for Windows version into a single jar. -->
+        <jar compress="true" destfile="${dist.jar}" update="true">
+            <zipfileset src="lib/acme.jar"/>
+            <zipfileset src="lib/jdom.jar"/>
+            <zipfileset src="lib/jts-1.13.jar"/>
+            <zipfileset src="lib/jtsio-1.13.jar"/>
+            <zipfileset src="lib/xerces.jar"/>
+            <zipfileset src="lib/jgrapht-0.9.1/lib/jgrapht-core-0.9.1.jar"/>
+            
+            <manifest>
+                <attribute value="${main.class}" name="Main-Class"/>
+            </manifest>
+        </jar>
+        
+        <!-- Create a Windows exe file with launch4j. -->
+        <property name="launch4j.dir" location="win/launch4j" />
+        <taskdef name="launch4j"
+                 classname="net.sf.launch4j.ant.Launch4jTask"
+                 classpath="${launch4j.dir}/launch4j.jar
+        :${launch4j.dir}/lib/xstream.jar" />
+        <launch4j configFile="win/Flox.xml" />
+        
+        <!-- Zip the generated exe file -->
+        <zip destfile="win/FloxWin.zip">
+            <fileset dir="win/" includes="Flox.exe"/>
+        </zip>
+        
+        
+        <!-- zip the jar file -->
+        <zip destfile="dist/FloxJar.zip" level="9">
+            <fileset dir="dist/" includes="Flox.jar"/>
+        </zip>
     </target>
     
     <target name="-post-clean">
         <delete dir="mac/Flox.app"/>
-        <delete file="mac/Flox.zip"/>
+        <delete file="mac/FloxMac.zip"/>
+        <delete file="win/FloxWin.zip"/>
+        <delete file="dist/FloxJar.zip"/>
     </target>
     
 </project>

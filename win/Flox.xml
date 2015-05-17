@@ -1,0 +1,23 @@
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>../dist/Flox.jar</jar>
+  <outfile>Flox.exe</outfile>
+  <errTitle>Flox</errTitle>
+  <cmdLine></cmdLine>
+  <chdir></chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl>http://cartography.oregonstate.edu</supportUrl>
+  <customProcName>false</customProcName>
+  <stayAlive>false</stayAlive>
+  <manifest></manifest>
+  <icon>icons.ico</icon>
+  <jre>
+    <path></path>
+    <minVersion>1.6.0</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+    <maxHeapSize>256</maxHeapSize>
+  </jre>
+</launch4jConfig>
