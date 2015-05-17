@@ -21,6 +21,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
@@ -49,7 +51,7 @@ public class MainWindow extends javax.swing.JFrame {
      * timer for animated drawing of layout process
      */
     private Timer timer = null;
-    
+
     /**
      * Creates new form MainWindow
      */
@@ -150,9 +152,12 @@ public class MainWindow extends javax.swing.JFrame {
         enforceRangeboxCheckbox = new javax.swing.JCheckBox();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
-        openShapefileMenuItem = new javax.swing.JMenuItem();
-        exportSVGMenuItem = new javax.swing.JMenuItem();
         importFlowsMenuItem = new javax.swing.JMenuItem();
+        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        openShapefileMenuItem = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        exportSVGMenuItem = new javax.swing.JMenuItem();
+        exportImageMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
         showAllMenuItem1 = new javax.swing.JMenuItem();
@@ -160,12 +165,10 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator viewSeparator = new javax.swing.JPopupMenu.Separator();
         viewZoomInMenuItem = new javax.swing.JMenuItem();
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
-        renderToImageMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
-        floxMenu = new javax.swing.JMenu();
+        infoMenu = new javax.swing.JMenu();
         floxReportMenuItem = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
@@ -546,6 +549,15 @@ public class MainWindow extends javax.swing.JFrame {
 
         fileMenu.setText("File");
 
+        importFlowsMenuItem.setText("Open Flows…");
+        importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(importFlowsMenuItem);
+        fileMenu.add(jSeparator4);
+
         openShapefileMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         openShapefileMenuItem.setText("Add Shapefile Layer…");
         openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -554,6 +566,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(openShapefileMenuItem);
+        fileMenu.add(jSeparator3);
 
         exportSVGMenuItem.setText("Export SVG…");
         exportSVGMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -563,13 +576,13 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(exportSVGMenuItem);
 
-        importFlowsMenuItem.setText("Open Flows…");
-        importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        exportImageMenuItem.setText("Export Image…");
+        exportImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                importFlowsMenuItemActionPerformed(evt);
+                exportImageMenuItemActionPerformed(evt);
             }
         });
-        fileMenu.add(importFlowsMenuItem);
+        fileMenu.add(exportImageMenuItem);
 
         menuBar.add(fileMenu);
 
@@ -618,15 +631,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         viewMenu.add(viewZoomOutMenuItem);
-        viewMenu.add(jSeparator1);
-
-        renderToImageMenuItem.setText("Render to Image");
-        renderToImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                renderToImageMenuItemActionPerformed(evt);
-            }
-        });
-        viewMenu.add(renderToImageMenuItem);
 
         menuBar.add(viewMenu);
 
@@ -650,7 +654,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(mapMenu);
 
-        floxMenu.setText("Flox");
+        infoMenu.setText("Info");
 
         floxReportMenuItem.setText("Report…");
         floxReportMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -658,8 +662,8 @@ public class MainWindow extends javax.swing.JFrame {
                 floxReportMenuItemActionPerformed(evt);
             }
         });
-        floxMenu.add(floxReportMenuItem);
-        floxMenu.add(jSeparator2);
+        infoMenu.add(floxReportMenuItem);
+        infoMenu.add(jSeparator2);
 
         infoMenuItem.setText("Info…");
         infoMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -667,9 +671,9 @@ public class MainWindow extends javax.swing.JFrame {
                 infoMenuItemActionPerformed(evt);
             }
         });
-        floxMenu.add(infoMenuItem);
+        infoMenu.add(infoMenuItem);
 
-        menuBar.add(floxMenu);
+        menuBar.add(infoMenu);
 
         setJMenuBar(menuBar);
 
@@ -752,6 +756,7 @@ public class MainWindow extends javax.swing.JFrame {
 
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             if (flows != null) {
+                setTitle(FileUtils.getFileNameWithoutExtension(inFilePath));
                 model.setFlows(flows);
                 double maxFlowValue = model.getMaxFlowValue();
                 model.setFlowWidthScale(20 / maxFlowValue);
@@ -938,7 +943,7 @@ public class MainWindow extends javax.swing.JFrame {
         int nbrIntersections = LayoutGrader.countFlowIntersections(flows);
         int nbrFlows = model.getNbrFlows();
         int nbrNodes = model.getNbrNodes();
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("Flows: ");
         sb.append(nbrFlows);
@@ -1000,17 +1005,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawReconstructedBezierCheckBoxActionPerformed
 
-    private void renderToImageMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_renderToImageMenuItemActionPerformed
-        BufferedImage image = FloxRenderer.renderToImage(model, 500, false);
-        // Use a JLabel in a JFrame to display the image
-        javax.swing.JFrame frame = new javax.swing.JFrame();
-        javax.swing.JLabel label = new javax.swing.JLabel(
-                new javax.swing.ImageIcon(image));
-        frame.getContentPane().add(label, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-    }//GEN-LAST:event_renderToImageMenuItemActionPerformed
-
     private void selfForcesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selfForcesCheckBoxActionPerformed
         model.setFlowExertingForcesOnItself(selfForcesCheckBox.isSelected());
         forceLayout();
@@ -1050,6 +1044,38 @@ public class MainWindow extends javax.swing.JFrame {
         ProgramInfoPanel.showApplicationInfo(this);
     }//GEN-LAST:event_infoMenuItemActionPerformed
 
+    private void exportImageMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportImageMenuItemActionPerformed
+        int size = Math.max(mapComponent.getWidth(), mapComponent.getHeight());
+        String msg = "Length of longer side in pixels.";
+        String input = JOptionPane.showInputDialog(this, msg, size);
+        if (input == null) {
+            return;
+        }
+        try {
+            size = Math.abs(Integer.parseInt(input));
+        } catch (NumberFormatException ex) {
+            ErrorDialog.showErrorDialog("Invalid image size.", "Error", ex, this);
+            return;
+        }
+        if (size > 5000) {
+            ErrorDialog.showErrorDialog("The entered size is too large.");
+            return;
+        }
+        BufferedImage image = FloxRenderer.renderToImage(model, size, true);
+        String filePath = FileUtils.askFile("PNG Image", false);
+        {
+            if (filePath != null) {
+                try {
+                    filePath = FileUtils.forceFileNameExtension(filePath, "png");
+                    ImageIO.write(image, "png", new File(filePath));
+                } catch (IOException ex) {
+                    msg = "Could not export the image.";
+                    ErrorDialog.showErrorDialog(msg, "Error", ex, this);
+                }
+            }
+        }
+    }//GEN-LAST:event_exportImageMenuItemActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1062,10 +1088,11 @@ public class MainWindow extends javax.swing.JFrame {
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
         model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
         model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
-        
+
         if (timer != null) {
             timer.stop();
         }
+        progressBar.setVisible(true);
         LayoutActionListener listener = new LayoutActionListener(layouter);
         timer = new Timer(0, listener);
         timer.start();
@@ -1087,7 +1114,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.repaint();
             if (++counter == NBR_ITERATIONS) {
                 timer.stop();
-
+                progressBar.setVisible(false);
             }
             progressBar.setValue(counter);
         }
@@ -1102,6 +1129,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
+    private javax.swing.JMenuItem exportImageMenuItem;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
@@ -1110,9 +1138,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider flowLengthSlider;
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JPanel flowWidthPanel;
-    private javax.swing.JMenu floxMenu;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JMenuItem importFlowsMenuItem;
+    private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -1122,8 +1150,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JPopupMenu.Separator jSeparator4;
     private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
@@ -1138,7 +1167,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JRadioButton quadraticCurvesRadioButton;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
-    private javax.swing.JMenuItem renderToImageMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JCheckBox selfForcesCheckBox;
     private javax.swing.JMenuItem showAllMenuItem;

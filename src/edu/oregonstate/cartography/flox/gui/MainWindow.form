@@ -11,6 +11,16 @@
             <Property name="text" type="java.lang.String" value="File"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="importFlowsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Open Flows&#x2026;"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="importFlowsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator4">
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="openShapefileMenuItem">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -22,6 +32,8 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="openShapefileMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="exportSVGMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Export SVG&#x2026;"/>
@@ -30,12 +42,12 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportSVGMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="importFlowsMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="exportImageMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Open Flows&#x2026;"/>
+                <Property name="text" type="java.lang.String" value="Export Image&#x2026;"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="importFlowsMenuItemActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportImageMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -100,16 +112,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewZoomOutMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="renderToImageMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Render to Image"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="renderToImageMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="mapMenu">
@@ -135,9 +137,9 @@
             </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="floxMenu">
+        <Menu class="javax.swing.JMenu" name="infoMenu">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Flox"/>
+            <Property name="text" type="java.lang.String" value="Info"/>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="floxReportMenuItem">

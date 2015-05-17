@@ -51,7 +51,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     public static BufferedImage renderToImage(Model model, int maxDim, boolean antialias) {
         // find size of fitting image
-        Rectangle2D bb = model.getBoundingBox();
+        Rectangle2D bb = model.getFlowsBoundingBox();
         double scale = maxDim / Math.max(bb.getWidth(), bb.getHeight());
         int w, h;
         if (bb.getWidth() > bb.getHeight()) {
@@ -89,6 +89,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         // render to image
         renderer.drawFlows();
+        renderer.drawNodes();
         return bufferImage;
     }
 
