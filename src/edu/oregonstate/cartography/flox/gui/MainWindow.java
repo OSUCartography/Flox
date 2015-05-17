@@ -120,6 +120,11 @@ public class MainWindow extends javax.swing.JFrame {
         flowLengthSlider = new javax.swing.JSlider();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         leftPanel = new javax.swing.JPanel();
+        drawControlPanel = new javax.swing.JPanel();
+        drawControlPointsCheckBox = new javax.swing.JCheckBox();
+        drawLineSegmentsCheckBox = new javax.swing.JCheckBox();
+        drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
+        jLabel9 = new javax.swing.JLabel();
         layerListScrollPane = new javax.swing.JScrollPane();
         layerList = new edu.oregonstate.cartography.flox.gui.DraggableList();
         symbolPanel = new javax.swing.JPanel();
@@ -133,15 +138,12 @@ public class MainWindow extends javax.swing.JFrame {
         flowScaleFormattedTextField = new javax.swing.JFormattedTextField();
         cubicCurvesRadioButton = new javax.swing.JRadioButton();
         quadraticCurvesRadioButton = new javax.swing.JRadioButton();
-        drawControlPointsCheckBox = new javax.swing.JCheckBox();
         jLabel3 = new javax.swing.JLabel();
         bSlider = new javax.swing.JSlider();
         jLabel4 = new javax.swing.JLabel();
         kSlider = new javax.swing.JSlider();
         zeroLengthStiffnessSlider = new javax.swing.JSlider();
         jLabel5 = new javax.swing.JLabel();
-        drawLineSegmentsCheckBox = new javax.swing.JCheckBox();
-        drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
         selfForcesCheckBox = new javax.swing.JCheckBox();
         jLabel6 = new javax.swing.JLabel();
         nodeWeightSlider = new javax.swing.JSlider();
@@ -257,8 +259,54 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
 
-        leftPanel.setPreferredSize(new java.awt.Dimension(120, 100));
-        leftPanel.setLayout(new java.awt.GridLayout(2, 1));
+        drawControlPanel.setLayout(new java.awt.GridBagLayout());
+
+        drawControlPointsCheckBox.setText("Draw Control Points");
+        drawControlPointsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawControlPointsCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        drawControlPanel.add(drawControlPointsCheckBox, gridBagConstraints);
+
+        drawLineSegmentsCheckBox.setText("Draw Line Segments");
+        drawLineSegmentsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawLineSegmentsCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        drawControlPanel.add(drawLineSegmentsCheckBox, gridBagConstraints);
+
+        drawReconstructedBezierCheckBox.setText("Draw Reconstructed BŽzier");
+        drawReconstructedBezierCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawReconstructedBezierCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        drawControlPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
+
+        jLabel9.setText("Map Layers");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 5, 0);
+        drawControlPanel.add(jLabel9, gridBagConstraints);
+
+        layerListScrollPane.setPreferredSize(new java.awt.Dimension(150, 132));
 
         layerList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -267,7 +315,12 @@ public class MainWindow extends javax.swing.JFrame {
         });
         layerListScrollPane.setViewportView(layerList);
 
-        leftPanel.add(layerListScrollPane);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        drawControlPanel.add(layerListScrollPane, gridBagConstraints);
 
         symbolPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -310,7 +363,14 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 1;
         symbolPanel.add(strokeColorButton, gridBagConstraints);
 
-        leftPanel.add(symbolPanel);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
+        drawControlPanel.add(symbolPanel, gridBagConstraints);
+
+        leftPanel.add(drawControlPanel);
 
         getContentPane().add(leftPanel, java.awt.BorderLayout.WEST);
 
@@ -364,20 +424,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 9;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(quadraticCurvesRadioButton, gridBagConstraints);
-
-        drawControlPointsCheckBox.setText("Draw Control Points");
-        drawControlPointsCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawControlPointsCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
-        flowWidthPanel.add(drawControlPointsCheckBox, gridBagConstraints);
 
         jLabel3.setText("Stiffness of Longest Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -446,30 +492,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 19;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         flowWidthPanel.add(jLabel5, gridBagConstraints);
-
-        drawLineSegmentsCheckBox.setText("Draw Line Segments");
-        drawLineSegmentsCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawLineSegmentsCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        flowWidthPanel.add(drawLineSegmentsCheckBox, gridBagConstraints);
-
-        drawReconstructedBezierCheckBox.setText("Draw Reconstructed BŽzier");
-        drawReconstructedBezierCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawReconstructedBezierCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        flowWidthPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
 
         selfForcesCheckBox.setText("Flows Exert Forces on Themselves");
         selfForcesCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1169,6 +1191,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider bSlider;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
+    private javax.swing.JPanel drawControlPanel;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
@@ -1196,6 +1219,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator4;
