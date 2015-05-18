@@ -11,7 +11,7 @@ import java.util.Iterator;
  * @author danielstephen
  */
 public class ForceLayouter {
-   
+
     // Stores the model, which contains all map features.
     private final Model model;
 
@@ -251,9 +251,8 @@ public class ForceLayouter {
 
         // compute force for each flow for current configuration
         ArrayList<Force> forces = new ArrayList<>();
-        Iterator<Flow> iterator = model.flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
+        ArrayList<Flow> flows = model.getFlows();
+        for (Flow flow : flows) {
             if (flow instanceof QuadraticBezierFlow) {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
                 //layouter.computeForceOnPoint(qFlow.getCtrlPt(), flow.getStartPt(), 
@@ -269,30 +268,28 @@ public class ForceLayouter {
             }
         }
 
-        iterator = model.flowIterator();
-
         // apply forces onto control points of flows
-        int i = 0;
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
+        int nbrFlows = flows.size();
+        for (int i = 0; i < nbrFlows; i++) {
+            Flow flow = flows.get(i);
             if (flow instanceof QuadraticBezierFlow) {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
                 Point ctrlPt = qFlow.getCtrlPt();
                 Force f = forces.get(i++);
-                
+
                 // Move the control point by the total force
                 ctrlPt.x += weight * f.fx;
                 ctrlPt.y += weight * f.fy;
-                
+
                 // Enforce control point range if enforceRangebox
                 // is true
-                if(model.isEnforceRangebox()) {
+                if (model.isEnforceRangebox()) {
                     Point tempPoint = RangeboxEnforcer.enforceFlowControlPointRange(qFlow);
                     ctrlPt.x = tempPoint.x;
                     ctrlPt.y = tempPoint.y;
                 }
-                
-                if(model.isEnforceCanvasRange()) {
+
+                if (model.isEnforceCanvasRange()) {
                     Rectangle2D canvasRect = model.getCanvas();
                     Point tempPoint = RangeboxEnforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
                     ctrlPt.x = tempPoint.x;

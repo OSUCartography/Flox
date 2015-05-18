@@ -23,7 +23,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     private Model model;
 
-    
     /**
      * flag for drawing control points
      */
@@ -33,12 +32,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing line segments
      */
     private boolean drawLineSegments = false;
-    
+
     /**
      * flag for drawing reconstructed BŽzier curves
      */
     private boolean drawReconstructedBezier = false;
-    
+
     public FloxMapComponent() {
     }
 
@@ -66,7 +65,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         Graphics2D g2d = getGraphics2DBuffer();
         FloxRenderer renderer = new FloxRenderer(model, g2d, west, north, scale);
         renderer.setStrokeWidth(1f);
-        
+
         // draw background map
         int nbrLayers = model.getNbrLayers();
         for (int i = nbrLayers - 1; i >= 0; i--) {
@@ -129,7 +128,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public boolean isDrawLineSegments() {
         return drawLineSegments;
     }
-    
+
     public void setDrawLineSegments(boolean drawLineSegments) {
         this.drawLineSegments = drawLineSegments;
     }

@@ -2,7 +2,9 @@ package edu.oregonstate.cartography.flox.model;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
@@ -19,6 +21,16 @@ public class Model {
 
         CUBIC,
         QUADRATIC
+    }
+
+    /**
+     * Order of drawing of flows
+     */
+    public enum FlowOrder {
+
+        INCREASING,
+        DECREASING,
+        UNORDERED
     }
 
     /**
@@ -82,6 +94,11 @@ public class Model {
      */
     private CurveType curveType = CurveType.CUBIC;
 
+    /**
+     * Order of drawing of flows
+     */
+    private FlowOrder flowOrder = FlowOrder.DECREASING;
+    
     /**
      * Constructor of the model.
      */
@@ -206,6 +223,25 @@ public class Model {
      */
     public Iterator<Flow> flowIterator() {
         return graph.edgeSet().iterator();
+    }
+
+    public ArrayList<Flow> getFlows() {
+        return new ArrayList<>(graph.edgeSet());
+    }
+
+    public ArrayList<Flow> getOrderedFlows(boolean increasing) {
+        ArrayList<Flow> flows = new ArrayList<>(graph.edgeSet());
+        java.util.Collections.sort(flows, new Comparator<Flow>() {
+            @Override
+            public int compare(Flow flow1, Flow flow2) {
+                if (increasing) {
+                    return Double.compare(flow1.getValue(), flow2.getValue());
+                } else {
+                    return Double.compare(flow2.getValue(), flow1.getValue());
+                }
+            }
+        });
+        return flows;
     }
 
     /**
@@ -428,7 +464,7 @@ public class Model {
     public double getDistanceWeightExponent() {
         return distanceWeightExponent;
     }
-    
+
     /**
      * Sets the distanceWeightExponent. This is currently set by the slider bar
      * in the GUI.
@@ -445,7 +481,7 @@ public class Model {
     public boolean isEnforceRangebox() {
         return enforceRangebox;
     }
-    
+
     public void setEnforceRangebox(boolean enforceRangebox) {
         this.enforceRangebox = enforceRangebox;
     }
@@ -456,18 +492,18 @@ public class Model {
     public boolean isEnforceCanvasRange() {
         return enforceCanvasRange;
     }
-    
+
     public void setEnforceCanvasRange(boolean enforceCanvasRange) {
         this.enforceCanvasRange = enforceCanvasRange;
     }
 
-     /**
+    /**
      * @return the canvas
      */
     public Rectangle2D getCanvas() {
         return canvas;
     }
-    
+
     public void setCanvas(Rectangle2D canvas) {
         this.canvas = canvas;
     }
@@ -486,4 +522,18 @@ public class Model {
         return minFlowLengthSpringConstant;
     }
     
+    /**
+     * @return the flowOrder
+     */
+    public FlowOrder getFlowOrder() {
+        return flowOrder;
+    }
+
+    /**
+     * @param flowOrder the flowOrder to set
+     */
+    public void setFlowOrder(FlowOrder flowOrder) {
+        this.flowOrder = flowOrder;
+    }
+
 }

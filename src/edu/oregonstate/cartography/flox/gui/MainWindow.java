@@ -16,6 +16,7 @@ import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -114,13 +115,10 @@ public class MainWindow extends javax.swing.JFrame {
 
         curvesButtonGroup = new javax.swing.ButtonGroup();
         flowLayoutPanel = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
         flowAngleSlider = new javax.swing.JSlider();
-        jLabel2 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
         flowLengthSlider = new javax.swing.JSlider();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel11 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         rightPanel = new javax.swing.JPanel();
         controlsTabbedPane = new javax.swing.JTabbedPane();
@@ -129,18 +127,18 @@ public class MainWindow extends javax.swing.JFrame {
         flowScaleFormattedTextField = new javax.swing.JFormattedTextField();
         cubicCurvesRadioButton = new javax.swing.JRadioButton();
         quadraticCurvesRadioButton = new javax.swing.JRadioButton();
-        jLabel3 = new javax.swing.JLabel();
-        bSlider = new javax.swing.JSlider();
-        jLabel4 = new javax.swing.JLabel();
-        kSlider = new javax.swing.JSlider();
+        javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
+        exponentSlider = new javax.swing.JSlider();
+        javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
+        longestFlowStiffnessSlider = new javax.swing.JSlider();
         zeroLengthStiffnessSlider = new javax.swing.JSlider();
-        jLabel5 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
         selfForcesCheckBox = new javax.swing.JCheckBox();
-        jLabel6 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel6 = new javax.swing.JLabel();
         nodeWeightSlider = new javax.swing.JSlider();
-        jLabel7 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel7 = new javax.swing.JLabel();
         antiTorsionSlider = new javax.swing.JSlider();
-        jLabel8 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel8 = new javax.swing.JLabel();
         peripheralStiffnessSlider = new javax.swing.JSlider();
         enforceRangeboxCheckbox = new javax.swing.JCheckBox();
         mapPanel = new TransparentMacPanel();
@@ -148,7 +146,7 @@ public class MainWindow extends javax.swing.JFrame {
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
         drawLineSegmentsCheckBox = new javax.swing.JCheckBox();
         drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
-        jLabel9 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
         layerListScrollPane = new javax.swing.JScrollPane();
         layerList = new edu.oregonstate.cartography.flox.gui.DraggableList();
         symbolPanel = new TransparentMacPanel();
@@ -156,17 +154,19 @@ public class MainWindow extends javax.swing.JFrame {
         strokeCheckBox = new javax.swing.JCheckBox();
         fillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        drawingOrderComboBox = new javax.swing.JComboBox();
+        javax.swing.JLabel jLabel12 = new javax.swing.JLabel();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
-        jLabel10 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel10 = new javax.swing.JLabel();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         importFlowsMenuItem = new javax.swing.JMenuItem();
-        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
         openShapefileMenuItem = new javax.swing.JMenuItem();
-        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
@@ -183,7 +183,7 @@ public class MainWindow extends javax.swing.JFrame {
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
         infoMenu = new javax.swing.JMenu();
         floxReportMenuItem = new javax.swing.JMenuItem();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JPopupMenu.Separator jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
 
         flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
@@ -264,12 +264,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         flowLayoutPanel.add(flowLengthSlider, gridBagConstraints);
 
-        jLabel11.setText("jLabel11");
-        jPanel1.add(jLabel11);
-
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel1.add(jComboBox1);
-
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
 
@@ -332,23 +326,24 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 16;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
         forcesPanel.add(jLabel3, gridBagConstraints);
 
-        bSlider.setMajorTickSpacing(100);
-        bSlider.setMaximum(500);
-        bSlider.setPaintLabels(true);
-        bSlider.setPaintTicks(true);
-        bSlider.setValue(40);
-        bSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+        exponentSlider.setMajorTickSpacing(100);
+        exponentSlider.setMaximum(500);
+        exponentSlider.setPaintLabels(true);
+        exponentSlider.setPaintTicks(true);
+        exponentSlider.setValue(40);
+        exponentSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                bSliderStateChanged(evt);
+                exponentSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 22;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        forcesPanel.add(bSlider, gridBagConstraints);
+        forcesPanel.add(exponentSlider, gridBagConstraints);
 
         jLabel4.setText("Weight Exponent");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -357,20 +352,20 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel4, gridBagConstraints);
 
-        kSlider.setMajorTickSpacing(20);
-        kSlider.setMinorTickSpacing(10);
-        kSlider.setPaintLabels(true);
-        kSlider.setPaintTicks(true);
-        kSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+        longestFlowStiffnessSlider.setMajorTickSpacing(20);
+        longestFlowStiffnessSlider.setMinorTickSpacing(10);
+        longestFlowStiffnessSlider.setPaintLabels(true);
+        longestFlowStiffnessSlider.setPaintTicks(true);
+        longestFlowStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                kSliderStateChanged(evt);
+                longestFlowStiffnessSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 17;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        forcesPanel.add(kSlider, gridBagConstraints);
+        forcesPanel.add(longestFlowStiffnessSlider, gridBagConstraints);
 
         zeroLengthStiffnessSlider.setMajorTickSpacing(100);
         zeroLengthStiffnessSlider.setMaximum(500);
@@ -606,6 +601,24 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
         mapControlPanel.add(symbolPanel, gridBagConstraints);
+
+        drawingOrderComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Largest First", "Smallest First", "Unordered" }));
+        drawingOrderComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                drawingOrderComboBoxItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(drawingOrderComboBox, gridBagConstraints);
+
+        jLabel12.setText("Drawing Order");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(jLabel12, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -1067,17 +1080,17 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawControlPointsCheckBoxActionPerformed
 
-    private void bSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_bSliderStateChanged
-        if (bSlider.getValueIsAdjusting() == false) {
+    private void exponentSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_exponentSliderStateChanged
+        if (exponentSlider.getValueIsAdjusting() == false) {
             forceLayout();
         }
-    }//GEN-LAST:event_bSliderStateChanged
+    }//GEN-LAST:event_exponentSliderStateChanged
 
-    private void kSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_kSliderStateChanged
-        if (kSlider.getValueIsAdjusting() == false) {
+    private void longestFlowStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_longestFlowStiffnessSliderStateChanged
+        if (longestFlowStiffnessSlider.getValueIsAdjusting() == false) {
             forceLayout();
         }
-    }//GEN-LAST:event_kSliderStateChanged
+    }//GEN-LAST:event_longestFlowStiffnessSliderStateChanged
 
     private void zeroLengthStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_zeroLengthStiffnessSliderStateChanged
         if (zeroLengthStiffnessSlider.getValueIsAdjusting() == false) {
@@ -1172,6 +1185,22 @@ public class MainWindow extends javax.swing.JFrame {
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
     }//GEN-LAST:event_geometricLayoutMenuItemActionPerformed
 
+    private void drawingOrderComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_drawingOrderComboBoxItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            switch (drawingOrderComboBox.getSelectedIndex()) {
+                case 0:
+                    model.setFlowOrder(Model.FlowOrder.DECREASING);
+                    break;
+                case 1:
+                    model.setFlowOrder(Model.FlowOrder.INCREASING);
+                    break;
+                case 2:
+                    model.setFlowOrder(Model.FlowOrder.UNORDERED);
+            }
+        }
+        mapComponent.repaint();
+    }//GEN-LAST:event_drawingOrderComboBoxItemStateChanged
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1179,8 +1208,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
         model.setCanvas(model.getFlowsBoundingBox());
-        model.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
-        model.setDistanceWeightExponent((double) bSlider.getValue() / 10);
+        model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
+        model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
         model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
         model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
@@ -1220,14 +1249,15 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JPanel arrowHeadsControlPanel;
     private javax.swing.JPanel arrowHeadsPanel;
-    private javax.swing.JSlider bSlider;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
+    private javax.swing.JComboBox drawingOrderComboBox;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
+    private javax.swing.JSlider exponentSlider;
     private javax.swing.JMenuItem exportImageMenuItem;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
@@ -1243,25 +1273,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JPopupMenu.Separator jSeparator3;
-    private javax.swing.JPopupMenu.Separator jSeparator4;
-    private javax.swing.JSlider kSlider;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
+    private javax.swing.JSlider longestFlowStiffnessSlider;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
     private javax.swing.JPanel mapControlPanel;
     private javax.swing.JMenu mapMenu;

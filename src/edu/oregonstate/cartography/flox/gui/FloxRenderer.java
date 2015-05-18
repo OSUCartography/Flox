@@ -23,12 +23,22 @@ import java.util.Iterator;
 
 /**
  * A renderer for the Flox data model
- * 
+ *
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
 public class FloxRenderer extends SimpleFeatureRenderer {
 
+    /**
+     * White border along flows
+     */
+    private final float WHITE_BORDER = 2;
+    
+    /**
+     * Width of stroke line for nodes
+     */
+    private final float NODE_STROKE_WIDTH = 2;
+    
     /**
      * Radius of circles for start and end points (in pixels)
      */
@@ -92,7 +102,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         renderer.drawNodes();
         return bufferImage;
     }
-
+    
     /**
      * Creates a new renderer.
      *
@@ -150,10 +160,19 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      *
      */
     public void drawFlows() {
-        g2d.setColor(Color.BLACK);
-        Iterator<Flow> iter = model.flowIterator();
-        while (iter.hasNext()) {
-            Flow flow = iter.next();
+        ArrayList<Flow> flows;
+        switch (model.getFlowOrder()) {
+            case DECREASING:
+                flows = model.getOrderedFlows(false);
+                break;
+            case INCREASING:
+                flows = model.getOrderedFlows(true);
+                break;
+            default:
+                flows = model.getFlows();
+        }
+        
+        for (Flow flow : flows) {
             GeneralPath path;
             if (flow instanceof CubicBezierFlow) {
                 path = flowToGeneralPath((CubicBezierFlow) flow);
@@ -161,7 +180,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 path = flowToGeneralPath((QuadraticBezierFlow) flow);
             }
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
-            g2d.setStroke(new BasicStroke((float) strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            g2d.setStroke(new BasicStroke((float) strokeWidth + WHITE_BORDER * 2,
+                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            g2d.setColor(Color.WHITE);
+            g2d.draw(path);
+            g2d.setStroke(new BasicStroke((float) strokeWidth, 
+                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            g2d.setColor(Color.BLACK);
             g2d.draw(path);
         }
     }
@@ -170,6 +195,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Draw all nodes to a Graphics2D context.
      */
     public void drawNodes() {
+        g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
         Iterator<Point> iter = model.nodeIterator();
         while (iter.hasNext()) {
             Point pt = iter.next();
@@ -230,7 +256,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Testing algorithm for reconstructing Bezier curves from straight line segments.
+     * Testing algorithm for reconstructing Bezier curves from straight line
+     * segments.
      */
     public void drawRebuiltBezierCurve() {
         // FIXME
