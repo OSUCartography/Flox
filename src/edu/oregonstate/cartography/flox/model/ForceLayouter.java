@@ -275,7 +275,7 @@ public class ForceLayouter {
             if (flow instanceof QuadraticBezierFlow) {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
                 Point ctrlPt = qFlow.getCtrlPt();
-                Force f = forces.get(i++);
+                Force f = forces.get(i);
 
                 // Move the control point by the total force
                 ctrlPt.x += weight * f.fx;
