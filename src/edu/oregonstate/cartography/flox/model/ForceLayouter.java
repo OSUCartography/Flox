@@ -11,66 +11,9 @@ import java.util.Iterator;
  * @author danielstephen
  */
 public class ForceLayouter {
-
-    private boolean enforceRangebox = true;
-    
-    public void setEnforceRangebox(boolean enforceRangebox) {
-        this.enforceRangebox = enforceRangebox;
-    }
-    
-    private boolean enforceCanvasRange = true;
-    
-    public void setEnforceCanvasRange(boolean enforceCanvasRange) {
-        this.enforceCanvasRange = enforceCanvasRange;
-    }
-    
-    private Rectangle2D canvas;
-    
-   public void setCanvas(Rectangle2D canvas) {
-       this.canvas = canvas;
-   }
-    
-    /**
-     * spring stiffness of longest flow
-     */
-    private double maxFlowLengthSpringConstant = 0.5;
-
-    /**
-     * spring stiffness of zero-length flow
-     */
-    private double minFlowLengthSpringConstant = 0.5;
-
-    // This determines the amount of force that objects far away from the target
-    // can apply to the target.  The lower the distanceWeightExponent, the more force distant
-    // objects are permitted to apply.
-    private double distanceWeightExponent = 4;
-
+   
     // Stores the model, which contains all map features.
     private final Model model;
-
-    /**
-     * Sets the spring constants. This is ultimately called by slider bars in
-     * the GUI.
-     *
-     * @param maxFlowLengthSpringConstant The stiffness of the spring of the
-     * longest flow
-     * @param minFlowLengthSpringConstant The minimum spring stiffness of all
-     * springs on the map.
-     */
-    public void setSpringConstants(double maxFlowLengthSpringConstant, double minFlowLengthSpringConstant) {
-        this.maxFlowLengthSpringConstant = maxFlowLengthSpringConstant;
-        this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
-    }
-
-    /**
-     * Sets the distanceWeightExponent. This is currently set by the slider bar
-     * in the GUI.
-     *
-     * @param idwExponent The distanceWeightExponent to set
-     */
-    public void setDistanceWeightExponent(double idwExponent) {
-        this.distanceWeightExponent = idwExponent;
-    }
 
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
@@ -191,9 +134,9 @@ public class ForceLayouter {
 
         double flowBaseLength = flow.getBaselineLength();
         double relativeFlowLength = flowBaseLength / maxFlowLength;
-        double flowSpringConstant = (-minFlowLengthSpringConstant
-                + maxFlowLengthSpringConstant) * relativeFlowLength
-                + minFlowLengthSpringConstant;
+        double flowSpringConstant = (-model.getMinFlowLengthSpringConstant()
+                + model.getMaxFlowLengthSpringConstant()) * relativeFlowLength
+                + model.getMinFlowLengthSpringConstant();
         return flowSpringConstant;
     }
 
@@ -240,12 +183,12 @@ public class ForceLayouter {
     }
 
     private double gaussianWeight(double d, double maxFlowLength) {
-        double K = distanceWeightExponent / maxFlowLength;
+        double K = model.getDistanceWeightExponent() / maxFlowLength;
         return Math.exp(-K * d * d);
     }
 
     private double inverseDistanceWeight(double d) {
-        return 1. / Math.pow(d, distanceWeightExponent);
+        return 1. / Math.pow(d, model.getDistanceWeightExponent());
     }
 
     /**
@@ -343,17 +286,17 @@ public class ForceLayouter {
                 
                 // Enforce control point range if enforceRangebox
                 // is true
-                if(enforceRangebox) {
+                if(model.isEnforceRangebox()) {
                     Point tempPoint = RangeboxEnforcer.enforceFlowControlPointRange(qFlow);
                     ctrlPt.x = tempPoint.x;
                     ctrlPt.y = tempPoint.y;
                 }
                 
-                if(enforceCanvasRange) {
-                    Point tempPoint = RangeboxEnforcer.enforceCanvasBoundingBox(qFlow, canvas);
+                if(model.isEnforceCanvasRange()) {
+                    Rectangle2D canvasRect = model.getCanvas();
+                    Point tempPoint = RangeboxEnforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
                     ctrlPt.x = tempPoint.x;
                     ctrlPt.y = tempPoint.y;
-                    
                 }
             }
 

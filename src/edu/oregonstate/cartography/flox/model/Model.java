@@ -35,22 +35,43 @@ public class Model {
      * if true, a flow exerts forces on itself
      */
     private boolean flowExertingForcesOnItself = false;
-    
+
     /**
      * Start and end node exert a larger force than points along flow lines
      */
     private double nodeWeightFactor = 10;
-    
+
     /**
      * Weight for the anti-torsion force
      */
     private double antiTorsionWeight = 1;
-    
+
     /**
      * Stiffness factor for peripheral flows
      */
     private double peripheralStiffnessFactor = 1;
-    
+
+    /**
+     * spring stiffness of longest flow
+     */
+    private double maxFlowLengthSpringConstant = 0.5;
+
+    /**
+     * spring stiffness of zero-length flow
+     */
+    private double minFlowLengthSpringConstant = 0.5;
+
+    // This determines the amount of force that objects far away from the target
+    // can apply to the target.  The lower the distanceWeightExponent, the more force distant
+    // objects are permitted to apply.
+    private double distanceWeightExponent = 4;
+
+    private boolean enforceRangebox = true;
+
+    private boolean enforceCanvasRange = true;
+
+    private Rectangle2D canvas;
+
     /**
      * A reference to the map with layers and geometry.
      */
@@ -69,20 +90,23 @@ public class Model {
 
     /**
      * Returns the number of flows.
+     *
      * @return The number of flows.
      */
     public int getNbrFlows() {
         return graph.edgeSet().size();
     }
-    
+
     /**
-     * Returns the number of nodes in the graph. This is different from 
+     * Returns the number of nodes in the graph. This is different from
      * getNbrFlows() * 2.
+     *
      * @return The number of nodes.
      */
     public int getNbrNodes() {
         return graph.vertexSet().size();
     }
+
     /**
      * Add a flow.
      *
@@ -216,6 +240,7 @@ public class Model {
 
     /**
      * Returns the length of the longest flow base line.
+     *
      * @return The length of the longest base line.
      */
     public double getLongestFlowLength() {
@@ -365,7 +390,7 @@ public class Model {
      * @param antiTorsionWeight the antiTorsionWeight to set
      */
     public void setAntiTorsionWeight(double antiTorsionWeight) {
-        assert(antiTorsionWeight >= 0 && antiTorsionWeight <= 1);
+        assert (antiTorsionWeight >= 0 && antiTorsionWeight <= 1);
         this.antiTorsionWeight = antiTorsionWeight;
     }
 
@@ -382,4 +407,83 @@ public class Model {
     public void setPeripheralStiffnessFactor(double peripheralStiffnessFactor) {
         this.peripheralStiffnessFactor = peripheralStiffnessFactor;
     }
+
+    /**
+     * Sets the spring constants. This is ultimately called by slider bars in
+     * the GUI.
+     *
+     * @param maxFlowLengthSpringConstant The stiffness of the spring of the
+     * longest flow
+     * @param minFlowLengthSpringConstant The minimum spring stiffness of all
+     * springs on the map.
+     */
+    public void setSpringConstants(double maxFlowLengthSpringConstant, double minFlowLengthSpringConstant) {
+        this.maxFlowLengthSpringConstant = maxFlowLengthSpringConstant;
+        this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
+    }
+
+    /**
+     * @return the distanceWeightExponent
+     */
+    public double getDistanceWeightExponent() {
+        return distanceWeightExponent;
+    }
+    
+    /**
+     * Sets the distanceWeightExponent. This is currently set by the slider bar
+     * in the GUI.
+     *
+     * @param idwExponent The distanceWeightExponent to set
+     */
+    public void setDistanceWeightExponent(double idwExponent) {
+        this.distanceWeightExponent = idwExponent;
+    }
+
+    /**
+     * @return the enforceRangebox
+     */
+    public boolean isEnforceRangebox() {
+        return enforceRangebox;
+    }
+    
+    public void setEnforceRangebox(boolean enforceRangebox) {
+        this.enforceRangebox = enforceRangebox;
+    }
+
+    /**
+     * @return the enforceCanvasRange
+     */
+    public boolean isEnforceCanvasRange() {
+        return enforceCanvasRange;
+    }
+    
+    public void setEnforceCanvasRange(boolean enforceCanvasRange) {
+        this.enforceCanvasRange = enforceCanvasRange;
+    }
+
+     /**
+     * @return the canvas
+     */
+    public Rectangle2D getCanvas() {
+        return canvas;
+    }
+    
+    public void setCanvas(Rectangle2D canvas) {
+        this.canvas = canvas;
+    }
+
+    /**
+     * @return the maxFlowLengthSpringConstant
+     */
+    public double getMaxFlowLengthSpringConstant() {
+        return maxFlowLengthSpringConstant;
+    }
+
+    /**
+     * @return the minFlowLengthSpringConstant
+     */
+    public double getMinFlowLengthSpringConstant() {
+        return minFlowLengthSpringConstant;
+    }
+    
 }

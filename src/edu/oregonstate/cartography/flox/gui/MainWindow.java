@@ -1168,19 +1168,19 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void geometricLayoutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_geometricLayoutMenuItemActionPerformed
         String title = "Geometric Layout";
-        JOptionPane.showOptionDialog(this, flowLayoutPanel, title, 
+        JOptionPane.showOptionDialog(this, flowLayoutPanel, title,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
     }//GEN-LAST:event_geometricLayoutMenuItemActionPerformed
 
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
-        layouter.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
-        // Place for getting/setting checkbox info for enforceCanvasRange
         layouter.straightenFlows();
-        layouter.setCanvas(model.getFlowsBoundingBox());
-        layouter.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
-        layouter.setDistanceWeightExponent((double) bSlider.getValue() / 10);
+
+        model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
+        model.setCanvas(model.getFlowsBoundingBox());
+        model.setSpringConstants(kSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
+        model.setDistanceWeightExponent((double) bSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
         model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
         model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
