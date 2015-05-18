@@ -118,6 +118,9 @@ public class MainWindow extends javax.swing.JFrame {
         flowAngleSlider = new javax.swing.JSlider();
         jLabel2 = new javax.swing.JLabel();
         flowLengthSlider = new javax.swing.JSlider();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         rightPanel = new javax.swing.JPanel();
         controlsTabbedPane = new javax.swing.JTabbedPane();
@@ -260,6 +263,12 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         flowLayoutPanel.add(flowLengthSlider, gridBagConstraints);
+
+        jLabel11.setText("jLabel11");
+        jPanel1.add(jLabel11);
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel1.add(jComboBox1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
@@ -1054,7 +1063,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_quadraticCurvesRadioButtonActionPerformed
 
     private void drawControlPointsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawControlPointsCheckBoxActionPerformed
-        model.setDrawControlPoints(drawControlPointsCheckBox.isSelected());
+        mapComponent.setDrawControlPoints(drawControlPointsCheckBox.isSelected());
         mapComponent.repaint();
     }//GEN-LAST:event_drawControlPointsCheckBoxActionPerformed
 
@@ -1077,12 +1086,12 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_zeroLengthStiffnessSliderStateChanged
 
     private void drawLineSegmentsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawLineSegmentsCheckBoxActionPerformed
-        model.setDrawLineSegments(drawLineSegmentsCheckBox.isSelected());
+        mapComponent.setDrawLineSegments(drawLineSegmentsCheckBox.isSelected());
         mapComponent.repaint();
     }//GEN-LAST:event_drawLineSegmentsCheckBoxActionPerformed
 
     private void drawReconstructedBezierCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawReconstructedBezierCheckBoxActionPerformed
-        model.setDrawReconstructedBezier(drawReconstructedBezierCheckBox.isSelected());
+        mapComponent.setDrawReconstructedBezier(drawReconstructedBezierCheckBox.isSelected());
         mapComponent.repaint();
     }//GEN-LAST:event_drawReconstructedBezierCheckBoxActionPerformed
 
@@ -1159,7 +1168,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void geometricLayoutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_geometricLayoutMenuItemActionPerformed
         String title = "Geometric Layout";
-        JOptionPane.showOptionDialog(this, flowLayoutPanel, title, JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+        JOptionPane.showOptionDialog(this, flowLayoutPanel, title, 
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
     }//GEN-LAST:event_geometricLayoutMenuItemActionPerformed
 
     private void forceLayout() {
@@ -1233,8 +1243,10 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
+    private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1243,6 +1255,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator4;

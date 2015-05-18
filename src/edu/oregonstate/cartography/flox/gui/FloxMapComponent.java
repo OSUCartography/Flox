@@ -23,6 +23,22 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     private Model model;
 
+    
+    /**
+     * flag for drawing control points
+     */
+    private boolean drawControlPoints = false;
+
+    /**
+     * flag for drawing line segments
+     */
+    private boolean drawLineSegments = false;
+    
+    /**
+     * flag for drawing reconstructed BŽzier curves
+     */
+    private boolean drawReconstructedBezier = false;
+    
     public FloxMapComponent() {
     }
 
@@ -67,14 +83,14 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         // draw flows and nodes
         renderer.drawFlows();
         renderer.drawNodes();
-        if (model.isDrawControlPoints()) {
+        if (isDrawControlPoints()) {
             renderer.drawControlPoints();
         }
-        if (model.isDrawLineSegments()) {
+        if (isDrawLineSegments()) {
             renderer.drawStraightLinesSegments();
         }
 
-        if (model.isDrawReconstructedBezier()) {
+        if (isDrawReconstructedBezier()) {
             renderer.drawRebuiltBezierCurve();
         }
 
@@ -92,4 +108,43 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         this.model = model;
     }
 
+    /**
+     * @return the drawControlPoints
+     */
+    public boolean isDrawControlPoints() {
+        return drawControlPoints;
+    }
+
+    /**
+     *
+     * @param drawControlPoints
+     */
+    public void setDrawControlPoints(boolean drawControlPoints) {
+        this.drawControlPoints = drawControlPoints;
+    }
+
+    /**
+     * @return the drawLineSegments
+     */
+    public boolean isDrawLineSegments() {
+        return drawLineSegments;
+    }
+    
+    public void setDrawLineSegments(boolean drawLineSegments) {
+        this.drawLineSegments = drawLineSegments;
+    }
+
+    /**
+     * @return the drawReconstructedBezier
+     */
+    public boolean isDrawReconstructedBezier() {
+        return drawReconstructedBezier;
+    }
+
+    /**
+     * @param drawReconstructedBezier the drawReconstructedBezier to set
+     */
+    public void setDrawReconstructedBezier(boolean drawReconstructedBezier) {
+        this.drawReconstructedBezier = drawReconstructedBezier;
+    }
 }

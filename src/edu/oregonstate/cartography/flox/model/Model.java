@@ -32,21 +32,6 @@ public class Model {
     private double flowWidthScale = 1;
 
     /**
-     * flag for drawing control points
-     */
-    private boolean drawControlPoints = false;
-
-    /**
-     * flag for drawing line segments
-     */
-    private boolean drawLineSegments = false;
-    
-    /**
-     * flag for drawing reconstructed BŽzier curves
-     */
-    private boolean drawReconstructedBezier = false;
-    
-    /**
      * if true, a flow exerts forces on itself
      */
     private boolean flowExertingForcesOnItself = false;
@@ -339,46 +324,6 @@ public class Model {
      */
     public void setCurveType(CurveType curveType) {
         this.curveType = curveType;
-    }
-
-    /**
-     * @return the drawControlPoints
-     */
-    public boolean isDrawControlPoints() {
-        return drawControlPoints;
-    }
-
-    /**
-     *
-     * @param drawControlPoints
-     */
-    public void setDrawControlPoints(boolean drawControlPoints) {
-        this.drawControlPoints = drawControlPoints;
-    }
-
-    /**
-     * @return the drawLineSegments
-     */
-    public boolean isDrawLineSegments() {
-        return drawLineSegments;
-    }
-    
-    public void setDrawLineSegments(boolean drawLineSegments) {
-        this.drawLineSegments = drawLineSegments;
-    }
-
-    /**
-     * @return the drawReconstructedBezier
-     */
-    public boolean isDrawReconstructedBezier() {
-        return drawReconstructedBezier;
-    }
-
-    /**
-     * @param drawReconstructedBezier the drawReconstructedBezier to set
-     */
-    public void setDrawReconstructedBezier(boolean drawReconstructedBezier) {
-        this.drawReconstructedBezier = drawReconstructedBezier;
     }
 
     /**
