@@ -13,14 +13,18 @@ import java.awt.geom.Rectangle2D;
  */
 public class RangeboxEnforcer {
 
+    
+    private final Model model;
+    
     /**
-     * Copied from here:
-     * http://www.java-gaming.org/index.php?topic=22590.0
      * 
+     * This method returns true if 2 line segments intersect.
      * The coordinates below are the endpoints of two line segments.
-     * The method returns true if the line segments intersect.
      * Points 1 & 2 are a line segment
      * Points 3 & 4 are a line segment
+     * 
+     * Copied from here:
+     * http://www.java-gaming.org/index.php?topic=22590.0
      * 
      * @param x1
      * @param y1
@@ -270,4 +274,7 @@ public class RangeboxEnforcer {
         return cPt;
     }
     
+    public RangeboxEnforcer(Model model) {
+        this.model = model;
+    }
 }

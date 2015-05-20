@@ -33,12 +33,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * White border along flows
      */
     private final float WHITE_BORDER = 2;
-    
+
     /**
      * Width of stroke line for nodes
      */
     private final float NODE_STROKE_WIDTH = 2;
-    
+
     /**
      * Radius of circles for start and end points (in pixels)
      */
@@ -102,7 +102,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         renderer.drawNodes();
         return bufferImage;
     }
-    
+
     /**
      * Creates a new renderer.
      *
@@ -171,7 +171,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             default:
                 flows = model.getFlows();
         }
-        
+
         for (Flow flow : flows) {
             GeneralPath path;
             if (flow instanceof CubicBezierFlow) {
@@ -184,7 +184,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.setColor(Color.WHITE);
             g2d.draw(path);
-            g2d.setStroke(new BasicStroke((float) strokeWidth, 
+            g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.setColor(Color.BLACK);
             g2d.draw(path);
@@ -201,6 +201,43 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             Point pt = iter.next();
             drawCircle(pt.x, pt.y, R, Color.WHITE, Color.BLACK);
         }
+    }
+
+    public void drawCanvasPadding() {
+        
+        g2d.setStroke(new BasicStroke(1));
+        Rectangle2D canvas = model.getCanvas();
+
+        if (canvas == null) {
+            System.out.println("No Canvas!");
+        } else {
+            System.out.println("We have a canvas!");
+            g2d.draw(canvas);
+            
+            double cWidth = canvas.getWidth();
+            double cHeight = canvas.getHeight();
+
+            // Is a percentage of the canvas size
+            double xPadding = cWidth * 0.1;
+            double yPadding = cHeight * 0.1;
+
+            Point b1 = new Point(canvas.getX() - xPadding, canvas.getY() - yPadding);
+            Point b2 = new Point(canvas.getX() + cWidth + xPadding, canvas.getY() - yPadding);
+            Point b3 = new Point(canvas.getX() - xPadding, canvas.getY() + cHeight + yPadding);
+            Point b4 = new Point(canvas.getX() + cWidth + xPadding, canvas.getY() + cHeight + yPadding);
+
+            Line2D line1 = new Line2D.Double(b1.x, b1.y, b2.x, b2.y);
+            Line2D line2 = new Line2D.Double(b2.x, b2.y, b4.x, b4.y);
+            Line2D line3 = new Line2D.Double(b3.x, b3.y, b4.x, b4.y);
+            Line2D line4 = new Line2D.Double(b1.x, b1.y, b3.x, b3.y);
+
+            g2d.draw(line1);
+            g2d.draw(line2);
+            g2d.draw(line3);
+            g2d.draw(line4);
+            
+        }
+
     }
 
     /**

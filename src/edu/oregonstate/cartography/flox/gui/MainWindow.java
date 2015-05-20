@@ -10,6 +10,7 @@ import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
+import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
@@ -156,6 +157,7 @@ public class MainWindow extends javax.swing.JFrame {
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         drawingOrderComboBox = new javax.swing.JComboBox();
         javax.swing.JLabel jLabel12 = new javax.swing.JLabel();
+        drawCanvasPaddingCheckbox = new javax.swing.JCheckBox();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel10 = new javax.swing.JLabel();
@@ -619,6 +621,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel12, gridBagConstraints);
+
+        drawCanvasPaddingCheckbox.setText("Draw Canvas Padding");
+        drawCanvasPaddingCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawCanvasPaddingCheckboxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(drawCanvasPaddingCheckbox, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -1201,8 +1215,14 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawingOrderComboBoxItemStateChanged
 
+    private void drawCanvasPaddingCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawCanvasPaddingCheckboxActionPerformed
+        mapComponent.setDrawCanvasPadding(drawCanvasPaddingCheckbox.isSelected());
+        mapComponent.repaint();
+    }//GEN-LAST:event_drawCanvasPaddingCheckboxActionPerformed
+
     private void forceLayout() {
 
+        RangeboxEnforcer rangeEnforcer = new RangeboxEnforcer(model);
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
 
@@ -1252,6 +1272,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JTabbedPane controlsTabbedPane;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
+    private javax.swing.JCheckBox drawCanvasPaddingCheckbox;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
