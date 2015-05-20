@@ -217,13 +217,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             double cHeight = canvas.getHeight();
 
             // Is a percentage of the canvas size
-            double xPadding = cWidth * 0.1;
-            double yPadding = cHeight * 0.1;
+            double xPad = cWidth * model.getCanvasPadding();
+            double yPad = cHeight * model.getCanvasPadding();
 
-            Point b1 = new Point(xToPx(canvas.getX() - xPadding), yToPx(canvas.getY() - yPadding));
-            Point b2 = new Point(xToPx(canvas.getMaxX() + xPadding), yToPx(canvas.getY() - yPadding));
-            Point b3 = new Point(xToPx(canvas.getX() - xPadding), yToPx(canvas.getMaxY() + yPadding));
-            Point b4 = new Point(xToPx(canvas.getMaxX() + xPadding), yToPx(canvas.getMaxY() + yPadding));
+            Point b1 = new Point(xToPx(canvas.getX() - xPad), yToPx(canvas.getY() - yPad));
+            Point b2 = new Point(xToPx(canvas.getMaxX() + xPad), yToPx(canvas.getY() - yPad));
+            Point b3 = new Point(xToPx(canvas.getX() - xPad), yToPx(canvas.getMaxY() + yPad));
+            Point b4 = new Point(xToPx(canvas.getMaxX() + xPad), yToPx(canvas.getMaxY() + yPad));
 
             Line2D line1 = new Line2D.Double(b1.x, b1.y, b2.x, b2.y);
             Line2D line2 = new Line2D.Double(b2.x, b2.y, b4.x, b4.y);

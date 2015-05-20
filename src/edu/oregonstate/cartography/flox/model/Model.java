@@ -82,6 +82,8 @@ public class Model {
 
     private boolean enforceCanvasRange = true;
 
+    private double canvasPadding = 0.1;
+    
     private Rectangle2D canvas;
 
     /**
@@ -497,6 +499,14 @@ public class Model {
         this.enforceCanvasRange = enforceCanvasRange;
     }
 
+    public void setCanvasPadding(double canvasPadding) {
+        this.canvasPadding = canvasPadding;
+    }
+    
+    public double getCanvasPadding() {
+        return canvasPadding;
+    }
+    
     /**
      * @return the canvas
      */

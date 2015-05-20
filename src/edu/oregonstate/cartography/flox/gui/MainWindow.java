@@ -142,6 +142,8 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JLabel jLabel8 = new javax.swing.JLabel();
         peripheralStiffnessSlider = new javax.swing.JSlider();
         enforceRangeboxCheckbox = new javax.swing.JCheckBox();
+        canvasSizeSlider = new javax.swing.JSlider();
+        jLabel11 = new javax.swing.JLabel();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -487,6 +489,31 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 14;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(enforceRangeboxCheckbox, gridBagConstraints);
+
+        canvasSizeSlider.setMajorTickSpacing(1);
+        canvasSizeSlider.setMaximum(10);
+        canvasSizeSlider.setPaintLabels(true);
+        canvasSizeSlider.setPaintTicks(true);
+        canvasSizeSlider.setValue(1);
+        canvasSizeSlider.setBounds(new java.awt.Rectangle(0, 0, 0, 0));
+        canvasSizeSlider.setPreferredSize(new java.awt.Dimension(240, 40));
+        canvasSizeSlider.setSize(new java.awt.Dimension(0, 0));
+        canvasSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                canvasSizeSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 31;
+        forcesPanel.add(canvasSizeSlider, gridBagConstraints);
+
+        jLabel11.setText("Canvas Size");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 30;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        forcesPanel.add(jLabel11, gridBagConstraints);
 
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
@@ -1220,6 +1247,12 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawCanvasPaddingCheckboxActionPerformed
 
+    private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
+        if (canvasSizeSlider.getValueIsAdjusting() == false) {
+            forceLayout();
+        }
+    }//GEN-LAST:event_canvasSizeSliderStateChanged
+
     private void forceLayout() {
 
         RangeboxEnforcer rangeEnforcer = new RangeboxEnforcer(model);
@@ -1228,6 +1261,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
         model.setCanvas(model.getFlowsBoundingBox());
+        model.setCanvasPadding(canvasSizeSlider.getValue()/10d);
         model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
@@ -1269,6 +1303,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JPanel arrowHeadsControlPanel;
     private javax.swing.JPanel arrowHeadsPanel;
+    private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
@@ -1294,6 +1329,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
+    private javax.swing.JLabel jLabel11;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JSlider longestFlowStiffnessSlider;

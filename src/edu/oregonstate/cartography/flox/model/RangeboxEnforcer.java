@@ -204,21 +204,21 @@ public class RangeboxEnforcer {
         return cPt;
     }
 
-    public static Point enforceCanvasBoundingBox(QuadraticBezierFlow flow, Rectangle2D canvas) {
+    public Point enforceCanvasBoundingBox(QuadraticBezierFlow flow, Rectangle2D canvas) {
         
         double cWidth = canvas.getWidth();
         double cHeight = canvas.getHeight();
         
         // Outer padding of the canvas bounding box
         // Is a percentage of the canvas size
-        double xPadding = cWidth * 0.1;
-        double yPadding = cHeight * 0.1;
+        double xPad = cWidth * model.getCanvasPadding();
+        double yPad = cHeight * model.getCanvasPadding();
         
         // Get the corner points of the canvas
-        Point b1 = new Point(canvas.getX() - xPadding, canvas.getY() - yPadding);
-        Point b2 = new Point(canvas.getX() + cWidth + xPadding, canvas.getY() - yPadding);
-        Point b3 = new Point(canvas.getX() - xPadding, canvas.getY() + cHeight + yPadding);
-        Point b4 = new Point(canvas.getX() + cWidth + xPadding, canvas.getY() + cHeight + yPadding);
+        Point b1 = new Point(canvas.getX() - xPad, canvas.getY() - yPad);
+        Point b2 = new Point(canvas.getMaxX() + xPad, canvas.getY() - yPad);
+        Point b3 = new Point(canvas.getX() - xPad, canvas.getMaxY() + yPad);
+        Point b4 = new Point(canvas.getMaxX() + xPad, canvas.getMaxY() + yPad);
         
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();

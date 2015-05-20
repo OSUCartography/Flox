@@ -291,7 +291,8 @@ public class ForceLayouter {
 
                 if (model.isEnforceCanvasRange()) {
                     Rectangle2D canvasRect = model.getCanvas();
-                    Point tempPoint = RangeboxEnforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
+                    RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
+                    Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
                     ctrlPt.x = tempPoint.x;
                     ctrlPt.y = tempPoint.y;
                 }
