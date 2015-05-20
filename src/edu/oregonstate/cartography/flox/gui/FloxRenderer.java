@@ -212,7 +212,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             System.out.println("No Canvas!");
         } else {
             System.out.println("We have a canvas!");
-            g2d.draw(canvas);
             
             double cWidth = canvas.getWidth();
             double cHeight = canvas.getHeight();
@@ -221,10 +220,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             double xPadding = cWidth * 0.1;
             double yPadding = cHeight * 0.1;
 
-            Point b1 = new Point(canvas.getX() - xPadding, canvas.getY() - yPadding);
-            Point b2 = new Point(canvas.getX() + cWidth + xPadding, canvas.getY() - yPadding);
-            Point b3 = new Point(canvas.getX() - xPadding, canvas.getY() + cHeight + yPadding);
-            Point b4 = new Point(canvas.getX() + cWidth + xPadding, canvas.getY() + cHeight + yPadding);
+            Point b1 = new Point(xToPx(canvas.getX() - xPadding), yToPx(canvas.getY() - yPadding));
+            Point b2 = new Point(xToPx(canvas.getMaxX() + xPadding), yToPx(canvas.getY() - yPadding));
+            Point b3 = new Point(xToPx(canvas.getX() - xPadding), yToPx(canvas.getMaxY() + yPadding));
+            Point b4 = new Point(xToPx(canvas.getMaxX() + xPadding), yToPx(canvas.getMaxY() + yPadding));
 
             Line2D line1 = new Line2D.Double(b1.x, b1.y, b2.x, b2.y);
             Line2D line2 = new Line2D.Double(b2.x, b2.y, b4.x, b4.y);
