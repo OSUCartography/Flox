@@ -2,10 +2,8 @@ package edu.oregonstate.cartography.flox.model;
 
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  *
@@ -20,17 +18,30 @@ public class QuadraticBezierFlow extends Flow {
     private Point cPt;
 
     /*
-    These fields define a rectangular field where the control point is
-    permitted to go.
-    It is currently only on one side of the baseLine. Needs to be extended to
-    both sides.
-    */
+     These fields define a rectangular field where the control point is
+     permitted to go.
+     It is currently only on one side of the baseLine. Needs to be extended to
+     both sides.
+     */
     protected Point b1;
     protected Point b2;
     protected Point b3;
     protected Point b4;
     protected double rangeBoxHeight = 1.25;
-    
+
+    /**
+     * Construct a QuadraticBezierFlow from 2 irregularPoints
+     *
+     * @param startPt Start point
+     * @param ctrlPt Control point
+     * @param endPt End point
+     */
+    public QuadraticBezierFlow(Point startPt, Point ctrlPt, Point endPt) {
+        this.startPt = startPt;
+        this.cPt = ctrlPt;
+        this.endPt = endPt;
+    }
+
     /**
      * Construct a QuadraticBezierFlow from 2 irregularPoints
      *
@@ -147,8 +158,8 @@ public class QuadraticBezierFlow extends Flow {
      *
      * @param flatness The maximum distance between the curve and the straight
      * line segments.
-     * @return An list of irregularPoints, including copies of the start point and the
- end point.
+     * @return An list of irregularPoints, including copies of the start point
+     * and the end point.
      */
     @Override
     public ArrayList<Point> toStraightLineSegments(double flatness) {
@@ -156,9 +167,9 @@ public class QuadraticBezierFlow extends Flow {
         double d = flatness * 100;
         assert (flatness > 0);
         assert (d > 0);
-        
+
         ArrayList<Point> regularPoints = new ArrayList<>();
-        
+
         ArrayList<Point> irregularPoints = new ArrayList<>();
         GeneralPath path = new GeneralPath();
         path.moveTo(startPt.x, startPt.y);
@@ -170,7 +181,7 @@ public class QuadraticBezierFlow extends Flow {
             irregularPoints.add(new Point(coords[0], coords[1]));
             iter.next();
         }
-                
+
         // create new point set with regularly distributed irregularPoints
         double startX = irregularPoints.get(0).x;
         double startY = irregularPoints.get(0).y;
@@ -222,15 +233,13 @@ public class QuadraticBezierFlow extends Flow {
 
         return new QuadraticBezierFlow(startPt, endPt, radians, distPerc, value);
     }
-    
-    
-    
+
     public void computeRangeBox() {
-        
+
         double baseDist = this.getBaselineLength();
         double baseAzimuth = this.getBaselineAzimuth();
         Point bPt = new Point(startPt.x + baseDist, startPt.y);
-        
+
         b1 = (new Point(startPt.x, startPt.y + (baseDist * rangeBoxHeight)))
                 .rotatePoint(startPt, baseAzimuth);
         b2 = (new Point(bPt.x, bPt.y + (baseDist * rangeBoxHeight)))
@@ -239,6 +248,120 @@ public class QuadraticBezierFlow extends Flow {
                 .rotatePoint(startPt, baseAzimuth);
         b4 = (new Point(bPt.x, bPt.y - (baseDist * rangeBoxHeight)))
                 .rotatePoint(startPt, baseAzimuth);
-        
+
+    }
+
+    /**
+     * Returns 
+     * @param t
+     * @return 
+     */
+    public Point pointOnCurve(double t) {
+        assert (t >= 0d && t <= 1d);
+
+        double t2 = t * t;
+        double mt = 1 - t;
+        double mt2 = mt * mt;
+        double x = startPt.x * mt2 + cPt.x * 2 * mt * t + endPt.x * t2;
+        double y = startPt.y * mt2 + cPt.y * 2 * mt * t + endPt.y * t2;
+        return new Point(x, y);
+    }
+
+    /**
+     * Split a flow into two new flows.
+     * http://pomax.github.io/bezierinfo/#matrixsplit
+     *
+     * @param t Parametric position [0..1]
+     * @return
+     */
+    public QuadraticBezierFlow[] split(double t) {
+
+        double startX1 = startPt.x;
+        double startY1 = startPt.y;
+        double ctrlX1 = t * cPt.x - (t - 1) * startPt.x;
+        double ctrlY1 = t * cPt.y - (t - 1) * startPt.y;
+        double endX1 = t * t * endPt.x - 2 * t * (t - 1) * cPt.x + (t - 1) * (t - 1) * startPt.x;
+        double endY1 = t * t * endPt.y - 2 * t * (t - 1) * cPt.y + (t - 1) * (t - 1) * startPt.y;
+
+        Point start1 = new Point(startX1, startY1);
+        Point ctrl1 = new Point(ctrlX1, ctrlY1);
+        Point end1 = new Point(endX1, endY1);
+
+        double startX2 = t * t * endPt.x - 2 * t * (t - 1) * cPt.x + (t - 1) * (t - 1) * startPt.x;
+        double startY2 = t * t * endPt.y - 2 * t * (t - 1) * cPt.y + (t - 1) * (t - 1) * startPt.y;
+        double ctrlX2 = t * endPt.x - (t - 1) * cPt.x;
+        double ctrlY2 = t * endPt.y - (t - 1) * cPt.y;
+        double endX2 = endPt.x;
+        double endY2 = endPt.y;
+
+        Point start2 = new Point(startX2, startY2);
+        Point ctrl2 = new Point(ctrlX2, ctrlY2);
+        Point end2 = new Point(endX2, endY2);
+
+        QuadraticBezierFlow flow1 = new QuadraticBezierFlow(start1, ctrl1, end1);
+        flow1.value = value;
+        flow1.computeRangeBox();
+
+        QuadraticBezierFlow flow2 = new QuadraticBezierFlow(start2, ctrl2, end2);
+        flow2.value = value;
+        flow2.computeRangeBox();
+
+        return new QuadraticBezierFlow[]{flow1, flow2};
+    }
+    
+    /**
+     * Returns the curve parameter where a circle with radius r around the end 
+     * point intersects the BŽzier curve.
+     * @param r Radius of circle
+     * @return t parameter where the circle intersects the flow.
+     */
+    public double getIntersectionTWithCircleAroundEndPoint(double r) {
+        if (r <= 0) {
+            return 1;   // t = 1: end of curve
+        }
+        double t = 0.5;
+        double t_step = 0.25;
+        for (int i = 0; i < 20; i++) {
+            Point pt = pointOnCurve(t);
+            final double dx = endPt.x - pt.x;
+            final double dy = endPt.y - pt.y;
+            final double d = Math.sqrt(dx * dx + dy * dy);
+            if (d < r) {
+                t -= t_step;
+            } else {
+                t += t_step;
+            }
+            t_step /= 2;
+        }
+
+        return t;
+    }
+
+    /**
+     * Returns the curve parameter where a circle with radius r around the start 
+     * point intersects the BŽzier curve.
+     * @param r Radius of circle
+     * @return t parameter where the circle intersects the flow.
+     */
+    public double getIntersectionTWithCircleAroundStartPoint(double r) {
+        if (r <= 0) {
+            return 0;   // t = 0: start of curve
+        }
+        double t = 0.5;
+        double t_step = 0.25;
+        for (int i = 0; i < 20; i++) {
+            Point pt = pointOnCurve(t);
+            final double dx = startPt.x - pt.x;
+            final double dy = startPt.y - pt.y;
+            final double d = Math.sqrt(dx * dx + dy * dy);
+            if (d < r) {
+                t += t_step;
+            } else {
+                t -= t_step;
+            }
+            t_step /= 2;
+        }
+
+        return t;
     }
 }
