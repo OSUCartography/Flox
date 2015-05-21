@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
+import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -42,12 +43,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing canvas padding border
      */
     private boolean drawCanvasPadding = false;
-    
+
     /**
      * flag for drawing flow rangebox
      */
     private boolean drawFlowRangebox = false;
-    
+
     public FloxMapComponent() {
     }
 
@@ -73,21 +74,30 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         }
 
         Graphics2D g2d = getGraphics2DBuffer();
-        FloxRenderer renderer = new FloxRenderer(model, g2d, west, north, scale);
-        renderer.setStrokeWidth(1f);
 
-        // draw background map
-        int nbrLayers = model.getNbrLayers();
-        for (int i = nbrLayers - 1; i >= 0; i--) {
-            Layer layer = model.getLayer(i);
-            GeometryCollection geometry = layer.getGeometryCollection();
-            VectorSymbol symbol = layer.getVectorSymbol();
-            Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
-            Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
-            if (fillColor != null || strokeColor != null) {
-                renderer.draw(geometry, fillColor, strokeColor);
+        // Give the current MapTool a chance to draw some background drawing.
+        // Returns true if the the tool also painted the map, i.e. there is no
+        // need to paint the map.
+        MapTool mapTool = getMapTool();
+        boolean toolPaintedMap = mapTool == null ? false : mapTool.drawBackground(g2d);
+
+        // paint the map if this has not been done by the current MapTool
+        if (toolPaintedMap == false) {
+            FloxRenderer renderer = new FloxRenderer(model, g2d, west, north, scale);
+            renderer.setStrokeWidth(1f);
+
+            // draw background map
+            int nbrLayers = model.getNbrLayers();
+            for (int i = nbrLayers - 1; i >= 0; i--) {
+                Layer layer = model.getLayer(i);
+                GeometryCollection geometry = layer.getGeometryCollection();
+                VectorSymbol symbol = layer.getVectorSymbol();
+                Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
+                Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
+                if (fillColor != null || strokeColor != null) {
+                    renderer.draw(geometry, fillColor, strokeColor);
+                }
             }
-        }
 
         // draw flows and nodes
         renderer.drawFlows();
@@ -109,13 +119,30 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             renderer.drawStraightLinesSegments();
         }
 
-        if (isDrawReconstructedBezier()) {
-            renderer.drawRebuiltBezierCurve();
+
+            if (isDrawCanvasPadding()) {
+                renderer.drawCanvasPadding();
+            }
+            if (isDrawControlPoints()) {
+                renderer.drawControlPoints();
+            }
+            if (isDrawLineSegments()) {
+                renderer.drawStraightLinesSegments();
+            }
+
+            if (isDrawReconstructedBezier()) {
+                renderer.drawRebuiltBezierCurve();
+            }
         }
 
         // copy double buffer image to JComponent
         Insets insets = getInsets();
         ((Graphics2D) g).drawImage(bufferImage, insets.left, insets.top, this);
+
+        // Give the current MapTool a chance to draw some custom graphics.
+        if (mapTool != null) {
+            mapTool.draw((Graphics2D) g);
+        }
     }
 
     /**
@@ -137,7 +164,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public boolean isDrawCanvasPadding() {
         return drawCanvasPadding;
     }
-    
+
     public void setDrawCanvasPadding(boolean drawCanvasPadding) {
         this.drawCanvasPadding = drawCanvasPadding;
     }
