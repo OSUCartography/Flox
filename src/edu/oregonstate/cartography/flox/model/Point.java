@@ -1,11 +1,12 @@
 package edu.oregonstate.cartography.flox.model;
 
 /**
- *
- * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
- * University
+ * Two-dimensional point.
+ * 
+ * @author Bernhard Jenny and Dan Stephen, Cartography and Geovisualization 
+ * Group, Oregon State University
  */
-public class Point {
+public final class Point {
     public double x;
     public double y;
     
@@ -15,22 +16,20 @@ public class Point {
     }
     
     /**
-     * Rotates this point by the provided angle around an origin point.
+     * Rotates this point by the provided angle around an origin point and returns
+     * the rotated point. The position of this point is not changed.
      * @param origin Pivot around which the point will be rotated
-     * @param angle Degrees of rotation. Positive numbers will rotate counter-
-     * clockwise, negative numbers will rotate clockwise
+     * @param angle Rotation angle in radians. Positive numbers will rotate counter-
+     * clockwise, negative numbers will rotate clockwise. 
      * @return 
      */
-    public Point rotatePoint(Point origin, double radians) {
-        
-        //double radians = angle * (Math.PI / 180);
-        
+    public Point rotatePoint(Point origin, double angle) {
         double tempX = x - origin.x;
         double tempY = y - origin.y;
-        
-        double newX = (tempX * (Math.cos(radians))) - (tempY * (Math.sin(radians)));
-        double newY = (tempX * (Math.sin(radians))) + (tempY * (Math.cos(radians)));
-        
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        double newX = tempX * cos - tempY * sin;
+        double newY = tempX * sin + tempY * cos;
         return new Point(newX + origin.x, newY + origin.y);
     }
     
