@@ -1433,8 +1433,6 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void forceLayout() {
 
-        mapComponent.eraseBufferImage();
-
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
 
@@ -1469,6 +1467,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            mapComponent.eraseBufferImage();
             layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
             mapComponent.repaint();
             if (++counter == NBR_ITERATIONS) {

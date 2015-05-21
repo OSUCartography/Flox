@@ -17,14 +17,6 @@ public class QuadraticBezierFlow extends Flow {
      */
     private Point cPt;
 
-    /*
-     These fields define a rectangular field where the control point is
-     permitted to go.
-     It is currently only on one side of the baseLine. Needs to be extended to
-     both sides.
-     */
-    
-
     /**
      * Construct a QuadraticBezierFlow from 2 irregularPoints
      *
@@ -149,22 +141,11 @@ public class QuadraticBezierFlow extends Flow {
         this.cPt = cPt;
     }
 
-    /**
-     * Converts this Bezier curve to straight line segments.
-     *
-     * @param flatness The maximum distance between the curve and the straight
-     * line segments.
-     * @return An list of irregularPoints, including copies of the start point
-     * and the end point.
-     */
-    @Override
-    public ArrayList<Point> toStraightLineSegments(double flatness) {
+    public ArrayList<Point> toStraightLineSegmentsWithIrregularLength(double flatness) {
+        assert (flatness > 0);
+
         // FIXME d should be a parameter
         double d = flatness * 100;
-        assert (flatness > 0);
-        assert (d > 0);
-
-        ArrayList<Point> regularPoints = new ArrayList<>();
 
         ArrayList<Point> irregularPoints = new ArrayList<>();
         GeneralPath path = new GeneralPath();
@@ -178,6 +159,26 @@ public class QuadraticBezierFlow extends Flow {
             iter.next();
         }
 
+        return irregularPoints;
+    }
+    /**
+     * Converts this Bezier curve to straight line segments.
+     *
+     * @param flatness The maximum distance between the curve and the straight
+     * line segments.
+     * @return An list of irregularPoints, including copies of the start point
+     * and the end point.
+     */
+    @Override
+    public ArrayList<Point> toStraightLineSegments(double flatness) {
+        assert (flatness > 0);
+
+        // FIXME d should be a parameter
+        double d = flatness * 100;
+
+        ArrayList<Point> regularPoints = new ArrayList<>();
+        ArrayList<Point> irregularPoints = toStraightLineSegmentsWithIrregularLength(flatness);
+        
         // create new point set with regularly distributed irregularPoints
         double startX = irregularPoints.get(0).x;
         double startY = irregularPoints.get(0).y;

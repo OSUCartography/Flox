@@ -243,10 +243,19 @@ public class Model {
         return graph.edgeSet().iterator();
     }
 
+    /**
+     * Returns all flows in the graph. The flows are not ordered.
+     * @return All flows.
+     */
     public ArrayList<Flow> getFlows() {
         return new ArrayList<>(graph.edgeSet());
     }
 
+    /**
+     * Get an ordered list of all flows.
+     * @param increasing Increasing or decreasing list.
+     * @return A list with all ordered flows.
+     */
     public ArrayList<Flow> getOrderedFlows(boolean increasing) {
         ArrayList<Flow> flows = new ArrayList<>(graph.edgeSet());
         java.util.Collections.sort(flows, new Comparator<Flow>() {
@@ -271,6 +280,14 @@ public class Model {
         return graph.vertexSet().iterator();
     }
 
+    /**
+     * Returns all nodes in the graph.
+     * @return All nodes.
+     */
+    public ArrayList<Point> getNodes() {
+        return new ArrayList<>(graph.vertexSet());
+    }
+    
     /**
      * Returns the maximum flow value.
      *
