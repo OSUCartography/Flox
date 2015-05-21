@@ -3,7 +3,7 @@ package edu.oregonstate.cartography.simplefeature;
 import edu.oregonstate.cartography.map.MapEventHandler;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.map.MapToolMouseMotionListener;
-import java.awt.BasicStroke;
+import edu.oregonstate.cartography.flox.gui.CoordinateFormatter;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -30,7 +30,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * zoom-out command without specifying the exact new scale factor.
      */
     private static final double ZOOM_STEP = 1. / 3.;
-    
+
     /**
      * minimum scale for map
      */
@@ -61,6 +61,12 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      */
     protected double scale;
 
+    /**
+     * A formatter for displaying coordinates.
+     */
+    private CoordinateFormatter coordinateFormatter = 
+            new CoordinateFormatter("###,##0.00", "###,##0", 1);
+    
     /**
      * The MapEventHandler is responsible for treating all key and mouse events
      * for this MapComponent. The whole functionality of MapEventHandler could
@@ -113,8 +119,8 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
-     * Returns the width of the currently visible area in world coordinates
-     * (the coordinate system used by the GeoObjects).
+     * Returns the width of the currently visible area in world coordinates (the
+     * coordinate system used by the GeoObjects).
      *
      * @return The width of the currently visible area in world coordinates.
      */
@@ -145,6 +151,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     public void centerOnPoint(double cx, double cy) {
         west = cx - getVisibleWidth() / 2;
         north = cy + getVisibleHeight() / 2;
+        eraseBufferImage();
         repaint();
     }
 
@@ -158,6 +165,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     public void offsetVisibleArea(double dx, double dy) {
         west += dx;
         north += dy;
+        eraseBufferImage();
         repaint();
     }
 
@@ -212,11 +220,12 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         double dx = cx - west;
         double dy = cy - north;
 
-        dx *= this.scale / newScale;
-        dy *= this.scale / newScale;
+        dx *= scale / newScale;
+        dy *= scale / newScale;
         west = cx - dx;
         north = cy - dy;
         scale = newScale;
+        eraseBufferImage();
         repaint();
     }
 
@@ -233,6 +242,8 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         scale *= zoomFactor;
         west = fixPoint.x - dx / zoomFactor;
         north = fixPoint.y + dy / zoomFactor;
+
+        eraseBufferImage();
         repaint();
     }
 
@@ -277,6 +288,15 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      */
     public void showAll() {
         zoomOnRectangle(getBoundingBox());
+    }
+
+    /**
+     * Returns the current map scale.
+     *
+     * @return The map scale.
+     */
+    public double getScale() {
+        return scale;
     }
 
     /**
@@ -330,29 +350,37 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
             bufferImage = (BufferedImage) createImage(w, h);
             g2dBuffer = bufferImage.createGraphics();
 
-            // enable antialiasing
-            g2dBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-            // enable high quality rendering
-            g2dBuffer.setRenderingHint(RenderingHints.KEY_RENDERING,
-                    RenderingHints.VALUE_RENDER_QUALITY);
-            g2dBuffer.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-                    RenderingHints.VALUE_STROKE_PURE);
-            // enable bicubic interpolation of images
-            g2dBuffer.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                    RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            // set default appearance of vector elements
-            g2dBuffer.setStroke(new BasicStroke(1));
-            g2dBuffer.setColor(Color.black);
             g2dBuffer.setBackground(Color.WHITE);
+            eraseBufferImage();
         }
 
-        // erase background
-        g2dBuffer.clearRect(0, 0, w, h);
+        // enable antialiasing
+        g2dBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        // enable high quality rendering
+        g2dBuffer.setRenderingHint(RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY);
+        g2dBuffer.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+                RenderingHints.VALUE_STROKE_PURE);
+        // enable bicubic interpolation of images
+        g2dBuffer.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
         return g2dBuffer;
     }
 
+    public void eraseBufferImage() {
+        g2dBuffer.clearRect(0, 0, bufferImage.getWidth(), bufferImage.getHeight());
+    }
+
+    /**
+     * Returns the image for buffering the map drawing.
+     *
+     * @return The buffer image.
+     */
+    public BufferedImage getBufferImage() {
+        return bufferImage;
+    }
 
     /**
      * Inform Swing that this JComponent is opaque, i.e. we are drawing the
@@ -364,5 +392,55 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     @Override
     public boolean isOpaque() {
         return true;
+    }
+
+    /**
+     * Transforms a horizontal x coordinate (usually in meters) to pixels. Takes
+     * the scale and bounding boundingBox defined by the PageFormat into
+     * account.
+     *
+     * @param x The horizontal coordinate.
+     * @return Returns the coordinate in pixels.
+     */
+    public double xToPx(double x) {
+        return (x - west) * scale;
+    }
+
+    /**
+     * Transforms a vertical y coordinate to the scale and bounding boundingBox
+     * defined by the PageFormat.
+     *
+     * @param y The vertical coordinate.
+     * @return Returns the coordinate in the page coordinate system.
+     */
+    public double yToPx(double y) {
+        return (north - y) * scale;
+    }
+    
+
+     /**
+     * Returns a formatter that is used to display coordinates of this map.
+     * @return The coordinate formatter.
+     */
+    public CoordinateFormatter getCoordinateFormatter() {
+        return coordinateFormatter;
+    }
+
+    /**
+     * Sets the formatter that is used to display coordinates of this map.
+     * @param coordinateFormatter The new formatter.
+     */
+    public void setCoordinateFormatter(CoordinateFormatter coordinateFormatter) {
+        this.coordinateFormatter = coordinateFormatter;
+    }
+
+    public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
+        System.out.println("selectByRectangle not implemented yet");
+        return false;
+    }
+
+    public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
+        System.out.println("selectByRectangle not implemented yet");
+        return false;
     }
 }

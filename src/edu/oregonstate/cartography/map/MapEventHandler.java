@@ -56,7 +56,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
      * The MapComponent for which this MapEventHandler receives and treats
      * events.
      */
-    private AbstractSimpleFeatureMapComponent mapComponent;
+    private final AbstractSimpleFeatureMapComponent mapComponent;
 
     /**
      * Keep track whether the user is currently dragging (i.e. move the mouse
@@ -91,7 +91,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
 
         KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         kfm.addKeyEventDispatcher(this);
-        mapTool = new PanTool(mapComponent);
+        mapTool = new ScaleMoveSelectionTool(mapComponent);
     }
 
     /**
@@ -104,7 +104,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     public void mousePressed(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
         dragging = false;
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             mapTool.mouseDown(mapComponent.userToWorldSpace(evt.getPoint()), evt);
         }
     }
@@ -121,7 +121,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     public void mouseDragged(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
         final Point2D.Double point = mapComponent.userToWorldSpace(evt.getPoint());
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             if (dragging == false) {
                 mapTool.startDrag(point, evt);
             } else {
@@ -129,7 +129,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
             }
         }
         dragging = true;
-        this.informMouseMotionListeners(point);
+        informMouseMotionListeners(point);
     }
 
     /**
@@ -141,7 +141,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     @Override
     public void mouseReleased(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
-        if (this.mapTool != null && dragging == true) {
+        if (mapTool != null && dragging == true) {
             mapTool.endDrag(mapComponent.userToWorldSpace(evt.getPoint()), evt);
         }
         dragging = false;
@@ -156,7 +156,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     @Override
     public void mouseClicked(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             mapTool.mouseClicked(mapComponent.userToWorldSpace(evt.getPoint()), evt);
         }
         dragging = false;
@@ -171,7 +171,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     @Override
     public void mouseEntered(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             mapTool.mouseEntered(mapComponent.userToWorldSpace(evt.getPoint()), evt);
         }
     }
@@ -185,10 +185,10 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     @Override
     public void mouseExited(java.awt.event.MouseEvent evt) {
         mouseOverComponent = false;
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             mapTool.mouseExited(mapComponent.userToWorldSpace(evt.getPoint()), evt);
         }
-        this.informMouseMotionListeners(null);
+        informMouseMotionListeners(null);
     }
 
     /**
@@ -201,10 +201,10 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     public void mouseMoved(java.awt.event.MouseEvent evt) {
         mouseOverComponent = true;
         final Point2D.Double point = mapComponent.userToWorldSpace(evt.getPoint());
-        if (this.mapTool != null) {
+        if (mapTool != null) {
             mapTool.mouseMoved(point, evt);
         }
-        this.informMouseMotionListeners(point);
+        informMouseMotionListeners(point);
     }
 
     public void removeMouseMotionListener(MapToolMouseMotionListener listener) {
@@ -217,10 +217,10 @@ public class MapEventHandler implements java.awt.event.MouseListener,
 
     private void informMouseMotionListeners(Point2D.Double point) {
 
-        for (int i = this.mouseMotionListeners.size() - 1; i >= 0; i--) {
+        for (int i = mouseMotionListeners.size() - 1; i >= 0; i--) {
             MapToolMouseMotionListener listener;
             listener = (MapToolMouseMotionListener) mouseMotionListeners.get(i);
-            listener.mouseMoved(point, this.mapComponent);
+            listener.mouseMoved(point, mapComponent);
         }
     }
 
@@ -261,8 +261,8 @@ public class MapEventHandler implements java.awt.event.MouseListener,
     private void restoreTemporarilySuspendedMapTool() {
         if (temporarilySuspendedTool != null) {
             setMapTool(temporarilySuspendedTool, false);
-            this.mapTool.resume();
-            this.mapTool.setDefaultCursor();
+            mapTool.resume();
+            mapTool.setDefaultCursor();
         }
         temporarilySuspendedTool = null;
     }
@@ -359,7 +359,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
          */
 
         // remember the current key state.
-        this.updateKeyStates(keyEvent);
+        updateKeyStates(keyEvent);
 
         final boolean keyReleased = keyEvent.getID() == KeyEvent.KEY_RELEASED;
         final boolean keyPressed = keyEvent.getID() == KeyEvent.KEY_PRESSED;
@@ -370,7 +370,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
         if (keyReleased && (isDeleteKey || isBackspaceKey)) {
 
             // make sure the parent window of the mapComponent owns the focus.
-            if (!FocusUtils.parentWindowHasFocus(this.mapComponent)) {
+            if (!FocusUtils.parentWindowHasFocus(mapComponent)) {
                 return false;
             }
 
@@ -382,17 +382,17 @@ public class MapEventHandler implements java.awt.event.MouseListener,
             }
 
             // ask the current map tool to treat the delete or backspace key event
-            if (this.mapTool.keyEvent(keyEvent) == true) {
+            if (mapTool.keyEvent(keyEvent) == true) {
                 return true;
             }
 
             // no other component is handling delete and backspace key strokes,
             // it is save to remove the currently selected objects from the map.
-            // return this.mapComponent.removeSelectedGeoObjects();
+            // return mapComponent.removeSelectedGeoObjects();
         }
 
         // give current map tool a chance to consume the key event
-        if (this.mapTool.keyEvent(keyEvent) == true) {
+        if (mapTool.keyEvent(keyEvent) == true) {
             return true;
         }
 
@@ -415,7 +415,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
                 return true;
             }
 
-            MapTool newMapTool = this.getNewMapTool(keyEvent.getKeyCode());
+            MapTool newMapTool = getNewMapTool(keyEvent.getKeyCode());
             if (newMapTool != null) {
                 setMapTool(newMapTool, temporarilySuspendedTool == null);
                 return true;

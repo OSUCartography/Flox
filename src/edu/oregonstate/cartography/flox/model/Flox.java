@@ -1,6 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
-import edu.oregonstate.cartography.flox.gui.MainWindow;
+import edu.oregonstate.cartography.flox.gui.MainWindow_TEMP;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import javax.swing.JOptionPane;
@@ -48,7 +48,7 @@ public class Flox {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MainWindow window = new MainWindow();
+                MainWindow_TEMP window = new MainWindow_TEMP();
                 window.setModel(model);
                 
                 // find available screen real estate (without taskbar, etc.)

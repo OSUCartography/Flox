@@ -10,8 +10,12 @@ import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
-import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
+import edu.oregonstate.cartography.map.MeasureTool;
+import edu.oregonstate.cartography.map.PanTool;
+import edu.oregonstate.cartography.map.ScaleMoveSelectionTool;
+import edu.oregonstate.cartography.map.ZoomInTool;
+import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
@@ -26,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -41,7 +46,7 @@ import javax.swing.Timer;
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
-public class MainWindow extends javax.swing.JFrame {
+public class MainWindow_TEMP extends javax.swing.JFrame {
 
     /**
      * the model of this application
@@ -56,11 +61,11 @@ public class MainWindow extends javax.swing.JFrame {
     /**
      * Creates new form MainWindow
      */
-    public MainWindow() {
+    public MainWindow_TEMP() {
         initComponents();
         progressBar.setVisible(false);
 
-        // change the name of a layer
+        // list event handerl for changing the name of a layer
         new ListAction(layerList, new EditListAction() {
             @Override
             protected void applyValueToModel(String value, ListModel model, int row) {
@@ -70,7 +75,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
 
-        // reorder layers
+        // list event handler for reordering layers
         layerList.addPropertyChangeListener(DraggableList.MODEL_PROPERTY,
                 new PropertyChangeListener() {
 
@@ -85,6 +90,8 @@ public class MainWindow extends javax.swing.JFrame {
                         mapComponent.repaint();
                     }
                 });
+        
+        mapComponent.addMouseMotionListener(coordinateInfoPanel);
     }
 
     /**
@@ -120,7 +127,8 @@ public class MainWindow extends javax.swing.JFrame {
         flowAngleSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
         flowLengthSlider = new javax.swing.JSlider();
-        mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
+        mapToolsButtonGroup = new javax.swing.ButtonGroup();
+        mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent_TEMP();
         rightPanel = new javax.swing.JPanel();
         controlsTabbedPane = new javax.swing.JTabbedPane();
         forcesPanel = new TransparentMacPanel();
@@ -144,8 +152,6 @@ public class MainWindow extends javax.swing.JFrame {
         enforceRangeboxCheckbox = new javax.swing.JCheckBox();
         canvasSizeSlider = new javax.swing.JSlider();
         jLabel11 = new javax.swing.JLabel();
-        flowRangeboxSizeSlider = new javax.swing.JSlider();
-        jLabel13 = new javax.swing.JLabel();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -162,12 +168,20 @@ public class MainWindow extends javax.swing.JFrame {
         drawingOrderComboBox = new javax.swing.JComboBox();
         javax.swing.JLabel jLabel12 = new javax.swing.JLabel();
         drawCanvasPaddingCheckbox = new javax.swing.JCheckBox();
-        drawFlowRangeboxCheckbox = new javax.swing.JCheckBox();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel10 = new javax.swing.JLabel();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
+        jToolBar1 = new javax.swing.JToolBar();
+        jPanel2 = new javax.swing.JPanel();
+        arrowToggleButton = new javax.swing.JToggleButton();
+        zoomInToggleButton = new javax.swing.JToggleButton();
+        zoomOutToggleButton = new javax.swing.JToggleButton();
+        handToggleButton = new javax.swing.JToggleButton();
+        distanceToggleButton = new javax.swing.JToggleButton();
+        showAllButton = new javax.swing.JButton();
+        coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         importFlowsMenuItem = new javax.swing.JMenuItem();
@@ -516,27 +530,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel11, gridBagConstraints);
 
-        flowRangeboxSizeSlider.setMajorTickSpacing(2);
-        flowRangeboxSizeSlider.setMaximum(20);
-        flowRangeboxSizeSlider.setPaintLabels(true);
-        flowRangeboxSizeSlider.setPaintTicks(true);
-        flowRangeboxSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                flowRangeboxSizeSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 33;
-        forcesPanel.add(flowRangeboxSizeSlider, gridBagConstraints);
-
-        jLabel13.setText("Flow Rangebox Size");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 32;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel13, gridBagConstraints);
-
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
         mapControlPanel.setLayout(new java.awt.GridBagLayout());
@@ -683,18 +676,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawCanvasPaddingCheckbox, gridBagConstraints);
 
-        drawFlowRangeboxCheckbox.setText("Draw Flow Rangebox");
-        drawFlowRangeboxCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawFlowRangeboxCheckboxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(drawFlowRangeboxCheckbox, gridBagConstraints);
-
         mapPanel.add(mapControlPanel);
 
         controlsTabbedPane.addTab("Map", mapPanel);
@@ -716,6 +697,97 @@ public class MainWindow extends javax.swing.JFrame {
         rightPanel.add(progressBarPanel, java.awt.BorderLayout.SOUTH);
 
         getContentPane().add(rightPanel, java.awt.BorderLayout.EAST);
+
+        jToolBar1.setRollover(true);
+
+        mapToolsButtonGroup.add(arrowToggleButton);
+        arrowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Arrow16x16.gif"))); // NOI18N
+        arrowToggleButton.setToolTipText("Select, move and scale objects.");
+        arrowToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        arrowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
+        arrowToggleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        arrowToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                arrowToggleButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(arrowToggleButton);
+
+        mapToolsButtonGroup.add(zoomInToggleButton);
+        zoomInToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ZoomIn16x16.gif"))); // NOI18N
+        zoomInToggleButton.setSelected(true);
+        zoomInToggleButton.setToolTipText("Zoom In");
+        zoomInToggleButton.setFocusable(false);
+        zoomInToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        zoomInToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
+        zoomInToggleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        zoomInToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                zoomInToggleButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(zoomInToggleButton);
+
+        mapToolsButtonGroup.add(zoomOutToggleButton);
+        zoomOutToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ZoomOut16x16.gif"))); // NOI18N
+        zoomOutToggleButton.setToolTipText("Zoom Out");
+        zoomOutToggleButton.setFocusable(false);
+        zoomOutToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        zoomOutToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
+        zoomOutToggleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        zoomOutToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                zoomOutToggleButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(zoomOutToggleButton);
+
+        mapToolsButtonGroup.add(handToggleButton);
+        handToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Hand16x16.gif"))); // NOI18N
+        handToggleButton.setToolTipText("Pan");
+        handToggleButton.setFocusable(false);
+        handToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        handToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
+        handToggleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        handToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                handToggleButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(handToggleButton);
+
+        mapToolsButtonGroup.add(distanceToggleButton);
+        distanceToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Ruler16x16.gif"))); // NOI18N
+        distanceToggleButton.setToolTipText("Measure Distance and Angle");
+        distanceToggleButton.setFocusable(false);
+        distanceToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        distanceToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
+        distanceToggleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        distanceToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                distanceToggleButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(distanceToggleButton);
+
+        showAllButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ShowAll20x14.png"))); // NOI18N
+        showAllButton.setToolTipText("Show All");
+        showAllButton.setBorderPainted(false);
+        showAllButton.setContentAreaFilled(false);
+        showAllButton.setFocusable(false);
+        showAllButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        showAllButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        showAllButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showAllButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(showAllButton);
+        jPanel2.add(coordinateInfoPanel);
+
+        jToolBar1.add(jPanel2);
+
+        getContentPane().add(jToolBar1, java.awt.BorderLayout.NORTH);
 
         fileMenu.setText("File");
 
@@ -876,7 +948,7 @@ public class MainWindow extends javax.swing.JFrame {
             outputStream = new FileOutputStream(outFilePath);
             exporter.export(outputStream);
         } catch (IOException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainWindow_TEMP.class.getName()).log(Level.SEVERE, null, ex);
             ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
         } finally {
             try {
@@ -884,7 +956,7 @@ public class MainWindow extends javax.swing.JFrame {
                     outputStream.close();
                 }
             } catch (IOException ex) {
-                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainWindow_TEMP.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -914,7 +986,7 @@ public class MainWindow extends javax.swing.JFrame {
             updateLayerList();
             layerList.setSelectedIndex(0);
         } catch (IOException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainWindow_TEMP.class.getName()).log(Level.SEVERE, null, ex);
             ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
         } finally {
             writeSymbolGUI();
@@ -1079,9 +1151,14 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void flowScaleFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowScaleFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName())) {
-            double s = ((Number) flowScaleFormattedTextField.getValue()).doubleValue();
-            model.setFlowWidthScale(s);
-            mapComponent.repaint();
+            try {
+                flowScaleFormattedTextField.commitEdit();
+                double s = ((Number) flowScaleFormattedTextField.getValue()).doubleValue();
+                model.setFlowWidthScale(s);
+                mapComponent.repaint();
+            } catch (ParseException ignore) {
+
+            }
         }
     }//GEN-LAST:event_flowScaleFormattedTextFieldPropertyChange
 
@@ -1287,27 +1364,42 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_canvasSizeSliderStateChanged
 
-    private void drawFlowRangeboxCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawFlowRangeboxCheckboxActionPerformed
-        mapComponent.setDrawFlowRangebox(drawFlowRangeboxCheckbox.isSelected());
-        mapComponent.repaint();
-    }//GEN-LAST:event_drawFlowRangeboxCheckboxActionPerformed
+    private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
+        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent));
+    }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
-    private void flowRangeboxSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowRangeboxSizeSliderStateChanged
-        if (flowRangeboxSizeSlider.getValueIsAdjusting() == false) {
-            forceLayout();
-        }
-    }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
+    private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
+        mapComponent.setMapTool(new ZoomInTool(mapComponent));
+    }//GEN-LAST:event_zoomInToggleButtonActionPerformed
+
+    private void zoomOutToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutToggleButtonActionPerformed
+        mapComponent.setMapTool(new ZoomOutTool(mapComponent));
+    }//GEN-LAST:event_zoomOutToggleButtonActionPerformed
+
+    private void handToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_handToggleButtonActionPerformed
+        mapComponent.setMapTool(new PanTool(mapComponent));
+    }//GEN-LAST:event_handToggleButtonActionPerformed
+
+    private void distanceToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_distanceToggleButtonActionPerformed
+        MeasureTool tool = new MeasureTool(this.mapComponent);
+        tool.addMeasureToolListener(this.coordinateInfoPanel);
+        this.mapComponent.setMapTool(tool);
+    }//GEN-LAST:event_distanceToggleButtonActionPerformed
+
+    private void showAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllButtonActionPerformed
+        mapComponent.showAll();
+    }//GEN-LAST:event_showAllButtonActionPerformed
 
     private void forceLayout() {
-
-        RangeboxEnforcer rangeEnforcer = new RangeboxEnforcer(model);
+        if (model.getFlows().isEmpty()) {
+            return;
+        }
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
 
         model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
         model.setCanvas(model.getFlowsBoundingBox());
-        model.setCanvasPadding(canvasSizeSlider.getValue()/10d);
-        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue()/10d + 0.01);
+        model.setCanvasPadding(canvasSizeSlider.getValue() / 10d);
         model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
@@ -1349,13 +1441,15 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JPanel arrowHeadsControlPanel;
     private javax.swing.JPanel arrowHeadsPanel;
+    private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JTabbedPane controlsTabbedPane;
+    private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
+    private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawCanvasPaddingCheckbox;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
-    private javax.swing.JCheckBox drawFlowRangeboxCheckbox;
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JComboBox drawingOrderComboBox;
@@ -1369,23 +1463,25 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider flowAngleSlider;
     private javax.swing.JPanel flowLayoutPanel;
     private javax.swing.JSlider flowLengthSlider;
-    private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JPanel forcesPanel;
     private javax.swing.JMenuItem geometricLayoutMenuItem;
+    private javax.swing.JToggleButton handToggleButton;
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel13;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JSlider longestFlowStiffnessSlider;
-    private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
+    private edu.oregonstate.cartography.flox.gui.FloxMapComponent_TEMP mapComponent;
     private javax.swing.JPanel mapControlPanel;
     private javax.swing.JMenu mapMenu;
     private javax.swing.JPanel mapPanel;
+    private javax.swing.ButtonGroup mapToolsButtonGroup;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openShapefileMenuItem;
@@ -1397,6 +1493,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JCheckBox selfForcesCheckBox;
+    private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;
     private javax.swing.JCheckBox strokeCheckBox;
@@ -1406,7 +1503,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;
     private javax.swing.JSlider zeroLengthStiffnessSlider;
+    private javax.swing.JToggleButton zoomInToggleButton;
     private javax.swing.JMenuItem zoomOnSelectedLayerMenuItem;
+    private javax.swing.JToggleButton zoomOutToggleButton;
     // End of variables declaration//GEN-END:variables
 
 }
