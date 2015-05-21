@@ -43,6 +43,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     private boolean drawCanvasPadding = false;
     
+    /**
+     * flag for drawing flow rangebox
+     */
+    private boolean drawFlowRangebox = false;
+    
     public FloxMapComponent() {
     }
 
@@ -88,6 +93,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         renderer.drawFlows();
         renderer.drawNodes();
         
+        
+        
+        if (isDrawFlowRangebox()) {
+            renderer.drawFlowRangebox();
+        }
+        
         if (isDrawCanvasPadding()) {
             renderer.drawCanvasPadding();
         }
@@ -131,6 +142,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         this.drawCanvasPadding = drawCanvasPadding;
     }
     
+    public boolean isDrawFlowRangebox () {
+        return drawFlowRangebox;
+    }
     /**
      *
      * @param drawControlPoints
@@ -162,5 +176,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     public void setDrawReconstructedBezier(boolean drawReconstructedBezier) {
         this.drawReconstructedBezier = drawReconstructedBezier;
+    }
+
+    /**
+     * @param drawFlowRangebox the drawFlowRangebox to set
+     */
+    public void setDrawFlowRangebox(boolean drawFlowRangebox) {
+        this.drawFlowRangebox = drawFlowRangebox;
     }
 }

@@ -23,11 +23,7 @@ public class QuadraticBezierFlow extends Flow {
      It is currently only on one side of the baseLine. Needs to be extended to
      both sides.
      */
-    protected Point b1;
-    protected Point b2;
-    protected Point b3;
-    protected Point b4;
-    protected double rangeBoxHeight = 1.25;
+    
 
     /**
      * Construct a QuadraticBezierFlow from 2 irregularPoints
@@ -62,7 +58,7 @@ public class QuadraticBezierFlow extends Flow {
         double dist = getBaselineLength();
         double tangentLength = dist * .33;
         computeCtrlPt(alpha, tangentLength);
-        computeRangeBox();
+
     }
 
     /**
@@ -83,7 +79,7 @@ public class QuadraticBezierFlow extends Flow {
         this.value = value;
         cPt = new Point(0, 0);
         bend(alpha, distPerc);
-        computeRangeBox();
+
     }
 
     /**
@@ -234,23 +230,9 @@ public class QuadraticBezierFlow extends Flow {
         return new QuadraticBezierFlow(startPt, endPt, radians, distPerc, value);
     }
 
-    public void computeRangeBox() {
-
-        double baseDist = this.getBaselineLength();
-        double baseAzimuth = this.getBaselineAzimuth();
-        Point bPt = new Point(startPt.x + baseDist, startPt.y);
-
-        b1 = (new Point(startPt.x, startPt.y + (baseDist * rangeBoxHeight)))
-                .rotatePoint(startPt, baseAzimuth);
-        b2 = (new Point(bPt.x, bPt.y + (baseDist * rangeBoxHeight)))
-                .rotatePoint(startPt, baseAzimuth);
-        b3 = (new Point(startPt.x, startPt.y - (baseDist * rangeBoxHeight)))
-                .rotatePoint(startPt, baseAzimuth);
-        b4 = (new Point(bPt.x, bPt.y - (baseDist * rangeBoxHeight)))
-                .rotatePoint(startPt, baseAzimuth);
-
-    }
-
+    
+   
+    
     /**
      * Returns 
      * @param t
@@ -300,11 +282,11 @@ public class QuadraticBezierFlow extends Flow {
 
         QuadraticBezierFlow flow1 = new QuadraticBezierFlow(start1, ctrl1, end1);
         flow1.value = value;
-        flow1.computeRangeBox();
+   
 
         QuadraticBezierFlow flow2 = new QuadraticBezierFlow(start2, ctrl2, end2);
         flow2.value = value;
-        flow2.computeRangeBox();
+   
 
         return new QuadraticBezierFlow[]{flow1, flow2};
     }

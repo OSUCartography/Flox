@@ -17,6 +17,20 @@ import org.jgrapht.graph.SimpleGraph;
  */
 public class Model {
 
+    /**
+     * @return the flowRangeboxHeight
+     */
+    public double getFlowRangeboxHeight() {
+        return flowRangeboxHeight;
+    }
+
+    /**
+     * @param flowRangeboxHeight the flowRangeboxHeight to set
+     */
+    public void setFlowRangeboxHeight(double flowRangeboxHeight) {
+        this.flowRangeboxHeight = flowRangeboxHeight;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -83,6 +97,8 @@ public class Model {
     private boolean enforceCanvasRange = true;
 
     private double canvasPadding = 0.1;
+    
+    private double flowRangeboxHeight = 1.25;
     
     private Rectangle2D canvas;
 

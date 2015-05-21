@@ -13,19 +13,16 @@ import java.awt.geom.Rectangle2D;
  */
 public class RangeboxEnforcer {
 
-    
     private final Model model;
-    
+
     /**
-     * 
-     * This method returns true if 2 line segments intersect.
-     * The coordinates below are the endpoints of two line segments.
-     * Points 1 & 2 are a line segment
-     * Points 3 & 4 are a line segment
-     * 
-     * Copied from here:
-     * http://www.java-gaming.org/index.php?topic=22590.0
-     * 
+     *
+     * This method returns true if 2 line segments intersect. The coordinates
+     * below are the endpoints of two line segments. Points 1 & 2 are a line
+     * segment Points 3 & 4 are a line segment
+     *
+     * Copied from here: http://www.java-gaming.org/index.php?topic=22590.0
+     *
      * @param x1
      * @param y1
      * @param x2
@@ -34,7 +31,7 @@ public class RangeboxEnforcer {
      * @param y3
      * @param x4
      * @param y4
-     * @return 
+     * @return
      */
     public static boolean linesIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
         // Return false if either of the lines have zero length
@@ -96,14 +93,12 @@ public class RangeboxEnforcer {
     }
 
     /**
-     * Copied from here:
-     * http://www.java-gaming.org/index.php?topic=22590.0
-     * 
-     * Finds the intersection between two infinite lines.
-     * Returns null if they are parallel.
-     * The coordinates below define two infinite lines.
-     * Points 1 & 2 are along one line
-     * Points 3 & 4 are along a second line
+     * Copied from here: http://www.java-gaming.org/index.php?topic=22590.0
+     *
+     * Finds the intersection between two infinite lines. Returns null if they
+     * are parallel. The coordinates below define two infinite lines. Points 1 &
+     * 2 are along one line Points 3 & 4 are along a second line
+     *
      * @param x1
      * @param y1
      * @param x2
@@ -112,7 +107,7 @@ public class RangeboxEnforcer {
      * @param y3
      * @param x4
      * @param y4
-     * @return 
+     * @return
      */
     public static Point getLineLineIntersection(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
         double det1And2 = det(x1, y1, x2, y2);
@@ -140,19 +135,72 @@ public class RangeboxEnforcer {
     }
 
     /**
-     * If the control point of a flow falls outside of the flow's range box, 
+     * If the control point of a flow falls outside of the flow's range box,
      * this returns the intersection between a line connecting the control point
      * to the midpoint of the baseline, and the location along the rangebox's
-     * border where the line crosses.
-     * Checks each side of the range rectangle one at a time.
+     * border where the line crosses. Checks each side of the range rectangle
+     * one at a time.
+     *
      * @param flow A QuadraticBezierFlow
-     * @return 
+     * @return
      */
-    public static Point enforceFlowControlPointRange(QuadraticBezierFlow flow) {
+    public Point enforceFlowControlPointRange(QuadraticBezierFlow flow) {
 
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();
 
+        Point[] box = computeRangebox(flow);
+        
+        if (linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                box[0].x, box[0].y,
+                box[1].x, box[1].y)) {
+            return getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    box[0].x, box[0].y,
+                    box[1].x, box[1].y);
+        }
+
+        if (linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                box[2].x, box[2].y,
+                box[3].x, box[3].y)) {
+            return getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    box[2].x, box[2].y,
+                    box[3].x, box[3].y);
+        }
+
+        if (linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                box[0].x, box[0].y,
+                box[2].x, box[2].y)) {
+            return getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    box[0].x, box[0].y,
+                box[2].x, box[2].y);
+        }
+
+        if (linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                box[1].x, box[1].y,
+                box[3].x, box[3].y)) {
+            return getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    box[1].x, box[1].y,
+                box[3].x, box[3].y);
+        }
+        
+        /* Pre-screwup version
+        
         if (linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -176,7 +224,7 @@ public class RangeboxEnforcer {
                     flow.b3.x, flow.b3.y,
                     flow.b4.x, flow.b4.y);
         }
-        
+
         if (linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -188,7 +236,7 @@ public class RangeboxEnforcer {
                     flow.b1.x, flow.b1.y,
                     flow.b3.x, flow.b3.y);
         }
-        
+
         if (linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -200,29 +248,30 @@ public class RangeboxEnforcer {
                     flow.b2.x, flow.b2.y,
                     flow.b4.x, flow.b4.y);
         }
-        
+
+        */
         return cPt;
     }
 
     public Point enforceCanvasBoundingBox(QuadraticBezierFlow flow, Rectangle2D canvas) {
-        
+
         double cWidth = canvas.getWidth();
         double cHeight = canvas.getHeight();
-        
+
         // Outer padding of the canvas bounding box
         // Is a percentage of the canvas size
         double xPad = cWidth * model.getCanvasPadding();
         double yPad = cHeight * model.getCanvasPadding();
-        
+
         // Get the corner points of the canvas
         Point b1 = new Point(canvas.getX() - xPad, canvas.getY() - yPad);
         Point b2 = new Point(canvas.getMaxX() + xPad, canvas.getY() - yPad);
         Point b3 = new Point(canvas.getX() - xPad, canvas.getMaxY() + yPad);
         Point b4 = new Point(canvas.getMaxX() + xPad, canvas.getMaxY() + yPad);
-        
+
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();
-        
+
         if (linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -234,7 +283,7 @@ public class RangeboxEnforcer {
                     b1.x, b1.y,
                     b2.x, b2.y);
         }
-        
+
         if (linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -246,7 +295,7 @@ public class RangeboxEnforcer {
                     b3.x, b3.y,
                     b4.x, b4.y);
         }
-        
+
         if (linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -258,7 +307,7 @@ public class RangeboxEnforcer {
                     b1.x, b1.y,
                     b3.x, b3.y);
         }
-        
+
         if (linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -270,11 +319,31 @@ public class RangeboxEnforcer {
                     b2.x, b2.y,
                     b4.x, b4.y);
         }
-        
+
         return cPt;
     }
-    
+
     public RangeboxEnforcer(Model model) {
         this.model = model;
+    }
+
+    public Point[] computeRangebox(Flow flow) {
+
+        double baseDist = flow.getBaselineLength();
+        double baseAzimuth = flow.getBaselineAzimuth();
+        Point bPt = new Point(flow.startPt.x + baseDist, flow.startPt.y);
+        double boxHeight = model.getFlowRangeboxHeight();
+
+        Point b1 = (new Point(flow.startPt.x, flow.startPt.y + (baseDist * boxHeight)))
+                .rotatePoint(flow.startPt, baseAzimuth);
+        Point b2 = (new Point(bPt.x, bPt.y + (baseDist * boxHeight)))
+                .rotatePoint(flow.startPt, baseAzimuth);
+        Point b3 = (new Point(flow.startPt.x, flow.startPt.y - (baseDist * boxHeight)))
+                .rotatePoint(flow.startPt, baseAzimuth);
+        Point b4 = (new Point(bPt.x, bPt.y - (baseDist * boxHeight)))
+                .rotatePoint(flow.startPt, baseAzimuth);
+        
+        Point[] rangeboxPoints = {b1, b2, b3, b4};
+        return rangeboxPoints;
     }
 }

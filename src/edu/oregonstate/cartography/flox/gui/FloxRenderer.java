@@ -5,6 +5,7 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
+import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.bezier.Bezier;
 import edu.oregonstate.cartography.flox.model.bezier.BezierPath;
 import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
@@ -204,7 +205,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     public void drawCanvasPadding() {
-        
+
         g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getCanvas();
 
@@ -212,7 +213,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             System.out.println("No Canvas!");
         } else {
             System.out.println("We have a canvas!");
-            
+
             double cWidth = canvas.getWidth();
             double cHeight = canvas.getHeight();
 
@@ -234,9 +235,30 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(line2);
             g2d.draw(line3);
             g2d.draw(line4);
-            
+
         }
 
+    }
+
+    public void drawFlowRangebox() {
+        g2d.setStroke(new BasicStroke(1f));
+        g2d.setColor(Color.GRAY);
+        Iterator<Flow> iter = model.flowIterator();
+        while (iter.hasNext()) {
+            Flow flow = iter.next();
+            RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
+            Point[] box = enforcer.computeRangebox(flow);
+            
+            Line2D line1 = new Line2D.Double(xToPx(box[0].x), yToPx(box[0].y), xToPx(box[1].x), yToPx(box[1].y));
+            Line2D line2 = new Line2D.Double(xToPx(box[2].x), yToPx(box[2].y), xToPx(box[3].x), yToPx(box[3].y));
+            Line2D line3 = new Line2D.Double(xToPx(box[0].x), yToPx(box[0].y), xToPx(box[2].x), yToPx(box[2].y));
+            Line2D line4 = new Line2D.Double(xToPx(box[1].x), yToPx(box[1].y), xToPx(box[3].x), yToPx(box[3].y));
+            
+            g2d.draw(line1);
+            g2d.draw(line2);
+            g2d.draw(line3);
+            g2d.draw(line4);
+        }
     }
 
     /**

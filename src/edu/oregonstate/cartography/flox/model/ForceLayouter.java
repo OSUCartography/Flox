@@ -284,7 +284,8 @@ public class ForceLayouter {
                 // Enforce control point range if enforceRangebox
                 // is true
                 if (model.isEnforceRangebox()) {
-                    Point tempPoint = RangeboxEnforcer.enforceFlowControlPointRange(qFlow);
+                    RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
+                    Point tempPoint = enforcer.enforceFlowControlPointRange(qFlow);
                     ctrlPt.x = tempPoint.x;
                     ctrlPt.y = tempPoint.y;
                 }
