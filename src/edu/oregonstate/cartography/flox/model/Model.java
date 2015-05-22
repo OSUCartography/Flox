@@ -35,14 +35,14 @@ public class Model {
      * @return the flowArrowEndPointRadius
      */
     public double getFlowArrowEndPointRadius() {
-        return flowArrowEndPointRadius;
+        return flowDistanceFromEndPoint;
     }
 
     /**
      * @param flowArrowEndPointRadius the flowArrowEndPointRadius to set
      */
     public void setFlowArrowEndPointRadius(double flowArrowEndPointRadius) {
-        this.flowArrowEndPointRadius = flowArrowEndPointRadius;
+        this.flowDistanceFromEndPoint = flowArrowEndPointRadius;
     }
 
     public enum CurveType {
@@ -114,7 +114,7 @@ public class Model {
     
     private double flowRangeboxHeight = 1.25;
     
-    private double flowArrowEndPointRadius = 0.6d;
+    private double flowDistanceFromEndPoint = 0.0d;
     
     private Rectangle2D canvas;
 

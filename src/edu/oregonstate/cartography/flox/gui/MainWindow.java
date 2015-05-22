@@ -1135,6 +1135,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void removeAllLayersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAllLayersMenuItemActionPerformed
         model.removeAllLayers();
         mapComponent.showAll();
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
         updateLayerList();
     }//GEN-LAST:event_removeAllLayersMenuItemActionPerformed
@@ -1214,6 +1215,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ("value".equals(evt.getPropertyName())) {
             double s = ((Number) flowScaleFormattedTextField.getValue()).doubleValue();
             model.setFlowWidthScale(s);
+            mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
     }//GEN-LAST:event_flowScaleFormattedTextFieldPropertyChange
@@ -1241,6 +1243,7 @@ public class MainWindow extends javax.swing.JFrame {
         model.setFlows(flows);
 
         // repaint the map
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }
 
@@ -1285,6 +1288,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void drawControlPointsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawControlPointsCheckBoxActionPerformed
         mapComponent.setDrawControlPoints(drawControlPointsCheckBox.isSelected());
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_drawControlPointsCheckBoxActionPerformed
 
@@ -1308,11 +1312,13 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void drawLineSegmentsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawLineSegmentsCheckBoxActionPerformed
         mapComponent.setDrawLineSegments(drawLineSegmentsCheckBox.isSelected());
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_drawLineSegmentsCheckBoxActionPerformed
 
     private void drawReconstructedBezierCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawReconstructedBezierCheckBoxActionPerformed
         mapComponent.setDrawReconstructedBezier(drawReconstructedBezierCheckBox.isSelected());
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_drawReconstructedBezierCheckBoxActionPerformed
 
@@ -1406,11 +1412,13 @@ public class MainWindow extends javax.swing.JFrame {
                     model.setFlowOrder(Model.FlowOrder.UNORDERED);
             }
         }
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_drawingOrderComboBoxItemStateChanged
 
     private void drawCanvasPaddingCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawCanvasPaddingCheckboxActionPerformed
         mapComponent.setDrawCanvasPadding(drawCanvasPaddingCheckbox.isSelected());
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_drawCanvasPaddingCheckboxActionPerformed
 
@@ -1422,6 +1430,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void drawFlowRangeboxCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawFlowRangeboxCheckboxActionPerformed
         mapComponent.setDrawFlowRangebox(drawFlowRangeboxCheckbox.isSelected());
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_drawFlowRangeboxCheckboxActionPerformed
 
@@ -1461,6 +1470,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ("value".equals(evt.getPropertyName())) {
             double s = ((Number) flowDistanceFromEndPointFormattedTextField.getValue()).doubleValue();
             model.setFlowArrowEndPointRadius(s);
+            mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
     }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
