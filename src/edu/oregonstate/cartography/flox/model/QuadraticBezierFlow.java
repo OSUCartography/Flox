@@ -48,7 +48,7 @@ public class QuadraticBezierFlow extends Flow {
 
         // Distance between startPt and endPt
         double dist = getBaselineLength();
-        double tangentLength = dist * .33;
+        double tangentLength = dist * .5;
         computeCtrlPt(alpha, tangentLength);
 
     }

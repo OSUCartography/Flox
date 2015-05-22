@@ -31,7 +31,7 @@ public class FlowImporter {
                 double x2 = Double.parseDouble(tokenizer.nextToken());
                 double y2 = Double.parseDouble(tokenizer.nextToken());
                 double value = Double.parseDouble(tokenizer.nextToken());
-                Flow flow = new CubicBezierFlow(new Point(x1, y1), new Point(x2, y2));
+                Flow flow = new QuadraticBezierFlow(new Point(x1, y1), new Point(x2, y2));
                 flow.setValue(value);
                 flows.add(flow);
             }

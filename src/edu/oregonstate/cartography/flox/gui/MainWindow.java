@@ -181,7 +181,8 @@ public class MainWindow extends javax.swing.JFrame {
         drawFlowRangeboxCheckbox = new javax.swing.JCheckBox();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
-        javax.swing.JLabel jLabel10 = new javax.swing.JLabel();
+        flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel14 = new javax.swing.JLabel();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
@@ -293,7 +294,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapToolsButtonGroup.add(arrowToggleButton);
         arrowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Arrow16x16.gif"))); // NOI18N
-        arrowToggleButton.setSelected(true);
         arrowToggleButton.setToolTipText("Select, move and scale objects.");
         arrowToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         arrowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
@@ -409,7 +409,6 @@ public class MainWindow extends javax.swing.JFrame {
         forcesPanel.add(flowScaleFormattedTextField, gridBagConstraints);
 
         curvesButtonGroup.add(cubicCurvesRadioButton);
-        cubicCurvesRadioButton.setSelected(true);
         cubicCurvesRadioButton.setText("Cubic Curves");
         cubicCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -423,6 +422,7 @@ public class MainWindow extends javax.swing.JFrame {
         forcesPanel.add(cubicCurvesRadioButton, gridBagConstraints);
 
         curvesButtonGroup.add(quadraticCurvesRadioButton);
+        quadraticCurvesRadioButton.setSelected(true);
         quadraticCurvesRadioButton.setText("Quadratic Curves");
         quadraticCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -807,10 +807,35 @@ public class MainWindow extends javax.swing.JFrame {
         controlsTabbedPane.addTab("Map", mapPanel);
 
         arrowHeadsControlPanel.setLayout(new java.awt.GridBagLayout());
-        arrowHeadsPanel.add(arrowHeadsControlPanel);
 
-        jLabel10.setText("Controls for arrow heads here");
-        arrowHeadsPanel.add(jLabel10);
+        flowDistanceFromEndPointFormattedTextField.setCaretPosition(0);
+        flowDistanceFromEndPointFormattedTextField.setMinimumSize(new java.awt.Dimension(40, 30));
+        flowDistanceFromEndPointFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                flowDistanceFromEndPointFormattedTextFieldActionPerformed(evt);
+            }
+        });
+        flowDistanceFromEndPointFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                flowDistanceFromEndPointFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(9, 0, 9, 0);
+        arrowHeadsControlPanel.add(flowDistanceFromEndPointFormattedTextField, gridBagConstraints);
+
+        jLabel14.setText("Flow Distance From End Point");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        arrowHeadsControlPanel.add(jLabel14, gridBagConstraints);
+
+        arrowHeadsPanel.add(arrowHeadsControlPanel);
 
         controlsTabbedPane.addTab("Arrows", arrowHeadsPanel);
 
@@ -1047,6 +1072,7 @@ public class MainWindow extends javax.swing.JFrame {
                 double maxFlowValue = model.getMaxFlowValue();
                 model.setFlowWidthScale(20 / maxFlowValue);
                 flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
+                flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowArrowEndPointRadius());
                 mapComponent.showAll();
             }
         } catch (Exception ex) {
@@ -1431,6 +1457,18 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.showAll();
     }//GEN-LAST:event_showAllButtonActionPerformed
 
+    private void flowDistanceFromEndPointFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName())) {
+            double s = ((Number) flowDistanceFromEndPointFormattedTextField.getValue()).doubleValue();
+            model.setFlowArrowEndPointRadius(s);
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
+
+    private void flowDistanceFromEndPointFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowDistanceFromEndPointFormattedTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1503,6 +1541,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox fillCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton fillColorButton;
     private javax.swing.JSlider flowAngleSlider;
+    private javax.swing.JFormattedTextField flowDistanceFromEndPointFormattedTextField;
     private javax.swing.JPanel flowLayoutPanel;
     private javax.swing.JSlider flowLengthSlider;
     private javax.swing.JSlider flowRangeboxSizeSlider;
@@ -1516,6 +1555,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem infoMenuItem;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;

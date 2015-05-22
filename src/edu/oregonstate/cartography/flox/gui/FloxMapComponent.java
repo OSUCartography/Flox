@@ -100,7 +100,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
 
         // draw flows and nodes
-        renderer.drawFlows();
+        renderer.drawFlowsWithArrows(model.getFlowArrowEndPointRadius());
         renderer.drawNodes();
         
         
