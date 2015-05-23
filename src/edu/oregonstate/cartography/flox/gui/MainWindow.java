@@ -602,11 +602,9 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(enforceRangeboxCheckbox, gridBagConstraints);
 
-        canvasSizeSlider.setMajorTickSpacing(1);
-        canvasSizeSlider.setMaximum(10);
+        canvasSizeSlider.setMajorTickSpacing(10);
         canvasSizeSlider.setPaintLabels(true);
         canvasSizeSlider.setPaintTicks(true);
-        canvasSizeSlider.setValue(1);
         canvasSizeSlider.setPreferredSize(new java.awt.Dimension(240, 40));
         canvasSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -616,6 +614,8 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 31;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         forcesPanel.add(canvasSizeSlider, gridBagConstraints);
 
         jLabel11.setText("Canvas Size");
@@ -625,10 +625,11 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel11, gridBagConstraints);
 
-        flowRangeboxSizeSlider.setMajorTickSpacing(2);
-        flowRangeboxSizeSlider.setMaximum(20);
+        flowRangeboxSizeSlider.setMajorTickSpacing(10);
+        flowRangeboxSizeSlider.setMaximum(50);
         flowRangeboxSizeSlider.setPaintLabels(true);
         flowRangeboxSizeSlider.setPaintTicks(true);
+        flowRangeboxSizeSlider.setValue(50);
         flowRangeboxSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 flowRangeboxSizeSliderStateChanged(evt);
@@ -637,6 +638,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 33;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         forcesPanel.add(flowRangeboxSizeSlider, gridBagConstraints);
 
         jLabel13.setText("Flow Rangebox Size");
@@ -1085,6 +1087,7 @@ public class MainWindow extends javax.swing.JFrame {
                 model.setFlowWidthScale(20 / maxFlowValue);
                 flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
                 flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowArrowEndPointRadius());
+                forceLayout();
                 mapComponent.showAll();
             }
         } catch (Exception ex) {
@@ -1435,6 +1438,11 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_drawCanvasPaddingCheckboxActionPerformed
 
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
+        if (mapComponent.isDrawCanvasPadding()) {
+            model.setCanvasPadding(canvasSizeSlider.getValue()/100d);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
         if (canvasSizeSlider.getValueIsAdjusting() == false) {
             forceLayout();
         }
@@ -1447,6 +1455,11 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_drawFlowRangeboxCheckboxActionPerformed
 
     private void flowRangeboxSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowRangeboxSizeSliderStateChanged
+        if (mapComponent.isDrawFlowRangebox()) {
+            model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue()/100d + 0.01);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
         if (flowRangeboxSizeSlider.getValueIsAdjusting() == false) {
             forceLayout();
         }
@@ -1504,8 +1517,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
         model.setCanvas(model.getFlowsBoundingBox());
-        model.setCanvasPadding(canvasSizeSlider.getValue()/10d);
-        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue()/10d + 0.01);
+        model.setCanvasPadding(canvasSizeSlider.getValue()/100d);
+        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue()/100d + 0.01);
         model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
