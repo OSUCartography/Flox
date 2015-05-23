@@ -33,8 +33,11 @@ public class Arrow {
         
         // This is not going to give me something we want, pretty sure.
         // Still working on it.
-        arrowLength = .5;
-        arrowWidth = arrowLength * 0.5;
+        double value = flow.getValue();
+        double scale = model.getFlowWidthScale();
+        
+        arrowLength = model.getArrowLength() * value * scale;
+        arrowWidth = arrowLength * model.getArrowWidth();
         
         // Get the location on the flow where the base of the arrowhead will sit
         double t = flow.getIntersectionTWithCircleAroundEndPoint(arrowLength);

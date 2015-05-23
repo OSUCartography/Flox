@@ -216,8 +216,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 double t = ((QuadraticBezierFlow) flow).getIntersectionTWithCircleAroundEndPoint(r);
                 QuadraticBezierFlow[] splitFlows = ((QuadraticBezierFlow) flow).split(t);
                 
-                
-                //this step here causes the flows to not draw!
+                // Instantiate an Arrow object, make a GeneralPath from its
+                // vertices.
                 Arrow arrow = new Arrow((QuadraticBezierFlow)splitFlows[0], model);
                 arrowPath.moveTo(xToPx(arrow.tip.x), yToPx(arrow.tip.y));
                 arrowPath.lineTo(xToPx(arrow.corner1.x), yToPx(arrow.corner1.y));

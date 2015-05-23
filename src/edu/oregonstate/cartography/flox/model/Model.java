@@ -80,6 +80,30 @@ public class Model {
      */
     private UndirectedGraph<Point, Flow> graph = new SimpleGraph<>(Flow.class);
 
+    // This is used to get a percentage of...something. Some number from the
+    // model in order to scale the arrow size to the value of the flow.
+    private double arrowLength = 0.025;
+    
+    // This is later used to get a percentage of the arrowLength. The width
+    // value is always relative to the length.
+    private double arrowWidth = 0.5;
+    
+    public double getArrowLength() {
+        return arrowLength;
+    }
+    
+    public double getArrowWidth() {
+        return arrowWidth;
+    }
+    
+    public void setArrowLength(double arrowLength) {
+        this.arrowLength = arrowLength;
+    }
+    
+    public void setArrowWidth(double arrowWidth) {
+        this.arrowWidth = arrowWidth;
+    }
+    
     /**
      * Scale factor to transform flow values to flow stroke widths
      */
