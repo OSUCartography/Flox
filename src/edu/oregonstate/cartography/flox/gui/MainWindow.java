@@ -10,7 +10,6 @@ import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
-import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.MeasureTool;
 import edu.oregonstate.cartography.map.PanTool;
@@ -91,6 +90,8 @@ public class MainWindow extends javax.swing.JFrame {
                     }
                 });
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
+        
+        mapComponent.requestFocusInWindow(); 
     }
 
     /**
@@ -808,7 +809,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         arrowHeadsControlPanel.setLayout(new java.awt.GridBagLayout());
 
-        flowDistanceFromEndPointFormattedTextField.setCaretPosition(0);
         flowDistanceFromEndPointFormattedTextField.setMinimumSize(new java.awt.Dimension(40, 30));
         flowDistanceFromEndPointFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

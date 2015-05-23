@@ -274,15 +274,15 @@ public class MapEventHandler implements java.awt.event.MouseListener,
      * @return A new MapTool (not the current yet) that can be activated.
      */
     private MapTool getNewMapTool(int keyCode) {
-//        final boolean zoomOutCurrent = mapTool instanceof ZoomOutTool;
-//        final boolean zoomInCurrent = mapTool instanceof ZoomInTool;
+        final boolean zoomOutCurrent = mapTool instanceof ZoomOutTool;
+        final boolean zoomInCurrent = mapTool instanceof ZoomInTool;
         final boolean panCurrent = mapTool instanceof PanTool;
 
         // pan tool with space key
         if (spaceKeyDown && !metaKeyDown && !altKeyDown && !panCurrent) {
             return new PanTool(mapComponent);
         }
-/*
+
         // zoom out with meta and alt key
         if (metaKeyDown && altKeyDown && !zoomOutCurrent) {
             return new ZoomOutTool(mapComponent);
@@ -297,7 +297,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
         if (metaKeyDown && !zoomInCurrent) {
             return new ZoomInTool(mapComponent);
         }
-*/
+        
         return null;
     }
 
@@ -388,6 +388,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
 
             // no other component is handling delete and backspace key strokes,
             // it is save to remove the currently selected objects from the map.
+            // FIXME
             // return mapComponent.removeSelectedGeoObjects();
         }
 
