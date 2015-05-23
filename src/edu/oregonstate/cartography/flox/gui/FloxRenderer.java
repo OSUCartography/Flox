@@ -233,9 +233,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(path);
             
             //Draw the arrow
-            g2d.setStroke(new BasicStroke(1));
-            g2d.setColor(Color.BLACK);
+            g2d.setStroke(new BasicStroke(3));
+            g2d.setColor(Color.WHITE);
             g2d.draw(arrowPath);
+            g2d.setColor(Color.BLACK);
+            g2d.fill(arrowPath);
+            
             
             // Draw the flow fill
             g2d.setStroke(new BasicStroke((float) strokeWidth,
