@@ -129,4 +129,16 @@ public class GeometryUtils {
         return a * d - b * c;
     }
 
+    /**
+     * Get the azimuth (in radians) of a line connecting two points
+     * @param startPt The start point of the line
+     * @param endPt The end point of the line
+     * @return 
+     */
+    public static double computeAzimuth(Point startPt, Point endPt) {
+        final double dx = endPt.x - startPt.x;
+        final double dy = endPt.y - startPt.y;
+        return Math.atan2(dy, dx);
+    }
+    
 }
