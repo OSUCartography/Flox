@@ -192,8 +192,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
 
-    public void drawFlowsWithArrows(double r) {
+    public void drawFlowsWithArrows() {
         ArrayList<Flow> flows;
+        double r = model.getFlowArrowEndPointRadius();
         switch (model.getFlowOrder()) {
             case DECREASING:
                 flows = model.getOrderedFlows(false);

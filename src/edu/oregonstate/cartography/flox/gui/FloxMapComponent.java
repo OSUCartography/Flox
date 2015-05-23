@@ -100,25 +100,26 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
 
         // draw flows and nodes
-        renderer.drawFlowsWithArrows(model.getFlowArrowEndPointRadius());
-        renderer.drawNodes();
-        
-        
-        
-        if (isDrawFlowRangebox()) {
-            renderer.drawFlowRangebox();
-        }
-        
-        if (isDrawCanvasPadding()) {
-            renderer.drawCanvasPadding();
-        }
-        if (isDrawControlPoints()) {
-            renderer.drawControlPoints();
-        }
-        if (isDrawLineSegments()) {
-            renderer.drawStraightLinesSegments();
-        }
+            if (model.isDrawArrows()) {
+                renderer.drawFlowsWithArrows();
+            } else {
+                renderer.drawFlows();
+            }
+            renderer.drawNodes();
 
+            if (isDrawFlowRangebox()) {
+                renderer.drawFlowRangebox();
+            }
+
+            if (isDrawCanvasPadding()) {
+                renderer.drawCanvasPadding();
+            }
+            if (isDrawControlPoints()) {
+                renderer.drawControlPoints();
+            }
+            if (isDrawLineSegments()) {
+                renderer.drawStraightLinesSegments();
+            }
 
             if (isDrawCanvasPadding()) {
                 renderer.drawCanvasPadding();
@@ -168,10 +169,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public void setDrawCanvasPadding(boolean drawCanvasPadding) {
         this.drawCanvasPadding = drawCanvasPadding;
     }
-    
-    public boolean isDrawFlowRangebox () {
+
+    public boolean isDrawFlowRangebox() {
         return drawFlowRangebox;
     }
+
     /**
      *
      * @param drawControlPoints

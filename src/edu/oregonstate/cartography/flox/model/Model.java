@@ -45,6 +45,20 @@ public class Model {
         this.flowDistanceFromEndPoint = flowArrowEndPointRadius;
     }
 
+    /**
+     * @return the addArrows
+     */
+    public boolean isDrawArrows() {
+        return addArrows;
+    }
+
+    /**
+     * @param addArrows the addArrows to set
+     */
+    public void setAddArrows(boolean addArrows) {
+        this.addArrows = addArrows;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -110,6 +124,8 @@ public class Model {
 
     private boolean enforceCanvasRange = true;
 
+    private boolean addArrows = false;
+    
     private double canvasPadding = 0.1;
     
     private double flowRangeboxHeight = 1.25;

@@ -184,6 +184,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
         jLabel14 = new javax.swing.JLabel();
+        addArrowsCheckbox = new javax.swing.JCheckBox();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
@@ -835,6 +836,17 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel14, gridBagConstraints);
 
+        addArrowsCheckbox.setText("Add Arrows");
+        addArrowsCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addArrowsCheckboxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        arrowHeadsControlPanel.add(addArrowsCheckbox, gridBagConstraints);
+
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
         controlsTabbedPane.addTab("Arrows", arrowHeadsPanel);
@@ -1479,6 +1491,12 @@ public class MainWindow extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldActionPerformed
 
+    private void addArrowsCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addArrowsCheckboxActionPerformed
+        model.setAddArrows(addArrowsCheckbox.isSelected());
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_addArrowsCheckboxActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1527,6 +1545,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JPanel arrowHeadsControlPanel;
     private javax.swing.JPanel arrowHeadsPanel;
