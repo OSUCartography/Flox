@@ -207,20 +207,37 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         for (Flow flow : flows) {
             GeneralPath path;
+            GeneralPath arrowPath = new GeneralPath();
             if (flow instanceof CubicBezierFlow) {
                 path = flowToGeneralPath((CubicBezierFlow) flow);
                 
             } else {
                 double t = ((QuadraticBezierFlow) flow).getIntersectionTWithCircleAroundEndPoint(r);
                 QuadraticBezierFlow[] splitFlows = ((QuadraticBezierFlow) flow).split(t);
-                
                 path = flowToGeneralPath(splitFlows[0]);
+                
+                //this step here causes the flows to not draw!
+                Arrow arrow = new Arrow((QuadraticBezierFlow)flow, model);
+                //arrowPath.moveTo(xToPx(arrow.tip.x), yToPx(arrow.tip.y));
+                //arrowPath.lineTo(xToPx(arrow.corner1.x), yToPx(arrow.corner1.y));
+                //arrowPath.lineTo(xToPx(arrow.corner2.x), yToPx(arrow.corner2.y));
+                //arrowPath.lineTo(xToPx(arrow.tip.x), yToPx(arrow.tip.y));
+                
             }
+            
+            // Draw the flow border
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth + WHITE_BORDER * 2,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.setColor(Color.WHITE);
             g2d.draw(path);
+            
+            // Draw the arrow
+            //g2d.setStroke(new BasicStroke(1));
+            //g2d.setColor(Color.BLACK);
+            //g2d.draw(arrowPath);
+            
+            // Draw the flow fill
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.setColor(Color.BLACK);
