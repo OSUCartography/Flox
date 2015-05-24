@@ -195,6 +195,11 @@ public class MainWindow extends javax.swing.JFrame {
         arrowEdgeCtrlWidth = new javax.swing.JSlider();
         arrowCornerPositionSlider = new javax.swing.JSlider();
         jLabel18 = new javax.swing.JLabel();
+        clipAreaPanel = new TransparentMacPanel();
+        clipAreaControlPanel = new TransparentMacPanel();
+        jLabel20 = new javax.swing.JLabel();
+        selectEndClipAreaButton = new javax.swing.JButton();
+        jLabel19 = new javax.swing.JLabel();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
@@ -975,6 +980,34 @@ public class MainWindow extends javax.swing.JFrame {
 
         controlsTabbedPane.addTab("Arrows", arrowHeadsPanel);
 
+        clipAreaControlPanel.setLayout(new java.awt.GridBagLayout());
+
+        jLabel20.setText("Clip Areas");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        clipAreaControlPanel.add(jLabel20, gridBagConstraints);
+
+        selectEndClipAreaButton.setText("Select Shapefile…");
+        selectEndClipAreaButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectEndClipAreaButtonActionPerformed(evt);
+            }
+        });
+        clipAreaControlPanel.add(selectEndClipAreaButton, new java.awt.GridBagConstraints());
+
+        jLabel19.setText("This is not functional yet.");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        clipAreaControlPanel.add(jLabel19, gridBagConstraints);
+
+        clipAreaPanel.add(clipAreaControlPanel);
+
+        controlsTabbedPane.addTab("Clip Areas", clipAreaPanel);
+
         rightPanel.add(controlsTabbedPane, java.awt.BorderLayout.NORTH);
 
         progressBarPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 5, 10));
@@ -1138,7 +1171,7 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
             outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
-            SVGExporter exporter = new SVGExporter(model.getGeometryCollection(),
+            SVGExporter exporter = new SVGExporter(model.getLayerGeometry(),
                     "OSU Cartography Group", "Flox");
             exporter.setSVGCanvasSize(800, 550);
             outputStream = new FileOutputStream(outFilePath);
@@ -1672,6 +1705,32 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
 
+    private void selectEndClipAreaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectEndClipAreaButtonActionPerformed
+        try {
+            // ask for import file
+            String inFilePath = FileUtils.askFile("Shapefile", true);
+            if (inFilePath == null) {
+                // user canceled
+                return;
+            }
+
+            // read shapefile
+            GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
+            if (collection == null) {
+                ErrorDialog.showErrorDialog("The selected file is not a shapefile.", "Flox Error");
+                return;
+            }
+
+            // set start and end clip areas for all flows
+            model.setClipAreas(collection);
+        } catch (IOException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
+        } finally {
+            writeSymbolGUI();
+        }
+    }//GEN-LAST:event_selectEndClipAreaButtonActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1731,6 +1790,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider arrowheadSizeSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
     private javax.swing.JSlider canvasSizeSlider;
+    private javax.swing.JPanel clipAreaControlPanel;
+    private javax.swing.JPanel clipAreaPanel;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
@@ -1770,6 +1831,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
@@ -1790,6 +1853,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JPanel rightPanel;
+    private javax.swing.JButton selectEndClipAreaButton;
     private javax.swing.JCheckBox selfForcesCheckBox;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;

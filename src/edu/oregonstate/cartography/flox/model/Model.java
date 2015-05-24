@@ -1,6 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,90 +19,6 @@ import org.jgrapht.graph.SimpleGraph;
  * University
  */
 public class Model {
-
-    /**
-     * @return the flowRangeboxHeight
-     */
-    public double getFlowRangeboxHeight() {
-        return flowRangeboxHeight;
-    }
-
-    /**
-     * @param flowRangeboxHeight the flowRangeboxHeight to set
-     */
-    public void setFlowRangeboxHeight(double flowRangeboxHeight) {
-        this.flowRangeboxHeight = flowRangeboxHeight;
-    }
-
-    /**
-     * @return the flowArrowEndPointRadius
-     */
-    public double getFlowArrowEndPointRadius() {
-        return flowDistanceFromEndPoint;
-    }
-
-    /**
-     * @param flowArrowEndPointRadius the flowArrowEndPointRadius to set
-     */
-    public void setFlowArrowEndPointRadius(double flowArrowEndPointRadius) {
-        this.flowDistanceFromEndPoint = flowArrowEndPointRadius;
-    }
-
-    /**
-     * @return the addArrows
-     */
-    public boolean isDrawArrows() {
-        return addArrows;
-    }
-
-    /**
-     * @param addArrows the addArrows to set
-     */
-    public void setAddArrows(boolean addArrows) {
-        this.addArrows = addArrows;
-    }
-
-    /**
-     * @return the arrowSideCurveFactor
-     */
-    public double getArrowEdgeCtrlLength() {
-        return arrowEdgeCtrlLength;
-    }
-
-    /**
-     * @param arrowSideCurveFactor the arrowSideCurveFactor to set
-     */
-    public void setArrowEdgeCtrlLength(double arrowSideCurveFactor) {
-        this.arrowEdgeCtrlLength = arrowSideCurveFactor;
-    }
-
-    /**
-     * @return the arrowEdgeCtrlWidth
-     */
-    public double getArrowEdgeCtrlWidth() {
-        return arrowEdgeCtrlWidth;
-    }
-
-    /**
-     * @param arrowEdgeCtrlWidth the arrowEdgeCtrlWidth to set
-     */
-    public void setArrowEdgeCtrlWidth(double arrowEdgeCtrlWidth) {
-        this.arrowEdgeCtrlWidth = arrowEdgeCtrlWidth;
-    }
-
-    /**
-     * @return the arrowCornerPosition
-     */
-    public double getArrowCornerPosition() {
-        return arrowCornerPosition;
-    }
-
-    /**
-     * @param arrowCornerPosition the arrowCornerPosition to set
-     */
-    public void setArrowCornerPosition(double arrowCornerPosition) {
-        this.arrowCornerPosition = arrowCornerPosition;
-    }
 
     public enum CurveType {
 
@@ -135,22 +54,6 @@ public class Model {
     private double arrowEdgeCtrlWidth = .5;
 
     private double arrowCornerPosition = 0.0;
-
-    public double getArrowLength() {
-        return arrowLength;
-    }
-
-    public double getArrowWidth() {
-        return arrowWidth;
-    }
-
-    public void setArrowLength(double arrowLength) {
-        this.arrowLength = arrowLength;
-    }
-
-    public void setArrowWidth(double arrowWidth) {
-        this.arrowWidth = arrowWidth;
-    }
 
     /**
      * Scale factor to transform flow values to flow stroke widths
@@ -220,6 +123,21 @@ public class Model {
      * Order of drawing of flows
      */
     private FlowOrder flowOrder = FlowOrder.DECREASING;
+
+    /**
+     * A geometry (collection) used for clipping start or end of flows
+     */
+    private Geometry clipAreas;
+
+    /** 
+     * Buffer width for start clip areas.
+     */
+    private double startClipAreaBufferDistance = 0;
+
+    /**
+     * Buffer width for end clip areas.
+     */
+    private double endClipAreaBufferDistance = 0;
 
     /**
      * Constructor of the model.
@@ -297,12 +215,128 @@ public class Model {
     }
 
     /**
-     * Returns the geometry if it is a GeometryCollection. Otherwise creates and
-     * returns a new GeometryCollection containing the geometry.
+     * Finds an OGC simple feature that contains a point.
+     *
+     * @param geometry A geometry or geometry collection to search through.
+     * @param point The point for which a containing geometry is to be searched.
+     * @param f A JTS GeometryFactory
+     * @return The found containing geometry or null if none is found.
+     */
+    private Geometry findContainingGeometry(Geometry geometry,
+            Point point, GeometryFactory f) {
+        if (geometry == null) {
+            return null;
+        }
+        if (geometry instanceof GeometryCollection) {
+            GeometryCollection collection = (GeometryCollection) geometry;
+            int nbrObj = collection.getNumGeometries();
+            for (int i = 0; i < nbrObj; i++) {
+                Geometry container = findContainingGeometry(
+                        collection.getGeometryN(i), point, f);
+                if (container != null) {
+                    return container;
+                }
+            }
+        } else {
+            Coordinate coordinate = new Coordinate(point.x, point.y);
+            com.vividsolutions.jts.geom.Point p = f.createPoint(coordinate);
+            if (p.within(geometry)) {
+                return geometry;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds the clip areas for the start and end of flows. First buffers the 
+     * clip area geometry, then finds containing geometry for the start and end
+     * point of each flow.
+     */
+    private void updateClipAreas() {
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+
+        // clip areas for start points
+        if (startClipAreaBufferDistance != 0) {
+            Geometry bufferedGeometry = clipAreas.buffer(startClipAreaBufferDistance);
+            GeometryCollection bufferedGeometryCollection
+                    = geometryFactory.createGeometryCollection(new Geometry[]{bufferedGeometry});
+
+            // find the containing geometry for the start point of each flow
+            Iterator<Flow> iterator = flowIterator();
+            GeometryFactory f = new GeometryFactory();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                Geometry startClipArea
+                        = findContainingGeometry(bufferedGeometryCollection, flow.getStartPt(), f);
+                flow.setStartClipArea(startClipArea);
+            }
+        }
+
+        // clip areas for end points
+        if (endClipAreaBufferDistance != 0) {
+            Geometry bufferedGeometry = clipAreas.buffer(endClipAreaBufferDistance);
+            GeometryCollection bufferedGeometryCollection
+                    = geometryFactory.createGeometryCollection(new Geometry[]{bufferedGeometry});
+
+            // find the containing geometry for the start and end points of each flow
+            Iterator<Flow> iterator = flowIterator();
+            GeometryFactory f = new GeometryFactory();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                Geometry endClipArea
+                        = findContainingGeometry(bufferedGeometryCollection, flow.getEndPt(), f);
+                flow.setEndClipArea(endClipArea);
+            }
+        }
+    }
+
+    /**
+     * Set the start and end clip areas for flows.
+     *
+     * @param clipAreas
+     */
+    public void setClipAreas(Geometry clipAreas) {
+        this.clipAreas = clipAreas;
+        updateClipAreas();
+    }
+
+    /**
+     * @return the startClipAreaBufferDistance
+     */
+    public double getStartClipAreaBufferDistance() {
+        return startClipAreaBufferDistance;
+    }
+
+    /**
+     * @param startClipAreaBufferDistance the startClipAreaBufferDistance to set
+     */
+    public void setStartClipAreaBufferDistance(double startClipAreaBufferDistance) {
+        this.startClipAreaBufferDistance = startClipAreaBufferDistance;
+        updateClipAreas();
+    }
+
+    /**
+     * @return the endClipAreaBufferDistance
+     */
+    public double getEndClipAreaBufferDistance() {
+        return endClipAreaBufferDistance;
+    }
+
+    /**
+     * @param endClipAreaBufferDistance the endClipAreaBufferDistance to set
+     */
+    public void setEndClipAreaBufferDistance(double endClipAreaBufferDistance) {
+        this.endClipAreaBufferDistance = endClipAreaBufferDistance;
+        updateClipAreas();
+    }
+
+    /**
+     * Returns the geometry of all layers.
      *
      * @return the geometry
      */
-    public GeometryCollection getGeometryCollection() {
+    public GeometryCollection getLayerGeometry() {
         return map.getGeometryCollection();
     }
 
@@ -686,4 +720,103 @@ public class Model {
         this.flowOrder = flowOrder;
     }
 
+    public double getArrowLength() {
+        return arrowLength;
+    }
+
+    public double getArrowWidth() {
+        return arrowWidth;
+    }
+
+    public void setArrowLength(double arrowLength) {
+        this.arrowLength = arrowLength;
+    }
+
+    public void setArrowWidth(double arrowWidth) {
+        this.arrowWidth = arrowWidth;
+    }
+    
+    /**
+     * @return the flowRangeboxHeight
+     */
+    public double getFlowRangeboxHeight() {
+        return flowRangeboxHeight;
+    }
+
+    /**
+     * @param flowRangeboxHeight the flowRangeboxHeight to set
+     */
+    public void setFlowRangeboxHeight(double flowRangeboxHeight) {
+        this.flowRangeboxHeight = flowRangeboxHeight;
+    }
+
+    /**
+     * @return the flowArrowEndPointRadius
+     */
+    public double getFlowArrowEndPointRadius() {
+        return flowDistanceFromEndPoint;
+    }
+
+    /**
+     * @param flowArrowEndPointRadius the flowArrowEndPointRadius to set
+     */
+    public void setFlowArrowEndPointRadius(double flowArrowEndPointRadius) {
+        this.flowDistanceFromEndPoint = flowArrowEndPointRadius;
+    }
+
+    /**
+     * @return the addArrows
+     */
+    public boolean isDrawArrows() {
+        return addArrows;
+    }
+
+    /**
+     * @param addArrows the addArrows to set
+     */
+    public void setAddArrows(boolean addArrows) {
+        this.addArrows = addArrows;
+    }
+
+    /**
+     * @return the arrowSideCurveFactor
+     */
+    public double getArrowEdgeCtrlLength() {
+        return arrowEdgeCtrlLength;
+    }
+
+    /**
+     * @param arrowSideCurveFactor the arrowSideCurveFactor to set
+     */
+    public void setArrowEdgeCtrlLength(double arrowSideCurveFactor) {
+        this.arrowEdgeCtrlLength = arrowSideCurveFactor;
+    }
+
+    /**
+     * @return the arrowEdgeCtrlWidth
+     */
+    public double getArrowEdgeCtrlWidth() {
+        return arrowEdgeCtrlWidth;
+    }
+
+    /**
+     * @param arrowEdgeCtrlWidth the arrowEdgeCtrlWidth to set
+     */
+    public void setArrowEdgeCtrlWidth(double arrowEdgeCtrlWidth) {
+        this.arrowEdgeCtrlWidth = arrowEdgeCtrlWidth;
+    }
+
+    /**
+     * @return the arrowCornerPosition
+     */
+    public double getArrowCornerPosition() {
+        return arrowCornerPosition;
+    }
+
+    /**
+     * @param arrowCornerPosition the arrowCornerPosition to set
+     */
+    public void setArrowCornerPosition(double arrowCornerPosition) {
+        this.arrowCornerPosition = arrowCornerPosition;
+    }
 }

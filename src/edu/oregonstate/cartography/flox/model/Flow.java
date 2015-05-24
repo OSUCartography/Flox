@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
+import com.vividsolutions.jts.geom.Geometry;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
@@ -24,6 +25,17 @@ public abstract class Flow {
      * mapped value
      */
     protected double value;
+    
+    /**
+     * clip area for the start of the flow
+     */
+    private Geometry startClipArea;
+    
+    /**
+     * clip area for the end of the flow
+     */
+    private Geometry endClipArea;
+
 
     /**
      * Return bounding box of this flow.
@@ -120,4 +132,32 @@ public abstract class Flow {
     * @return An list of points, including copies of the start point and the end point.
     */
     public abstract ArrayList<Point> toStraightLineSegments(double flatness);
+
+    /**
+     * @return the startClipArea
+     */
+    public Geometry getStartClipArea() {
+        return startClipArea;
+    }
+
+    /**
+     * @param startClipArea the startClipArea to set
+     */
+    public void setStartClipArea(Geometry startClipArea) {
+        this.startClipArea = startClipArea;
+    }
+
+    /**
+     * @return the endClipArea
+     */
+    public Geometry getEndClipArea() {
+        return endClipArea;
+    }
+
+    /**
+     * @param endClipArea the endClipArea to set
+     */
+    public void setEndClipArea(Geometry endClipArea) {
+        this.endClipArea = endClipArea;
+    }
 }
