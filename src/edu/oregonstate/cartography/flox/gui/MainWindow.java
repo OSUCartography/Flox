@@ -193,6 +193,8 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel17 = new javax.swing.JLabel();
         arrowEdgeCtrlLength = new javax.swing.JSlider();
         arrowEdgeCtrlWidth = new javax.swing.JSlider();
+        arrowCornerPositionSlider = new javax.swing.JSlider();
+        jLabel18 = new javax.swing.JLabel();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
@@ -943,6 +945,30 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 10;
         arrowHeadsControlPanel.add(arrowEdgeCtrlWidth, gridBagConstraints);
 
+        arrowCornerPositionSlider.setMajorTickSpacing(25);
+        arrowCornerPositionSlider.setMaximum(50);
+        arrowCornerPositionSlider.setMinimum(-50);
+        arrowCornerPositionSlider.setPaintLabels(true);
+        arrowCornerPositionSlider.setPaintTicks(true);
+        arrowCornerPositionSlider.setValue(0);
+        arrowCornerPositionSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        arrowCornerPositionSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                arrowCornerPositionSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        arrowHeadsControlPanel.add(arrowCornerPositionSlider, gridBagConstraints);
+
+        jLabel18.setText("Arrow Corner Position");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        arrowHeadsControlPanel.add(jLabel18, gridBagConstraints);
+
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
         controlsTabbedPane.addTab("Arrows", arrowHeadsPanel);
@@ -1636,6 +1662,14 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_arrowEdgeCtrlWidthStateChanged
 
+    private void arrowCornerPositionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowCornerPositionSliderStateChanged
+        if (model.isDrawArrows()) {
+            model.setArrowCornerPosition((arrowCornerPositionSlider.getValue())/100d);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1686,6 +1720,7 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JSlider antiTorsionSlider;
+    private javax.swing.JSlider arrowCornerPositionSlider;
     private javax.swing.JSlider arrowEdgeCtrlLength;
     private javax.swing.JSlider arrowEdgeCtrlWidth;
     private javax.swing.JPanel arrowHeadsControlPanel;
@@ -1732,6 +1767,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;

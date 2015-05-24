@@ -87,6 +87,20 @@ public class Model {
         this.arrowEdgeCtrlWidth = arrowEdgeCtrlWidth;
     }
 
+    /**
+     * @return the arrowCornerPosition
+     */
+    public double getArrowCornerPosition() {
+        return arrowCornerPosition;
+    }
+
+    /**
+     * @param arrowCornerPosition the arrowCornerPosition to set
+     */
+    public void setArrowCornerPosition(double arrowCornerPosition) {
+        this.arrowCornerPosition = arrowCornerPosition;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -119,6 +133,8 @@ public class Model {
     private double arrowEdgeCtrlLength = .5;
     
     private double arrowEdgeCtrlWidth = .5;
+    
+    private double arrowCornerPosition = 0.0;
     
     public double getArrowLength() {
         return arrowLength;

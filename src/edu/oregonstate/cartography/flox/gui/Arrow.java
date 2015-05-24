@@ -14,6 +14,7 @@ public class Arrow {
 
     private double arrowLength;
     private double arrowWidth;
+    private double arrowCornerPosition;
     
     private QuadraticBezierFlow flow;
     public Point base;
@@ -42,6 +43,7 @@ public class Arrow {
         
         arrowLength = model.getArrowLength() * value * scale;
         arrowWidth = model.getArrowWidth() * value * scale;
+        arrowCornerPosition = model.getArrowCornerPosition();
         
         // Get the location on the flow where the base of the arrowhead will sit
         double t = flow.getIntersectionTWithCircleAroundEndPoint(arrowLength);
@@ -56,16 +58,16 @@ public class Arrow {
         tip.x = base.x + arrowLength;
         tip.y = base.y;
         
-        corner1.x = base.x;
+        corner1.x = base.x + (arrowLength * arrowCornerPosition);
         corner1.y = base.y + arrowWidth;
         
-        corner1cPt.x = base.x + arrowLength * model.getArrowEdgeCtrlLength();
+        corner1cPt.x = base.x + (corner1.x-base.x) + ((tip.x - corner1.x) * model.getArrowEdgeCtrlLength());
         corner1cPt.y = base.y + arrowWidth * model.getArrowEdgeCtrlWidth();
         
-        corner2.x = base.x;
+        corner2.x = base.x + (arrowLength * arrowCornerPosition);
         corner2.y = base.y - arrowWidth;
         
-        corner2cPt.x = base.x + arrowLength * model.getArrowEdgeCtrlLength();
+        corner2cPt.x = base.x + (corner2.x-base.x) + ((tip.x - corner2.x) * model.getArrowEdgeCtrlLength());
         corner2cPt.y = base.y - arrowWidth * model.getArrowEdgeCtrlWidth();
         
         // Get the azimuth of the line connecting base to flow endpoint
