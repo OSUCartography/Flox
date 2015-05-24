@@ -125,33 +125,33 @@ public class Model {
     // Length of the arrow. This number is altered by a GUI slider.
     // It is multiplied by the value of each flow and the flowWidthScale
     private double arrowLength = 0.025;
-    
+
     // This is later used to get a percentage of the arrowLength. The width
     // value is always relative to the length.
     private double arrowWidth = 0.013;
-    
+
     private double arrowEdgeCtrlLength = .5;
-    
+
     private double arrowEdgeCtrlWidth = .5;
-    
+
     private double arrowCornerPosition = 0.0;
-    
+
     public double getArrowLength() {
         return arrowLength;
     }
-    
+
     public double getArrowWidth() {
         return arrowWidth;
     }
-    
+
     public void setArrowLength(double arrowLength) {
         this.arrowLength = arrowLength;
     }
-    
+
     public void setArrowWidth(double arrowWidth) {
         this.arrowWidth = arrowWidth;
     }
-    
+
     /**
      * Scale factor to transform flow values to flow stroke widths
      */
@@ -197,13 +197,13 @@ public class Model {
     private boolean enforceCanvasRange = true;
 
     private boolean addArrows = false;
-    
+
     private double canvasPadding = 0.1;
-    
+
     private double flowRangeboxHeight = 1.25;
-    
+
     private double flowDistanceFromEndPoint = 0.0d;
-    
+
     private Rectangle2D canvas;
 
     /**
@@ -220,7 +220,7 @@ public class Model {
      * Order of drawing of flows
      */
     private FlowOrder flowOrder = FlowOrder.DECREASING;
-    
+
     /**
      * Constructor of the model.
      */
@@ -349,6 +349,7 @@ public class Model {
 
     /**
      * Returns all flows in the graph. The flows are not ordered.
+     *
      * @return All flows.
      */
     public ArrayList<Flow> getFlows() {
@@ -357,6 +358,7 @@ public class Model {
 
     /**
      * Get an ordered list of all flows.
+     *
      * @param increasing Increasing or decreasing list.
      * @return A list with all ordered flows.
      */
@@ -386,12 +388,13 @@ public class Model {
 
     /**
      * Returns all nodes in the graph.
+     *
      * @return All nodes.
      */
     public ArrayList<Point> getNodes() {
         return new ArrayList<>(graph.vertexSet());
     }
-    
+
     /**
      * Returns the maximum flow value.
      *
@@ -639,11 +642,11 @@ public class Model {
     public void setCanvasPadding(double canvasPadding) {
         this.canvasPadding = canvasPadding;
     }
-    
+
     public double getCanvasPadding() {
         return canvasPadding;
     }
-    
+
     /**
      * @return the canvas
      */
@@ -668,7 +671,7 @@ public class Model {
     public double getMinFlowLengthSpringConstant() {
         return minFlowLengthSpringConstant;
     }
-    
+
     /**
      * @return the flowOrder
      */

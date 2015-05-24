@@ -90,8 +90,8 @@ public class MainWindow extends javax.swing.JFrame {
                     }
                 });
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
-        
-        mapComponent.requestFocusInWindow(); 
+
+        mapComponent.requestFocusInWindow();
     }
 
     /**
@@ -859,7 +859,8 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         arrowHeadsControlPanel.add(addArrowsCheckbox, gridBagConstraints);
 
-        arrowheadSizeSlider.setMajorTickSpacing(20);
+        arrowheadSizeSlider.setMajorTickSpacing(50);
+        arrowheadSizeSlider.setMaximum(400);
         arrowheadSizeSlider.setPaintLabels(true);
         arrowheadSizeSlider.setPaintTicks(true);
         arrowheadSizeSlider.setPreferredSize(new java.awt.Dimension(240, 43));
@@ -880,7 +881,8 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel10, gridBagConstraints);
 
-        arrowheadWidthSlider.setMajorTickSpacing(20);
+        arrowheadWidthSlider.setMajorTickSpacing(25);
+        arrowheadWidthSlider.setMaximum(200);
         arrowheadWidthSlider.setPaintLabels(true);
         arrowheadWidthSlider.setPaintTicks(true);
         arrowheadWidthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
@@ -1559,7 +1561,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
         if (mapComponent.isDrawCanvasPadding()) {
-            model.setCanvasPadding(canvasSizeSlider.getValue()/100d);
+            model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -1576,7 +1578,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void flowRangeboxSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowRangeboxSizeSliderStateChanged
         if (mapComponent.isDrawFlowRangebox()) {
-            model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue()/100d + 0.01);
+            model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -1632,7 +1634,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadSizeSliderStateChanged
         if (model.isDrawArrows()) {
-            model.setArrowLength((arrowheadSizeSlider.getValue()+1)/1000d);
+            model.setArrowLength((arrowheadSizeSlider.getValue() + 1) / 1000d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -1640,7 +1642,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (model.isDrawArrows()) {
-            model.setArrowWidth((arrowheadWidthSlider.getValue()+1)/1000d);
+            model.setArrowWidth((arrowheadWidthSlider.getValue() + 1) / 1000d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -1648,7 +1650,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowEdgeCtrlLengthStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlLengthStateChanged
         if (model.isDrawArrows()) {
-            model.setArrowEdgeCtrlLength((arrowEdgeCtrlLength.getValue())/100d);
+            model.setArrowEdgeCtrlLength((arrowEdgeCtrlLength.getValue()) / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -1656,7 +1658,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowEdgeCtrlWidthStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlWidthStateChanged
         if (model.isDrawArrows()) {
-            model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidth.getValue())/100d);
+            model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidth.getValue()) / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -1664,7 +1666,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowCornerPositionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowCornerPositionSliderStateChanged
         if (model.isDrawArrows()) {
-            model.setArrowCornerPosition((arrowCornerPositionSlider.getValue())/100d);
+            model.setArrowCornerPosition((arrowCornerPositionSlider.getValue()) / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -1677,8 +1679,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
         model.setCanvas(model.getFlowsBoundingBox());
-        model.setCanvasPadding(canvasSizeSlider.getValue()/100d);
-        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue()/100d + 0.01);
+        model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
+        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
         model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
         model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
         model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
