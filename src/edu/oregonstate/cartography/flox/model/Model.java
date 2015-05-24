@@ -129,7 +129,7 @@ public class Model {
      */
     private Geometry clipAreas;
 
-    /** 
+    /**
      * Buffer width for start clip areas.
      */
     private double startClipAreaBufferDistance = 0;
@@ -248,46 +248,48 @@ public class Model {
     }
 
     /**
-     * Finds the clip areas for the start and end of flows. First buffers the 
-     * clip area geometry, then finds containing geometry for the start and end
-     * point of each flow.
+     * Finds the clip areas for the start of flows. First buffers the clip area
+     * geometry, then finds containing geometry for the start point of each flow.
      */
-    private void updateClipAreas() {
-
-        GeometryFactory geometryFactory = new GeometryFactory();
-
-        // clip areas for start points
-        if (startClipAreaBufferDistance != 0) {
-            Geometry bufferedGeometry = clipAreas.buffer(startClipAreaBufferDistance);
-            GeometryCollection bufferedGeometryCollection
-                    = geometryFactory.createGeometryCollection(new Geometry[]{bufferedGeometry});
-
-            // find the containing geometry for the start point of each flow
-            Iterator<Flow> iterator = flowIterator();
-            GeometryFactory f = new GeometryFactory();
-            while (iterator.hasNext()) {
-                Flow flow = iterator.next();
-                Geometry startClipArea
-                        = findContainingGeometry(bufferedGeometryCollection, flow.getStartPt(), f);
-                flow.setStartClipArea(startClipArea);
-            }
+    private void updateStartClipAreas() {
+        if (clipAreas == null) {
+            return;
         }
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Geometry bufferedGeometry = clipAreas.buffer(startClipAreaBufferDistance);
+        GeometryCollection bufferedGeometryCollection
+                = geometryFactory.createGeometryCollection(new Geometry[]{bufferedGeometry});
 
-        // clip areas for end points
-        if (endClipAreaBufferDistance != 0) {
-            Geometry bufferedGeometry = clipAreas.buffer(endClipAreaBufferDistance);
-            GeometryCollection bufferedGeometryCollection
-                    = geometryFactory.createGeometryCollection(new Geometry[]{bufferedGeometry});
+        Iterator<Flow> iterator = flowIterator();
+        GeometryFactory f = new GeometryFactory();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            Geometry startClipArea
+                    = findContainingGeometry(bufferedGeometryCollection, flow.getStartPt(), f);
+            flow.setStartClipArea(startClipArea);
+        }
+    }
 
-            // find the containing geometry for the start and end points of each flow
-            Iterator<Flow> iterator = flowIterator();
-            GeometryFactory f = new GeometryFactory();
-            while (iterator.hasNext()) {
-                Flow flow = iterator.next();
-                Geometry endClipArea
-                        = findContainingGeometry(bufferedGeometryCollection, flow.getEndPt(), f);
-                flow.setEndClipArea(endClipArea);
-            }
+    /**
+     * Finds the clip areas for the the end of flows. First buffers the clip area
+     * geometry, then finds containing geometry for the end point of each flow.
+     */
+    private void updateEndClipAreas() {
+        if (clipAreas == null) {
+            return;
+        }
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Geometry bufferedGeometry = clipAreas.buffer(endClipAreaBufferDistance);
+        GeometryCollection bufferedGeometryCollection
+                = geometryFactory.createGeometryCollection(new Geometry[]{bufferedGeometry});
+
+        Iterator<Flow> iterator = flowIterator();
+        GeometryFactory f = new GeometryFactory();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            Geometry endClipArea
+                    = findContainingGeometry(bufferedGeometryCollection, flow.getEndPt(), f);
+            flow.setEndClipArea(endClipArea);
         }
     }
 
@@ -298,7 +300,8 @@ public class Model {
      */
     public void setClipAreas(Geometry clipAreas) {
         this.clipAreas = clipAreas;
-        updateClipAreas();
+        updateStartClipAreas();
+        updateEndClipAreas();
     }
 
     /**
@@ -313,7 +316,7 @@ public class Model {
      */
     public void setStartClipAreaBufferDistance(double startClipAreaBufferDistance) {
         this.startClipAreaBufferDistance = startClipAreaBufferDistance;
-        updateClipAreas();
+        updateStartClipAreas();
     }
 
     /**
@@ -328,7 +331,7 @@ public class Model {
      */
     public void setEndClipAreaBufferDistance(double endClipAreaBufferDistance) {
         this.endClipAreaBufferDistance = endClipAreaBufferDistance;
-        updateClipAreas();
+        updateEndClipAreas();
     }
 
     /**
@@ -735,7 +738,7 @@ public class Model {
     public void setArrowWidth(double arrowWidth) {
         this.arrowWidth = arrowWidth;
     }
-    
+
     /**
      * @return the flowRangeboxHeight
      */
