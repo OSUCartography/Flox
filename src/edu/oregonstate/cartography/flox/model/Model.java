@@ -59,6 +59,34 @@ public class Model {
         this.addArrows = addArrows;
     }
 
+    /**
+     * @return the arrowSideCurveFactor
+     */
+    public double getArrowEdgeCtrlLength() {
+        return arrowEdgeCtrlLength;
+    }
+
+    /**
+     * @param arrowSideCurveFactor the arrowSideCurveFactor to set
+     */
+    public void setArrowEdgeCtrlLength(double arrowSideCurveFactor) {
+        this.arrowEdgeCtrlLength = arrowSideCurveFactor;
+    }
+
+    /**
+     * @return the arrowEdgeCtrlWidth
+     */
+    public double getArrowEdgeCtrlWidth() {
+        return arrowEdgeCtrlWidth;
+    }
+
+    /**
+     * @param arrowEdgeCtrlWidth the arrowEdgeCtrlWidth to set
+     */
+    public void setArrowEdgeCtrlWidth(double arrowEdgeCtrlWidth) {
+        this.arrowEdgeCtrlWidth = arrowEdgeCtrlWidth;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -80,13 +108,17 @@ public class Model {
      */
     private UndirectedGraph<Point, Flow> graph = new SimpleGraph<>(Flow.class);
 
-    // This is used to get a percentage of...something. Some number from the
-    // model in order to scale the arrow size to the value of the flow.
+    // Length of the arrow. This number is altered by a GUI slider.
+    // It is multiplied by the value of each flow and the flowWidthScale
     private double arrowLength = 0.025;
     
     // This is later used to get a percentage of the arrowLength. The width
     // value is always relative to the length.
-    private double arrowWidth = 0.5;
+    private double arrowWidth = 0.013;
+    
+    private double arrowEdgeCtrlLength = .5;
+    
+    private double arrowEdgeCtrlWidth = .5;
     
     public double getArrowLength() {
         return arrowLength;

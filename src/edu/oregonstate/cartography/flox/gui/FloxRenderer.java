@@ -211,36 +211,41 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             GeneralPath arrowPath = new GeneralPath();
             if (flow instanceof CubicBezierFlow) {
                 path = flowToGeneralPath((CubicBezierFlow) flow);
-                
+
             } else {
                 double t = ((QuadraticBezierFlow) flow).getIntersectionTWithCircleAroundEndPoint(r);
                 QuadraticBezierFlow[] splitFlows = ((QuadraticBezierFlow) flow).split(t);
-                
+
                 // Instantiate an Arrow object, make a GeneralPath from its
                 // vertices.
-                Arrow arrow = new Arrow((QuadraticBezierFlow)splitFlows[0], model);
-                arrowPath.moveTo(xToPx(arrow.tip.x), yToPx(arrow.tip.y));
+                Arrow arrow = new Arrow((QuadraticBezierFlow) splitFlows[0], model);
+                arrowPath.moveTo(xToPx(arrow.base.x), yToPx(arrow.base.y));
                 arrowPath.lineTo(xToPx(arrow.corner1.x), yToPx(arrow.corner1.y));
-                arrowPath.lineTo(xToPx(arrow.corner2.x), yToPx(arrow.corner2.y));
-                arrowPath.lineTo(xToPx(arrow.tip.x), yToPx(arrow.tip.y));
+                
+                //arrowPath.lineTo(xToPx(arrow.tip.x), yToPx(arrow.tip.y));
+                //arrowPath.lineTo(xToPx(arrow.corner2.x), yToPx(arrow.corner2.y));
+                
+                arrowPath.quadTo(xToPx(arrow.corner1cPt.x), yToPx(arrow.corner1cPt.y), xToPx(arrow.tip.x), yToPx(arrow.tip.y));
+                arrowPath.quadTo(xToPx(arrow.corner2cPt.x), yToPx(arrow.corner2cPt.y), xToPx(arrow.corner2.x), yToPx(arrow.corner2.y));
+                
+                arrowPath.lineTo(xToPx(arrow.base.x), yToPx(arrow.base.y));
                 path = flowToGeneralPath(arrow.getFlow());
             }
-            
+
             // Draw the flow border
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth + WHITE_BORDER * 2,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.setColor(Color.WHITE);
             g2d.draw(path);
-            
+
             //Draw the arrow
             g2d.setStroke(new BasicStroke(3));
             g2d.setColor(Color.WHITE);
             g2d.draw(arrowPath);
             g2d.setColor(Color.BLACK);
             g2d.fill(arrowPath);
-            
-            
+
             // Draw the flow fill
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
@@ -248,7 +253,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(path);
         }
     }
-    
+
     /**
      * Draw all nodes to a Graphics2D context.
      */
@@ -279,16 +284,16 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             double yPad = cHeight * model.getCanvasPadding();
 
             Point b1 = new Point(
-                    xToPx(canvas.getX() - xPad), 
+                    xToPx(canvas.getX() - xPad),
                     yToPx(canvas.getY() - yPad));
             Point b2 = new Point(
-                    xToPx(canvas.getMaxX() + xPad), 
+                    xToPx(canvas.getMaxX() + xPad),
                     yToPx(canvas.getY() - yPad));
             Point b3 = new Point(
-                    xToPx(canvas.getX() - xPad), 
+                    xToPx(canvas.getX() - xPad),
                     yToPx(canvas.getMaxY() + yPad));
             Point b4 = new Point(
-                    xToPx(canvas.getMaxX() + xPad), 
+                    xToPx(canvas.getMaxX() + xPad),
                     yToPx(canvas.getMaxY() + yPad));
 
             Line2D line1 = new Line2D.Double(b1.x, b1.y, b2.x, b2.y);
@@ -313,20 +318,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             Flow flow = iter.next();
             RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
             Point[] box = enforcer.computeRangebox(flow);
-            
+
             Line2D line1 = new Line2D.Double(
-                    xToPx(box[0].x), yToPx(box[0].y), 
+                    xToPx(box[0].x), yToPx(box[0].y),
                     xToPx(box[1].x), yToPx(box[1].y));
             Line2D line2 = new Line2D.Double(
-                    xToPx(box[2].x), yToPx(box[2].y), 
+                    xToPx(box[2].x), yToPx(box[2].y),
                     xToPx(box[3].x), yToPx(box[3].y));
             Line2D line3 = new Line2D.Double(
-                    xToPx(box[0].x), yToPx(box[0].y), 
+                    xToPx(box[0].x), yToPx(box[0].y),
                     xToPx(box[2].x), yToPx(box[2].y));
             Line2D line4 = new Line2D.Double(
-                    xToPx(box[1].x), yToPx(box[1].y), 
+                    xToPx(box[1].x), yToPx(box[1].y),
                     xToPx(box[3].x), yToPx(box[3].y));
-            
+
             g2d.draw(line1);
             g2d.draw(line2);
             g2d.draw(line3);

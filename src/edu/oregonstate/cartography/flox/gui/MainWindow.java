@@ -189,6 +189,10 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         arrowheadWidthSlider = new javax.swing.JSlider();
         jLabel15 = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
+        arrowEdgeCtrlLength = new javax.swing.JSlider();
+        arrowEdgeCtrlWidth = new javax.swing.JSlider();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
@@ -867,7 +871,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 4;
         arrowHeadsControlPanel.add(arrowheadSizeSlider, gridBagConstraints);
 
-        jLabel10.setText("Arrowhead Size");
+        jLabel10.setText("Arrowhead Length");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -895,6 +899,49 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel15, gridBagConstraints);
+
+        jLabel16.setText("Arrow Edge Ctrl Point Length");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        arrowHeadsControlPanel.add(jLabel16, gridBagConstraints);
+
+        jLabel17.setText("Arrow Edge Ctrl Point Width");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        arrowHeadsControlPanel.add(jLabel17, gridBagConstraints);
+
+        arrowEdgeCtrlLength.setMajorTickSpacing(25);
+        arrowEdgeCtrlLength.setPaintLabels(true);
+        arrowEdgeCtrlLength.setPaintTicks(true);
+        arrowEdgeCtrlLength.setPreferredSize(new java.awt.Dimension(240, 43));
+        arrowEdgeCtrlLength.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                arrowEdgeCtrlLengthStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        arrowHeadsControlPanel.add(arrowEdgeCtrlLength, gridBagConstraints);
+
+        arrowEdgeCtrlWidth.setMajorTickSpacing(50);
+        arrowEdgeCtrlWidth.setMaximum(200);
+        arrowEdgeCtrlWidth.setPaintLabels(true);
+        arrowEdgeCtrlWidth.setPaintTicks(true);
+        arrowEdgeCtrlWidth.setPreferredSize(new java.awt.Dimension(240, 43));
+        arrowEdgeCtrlWidth.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                arrowEdgeCtrlWidthStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        arrowHeadsControlPanel.add(arrowEdgeCtrlWidth, gridBagConstraints);
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
@@ -1567,11 +1614,27 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (model.isDrawArrows()) {
-            model.setArrowWidth((arrowheadWidthSlider.getValue()+1)/100d);
+            model.setArrowWidth((arrowheadWidthSlider.getValue()+1)/1000d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
     }//GEN-LAST:event_arrowheadWidthSliderStateChanged
+
+    private void arrowEdgeCtrlLengthStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlLengthStateChanged
+        if (model.isDrawArrows()) {
+            model.setArrowEdgeCtrlLength((arrowEdgeCtrlLength.getValue())/100d);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_arrowEdgeCtrlLengthStateChanged
+
+    private void arrowEdgeCtrlWidthStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlWidthStateChanged
+        if (model.isDrawArrows()) {
+            model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidth.getValue())/100d);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_arrowEdgeCtrlWidthStateChanged
 
     private void forceLayout() {
 
@@ -1623,6 +1686,8 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JSlider antiTorsionSlider;
+    private javax.swing.JSlider arrowEdgeCtrlLength;
+    private javax.swing.JSlider arrowEdgeCtrlWidth;
     private javax.swing.JPanel arrowHeadsControlPanel;
     private javax.swing.JPanel arrowHeadsPanel;
     private javax.swing.JToggleButton arrowToggleButton;
@@ -1665,6 +1730,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
