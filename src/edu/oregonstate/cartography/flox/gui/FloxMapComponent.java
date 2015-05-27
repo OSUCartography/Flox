@@ -12,6 +12,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -220,55 +221,51 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
     @Override
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
-        System.out.println("You drew a rectangle!");
         Iterator<Point> nodes = model.nodeIterator();
 
         boolean somethingGotSelected = false;
 
+        System.out.println("Min: " + xToPx(rect.getMinX()) + " " + yToPx(rect.getMinY()));
+        System.out.println("Max: " + xToPx(rect.getMaxX()) + " " + yToPx(rect.getMaxY()));
+
         while (nodes.hasNext()) {
             Point pt = nodes.next();
 
-            if ((pt.x >= rect.getMinX() && pt.x <= rect.getMaxX())
-                    && (pt.y >= rect.getMinY() && pt.y <= rect.getMaxY())) {
+            if (((xToPx(pt.x) >= xToPx(rect.getMinX()) - 10)
+                    && (xToPx(pt.x) <= xToPx(rect.getMaxX()) + 10))
+                    && ((yToPx(pt.y) >= yToPx(rect.getMaxY()) - 10)
+                    && (yToPx(pt.y) <= yToPx(rect.getMinY()) + 10))) {
                 pt.setSelected(true);
                 somethingGotSelected = true;
             } else {
-                if (shiftDown) {
-                    continue;
-                } else {
+                if (shiftDown == false) {
                     pt.setSelected(false);
                 }
 
             }
 
         }
-        repaint();
 
+        repaint();
         return somethingGotSelected;
     }
 
     @Override
     public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
-        System.out.println("You clicked without dragging!");
-        System.out.println("Click coords: " + point.x + " " + point.y);
         Iterator<Point> nodes = model.nodeIterator();
-        
+
         boolean somethingGotSelected = false;
 
         while (nodes.hasNext()) {
             Point pt = nodes.next();
 
-            
-            
             if (((xToPx(pt.x) >= xToPx(point.x) - pixelTolerance)
                     && (xToPx(pt.x) <= xToPx(point.x) + pixelTolerance))
                     && ((yToPx(pt.y) >= yToPx(point.y) - pixelTolerance)
                     && (yToPx(pt.y) <= yToPx(point.y) + pixelTolerance))) {
                 pt.setSelected(true);
             } else {
-                if (shiftDown) {
-                    continue;
-                } else {
+                if (shiftDown == false) {
                     pt.setSelected(false);
                 }
             }
