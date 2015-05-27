@@ -1,5 +1,10 @@
 package edu.oregonstate.cartography.flox.model;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
@@ -161,6 +166,7 @@ public class QuadraticBezierFlow extends Flow {
 
         return irregularPoints;
     }
+
     /**
      * Converts this Bezier curve to straight line segments.
      *
@@ -178,7 +184,7 @@ public class QuadraticBezierFlow extends Flow {
 
         ArrayList<Point> regularPoints = new ArrayList<>();
         ArrayList<Point> irregularPoints = toStraightLineSegmentsWithIrregularLength(flatness);
-        
+
         // create new point set with regularly distributed irregularPoints
         double startX = irregularPoints.get(0).x;
         double startY = irregularPoints.get(0).y;
@@ -231,13 +237,11 @@ public class QuadraticBezierFlow extends Flow {
         return new QuadraticBezierFlow(startPt, endPt, radians, distPerc, value);
     }
 
-    
-   
-    
     /**
-     * Returns 
+     * Returns
+     *
      * @param t
-     * @return 
+     * @return
      */
     public Point pointOnCurve(double t) {
         assert (t >= 0d && t <= 1d);
@@ -283,18 +287,17 @@ public class QuadraticBezierFlow extends Flow {
 
         QuadraticBezierFlow flow1 = new QuadraticBezierFlow(start1, ctrl1, end1);
         flow1.value = value;
-   
 
         QuadraticBezierFlow flow2 = new QuadraticBezierFlow(start2, ctrl2, end2);
         flow2.value = value;
-   
 
         return new QuadraticBezierFlow[]{flow1, flow2};
     }
-    
+
     /**
-     * Returns the curve parameter where a circle with radius r around the end 
+     * Returns the curve parameter where a circle with radius r around the end
      * point intersects the BŽzier curve.
+     *
      * @param r Radius of circle
      * @return t parameter where the circle intersects the flow.
      */
@@ -321,8 +324,9 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns the curve parameter where a circle with radius r around the start 
+     * Returns the curve parameter where a circle with radius r around the start
      * point intersects the BŽzier curve.
+     *
      * @param r Radius of circle
      * @return t parameter where the circle intersects the flow.
      */
@@ -346,5 +350,66 @@ public class QuadraticBezierFlow extends Flow {
         }
 
         return t;
+    }
+
+    /**
+     * Returns a new flow object with the the start or end masking areas removed.
+     * @param clipWithStartArea
+     * @param clipWithEndArea
+     * @return 
+     */
+    public QuadraticBezierFlow getClippedFlow(boolean clipWithStartArea,
+            boolean clipWithEndArea) {
+
+        clipWithStartArea &= getStartClipArea() != null;
+        clipWithEndArea &= getEndClipArea() != null;
+
+        // construct LineString from current flow geometry
+        // FIXME adapt de Casteljau tolerance
+        ArrayList<Point> points = toStraightLineSegments(0.01);
+        GeometryFactory geometryFactory = new GeometryFactory();
+        int numPoints = points.size();
+        Coordinate[] xy = new Coordinate[numPoints];
+        for (int i = 0; i < numPoints; i++) {
+            Point point = points.get(i);
+            xy[i] = new Coordinate(point.x, point.y);
+        }
+        LineString lineString = geometryFactory.createLineString(xy);
+
+        QuadraticBezierFlow splitFlow = this;
+
+        if (clipWithStartArea) {
+            Geometry clippedGeometry = lineString.difference(this.getStartClipArea());
+            // FIXME add support for MultiLineString
+            if (clippedGeometry instanceof LineString) {
+                lineString = (LineString) clippedGeometry;
+                if (lineString.getNumPoints() >= 2) {
+                    com.vividsolutions.jts.geom.Point pt = lineString.getStartPoint();
+                    double dx = startPt.x - pt.getX();
+                    double dy = startPt.y - pt.getY();
+                    double startDistance = Math.sqrt(dx * dx + dy * dy);
+                    double t = getIntersectionTWithCircleAroundStartPoint(startDistance);
+                    splitFlow = split(t)[1];
+                }
+            }
+        }
+
+        if (clipWithEndArea) {
+            Geometry clippedGeometry = lineString.difference(this.getEndClipArea());
+            // FIXME add support for MultiLineString
+            if (clippedGeometry instanceof LineString) {
+                lineString = (LineString) clippedGeometry;
+                if (lineString.getNumPoints() >= 2) {
+                    com.vividsolutions.jts.geom.Point pt = lineString.getEndPoint();
+                    double dx = endPt.x - pt.getX();
+                    double dy = endPt.y - pt.getY();
+                    double endDistance = Math.sqrt(dx * dx + dy * dy);
+                    double t = splitFlow.getIntersectionTWithCircleAroundEndPoint(endDistance);
+                    splitFlow = split(t)[0];
+                }
+            }
+        }
+
+        return splitFlow;
     }
 }
