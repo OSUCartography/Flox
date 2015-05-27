@@ -21,7 +21,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     /**
      * Tolerance for selection of objects by mouse clicks.
      */
-    protected static final int CLICK_PIXEL_TOLERANCE = 2;
+    protected static final int CLICK_PIXEL_TOLERANCE = 10;
     
     /**
      * Create a new instance.

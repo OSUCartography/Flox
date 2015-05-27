@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -221,17 +222,61 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
         System.out.println("You drew a rectangle!");
         Iterator<Point> nodes = model.nodeIterator();
+
+        boolean somethingGotSelected = false;
+
         while (nodes.hasNext()) {
             Point pt = nodes.next();
 
             if ((pt.x >= rect.getMinX() && pt.x <= rect.getMaxX())
                     && (pt.y >= rect.getMinY() && pt.y <= rect.getMaxY())) {
                 pt.setSelected(true);
+                somethingGotSelected = true;
             } else {
-                pt.setSelected(false);
+                if (shiftDown) {
+                    continue;
+                } else {
+                    pt.setSelected(false);
+                }
+
             }
+
         }
         repaint();
-        return false;
+
+        return somethingGotSelected;
+    }
+
+    @Override
+    public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
+        System.out.println("You clicked without dragging!");
+        System.out.println("Click coords: " + point.x + " " + point.y);
+        Iterator<Point> nodes = model.nodeIterator();
+        
+        boolean somethingGotSelected = false;
+
+        while (nodes.hasNext()) {
+            Point pt = nodes.next();
+
+            
+            
+            if (((xToPx(pt.x) >= xToPx(point.x) - pixelTolerance)
+                    && (xToPx(pt.x) <= xToPx(point.x) + pixelTolerance))
+                    && ((yToPx(pt.y) >= yToPx(point.y) - pixelTolerance)
+                    && (yToPx(pt.y) <= yToPx(point.y) + pixelTolerance))) {
+                pt.setSelected(true);
+            } else {
+                if (shiftDown) {
+                    continue;
+                } else {
+                    pt.setSelected(false);
+                }
+            }
+
+        }
+
+        repaint();
+
+        return somethingGotSelected;
     }
 }
