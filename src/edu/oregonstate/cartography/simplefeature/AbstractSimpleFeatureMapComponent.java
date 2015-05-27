@@ -440,7 +440,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
-        System.out.println("selectByRectangle not implemented yet");
+        System.out.println("selectByPoint not implemented yet");
         return false;
     }
 }

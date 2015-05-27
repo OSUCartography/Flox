@@ -262,7 +262,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Point> iter = model.nodeIterator();
         while (iter.hasNext()) {
             Point pt = iter.next();
-            drawCircle(pt.x, pt.y, R, Color.WHITE, Color.BLACK);
+            if(pt.isSelected()) {
+                drawCircle(pt.x, pt.y, R, Color.WHITE, Color.CYAN);
+            } else {
+                drawCircle(pt.x, pt.y, R, Color.WHITE, Color.BLACK);
+            }
+            
         }
     }
 

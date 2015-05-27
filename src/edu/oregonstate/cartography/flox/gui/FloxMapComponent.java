@@ -3,6 +3,7 @@ package edu.oregonstate.cartography.flox.gui;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
+import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
@@ -11,6 +12,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -99,7 +102,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 }
             }
 
-        // draw flows and nodes
+            // draw flows and nodes
             if (model.isDrawArrows()) {
                 renderer.drawFlowsWithArrows();
             } else {
@@ -212,5 +215,23 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     public void setDrawFlowRangebox(boolean drawFlowRangebox) {
         this.drawFlowRangebox = drawFlowRangebox;
+    }
+
+    @Override
+    public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
+        System.out.println("You drew a rectangle!");
+        Iterator<Point> nodes = model.nodeIterator();
+        while (nodes.hasNext()) {
+            Point pt = nodes.next();
+
+            if ((pt.x >= rect.getMinX() && pt.x <= rect.getMaxX())
+                    && (pt.y >= rect.getMinY() && pt.y <= rect.getMaxY())) {
+                pt.setSelected(true);
+            } else {
+                pt.setSelected(false);
+            }
+        }
+        repaint();
+        return false;
     }
 }

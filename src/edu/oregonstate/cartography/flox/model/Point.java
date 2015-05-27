@@ -10,6 +10,8 @@ public final class Point {
     public double x;
     public double y;
     
+    private boolean selected = false;
+    
     public Point(double x, double y) {
         this.x = x;
         this.y = y;
@@ -31,6 +33,20 @@ public final class Point {
         double newX = tempX * cos - tempY * sin;
         double newY = tempX * sin + tempY * cos;
         return new Point(newX + origin.x, newY + origin.y);
+    }
+
+    /**
+     * @return the selected
+     */
+    public boolean isSelected() {
+        return selected;
+    }
+
+    /**
+     * @param selected the selected to set
+     */
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
     
 }
