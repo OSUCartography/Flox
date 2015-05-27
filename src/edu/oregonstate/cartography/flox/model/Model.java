@@ -274,7 +274,7 @@ public class Model {
      * Finds the clip areas for the the end of flows. First buffers the clip area
      * geometry, then finds containing geometry for the end point of each flow.
      */
-    private void updateEndClipAreas() {
+    public void updateEndClipAreas() {
         if (clipAreas == null) {
             return;
         }
@@ -302,6 +302,13 @@ public class Model {
         this.clipAreas = clipAreas;
         updateStartClipAreas();
         updateEndClipAreas();
+    }
+    
+    public void removeEndClipAreasFromFlows() {
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            iterator.next().setEndClipArea(null);
+        }
     }
 
     /**

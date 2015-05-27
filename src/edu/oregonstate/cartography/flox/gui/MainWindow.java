@@ -200,6 +200,9 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel20 = new javax.swing.JLabel();
         selectEndClipAreaButton = new javax.swing.JButton();
         jLabel19 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        endAreasBufferDistanceFormattedTextField = new javax.swing.JFormattedTextField();
+        clipWithEndAreasCheckBox = new javax.swing.JCheckBox();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
@@ -1000,9 +1003,47 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel19.setText("This is not functional yet.");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
+        clipAreaControlPanel.add(jLabel19, gridBagConstraints);
+
+        jLabel21.setText("End Areas Buffer Distance");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
+        clipAreaControlPanel.add(jLabel21, gridBagConstraints);
+
+        endAreasBufferDistanceFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        endAreasBufferDistanceFormattedTextField.setValue(0.);
+        endAreasBufferDistanceFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                endAreasBufferDistanceFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        clipAreaControlPanel.add(endAreasBufferDistanceFormattedTextField, gridBagConstraints);
+
+        clipWithEndAreasCheckBox.setText("Clip with End Areas");
+        clipWithEndAreasCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clipWithEndAreasCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
-        clipAreaControlPanel.add(jLabel19, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        clipAreaControlPanel.add(clipWithEndAreasCheckBox, gridBagConstraints);
 
         clipAreaPanel.add(clipAreaControlPanel);
 
@@ -1643,7 +1684,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_distanceToggleButtonActionPerformed
 
     private void showAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllButtonActionPerformed
-        mapComponent.showAll();
+        mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
     }//GEN-LAST:event_showAllButtonActionPerformed
 
     private void flowDistanceFromEndPointFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
@@ -1731,6 +1772,25 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_selectEndClipAreaButtonActionPerformed
 
+    private void clipWithEndAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithEndAreasCheckBoxActionPerformed
+        if (clipWithEndAreasCheckBox.isSelected()) {
+            model.updateEndClipAreas();
+        } else {
+            model.removeEndClipAreasFromFlows();
+        }
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_clipWithEndAreasCheckBoxActionPerformed
+
+    private void endAreasBufferDistanceFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName())) {
+            double d = ((Number) endAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
+            model.setEndClipAreaBufferDistance(d);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1792,6 +1852,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JPanel clipAreaControlPanel;
     private javax.swing.JPanel clipAreaPanel;
+    private javax.swing.JCheckBox clipWithEndAreasCheckBox;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
@@ -1803,6 +1864,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JComboBox drawingOrderComboBox;
+    private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
     private javax.swing.JSlider exponentSlider;
     private javax.swing.JMenuItem exportImageMenuItem;
@@ -1833,6 +1895,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
