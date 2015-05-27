@@ -128,6 +128,13 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
         flowLengthSlider = new javax.swing.JSlider();
         mapToolsButtonGroup = new javax.swing.ButtonGroup();
+        importPanel = new javax.swing.JPanel();
+        jLabel22 = new javax.swing.JLabel();
+        jLabel23 = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
         jToolBar1 = new javax.swing.JToolBar();
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
@@ -208,6 +215,7 @@ public class MainWindow extends javax.swing.JFrame {
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         importFlowsMenuItem = new javax.swing.JMenuItem();
+        openPointsAndFlowsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
         openShapefileMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
@@ -307,6 +315,53 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         flowLayoutPanel.add(flowLengthSlider, gridBagConstraints);
+
+        importPanel.setLayout(new java.awt.GridBagLayout());
+
+        jLabel22.setText("Points File");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        importPanel.add(jLabel22, gridBagConstraints);
+
+        jLabel23.setText("Flows File");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        importPanel.add(jLabel23, gridBagConstraints);
+
+        jLabel24.setFont(jLabel24.getFont().deriveFont(jLabel24.getFont().getSize()-3f));
+        jLabel24.setText("jLabel24");
+        jLabel24.setPreferredSize(new java.awt.Dimension(500, 13));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        importPanel.add(jLabel24, gridBagConstraints);
+
+        jLabel25.setFont(jLabel25.getFont().deriveFont(jLabel25.getFont().getSize()-3f));
+        jLabel25.setText("jLabel25");
+        jLabel25.setPreferredSize(new java.awt.Dimension(500, 13));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        importPanel.add(jLabel25, gridBagConstraints);
+
+        jButton1.setText("Select…");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        importPanel.add(jButton1, gridBagConstraints);
+
+        jButton2.setText("Select…");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        importPanel.add(jButton2, gridBagConstraints);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -1068,6 +1123,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(importFlowsMenuItem);
+
+        openPointsAndFlowsMenuItem.setText("Open Points and Flows…");
+        openPointsAndFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openPointsAndFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(openPointsAndFlowsMenuItem);
         fileMenu.add(jSeparator4);
 
         openShapefileMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -1791,6 +1854,12 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
 
+    private void openPointsAndFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openPointsAndFlowsMenuItemActionPerformed
+        String title = "Open Points and Flows";
+        JOptionPane.showOptionDialog(this, importPanel, title,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+    }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -1883,8 +1952,11 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem geometricLayoutMenuItem;
     private javax.swing.JToggleButton handToggleButton;
     private javax.swing.JMenuItem importFlowsMenuItem;
+    private javax.swing.JPanel importPanel;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;
@@ -1896,6 +1968,10 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
@@ -1908,6 +1984,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.ButtonGroup mapToolsButtonGroup;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JSlider nodeWeightSlider;
+    private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openShapefileMenuItem;
     private javax.swing.JSlider peripheralStiffnessSlider;
     private javax.swing.JProgressBar progressBar;
