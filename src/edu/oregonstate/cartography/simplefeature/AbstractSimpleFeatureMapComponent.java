@@ -417,7 +417,15 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         return (north - y) * scale;
     }
     
-
+    /**
+     * Convert a distance to pixels
+     * @param d The distance to convert in world coordinates
+     * @return The distance in pixels.
+     */
+    public double distToPx(double d) {
+        return d * scale;
+    }
+    
      /**
      * Returns a formatter that is used to display coordinates of this map.
      * @return The coordinate formatter.
@@ -434,13 +442,4 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         this.coordinateFormatter = coordinateFormatter;
     }
 
-    public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
-        System.out.println("selectByRectangle not implemented yet");
-        return false;
-    }
-
-    public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
-        System.out.println("selectByPoint not implemented yet");
-        return false;
-    }
 }

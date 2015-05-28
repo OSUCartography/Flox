@@ -64,7 +64,7 @@ public class SVGExporter {
     /**
      * Bounding box of the geometry collection that is exported.
      */
-    private final Envelope bb;
+    protected final Envelope bb;
 
     /**
      * Scale factor to fit geometry to SVG canvas.
@@ -99,7 +99,7 @@ public class SVGExporter {
         }
         setSVGCanvasSize(600, 450);
     }
-
+    
     public final void setSVGCanvasSize(double width, double height) {
         canvasWidth = width;
         canvasHeight = height;

@@ -5,10 +5,17 @@
  */
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.model.Flow;
+import edu.oregonstate.cartography.flox.model.Model;
+import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import static edu.oregonstate.cartography.utils.GeometryUtils.getBoundingBoxOfPoints;
+import static edu.oregonstate.cartography.utils.GeometryUtils.getDistanceToLine;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * SelectionTool - a tool to select GeoObjects by mouse clicks and mouse drags.
@@ -23,13 +30,19 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     protected static final int CLICK_PIXEL_TOLERANCE = 12;
 
     /**
+     * Model with elements to select.
+     */
+    private final Model model;
+
+    /**
      * Create a new instance.
      *
      * @param mapComponent The MapComponent for which this MapTool provides its
      * services.
      */
-    public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent) {
+    public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent, Model model) {
         super(mapComponent);
+        this.model = model;
     }
 
     /**
@@ -40,18 +53,16 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
-        Rectangle2D.Double rect = this.getRectangle();
+        Rectangle2D.Double rect = getRectangle();
         super.endDrag(point, evt);
 
-        final boolean selectionChanged
-                = this.mapComponent.selectByRectangle(rect, evt.isShiftDown());
+        if (rect != null) {
+            final boolean selectionChanged = selectByRectangle(rect, evt.isShiftDown());
+        }
 
         setDefaultCursor();
     }
 
-    
-    
-    
     /**
      * The mouse was clicked, while this MapTool was the active one.
      *
@@ -67,7 +78,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         //        point, evt.isShiftDown(),
         //        SelectionTool.CLICK_PIXEL_TOLERANCE);
     }
-    
+
     /**
      * The left mouse button was clicked down, while this MapTool was the active
      * one.
@@ -78,10 +89,112 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     @Override
     public void mouseDown(Point2D.Double point, MouseEvent evt) {
 
-        boolean selectionChanged = mapComponent.selectByPoint(
-                point, evt.isShiftDown(),
+        boolean selectionChanged = selectByPoint(point, evt.isShiftDown(),
                 SelectionTool.CLICK_PIXEL_TOLERANCE);
+    }
 
+    public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
+        Iterator<Point> nodes = model.nodeIterator();
+
+        boolean somethingGotSelected = false;
+
+        System.out.println("Min: " + mapComponent.xToPx(rect.getMinX()) + " " + mapComponent.yToPx(rect.getMinY()));
+        System.out.println("Max: " + mapComponent.xToPx(rect.getMaxX()) + " " + mapComponent.yToPx(rect.getMaxY()));
+
+        while (nodes.hasNext()) {
+            Point pt = nodes.next();
+
+            if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(rect.getMinX()) - 10)
+                    && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(rect.getMaxX()) + 10))
+                    && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(rect.getMaxY()) - 10)
+                    && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(rect.getMinY()) + 10))) {
+                pt.setSelected(true);
+                somethingGotSelected = true;
+            } else {
+                if (shiftDown == false) {
+                    pt.setSelected(false);
+                }
+
+            }
+
+        }
+
+        mapComponent.repaint();
+        return somethingGotSelected;
+    }
+
+    public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
+        Iterator<Point> nodes = model.nodeIterator();
+
+        boolean somethingGotSelected = false;
+
+        // Select nodes
+        while (nodes.hasNext()) {
+            Point pt = nodes.next();
+
+            if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(point.x) - pixelTolerance)
+                    && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
+                    && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
+                    && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
+                pt.setSelected(true);
+                somethingGotSelected = true;
+            } else {
+                if (shiftDown == false) {
+                    pt.setSelected(false);
+                }
+            }
+
+        }
+
+        // Select flows
+        Iterator<Flow> flows = model.flowIterator();
+
+        while (flows.hasNext()) {
+            Flow flow = flows.next();
+            if (flow.getBoundingBox().contains(point)) {
+
+                System.out.println("Clicked in a flow bounding box!");
+                ArrayList<Point> pts = flow.toStraightLineSegments(pixelTolerance);
+                for (int i = 0; i < pts.size() - 1; i++) {
+                    Point pt1 = pts.get(i);
+                    Point pt2 = pts.get(i + 1);
+
+                    ArrayList<Point> segmentPts = new ArrayList();
+                    segmentPts.add(pt1);
+                    segmentPts.add(pt2);
+
+                    if (getBoundingBoxOfPoints(segmentPts).contains(point)) {
+                        // Convert the point coordinates to pixel coordinates
+
+                        double x0px = mapComponent.xToPx(point.x);
+                        double y0px = mapComponent.yToPx(point.y);
+                        double x1px = mapComponent.xToPx(pt1.x);
+                        double y1px = mapComponent.yToPx(pt1.y);
+                        double x2px = mapComponent.xToPx(pt2.x);
+                        double y2px = mapComponent.yToPx(pt2.y);
+
+                        double dist = getDistanceToLine(x0px, y0px, x1px, y1px,
+                                x2px, y2px);
+
+                        System.out.println("Dist: " + dist);
+                        if (dist <= 10) {
+                            flow.setSelected(true);
+                            somethingGotSelected = true;
+                        }
+
+                    }
+
+                }
+            } else {
+                if (shiftDown == false) {
+                    flow.setSelected(false);
+                }
+            }
+        }
+
+        mapComponent.repaint();
+        System.out.println("");
+        return somethingGotSelected;
     }
 
     @Override

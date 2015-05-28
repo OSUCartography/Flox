@@ -10,6 +10,7 @@ import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
+import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.MeasureTool;
 import edu.oregonstate.cartography.map.PanTool;
@@ -35,7 +36,6 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
@@ -94,6 +94,15 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
 
         mapComponent.requestFocusInWindow();
+
+        writeModelToGUI();
+    }
+
+    private void writeModelToGUI() {
+
+        // write arrow head setttings
+        flowDistanceFromEndPointFormattedTextField.setValue(123);
+        // ...
     }
 
     /**
@@ -1303,8 +1312,7 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
             outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
-            SVGExporter exporter = new SVGExporter(model.getLayerGeometry(),
-                    "OSU Cartography Group", "Flox");
+            SVGFlowExporter exporter = new SVGFlowExporter(model);
             exporter.setSVGCanvasSize(800, 550);
             outputStream = new FileOutputStream(outFilePath);
             exporter.export(outputStream);
@@ -1762,7 +1770,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
-        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent));
+        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent, model));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
@@ -1788,7 +1796,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_showAllButtonActionPerformed
 
     private void flowDistanceFromEndPointFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
-        if ("value".equals(evt.getPropertyName())) {
+        if ("value".equals(evt.getPropertyName()) && model != null) {
             double s = ((Number) flowDistanceFromEndPointFormattedTextField.getValue()).doubleValue();
             model.setFlowArrowEndPointRadius(s);
             mapComponent.eraseBufferImage();

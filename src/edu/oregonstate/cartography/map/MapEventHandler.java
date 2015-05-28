@@ -5,6 +5,7 @@
  */
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import edu.oregonstate.cartography.utils.FocusUtils;
 import java.awt.geom.*;
@@ -91,7 +92,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
 
         KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         kfm.addKeyEventDispatcher(this);
-        mapTool = new ScaleMoveSelectionTool(mapComponent);
+        mapTool = null;
     }
 
     /**
@@ -242,7 +243,9 @@ public class MapEventHandler implements java.awt.event.MouseListener,
      */
     public void setMapTool(MapTool mapTool, boolean rememberCurrentTool) {
         if (rememberCurrentTool) {
-            this.mapTool.pause();
+            if (this.mapTool != null) {
+                this.mapTool.pause();
+            }
             temporarilySuspendedTool = this.mapTool;
         } else if (this.mapTool != null) {
             this.mapTool.deactivate();
@@ -393,7 +396,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
         }
 
         // give current map tool a chance to consume the key event
-        if (mapTool.keyEvent(keyEvent) == true) {
+        if (mapTool != null && mapTool.keyEvent(keyEvent) == true) {
             return true;
         }
 
