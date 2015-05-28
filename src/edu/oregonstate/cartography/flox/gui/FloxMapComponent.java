@@ -1,18 +1,20 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
+import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import static edu.oregonstate.cartography.utils.GeometryUtils.getBoundingBoxOfPoints;
+import static edu.oregonstate.cartography.utils.GeometryUtils.getDistanceToLine;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.geom.Point2D;
-import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -256,6 +258,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
         boolean somethingGotSelected = false;
 
+        // Select nodes
         while (nodes.hasNext()) {
             Point pt = nodes.next();
 
@@ -264,6 +267,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                     && ((yToPx(pt.y) >= yToPx(point.y) - pixelTolerance)
                     && (yToPx(pt.y) <= yToPx(point.y) + pixelTolerance))) {
                 pt.setSelected(true);
+                somethingGotSelected = true;
             } else {
                 if (shiftDown == false) {
                     pt.setSelected(false);
@@ -272,8 +276,55 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
         }
 
-        repaint();
+        // Select flows
+        Iterator<Flow> flows = model.flowIterator();
 
+        while (flows.hasNext()) {
+            Flow flow = flows.next();
+            if(flow.getBoundingBox().contains(point)) {
+
+                System.out.println("Clicked in a flow bounding box!");
+                ArrayList<Point> pts = flow.toStraightLineSegments(pixelTolerance);
+                for(int i = 0; i < pts.size() - 1; i++) {
+                    Point pt1 = pts.get(i);
+                    Point pt2 = pts.get(i + 1);
+
+                    ArrayList<Point> segmentPts = new ArrayList();
+                    segmentPts.add(pt1);
+                    segmentPts.add(pt2);
+
+                    if (getBoundingBoxOfPoints(segmentPts).contains(point)) {
+                        // Convert the point coordinates to pixel coordinates
+
+                        double x0px = xToPx(point.x);
+                        double y0px = yToPx(point.y);
+                        double x1px = xToPx(pt1.x);
+                        double y1px = yToPx(pt1.y);
+                        double x2px = xToPx(pt2.x);
+                        double y2px = yToPx(pt2.y);
+
+                        double dist = getDistanceToLine(x0px, y0px, x1px, y1px,
+                                x2px, y2px);
+
+                        System.out.println("Dist: " + dist);
+                        if(dist<=10) {
+                            flow.setSelected(true);
+                            somethingGotSelected = true;
+                        }
+
+                    }
+
+
+                }
+            } else {
+                if (shiftDown == false) {
+                    flow.setSelected(false);
+                }
+            }
+        }
+
+        repaint();
+        System.out.println("");
         return somethingGotSelected;
     }
 }

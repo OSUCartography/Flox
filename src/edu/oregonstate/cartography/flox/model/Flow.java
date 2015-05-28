@@ -37,6 +37,8 @@ public abstract class Flow {
     private Geometry endClipArea;
 
 
+    private boolean selected = false;
+    
     /**
      * Return bounding box of this flow.
      *
@@ -159,5 +161,19 @@ public abstract class Flow {
      */
     public void setEndClipArea(Geometry endClipArea) {
         this.endClipArea = endClipArea;
+    }
+
+    /**
+     * @return the selected
+     */
+    public boolean isSelected() {
+        return selected;
+    }
+
+    /**
+     * @param selected the selected to set
+     */
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }

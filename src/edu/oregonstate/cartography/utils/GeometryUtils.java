@@ -1,6 +1,12 @@
 package edu.oregonstate.cartography.utils;
 
+import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Point;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import static java.lang.Double.isNaN;
+import static java.lang.Math.abs;
+import java.util.ArrayList;
 
 public class GeometryUtils {
 
@@ -101,9 +107,9 @@ public class GeometryUtils {
      * @param y4
      * @return
      */
-    public static Point getLineLineIntersection(double x1, double y1, 
-            double x2, double y2, 
-            double x3, double y3, 
+    public static Point getLineLineIntersection(double x1, double y1,
+            double x2, double y2,
+            double x3, double y3,
             double x4, double y4) {
         double det1And2 = det(x1, y1, x2, y2);
         double det3And4 = det(x3, y3, x4, y4);
@@ -131,14 +137,95 @@ public class GeometryUtils {
 
     /**
      * Get the azimuth (in radians) of a line connecting two points
+     *
      * @param startPt The start point of the line
      * @param endPt The end point of the line
-     * @return 
+     * @return
      */
     public static double computeAzimuth(Point startPt, Point endPt) {
         final double dx = endPt.x - startPt.x;
         final double dy = endPt.y - startPt.y;
         return Math.atan2(dy, dx);
     }
-    
+
+    public static boolean detectFlowCollisionWithPoint(Flow flow, Point2D.Double pt, double pixelTolerance) {
+
+        //Is the point in the bounding box of the flow? +/- tolerance?
+        if (flow.getBoundingBox().contains(pt)) {
+
+            //Split flow into segments, iterate through them
+            ArrayList<Point> pts = flow.toStraightLineSegments(pixelTolerance);
+            for (int i = 0; i < pts.size() - 1; i++) {
+
+                // Get the other two points for better readability.
+                Point pt1 = pts.get(i);
+                Point pt2 = pts.get(i + 1);
+
+                ArrayList<Point> segmentPts = new ArrayList();
+                segmentPts.add(pt1);
+                segmentPts.add(pt2);
+
+                // is the point inside the bounding box for the segment?
+                if (getBoundingBoxOfPoints(segmentPts).contains(pt)) {
+                    // Get the distance to the line IN PIXELS
+
+                    //double dist = getDistanceToLine(pt, pt1, pt2);
+                    //Is the distance <= tolerance?
+                    //Yes,
+                    //Select the flow!
+                }
+
+            }
+
+        }
+
+        // Point is not within tolorance of the flow
+        return false;
+    }
+
+    public static boolean detectFlowCollisionWithRectangle(Flow flow, Rectangle2D rect, double pixelTolerance) {
+        return false;
+    }
+
+    /**
+     * Get the bounding box for an ArrayList of Points.
+     *
+     * @param points An ArrayList of Points
+     * @return A Rectangle2D object that contains all the Points.
+     */
+    public static Rectangle2D getBoundingBoxOfPoints(ArrayList<Point> points) {
+
+        Rectangle2D.Double bb = new Rectangle2D.Double(points.get(0).x, points.get(0).y, 0, 0);
+        for (int i = 1; i < points.size(); i++) {
+            Point pt = points.get(i);
+            bb.add(pt.x, pt.y);
+        }
+
+        return bb;
+    }
+
+    /**
+     * Compute the shortest distance between a point and a line using
+     * coordinates
+     *
+     * @param point Point who's distance is being measured
+     * @param point0 Line start point
+     * @param point1 Line end point
+     * @return
+     */
+    public static double getDistanceToLine(double x, double y,
+            double x0, double y0, double x1, double y1) {
+
+        double distToLine = (abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0))
+                / (Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)))));
+
+        double number1 = abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0));
+        double number2 = Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)));
+
+        if (isNaN(distToLine)) {
+            return 0;
+        }
+        return distToLine;
+
+    }
 }

@@ -49,6 +49,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         setDefaultCursor();
     }
 
+    
+    
+    
     /**
      * The mouse was clicked, while this MapTool was the active one.
      *
@@ -60,11 +63,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         //super.mouseClicked(point, evt);
 
         // try selecting objects close to the mouse click.
-        boolean selectionChanged = mapComponent.selectByPoint(
-                point, evt.isShiftDown(),
-                SelectionTool.CLICK_PIXEL_TOLERANCE);
+        //boolean selectionChanged = mapComponent.selectByPoint(
+        //        point, evt.isShiftDown(),
+        //        SelectionTool.CLICK_PIXEL_TOLERANCE);
     }
-
+    
     /**
      * The left mouse button was clicked down, while this MapTool was the active
      * one.

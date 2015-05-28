@@ -187,7 +187,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(path);
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            g2d.setColor(Color.BLACK);
+            if(flow.isSelected()) {
+                g2d.setColor(Color.CYAN);
+            } else {
+                g2d.setColor(Color.BLACK);
+            }
+            
             g2d.draw(path);
         }
     }
@@ -243,13 +248,21 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.setStroke(new BasicStroke(3));
             g2d.setColor(Color.WHITE);
             g2d.draw(arrowPath);
-            g2d.setColor(Color.BLACK);
+            if(flow.isSelected()) {
+                g2d.setColor(Color.CYAN);
+            } else {
+                g2d.setColor(Color.BLACK);
+            }
             g2d.fill(arrowPath);
 
             // Draw the flow fill
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            g2d.setColor(Color.BLACK);
+            if(flow.isSelected()) {
+                g2d.setColor(Color.CYAN);
+            } else {
+                g2d.setColor(Color.BLACK);
+            }
             g2d.draw(path);
         }
     }
