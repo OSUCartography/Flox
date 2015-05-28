@@ -35,6 +35,8 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
@@ -131,10 +133,12 @@ public class MainWindow extends javax.swing.JFrame {
         importPanel = new javax.swing.JPanel();
         jLabel22 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
-        jLabel24 = new javax.swing.JLabel();
-        jLabel25 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        pointsFilePathLabel = new javax.swing.JLabel();
+        flowsFilePathLabel = new javax.swing.JLabel();
+        selectPointsFileButton = new javax.swing.JButton();
+        selectFlowsFileButton = new javax.swing.JButton();
+        importPanelOKButton = new javax.swing.JButton();
+        importPanelCancelButton = new javax.swing.JButton();
         jToolBar1 = new javax.swing.JToolBar();
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
@@ -330,38 +334,62 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         importPanel.add(jLabel23, gridBagConstraints);
 
-        jLabel24.setFont(jLabel24.getFont().deriveFont(jLabel24.getFont().getSize()-3f));
-        jLabel24.setText("jLabel24");
-        jLabel24.setPreferredSize(new java.awt.Dimension(500, 13));
+        pointsFilePathLabel.setFont(pointsFilePathLabel.getFont().deriveFont(pointsFilePathLabel.getFont().getSize()-3f));
+        pointsFilePathLabel.setText("–");
+        pointsFilePathLabel.setPreferredSize(new java.awt.Dimension(500, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
-        importPanel.add(jLabel24, gridBagConstraints);
+        importPanel.add(pointsFilePathLabel, gridBagConstraints);
 
-        jLabel25.setFont(jLabel25.getFont().deriveFont(jLabel25.getFont().getSize()-3f));
-        jLabel25.setText("jLabel25");
-        jLabel25.setPreferredSize(new java.awt.Dimension(500, 13));
+        flowsFilePathLabel.setFont(flowsFilePathLabel.getFont().deriveFont(flowsFilePathLabel.getFont().getSize()-3f));
+        flowsFilePathLabel.setText("–");
+        flowsFilePathLabel.setPreferredSize(new java.awt.Dimension(500, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        importPanel.add(jLabel25, gridBagConstraints);
+        importPanel.add(flowsFilePathLabel, gridBagConstraints);
 
-        jButton1.setText("Select…");
+        selectPointsFileButton.setText("Select…");
+        selectPointsFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectPointsFileButtonActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        importPanel.add(jButton1, gridBagConstraints);
+        importPanel.add(selectPointsFileButton, gridBagConstraints);
 
-        jButton2.setText("Select…");
+        selectFlowsFileButton.setText("Select…");
+        selectFlowsFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectFlowsFileButtonActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        importPanel.add(jButton2, gridBagConstraints);
+        importPanel.add(selectFlowsFileButton, gridBagConstraints);
+
+        importPanelOKButton.setText("OK");
+        importPanelOKButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importPanelOKButtonActionPerformed(evt);
+            }
+        });
+
+        importPanelCancelButton.setText("Cancel");
+        importPanelCancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importPanelCancelButtonActionPerformed(evt);
+            }
+        });
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -1327,6 +1355,25 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     /**
+     * Passes flows to the model and initializes the GUI for the flows.
+     *
+     * @param flows
+     * @param filePath
+     */
+    private void setFlows(ArrayList<Flow> flows, String filePath) {
+        if (flows != null) {
+            setTitle(FileUtils.getFileNameWithoutExtension(filePath));
+            model.setFlows(flows);
+            double maxFlowValue = model.getMaxFlowValue();
+            model.setFlowWidthScale(20 / maxFlowValue);
+            flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
+            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowArrowEndPointRadius());
+            forceLayout();
+            mapComponent.showAll();
+        }
+    }
+
+    /**
      * Open a CSV file with flows
      */
     public void openFlowsCSVFile() {
@@ -1337,18 +1384,8 @@ public class MainWindow extends javax.swing.JFrame {
                 // user canceled
                 return;
             }
-
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
-            if (flows != null) {
-                setTitle(FileUtils.getFileNameWithoutExtension(inFilePath));
-                model.setFlows(flows);
-                double maxFlowValue = model.getMaxFlowValue();
-                model.setFlowWidthScale(20 / maxFlowValue);
-                flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
-                flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowArrowEndPointRadius());
-                forceLayout();
-                mapComponent.showAll();
-            }
+            setFlows(flows, inFilePath);
         } catch (Exception ex) {
             ErrorDialog.showErrorDialog("The file could not be read.", "Flox Error", ex, null);
         }
@@ -1854,11 +1891,75 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
 
+    protected JOptionPane getOptionPane(JComponent parent) {
+        JOptionPane pane = null;
+        if (!(parent instanceof JOptionPane)) {
+            pane = getOptionPane((JComponent) parent.getParent());
+        } else {
+            pane = (JOptionPane) parent;
+        }
+        return pane;
+    }
+
     private void openPointsAndFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openPointsAndFlowsMenuItemActionPerformed
         String title = "Open Points and Flows";
-        JOptionPane.showOptionDialog(this, importPanel, title,
-                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+        importPanelOKButton.setEnabled(false);
+        pointsFilePathLabel.setText("–");
+        flowsFilePathLabel.setText("–");
+        // http://stackoverflow.com/questions/14334931/disable-ok-button-on-joptionpane-dialog-until-user-gives-an-input/14335083#14335083
+        int res = JOptionPane.showOptionDialog(
+                this,
+                importPanel,
+                title,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new Object[]{importPanelOKButton, importPanelCancelButton},
+                importPanelOKButton);
+        if (res != 0) {
+            return;
+        }
+        try {
+            String pointsFilePath = pointsFilePathLabel.getText();
+            String flowsFilePath = flowsFilePathLabel.getText();
+            ArrayList<Flow> flows = FlowImporter.readFlows(pointsFilePath, flowsFilePath);
+            setFlows(flows, flowsFilePath);
+        } catch (Exception ex) {
+            ErrorDialog.showErrorDialog("The flows could not be imported.", "Flox Error", ex, this);
+        }
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
+
+    private void selectPointsFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectPointsFileButtonActionPerformed
+        String filePath = FileUtils.askFile("Points File (CSV)", true);
+        if (filePath == null) {
+            // user canceled
+            return;
+        }
+        // abusing JLabel to store user input
+        pointsFilePathLabel.setText(filePath);
+        importPanelOKButton.setEnabled(flowsFilePathLabel.getText().length() > 2);
+    }//GEN-LAST:event_selectPointsFileButtonActionPerformed
+
+    private void selectFlowsFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFlowsFileButtonActionPerformed
+        String filePath = FileUtils.askFile("Flows File (CSV)", true);
+        if (filePath == null) {
+            // user canceled
+            return;
+        }
+        // abusing JLabel to store user input
+        flowsFilePathLabel.setText(filePath);
+        importPanelOKButton.setEnabled(pointsFilePathLabel.getText().length() > 2);
+    }//GEN-LAST:event_selectFlowsFileButtonActionPerformed
+
+    private void importPanelOKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importPanelOKButtonActionPerformed
+        JOptionPane pane = getOptionPane((JComponent) evt.getSource());
+        pane.setValue(importPanelOKButton);
+    }//GEN-LAST:event_importPanelOKButtonActionPerformed
+
+    private void importPanelCancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importPanelCancelButtonActionPerformed
+        JOptionPane pane = getOptionPane((JComponent) evt.getSource());
+        pane.setValue(importPanelCancelButton);
+    }//GEN-LAST:event_importPanelCancelButtonActionPerformed
 
     private void forceLayout() {
 
@@ -1947,16 +2048,17 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider flowLengthSlider;
     private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
+    private javax.swing.JLabel flowsFilePathLabel;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JPanel forcesPanel;
     private javax.swing.JMenuItem geometricLayoutMenuItem;
     private javax.swing.JToggleButton handToggleButton;
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JPanel importPanel;
+    private javax.swing.JButton importPanelCancelButton;
+    private javax.swing.JButton importPanelOKButton;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;
@@ -1970,8 +2072,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel25;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
@@ -1987,6 +2087,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openShapefileMenuItem;
     private javax.swing.JSlider peripheralStiffnessSlider;
+    private javax.swing.JLabel pointsFilePathLabel;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JPanel progressBarPanel;
     private javax.swing.JRadioButton quadraticCurvesRadioButton;
@@ -1994,6 +2095,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JButton selectEndClipAreaButton;
+    private javax.swing.JButton selectFlowsFileButton;
+    private javax.swing.JButton selectPointsFileButton;
     private javax.swing.JCheckBox selfForcesCheckBox;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
