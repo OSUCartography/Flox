@@ -49,4 +49,9 @@ public final class Point {
         this.selected = selected;
     }
     
+    @Override
+    public String toString() {
+        return "[" + x + "/" + y + "]";
+    }
+    
 }

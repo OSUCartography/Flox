@@ -223,6 +223,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         endAreasBufferDistanceFormattedTextField = new javax.swing.JFormattedTextField();
         clipWithEndAreasCheckBox = new javax.swing.JCheckBox();
+        drawEndClipAreasCheckBox = new javax.swing.JCheckBox();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
@@ -1137,6 +1138,19 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         clipAreaControlPanel.add(clipWithEndAreasCheckBox, gridBagConstraints);
 
+        drawEndClipAreasCheckBox.setText("Draw");
+        drawEndClipAreasCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawEndClipAreasCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        clipAreaControlPanel.add(drawEndClipAreasCheckBox, gridBagConstraints);
+
         clipAreaPanel.add(clipAreaControlPanel);
 
         controlsTabbedPane.addTab("Clip Areas", clipAreaPanel);
@@ -1969,6 +1983,12 @@ public class MainWindow extends javax.swing.JFrame {
         pane.setValue(importPanelCancelButton);
     }//GEN-LAST:event_importPanelCancelButtonActionPerformed
 
+    private void drawEndClipAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawEndClipAreasCheckBoxActionPerformed
+        mapComponent.setDrawEndClipAreas(drawEndClipAreasCheckBox.isSelected());
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_drawEndClipAreasCheckBoxActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -2038,6 +2058,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawCanvasPaddingCheckbox;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
+    private javax.swing.JCheckBox drawEndClipAreasCheckBox;
     private javax.swing.JCheckBox drawFlowRangeboxCheckbox;
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;

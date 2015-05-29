@@ -291,6 +291,15 @@ public class Model {
                     = findContainingGeometry(bufferedGeometryCollection, flow.getEndPt(), f);
             flow.setEndClipArea(endClipArea);
         }
+        
+        // FIXME test
+        iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.getEndClipArea() == null) {
+                System.out.println("no end clip area for flow ending at " + flow.getEndPt());
+            }
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.gui;
 
+import com.vividsolutions.jts.geom.Geometry;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -20,6 +21,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 /**
@@ -460,6 +462,22 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
 
             g2d.draw(generalPath);
+        }
+    }
+    
+    public void drawClipAreas() {
+        ArrayList<Flow> flows = model.getFlows();
+        HashSet<Geometry> endClipAreas = new HashSet<>();
+        HashSet<Geometry> startClipAreas = new HashSet<>();
+        for (Flow flow : flows) {
+            endClipAreas.add(flow.getEndClipArea());
+            startClipAreas.add(flow.getStartClipArea());
+        }
+        for (Geometry geometry : endClipAreas) {
+            draw(geometry, null, Color.GRAY);
+        }
+        for (Geometry geometry : startClipAreas) {
+            draw(geometry, null, Color.GRAY);
         }
     }
 }

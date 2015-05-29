@@ -55,6 +55,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing flow rangebox
      */
     private boolean drawFlowRangebox = false;
+    
+    /**
+     * flag for drawing clip areas around ends of flows
+     */
+    private boolean drawEndClipAreas = false;
 
     public FloxMapComponent() {
     }
@@ -141,6 +146,10 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             if (isDrawReconstructedBezier()) {
                 renderer.drawRebuiltBezierCurve();
             }
+            
+            if (isDrawEndClipAreas()) {
+                renderer.drawClipAreas();
+            }
         }
 
         // copy double buffer image to JComponent
@@ -219,5 +228,19 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     public void setDrawFlowRangebox(boolean drawFlowRangebox) {
         this.drawFlowRangebox = drawFlowRangebox;
+    }
+
+    /**
+     * @return the drawEndClipAreas
+     */
+    public boolean isDrawEndClipAreas() {
+        return drawEndClipAreas;
+    }
+
+    /**
+     * @param drawEndClipAreas the drawEndClipAreas to set
+     */
+    public void setDrawEndClipAreas(boolean drawEndClipAreas) {
+        this.drawEndClipAreas = drawEndClipAreas;
     }
 }

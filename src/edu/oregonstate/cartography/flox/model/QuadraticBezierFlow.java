@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
@@ -352,10 +353,12 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns a new flow object with the the start or end masking areas removed.
+     * Returns a new flow object with the the start or end masking areas
+     * removed.
+     *
      * @param clipWithStartArea
      * @param clipWithEndArea
-     * @return 
+     * @return
      */
     public QuadraticBezierFlow getClippedFlow(boolean clipWithStartArea,
             boolean clipWithEndArea) {
@@ -363,7 +366,7 @@ public class QuadraticBezierFlow extends Flow {
         clipWithStartArea &= getStartClipArea() != null;
         clipWithEndArea &= getEndClipArea() != null;
 
-        // construct LineString from current flow geometry
+        // construct LineString from the current Bezier flow geometry
         // FIXME adapt de Casteljau tolerance
         ArrayList<Point> points = toStraightLineSegments(0.01);
         GeometryFactory geometryFactory = new GeometryFactory();
@@ -377,36 +380,48 @@ public class QuadraticBezierFlow extends Flow {
 
         QuadraticBezierFlow splitFlow = this;
 
-        if (clipWithStartArea) {
-            Geometry clippedGeometry = lineString.difference(this.getStartClipArea());
-            // FIXME add support for MultiLineString
-            if (clippedGeometry instanceof LineString) {
-                lineString = (LineString) clippedGeometry;
-                if (lineString.getNumPoints() >= 2) {
-                    com.vividsolutions.jts.geom.Point pt = lineString.getStartPoint();
-                    double dx = startPt.x - pt.getX();
-                    double dy = startPt.y - pt.getY();
-                    double startDistance = Math.sqrt(dx * dx + dy * dy);
-                    double t = getIntersectionTWithCircleAroundStartPoint(startDistance);
-                    splitFlow = split(t)[1];
+        if (clipWithStartArea && getStartClipArea() != null) {
+            Geometry clippedGeometry = lineString.difference(getStartClipArea());
+            int nbrGeometries = clippedGeometry.getNumGeometries();
+            for (int i = 0; i < nbrGeometries; i++) {
+                Geometry geometry = clippedGeometry.getGeometryN(i);
+                if (geometry instanceof LineString) {
+                    lineString = (LineString) geometry;
+                    if (lineString.getNumPoints() >= 2) {
+                        com.vividsolutions.jts.geom.Point pt = lineString.getStartPoint();
+                        if (pt != null) {
+                            double dx = startPt.x - pt.getX();
+                            double dy = startPt.y - pt.getY();
+                            double startDistance = Math.sqrt(dx * dx + dy * dy);
+                            double t = getIntersectionTWithCircleAroundStartPoint(startDistance);
+                            splitFlow = split(t)[1];
+                        }
+                    }
                 }
             }
         }
 
-        if (clipWithEndArea) {
-            Geometry clippedGeometry = lineString.difference(this.getEndClipArea());
-            // FIXME add support for MultiLineString
-            if (clippedGeometry instanceof LineString) {
-                lineString = (LineString) clippedGeometry;
-                if (lineString.getNumPoints() >= 2) {
+        if (clipWithEndArea && getEndClipArea() != null) {
+            Geometry clippedGeometry = lineString.difference(getEndClipArea());
+            int nbrGeometries = clippedGeometry.getNumGeometries();
+            double d = 0;
+            for (int i = 0; i < nbrGeometries; i++) {
+                Geometry geometry = clippedGeometry.getGeometryN(i);
+                if (geometry instanceof LineString) {
+                    lineString = (LineString) geometry;
                     com.vividsolutions.jts.geom.Point pt = lineString.getEndPoint();
-                    double dx = endPt.x - pt.getX();
-                    double dy = endPt.y - pt.getY();
-                    double endDistance = Math.sqrt(dx * dx + dy * dy);
-                    double t = splitFlow.getIntersectionTWithCircleAroundEndPoint(endDistance);
-                    splitFlow = split(t)[0];
+                    if (lineString.getNumPoints() >= 2) {
+                        double dx = endPt.x - pt.getX();
+                        double dy = endPt.y - pt.getY();
+                        double endDistance = Math.sqrt(dx * dx + dy * dy);
+                        if (endDistance > d) {
+                            d = endDistance;
+                        }
+                    }
                 }
             }
+            double t = splitFlow.getIntersectionTWithCircleAroundEndPoint(d);
+            splitFlow = split(t)[0];
         }
 
         return splitFlow;
