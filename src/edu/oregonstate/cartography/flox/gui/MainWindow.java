@@ -96,6 +96,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.requestFocusInWindow();
 
         writeModelToGUI();
+        updateClippingGUI();
     }
 
     private void writeModelToGUI() {
@@ -1932,6 +1933,18 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
 
+    private void updateClippingGUI() {
+        boolean hasClipAreas = model != null && model.getFlows().size() > 0 && model.hasClipAreas();
+        boolean clipStart = clipWithStartAreasCheckBox.isSelected();
+        boolean clipEnd = clipWithEndAreasCheckBox.isSelected();
+        clipWithEndAreasCheckBox.setEnabled(hasClipAreas);
+        endAreasBufferDistanceFormattedTextField.setEnabled(hasClipAreas && clipEnd);
+        drawEndClipAreasCheckBox.setEnabled(hasClipAreas && clipEnd);
+        clipWithStartAreasCheckBox.setEnabled(hasClipAreas);
+        startAreasBufferDistanceFormattedTextField.setEnabled(hasClipAreas && clipStart);
+        drawStartClipAreasCheckBox.setEnabled(hasClipAreas && clipStart);
+    }
+    
     private void selectEndClipAreaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectEndClipAreaButtonActionPerformed
         try {
             // ask for import file
@@ -1948,8 +1961,8 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
 
-            // set start and end clip areas for all flows
             model.setClipAreas(collection);
+            updateClippingGUI();
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
@@ -1966,6 +1979,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
+        updateClippingGUI();
     }//GEN-LAST:event_clipWithEndAreasCheckBoxActionPerformed
 
     private void endAreasBufferDistanceFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
@@ -2076,6 +2090,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
+        updateClippingGUI();
     }//GEN-LAST:event_clipWithStartAreasCheckBoxActionPerformed
 
     private void forceLayout() {

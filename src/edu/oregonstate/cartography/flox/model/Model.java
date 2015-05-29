@@ -294,8 +294,14 @@ public class Model {
      */
     public void setClipAreas(Geometry clipAreas) {
         this.clipAreas = clipAreas;
-        updateStartClipAreas();
-        updateEndClipAreas();
+    }
+    
+    /**
+     * Returns true if clip areas exist.
+     * @return 
+     */
+    public boolean hasClipAreas() {
+        return clipAreas != null;
     }
 
     /**
