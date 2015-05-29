@@ -2,6 +2,8 @@ package edu.oregonstate.cartography.flox.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -9,6 +11,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -353,19 +356,20 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns a new flow object with the the start or end masking areas
+     * Returns a flow with the the start or end masking areas
      * removed.
-     *
-     * @param clipWithStartArea
-     * @param clipWithEndArea
-     * @return
+
+     * @return A new flow object (if something was clipped), or this object.
      */
-    public QuadraticBezierFlow getClippedFlow(boolean clipWithStartArea,
-            boolean clipWithEndArea) {
+    public QuadraticBezierFlow getClippedFlow() {
 
-        clipWithStartArea &= getStartClipArea() != null;
-        clipWithEndArea &= getEndClipArea() != null;
+        boolean clipWithStartArea = getStartClipArea() != null;
+        boolean clipWithEndArea = getEndClipArea() != null;
 
+        if (clipWithStartArea == false && clipWithEndArea == false) {
+            return this;
+        }
+        
         // construct LineString from the current Bezier flow geometry
         // FIXME adapt de Casteljau tolerance
         ArrayList<Point> points = toStraightLineSegments(0.01);
@@ -380,33 +384,37 @@ public class QuadraticBezierFlow extends Flow {
 
         QuadraticBezierFlow splitFlow = this;
 
+        // clip start
         if (clipWithStartArea && getStartClipArea() != null) {
+            double d = 0;
             Geometry clippedGeometry = lineString.difference(getStartClipArea());
-            int nbrGeometries = clippedGeometry.getNumGeometries();
-            for (int i = 0; i < nbrGeometries; i++) {
-                Geometry geometry = clippedGeometry.getGeometryN(i);
+            Iterator geomi = new GeometryCollectionIterator(clippedGeometry);
+            while (geomi.hasNext()) {
+                Geometry geometry = (Geometry) geomi.next();
                 if (geometry instanceof LineString) {
                     lineString = (LineString) geometry;
+                    com.vividsolutions.jts.geom.Point pt = lineString.getStartPoint();
                     if (lineString.getNumPoints() >= 2) {
-                        com.vividsolutions.jts.geom.Point pt = lineString.getStartPoint();
-                        if (pt != null) {
-                            double dx = startPt.x - pt.getX();
-                            double dy = startPt.y - pt.getY();
-                            double startDistance = Math.sqrt(dx * dx + dy * dy);
-                            double t = getIntersectionTWithCircleAroundStartPoint(startDistance);
-                            splitFlow = split(t)[1];
+                        double dx = startPt.x - pt.getX();
+                        double dy = startPt.y - pt.getY();
+                        double dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist > d) {
+                            d = dist;
                         }
                     }
                 }
             }
+            double t = splitFlow.getIntersectionTWithCircleAroundStartPoint(d);
+            splitFlow = split(t)[1];
         }
-
+        
+        // clip end
         if (clipWithEndArea && getEndClipArea() != null) {
-            Geometry clippedGeometry = lineString.difference(getEndClipArea());
-            int nbrGeometries = clippedGeometry.getNumGeometries();
             double d = 0;
-            for (int i = 0; i < nbrGeometries; i++) {
-                Geometry geometry = clippedGeometry.getGeometryN(i);
+            Geometry clippedGeometry = lineString.difference(getEndClipArea());
+            Iterator geomi = new GeometryCollectionIterator(clippedGeometry);
+            while (geomi.hasNext()) {
+                Geometry geometry = (Geometry) geomi.next();
                 if (geometry instanceof LineString) {
                     lineString = (LineString) geometry;
                     com.vividsolutions.jts.geom.Point pt = lineString.getEndPoint();

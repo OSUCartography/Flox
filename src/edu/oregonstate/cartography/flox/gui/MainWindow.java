@@ -217,13 +217,18 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel18 = new javax.swing.JLabel();
         clipAreaPanel = new TransparentMacPanel();
         clipAreaControlPanel = new TransparentMacPanel();
-        jLabel20 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel20 = new javax.swing.JLabel();
         selectEndClipAreaButton = new javax.swing.JButton();
-        jLabel19 = new javax.swing.JLabel();
-        jLabel21 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel21 = new javax.swing.JLabel();
         endAreasBufferDistanceFormattedTextField = new javax.swing.JFormattedTextField();
         clipWithEndAreasCheckBox = new javax.swing.JCheckBox();
         drawEndClipAreasCheckBox = new javax.swing.JCheckBox();
+        javax.swing.JSeparator jSeparator5 = new javax.swing.JSeparator();
+        javax.swing.JSeparator jSeparator6 = new javax.swing.JSeparator();
+        javax.swing.JLabel jLabel24 = new javax.swing.JLabel();
+        startAreasBufferDistanceFormattedTextField = new javax.swing.JFormattedTextField();
+        drawStartClipAreasCheckBox = new javax.swing.JCheckBox();
+        clipWithStartAreasCheckBox = new javax.swing.JCheckBox();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
@@ -1081,7 +1086,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel20.setText("Clip Areas");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         clipAreaControlPanel.add(jLabel20, gridBagConstraints);
 
@@ -1091,20 +1096,15 @@ public class MainWindow extends javax.swing.JFrame {
                 selectEndClipAreaButtonActionPerformed(evt);
             }
         });
-        clipAreaControlPanel.add(selectEndClipAreaButton, new java.awt.GridBagConstraints());
-
-        jLabel19.setText("This is not functional yet.");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
-        clipAreaControlPanel.add(jLabel19, gridBagConstraints);
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        clipAreaControlPanel.add(selectEndClipAreaButton, gridBagConstraints);
 
         jLabel21.setText("End Areas Buffer Distance");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
@@ -1119,7 +1119,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
@@ -1133,7 +1133,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         clipAreaControlPanel.add(clipWithEndAreasCheckBox, gridBagConstraints);
@@ -1146,10 +1146,74 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         clipAreaControlPanel.add(drawEndClipAreasCheckBox, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 12, 0);
+        clipAreaControlPanel.add(jSeparator5, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 12, 0);
+        clipAreaControlPanel.add(jSeparator6, gridBagConstraints);
+
+        jLabel24.setText("Start Areas Buffer Distance");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
+        clipAreaControlPanel.add(jLabel24, gridBagConstraints);
+
+        startAreasBufferDistanceFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        startAreasBufferDistanceFormattedTextField.setValue(0.);
+        startAreasBufferDistanceFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                startAreasBufferDistanceFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        clipAreaControlPanel.add(startAreasBufferDistanceFormattedTextField, gridBagConstraints);
+
+        drawStartClipAreasCheckBox.setText("Draw");
+        drawStartClipAreasCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawStartClipAreasCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        clipAreaControlPanel.add(drawStartClipAreasCheckBox, gridBagConstraints);
+
+        clipWithStartAreasCheckBox.setText("Clip with Start Areas");
+        clipWithStartAreasCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clipWithStartAreasCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        clipAreaControlPanel.add(clipWithStartAreasCheckBox, gridBagConstraints);
 
         clipAreaPanel.add(clipAreaControlPanel);
 
@@ -1989,6 +2053,31 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawEndClipAreasCheckBoxActionPerformed
 
+    private void startAreasBufferDistanceFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_startAreasBufferDistanceFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName())) {
+            double d = ((Number) startAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
+            model.setStartClipAreaBufferDistance(d);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_startAreasBufferDistanceFormattedTextFieldPropertyChange
+
+    private void drawStartClipAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawStartClipAreasCheckBoxActionPerformed
+        mapComponent.setDrawStartClipAreas(drawStartClipAreasCheckBox.isSelected());
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_drawStartClipAreasCheckBoxActionPerformed
+
+    private void clipWithStartAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithStartAreasCheckBoxActionPerformed
+        if (clipWithStartAreasCheckBox.isSelected()) {
+            model.updateStartClipAreas();
+        } else {
+            model.removeStartClipAreasFromFlows();
+        }
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_clipWithStartAreasCheckBoxActionPerformed
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -2051,6 +2140,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel clipAreaControlPanel;
     private javax.swing.JPanel clipAreaPanel;
     private javax.swing.JCheckBox clipWithEndAreasCheckBox;
+    private javax.swing.JCheckBox clipWithStartAreasCheckBox;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
@@ -2062,6 +2152,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawFlowRangeboxCheckbox;
     private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
+    private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JComboBox drawingOrderComboBox;
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
@@ -2096,9 +2187,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JPanel jPanel2;
@@ -2130,6 +2218,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;
+    private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;

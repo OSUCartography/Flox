@@ -244,34 +244,11 @@ public class Model {
     }
 
     /**
-     * Buffer each geometry inside a geometry collection
-     *
-     * @param geometry A geometry collection
-     * @param d Buffer distance
-     * @return Buffered geometry
-     */
-    private GeometryCollection buffer(GeometryCollection geometry, double d) {
-
-        ArrayList<Geometry> buffered = new ArrayList<>();
-
-        Iterator geomi = new GeometryCollectionIterator(geometry);
-        while (geomi.hasNext()) {
-            Geometry g = (Geometry) geomi.next();
-            if (g instanceof GeometryCollection == false) {
-                buffered.add(g.buffer(d));
-            }
-        }
-
-        Geometry[] bufferedGeomArray = buffered.toArray(new Geometry[buffered.size()]);
-        return new GeometryFactory().createGeometryCollection(bufferedGeomArray);
-    }
-
-    /**
      * Finds the clip areas for the start of flows. First buffers the clip area
      * geometry, then finds containing geometry for the start point of each
      * flow.
      */
-    private void updateStartClipAreas() {
+    public void updateStartClipAreas() {
         if (clipAreas == null) {
             return;
         }
@@ -308,15 +285,6 @@ public class Model {
             }
             flow.setEndClipArea(endClipArea);
         }
-
-        // FIXME test
-        flowIterator = flowIterator();
-        while (flowIterator.hasNext()) {
-            Flow flow = flowIterator.next();
-            if (flow.getEndClipArea() == null) {
-                System.out.println("no end clip area for flow ending at " + flow.getEndPt());
-            }
-        }
     }
 
     /**
@@ -330,6 +298,9 @@ public class Model {
         updateEndClipAreas();
     }
 
+    /**
+     * Removes the end clip areas from all flows
+     */
     public void removeEndClipAreasFromFlows() {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
@@ -337,6 +308,16 @@ public class Model {
         }
     }
 
+    /**
+     * Removes the start clip areas from all flows
+     */
+    public void removeStartClipAreasFromFlows() {
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            iterator.next().setStartClipArea(null);
+        }
+    }
+    
     /**
      * @return the startClipAreaBufferDistance
      */

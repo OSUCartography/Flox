@@ -248,4 +248,18 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public void setDrawEndClipAreas(boolean drawEndClipAreas) {
         this.drawEndClipAreas = drawEndClipAreas;
     }
+
+    /**
+     * @return the drawStartClipAreas
+     */
+    public boolean isDrawStartClipAreas() {
+        return drawStartClipAreas;
+    }
+
+    /**
+     * @param drawStartClipAreas the drawStartClipAreas to set
+     */
+    public void setDrawStartClipAreas(boolean drawStartClipAreas) {
+        this.drawStartClipAreas = drawStartClipAreas;
+    }
 }

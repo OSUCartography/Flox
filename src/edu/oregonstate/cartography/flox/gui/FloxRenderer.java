@@ -180,7 +180,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             if (flow instanceof CubicBezierFlow) {
                 path = flowToGeneralPath((CubicBezierFlow) flow);
             } else {
-                path = flowToGeneralPath(((QuadraticBezierFlow) flow).getClippedFlow(false, true));
+                path = flowToGeneralPath(((QuadraticBezierFlow) flow).getClippedFlow());
             }
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth + WHITE_BORDER * 2,
