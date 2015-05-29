@@ -247,11 +247,16 @@ public class ForceLayouter {
     }
 
     public void layoutAllFlows(double weight) {
+        ArrayList<Flow> flows = model.getFlows();
+        if (flows.size() < 2) {
+            return;
+        }
+        
         double maxFlowLength = model.getLongestFlowLength();
 
         // compute force for each flow for current configuration
         ArrayList<Force> forces = new ArrayList<>();
-        ArrayList<Flow> flows = model.getFlows();
+        
         for (Flow flow : flows) {
             if (flow instanceof QuadraticBezierFlow) {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;

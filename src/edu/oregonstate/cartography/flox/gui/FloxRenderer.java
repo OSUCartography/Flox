@@ -148,6 +148,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @return A GeneralPath for drawing.
      */
     private GeneralPath flowToGeneralPath(QuadraticBezierFlow flow) {
+        if (flow == null) {
+            return null;
+        }
         GeneralPath path = new GeneralPath();
         Point startPt = flow.getStartPt();
         path.moveTo(xToPx(startPt.x), yToPx(startPt.y));
@@ -181,6 +184,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 path = flowToGeneralPath((CubicBezierFlow) flow);
             } else {
                 path = flowToGeneralPath(((QuadraticBezierFlow) flow).getClippedFlow());
+            }
+            if (path == null) {
+                continue;
             }
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth + WHITE_BORDER * 2,
@@ -220,8 +226,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 path = flowToGeneralPath((CubicBezierFlow) flow);
 
             } else {
-                double t = ((QuadraticBezierFlow) flow).getIntersectionTWithCircleAroundEndPoint(r);
-                QuadraticBezierFlow[] splitFlows = ((QuadraticBezierFlow) flow).split(t);
+                QuadraticBezierFlow f = (QuadraticBezierFlow) flow;
+                f = f.getClippedFlow();
+                if (f == null) {
+                    continue;
+                }
+                double t = f.getIntersectionTWithCircleAroundEndPoint(r);
+                QuadraticBezierFlow[] splitFlows = f.split(t);
 
                 // Instantiate an Arrow object, make a GeneralPath from its
                 // vertices.

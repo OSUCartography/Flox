@@ -58,7 +58,6 @@ public class QuadraticBezierFlow extends Flow {
         double dist = getBaselineLength();
         double tangentLength = dist * .5;
         computeCtrlPt(alpha, tangentLength);
-
     }
 
     /**
@@ -223,6 +222,8 @@ public class QuadraticBezierFlow extends Flow {
             startY = endY;
         }
 
+        // add end point
+        regularPoints.add(irregularPoints.get(irregularPoints.size() - 1));
         return regularPoints;
     }
 
@@ -262,9 +263,13 @@ public class QuadraticBezierFlow extends Flow {
      * http://pomax.github.io/bezierinfo/#matrixsplit
      *
      * @param t Parametric position [0..1]
-     * @return
+     * @return Two new flows if t is > 0 and t < 1. Otherwise two references to
+     * this.
      */
     public QuadraticBezierFlow[] split(double t) {
+        if (t <= 0 || t >= 1) {
+            return new QuadraticBezierFlow[]{this, this};
+        }
 
         double startX1 = startPt.x;
         double startY1 = startPt.y;
@@ -356,9 +361,8 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns a flow with the the start or end masking areas
-     * removed.
-
+     * Returns a flow with the the start or end masking areas removed.
+     *
      * @return A new flow object (if something was clipped), or this object.
      */
     public QuadraticBezierFlow getClippedFlow() {
@@ -369,7 +373,7 @@ public class QuadraticBezierFlow extends Flow {
         if (clipWithStartArea == false && clipWithEndArea == false) {
             return this;
         }
-        
+
         // construct LineString from the current Bezier flow geometry
         // FIXME adapt de Casteljau tolerance
         ArrayList<Point> points = toStraightLineSegments(0.01);
@@ -380,21 +384,22 @@ public class QuadraticBezierFlow extends Flow {
             Point point = points.get(i);
             xy[i] = new Coordinate(point.x, point.y);
         }
-        LineString lineString = geometryFactory.createLineString(xy);
 
+        LineString lineString = geometryFactory.createLineString(xy);
         QuadraticBezierFlow splitFlow = this;
 
-        // clip start
-        if (clipWithStartArea && getStartClipArea() != null) {
+        // clip linestring with clip areas around start point
+        double startT = 0;
+        if (clipWithStartArea) {
+            Geometry clippedFlowLineGeometry = lineString.difference(getStartClipArea());
             double d = 0;
-            Geometry clippedGeometry = lineString.difference(getStartClipArea());
-            Iterator geomi = new GeometryCollectionIterator(clippedGeometry);
+            Iterator geomi = new GeometryCollectionIterator(clippedFlowLineGeometry);
             while (geomi.hasNext()) {
                 Geometry geometry = (Geometry) geomi.next();
                 if (geometry instanceof LineString) {
-                    lineString = (LineString) geometry;
-                    com.vividsolutions.jts.geom.Point pt = lineString.getStartPoint();
-                    if (lineString.getNumPoints() >= 2) {
+                    LineString l = (LineString) geometry;
+                    com.vividsolutions.jts.geom.Point pt = l.getStartPoint();
+                    if (l.getNumPoints() >= 2) {
                         double dx = startPt.x - pt.getX();
                         double dy = startPt.y - pt.getY();
                         double dist = Math.sqrt(dx * dx + dy * dy);
@@ -404,32 +409,32 @@ public class QuadraticBezierFlow extends Flow {
                     }
                 }
             }
-            double t = splitFlow.getIntersectionTWithCircleAroundStartPoint(d);
-            splitFlow = split(t)[1];
+            startT = splitFlow.getIntersectionTWithCircleAroundStartPoint(d);
+            splitFlow = split(startT)[1];
         }
-        
-        // clip end
-        if (clipWithEndArea && getEndClipArea() != null) {
+
+        // clip linestring with clip areas around end point
+        if (clipWithEndArea) {
+            Geometry clippedFlowLineGeometry = lineString.difference(getEndClipArea());
             double d = 0;
-            Geometry clippedGeometry = lineString.difference(getEndClipArea());
-            Iterator geomi = new GeometryCollectionIterator(clippedGeometry);
+            Iterator geomi = new GeometryCollectionIterator(clippedFlowLineGeometry);
             while (geomi.hasNext()) {
                 Geometry geometry = (Geometry) geomi.next();
                 if (geometry instanceof LineString) {
-                    lineString = (LineString) geometry;
-                    com.vividsolutions.jts.geom.Point pt = lineString.getEndPoint();
-                    if (lineString.getNumPoints() >= 2) {
+                    LineString l = (LineString) geometry;
+                    com.vividsolutions.jts.geom.Point pt = l.getEndPoint();
+                    if (l.getNumPoints() >= 2) {
                         double dx = endPt.x - pt.getX();
                         double dy = endPt.y - pt.getY();
-                        double endDistance = Math.sqrt(dx * dx + dy * dy);
-                        if (endDistance > d) {
-                            d = endDistance;
+                        double dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist > d) {
+                            d = dist;
                         }
                     }
                 }
             }
-            double t = splitFlow.getIntersectionTWithCircleAroundEndPoint(d);
-            splitFlow = split(t)[0];
+            double endT = splitFlow.getIntersectionTWithCircleAroundEndPoint(d);
+            splitFlow = splitFlow.split(endT)[0];
         }
 
         return splitFlow;
