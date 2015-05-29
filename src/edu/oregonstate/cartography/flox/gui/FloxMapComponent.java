@@ -61,6 +61,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     private boolean drawEndClipAreas = false;
 
+    /**
+     * flag for drawing clip areas around starts of flows
+     */
+    private boolean drawStartClipAreas = false;
+    
     public FloxMapComponent() {
     }
 
@@ -147,8 +152,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 renderer.drawRebuiltBezierCurve();
             }
             
-            if (isDrawEndClipAreas()) {
-                renderer.drawClipAreas();
+            if (drawStartClipAreas || drawEndClipAreas) {
+                renderer.drawClipAreas(drawStartClipAreas, drawEndClipAreas);
             }
         }
 

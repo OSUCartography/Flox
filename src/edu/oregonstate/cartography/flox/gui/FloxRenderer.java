@@ -189,12 +189,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(path);
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            if(flow.isSelected()) {
+            if (flow.isSelected()) {
                 g2d.setColor(Color.CYAN);
             } else {
                 g2d.setColor(Color.BLACK);
             }
-            
+
             g2d.draw(path);
         }
     }
@@ -228,13 +228,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 Arrow arrow = new Arrow((QuadraticBezierFlow) splitFlows[0], model);
                 arrowPath.moveTo(xToPx(arrow.base.x), yToPx(arrow.base.y));
                 arrowPath.lineTo(xToPx(arrow.corner1.x), yToPx(arrow.corner1.y));
-                
+
                 //arrowPath.lineTo(xToPx(arrow.tip.x), yToPx(arrow.tip.y));
                 //arrowPath.lineTo(xToPx(arrow.corner2.x), yToPx(arrow.corner2.y));
-                
                 arrowPath.quadTo(xToPx(arrow.corner1cPt.x), yToPx(arrow.corner1cPt.y), xToPx(arrow.tip.x), yToPx(arrow.tip.y));
                 arrowPath.quadTo(xToPx(arrow.corner2cPt.x), yToPx(arrow.corner2cPt.y), xToPx(arrow.corner2.x), yToPx(arrow.corner2.y));
-                
+
                 arrowPath.lineTo(xToPx(arrow.base.x), yToPx(arrow.base.y));
                 path = flowToGeneralPath(arrow.getFlow());
             }
@@ -250,7 +249,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.setStroke(new BasicStroke(3));
             g2d.setColor(Color.WHITE);
             g2d.draw(arrowPath);
-            if(flow.isSelected()) {
+            if (flow.isSelected()) {
                 g2d.setColor(Color.CYAN);
             } else {
                 g2d.setColor(Color.BLACK);
@@ -260,7 +259,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // Draw the flow fill
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            if(flow.isSelected()) {
+            if (flow.isSelected()) {
                 g2d.setColor(Color.CYAN);
             } else {
                 g2d.setColor(Color.BLACK);
@@ -277,12 +276,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Point> iter = model.nodeIterator();
         while (iter.hasNext()) {
             Point pt = iter.next();
-            if(pt.isSelected()) {
+            if (pt.isSelected()) {
                 drawCircle(pt.x, pt.y, R, Color.WHITE, Color.CYAN);
             } else {
                 drawCircle(pt.x, pt.y, R, Color.WHITE, Color.BLACK);
             }
-            
+
         }
     }
 
@@ -464,8 +463,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(generalPath);
         }
     }
-    
-    public void drawClipAreas() {
+
+    public void drawClipAreas(boolean drawStartClipAreas, boolean drawEndClipAreas) {
         ArrayList<Flow> flows = model.getFlows();
         HashSet<Geometry> endClipAreas = new HashSet<>();
         HashSet<Geometry> startClipAreas = new HashSet<>();
@@ -473,11 +472,17 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             endClipAreas.add(flow.getEndClipArea());
             startClipAreas.add(flow.getStartClipArea());
         }
-        for (Geometry geometry : endClipAreas) {
-            draw(geometry, null, Color.GRAY);
+        
+        if (drawStartClipAreas) {
+            for (Geometry geometry : startClipAreas) {
+                draw(geometry, null, Color.GRAY);
+            }
         }
-        for (Geometry geometry : startClipAreas) {
-            draw(geometry, null, Color.GRAY);
+        
+        if (drawEndClipAreas) {
+            for (Geometry geometry : endClipAreas) {
+                draw(geometry, null, Color.GRAY);
+            }
         }
     }
 }

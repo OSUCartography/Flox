@@ -3,6 +3,7 @@ package edu.oregonstate.cartography.flox.model;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -227,75 +228,91 @@ public class Model {
         if (geometry == null) {
             return null;
         }
-        if (geometry instanceof GeometryCollection) {
-            GeometryCollection collection = (GeometryCollection) geometry;
-            int nbrObj = collection.getNumGeometries();
-            for (int i = 0; i < nbrObj; i++) {
-                Geometry container = findContainingGeometry(
-                        collection.getGeometryN(i), point, f);
-                if (container != null) {
-                    return container;
-                }
-            }
-        } else {
-            Coordinate coordinate = new Coordinate(point.x, point.y);
-            com.vividsolutions.jts.geom.Point p = f.createPoint(coordinate);
-            if (p.within(geometry)) {
-                return geometry;
+
+        Coordinate coordinate = new Coordinate(point.x, point.y);
+        com.vividsolutions.jts.geom.Point p = f.createPoint(coordinate);
+
+        Iterator geomi = new GeometryCollectionIterator(geometry);
+        while (geomi.hasNext()) {
+            Geometry g = (Geometry) geomi.next();
+            if (g instanceof GeometryCollection == false && p.within(g)) {
+                return g;
             }
         }
+
         return null;
     }
 
     /**
+     * Buffer each geometry inside a geometry collection
+     *
+     * @param geometry A geometry collection
+     * @param d Buffer distance
+     * @return Buffered geometry
+     */
+    private GeometryCollection buffer(GeometryCollection geometry, double d) {
+
+        ArrayList<Geometry> buffered = new ArrayList<>();
+
+        Iterator geomi = new GeometryCollectionIterator(geometry);
+        while (geomi.hasNext()) {
+            Geometry g = (Geometry) geomi.next();
+            if (g instanceof GeometryCollection == false) {
+                buffered.add(g.buffer(d));
+            }
+        }
+
+        Geometry[] bufferedGeomArray = buffered.toArray(new Geometry[buffered.size()]);
+        return new GeometryFactory().createGeometryCollection(bufferedGeomArray);
+    }
+
+    /**
      * Finds the clip areas for the start of flows. First buffers the clip area
-     * geometry, then finds containing geometry for the start point of each flow.
+     * geometry, then finds containing geometry for the start point of each
+     * flow.
      */
     private void updateStartClipAreas() {
         if (clipAreas == null) {
             return;
         }
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Geometry bufferedGeometry = clipAreas.buffer(startClipAreaBufferDistance);
-        GeometryCollection bufferedGeometryCollection
-                = geometryFactory.createGeometryCollection(new Geometry[]{bufferedGeometry});
 
-        Iterator<Flow> iterator = flowIterator();
+        Iterator<Flow> flowIterator = flowIterator();
         GeometryFactory f = new GeometryFactory();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            Geometry startClipArea
-                    = findContainingGeometry(bufferedGeometryCollection, flow.getStartPt(), f);
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
+            Geometry startClipArea = findContainingGeometry(clipAreas, flow.getStartPt(), f);
+            if (startClipArea != null) {
+                startClipArea = startClipArea.buffer(startClipAreaBufferDistance);
+            }
             flow.setStartClipArea(startClipArea);
         }
     }
 
     /**
-     * Finds the clip areas for the the end of flows. First buffers the clip area
-     * geometry, then finds containing geometry for the end point of each flow.
+     * Finds the clip areas for the the end of flows. First buffers the clip
+     * area geometry, then finds containing geometry for the end point of each
+     * flow.
      */
     public void updateEndClipAreas() {
         if (clipAreas == null) {
             return;
         }
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Geometry bufferedGeometry = clipAreas.buffer(endClipAreaBufferDistance);
-        GeometryCollection bufferedGeometryCollection
-                = geometryFactory.createGeometryCollection(new Geometry[]{bufferedGeometry});
 
-        Iterator<Flow> iterator = flowIterator();
+        Iterator<Flow> flowIterator = flowIterator();
         GeometryFactory f = new GeometryFactory();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            Geometry endClipArea
-                    = findContainingGeometry(bufferedGeometryCollection, flow.getEndPt(), f);
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
+            Geometry endClipArea = findContainingGeometry(clipAreas, flow.getEndPt(), f);
+            if (endClipArea != null) {
+                endClipArea = endClipArea.buffer(endClipAreaBufferDistance);
+            }
             flow.setEndClipArea(endClipArea);
         }
-        
+
         // FIXME test
-        iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
+        flowIterator = flowIterator();
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
             if (flow.getEndClipArea() == null) {
                 System.out.println("no end clip area for flow ending at " + flow.getEndPt());
             }
@@ -312,7 +329,7 @@ public class Model {
         updateStartClipAreas();
         updateEndClipAreas();
     }
-    
+
     public void removeEndClipAreasFromFlows() {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
