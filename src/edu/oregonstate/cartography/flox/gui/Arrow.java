@@ -90,7 +90,12 @@ public class Arrow {
 
         // Stores the value of the flow
         double value = flow.getValue();
-
+        double maxValue = model.getMaxFlowValue();
+        double valRatio = model.getArrowSizeRatio();
+        
+        double valDiff = maxValue - value;
+        double plusVal = valDiff * valRatio;
+        
         // Stores the scale factor that the model is currently applying to
         // the flow values to determine their width.
         double scale = model.getFlowWidthScale();
@@ -98,11 +103,11 @@ public class Arrow {
         // Determine the distance of the tip of the arrow from the base.
         // Is scaled to the value of the flow, which itself is scaled by the 
         // scale factor of the model.
-        arrowLength = model.getArrowLength() * value * scale;
+        arrowLength = model.getArrowLength() * (value + plusVal) * scale;
 
         // Determine the perpendicular distance of the corners of the arrow from 
         // a line drawn between the base and tip of the arrow.
-        arrowWidth = model.getArrowWidth() * value * scale;
+        arrowWidth = model.getArrowWidth() * (value + plusVal) * scale;
 
         // Get the arrowCornerPosition from the model. This value determines
         // the horizontal location of the corners of the Arrow

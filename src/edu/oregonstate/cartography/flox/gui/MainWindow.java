@@ -216,6 +216,8 @@ public class MainWindow extends javax.swing.JFrame {
         arrowEdgeCtrlWidth = new javax.swing.JSlider();
         arrowCornerPositionSlider = new javax.swing.JSlider();
         jLabel18 = new javax.swing.JLabel();
+        jLabel19 = new javax.swing.JLabel();
+        arrowSizeRatioSlider = new javax.swing.JSlider();
         clipAreaPanel = new TransparentMacPanel();
         clipAreaControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel20 = new javax.swing.JLabel();
@@ -1077,6 +1079,29 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 11;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel18, gridBagConstraints);
+
+        jLabel19.setText("Arrow Size Ratio");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
+        arrowHeadsControlPanel.add(jLabel19, gridBagConstraints);
+
+        arrowSizeRatioSlider.setMajorTickSpacing(10);
+        arrowSizeRatioSlider.setPaintLabels(true);
+        arrowSizeRatioSlider.setPaintTicks(true);
+        arrowSizeRatioSlider.setValue(0);
+        arrowSizeRatioSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        arrowSizeRatioSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                arrowSizeRatioSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 14;
+        arrowHeadsControlPanel.add(arrowSizeRatioSlider, gridBagConstraints);
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
@@ -2093,6 +2118,14 @@ public class MainWindow extends javax.swing.JFrame {
         updateClippingGUI();
     }//GEN-LAST:event_clipWithStartAreasCheckBoxActionPerformed
 
+    private void arrowSizeRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowSizeRatioSliderStateChanged
+        if (model.isDrawArrows()) {
+            model.setArrowSizeRatio((arrowSizeRatioSlider.getValue()) / 100d);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_arrowSizeRatioSliderStateChanged
+
     private void forceLayout() {
 
         ForceLayouter layouter = new ForceLayouter(model);
@@ -2148,6 +2181,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider arrowEdgeCtrlWidth;
     private javax.swing.JPanel arrowHeadsControlPanel;
     private javax.swing.JPanel arrowHeadsPanel;
+    private javax.swing.JSlider arrowSizeRatioSlider;
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadSizeSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
@@ -2202,6 +2236,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JPanel jPanel2;

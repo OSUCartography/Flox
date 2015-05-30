@@ -21,6 +21,20 @@ import org.jgrapht.graph.SimpleGraph;
  */
 public class Model {
 
+    /**
+     * @return the arrowSizeRatio
+     */
+    public double getArrowSizeRatio() {
+        return arrowSizeRatio;
+    }
+
+    /**
+     * @param arrowSizeRatio the arrowSizeRatio to set
+     */
+    public void setArrowSizeRatio(double arrowSizeRatio) {
+        this.arrowSizeRatio = arrowSizeRatio;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -42,12 +56,12 @@ public class Model {
      */
     private UndirectedGraph<Point, Flow> graph = new SimpleGraph<>(Flow.class);
 
-    // Length of the arrow. This number is altered by a GUI slider.
-    // It is multiplied by the value of each flow and the flowWidthScale
+    // Length of the arrow. This number is modified by a GUI slider bar.
+    // It is multiplied by the value of each flow and the flowWidthScale.
     private double arrowLength = 0.025;
 
-    // This is later used to get a percentage of the arrowLength. The width
-    // value is always relative to the length.
+    // Width of the arrow. This number is modified This number is modified by a GUI slider bar.
+    // It is multiplied by the value of each flow and the flowWidthScale.
     private double arrowWidth = 0.013;
 
     private double arrowEdgeCtrlLength = .5;
@@ -55,6 +69,8 @@ public class Model {
     private double arrowEdgeCtrlWidth = .5;
 
     private double arrowCornerPosition = 0.0;
+    
+    private double arrowSizeRatio = 0.0;
 
     /**
      * Scale factor to transform flow values to flow stroke widths
@@ -491,6 +507,19 @@ public class Model {
         return maxLength;
     }
 
+    public double getLargestFlowValue() {
+        double maxValue = 0;
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+                double val = flow.getValue();
+                if (val < maxValue) {
+                    maxValue = val;
+                }
+        }
+        return maxValue;
+    }
+    
     /**
      * Returns all map layers.
      *
