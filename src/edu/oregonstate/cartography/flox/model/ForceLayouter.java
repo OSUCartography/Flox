@@ -2,6 +2,7 @@ package edu.oregonstate.cartography.flox.model;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 /**
@@ -12,8 +13,15 @@ import java.util.Iterator;
  */
 public class ForceLayouter {
 
-    // Stores the model, which contains all map features.
+    // model with all map features.
     private final Model model;
+    
+    /**
+     * hash map with a line string for each flow to accelerate computations.
+     * The content of the hash map needs to be updated whenever the start, end, 
+     * or control point of a BŽzier flow changes.
+     */
+    HashMap<Flow, ArrayList<Point>> straightLinesMap = new HashMap<>();
 
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
@@ -24,10 +32,23 @@ public class ForceLayouter {
     public ForceLayouter(Model model) {
         this.model = model;
     }
+    
+    /**
+     * Updates the hash map with line strings for each flow.
+     */
+    private void initStraightLinesHashMap(){
+        straightLinesMap.clear();
+        Iterator<Flow> iter = model.flowIterator();
+        while(iter.hasNext()) {
+            Flow flow = iter.next();
+            ArrayList<Point> points = flow.toStraightLineSegments(0.01);
+            straightLinesMap.put(flow, points);
+        }
+    }
 
     /**
      * Computes the total acting force on a point as applied by neighboring
-     * points. This is currently used to calculate the forces applied to the
+     * points. This is used to calculate the forces applied to the
      * control point(s) of a BŽzier flow. There are two forces that will be
      * calculated for each control point: The combined force of all nodes on the
      * target node, and the force of the spring that pulls the target node
@@ -43,7 +64,7 @@ public class ForceLayouter {
 
         Iterator<Flow> flowIterator = model.flowIterator();
 
-        double fxTotal = 0; // Total force along the x axis
+        double fxTotal = 0; // total force along the x axis
         double fyTotal = 0; // total force along the y axis 
         double wTotal = 0; // sum of the weight of all forces
 
@@ -56,7 +77,7 @@ public class ForceLayouter {
             if (!model.isFlowExertingForcesOnItself() && targetFlow == flow) {
                 continue;
             }
-            ArrayList<Point> points = flow.toStraightLineSegments(0.01);
+            ArrayList<Point> points = straightLinesMap.get(flow);
             int nPoints = points.size();
 
             // FIXME
@@ -205,7 +226,7 @@ public class ForceLayouter {
 
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
-        ArrayList<Point> flowPoints = flow.toStraightLineSegments(0.01);
+        ArrayList<Point> flowPoints = straightLinesMap.get(flow);
 
         // compute the sum of all force vectors that are applied on each 
         // flow segment
@@ -252,6 +273,8 @@ public class ForceLayouter {
             return;
         }
         
+        initStraightLinesHashMap();
+        
         double maxFlowLength = model.getLongestFlowLength();
 
         // compute force for each flow for current configuration
@@ -273,7 +296,7 @@ public class ForceLayouter {
             }
         }
 
-        // apply forces onto control points of flows
+        // apply forces onto control points of each flow
         int nbrFlows = flows.size();
         for (int i = 0; i < nbrFlows; i++) {
             Flow flow = flows.get(i);

@@ -2,11 +2,9 @@ package edu.oregonstate.cartography.flox.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
@@ -169,6 +167,25 @@ public class QuadraticBezierFlow extends Flow {
         return irregularPoints;
     }
 
+    private LineString pointsToLineString(ArrayList<Point> points) {
+        // construct LineString from the current Bezier flow geometry
+        GeometryFactory geometryFactory = new GeometryFactory();
+        int numPoints = points.size();
+        Coordinate[] xy = new Coordinate[numPoints];
+        for (int i = 0; i < numPoints; i++) {
+            Point point = points.get(i);
+            xy[i] = new Coordinate(point.x, point.y);
+        }
+
+        return geometryFactory.createLineString(xy);
+    }
+
+    @Override
+    public ArrayList<Point> toStraightLineSegments(double flatness) {
+        QuadraticBezierFlow clippedFlow = getClippedFlow();
+        return clippedFlow.toUnclippedStraightLineSegments(flatness);
+    }
+
     /**
      * Converts this Bezier curve to straight line segments.
      *
@@ -177,8 +194,7 @@ public class QuadraticBezierFlow extends Flow {
      * @return An list of irregularPoints, including copies of the start point
      * and the end point.
      */
-    @Override
-    public ArrayList<Point> toStraightLineSegments(double flatness) {
+    public ArrayList<Point>toUnclippedStraightLineSegments (double flatness) {
         assert (flatness > 0);
 
         // FIXME d should be a parameter
@@ -361,7 +377,7 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns a flow with the the start or end masking areas removed.
+     * Returns a flow with the the start and/or end masking areas removed.
      *
      * @return A new flow object (if something was clipped), or this object.
      */
@@ -376,16 +392,8 @@ public class QuadraticBezierFlow extends Flow {
 
         // construct LineString from the current Bezier flow geometry
         // FIXME adapt de Casteljau tolerance
-        ArrayList<Point> points = toStraightLineSegments(0.01);
-        GeometryFactory geometryFactory = new GeometryFactory();
-        int numPoints = points.size();
-        Coordinate[] xy = new Coordinate[numPoints];
-        for (int i = 0; i < numPoints; i++) {
-            Point point = points.get(i);
-            xy[i] = new Coordinate(point.x, point.y);
-        }
-
-        LineString lineString = geometryFactory.createLineString(xy);
+        ArrayList<Point> points = toUnclippedStraightLineSegments(0.01);
+        LineString lineString = pointsToLineString(points);
         QuadraticBezierFlow splitFlow = this;
 
         // clip linestring with clip areas around start point

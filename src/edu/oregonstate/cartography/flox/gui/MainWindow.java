@@ -17,7 +17,6 @@ import edu.oregonstate.cartography.map.PanTool;
 import edu.oregonstate.cartography.map.ScaleMoveSelectionTool;
 import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
-import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
 import java.awt.event.ActionEvent;
@@ -2002,6 +2001,7 @@ public class MainWindow extends javax.swing.JFrame {
         } else {
             model.removeEndClipAreasFromFlows();
         }
+        forceLayout();
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
         updateClippingGUI();
@@ -2113,6 +2113,7 @@ public class MainWindow extends javax.swing.JFrame {
         } else {
             model.removeStartClipAreasFromFlows();
         }
+        forceLayout();
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
         updateClippingGUI();

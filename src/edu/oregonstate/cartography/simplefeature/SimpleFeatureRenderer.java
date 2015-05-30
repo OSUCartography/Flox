@@ -178,7 +178,8 @@ public class SimpleFeatureRenderer {
      * @param lineString The line string to add.
      * @param path The Swing path.
      */
-    private void addLineStringToGeneralPath(LineString lineString, GeneralPath path) {
+    private void addLineStringToGeneralPath(LineString lineString, 
+            GeneralPath path, boolean close) {
         int nPts = lineString.getNumPoints();
         if (nPts < 2) {
             return;
@@ -191,6 +192,10 @@ public class SimpleFeatureRenderer {
             point = lineString.getPointN(i);
             path.lineTo(xToPx(point.getX()), yToPx(point.getY()));
         }
+        
+        if (close) {
+            path.closePath();
+        }
     }
 
     /**
@@ -202,7 +207,7 @@ public class SimpleFeatureRenderer {
      */
     public void draw(LineString lineString, Color fillColor, Color strokeColor) {
         GeneralPath path = new GeneralPath();
-        addLineStringToGeneralPath(lineString, path);
+        addLineStringToGeneralPath(lineString, path, false);
         fillStroke(path, fillColor, strokeColor);
     }
 
@@ -216,13 +221,11 @@ public class SimpleFeatureRenderer {
     public void draw(Polygon polygon, Color fillColor, Color strokeColor) {
         LineString exteriorRing = polygon.getExteriorRing();
         GeneralPath path = new GeneralPath();
-        addLineStringToGeneralPath(exteriorRing, path);
-        path.closePath();
+        addLineStringToGeneralPath(exteriorRing, path, true);
 
         int nbrInteriorRings = polygon.getNumInteriorRing();
         for (int i = 0; i < nbrInteriorRings; i++) {
-            addLineStringToGeneralPath(polygon.getInteriorRingN(i), path);
-            path.closePath();
+            addLineStringToGeneralPath(polygon.getInteriorRingN(i), path, true);
         }
         fillStroke(path, fillColor, strokeColor);
     }
