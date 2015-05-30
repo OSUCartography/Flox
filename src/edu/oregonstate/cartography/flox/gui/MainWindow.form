@@ -1337,7 +1337,7 @@
                         </Constraint>
                       </Constraints>
                     </Component>
-                    <Component class="javax.swing.JSlider" name="arrowEdgeCtrlLength">
+                    <Component class="javax.swing.JSlider" name="arrowEdgeCtrlLengthSlider">
                       <Properties>
                         <Property name="majorTickSpacing" type="int" value="25"/>
                         <Property name="paintLabels" type="boolean" value="true"/>
@@ -1347,7 +1347,7 @@
                         </Property>
                       </Properties>
                       <Events>
-                        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="arrowEdgeCtrlLengthStateChanged"/>
+                        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="arrowEdgeCtrlLengthSliderStateChanged"/>
                       </Events>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1355,7 +1355,7 @@
                         </Constraint>
                       </Constraints>
                     </Component>
-                    <Component class="javax.swing.JSlider" name="arrowEdgeCtrlWidth">
+                    <Component class="javax.swing.JSlider" name="arrowEdgeCtrlWidthSlider">
                       <Properties>
                         <Property name="majorTickSpacing" type="int" value="50"/>
                         <Property name="maximum" type="int" value="200"/>
@@ -1366,7 +1366,7 @@
                         </Property>
                       </Properties>
                       <Events>
-                        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="arrowEdgeCtrlWidthStateChanged"/>
+                        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="arrowEdgeCtrlWidthSliderStateChanged"/>
                       </Events>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

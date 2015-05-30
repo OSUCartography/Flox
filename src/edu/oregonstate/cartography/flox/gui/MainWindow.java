@@ -100,9 +100,20 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void writeModelToGUI() {
 
-        // write arrow head setttings
-        //flowDistanceFromEndPointFormattedTextField.setValue(123);
-        // ...
+        if (model != null) {
+            // Arrow Settings
+            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
+            addArrowsCheckbox.setSelected(model.isDrawArrows());
+            arrowheadSizeSlider.setValue( (int)(model.getArrowLength() * 1000));
+            arrowheadWidthSlider.setValue( (int)(model.getArrowWidth() * 1000));
+            arrowEdgeCtrlLengthSlider.setValue((int) (model.getArrowEdgeCtrlLength() * 100));
+            arrowEdgeCtrlWidthSlider.setValue((int) (model.getArrowEdgeCtrlWidth() * 100));
+            arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
+            arrowSizeRatioSlider.setValue ((int) (model.getArrowSizeRatio() * 100));
+            
+            // Force Settings
+        }
+
     }
 
     /**
@@ -213,8 +224,8 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel15 = new javax.swing.JLabel();
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
-        arrowEdgeCtrlLength = new javax.swing.JSlider();
-        arrowEdgeCtrlWidth = new javax.swing.JSlider();
+        arrowEdgeCtrlLengthSlider = new javax.swing.JSlider();
+        arrowEdgeCtrlWidthSlider = new javax.swing.JSlider();
         arrowCornerPositionSlider = new javax.swing.JSlider();
         jLabel18 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
@@ -1067,34 +1078,34 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel17, gridBagConstraints);
 
-        arrowEdgeCtrlLength.setMajorTickSpacing(25);
-        arrowEdgeCtrlLength.setPaintLabels(true);
-        arrowEdgeCtrlLength.setPaintTicks(true);
-        arrowEdgeCtrlLength.setPreferredSize(new java.awt.Dimension(240, 43));
-        arrowEdgeCtrlLength.addChangeListener(new javax.swing.event.ChangeListener() {
+        arrowEdgeCtrlLengthSlider.setMajorTickSpacing(25);
+        arrowEdgeCtrlLengthSlider.setPaintLabels(true);
+        arrowEdgeCtrlLengthSlider.setPaintTicks(true);
+        arrowEdgeCtrlLengthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        arrowEdgeCtrlLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                arrowEdgeCtrlLengthStateChanged(evt);
+                arrowEdgeCtrlLengthSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 8;
-        arrowHeadsControlPanel.add(arrowEdgeCtrlLength, gridBagConstraints);
+        arrowHeadsControlPanel.add(arrowEdgeCtrlLengthSlider, gridBagConstraints);
 
-        arrowEdgeCtrlWidth.setMajorTickSpacing(50);
-        arrowEdgeCtrlWidth.setMaximum(200);
-        arrowEdgeCtrlWidth.setPaintLabels(true);
-        arrowEdgeCtrlWidth.setPaintTicks(true);
-        arrowEdgeCtrlWidth.setPreferredSize(new java.awt.Dimension(240, 43));
-        arrowEdgeCtrlWidth.addChangeListener(new javax.swing.event.ChangeListener() {
+        arrowEdgeCtrlWidthSlider.setMajorTickSpacing(50);
+        arrowEdgeCtrlWidthSlider.setMaximum(200);
+        arrowEdgeCtrlWidthSlider.setPaintLabels(true);
+        arrowEdgeCtrlWidthSlider.setPaintTicks(true);
+        arrowEdgeCtrlWidthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        arrowEdgeCtrlWidthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                arrowEdgeCtrlWidthStateChanged(evt);
+                arrowEdgeCtrlWidthSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 10;
-        arrowHeadsControlPanel.add(arrowEdgeCtrlWidth, gridBagConstraints);
+        arrowHeadsControlPanel.add(arrowEdgeCtrlWidthSlider, gridBagConstraints);
 
         arrowCornerPositionSlider.setMajorTickSpacing(25);
         arrowCornerPositionSlider.setMaximum(50);
@@ -1647,7 +1658,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }
-    
+
     private void removeSelectedLayerMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeSelectedLayerMenuItemActionPerformed
         removeSelectedLayer();
     }//GEN-LAST:event_removeSelectedLayerMenuItemActionPerformed
@@ -1958,13 +1969,16 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldActionPerformed
 
     private void addArrowsCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addArrowsCheckboxActionPerformed
-        model.setAddArrows(addArrowsCheckbox.isSelected());
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
+        if (model != null) {
+            model.setAddArrows(addArrowsCheckbox.isSelected());
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
 
     private void arrowheadSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadSizeSliderStateChanged
-        if (model.isDrawArrows()) {
+        if (model.isDrawArrows() && model != null) {
             model.setArrowLength((arrowheadSizeSlider.getValue() + 1) / 1000d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
@@ -1979,24 +1993,24 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_arrowheadWidthSliderStateChanged
 
-    private void arrowEdgeCtrlLengthStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlLengthStateChanged
-        if (model.isDrawArrows()) {
-            model.setArrowEdgeCtrlLength((arrowEdgeCtrlLength.getValue()) / 100d);
+    private void arrowEdgeCtrlLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlLengthSliderStateChanged
+        if (model.isDrawArrows() && model != null) {
+            model.setArrowEdgeCtrlLength((arrowEdgeCtrlLengthSlider.getValue()) / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
-    }//GEN-LAST:event_arrowEdgeCtrlLengthStateChanged
+    }//GEN-LAST:event_arrowEdgeCtrlLengthSliderStateChanged
 
-    private void arrowEdgeCtrlWidthStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlWidthStateChanged
-        if (model.isDrawArrows()) {
-            model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidth.getValue()) / 100d);
+    private void arrowEdgeCtrlWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlWidthSliderStateChanged
+        if (model.isDrawArrows() && model != null) {
+            model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidthSlider.getValue()) / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
-    }//GEN-LAST:event_arrowEdgeCtrlWidthStateChanged
+    }//GEN-LAST:event_arrowEdgeCtrlWidthSliderStateChanged
 
     private void arrowCornerPositionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowCornerPositionSliderStateChanged
-        if (model.isDrawArrows()) {
+        if (model.isDrawArrows() && model != null) {
             model.setArrowCornerPosition((arrowCornerPositionSlider.getValue()) / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
@@ -2014,7 +2028,7 @@ public class MainWindow extends javax.swing.JFrame {
         startAreasBufferDistanceFormattedTextField.setEnabled(hasClipAreas && clipStart);
         drawStartClipAreasCheckBox.setEnabled(hasClipAreas && clipStart);
     }
-    
+
     private void selectEndClipAreaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectEndClipAreaButtonActionPerformed
         try {
             // ask for import file
@@ -2168,7 +2182,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_clipWithStartAreasCheckBoxActionPerformed
 
     private void arrowSizeRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowSizeRatioSliderStateChanged
-        if (model.isDrawArrows()) {
+        if (model.isDrawArrows() && model!=null) {
             model.setArrowSizeRatio((arrowSizeRatioSlider.getValue()) / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
@@ -2235,8 +2249,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton addLayerButton;
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JSlider arrowCornerPositionSlider;
-    private javax.swing.JSlider arrowEdgeCtrlLength;
-    private javax.swing.JSlider arrowEdgeCtrlWidth;
+    private javax.swing.JSlider arrowEdgeCtrlLengthSlider;
+    private javax.swing.JSlider arrowEdgeCtrlWidthSlider;
     private javax.swing.JPanel arrowHeadsControlPanel;
     private javax.swing.JPanel arrowHeadsPanel;
     private javax.swing.JSlider arrowSizeRatioSlider;

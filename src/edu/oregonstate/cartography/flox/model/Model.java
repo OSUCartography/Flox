@@ -58,19 +58,19 @@ public class Model {
 
     // Length of the arrow. This number is modified by a GUI slider bar.
     // It is multiplied by the value of each flow and the flowWidthScale.
-    private double arrowLength = 0.025;
+    private double arrowLength = 0.01;
 
     // Width of the arrow. This number is modified This number is modified by a GUI slider bar.
     // It is multiplied by the value of each flow and the flowWidthScale.
-    private double arrowWidth = 0.013;
+    private double arrowWidth = 0.01;
 
-    private double arrowEdgeCtrlLength = .5;
+    private double arrowEdgeCtrlLength = 0.5;
 
-    private double arrowEdgeCtrlWidth = .5;
+    private double arrowEdgeCtrlWidth = 0.5;
 
     private double arrowCornerPosition = 0.0;
     
-    private double arrowSizeRatio = 0.0;
+    private double arrowSizeRatio = 1.0;
 
     /**
      * Scale factor to transform flow values to flow stroke widths
@@ -116,13 +116,13 @@ public class Model {
 
     private boolean enforceCanvasRange = true;
 
-    private boolean addArrows = false;
+    private boolean drawArrows = true;
 
     private double canvasPadding = 0.1;
 
     private double flowRangeboxHeight = 1.25;
 
-    private double flowDistanceFromEndPoint = 0.0d;
+    private double flowDistanceFromEndPoint = 0.5d;
 
     private Rectangle2D canvas;
 
@@ -739,11 +739,11 @@ public class Model {
     public Rectangle2D getCanvas() {
         return canvas;
     }
-
+    
     public void setCanvas(Rectangle2D canvas) {
         this.canvas = canvas;
     }
-
+    
     /**
      * @return the maxFlowLengthSpringConstant
      */
@@ -820,14 +820,14 @@ public class Model {
      * @return the addArrows
      */
     public boolean isDrawArrows() {
-        return addArrows;
+        return drawArrows;
     }
 
     /**
      * @param addArrows the addArrows to set
      */
     public void setAddArrows(boolean addArrows) {
-        this.addArrows = addArrows;
+        this.drawArrows = addArrows;
     }
 
     /**

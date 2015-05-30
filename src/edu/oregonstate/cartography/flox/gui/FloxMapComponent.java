@@ -126,7 +126,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
 
             if (isDrawCanvasPadding()) {
-                renderer.drawCanvasPadding();
+                renderer.drawCanvasBorder();
             }
             if (isDrawControlPoints()) {
                 renderer.drawControlPoints();
@@ -136,7 +136,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
 
             if (isDrawCanvasPadding()) {
-                renderer.drawCanvasPadding();
+                renderer.drawCanvasBorder();
             }
             if (isDrawControlPoints()) {
                 renderer.drawControlPoints();

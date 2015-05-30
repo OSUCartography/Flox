@@ -5,6 +5,7 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.utils.GeometryUtils;
+import java.awt.geom.GeneralPath;
 
 /**
  * The Arrow class contains algorithms for finding the shape, location, and

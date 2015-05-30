@@ -52,6 +52,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     private final double CR = 3;
 
+    /**
+     * The model containing all the map data
+     */
     private final Model model;
 
     /**
@@ -123,7 +126,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Constructs a GeneralPath object for drawing from a flow
+     * Constructs a GeneralPath object for drawing from a CubicBezierFlow
      *
      * @param flow The flow to convert.
      * @return A GeneralPath for drawing.
@@ -142,7 +145,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Constructs a GeneralPath object for drawing from a flow
+     * Constructs a GeneralPath object for drawing from a 
+     * QuadraticBezierFlow
      *
      * @param flow The flow to convert.
      * @return A GeneralPath for drawing.
@@ -161,9 +165,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         return path;
     }
 
+    /**
+     * Draws the flows to the Graphics2D context. Retrieves settings from
+     * the model to determine flow width, length, as well as determining
+     * whether to apply any clipping or add arrowheads.
+     */
     public void drawFlows() {
+        
+        // Create an ArrayList to store the flows
         ArrayList<Flow> flows;
+        
+        // Determine location of the end point of flows based on the model
         double r = model.getFlowDistanceFromEndPoint();
+        
+        // Order the flows based on the model
         switch (model.getFlowOrder()) {
             case DECREASING:
                 flows = model.getOrderedFlows(false);
@@ -175,59 +190,87 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 flows = model.getFlows();
         }
 
+        // Iterate through the flows
         for (Flow flow : flows) {
-            GeneralPath path;
+            
+            // Create a GeneralPath for the flow
+            GeneralPath flowPath;
+            
+            // Create and initialize a GeneralPath for the arrowhead
             GeneralPath arrowPath = new GeneralPath();
+            
+            // If flow is a CubicBezierFlow, just set the flowPath to 
+            // the flow without any changes. 
             if (flow instanceof CubicBezierFlow) {
-                path = flowToGeneralPath((CubicBezierFlow) flow);
+                flowPath = flowToGeneralPath((CubicBezierFlow) flow);
 
             } else {
 
                 // Convert the flow to a QuadraticBezierFlow
                 QuadraticBezierFlow f = (QuadraticBezierFlow) flow;
 
-                // This gets a clipped flow.
+                // This gets a clipped flow using the clipping tool designed
+                // to clip flows to some map geometry. It returns the same
+                // flow if no clipping is applied.
                 f = f.getClippedFlow();
                 if (f == null) {
                     continue;
                 }
 
-                // Get the location of the tip of the arrow.
-                // The name of this
+                // If the flow distance from the end point is currently being
+                // increased by the arrow drawing GUI, find the t-value along
+                // the curve where it should be split
                 double t = f.getIntersectionTWithCircleAroundEndPoint(r);
 
-                // Split the flow at the tip of the arrow, store the flows
+                // Split the flow at the t-value stored above, store the flows
                 // in an array
                 QuadraticBezierFlow[] splitFlows = f.split(t);
 
+                // Draw arrows if the model says so
                 if (model.isDrawArrows()) {
-                    // Instantiate an Arrow object, make a GeneralPath from its
-                    // vertices.
-                    Arrow arrow = new Arrow((QuadraticBezierFlow) splitFlows[0], model);
+                    
+                    // Instantiate an Arrow object, passing it the first of
+                    // the split flows and the model
+                    Arrow arrow = new Arrow((QuadraticBezierFlow) splitFlows[0],
+                            model);
 
                     // Compute the path of the line that will draw the arrowhead
+                    // based on the points computed inside the arrow class
+                    // when it was instantiated.
                     arrowPath.moveTo(xToPx(arrow.base.x), yToPx(arrow.base.y));
-                    arrowPath.lineTo(xToPx(arrow.corner1.x), yToPx(arrow.corner1.y));
-                    arrowPath.quadTo(xToPx(arrow.corner1cPt.x), yToPx(arrow.corner1cPt.y), xToPx(arrow.tip.x), yToPx(arrow.tip.y));
-                    arrowPath.quadTo(xToPx(arrow.corner2cPt.x), yToPx(arrow.corner2cPt.y), xToPx(arrow.corner2.x), yToPx(arrow.corner2.y));
+                    arrowPath.lineTo(
+                            xToPx(arrow.corner1.x), yToPx(arrow.corner1.y));
+                    arrowPath.quadTo(
+                            xToPx(arrow.corner1cPt.x), yToPx(arrow.corner1cPt.y),
+                            xToPx(arrow.tip.x), yToPx(arrow.tip.y));
+                    arrowPath.quadTo(
+                            xToPx(arrow.corner2cPt.x), yToPx(arrow.corner2cPt.y),
+                            xToPx(arrow.corner2.x), yToPx(arrow.corner2.y));
                     arrowPath.lineTo(xToPx(arrow.base.x), yToPx(arrow.base.y));
 
-                    // Get the clipped path generated by the Arrow class.
-                    path = flowToGeneralPath(arrow.getFlow());
+                    // Get the clipped flow generated by the Arrow class. The 
+                    // Arrow class shortens the flow it was passed based on the
+                    // length of the arrowhead.
+                    flowPath = flowToGeneralPath(arrow.getFlow());
                 } else {
-                    path = flowToGeneralPath(splitFlows[0]);
+                    // If the model does not specify the drawing of arrows, set
+                    // flowPath to the first of splitFlows
+                    flowPath = flowToGeneralPath(splitFlows[0]);
                 }
 
             }
 
-            // Draw the flow border
+            // Draw the flow border. This is actually just a slightly wider
+            // version of the flow drawn underneath the flow.  
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth + WHITE_BORDER * 2,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.setColor(Color.WHITE);
-            g2d.draw(path);
+            g2d.draw(flowPath);
 
-            //Draw the arrow
+            // Draw the arrow if the model says so. This also draws a white 
+            // border around the arrow which, unlike the flow border, acually is 
+            // a white stroked border around a polygon. 
             if (model.isDrawArrows()) {
                 g2d.setStroke(new BasicStroke(3));
                 g2d.setColor(Color.WHITE);
@@ -248,7 +291,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             } else {
                 g2d.setColor(Color.BLACK);
             }
-            g2d.draw(path);
+            g2d.draw(flowPath);
         }
     }
 
@@ -269,7 +312,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
 
-    public void drawCanvasPadding() {
+    /**
+     * Draws the border of the canvas. 
+     */
+    public void drawCanvasBorder() {
 
         g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getCanvas();
@@ -277,15 +323,16 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         if (canvas == null) {
             System.out.println("No Canvas!");
         } else {
-            System.out.println("We have a canvas!");
-
             double cWidth = canvas.getWidth();
             double cHeight = canvas.getHeight();
 
-            // Is a percentage of the canvas size
+            // Get the additional padding around the canvas, which is a
+            // percentage of the current canvas specified by the model.
             double xPad = cWidth * model.getCanvasPadding();
             double yPad = cHeight * model.getCanvasPadding();
 
+            // Calculate the points of the canvas rectangle, adding the 
+            // canvasPadding.
             Point b1 = new Point(
                     xToPx(canvas.getX() - xPad),
                     yToPx(canvas.getY() - yPad));
@@ -299,16 +346,19 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                     xToPx(canvas.getMaxX() + xPad),
                     yToPx(canvas.getMaxY() + yPad));
 
+            // Create the 4 lines of the canvas rectangle
             Line2D line1 = new Line2D.Double(b1.x, b1.y, b2.x, b2.y);
             Line2D line2 = new Line2D.Double(b2.x, b2.y, b4.x, b4.y);
             Line2D line3 = new Line2D.Double(b3.x, b3.y, b4.x, b4.y);
             Line2D line4 = new Line2D.Double(b1.x, b1.y, b3.x, b3.y);
 
+            // Draw the rectangle lines.
             g2d.draw(line1);
             g2d.draw(line2);
             g2d.draw(line3);
             g2d.draw(line4);
 
+            
         }
 
     }
