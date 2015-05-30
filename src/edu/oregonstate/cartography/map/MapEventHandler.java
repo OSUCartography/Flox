@@ -385,7 +385,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
             }
 
             // ask the current map tool to treat the delete or backspace key event
-            if (mapTool.keyEvent(keyEvent) == true) {
+            if (mapTool != null && mapTool.keyEvent(keyEvent) == true) {
                 return true;
             }
 

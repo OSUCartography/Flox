@@ -200,6 +200,8 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JLabel jLabel12 = new javax.swing.JLabel();
         drawCanvasPaddingCheckbox = new javax.swing.JCheckBox();
         drawFlowRangeboxCheckbox = new javax.swing.JCheckBox();
+        addLayerButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -778,6 +780,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawControlPointsCheckBox, gridBagConstraints);
 
@@ -790,6 +793,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawLineSegmentsCheckBox, gridBagConstraints);
 
@@ -802,6 +806,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
 
@@ -810,7 +815,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(12, 0, 5, 0);
         mapControlPanel.add(jLabel9, gridBagConstraints);
 
         layerListScrollPane.setPreferredSize(new java.awt.Dimension(220, 132));
@@ -825,8 +829,9 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 5, 0);
         mapControlPanel.add(layerListScrollPane, gridBagConstraints);
 
         symbolPanel.setLayout(new java.awt.GridBagLayout());
@@ -877,6 +882,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
         mapControlPanel.add(symbolPanel, gridBagConstraints);
@@ -890,12 +896,16 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawingOrderComboBox, gridBagConstraints);
 
         jLabel12.setText("Drawing Order");
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel12, gridBagConstraints);
 
@@ -908,6 +918,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawCanvasPaddingCheckbox, gridBagConstraints);
 
@@ -920,8 +931,38 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 22, 0);
         mapControlPanel.add(drawFlowRangeboxCheckbox, gridBagConstraints);
+
+        addLayerButton.setText("+");
+        addLayerButton.setPreferredSize(new java.awt.Dimension(22, 22));
+        addLayerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addLayerButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
+        mapControlPanel.add(addLayerButton, gridBagConstraints);
+
+        jButton1.setText("-");
+        jButton1.setPreferredSize(new java.awt.Dimension(22, 22));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        mapControlPanel.add(jButton1, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -1242,7 +1283,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         clipAreaPanel.add(clipAreaControlPanel);
 
-        controlsTabbedPane.addTab("Clip Areas", clipAreaPanel);
+        controlsTabbedPane.addTab("Clipping", clipAreaPanel);
 
         rightPanel.add(controlsTabbedPane, java.awt.BorderLayout.NORTH);
 
@@ -1594,7 +1635,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_strokeColorButtonActionPerformed
 
-    private void removeSelectedLayerMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeSelectedLayerMenuItemActionPerformed
+    private void removeSelectedLayer() {
         int selectedLayerID = layerList.getSelectedIndex();
         if (selectedLayerID < 0) {
             return;
@@ -1603,7 +1644,12 @@ public class MainWindow extends javax.swing.JFrame {
         updateLayerList();
         layerList.setSelectedIndex(--selectedLayerID);
         writeSymbolGUI();
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
+    }
+    
+    private void removeSelectedLayerMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeSelectedLayerMenuItemActionPerformed
+        removeSelectedLayer();
     }//GEN-LAST:event_removeSelectedLayerMenuItemActionPerformed
 
     private void importFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFlowsMenuItemActionPerformed
@@ -2011,6 +2057,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ("value".equals(evt.getPropertyName())) {
             double d = ((Number) endAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
             model.setEndClipAreaBufferDistance(d);
+            forceLayout();
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -2096,6 +2143,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ("value".equals(evt.getPropertyName())) {
             double d = ((Number) startAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
             model.setStartClipAreaBufferDistance(d);
+            forceLayout();
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -2126,6 +2174,14 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.repaint();
         }
     }//GEN-LAST:event_arrowSizeRatioSliderStateChanged
+
+    private void addLayerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addLayerButtonActionPerformed
+        openShapefile();
+    }//GEN-LAST:event_addLayerButtonActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        removeSelectedLayer();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     private void forceLayout() {
 
@@ -2176,6 +2232,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox addArrowsCheckbox;
+    private javax.swing.JButton addLayerButton;
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JSlider arrowCornerPositionSlider;
     private javax.swing.JSlider arrowEdgeCtrlLength;
@@ -2229,6 +2286,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton importPanelOKButton;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;
