@@ -776,14 +776,14 @@ public class Model {
     /**
      * @return the flowArrowEndPointRadius
      */
-    public double getFlowArrowEndPointRadius() {
+    public double getFlowDistanceFromEndPoint() {
         return flowDistanceFromEndPoint;
     }
 
     /**
      * @param flowArrowEndPointRadius the flowArrowEndPointRadius to set
      */
-    public void setFlowArrowEndPointRadius(double flowArrowEndPointRadius) {
+    public void setFlowDistanceFromEndPoint(double flowArrowEndPointRadius) {
         this.flowDistanceFromEndPoint = flowArrowEndPointRadius;
     }
 

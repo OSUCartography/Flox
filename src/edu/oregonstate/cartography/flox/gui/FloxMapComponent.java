@@ -117,11 +117,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
 
             // draw flows and nodes
-            if (model.isDrawArrows()) {
-                renderer.drawFlowsWithArrows();
-            } else {
-                renderer.drawFlows();
-            }
+            renderer.drawFlows();
+
             renderer.drawNodes();
 
             if (isDrawFlowRangebox()) {

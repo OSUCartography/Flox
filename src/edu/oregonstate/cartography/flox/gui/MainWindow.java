@@ -102,7 +102,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void writeModelToGUI() {
 
         // write arrow head setttings
-        flowDistanceFromEndPointFormattedTextField.setValue(123);
+        //flowDistanceFromEndPointFormattedTextField.setValue(123);
         // ...
     }
 
@@ -1454,7 +1454,7 @@ public class MainWindow extends javax.swing.JFrame {
             double maxFlowValue = model.getMaxFlowValue();
             model.setFlowWidthScale(20 / maxFlowValue);
             flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
-            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowArrowEndPointRadius());
+            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
             forceLayout();
             mapComponent.showAll();
         }
@@ -1877,7 +1877,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void flowDistanceFromEndPointFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName()) && model != null) {
             double s = ((Number) flowDistanceFromEndPointFormattedTextField.getValue()).doubleValue();
-            model.setFlowArrowEndPointRadius(s);
+            model.setFlowDistanceFromEndPoint(s);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
