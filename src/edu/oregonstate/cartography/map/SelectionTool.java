@@ -126,7 +126,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
         Iterator<Point> nodes = model.nodeIterator();
 
-        boolean somethingGotSelected = false;
+        boolean nodeGotSelected = false;
+        boolean flowGotSelected = false;
 
         // Select nodes
         while (nodes.hasNext()) {
@@ -137,7 +138,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
                     && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
                 pt.setSelected(true);
-                somethingGotSelected = true;
+                nodeGotSelected = true;
             } else {
                 if (shiftDown == false) {
                     pt.setSelected(false);
@@ -156,9 +157,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 System.out.println("Clicked in a flow bounding box!");
                 ArrayList<Point> pts = flow.toStraightLineSegments(0.01);
                 for (int i = 0; i < pts.size() - 1; i++) {
-                    if(somethingGotSelected) {
-                        break;
-                    }
+                    
                     Point pt1 = pts.get(i);
                     Point pt2 = pts.get(i + 1);
 
@@ -182,9 +181,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                                 x2px, y2px);
 
                         System.out.println("Dist: " + dist);
-                        if (dist <= 3) {
+                        if (dist <= 4) {
                             flow.setSelected(true);
-                            somethingGotSelected = true;
+                            flowGotSelected = true;
                         } else {
                             if (shiftDown == false) {
                                 flow.setSelected(false);
@@ -199,7 +198,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         }
                     }
                     
-                    
+                    if(flowGotSelected) {
+                            break;
+                    }
 
                 }
             } else {
@@ -211,7 +212,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.repaint();
         System.out.println("");
-        return somethingGotSelected;
+        if (flowGotSelected || nodeGotSelected) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
