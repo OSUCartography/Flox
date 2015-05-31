@@ -154,7 +154,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             if (flow.getBoundingBox().contains(point)) {
 
                 System.out.println("Clicked in a flow bounding box!");
-                ArrayList<Point> pts = flow.toStraightLineSegments(pixelTolerance);
+                ArrayList<Point> pts = flow.toStraightLineSegments(0.01);
                 for (int i = 0; i < pts.size() - 1; i++) {
                     Point pt1 = pts.get(i);
                     Point pt2 = pts.get(i + 1);
@@ -177,7 +177,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                                 x2px, y2px);
 
                         System.out.println("Dist: " + dist);
-                        if (dist <= 10) {
+                        if (dist <= 3) {
                             flow.setSelected(true);
                             somethingGotSelected = true;
                         }

@@ -154,7 +154,7 @@ public class GeometryUtils {
         if (flow.getBoundingBox().contains(pt)) {
 
             //Split flow into segments, iterate through them
-            ArrayList<Point> pts = flow.toStraightLineSegments(pixelTolerance);
+            ArrayList<Point> pts = flow.toStraightLineSegments(0.01);
             for (int i = 0; i < pts.size() - 1; i++) {
 
                 // Get the other two points for better readability.
