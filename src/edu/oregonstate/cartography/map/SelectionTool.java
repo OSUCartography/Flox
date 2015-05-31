@@ -156,6 +156,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 System.out.println("Clicked in a flow bounding box!");
                 ArrayList<Point> pts = flow.toStraightLineSegments(0.01);
                 for (int i = 0; i < pts.size() - 1; i++) {
+                    if(somethingGotSelected) {
+                        break;
+                    }
                     Point pt1 = pts.get(i);
                     Point pt2 = pts.get(i + 1);
 
@@ -163,9 +166,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     segmentPts.add(pt1);
                     segmentPts.add(pt2);
 
+                   
                     if (getBoundingBoxOfPoints(segmentPts).contains(point)) {
                         // Convert the point coordinates to pixel coordinates
 
+                        System.out.println("Clicked in a segment bounding box!");
                         double x0px = mapComponent.xToPx(point.x);
                         double y0px = mapComponent.yToPx(point.y);
                         double x1px = mapComponent.xToPx(pt1.x);
@@ -180,9 +185,21 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         if (dist <= 3) {
                             flow.setSelected(true);
                             somethingGotSelected = true;
+                        } else {
+                            if (shiftDown == false) {
+                                flow.setSelected(false);
+                            }
+                            
                         }
+                        
 
+                    } else {
+                        if (shiftDown == false) {
+                            flow.setSelected(false);
+                        }
                     }
+                    
+                    
 
                 }
             } else {
