@@ -283,16 +283,8 @@ public class ForceLayouter {
         for (Flow flow : flows) {
             if (flow instanceof QuadraticBezierFlow) {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                //layouter.computeForceOnPoint(qFlow.getCtrlPt(), flow.getStartPt(), 
-                //        flow.getEndPt(), basePt, maxFlowLength, flowBaseLength);
                 Force f = computeForceOnFlow(qFlow, maxFlowLength);
                 forces.add(f);
-            } else {
-                //CubicBezierFlow cFlow = (CubicBezierFlow) flow;
-                //double flowBaseLength = flow.getBaselineLength();
-                //Point basePt = flow.getBaseLineMidPoint();
-                //layouter.computeForceOnPoint(cFlow.getcPt1(), cFlow, basePt, maxFlowLength, flowBaseLength);
-                //layouter.computeForceOnPoint(cFlow.getcPt2(), cFlow, basePt, maxFlowLength, flowBaseLength);
             }
         }
 

@@ -164,6 +164,8 @@ public class MainWindow extends javax.swing.JFrame {
         flowAngleSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
         flowLengthSlider = new javax.swing.JSlider();
+        cubicCurvesRadioButton = new javax.swing.JRadioButton();
+        quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         mapToolsButtonGroup = new javax.swing.ButtonGroup();
         importPanel = new javax.swing.JPanel();
         jLabel22 = new javax.swing.JLabel();
@@ -189,8 +191,6 @@ public class MainWindow extends javax.swing.JFrame {
         forcesPanel = new TransparentMacPanel();
         javax.swing.JLabel flowWidthLabel = new javax.swing.JLabel();
         flowScaleFormattedTextField = new javax.swing.JFormattedTextField();
-        cubicCurvesRadioButton = new javax.swing.JRadioButton();
-        quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
         exponentSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
@@ -294,6 +294,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
         flowLayoutPanel.add(jLabel1, gridBagConstraints);
 
         flowAngleSlider.setMajorTickSpacing(45);
@@ -364,6 +365,33 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         flowLayoutPanel.add(flowLengthSlider, gridBagConstraints);
+
+        curvesButtonGroup.add(cubicCurvesRadioButton);
+        cubicCurvesRadioButton.setText("Cubic Curves");
+        cubicCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cubicCurvesRadioButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowLayoutPanel.add(cubicCurvesRadioButton, gridBagConstraints);
+
+        curvesButtonGroup.add(quadraticCurvesRadioButton);
+        quadraticCurvesRadioButton.setSelected(true);
+        quadraticCurvesRadioButton.setText("Quadratic Curves");
+        quadraticCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                quadraticCurvesRadioButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowLayoutPanel.add(quadraticCurvesRadioButton, gridBagConstraints);
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -555,33 +583,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(flowScaleFormattedTextField, gridBagConstraints);
-
-        curvesButtonGroup.add(cubicCurvesRadioButton);
-        cubicCurvesRadioButton.setText("Cubic Curves");
-        cubicCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cubicCurvesRadioButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(cubicCurvesRadioButton, gridBagConstraints);
-
-        curvesButtonGroup.add(quadraticCurvesRadioButton);
-        quadraticCurvesRadioButton.setSelected(true);
-        quadraticCurvesRadioButton.setText("Quadratic Curves");
-        quadraticCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                quadraticCurvesRadioButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(quadraticCurvesRadioButton, gridBagConstraints);
 
         jLabel3.setText("Stiffness of Longest Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -2228,7 +2229,12 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void forceLayout() {
-
+        if (model.getCurveType() != Model.CurveType.QUADRATIC) {
+            String msg = "Please switch to quadratic Bézier curves first.\nUse Map > Geometric Flow Layout…";
+            ErrorDialog.showErrorDialog(msg, "Flow Error", null, this);
+            return;
+        }
+        
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
 

@@ -148,7 +148,7 @@ public class Model {
     /**
      * Either work with cubic or quadratic curves
      */
-    private CurveType curveType = CurveType.CUBIC;
+    private CurveType curveType = CurveType.QUADRATIC;
 
     /**
      * Order of drawing of flows
