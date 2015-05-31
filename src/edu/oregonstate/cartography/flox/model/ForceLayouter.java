@@ -41,7 +41,7 @@ public class ForceLayouter {
         Iterator<Flow> iter = model.flowIterator();
         while(iter.hasNext()) {
             Flow flow = iter.next();
-            ArrayList<Point> points = flow.toStraightLineSegments(0.01);
+            ArrayList<Point> points = flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes());
             straightLinesMap.put(flow, points);
         }
     }

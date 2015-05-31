@@ -150,13 +150,13 @@ public class QuadraticBezierFlow extends Flow {
         assert (flatness > 0);
 
         // FIXME d should be a parameter
-        double d = flatness * 100;
+        double d = flatness;
 
         ArrayList<Point> irregularPoints = new ArrayList<>();
         GeneralPath path = new GeneralPath();
         path.moveTo(startPt.x, startPt.y);
         path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
-        PathIterator iter = path.getPathIterator(null, flatness);
+        PathIterator iter = path.getPathIterator(null, flatness/100);
         double[] coords = new double[6];
         while (!iter.isDone()) {
             iter.currentSegment(coords);
@@ -198,7 +198,7 @@ public class QuadraticBezierFlow extends Flow {
         assert (flatness > 0);
 
         // FIXME d should be a parameter
-        double d = flatness * 100;
+        double d = flatness;
 
         ArrayList<Point> regularPoints = new ArrayList<>();
         ArrayList<Point> irregularPoints = toStraightLineSegmentsWithIrregularLength(flatness);

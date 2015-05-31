@@ -420,7 +420,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            ArrayList<Point> points = flow.toStraightLineSegments(0.01);
+            ArrayList<Point> points = flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes());
             for (Point point : points) {
                 drawCircle(point.x, point.y, CR, Color.pink, Color.white);
             }
@@ -441,7 +441,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            ArrayList<Point> points = flow.toStraightLineSegments(0.01);
+            ArrayList<Point> points = flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes());
             ArrayList<Point2D.Double> points2D = new ArrayList<>();
             for (Point pt : points) {
                 points2D.add(new Point2D.Double(pt.x, pt.y));

@@ -25,13 +25,13 @@ public class LayoutGrader {
      * @param flows An ArrayList of Flow objects
      * @return
      */
-    public static int countFlowIntersections(ArrayList<Flow> flows) {
+    public static int countFlowIntersections(Model model) {
 
         ArrayList<Geometry> flowPolylines = new ArrayList<>();
 
-        for (Flow flow : flows) {
+        for (Flow flow : model.getFlows()) {
 
-            ArrayList<Point> flowPoints = new ArrayList<>(flow.toStraightLineSegments(0.01));
+            ArrayList<Point> flowPoints = new ArrayList<>(flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes()));
 
             GeometryFactory geometryFactory = new GeometryFactory();
             LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);

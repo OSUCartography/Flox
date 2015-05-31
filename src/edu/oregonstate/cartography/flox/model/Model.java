@@ -49,6 +49,20 @@ public class Model {
         this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
     }
 
+    /**
+     * @return the minFlowNodes
+     */
+    public double getMinFlowNodes() {
+        return minFlowNodes;
+    }
+
+    /**
+     * @param minFlowNodes the minFlowNodes to set
+     */
+    public void setMinFlowNodes(double minFlowNodes) {
+        this.minFlowNodes = minFlowNodes;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -138,7 +152,7 @@ public class Model {
 
     private double flowDistanceFromEndPoint = 0.5d;
 
-    private double minFlowNodes = 3;
+    private double minFlowNodes = 2.5;
     
     private Rectangle2D canvas;
 
@@ -538,7 +552,7 @@ public class Model {
     }
 
     public double getShortestFlowLengthDividedByMinFlowNodes() {
-        return getShortestFlowLength() / minFlowNodes;
+        return getShortestFlowLength() / getMinFlowNodes();
     }
     
     public double getLargestFlowValue() {

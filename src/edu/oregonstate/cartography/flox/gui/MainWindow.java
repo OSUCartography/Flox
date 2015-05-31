@@ -209,6 +209,8 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         flowRangeboxSizeSlider = new javax.swing.JSlider();
         jLabel13 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        minimumFlowNodesSlider = new javax.swing.JSlider();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -795,6 +797,30 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 32;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel13, gridBagConstraints);
+
+        jLabel25.setText("Minimum Flow Nodes");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 34;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
+        forcesPanel.add(jLabel25, gridBagConstraints);
+
+        minimumFlowNodesSlider.setMajorTickSpacing(10);
+        minimumFlowNodesSlider.setMinorTickSpacing(100);
+        minimumFlowNodesSlider.setPaintLabels(true);
+        minimumFlowNodesSlider.setPaintTicks(true);
+        minimumFlowNodesSlider.setValue(40);
+        minimumFlowNodesSlider.setPreferredSize(new java.awt.Dimension(243, 43));
+        minimumFlowNodesSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                minimumFlowNodesSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 35;
+        forcesPanel.add(minimumFlowNodesSlider, gridBagConstraints);
 
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
@@ -1751,7 +1777,7 @@ public class MainWindow extends javax.swing.JFrame {
             Flow flow = iter.next();
             flows.add(flow);
         }
-        int nbrIntersections = LayoutGrader.countFlowIntersections(flows);
+        int nbrIntersections = LayoutGrader.countFlowIntersections(model);
         int nbrFlows = model.getNbrFlows();
         int nbrNodes = model.getNbrNodes();
 
@@ -2228,6 +2254,14 @@ public class MainWindow extends javax.swing.JFrame {
         removeSelectedLayer();
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void minimumFlowNodesSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_minimumFlowNodesSliderStateChanged
+        if (model != null) {
+            model.setMinFlowNodes((minimumFlowNodesSlider.getValue()) / 10d);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_minimumFlowNodesSliderStateChanged
+
     private void forceLayout() {
         if (model.getCurveType() != Model.CurveType.QUADRATIC) {
             String msg = "Please switch to quadratic Bézier curves first.\nUse Map > Geometric Flow Layout…";
@@ -2347,6 +2381,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
@@ -2358,6 +2393,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel mapPanel;
     private javax.swing.ButtonGroup mapToolsButtonGroup;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JSlider minimumFlowNodesSlider;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openShapefileMenuItem;
