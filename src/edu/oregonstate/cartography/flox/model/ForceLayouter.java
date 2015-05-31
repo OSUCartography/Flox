@@ -289,6 +289,7 @@ public class ForceLayouter {
         }
 
         // apply forces onto control points of each flow
+        RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
         int nbrFlows = flows.size();
         for (int i = 0; i < nbrFlows; i++) {
             Flow flow = flows.get(i);
@@ -304,7 +305,6 @@ public class ForceLayouter {
                 // Enforce control point range if enforceRangebox
                 // is true
                 if (model.isEnforceRangebox()) {
-                    RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
                     Point tempPoint = enforcer.enforceFlowControlPointRange(qFlow);
                     ctrlPt.x = tempPoint.x;
                     ctrlPt.y = tempPoint.y;
@@ -312,7 +312,6 @@ public class ForceLayouter {
 
                 if (model.isEnforceCanvasRange()) {
                     Rectangle2D canvasRect = model.getCanvas();
-                    RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
                     Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
                     ctrlPt.x = tempPoint.x;
                     ctrlPt.y = tempPoint.y;

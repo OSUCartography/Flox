@@ -9,8 +9,7 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
-import static edu.oregonstate.cartography.utils.GeometryUtils.getBoundingBoxOfPoints;
-import static edu.oregonstate.cartography.utils.GeometryUtils.getDistanceToLine;
+import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -19,8 +18,6 @@ import java.util.Iterator;
 
 /**
  * SelectionTool - a tool to select GeoObjects by mouse clicks and mouse drags.
- *
- * @author Bernhard Jenny, Institute of Cartography, ETH Zurich.
  */
 public class SelectionTool extends RectangleTool implements CombinableTool {
 
@@ -166,7 +163,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     segmentPts.add(pt2);
 
                    
-                    if (getBoundingBoxOfPoints(segmentPts).contains(point)) {
+                    if (GeometryUtils.getBoundingBoxOfPoints(segmentPts).contains(point)) {
                         // Convert the point coordinates to pixel coordinates
 
                         System.out.println("Clicked in a segment bounding box!");
@@ -177,7 +174,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         double x2px = mapComponent.xToPx(pt2.x);
                         double y2px = mapComponent.yToPx(pt2.y);
 
-                        double dist = getDistanceToLine(x0px, y0px, x1px, y1px,
+                        double dist = GeometryUtils.getDistanceToLine(x0px, y0px, x1px, y1px,
                                 x2px, y2px);
 
                         System.out.println("Dist: " + dist);

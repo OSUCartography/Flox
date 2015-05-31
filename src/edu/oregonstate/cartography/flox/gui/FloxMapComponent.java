@@ -1,23 +1,16 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
-import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
-import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
-import static edu.oregonstate.cartography.utils.GeometryUtils.getBoundingBoxOfPoints;
-import static edu.oregonstate.cartography.utils.GeometryUtils.getDistanceToLine;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  *

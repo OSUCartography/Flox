@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.oregonstate.cartography.flox.model;
 
 import edu.oregonstate.cartography.utils.GeometryUtils;
@@ -15,6 +10,10 @@ import java.awt.geom.Rectangle2D;
 public class RangeboxEnforcer {
 
     private final Model model;
+
+    public RangeboxEnforcer(Model model) {
+        this.model = model;
+    }
 
     /**
      * If the control point of a flow falls outside of the flow's range box,
@@ -152,10 +151,6 @@ public class RangeboxEnforcer {
         }
 
         return cPt;
-    }
-
-    public RangeboxEnforcer(Model model) {
-        this.model = model;
     }
 
     public Point[] computeRangebox(Flow flow) {

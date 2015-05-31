@@ -205,27 +205,20 @@ public class GeometryUtils {
     }
 
     /**
-     * Compute the shortest distance between a point and a line using
-     * coordinates
+     * Compute the shortest distance between a point and a line.
      *
-     * @param point Point who's distance is being measured
-     * @param point0 Line start point
-     * @param point1 Line end point
+     * @param x Point who's distance is being measured x
+     * @param y Point who's distance is being measured y
+     * @param x0 Line start point x
+     * @param y0 Line start point y
+     * @param x1 Line end point x
+     * @param y1 Line end point y
      * @return
      */
     public static double getDistanceToLine(double x, double y,
             double x0, double y0, double x1, double y1) {
-
         double distToLine = (abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0))
                 / (Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)))));
-
-        double number1 = abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0));
-        double number2 = Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)));
-
-        if (isNaN(distToLine)) {
-            return 0;
-        }
-        return distToLine;
-
+        return isNaN(distToLine) ? 0 : distToLine;
     }
 }
