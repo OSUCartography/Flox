@@ -148,41 +148,6 @@ public class GeometryUtils {
         return Math.atan2(dy, dx);
     }
 
-    public static boolean detectFlowCollisionWithPoint(Flow flow, Point2D.Double pt, double pixelTolerance) {
-
-        //Is the point in the bounding box of the flow? +/- tolerance?
-        if (flow.getBoundingBox().contains(pt)) {
-
-            //Split flow into segments, iterate through them
-            ArrayList<Point> pts = flow.toStraightLineSegments(0.01);
-            for (int i = 0; i < pts.size() - 1; i++) {
-
-                // Get the other two points for better readability.
-                Point pt1 = pts.get(i);
-                Point pt2 = pts.get(i + 1);
-
-                ArrayList<Point> segmentPts = new ArrayList();
-                segmentPts.add(pt1);
-                segmentPts.add(pt2);
-
-                // is the point inside the bounding box for the segment?
-                if (getBoundingBoxOfPoints(segmentPts).contains(pt)) {
-                    // Get the distance to the line IN PIXELS
-
-                    //double dist = getDistanceToLine(pt, pt1, pt2);
-                    //Is the distance <= tolerance?
-                    //Yes,
-                    //Select the flow!
-                }
-
-            }
-
-        }
-
-        // Point is not within tolorance of the flow
-        return false;
-    }
-
     public static boolean detectFlowCollisionWithRectangle(Flow flow, Rectangle2D rect, double pixelTolerance) {
         return false;
     }

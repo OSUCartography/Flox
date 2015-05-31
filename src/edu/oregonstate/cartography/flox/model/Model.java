@@ -83,7 +83,7 @@ public class Model {
     private double arrowEdgeCtrlWidth = 0.5;
 
     private double arrowCornerPosition = 0.0;
-    
+
     private double arrowSizeRatio = 0.0;
 
     /**
@@ -138,6 +138,8 @@ public class Model {
 
     private double flowDistanceFromEndPoint = 0.5d;
 
+    private double minFlowNodes = 3;
+    
     private Rectangle2D canvas;
 
     /**
@@ -325,10 +327,11 @@ public class Model {
     public void setClipAreas(Geometry clipAreas) {
         this.clipAreas = clipAreas;
     }
-    
+
     /**
      * Returns true if clip areas exist.
-     * @return 
+     *
+     * @return
      */
     public boolean hasClipAreas() {
         return clipAreas != null;
@@ -353,7 +356,7 @@ public class Model {
             iterator.next().setStartClipArea(null);
         }
     }
-    
+
     /**
      * @return the startClipAreaBufferDistance
      */
@@ -521,19 +524,36 @@ public class Model {
         return maxLength;
     }
 
+    public double getShortestFlowLength() {
+        double minLength = Double.POSITIVE_INFINITY;
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            double l = flow.getBaselineLength();
+            if (l < minLength) {
+                minLength = l;
+            }
+        }
+        return minLength == Double.POSITIVE_INFINITY ? null : minLength;
+    }
+
+    public double getShortestFlowLengthDividedByMinFlowNodes() {
+        return getShortestFlowLength() / minFlowNodes;
+    }
+    
     public double getLargestFlowValue() {
         double maxValue = 0;
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-                double val = flow.getValue();
-                if (val < maxValue) {
-                    maxValue = val;
-                }
+            double val = flow.getValue();
+            if (val < maxValue) {
+                maxValue = val;
+            }
         }
         return maxValue;
     }
-    
+
     /**
      * Returns all map layers.
      *
@@ -643,8 +663,6 @@ public class Model {
         this.flowExertingForcesOnItself = flowExertingForcesOnItself;
     }
 
-
-    
     /**
      * @return the nodeWeightFactor
      */
@@ -755,11 +773,11 @@ public class Model {
     public Rectangle2D getCanvas() {
         return canvas;
     }
-    
+
     public void setCanvas(Rectangle2D canvas) {
         this.canvas = canvas;
     }
-    
+
     /**
      * @return the maxFlowLengthSpringConstant
      */
