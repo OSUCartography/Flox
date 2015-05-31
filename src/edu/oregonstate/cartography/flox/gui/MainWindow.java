@@ -62,6 +62,7 @@ public class MainWindow extends javax.swing.JFrame {
      * Creates new form MainWindow
      */
     public MainWindow() {
+
         initComponents();
         progressBar.setVisible(false);
 
@@ -94,24 +95,40 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapComponent.requestFocusInWindow();
 
-        writeModelToGUI();
         updateClippingGUI();
     }
 
-    private void writeModelToGUI() {
+    /**
+     * Write the data values from the model to the GUI elements
+     */
+    public void writeModelToGUI() {
 
         if (model != null) {
             // Arrow Settings
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
             addArrowsCheckbox.setSelected(model.isDrawArrows());
-            arrowheadSizeSlider.setValue( (int)(model.getArrowLength() * 1000));
-            arrowheadWidthSlider.setValue( (int)(model.getArrowWidth() * 1000));
+            arrowheadSizeSlider.setValue((int) (model.getArrowLength() * 1000));
+            arrowheadWidthSlider.setValue((int) (model.getArrowWidth() * 1000));
             arrowEdgeCtrlLengthSlider.setValue((int) (model.getArrowEdgeCtrlLength() * 100));
             arrowEdgeCtrlWidthSlider.setValue((int) (model.getArrowEdgeCtrlWidth() * 100));
             arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
-            arrowSizeRatioSlider.setValue ((int) (model.getArrowSizeRatio() * 100));
-            
+            arrowSizeRatioSlider.setValue((int) (model.getArrowSizeRatio() * 100));
+
             // Force Settings
+            selfForcesCheckBox.setSelected(model.isFlowExertingForcesOnItself());
+            enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
+            longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
+            zeroLengthStiffnessSlider.setValue((int) (model.getMinFlowLengthSpringConstant() * 100d));
+            //exponentSlider.setValue(100);
+            exponentSlider.setValue((int) (model.getDistanceWeightExponent() * 10d));
+            nodeWeightSlider.setValue((int) (model.getNodeWeightFactor() * 10d));
+            antiTorsionSlider.setValue((int) (model.getAntiTorsionWeight() * 100d));
+            peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
+            canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
+            flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
+        } else {
+            System.out.println("writeModelToGUI() says:\n"
+                    + "  No model to write to the GUI!");
         }
 
     }
@@ -124,6 +141,8 @@ public class MainWindow extends javax.swing.JFrame {
     public void setModel(Model model) {
         this.model = model;
         mapComponent.setModel(model);
+        //writeModelToGUI();
+
     }
 
     private void updateLayerList() {
@@ -580,7 +599,7 @@ public class MainWindow extends javax.swing.JFrame {
         exponentSlider.setMaximum(500);
         exponentSlider.setPaintLabels(true);
         exponentSlider.setPaintTicks(true);
-        exponentSlider.setValue(40);
+        exponentSlider.setValue(0);
         exponentSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 exponentSliderStateChanged(evt);
@@ -603,6 +622,7 @@ public class MainWindow extends javax.swing.JFrame {
         longestFlowStiffnessSlider.setMinorTickSpacing(10);
         longestFlowStiffnessSlider.setPaintLabels(true);
         longestFlowStiffnessSlider.setPaintTicks(true);
+        longestFlowStiffnessSlider.setValue(0);
         longestFlowStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 longestFlowStiffnessSliderStateChanged(evt);
@@ -619,6 +639,7 @@ public class MainWindow extends javax.swing.JFrame {
         zeroLengthStiffnessSlider.setMinorTickSpacing(50);
         zeroLengthStiffnessSlider.setPaintLabels(true);
         zeroLengthStiffnessSlider.setPaintTicks(true);
+        zeroLengthStiffnessSlider.setValue(0);
         zeroLengthStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 zeroLengthStiffnessSliderStateChanged(evt);
@@ -1773,18 +1794,21 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void exponentSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_exponentSliderStateChanged
         if (exponentSlider.getValueIsAdjusting() == false) {
+            model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
             forceLayout();
         }
     }//GEN-LAST:event_exponentSliderStateChanged
 
     private void longestFlowStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_longestFlowStiffnessSliderStateChanged
-        if (longestFlowStiffnessSlider.getValueIsAdjusting() == false) {
+        if (longestFlowStiffnessSlider.getValueIsAdjusting() == false && model != null) {
+            model.setMaxFlowLengthSpringConstant(longestFlowStiffnessSlider.getValue() / 100d);
             forceLayout();
         }
     }//GEN-LAST:event_longestFlowStiffnessSliderStateChanged
 
     private void zeroLengthStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_zeroLengthStiffnessSliderStateChanged
-        if (zeroLengthStiffnessSlider.getValueIsAdjusting() == false) {
+        if (zeroLengthStiffnessSlider.getValueIsAdjusting() == false && model != null) {
+            model.setMinFlowLengthSpringConstant(zeroLengthStiffnessSlider.getValue() / 100d);
             forceLayout();
         }
     }//GEN-LAST:event_zeroLengthStiffnessSliderStateChanged
@@ -1802,24 +1826,30 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_drawReconstructedBezierCheckBoxActionPerformed
 
     private void selfForcesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selfForcesCheckBoxActionPerformed
-        model.setFlowExertingForcesOnItself(selfForcesCheckBox.isSelected());
-        forceLayout();
+        if (model != null) {
+            model.setFlowExertingForcesOnItself(selfForcesCheckBox.isSelected());
+            forceLayout();
+        }
+
     }//GEN-LAST:event_selfForcesCheckBoxActionPerformed
 
     private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
         if (nodeWeightSlider.getValueIsAdjusting() == false) {
+            model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
             forceLayout();
         }
     }//GEN-LAST:event_nodeWeightSliderStateChanged
 
     private void antiTorsionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_antiTorsionSliderStateChanged
         if (antiTorsionSlider.getValueIsAdjusting() == false) {
+            model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
             forceLayout();
         }
     }//GEN-LAST:event_antiTorsionSliderStateChanged
 
     private void peripheralStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_peripheralStiffnessSliderStateChanged
         if (peripheralStiffnessSlider.getValueIsAdjusting() == false) {
+            model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
             forceLayout();
         }
     }//GEN-LAST:event_peripheralStiffnessSliderStateChanged
@@ -1829,7 +1859,11 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_floxReportMenuItemActionPerformed
 
     private void enforceRangeboxCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enforceRangeboxCheckboxActionPerformed
-        forceLayout();
+        if (model != null) {
+            model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
+            forceLayout();
+        }
+
     }//GEN-LAST:event_enforceRangeboxCheckboxActionPerformed
 
     private void showAllMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllMenuItem1ActionPerformed
@@ -2182,7 +2216,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_clipWithStartAreasCheckBoxActionPerformed
 
     private void arrowSizeRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowSizeRatioSliderStateChanged
-        if (model.isDrawArrows() && model!=null) {
+        if (model.isDrawArrows() && model != null) {
             model.setArrowSizeRatio((arrowSizeRatioSlider.getValue()) / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
@@ -2202,15 +2236,16 @@ public class MainWindow extends javax.swing.JFrame {
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
 
-        model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
+        
         model.setCanvas(model.getFlowsBoundingBox());
-        model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
-        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
-        model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
-        model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
-        model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
-        model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
-        model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
+        
+        //model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
+        //model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
+        //model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
+        //model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
+        //model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
+        //model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
+        //model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
 
         if (timer != null) {
             timer.stop();

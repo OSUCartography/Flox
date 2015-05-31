@@ -57,7 +57,9 @@ public class Flox {
                 window.setLocation((int) screen.getMinX(), (int) screen.getMinY());
                 window.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
                 window.setVisible(true);
+                
                 window.openFlowsCSVFile();
+                window.writeModelToGUI();
             }
         });
 

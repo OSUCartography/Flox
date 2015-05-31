@@ -35,6 +35,20 @@ public class Model {
         this.arrowSizeRatio = arrowSizeRatio;
     }
 
+    /**
+     * @param maxFlowLengthSpringConstant the maxFlowLengthSpringConstant to set
+     */
+    public void setMaxFlowLengthSpringConstant(double maxFlowLengthSpringConstant) {
+        this.maxFlowLengthSpringConstant = maxFlowLengthSpringConstant;
+    }
+
+    /**
+     * @param minFlowLengthSpringConstant the minFlowLengthSpringConstant to set
+     */
+    public void setMinFlowLengthSpringConstant(double minFlowLengthSpringConstant) {
+        this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -70,7 +84,7 @@ public class Model {
 
     private double arrowCornerPosition = 0.0;
     
-    private double arrowSizeRatio = 1.0;
+    private double arrowSizeRatio = 0.0;
 
     /**
      * Scale factor to transform flow values to flow stroke widths
@@ -85,32 +99,32 @@ public class Model {
     /**
      * Start and end node exert a larger force than points along flow lines
      */
-    private double nodeWeightFactor = 10;
+    private double nodeWeightFactor = 0.0;
 
     /**
      * Weight for the anti-torsion force
      */
-    private double antiTorsionWeight = 1;
+    private double antiTorsionWeight = .8;
 
     /**
      * Stiffness factor for peripheral flows
      */
-    private double peripheralStiffnessFactor = 1;
+    private double peripheralStiffnessFactor = 0.0;
 
     /**
      * spring stiffness of longest flow
      */
-    private double maxFlowLengthSpringConstant = 0.5;
+    private double maxFlowLengthSpringConstant = .2;
 
     /**
      * spring stiffness of zero-length flow
      */
-    private double minFlowLengthSpringConstant = 0.5;
+    private double minFlowLengthSpringConstant = 1.0;
 
     // This determines the amount of force that objects far away from the target
     // can apply to the target.  The lower the distanceWeightExponent, the more force distant
     // objects are permitted to apply.
-    private double distanceWeightExponent = 4;
+    private double distanceWeightExponent = 10.0;
 
     private boolean enforceRangebox = true;
 
@@ -118,9 +132,9 @@ public class Model {
 
     private boolean drawArrows = true;
 
-    private double canvasPadding = 0.1;
+    private double canvasPadding = 0.5;
 
-    private double flowRangeboxHeight = 1.25;
+    private double flowRangeboxHeight = .5;
 
     private double flowDistanceFromEndPoint = 0.5d;
 
@@ -629,6 +643,8 @@ public class Model {
         this.flowExertingForcesOnItself = flowExertingForcesOnItself;
     }
 
+
+    
     /**
      * @return the nodeWeightFactor
      */
@@ -682,8 +698,8 @@ public class Model {
      * springs on the map.
      */
     public void setSpringConstants(double maxFlowLengthSpringConstant, double minFlowLengthSpringConstant) {
-        this.maxFlowLengthSpringConstant = maxFlowLengthSpringConstant;
-        this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
+        this.setMaxFlowLengthSpringConstant(maxFlowLengthSpringConstant);
+        this.setMinFlowLengthSpringConstant(minFlowLengthSpringConstant);
     }
 
     /**
