@@ -33,11 +33,6 @@ import java.util.Iterator;
 public class FloxRenderer extends SimpleFeatureRenderer {
 
     /**
-     * White border along flows
-     */
-    private final float WHITE_BORDER = 2;
-
-    /**
      * Width of stroke line for nodes
      */
     private final float NODE_STROKE_WIDTH = 2;
@@ -190,6 +185,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 flows = model.getFlows();
         }
 
+        ArrayList<GeneralPath> flowPaths = new ArrayList<>();
+        
         // Iterate through the flows
         for (Flow flow : flows) {
             
@@ -205,8 +202,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 flowPath = flowToGeneralPath((CubicBezierFlow) flow);
 
             } else {
-
-                // Convert the flow to a QuadraticBezierFlow
                 QuadraticBezierFlow f = (QuadraticBezierFlow) flow;
 
                 // This gets a clipped flow using the clipping tool designed
@@ -260,21 +255,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             }
 
-            // Draw the flow border. This is actually just a slightly wider
-            // version of the flow drawn underneath the flow.  
-            double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
-            g2d.setStroke(new BasicStroke((float) strokeWidth + WHITE_BORDER * 2,
-                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            g2d.setColor(Color.WHITE);
-            g2d.draw(flowPath);
-
-            // Draw the arrow if the model says so. This also draws a white 
-            // border around the arrow which, unlike the flow border, acually is 
-            // a white stroked border around a polygon. 
+            // Draw the arrow if the model says so.
             if (model.isDrawArrows()) {
-                g2d.setStroke(new BasicStroke(3));
-                g2d.setColor(Color.WHITE);
-                g2d.draw(arrowPath);
                 if (flow.isSelected()) {
                     g2d.setColor(Color.CYAN);
                 } else {
@@ -284,6 +266,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
 
             // Draw the flow fill
+            double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             if (flow.isSelected()) {
