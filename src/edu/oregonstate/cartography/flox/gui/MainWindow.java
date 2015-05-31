@@ -130,13 +130,13 @@ public class MainWindow extends javax.swing.JFrame {
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
             zeroLengthStiffnessSlider.setValue((int) (model.getMinFlowLengthSpringConstant() * 100d));
-            //exponentSlider.setValue(100);
             exponentSlider.setValue((int) (model.getDistanceWeightExponent() * 10d));
             nodeWeightSlider.setValue((int) (model.getNodeWeightFactor() * 10d));
             antiTorsionSlider.setValue((int) (model.getAntiTorsionWeight() * 100d));
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
+            minimumFlowNodesSlider.setValue((int) (model.getMinFlowNodes() * 10));
             updateClippingGUI();
         }
     }
