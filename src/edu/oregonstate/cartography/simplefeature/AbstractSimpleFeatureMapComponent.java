@@ -370,7 +370,8 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     public void eraseBufferImage() {
-        g2dBuffer.clearRect(0, 0, bufferImage.getWidth(), bufferImage.getHeight());
+        Graphics2D g2d = getGraphics2DBuffer();
+        g2d.clearRect(0, 0, bufferImage.getWidth(), bufferImage.getHeight());
     }
 
     /**

@@ -59,7 +59,6 @@ public class Flox {
                 window.setVisible(true);
                 
                 window.openFlowsCSVFile();
-                window.writeModelToGUI();
             }
         });
 

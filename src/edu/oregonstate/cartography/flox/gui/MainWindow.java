@@ -99,10 +99,21 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     /**
+     * Set the model for this application.
+     *
+     * @param model
+     */
+    public void setModel(Model model) {
+        assert (model != null);
+        this.model = model;
+        mapComponent.setModel(model);
+        writeModelToGUI();
+    }
+
+    /**
      * Write the data values from the model to the GUI elements
      */
-    public void writeModelToGUI() {
-
+    private void writeModelToGUI() {
         if (model != null) {
             // Arrow Settings
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
@@ -126,23 +137,8 @@ public class MainWindow extends javax.swing.JFrame {
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
-        } else {
-            System.out.println("writeModelToGUI() says:\n"
-                    + "  No model to write to the GUI!");
+            updateClippingGUI();
         }
-
-    }
-
-    /**
-     * Set the model for this application.
-     *
-     * @param model
-     */
-    public void setModel(Model model) {
-        this.model = model;
-        mapComponent.setModel(model);
-        //writeModelToGUI();
-
     }
 
     private void updateLayerList() {
@@ -2236,9 +2232,8 @@ public class MainWindow extends javax.swing.JFrame {
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
 
-        
         model.setCanvas(model.getFlowsBoundingBox());
-        
+
         //model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
         //model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
         //model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
@@ -2246,7 +2241,6 @@ public class MainWindow extends javax.swing.JFrame {
         //model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
         //model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
         //model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
-
         if (timer != null) {
             timer.stop();
         }
