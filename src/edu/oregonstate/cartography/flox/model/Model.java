@@ -63,6 +63,34 @@ public class Model {
         this.minFlowNodes = minFlowNodes;
     }
 
+    /**
+     * @return the arrowLengthScaleFactor
+     */
+    public double getArrowLengthScaleFactor() {
+        return arrowLengthScaleFactor;
+    }
+
+    /**
+     * @param arrowLengthScaleFactor the arrowLengthScaleFactor to set
+     */
+    public void setArrowLengthScaleFactor(double arrowLengthScaleFactor) {
+        this.arrowLengthScaleFactor = arrowLengthScaleFactor;
+    }
+
+    /**
+     * @return the arrowWidthScaleFactor
+     */
+    public double getArrowWidthScaleFactor() {
+        return arrowWidthScaleFactor;
+    }
+
+    /**
+     * @param arrowWidthScaleFactor the arrowWidthScaleFactor to set
+     */
+    public void setArrowWidthScaleFactor(double arrowWidthScaleFactor) {
+        this.arrowWidthScaleFactor = arrowWidthScaleFactor;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -84,60 +112,82 @@ public class Model {
      */
     private UndirectedGraph<Point, Flow> graph = new SimpleGraph<>(Flow.class);
 
-    // Length of the arrow. This number is modified by a GUI slider bar.
-    // It is multiplied by the value of each flow and the flowWidthScale.
-    private double arrowLength = 0.01;
 
-    // Width of the arrow. This number is modified This number is modified by a GUI slider bar.
-    // It is multiplied by the value of each flow and the flowWidthScale.
-    private double arrowWidth = 0.01;
-
+    /**
+     * Used by the Arrow class to determine the length of arrowheads.
+     */
+    private double arrowLengthScaleFactor = 0.01;
+    
+    /**
+     * Used by the Arrow class to determine the width of arrowheads.
+     */
+    private double arrowWidthScaleFactor = 0.005;
+    
+    /**
+     * Used by the Arrow class to determine the location of the arrow edge
+     * control points.
+     */
     private double arrowEdgeCtrlLength = 0.5;
 
+    /**
+     * Used by the Arrow class to determine the location of the arrow edge
+     * control points.
+     */
     private double arrowEdgeCtrlWidth = 0.5;
 
+    /**
+     * Used by the Arrow class to determine the horizontal postion of the
+     * arrow's corners relative to the base.
+     */
     private double arrowCornerPosition = 0.0;
 
+    /**
+     * Used by the Arrow class to determine the size of the smallest arrowhead.
+     */
     private double arrowSizeRatio = 0.0;
 
     /**
-     * Scale factor to transform flow values to flow stroke widths
+     * Scale factor to transform flow values to flow stroke widths.
      */
     private double flowWidthScale = 1;
 
     /**
-     * if true, a flow exerts forces on itself
+     * if true, a flow exerts forces on itself.
      */
     private boolean flowExertingForcesOnItself = false;
 
     /**
-     * Start and end node exert a larger force than points along flow lines
+     * Start and end node exert a larger force than points along flow lines.
      */
     private double nodeWeightFactor = 0.0;
 
     /**
-     * Weight for the anti-torsion force
+     * Weight for the anti-torsion force.
      */
     private double antiTorsionWeight = .8;
 
     /**
-     * Stiffness factor for peripheral flows
+     * Stiffness factor for peripheral flows.
      */
     private double peripheralStiffnessFactor = 0.0;
 
     /**
-     * spring stiffness of longest flow
+     * spring stiffness of longest flow.
      */
     private double maxFlowLengthSpringConstant = .2;
 
     /**
-     * spring stiffness of zero-length flow
+     * spring stiffness of zero-length flow.
      */
     private double minFlowLengthSpringConstant = 1.0;
 
-    // This determines the amount of force that objects far away from the target
-    // can apply to the target.  The lower the distanceWeightExponent, the more force distant
-    // objects are permitted to apply.
+
+    
+    /**
+     * This determines the amount of force that objects far away from the target
+     * can apply to the target.  The lower the distanceWeightExponent, the more 
+     * force distant objects are permitted to apply.
+     */
     private double distanceWeightExponent = 10.0;
 
     private boolean enforceRangebox = true;
@@ -818,22 +868,6 @@ public class Model {
      */
     public void setFlowOrder(FlowOrder flowOrder) {
         this.flowOrder = flowOrder;
-    }
-
-    public double getArrowLength() {
-        return arrowLength;
-    }
-
-    public double getArrowWidth() {
-        return arrowWidth;
-    }
-
-    public void setArrowLength(double arrowLength) {
-        this.arrowLength = arrowLength;
-    }
-
-    public void setArrowWidth(double arrowWidth) {
-        this.arrowWidth = arrowWidth;
     }
 
     /**

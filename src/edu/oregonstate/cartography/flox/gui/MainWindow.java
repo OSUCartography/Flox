@@ -118,8 +118,8 @@ public class MainWindow extends javax.swing.JFrame {
             // Arrow Settings
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
             addArrowsCheckbox.setSelected(model.isDrawArrows());
-            arrowheadSizeSlider.setValue((int) (model.getArrowLength() * 1000));
-            arrowheadWidthSlider.setValue((int) (model.getArrowWidth() * 1000));
+            arrowheadSizeSlider.setValue((int) (model.getArrowLengthScaleFactor() * 1000));
+            arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 1000));
             arrowEdgeCtrlLengthSlider.setValue((int) (model.getArrowEdgeCtrlLength() * 100));
             arrowEdgeCtrlWidthSlider.setValue((int) (model.getArrowEdgeCtrlWidth() * 100));
             arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
@@ -1064,7 +1064,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowHeadsControlPanel.add(addArrowsCheckbox, gridBagConstraints);
 
         arrowheadSizeSlider.setMajorTickSpacing(50);
-        arrowheadSizeSlider.setMaximum(400);
+        arrowheadSizeSlider.setMaximum(200);
         arrowheadSizeSlider.setPaintLabels(true);
         arrowheadSizeSlider.setPaintTicks(true);
         arrowheadSizeSlider.setPreferredSize(new java.awt.Dimension(240, 43));
@@ -1086,7 +1086,6 @@ public class MainWindow extends javax.swing.JFrame {
         arrowHeadsControlPanel.add(jLabel10, gridBagConstraints);
 
         arrowheadWidthSlider.setMajorTickSpacing(25);
-        arrowheadWidthSlider.setMaximum(200);
         arrowheadWidthSlider.setPaintLabels(true);
         arrowheadWidthSlider.setPaintTicks(true);
         arrowheadWidthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
@@ -2036,7 +2035,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadSizeSliderStateChanged
         if (model.isDrawArrows() && model != null) {
-            model.setArrowLength((arrowheadSizeSlider.getValue() + 1) / 1000d);
+            model.setArrowLengthScaleFactor((arrowheadSizeSlider.getValue() + 1) / 1000d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -2044,7 +2043,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (model.isDrawArrows()) {
-            model.setArrowWidth((arrowheadWidthSlider.getValue() + 1) / 1000d);
+            model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 1000d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }

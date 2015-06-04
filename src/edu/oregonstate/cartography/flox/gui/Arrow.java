@@ -104,11 +104,13 @@ public class Arrow {
         // Determine the distance of the tip of the arrow from the base.
         // Is scaled to the value of the flow, which itself is scaled by the 
         // scale factor of the model.
-        arrowLength = model.getArrowLength() * (value + plusVal) * scale;
+        //arrowLength = model.getArrowLength() * (value + plusVal) * scale;
+        arrowLength = (model.getShortestFlowLength()) * model.getArrowLengthScaleFactor() * (value + plusVal) * scale;
 
         // Determine the perpendicular distance of the corners of the arrow from 
         // a line drawn between the base and tip of the arrow.
-        arrowWidth = model.getArrowWidth() * (value + plusVal) * scale;
+        //arrowWidth = model.getArrowWidth() * (value + plusVal) * scale;
+        arrowWidth = (model.getShortestFlowLength()) * model.getArrowWidthScaleFactor() * (value + plusVal) * scale;
 
         // Get the arrowCornerPosition from the model. This value determines
         // the horizontal location of the corners of the Arrow
