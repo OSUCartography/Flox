@@ -69,7 +69,7 @@ public class ForceLayouter {
         double wTotal = 0; // sum of the weight of all forces
 
         double nodeWeight = model.getNodeWeightFactor();
-
+        
         // Iterate through the flows. The forces of each flow on the target is
         // calculated and added to the total force
         while (flowIterator.hasNext()) {
@@ -99,24 +99,24 @@ public class ForceLayouter {
                     continue;
                 }
 
-                // double w = gaussianWeight(l, maxFlowLength);
+                //double w = gaussianWeight(l, maxFlowLength);
                 double w = inverseDistanceWeight(l);
-                double fx = xDist / l; //normalized x distance
-                double fy = yDist / l; //normalized y distance
+                //double fx = xDist / l; //normalized x distance
+                //double fy = yDist / l; //normalized y distance
 
                 // Apply the distance weight to each focre
-                fx *= w; // The force along the x-axis after weighting
-                fy *= w; // The force along the y-axix after weighting
+                xDist *= w; // The force along the x-axis after weighting
+                yDist *= w; // The force along the y-axix after weighting
 
                 // start and end points have bigger weight
                 if (startOrEndPoint) {
-                    fx *= nodeWeight;
-                    fy *= nodeWeight;
+                    xDist *= nodeWeight;
+                    yDist *= nodeWeight;
                 }
 
                 // Add forces to the totals
-                fxTotal += fx;
-                fyTotal += fy;
+                fxTotal += xDist;
+                fyTotal += yDist;
                 wTotal += w;
             }
         }
