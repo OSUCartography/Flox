@@ -2,7 +2,6 @@ package edu.oregonstate.cartography.utils;
 
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Point;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import static java.lang.Double.isNaN;
 import static java.lang.Math.abs;
@@ -185,5 +184,45 @@ public class GeometryUtils {
         double distToLine = (abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0))
                 / (Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)))));
         return isNaN(distToLine) ? 0 : distToLine;
+    }
+    
+    /** Compute the difference between two angles.
+     * The resulting angle is in the range of -pi..+pi if the input angle are
+     * also in this range.
+     */
+    public static double angleDif(double a1, double a2) {
+        double val = a1 - a2;
+        if (val > Math.PI) {
+            val -= 2. * Math.PI;
+        }
+        if (val < -Math.PI) {
+            val += 2. * Math.PI;
+        }
+        return val;
+    }
+
+    /** Sum of two angles.
+     * The resulting angle is in the range of -pi..+pi if the input angle are
+     * also in this range.
+     */
+    public static float angleSum(float a1, float a2) {
+        double val = a1 + a2;
+        if (val > Math.PI) {
+            val -= 2. * Math.PI;
+        }
+        if (val < -Math.PI) {
+            val += 2. * Math.PI;
+        }
+        return (float) val;
+    }
+
+    public static double trimAngle(double angle) {
+        if (angle > Math.PI) {
+            return angle - 2. * Math.PI;
+        }
+        if (angle < -Math.PI) {
+            return angle + 2. * Math.PI;
+        }
+        return angle;
     }
 }

@@ -200,11 +200,13 @@ public class Model {
      * @param flow The flow to add.
      */
     public void addFlow(Flow flow) {
-        Point sourceVertex = findNodeInGraph(flow.getStartPt());
-        Point targetVertex = findNodeInGraph(flow.getEndPt());
-        graph.addVertex(sourceVertex);
-        graph.addVertex(targetVertex);
-        graph.addEdge(sourceVertex, targetVertex, flow);
+        Point startPoint = findNodeInGraph(flow.getStartPt());
+        Point endPoint = findNodeInGraph(flow.getEndPt());
+        flow.setStartPt(startPoint);
+        flow.setEndPt(endPoint);
+        graph.addVertex(startPoint);
+        graph.addVertex(endPoint);
+        graph.addEdge(startPoint, endPoint, flow);
     }
 
     /**

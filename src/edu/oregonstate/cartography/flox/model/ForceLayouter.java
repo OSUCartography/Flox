@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
+import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -311,6 +312,8 @@ public class ForceLayouter {
                     ctrlPt.y = tempPoint.y;
                 }
 
+                computeAngularDistributionForce(qFlow);
+                
                 if (model.isEnforceCanvasRange()) {
                     Rectangle2D canvasRect = model.getCanvas();
                     Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
@@ -320,6 +323,79 @@ public class ForceLayouter {
             }
 
         }
+    }
+    
+    private static double startToCtrlAngle(QuadraticBezierFlow flow) {
+        Point ctrlPt = flow.getCtrlPt();
+        Point startPt = flow.getStartPt();
+        double dx = ctrlPt.x - startPt.x;
+        double dy = ctrlPt.y - startPt.y;
+        return Math.atan2(dy, dx);
+    }
+    
+    private static double endToCtrlAngle(QuadraticBezierFlow flow) {
+        Point ctrlPt = flow.getCtrlPt();
+        Point endPt = flow.getEndPt();
+        double dx = ctrlPt.x - endPt.x;
+        double dy = ctrlPt.y - endPt.y;
+        return Math.atan2(dy, dx);
+    }
+    
+    private void computeAngularDistributionForce(QuadraticBezierFlow flow) {
+        final double K = 8;
+        Point startPoint = flow.getStartPt();
+        Point endPoint = flow.getEndPt();
+        double startToCtrlAngle = startToCtrlAngle(flow);
+        double endToCtrlAngle = endToCtrlAngle(flow);
+        Iterator<Flow> iter = model.flowIterator();
+        double startSum = 0;
+        double startWSum = 0;
+        double endSum = 0;
+        double endWSum = 0;
+        while(iter.hasNext()) {
+            QuadraticBezierFlow f = (QuadraticBezierFlow)iter.next();
+            if (f == flow) {
+                continue;
+            }
+            Point fStart = f.getStartPt();
+            Point fEnd = f.getEndPt();
+            if (startPoint == fStart) {
+                double fStartToCtrlAngle = startToCtrlAngle(f);
+                double d = GeometryUtils.angleDif(startToCtrlAngle, fStartToCtrlAngle);
+                double w = Math.exp(-K * d * d);
+                startSum += d * w;
+                startWSum += w;
+            }
+            
+            if (startPoint == fEnd) {
+                double fEndToCtrlAngle = endToCtrlAngle(f);
+                double d = GeometryUtils.angleDif(startToCtrlAngle, fEndToCtrlAngle);
+                double w = Math.exp(-K * d * d);
+                startSum += d * w;
+                startWSum += w;
+            }
+            
+            if (endPoint == fStart) {
+                double fStartToCtrlAngle = startToCtrlAngle(f);
+                double d = GeometryUtils.angleDif(endToCtrlAngle, fStartToCtrlAngle);
+                double w = Math.exp(-K * d * d);
+                endSum += d * w;
+                endWSum += w;
+            }
+            
+            if (endPoint == fEnd) {
+                double fEndToCtrlAngle = endToCtrlAngle(f);
+                double d = GeometryUtils.angleDif(endToCtrlAngle, fEndToCtrlAngle);
+                double w = Math.exp(-K * d * d);
+                endSum += d * w;
+                endWSum += w;
+            }
+        }
+        double s = startSum / startWSum;
+        double e = endSum / endWSum;
+        System.out.println();
+        System.out.println ("start " + Math.toDegrees(s));
+        System.out.println ("end " + Math.toDegrees(e));
     }
 
     public void straightenFlows() {
