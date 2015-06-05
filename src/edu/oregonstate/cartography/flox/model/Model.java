@@ -21,76 +21,6 @@ import org.jgrapht.graph.SimpleGraph;
  */
 public class Model {
 
-    /**
-     * @return the arrowSizeRatio
-     */
-    public double getArrowSizeRatio() {
-        return arrowSizeRatio;
-    }
-
-    /**
-     * @param arrowSizeRatio the arrowSizeRatio to set
-     */
-    public void setArrowSizeRatio(double arrowSizeRatio) {
-        this.arrowSizeRatio = arrowSizeRatio;
-    }
-
-    /**
-     * @param maxFlowLengthSpringConstant the maxFlowLengthSpringConstant to set
-     */
-    public void setMaxFlowLengthSpringConstant(double maxFlowLengthSpringConstant) {
-        this.maxFlowLengthSpringConstant = maxFlowLengthSpringConstant;
-    }
-
-    /**
-     * @param minFlowLengthSpringConstant the minFlowLengthSpringConstant to set
-     */
-    public void setMinFlowLengthSpringConstant(double minFlowLengthSpringConstant) {
-        this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
-    }
-
-    /**
-     * @return the minFlowNodes
-     */
-    public double getMinFlowNodes() {
-        return minFlowNodes;
-    }
-
-    /**
-     * @param minFlowNodes the minFlowNodes to set
-     */
-    public void setMinFlowNodes(double minFlowNodes) {
-        this.minFlowNodes = minFlowNodes;
-    }
-
-    /**
-     * @return the arrowLengthScaleFactor
-     */
-    public double getArrowLengthScaleFactor() {
-        return arrowLengthScaleFactor;
-    }
-
-    /**
-     * @param arrowLengthScaleFactor the arrowLengthScaleFactor to set
-     */
-    public void setArrowLengthScaleFactor(double arrowLengthScaleFactor) {
-        this.arrowLengthScaleFactor = arrowLengthScaleFactor;
-    }
-
-    /**
-     * @return the arrowWidthScaleFactor
-     */
-    public double getArrowWidthScaleFactor() {
-        return arrowWidthScaleFactor;
-    }
-
-    /**
-     * @param arrowWidthScaleFactor the arrowWidthScaleFactor to set
-     */
-    public void setArrowWidthScaleFactor(double arrowWidthScaleFactor) {
-        this.arrowWidthScaleFactor = arrowWidthScaleFactor;
-    }
-
     public enum CurveType {
 
         CUBIC,
@@ -202,6 +132,9 @@ public class Model {
 
     private double flowDistanceFromEndPoint = 0.5d;
 
+    /**
+     * FIXME what is this? the minimum number of line segments? Why is not an integer?
+     */
     private double minFlowNodes = 2.5;
     
     private Rectangle2D canvas;
@@ -952,5 +885,75 @@ public class Model {
      */
     public void setArrowCornerPosition(double arrowCornerPosition) {
         this.arrowCornerPosition = arrowCornerPosition;
+    }
+    
+    /**
+     * @return the arrowSizeRatio
+     */
+    public double getArrowSizeRatio() {
+        return arrowSizeRatio;
+    }
+
+    /**
+     * @param arrowSizeRatio the arrowSizeRatio to set
+     */
+    public void setArrowSizeRatio(double arrowSizeRatio) {
+        this.arrowSizeRatio = arrowSizeRatio;
+    }
+
+    /**
+     * @param maxFlowLengthSpringConstant the maxFlowLengthSpringConstant to set
+     */
+    public void setMaxFlowLengthSpringConstant(double maxFlowLengthSpringConstant) {
+        this.maxFlowLengthSpringConstant = maxFlowLengthSpringConstant;
+    }
+
+    /**
+     * @param minFlowLengthSpringConstant the minFlowLengthSpringConstant to set
+     */
+    public void setMinFlowLengthSpringConstant(double minFlowLengthSpringConstant) {
+        this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
+    }
+
+    /**
+     * @return the minFlowNodes
+     */
+    public double getMinFlowNodes() {
+        return minFlowNodes;
+    }
+
+    /**
+     * @param minFlowNodes the minFlowNodes to set
+     */
+    public void setMinFlowNodes(double minFlowNodes) {
+        this.minFlowNodes = minFlowNodes;
+    }
+
+    /**
+     * @return the arrowLengthScaleFactor
+     */
+    public double getArrowLengthScaleFactor() {
+        return arrowLengthScaleFactor;
+    }
+
+    /**
+     * @param arrowLengthScaleFactor the arrowLengthScaleFactor to set
+     */
+    public void setArrowLengthScaleFactor(double arrowLengthScaleFactor) {
+        this.arrowLengthScaleFactor = arrowLengthScaleFactor;
+    }
+
+    /**
+     * @return the arrowWidthScaleFactor
+     */
+    public double getArrowWidthScaleFactor() {
+        return arrowWidthScaleFactor;
+    }
+
+    /**
+     * @param arrowWidthScaleFactor the arrowWidthScaleFactor to set
+     */
+    public void setArrowWidthScaleFactor(double arrowWidthScaleFactor) {
+        this.arrowWidthScaleFactor = arrowWidthScaleFactor;
     }
 }

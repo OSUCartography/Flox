@@ -5,9 +5,7 @@ package edu.oregonstate.cartography.flox.model;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import java.util.ArrayList;
 
@@ -22,24 +20,23 @@ public class LayoutGrader {
      * Converts the flows to JTS geometry objects, and uses the intersect()
      * method on every possible combination of 2 flows from the ArrayList.
      *
-     * @param flows An ArrayList of Flow objects
+     * @param model
      * @return
      */
     public static int countFlowIntersections(Model model) {
 
         ArrayList<Geometry> flowPolylines = new ArrayList<>();
 
+        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+        GeometryFactory geometryFactory = new GeometryFactory();
+        LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
         for (Flow flow : model.getFlows()) {
 
-            ArrayList<Point> flowPoints = new ArrayList<>(flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes()));
-
-            GeometryFactory geometryFactory = new GeometryFactory();
-            LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
-
+            ArrayList<Point> flowPoints
+                    = new ArrayList<>(flow.toStraightLineSegments(deCasteljauTol));
             for (Point point : flowPoints) {
                 lineBuilder.add(new Coordinate(point.x, point.y));
             }
-
             flowPolylines.add(lineBuilder.getGeometry());
         }
 

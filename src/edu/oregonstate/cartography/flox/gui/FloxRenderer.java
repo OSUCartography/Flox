@@ -432,21 +432,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * segments.
      */
     public void drawRebuiltBezierCurve() {
-        // FIXME
-        double tol = 0.3;
 
         setStrokeWidth(1f);
         g2d.setColor(Color.RED);
 
+        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            ArrayList<Point> points = flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes());
+            ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
             ArrayList<Point2D.Double> points2D = new ArrayList<>();
             for (Point pt : points) {
                 points2D.add(new Point2D.Double(pt.x, pt.y));
             }
-            BezierPath rebuilt = Bezier.fitBezierPath(points2D, tol);
+            BezierPath rebuilt = Bezier.fitBezierPath(points2D, deCasteljauTol);
             PathIterator pathIterator = rebuilt.getPathIterator(null);
 
             GeneralPath generalPath = new GeneralPath();

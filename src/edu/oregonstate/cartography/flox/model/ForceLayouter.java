@@ -38,10 +38,11 @@ public class ForceLayouter {
      */
     private void initStraightLinesHashMap(){
         straightLinesMap.clear();
+        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
         Iterator<Flow> iter = model.flowIterator();
         while(iter.hasNext()) {
             Flow flow = iter.next();
-            ArrayList<Point> points = flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes());
+            ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
             straightLinesMap.put(flow, points);
         }
     }

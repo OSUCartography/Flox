@@ -147,12 +147,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         // Select flows
         Iterator<Flow> flows = model.flowIterator();
 
+        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
         while (flows.hasNext()) {
             Flow flow = flows.next();
             if (flow.getBoundingBox().contains(point)) {
 
                 System.out.println("Clicked in a flow bounding box!");
-                ArrayList<Point> pts = flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes());
+                ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
                 for (int i = 0; i < pts.size() - 1; i++) {
                     
                     Point pt1 = pts.get(i);
