@@ -184,8 +184,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             default:
                 flows = model.getFlows();
         }
-
-        ArrayList<GeneralPath> flowPaths = new ArrayList<>();
         
         // Iterate through the flows
         for (Flow flow : flows) {
@@ -207,7 +205,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 // This gets a clipped flow using the clipping tool designed
                 // to clip flows to some map geometry. It returns the same
                 // flow if no clipping is applied.
-                f = f.getClippedFlow();
+                double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+                f = f.getClippedFlow(deCasteljauTol);
                 if (f == null) {
                     continue;
                 }
@@ -417,10 +416,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     public void drawStraightLinesSegments() {
         setStrokeWidth(2f);
+        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            ArrayList<Point> points = flow.toStraightLineSegments(model.getShortestFlowLengthDividedByMinFlowNodes());
+            ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
             for (Point point : points) {
                 drawCircle(point.x, point.y, CR, Color.pink, Color.white);
             }

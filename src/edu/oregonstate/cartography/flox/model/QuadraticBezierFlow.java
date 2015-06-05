@@ -146,17 +146,18 @@ public class QuadraticBezierFlow extends Flow {
         this.cPt = cPt;
     }
 
-    public ArrayList<Point> toStraightLineSegmentsWithIrregularLength(double flatness) {
-        assert (flatness > 0);
+    public ArrayList<Point> toStraightLineSegmentsWithIrregularLength(
+            double deCasteljauTol) {
+        assert (deCasteljauTol > 0);
 
         // FIXME d should be a parameter
-        double d = flatness;
+        double d = deCasteljauTol;
 
         ArrayList<Point> irregularPoints = new ArrayList<>();
         GeneralPath path = new GeneralPath();
         path.moveTo(startPt.x, startPt.y);
         path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
-        PathIterator iter = path.getPathIterator(null, flatness/100);
+        PathIterator iter = path.getPathIterator(null, deCasteljauTol/100);
         double[] coords = new double[6];
         while (!iter.isDone()) {
             iter.currentSegment(coords);
@@ -181,27 +182,28 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     @Override
-    public ArrayList<Point> toStraightLineSegments(double flatness) {
-        QuadraticBezierFlow clippedFlow = getClippedFlow();
-        return clippedFlow.toUnclippedStraightLineSegments(flatness);
+    public ArrayList<Point> toStraightLineSegments(double deCasteljauTol) {
+        QuadraticBezierFlow clippedFlow = getClippedFlow(deCasteljauTol);
+        return clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
     }
 
     /**
      * Converts this Bezier curve to straight line segments.
      *
-     * @param flatness The maximum distance between the curve and the straight
+     * @param deCasteljauTol The maximum distance between the curve and the straight
      * line segments.
      * @return An list of irregularPoints, including copies of the start point
      * and the end point.
      */
-    public ArrayList<Point>toUnclippedStraightLineSegments (double flatness) {
-        assert (flatness > 0);
+    public ArrayList<Point>toUnclippedStraightLineSegments (double deCasteljauTol) {
+        assert (deCasteljauTol > 0);
 
         // FIXME d should be a parameter
-        double d = flatness;
+        double d = deCasteljauTol;
 
         ArrayList<Point> regularPoints = new ArrayList<>();
-        ArrayList<Point> irregularPoints = toStraightLineSegmentsWithIrregularLength(flatness);
+        ArrayList<Point> irregularPoints 
+                = toStraightLineSegmentsWithIrregularLength(deCasteljauTol);
 
         // create new point set with regularly distributed irregularPoints
         double startX = irregularPoints.get(0).x;
@@ -381,7 +383,7 @@ public class QuadraticBezierFlow extends Flow {
      *
      * @return A new flow object (if something was clipped), or this object.
      */
-    public QuadraticBezierFlow getClippedFlow() {
+    public QuadraticBezierFlow getClippedFlow(double deCasteljauTol) {
 
         boolean clipWithStartArea = getStartClipArea() != null;
         boolean clipWithEndArea = getEndClipArea() != null;
@@ -391,8 +393,7 @@ public class QuadraticBezierFlow extends Flow {
         }
 
         // construct LineString from the current Bezier flow geometry
-        // FIXME adapt de Casteljau tolerance
-        ArrayList<Point> points = toUnclippedStraightLineSegments(0.01);
+        ArrayList<Point> points = toUnclippedStraightLineSegments(deCasteljauTol);
         LineString lineString = pointsToLineString(points);
         QuadraticBezierFlow splitFlow = this;
 
