@@ -11,6 +11,7 @@ import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -91,13 +92,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     }
 
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
-        Iterator<Point> nodes = model.nodeIterator();
-
-        boolean somethingGotSelected = false;
 
         System.out.println("Min: " + mapComponent.xToPx(rect.getMinX()) + " " + mapComponent.yToPx(rect.getMinY()));
         System.out.println("Max: " + mapComponent.xToPx(rect.getMaxX()) + " " + mapComponent.yToPx(rect.getMaxY()));
 
+        // Select nodes
+        boolean nodeGotSelected = false;
+        Iterator<Point> nodes = model.nodeIterator();
         while (nodes.hasNext()) {
             Point pt = nodes.next();
 
@@ -106,7 +107,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(rect.getMaxY()) - 10)
                     && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(rect.getMinY()) + 10))) {
                 pt.setSelected(true);
-                somethingGotSelected = true;
+                nodeGotSelected = true;
             } else {
                 if (shiftDown == false) {
                     pt.setSelected(false);
@@ -116,8 +117,41 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         }
 
+        // Select flows
+        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+        boolean flowGotSelected = false;
+        Iterator<Flow> flows = model.flowIterator();
+        while (flows.hasNext()) {
+            Flow flow = flows.next();
+            if (flow.getBoundingBox().intersects(rect)) {
+                ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
+                for (int i = 0; i < pts.size() - 1; i++) {
+                    // Get the points
+                    Point pt1 = pts.get(i);
+                    Point pt2 = pts.get(i + 1);
+                    // Does the segment intersect rect?
+                    if (rect.intersectsLine(pt1.x, pt1.y, pt2.x, pt2.y)) {
+                        flow.setSelected(true);
+                        flowGotSelected = true;
+                        break;
+                    }
+                    // Else statement for deselecting flows? Doesn't seem to be
+                    // needed because flows are deselected by the initial click.
+                }
+            } else {
+                // flow bb does not intersect rect
+                if (shiftDown == false) {
+                    flow.setSelected(false);
+                }
+            }
+        }
+
         mapComponent.repaint();
-        return somethingGotSelected;
+        if (flowGotSelected || nodeGotSelected) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
@@ -152,10 +186,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             Flow flow = flows.next();
             if (flow.getBoundingBox().contains(point)) {
 
-                System.out.println("Clicked in a flow bounding box!");
+                // iterate through the points along the flow
                 ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
-                for (int i = 0; i < pts.size() - 1; i++) {
-                    
+                for (int i = 0; i < (pts.size() - 1); i++) {
+
                     Point pt1 = pts.get(i);
                     Point pt2 = pts.get(i + 1);
 
@@ -163,11 +197,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     segmentPts.add(pt1);
                     segmentPts.add(pt2);
 
-                   
+                    // Does the bounding box of the segment contain the click?
                     if (GeometryUtils.getBoundingBoxOfPoints(segmentPts).contains(point)) {
                         // Convert the point coordinates to pixel coordinates
-
-                        System.out.println("Clicked in a segment bounding box!");
                         double x0px = mapComponent.xToPx(point.x);
                         double y0px = mapComponent.yToPx(point.y);
                         double x1px = mapComponent.xToPx(pt1.x);
@@ -178,7 +210,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         double dist = GeometryUtils.getDistanceToLine(x0px, y0px, x1px, y1px,
                                 x2px, y2px);
 
-                        System.out.println("Dist: " + dist);
                         if (dist <= 4) {
                             flow.setSelected(true);
                             flowGotSelected = true;
@@ -186,18 +217,17 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             if (shiftDown == false) {
                                 flow.setSelected(false);
                             }
-                            
+
                         }
-                        
 
                     } else {
                         if (shiftDown == false) {
                             flow.setSelected(false);
                         }
                     }
-                    
-                    if(flowGotSelected) {
-                            break;
+
+                    if (flowGotSelected) {
+                        break;
                     }
 
                 }

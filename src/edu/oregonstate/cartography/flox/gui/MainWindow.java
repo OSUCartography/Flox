@@ -1975,11 +1975,9 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_drawFlowRangeboxCheckboxActionPerformed
 
     private void flowRangeboxSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowRangeboxSizeSliderStateChanged
-        //if (mapComponent.isDrawFlowRangebox()) {
-            model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
-        //}
+model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
         if (flowRangeboxSizeSlider.getValueIsAdjusting() == false) {
             forceLayout();
         }
@@ -2267,7 +2265,7 @@ public class MainWindow extends javax.swing.JFrame {
             ErrorDialog.showErrorDialog(msg, "Flow Error", null, this);
             return;
         }
-        
+
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
 
