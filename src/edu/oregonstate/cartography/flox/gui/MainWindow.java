@@ -2260,6 +2260,13 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     }//GEN-LAST:event_minimumFlowNodesSliderStateChanged
 
     private void forceLayout() {
+        
+        // If there are no flows, exit the method.
+        if(model.getNbrFlows()==0) {
+            return;
+        }
+        
+        // If the flows are not QuadraticBezierFlows, exit the method.
         if (model.getCurveType() != Model.CurveType.QUADRATIC) {
             String msg = "Please switch to quadratic Bézier curves first.\nUse Map > Geometric Flow Layout…";
             ErrorDialog.showErrorDialog(msg, "Flow Error", null, this);
