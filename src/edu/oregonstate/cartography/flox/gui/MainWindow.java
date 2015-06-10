@@ -27,6 +27,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -40,6 +41,7 @@ import javax.swing.JOptionPane;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.xml.bind.JAXBException;
 
 /**
  *
@@ -268,6 +270,9 @@ public class MainWindow extends javax.swing.JFrame {
         importFlowsMenuItem = new javax.swing.JMenuItem();
         openPointsAndFlowsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        openSettingsMenuItem = new javax.swing.JMenuItem();
+        saveSettingsMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator7 = new javax.swing.JPopupMenu.Separator();
         openShapefileMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
@@ -1368,6 +1373,25 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(openPointsAndFlowsMenuItem);
         fileMenu.add(jSeparator4);
 
+        openSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        openSettingsMenuItem.setText("Open Settings…");
+        openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(openSettingsMenuItem);
+
+        saveSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        saveSettingsMenuItem.setText("Save Settings…");
+        saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(saveSettingsMenuItem);
+        fileMenu.add(jSeparator7);
+
         openShapefileMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         openShapefileMenuItem.setText("Add Shapefile Layer…");
         openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1504,7 +1528,7 @@ public class MainWindow extends javax.swing.JFrame {
         OutputStream outputStream = null;
         try {
             // ask for export file
-            String outFilePath = FileUtils.askFile("SVG File", false);
+            String outFilePath = FileUtils.askFile(this, "SVG File", false);
             if (outFilePath == null) {
                 // user canceled
                 return;
@@ -1535,7 +1559,7 @@ public class MainWindow extends javax.swing.JFrame {
     public void openShapefile() {
         try {
             // ask for import file
-            String inFilePath = FileUtils.askFile("Shapefile", true);
+            String inFilePath = FileUtils.askFile(this, "Shapefile", true);
             if (inFilePath == null) {
                 // user canceled
                 return;
@@ -1585,7 +1609,7 @@ public class MainWindow extends javax.swing.JFrame {
     public void openFlowsCSVFile() {
         try {
             // ask for import file
-            String inFilePath = FileUtils.askFile("CSV Flows File", true);
+            String inFilePath = FileUtils.askFile(this, "CSV Flows File", true);
             if (inFilePath == null) {
                 // user canceled
                 return;
@@ -1914,7 +1938,7 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
         BufferedImage image = FloxRenderer.renderToImage(model, size, true);
-        String filePath = FileUtils.askFile("PNG Image", false);
+        String filePath = FileUtils.askFile(this, "PNG Image", null, false, "png");
         {
             if (filePath != null) {
                 try {
@@ -2086,7 +2110,7 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     private void selectEndClipAreaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectEndClipAreaButtonActionPerformed
         try {
             // ask for import file
-            String inFilePath = FileUtils.askFile("Shapefile", true);
+            String inFilePath = FileUtils.askFile(this, "Shapefile", true);
             if (inFilePath == null) {
                 // user canceled
                 return;
@@ -2170,7 +2194,7 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
 
     private void selectPointsFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectPointsFileButtonActionPerformed
-        String filePath = FileUtils.askFile("Points File (CSV)", true);
+        String filePath = FileUtils.askFile(this, "Points File (CSV)", true);
         if (filePath == null) {
             // user canceled
             return;
@@ -2181,7 +2205,7 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     }//GEN-LAST:event_selectPointsFileButtonActionPerformed
 
     private void selectFlowsFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFlowsFileButtonActionPerformed
-        String filePath = FileUtils.askFile("Flows File (CSV)", true);
+        String filePath = FileUtils.askFile(this, "Flows File (CSV)", true);
         if (filePath == null) {
             // user canceled
             return;
@@ -2258,6 +2282,37 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
             mapComponent.repaint();
         }
     }//GEN-LAST:event_minimumFlowNodesSliderStateChanged
+
+    private void openSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openSettingsMenuItemActionPerformed
+        String filePath = FileUtils.askFile(null, "Load XML Settings", null, true, "xml");
+        if (filePath != null) {
+            try {
+                Model newModel = Model.unmarshal(filePath);
+                model.copyTransientFields(newModel);
+                setModel(newModel);
+            } catch (JAXBException | FileNotFoundException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                String msg = "Could not load file";
+                String title = "Flox Error";
+                ErrorDialog.showErrorDialog(msg, title, ex, rootPane);
+            }
+        }
+    }//GEN-LAST:event_openSettingsMenuItemActionPerformed
+
+    private void saveSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveSettingsMenuItemActionPerformed
+        String filePath = FileUtils.askFile(null, "Save XML Settings", null, false, "xml");
+        if (filePath == null) {
+            return;
+        }
+        File file = new File(filePath);
+        try {
+            model.marshal(file.getAbsolutePath());
+        } catch (JAXBException | FileNotFoundException ex) {
+            String msg = "Could not save file";
+            String title = "Flox Error";
+            ErrorDialog.showErrorDialog(msg, title, ex, rootPane);
+        }
+    }//GEN-LAST:event_saveSettingsMenuItemActionPerformed
 
     private void forceLayout() {
         
@@ -2400,6 +2455,7 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     private javax.swing.JSlider minimumFlowNodesSlider;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
+    private javax.swing.JMenuItem openSettingsMenuItem;
     private javax.swing.JMenuItem openShapefileMenuItem;
     private javax.swing.JSlider peripheralStiffnessSlider;
     private javax.swing.JLabel pointsFilePathLabel;
@@ -2409,6 +2465,7 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JPanel rightPanel;
+    private javax.swing.JMenuItem saveSettingsMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JButton selectPointsFileButton;

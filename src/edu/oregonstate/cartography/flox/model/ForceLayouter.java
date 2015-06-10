@@ -393,9 +393,9 @@ public class ForceLayouter {
         }
         double s = startSum / startWSum;
         double e = endSum / endWSum;
-        System.out.println();
-        System.out.println ("start " + Math.toDegrees(s));
-        System.out.println ("end " + Math.toDegrees(e));
+//        System.out.println();
+//        System.out.println ("start " + Math.toDegrees(s));
+//        System.out.println ("end " + Math.toDegrees(e));
     }
 
     public void straightenFlows() {

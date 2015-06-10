@@ -6,10 +6,30 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import java.awt.geom.Rectangle2D;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 
@@ -19,6 +39,13 @@ import org.jgrapht.graph.SimpleGraph;
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
+//Defines root element of JAXB XML file
+@XmlRootElement
+
+//Every non static, non transient field in a JAXB-bound class will be 
+//automatically bound to XML, unless annotated by @XmlTransient
+@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Model {
 
     public enum CurveType {
@@ -40,19 +67,19 @@ public class Model {
     /**
      * Graph of edges (CubicBezierFlow) and nodes (Point)
      */
+    @XmlTransient
     private UndirectedGraph<Point, Flow> graph = new SimpleGraph<>(Flow.class);
-
 
     /**
      * Used by the Arrow class to determine the length of arrowheads.
      */
     private double arrowLengthScaleFactor = 0.01;
-    
+
     /**
      * Used by the Arrow class to determine the width of arrowheads.
      */
     private double arrowWidthScaleFactor = 0.005;
-    
+
     /**
      * Used by the Arrow class to determine the location of the arrow edge
      * control points.
@@ -111,11 +138,9 @@ public class Model {
      */
     private double minFlowLengthSpringConstant = 1.0;
 
-
-    
     /**
      * This determines the amount of force that objects far away from the target
-     * can apply to the target.  The lower the distanceWeightExponent, the more 
+     * can apply to the target. The lower the distanceWeightExponent, the more
      * force distant objects are permitted to apply.
      */
     private double distanceWeightExponent = 10.0;
@@ -133,16 +158,20 @@ public class Model {
     private double flowDistanceFromEndPoint = 0.5d;
 
     /**
-     * FIXME what is this? the minimum number of line segments? Why is not an integer?
+     * FIXME what is this? the minimum number of line segments? Why is not an
+     * integer?
      */
     private double minFlowNodes = 2.5;
-    
+
+    // FIXME should not be transient
+    @XmlTransient
     private Rectangle2D canvas;
 
     /**
      * A reference to the map with layers and geometry.
      */
-    private final Map map = new Map();
+    @XmlTransient
+    private Map map = new Map();
 
     /**
      * Either work with cubic or quadratic curves
@@ -157,6 +186,7 @@ public class Model {
     /**
      * A geometry (collection) used for clipping start or end of flows
      */
+    @XmlTransient
     private Geometry clipAreas;
 
     /**
@@ -173,6 +203,92 @@ public class Model {
      * Constructor of the model.
      */
     public Model() {
+    }
+
+    private static JAXBContext getJAXBContext() throws JAXBException {
+        String packageName = Model.class.getPackage().getName();
+        return JAXBContext.newInstance(packageName, Model.class.getClassLoader());
+    }
+
+    public static Model unmarshal(InputStream is) throws JAXBException {
+        Unmarshaller unmarshaller = getJAXBContext().createUnmarshaller();
+        return (Model) unmarshaller.unmarshal(is);
+    }
+
+    public static Model unmarshal(byte[] buf) throws JAXBException {
+        return unmarshal(new ByteArrayInputStream(buf));
+    }
+
+    public static Model unmarshal(String fileName) throws JAXBException, FileNotFoundException {
+        FileInputStream is = null;
+        try {
+            is = new FileInputStream(fileName);
+            return unmarshal(is);
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public void marshal(OutputStream os) throws JAXBException {
+        Marshaller m = getJAXBContext().createMarshaller();
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        m.marshal(this, os);
+    }
+
+    public void marshal(Writer w) throws JAXBException {
+        Marshaller m = getJAXBContext().createMarshaller();
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+        m.marshal(this, w);
+    }
+
+    public byte[] marshal() throws JAXBException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        marshal(baos);
+        return baos.toByteArray();
+    }
+
+    public void marshal(String fileName) throws JAXBException, FileNotFoundException {
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(fileName);
+            marshal(os);
+        } finally {
+            try {
+                if (os != null) {
+                    os.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public void copyTransientFields(Model destination) {
+        destination.graph = graph;
+        destination.map = map;
+        destination.clipAreas = clipAreas;
+                
+        // FIXME should not be transient
+        destination.canvas = canvas;
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        try {
+            marshal(sw);
+            return sw.toString();
+        } catch (JAXBException ex) {
+            Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
+            return "could not marshal model";
+        }
     }
 
     /**
@@ -539,7 +655,7 @@ public class Model {
     public double getShortestFlowLengthDividedByMinFlowNodes() {
         return getShortestFlowLength() / getMinFlowNodes();
     }
-    
+
     public double getLargestFlowValue() {
         double maxValue = 0;
         Iterator<Flow> iterator = flowIterator();
@@ -888,7 +1004,7 @@ public class Model {
     public void setArrowCornerPosition(double arrowCornerPosition) {
         this.arrowCornerPosition = arrowCornerPosition;
     }
-    
+
     /**
      * @return the arrowSizeRatio
      */
