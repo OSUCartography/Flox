@@ -5,9 +5,11 @@
  */
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
+import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.event.MouseEvent;
@@ -43,8 +45,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         this.model = model;
     }
 
-    
-    
     /**
      * A drag ends, while this MapTool was the active one.
      *
@@ -53,6 +53,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
+        
+        
+        
         Rectangle2D.Double rect = getRectangle();
         super.endDrag(point, evt);
 
@@ -60,6 +63,24 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             final boolean selectionChanged = selectByRectangle(rect, evt.isShiftDown());
         }
 
+        if(model.isControlPtIsSelected()) {
+            // deselect all control points
+            Iterator flows = model.flowIterator();
+            while(flows.hasNext()) {
+                Flow flow = (Flow) flows.next();
+                if(flow instanceof CubicBezierFlow) {
+                    break;
+                }
+                
+                Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
+                cPt.setSelected(false);
+            }
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+            model.setControlPtIsSelected(false);
+            System.out.println("selectionTool: endDrag told model no cPts selected");
+        }
+        
         setDefaultCursor();
         //System.out.println("Selection tool: 'ended a drag'");
     }
@@ -72,12 +93,26 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     @Override
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
-        //super.mouseClicked(point, evt);
+        super.mouseClicked(point, evt);
 
-        // try selecting objects close to the mouse click.
-        //boolean selectionChanged = mapComponent.selectByPoint(
-        //        point, evt.isShiftDown(),
-        //        SelectionTool.CLICK_PIXEL_TOLERANCE);
+        if(model.isControlPtIsSelected()) {
+            // deselect all control points
+            Iterator flows = model.flowIterator();
+            while(flows.hasNext()) {
+                Flow flow = (Flow) flows.next();
+                if(flow instanceof CubicBezierFlow) {
+                    break;
+                }
+                
+                Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
+                cPt.setSelected(false);
+                
+            }
+            System.out.println("Selection Tool: cPts deselected after click");
+            model.setControlPtIsSelected(false);
+        }
+        
+        
     }
 
     /**
@@ -93,7 +128,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         boolean selectionChanged = selectByPoint(point, evt.isShiftDown(),
                 SelectionTool.CLICK_PIXEL_TOLERANCE);
     }
-
+    
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
 
         // Select nodes
@@ -146,12 +181,17 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
         }
 
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
         if (flowGotSelected || nodeGotSelected) {
-            model.setSomethingIsSelected(true);
+            model.setNodeIsSelected(nodeGotSelected);
+            model.setFlowIsSelected(flowGotSelected);
             return true;
         } else {
-            model.setSomethingIsSelected(false);
+            if (shiftDown == false) {
+                model.setNodeIsSelected(false);
+                model.setFlowIsSelected(false);
+            }
             return false;
         }
     }
@@ -161,16 +201,57 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
+        boolean controlPtGotSelected = false;
+
+        // if the model says a flow is currently selected...
+        if (model.isFlowIsSelected()) {
+            System.out.println("Selection tool: model says flow is selected");
+            // Iterate througth the flows, checking to see if it is selected.
+            Iterator flows = model.flowIterator();
+            while (flows.hasNext()) {
+                Flow flow = (Flow) flows.next();
+                if (flow instanceof CubicBezierFlow) {
+                    System.out.println("It's cubic!");
+                    break;
+                }
+                if (flow.isSelected()) {
+                    // See if the event point is near the control point.
+                    Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
+
+                    if (controlPtGotSelected) {
+                        cPt.setSelected(false);
+                        continue;
+                    }
+
+                    if (((mapComponent.xToPx(cPt.x) >= mapComponent.xToPx(point.x) - 5)
+                            && (mapComponent.xToPx(cPt.x) <= mapComponent.xToPx(point.x) + 5))
+                            && ((mapComponent.yToPx(cPt.y) >= mapComponent.yToPx(point.y) - 5)
+                            && (mapComponent.yToPx(cPt.y) <= mapComponent.yToPx(point.y) + 5))) {
+                        cPt.setSelected(true);
+                        controlPtGotSelected = true;
+                        model.setControlPtIsSelected(true);
+                        System.out.println("Control Point selected!");
+                        mapComponent.eraseBufferImage();
+                        mapComponent.repaint();
+                        return true;
+                    } else {
+                        cPt.setSelected(false);
+                        model.setControlPtIsSelected(false);
+                        System.out.println("No control points selected");
+                    }
+                }
+            }
+        }
 
         // Select nodes
         while (nodes.hasNext()) {
             Point pt = nodes.next();
 
-            if(nodeGotSelected && (shiftDown == false)){
+            if (nodeGotSelected && (shiftDown == false)) {
                 pt.setSelected(false);
                 continue;
             }
-            
+
             if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(point.x) - pixelTolerance)
                     && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
                     && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
@@ -184,7 +265,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
 
         }
-        
+
         // Select flows
         Iterator<Flow> flows = model.flowIterator();
 
@@ -247,12 +328,17 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
         }
 
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
         if (flowGotSelected || nodeGotSelected) {
-            model.setSomethingIsSelected(true);
+            model.setNodeIsSelected(nodeGotSelected);
+            model.setFlowIsSelected(flowGotSelected);
             return true;
         } else {
-            model.setSomethingIsSelected(false);
+            if (shiftDown == false) {
+                model.setNodeIsSelected(false);
+                model.setFlowIsSelected(false);
+            }
             return false;
         }
     }

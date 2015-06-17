@@ -49,18 +49,20 @@ import org.jgrapht.graph.SimpleGraph;
 public class Model {
 
     /**
-     * @return the somethingIsSelected
+     * @return the controlPtIsSelected
      */
-    public boolean isSomethingIsSelected() {
-        return somethingIsSelected;
+    public boolean isControlPtIsSelected() {
+        return controlPtIsSelected;
     }
 
     /**
-     * @param somethingIsSelected the somethingIsSelected to set
+     * @param controlPtIsSelected the controlPtIsSelected to set
      */
-    public void setSomethingIsSelected(boolean somethingIsSelected) {
-        this.somethingIsSelected = somethingIsSelected;
+    public void setControlPtIsSelected(boolean controlPtIsSelected) {
+        this.controlPtIsSelected = controlPtIsSelected;
     }
+
+    
 
     public enum CurveType {
 
@@ -171,8 +173,11 @@ public class Model {
 
     private double flowDistanceFromEndPoint = 0.5d;
 
-    private boolean somethingIsSelected = false;
+    private boolean nodeIsSelected = false;
     
+    private boolean flowIsSelected = false;
+    
+    private boolean controlPtIsSelected = false;
     /**
      * FIXME what is this? the minimum number of line segments? Why is not an
      * integer?
@@ -1089,5 +1094,33 @@ public class Model {
      */
     public void setArrowWidthScaleFactor(double arrowWidthScaleFactor) {
         this.arrowWidthScaleFactor = arrowWidthScaleFactor;
+    }
+    
+    /**
+     * @return the somethingIsSelected
+     */
+    public boolean isNodeIsSelected() {
+        return nodeIsSelected;
+    }
+
+    /**
+     * @param somethingIsSelected the somethingIsSelected to set
+     */
+    public void setNodeIsSelected(boolean somethingIsSelected) {
+        this.nodeIsSelected = somethingIsSelected;
+    }
+
+    /**
+     * @return the flowIsSelected
+     */
+    public boolean isFlowIsSelected() {
+        return flowIsSelected;
+    }
+
+    /**
+     * @param flowIsSelected the flowIsSelected to set
+     */
+    public void setFlowIsSelected(boolean flowIsSelected) {
+        this.flowIsSelected = flowIsSelected;
     }
 }

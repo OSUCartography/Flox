@@ -128,16 +128,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 renderer.drawStraightLinesSegments();
             }
 
-            if (isDrawCanvasPadding()) {
-                renderer.drawCanvasBorder();
-            }
-            if (isDrawControlPoints()) {
-                renderer.drawControlPoints();
-            }
-            if (isDrawLineSegments()) {
-                renderer.drawStraightLinesSegments();
-            }
-
             if (isDrawReconstructedBezier()) {
                 renderer.drawRebuiltBezierCurve();
             }
