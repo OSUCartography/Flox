@@ -177,7 +177,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
 
         }
-
+        
         // Select flows
         Iterator<Flow> flows = model.flowIterator();
 
@@ -210,7 +210,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         double dist = GeometryUtils.getDistanceToLine(x0px, y0px, x1px, y1px,
                                 x2px, y2px);
 
-                        if (dist <= 4) {
+                        if (dist <= 4 && nodeGotSelected != true) {
                             flow.setSelected(true);
                             flowGotSelected = true;
                         } else {
