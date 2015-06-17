@@ -148,8 +148,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.repaint();
         if (flowGotSelected || nodeGotSelected) {
+            model.setSomethingIsSelected(true);
             return true;
         } else {
+            model.setSomethingIsSelected(false);
             return false;
         }
     }
@@ -240,8 +242,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.repaint();
         if (flowGotSelected || nodeGotSelected) {
+            model.setSomethingIsSelected(true);
             return true;
         } else {
+            model.setSomethingIsSelected(false);
             return false;
         }
     }

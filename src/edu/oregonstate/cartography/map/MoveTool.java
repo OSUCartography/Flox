@@ -26,7 +26,11 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         if(VERBOSE) {
             System.out.println("MoveTool: 'Started a drag'");
         }
-        dragging = true;
+        
+        if(model.isSomethingIsSelected()) {
+            dragging = true;
+        }
+        
     }
     
     @Override
@@ -78,6 +82,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 node.y = (point.y);
             }
         }
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
         
         if(VERBOSE) {

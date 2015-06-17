@@ -48,6 +48,20 @@ import org.jgrapht.graph.SimpleGraph;
 
 public class Model {
 
+    /**
+     * @return the somethingIsSelected
+     */
+    public boolean isSomethingIsSelected() {
+        return somethingIsSelected;
+    }
+
+    /**
+     * @param somethingIsSelected the somethingIsSelected to set
+     */
+    public void setSomethingIsSelected(boolean somethingIsSelected) {
+        this.somethingIsSelected = somethingIsSelected;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -157,6 +171,8 @@ public class Model {
 
     private double flowDistanceFromEndPoint = 0.5d;
 
+    private boolean somethingIsSelected = false;
+    
     /**
      * FIXME what is this? the minimum number of line segments? Why is not an
      * integer?
