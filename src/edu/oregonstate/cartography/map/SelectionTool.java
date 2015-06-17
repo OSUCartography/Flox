@@ -166,6 +166,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         while (nodes.hasNext()) {
             Point pt = nodes.next();
 
+            if(nodeGotSelected && (shiftDown == false)){
+                pt.setSelected(false);
+                continue;
+            }
+            
             if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(point.x) - pixelTolerance)
                     && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
                     && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
@@ -212,6 +217,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         double dist = GeometryUtils.getDistanceToLine(x0px, y0px, x1px, y1px,
                                 x2px, y2px);
 
+                        // select the flow if dist is below a tolorance
+                        // don't select a flow if a node got selected
                         if (dist <= 4 && nodeGotSelected != true) {
                             flow.setSelected(true);
                             flowGotSelected = true;

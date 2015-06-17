@@ -20,6 +20,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     //Holds the coordinates of the user's last mouseDown event
     double last_x, last_y;
     
+    double previousDrag_x, previousDrag_y;
+    
     @Override
     public void startDrag(Point2D.Double point, MouseEvent evt) {
         
@@ -30,6 +32,9 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         if(model.isSomethingIsSelected()) {
             dragging = true;
         }
+        
+        previousDrag_x = point.x;
+        previousDrag_y = point.y;
         
     }
     
@@ -51,6 +56,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         }
         
         dragging = false;
+        
+        
     }
     
     /**
@@ -78,12 +85,15 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         while (nodes.hasNext()){
             Point node = (Point) nodes.next();
             if (node.isSelected()){
-                node.x = (point.x);
-                node.y = (point.y);
+                node.x += (point.x - previousDrag_x);
+                node.y += (point.y - previousDrag_y);
             }
         }
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
+        
+        previousDrag_x = point.x;
+        previousDrag_y = point.y;
         
         if(VERBOSE) {
             System.out.println("Updating...");
