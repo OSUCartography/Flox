@@ -43,6 +43,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         this.model = model;
     }
 
+    
+    
     /**
      * A drag ends, while this MapTool was the active one.
      *
@@ -59,6 +61,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         }
 
         setDefaultCursor();
+        //System.out.println("Selection tool: 'ended a drag'");
     }
 
     /**
@@ -92,9 +95,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     }
 
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
-
-        System.out.println("Min: " + mapComponent.xToPx(rect.getMinX()) + " " + mapComponent.yToPx(rect.getMinY()));
-        System.out.println("Max: " + mapComponent.xToPx(rect.getMaxX()) + " " + mapComponent.yToPx(rect.getMaxY()));
 
         // Select nodes
         boolean nodeGotSelected = false;
@@ -239,7 +239,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         }
 
         mapComponent.repaint();
-        System.out.println("");
         if (flowGotSelected || nodeGotSelected) {
             return true;
         } else {

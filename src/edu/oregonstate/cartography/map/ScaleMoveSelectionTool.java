@@ -25,12 +25,12 @@ public class ScaleMoveSelectionTool extends CombinedTool {
         super(mapComponent, "Select - Move - Scale");
         
         SelectionTool selectionTool = new SelectionTool(this.mapComponent, model);
-        //MoverTool moveTool = new MoverTool(mapComponent);
+        MoveTool moveTool = new MoveTool(this.mapComponent, model);
         //moveTool.setSelectOnDragStart(true);
         //ScaleTool scaleTool = new ScaleTool(this.mapComponent);     
         
         //this.addMapTool(scaleTool);
-        //this.addMapTool(moveTool);
+        this.addMapTool(moveTool);
         // selection tool must be added last
         this.addMapTool(selectionTool);
     }
