@@ -295,7 +295,7 @@ public class ForceLayouter {
         int nbrFlows = flows.size();
         for (int i = 0; i < nbrFlows; i++) {
             Flow flow = flows.get(i);
-            if (flow instanceof QuadraticBezierFlow) {
+            if (flow instanceof QuadraticBezierFlow && (!flow.isLocked())) {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
                 Point ctrlPt = qFlow.getCtrlPt();
                 Force f = forces.get(i);
@@ -402,7 +402,10 @@ public class ForceLayouter {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            flow.bend(0, 0);
+            if(!flow.isLocked()){
+                flow.bend(0, 0);
+            }
+                
         }
     }
 

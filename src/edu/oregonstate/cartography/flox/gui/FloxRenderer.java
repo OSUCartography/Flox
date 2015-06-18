@@ -256,8 +256,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             // Draw the arrow if the model says so.
             if (model.isDrawArrows()) {
-                if (flow.isSelected()) {
+                if (flow.isSelected() && flow.isLocked()) {
+                    g2d.setColor(Color.RED);
+                } else if ( flow.isSelected()){
                     g2d.setColor(Color.CYAN);
+                } else if (flow.isLocked()){
+                    g2d.setColor(Color.GRAY);
                 } else {
                     g2d.setColor(Color.BLACK);
                 }
@@ -268,10 +272,17 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            if (flow.isSelected()) {
+            if (flow.isSelected() && flow.isLocked()) {
+                g2d.setColor(Color.RED);
+                g2d.draw(flowPath);
+                drawControlPoint(flow);
+            } else if (flow.isSelected()) {
                 g2d.setColor(Color.CYAN);
                 g2d.draw(flowPath);
                 drawControlPoint(flow);
+            } else if (flow.isLocked()) {
+                g2d.setColor(Color.GRAY);
+                g2d.draw(flowPath);
             } else {
                 g2d.setColor(Color.BLACK);
                 g2d.draw(flowPath);

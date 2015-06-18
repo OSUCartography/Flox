@@ -17,27 +17,35 @@ public abstract class Flow {
     protected Point startPt;
 
     /**
-     * end point of flow
+     * end point of flow.
      */
     protected Point endPt;
 
     /**
-     * mapped value
+     * mapped value.
      */
     protected double value;
     
     /**
-     * clip area for the start of the flow
+     * clip area for the start of the flow.
      */
     private Geometry startClipArea;
     
     /**
-     * clip area for the end of the flow
+     * clip area for the end of the flow.
      */
     private Geometry endClipArea;
 
-
+    /**
+     * Flag for selected flows.
+     */
     private boolean selected = false;
+    
+    /**
+     * Flag for locked flows. Locked flows are not affected by forces, but still
+     * emit forces onto other flows. 
+     */
+    private boolean locked = false;
     
     /**
      * Return bounding box of this flow.
@@ -175,5 +183,19 @@ public abstract class Flow {
      */
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    /**
+     * @return the locked
+     */
+    public boolean isLocked() {
+        return locked;
+    }
+
+    /**
+     * @param locked the locked to set
+     */
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 }
