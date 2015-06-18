@@ -30,7 +30,10 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.DirectedMultigraph;
+import org.jgrapht.graph.Multigraph;
 import org.jgrapht.graph.SimpleGraph;
 
 /**
@@ -47,22 +50,6 @@ import org.jgrapht.graph.SimpleGraph;
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class Model {
-
-    /**
-     * @return the controlPtIsSelected
-     */
-    public boolean isControlPtIsSelected() {
-        return controlPtIsSelected;
-    }
-
-    /**
-     * @param controlPtIsSelected the controlPtIsSelected to set
-     */
-    public void setControlPtIsSelected(boolean controlPtIsSelected) {
-        this.controlPtIsSelected = controlPtIsSelected;
-    }
-
-    
 
     public enum CurveType {
 
@@ -84,7 +71,7 @@ public class Model {
      * Graph of edges (CubicBezierFlow) and nodes (Point)
      */
     @XmlTransient
-    private UndirectedGraph<Point, Flow> graph = new SimpleGraph<>(Flow.class);
+    private DirectedGraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
 
     /**
      * Used by the Arrow class to determine the length of arrowheads.
@@ -380,7 +367,7 @@ public class Model {
      * Remove all flows.
      */
     public void clearFlows() {
-        graph = new SimpleGraph<>(CubicBezierFlow.class);
+        graph = new DirectedMultigraph<>(CubicBezierFlow.class);
     }
 
     /**
@@ -631,7 +618,7 @@ public class Model {
         if (nFlows < 1) {
             return 0;
         }
-        Iterator<Flow> iter = graph.edgeSet().iterator();
+        Iterator<Flow> iter = flowIterator();
         double max = iter.next().value;
         while (iter.hasNext()) {
             double v = iter.next().getValue();
@@ -1122,5 +1109,19 @@ public class Model {
      */
     public void setFlowIsSelected(boolean flowIsSelected) {
         this.flowIsSelected = flowIsSelected;
+    }
+    
+    /**
+     * @return the controlPtIsSelected
+     */
+    public boolean isControlPtIsSelected() {
+        return controlPtIsSelected;
+    }
+
+    /**
+     * @param controlPtIsSelected the controlPtIsSelected to set
+     */
+    public void setControlPtIsSelected(boolean controlPtIsSelected) {
+        this.controlPtIsSelected = controlPtIsSelected;
     }
 }
