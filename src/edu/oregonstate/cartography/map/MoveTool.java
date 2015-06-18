@@ -28,14 +28,14 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     @Override
     public void startDrag(Point2D.Double point, MouseEvent evt) {
 
-        if (VERBOSE) {
-            System.out.println("MoveTool: 'Started a drag'");
-        }
-
         if (model.isNodeIsSelected()) {
             dragging = true;
         }
 
+        if (model.isControlPtIsSelected()) {
+            dragging = true;
+        }
+        
         previousDrag_x = point.x;
         previousDrag_y = point.y;
 
@@ -45,18 +45,11 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
 
         updateLocation(point);
-
-        if (VERBOSE) {
-            System.out.println("dragging...");
-        }
     }
 
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
         super.endDrag(point, evt);
-        if (VERBOSE) {
-            System.out.println("Ended a drag");
-        }
 
         dragging = false;
 
@@ -75,16 +68,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 mapComponent.repaint();
             }
             model.setControlPtIsSelected(false);
-            System.out.println("MoveTool.endDrag told the model no cPts are "
-                    + "selected");
         }
-        
-        if(model.isControlPtIsSelected()) {
-            System.out.println("The model thinks a cPt is selected still");
-        } else {
-            System.out.println("The model says no cPts are selected");
-        }
-        
     }
 
     /**
@@ -96,13 +80,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      */
     @Override
     public void mouseDown(Point2D.Double point, MouseEvent evt) {
-        // initialize last_x and last_y to prepare for dragging.
-        //last_x = point.x;
-        //last_y = point.y;
 
-        if (VERBOSE) {
-            System.out.println("mouseDown at: " + last_x + " " + last_y);
-        }
     }
 
     /**
@@ -141,10 +119,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
         previousDrag_x = point.x;
         previousDrag_y = point.y;
-
-        if (VERBOSE) {
-            System.out.println("Updating...");
-        }
     }
 
     // Constructor

@@ -78,11 +78,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
             model.setControlPtIsSelected(false);
-            System.out.println("selectionTool: endDrag told model no cPts selected");
         }
         
         setDefaultCursor();
-        //System.out.println("Selection tool: 'ended a drag'");
     }
 
     /**
@@ -108,7 +106,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 cPt.setSelected(false);
                 
             }
-            System.out.println("Selection Tool: cPts deselected after click");
             model.setControlPtIsSelected(false);
         }
         
@@ -205,13 +202,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         // if the model says a flow is currently selected...
         if (model.isFlowIsSelected()) {
-            System.out.println("Selection tool: model says flow is selected");
             // Iterate througth the flows, checking to see if it is selected.
             Iterator flows = model.flowIterator();
             while (flows.hasNext()) {
                 Flow flow = (Flow) flows.next();
                 if (flow instanceof CubicBezierFlow) {
-                    System.out.println("It's cubic!");
                     break;
                 }
                 if (flow.isSelected()) {
@@ -230,14 +225,12 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         cPt.setSelected(true);
                         controlPtGotSelected = true;
                         model.setControlPtIsSelected(true);
-                        System.out.println("Control Point selected!");
                         mapComponent.eraseBufferImage();
                         mapComponent.repaint();
                         return true;
                     } else {
                         cPt.setSelected(false);
                         model.setControlPtIsSelected(false);
-                        System.out.println("No control points selected");
                     }
                 }
             }
