@@ -2,6 +2,7 @@ package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
 import static edu.oregonstate.cartography.flox.model.CubicBezierFlow.bendCubicFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
@@ -278,6 +279,7 @@ public class MainWindow extends javax.swing.JFrame {
         openShapefileMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
+        exportCSVMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
@@ -1448,6 +1450,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(exportSVGMenuItem);
 
+        exportCSVMenuItem.setText("Export CSV...");
+        exportCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportCSVMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(exportCSVMenuItem);
+
         exportImageMenuItem.setText("Export Image…");
         exportImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2037,7 +2047,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_drawFlowRangeboxCheckboxActionPerformed
 
     private void flowRangeboxSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowRangeboxSizeSliderStateChanged
-model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
+        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
         if (flowRangeboxSizeSlider.getValueIsAdjusting() == false) {
@@ -2355,9 +2365,9 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     private void lockSelectedFlowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockSelectedFlowsButtonActionPerformed
         // iterate through flows in the model. If it is selected, lock it.
         Iterator flows = model.flowIterator();
-        while(flows.hasNext()){
+        while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
-            if(flow.isSelected()){
+            if (flow.isSelected()) {
                 flow.setLocked(true);
             }
         }
@@ -2367,22 +2377,39 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     private void unlockSelectedFlowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockSelectedFlowsButtonActionPerformed
         // iterate through flows in the model. If it is selected, unlock it.
         Iterator flows = model.flowIterator();
-        while(flows.hasNext()){
+        while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
-            if(flow.isSelected()){
+            if (flow.isSelected()) {
                 flow.setLocked(false);
             }
         }
         mapComponent.repaint();
     }//GEN-LAST:event_unlockSelectedFlowsButtonActionPerformed
 
+    private void exportCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportCSVMenuItemActionPerformed
+
+        try {
+            // ask for export file
+            String outFilePath = FileUtils.askFile(this, "CSV File", false);
+            if (outFilePath == null) {
+                // user canceled
+                return;
+            }
+            outFilePath = FileUtils.forceFileNameExtension(outFilePath, "csv");
+            CSVFlowExporter exporter = new CSVFlowExporter(model);
+            exporter.export(outFilePath);
+        } catch (IOException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_exportCSVMenuItemActionPerformed
+
     private void forceLayout() {
-        
+
         // If there are no flows, exit the method.
-        if(model.getNbrFlows()==0) {
+        if (model.getNbrFlows() == 0) {
             return;
         }
-        
+
         // If the flows are not QuadraticBezierFlows, exit the method.
         if (model.getCurveType() != Model.CurveType.QUADRATIC) {
             String msg = "Please switch to quadratic Bézier curves first.\nUse Map > Geometric Flow Layout…";
@@ -2468,6 +2495,7 @@ model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
     private javax.swing.JSlider exponentSlider;
+    private javax.swing.JMenuItem exportCSVMenuItem;
     private javax.swing.JMenuItem exportImageMenuItem;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;

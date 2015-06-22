@@ -21,7 +21,7 @@ public class QuadraticBezierFlow extends Flow {
     /**
      * control point.
      */
-    private Point cPt;
+    public Point cPt;
 
     /**
      * Construct a QuadraticBezierFlow from 2 irregularPoints
