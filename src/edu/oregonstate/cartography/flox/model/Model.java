@@ -685,7 +685,21 @@ public class Model {
         }
         return maxValue;
     }
-
+    
+    public ArrayList<Flow> getSelectedFlows () {
+        
+        ArrayList<Flow> selectedFlows = new ArrayList();
+        Iterator flows = flowIterator();
+        while(flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            if(flow.isSelected()) {
+                selectedFlows.add(flow);
+                
+            }
+        }
+        return selectedFlows;
+    }
+    
     /**
      * Returns all map layers.
      *

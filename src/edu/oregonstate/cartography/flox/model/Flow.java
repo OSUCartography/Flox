@@ -121,6 +121,13 @@ public abstract class Flow {
     public Point getBaseLineMidPoint() {
         return new Point((endPt.x + startPt.x) / 2, (endPt.y + startPt.y) / 2);
     }
+    
+    public void reverseFlow() {
+        Point temp = startPt;
+        startPt = endPt;
+        endPt = temp;
+    }
+    
     /**
      * @return the value
      */

@@ -239,6 +239,8 @@ public class MainWindow extends javax.swing.JFrame {
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         deleteSelectedFeaturesButton = new javax.swing.JButton();
+        editFlowValueButton = new javax.swing.JButton();
+        reverseFlowDirectionButton = new javax.swing.JButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -499,7 +501,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapToolsButtonGroup.add(addFlowToggleButton);
         addFlowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/SetPoint16x16.gif"))); // NOI18N
         addFlowToggleButton.setToolTipText("Add Flow");
-        addFlowToggleButton.setBounds(new java.awt.Rectangle(0, 0, 0, 0));
         addFlowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         addFlowToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1088,9 +1089,34 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.insets = new java.awt.Insets(13, 0, 0, 0);
+        mapControlPanel.add(deleteSelectedFeaturesButton, gridBagConstraints);
+
+        editFlowValueButton.setText("Edit Selected Flow Value");
+        editFlowValueButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editFlowValueButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 10;
         gridBagConstraints.gridwidth = 3;
-        mapControlPanel.add(deleteSelectedFeaturesButton, gridBagConstraints);
+        mapControlPanel.add(editFlowValueButton, gridBagConstraints);
+
+        reverseFlowDirectionButton.setText("Reverse Flow Direction");
+        reverseFlowDirectionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                reverseFlowDirectionButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridwidth = 3;
+        mapControlPanel.add(reverseFlowDirectionButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2438,34 +2464,107 @@ public class MainWindow extends javax.swing.JFrame {
     private void deleteSelectedFeaturesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteSelectedFeaturesButtonActionPerformed
         ArrayList<Flow> flowsToRemove = new ArrayList<Flow>();
         ArrayList<Point> nodesToRemove = new ArrayList<Point>();
-        
+
         Iterator flows = model.flowIterator();
-        while(flows.hasNext()) {
+        while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
-            if(flow.isSelected()) {
+            if (flow.isSelected()) {
                 flowsToRemove.add(flow);
             }
         }
-        
+
         Iterator nodes = model.nodeIterator();
-        while(nodes.hasNext()) {
+        while (nodes.hasNext()) {
             Point node = (Point) nodes.next();
-            if(node.isSelected()) {
+            if (node.isSelected()) {
                 nodesToRemove.add(node);
             }
         }
-        
+
         flowsToRemove.stream().forEach((flow) -> {
             model.deleteFlow(flow);
         });
-        
+
         nodesToRemove.stream().forEach((node) -> {
             model.deleteNode(node);
         });
-        
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_deleteSelectedFeaturesButtonActionPerformed
+
+    private void editFlowValueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editFlowValueButtonActionPerformed
+
+        if (model.isFlowIsSelected()) {
+            
+            ArrayList<Flow> selectedFlows = new ArrayList<>(model.getSelectedFlows());
+            double newValue = 0;
+            
+            if (selectedFlows.size() == 1) {
+
+                
+                double value = selectedFlows.get(0).getValue();
+
+                while (newValue <= 0) {
+                    
+                    String userInput = (String) JOptionPane.showInputDialog(
+                            this, 
+                            "Current Flow Value: " + value + "\n"
+                            + "Input a new numerical value over zero");
+                    
+                    try {
+                        newValue = Double.parseDouble(userInput);
+                        selectedFlows.get(0).setValue(newValue);
+                    } catch (NumberFormatException nfe) {
+                        newValue = 0;
+
+                    }
+
+                }
+
+                mapComponent.eraseBufferImage();
+                mapComponent.repaint();
+
+            } else {
+                
+                while (newValue <= 0) {
+                    
+                    String userInput = (String) JOptionPane.showInputDialog(
+                            this,
+                            "Input a new numerical value over zero");
+                    
+                    try {
+                        newValue = Double.parseDouble(userInput);
+                        for(Flow flow : selectedFlows) {
+                            flow.setValue(newValue);
+                        }
+                    } catch (NumberFormatException nfe) {
+                        JOptionPane.showMessageDialog(this, "Please enter a number over 0");
+
+                    }
+
+                }
+
+                mapComponent.eraseBufferImage();
+                mapComponent.repaint();
+                
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select one flow");
+        }
+
+    }//GEN-LAST:event_editFlowValueButtonActionPerformed
+
+    private void reverseFlowDirectionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionButtonActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        for(Flow flow: flows) {
+            flow.reverseFlow();
+        }
+        
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_reverseFlowDirectionButtonActionPerformed
 
     private void forceLayout() {
 
@@ -2558,6 +2657,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JComboBox drawingOrderComboBox;
+    private javax.swing.JButton editFlowValueButton;
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
     private javax.swing.JSlider exponentSlider;
@@ -2621,6 +2721,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JRadioButton quadraticCurvesRadioButton;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
+    private javax.swing.JButton reverseFlowDirectionButton;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveSettingsMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
