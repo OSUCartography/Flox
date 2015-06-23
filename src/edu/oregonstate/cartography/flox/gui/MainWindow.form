@@ -1036,7 +1036,7 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="lockSelectedFlowsButton">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Lock selected flows"/>
+                    <Property name="text" type="java.lang.String" value="Lock/unlock selected flows"/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="lockSelectedFlowsButtonActionPerformed"/>
@@ -1047,15 +1047,12 @@
                     </Constraint>
                   </Constraints>
                 </Component>
-                <Component class="javax.swing.JButton" name="unlockSelectedFlowsButton">
+                <Component class="javax.swing.JToggleButton" name="keepForcesConstantToggleButton">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Unlock selected flows"/>
-                    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                      <Dimension value="[168, 29]"/>
-                    </Property>
+                    <Property name="text" type="java.lang.String" value="Keep Forces Constant"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="unlockSelectedFlowsButtonActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="keepForcesConstantToggleButtonActionPerformed"/>
                   </Events>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1330,6 +1327,9 @@
                     <Component class="javax.swing.JButton" name="deleteSelectedFeaturesButton">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Delete Selected Features"/>
+                        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[195, 29]"/>
+                        </Property>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="deleteSelectedFeaturesButtonActionPerformed"/>
@@ -1356,6 +1356,9 @@
                     <Component class="javax.swing.JButton" name="reverseFlowDirectionButton">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Reverse Flow Direction"/>
+                        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[195, 29]"/>
+                        </Property>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="reverseFlowDirectionButtonActionPerformed"/>

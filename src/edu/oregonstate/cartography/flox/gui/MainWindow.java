@@ -218,7 +218,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel25 = new javax.swing.JLabel();
         minimumFlowNodesSlider = new javax.swing.JSlider();
         lockSelectedFlowsButton = new javax.swing.JButton();
-        unlockSelectedFlowsButton = new javax.swing.JButton();
+        keepForcesConstantToggleButton = new javax.swing.JToggleButton();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -861,7 +861,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(minimumFlowNodesSlider, gridBagConstraints);
 
-        lockSelectedFlowsButton.setText("Lock selected flows");
+        lockSelectedFlowsButton.setText("Lock/unlock selected flows");
         lockSelectedFlowsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lockSelectedFlowsButtonActionPerformed(evt);
@@ -872,17 +872,16 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 22;
         forcesPanel.add(lockSelectedFlowsButton, gridBagConstraints);
 
-        unlockSelectedFlowsButton.setText("Unlock selected flows");
-        unlockSelectedFlowsButton.setPreferredSize(new java.awt.Dimension(168, 29));
-        unlockSelectedFlowsButton.addActionListener(new java.awt.event.ActionListener() {
+        keepForcesConstantToggleButton.setText("Keep Forces Constant");
+        keepForcesConstantToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                unlockSelectedFlowsButtonActionPerformed(evt);
+                keepForcesConstantToggleButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 23;
-        forcesPanel.add(unlockSelectedFlowsButton, gridBagConstraints);
+        forcesPanel.add(keepForcesConstantToggleButton, gridBagConstraints);
 
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
@@ -1082,6 +1081,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapControlPanel.add(jButton1, gridBagConstraints);
 
         deleteSelectedFeaturesButton.setText("Delete Selected Features");
+        deleteSelectedFeaturesButton.setPreferredSize(new java.awt.Dimension(195, 29));
         deleteSelectedFeaturesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 deleteSelectedFeaturesButtonActionPerformed(evt);
@@ -1107,6 +1107,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapControlPanel.add(editFlowValueButton, gridBagConstraints);
 
         reverseFlowDirectionButton.setText("Reverse Flow Direction");
+        reverseFlowDirectionButton.setPreferredSize(new java.awt.Dimension(195, 29));
         reverseFlowDirectionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 reverseFlowDirectionButtonActionPerformed(evt);
@@ -2422,23 +2423,16 @@ public class MainWindow extends javax.swing.JFrame {
         while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
             if (flow.isSelected()) {
-                flow.setLocked(true);
+                if(flow.isLocked()) {
+                    flow.setLocked(false);
+                } else {
+                    flow.setLocked(true);
+                }
+                
             }
         }
         mapComponent.repaint();
     }//GEN-LAST:event_lockSelectedFlowsButtonActionPerformed
-
-    private void unlockSelectedFlowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockSelectedFlowsButtonActionPerformed
-        // iterate through flows in the model. If it is selected, unlock it.
-        Iterator flows = model.flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
-            if (flow.isSelected()) {
-                flow.setLocked(false);
-            }
-        }
-        mapComponent.repaint();
-    }//GEN-LAST:event_unlockSelectedFlowsButtonActionPerformed
 
     private void exportCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportCSVMenuItemActionPerformed
 
@@ -2566,8 +2560,16 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_reverseFlowDirectionButtonActionPerformed
 
-    private void forceLayout() {
+    private void keepForcesConstantToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_keepForcesConstantToggleButtonActionPerformed
+        if(keepForcesConstantToggleButton.isSelected()) {
+            forceLayout();
+        }
+    }//GEN-LAST:event_keepForcesConstantToggleButtonActionPerformed
 
+    private void forceLayout() {
+        
+        
+        
         // If there are no flows, exit the method.
         if (model.getNbrFlows() == 0) {
             return;
@@ -2581,7 +2583,11 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
         ForceLayouter layouter = new ForceLayouter(model);
-        layouter.straightenFlows();
+        
+        if(!keepForcesConstantToggleButton.isSelected()) {
+            layouter.straightenFlows();
+        }
+        
 
         model.setCanvas(model.getFlowsBoundingBox());
 
@@ -2596,27 +2602,44 @@ public class MainWindow extends javax.swing.JFrame {
             timer.stop();
         }
         progressBar.setVisible(true);
-        LayoutActionListener listener = new LayoutActionListener(layouter);
+        LayoutActionListener listener = new LayoutActionListener(layouter, 
+                keepForcesConstantToggleButton.isSelected());
         timer = new Timer(0, listener);
         timer.start();
     }
 
     class LayoutActionListener implements ActionListener {
-
-        private static final int NBR_ITERATIONS = 100;
+        
+        private int NBR_ITERATIONS;
         private final ForceLayouter layouter;
         private int counter = 0;
-
-        public LayoutActionListener(ForceLayouter layouter) {
+        private boolean constant = false;
+        double weight;
+        
+        public LayoutActionListener(ForceLayouter layouter, boolean constant) {
             this.layouter = layouter;
+            if(constant) {
+                NBR_ITERATIONS = 100000;
+                weight = 0.75;
+            } else {
+                NBR_ITERATIONS = 100;
+            }
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             mapComponent.eraseBufferImage();
-            layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
+            
+            //layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
+            
+            if(constant) {
+                layouter.layoutAllFlows(weight);
+            } else {
+                layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
+            }
+            
             mapComponent.repaint();
-            if (++counter == NBR_ITERATIONS) {
+            if (++counter > NBR_ITERATIONS) {
                 timer.stop();
                 progressBar.setVisible(false);
             }
@@ -2699,6 +2722,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel25;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JToggleButton keepForcesConstantToggleButton;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JButton lockSelectedFlowsButton;
@@ -2735,7 +2759,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;
-    private javax.swing.JButton unlockSelectedFlowsButton;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;
