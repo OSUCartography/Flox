@@ -213,6 +213,15 @@ public class Model {
     public Model() {
     }
 
+    public void deleteFlow(Flow flow) {
+        graph.removeEdge(flow);
+        // If no
+    }
+    
+    public void deleteNode(Point node) {
+        graph.removeVertex(node);
+    }
+    
     private static JAXBContext getJAXBContext() throws JAXBException {
         String packageName = Model.class.getPackage().getName();
         return JAXBContext.newInstance(packageName, Model.class.getClassLoader());

@@ -10,9 +10,11 @@ import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
+import edu.oregonstate.cartography.flox.model.Point;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
+import edu.oregonstate.cartography.map.AddFlowTool;
 import edu.oregonstate.cartography.map.MeasureTool;
 import edu.oregonstate.cartography.map.PanTool;
 import edu.oregonstate.cartography.map.ScaleMoveSelectionTool;
@@ -182,6 +184,7 @@ public class MainWindow extends javax.swing.JFrame {
         jToolBar1 = new javax.swing.JToolBar();
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
+        addFlowToggleButton = new javax.swing.JToggleButton();
         zoomInToggleButton = new javax.swing.JToggleButton();
         zoomOutToggleButton = new javax.swing.JToggleButton();
         handToggleButton = new javax.swing.JToggleButton();
@@ -235,6 +238,7 @@ public class MainWindow extends javax.swing.JFrame {
         drawFlowRangeboxCheckbox = new javax.swing.JCheckBox();
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        deleteSelectedFeaturesButton = new javax.swing.JButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -491,6 +495,18 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jPanel2.add(arrowToggleButton);
+
+        mapToolsButtonGroup.add(addFlowToggleButton);
+        addFlowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/SetPoint16x16.gif"))); // NOI18N
+        addFlowToggleButton.setToolTipText("Add Flow");
+        addFlowToggleButton.setBounds(new java.awt.Rectangle(0, 0, 0, 0));
+        addFlowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
+        addFlowToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addFlowToggleButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(addFlowToggleButton);
 
         mapToolsButtonGroup.add(zoomInToggleButton);
         zoomInToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ZoomIn16x16.gif"))); // NOI18N
@@ -1063,6 +1079,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         mapControlPanel.add(jButton1, gridBagConstraints);
+
+        deleteSelectedFeaturesButton.setText("Delete Selected Features");
+        deleteSelectedFeaturesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteSelectedFeaturesButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 3;
+        mapControlPanel.add(deleteSelectedFeaturesButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2403,6 +2431,42 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_exportCSVMenuItemActionPerformed
 
+    private void addFlowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFlowToggleButtonActionPerformed
+        mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
+    }//GEN-LAST:event_addFlowToggleButtonActionPerformed
+
+    private void deleteSelectedFeaturesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteSelectedFeaturesButtonActionPerformed
+        ArrayList<Flow> flowsToRemove = new ArrayList<Flow>();
+        ArrayList<Point> nodesToRemove = new ArrayList<Point>();
+        
+        Iterator flows = model.flowIterator();
+        while(flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            if(flow.isSelected()) {
+                flowsToRemove.add(flow);
+            }
+        }
+        
+        Iterator nodes = model.nodeIterator();
+        while(nodes.hasNext()) {
+            Point node = (Point) nodes.next();
+            if(node.isSelected()) {
+                nodesToRemove.add(node);
+            }
+        }
+        
+        flowsToRemove.stream().forEach((flow) -> {
+            model.deleteFlow(flow);
+        });
+        
+        nodesToRemove.stream().forEach((node) -> {
+            model.deleteNode(node);
+        });
+        
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_deleteSelectedFeaturesButtonActionPerformed
+
     private void forceLayout() {
 
         // If there are no flows, exit the method.
@@ -2463,6 +2527,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox addArrowsCheckbox;
+    private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JSlider arrowCornerPositionSlider;
@@ -2483,6 +2548,7 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
+    private javax.swing.JButton deleteSelectedFeaturesButton;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawCanvasPaddingCheckbox;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
