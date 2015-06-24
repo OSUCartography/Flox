@@ -122,7 +122,7 @@ public class AddFlowTool extends MapTool {
                 newFlow.setValue(maxFlowValue/2);
             }
         }
-        
+        newFlow.bend(0, 0);
         model.addFlow(newFlow);
         
         // repaint the map

@@ -46,7 +46,7 @@ public class QuadraticBezierFlow extends Flow {
 
         this.startPt = startPt;
         this.endPt = endPt;
-
+        
         // Angle between the straight line connecting start and end point and 
         // the line connecting the start/end point with the corresponding Bezier 
         // control point.
@@ -56,6 +56,7 @@ public class QuadraticBezierFlow extends Flow {
         double dist = getBaselineLength();
         double tangentLength = dist * .5;
         computeCtrlPt(alpha, tangentLength);
+        
     }
 
     /**

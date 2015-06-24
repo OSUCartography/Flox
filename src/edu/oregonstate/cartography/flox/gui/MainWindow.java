@@ -241,6 +241,7 @@ public class MainWindow extends javax.swing.JFrame {
         deleteSelectedFeaturesButton = new javax.swing.JButton();
         editFlowValueButton = new javax.swing.JButton();
         reverseFlowDirectionButton = new javax.swing.JButton();
+        straightenAllFlowsButton = new javax.swing.JButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -872,7 +873,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 22;
         forcesPanel.add(lockSelectedFlowsButton, gridBagConstraints);
 
-        keepForcesConstantToggleButton.setText("Keep Forces Constant");
+        keepForcesConstantToggleButton.setText("Apply Constant Forces");
         keepForcesConstantToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 keepForcesConstantToggleButtonActionPerformed(evt);
@@ -1118,6 +1119,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 11;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(reverseFlowDirectionButton, gridBagConstraints);
+
+        straightenAllFlowsButton.setText("Straighten All Flows");
+        straightenAllFlowsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                straightenAllFlowsButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridwidth = 3;
+        mapControlPanel.add(straightenAllFlowsButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2428,14 +2441,12 @@ public class MainWindow extends javax.swing.JFrame {
                 } else {
                     flow.setLocked(true);
                 }
-                
             }
         }
         mapComponent.repaint();
     }//GEN-LAST:event_lockSelectedFlowsButtonActionPerformed
 
     private void exportCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportCSVMenuItemActionPerformed
-
         try {
             // ask for export file
             String outFilePath = FileUtils.askFile(this, "CSV File", false);
@@ -2490,60 +2501,42 @@ public class MainWindow extends javax.swing.JFrame {
     private void editFlowValueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editFlowValueButtonActionPerformed
 
         if (model.isFlowIsSelected()) {
-            
             ArrayList<Flow> selectedFlows = new ArrayList<>(model.getSelectedFlows());
             double newValue = 0;
-            
             if (selectedFlows.size() == 1) {
-
-                
                 double value = selectedFlows.get(0).getValue();
-
                 while (newValue <= 0) {
-                    
                     String userInput = (String) JOptionPane.showInputDialog(
                             this, 
                             "Current Flow Value: " + value + "\n"
                             + "Input a new numerical value over zero");
-                    
                     try {
                         newValue = Double.parseDouble(userInput);
                         selectedFlows.get(0).setValue(newValue);
                     } catch (NumberFormatException nfe) {
                         newValue = 0;
-
                     }
-
                 }
-
                 mapComponent.eraseBufferImage();
                 mapComponent.repaint();
-
             } else {
-                
                 while (newValue <= 0) {
-                    
                     String userInput = (String) JOptionPane.showInputDialog(
                             this,
                             "Input a new numerical value over zero");
-                    
                     try {
                         newValue = Double.parseDouble(userInput);
                         for(Flow flow : selectedFlows) {
                             flow.setValue(newValue);
                         }
                     } catch (NumberFormatException nfe) {
-                        JOptionPane.showMessageDialog(this, "Please enter a number over 0");
-
+                        JOptionPane.showMessageDialog(this, "Please enter a "
+                                + "number over 0");
                     }
-
                 }
-
                 mapComponent.eraseBufferImage();
                 mapComponent.repaint();
-                
             }
-
         } else {
             JOptionPane.showMessageDialog(this, "Please select one flow");
         }
@@ -2561,14 +2554,18 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_reverseFlowDirectionButtonActionPerformed
 
     private void keepForcesConstantToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_keepForcesConstantToggleButtonActionPerformed
-        if(keepForcesConstantToggleButton.isSelected()) {
             forceLayout();
-        }
     }//GEN-LAST:event_keepForcesConstantToggleButtonActionPerformed
 
+    private void straightenAllFlowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenAllFlowsButtonActionPerformed
+        ForceLayouter layouter = new ForceLayouter(model);
+        layouter.straightenFlows();
+        
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_straightenAllFlowsButtonActionPerformed
+
     private void forceLayout() {
-        
-        
         
         // If there are no flows, exit the method.
         if (model.getNbrFlows() == 0) {
@@ -2588,16 +2585,8 @@ public class MainWindow extends javax.swing.JFrame {
             layouter.straightenFlows();
         }
         
-
         model.setCanvas(model.getFlowsBoundingBox());
 
-        //model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
-        //model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
-        //model.setSpringConstants(longestFlowStiffnessSlider.getValue() / 100d, zeroLengthStiffnessSlider.getValue() / 100d);
-        //model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
-        //model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
-        //model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
-        //model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
         if (timer != null) {
             timer.stop();
         }
@@ -2756,6 +2745,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
+    private javax.swing.JButton straightenAllFlowsButton;
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;

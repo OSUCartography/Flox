@@ -54,8 +54,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
         
-        
-        
         Rectangle2D.Double rect = getRectangle();
         super.endDrag(point, evt);
 
@@ -195,12 +193,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
     public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
         Iterator<Point> nodes = model.nodeIterator();
-
+        
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
 
-        // if the model says a flow is currently selected...
+        // if the model says a flow is currently selected, check to see if a 
+        // control point is nearby, and select it if so.
         if (model.isFlowIsSelected()) {
             // Iterate througth the flows, checking to see if it is selected.
             Iterator flows = model.flowIterator();
@@ -240,6 +239,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         while (nodes.hasNext()) {
             Point pt = nodes.next();
 
+            // If a node was selected stop checking.
             if (nodeGotSelected && (shiftDown == false)) {
                 pt.setSelected(false);
                 continue;
