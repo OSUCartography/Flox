@@ -140,8 +140,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Constructs a GeneralPath object for drawing from a 
-     * QuadraticBezierFlow
+     * Constructs a GeneralPath object for drawing from a QuadraticBezierFlow
      *
      * @param flow The flow to convert.
      * @return A GeneralPath for drawing.
@@ -161,18 +160,18 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Draws the flows to the Graphics2D context. Retrieves settings from
-     * the model to determine flow width, length, as well as determining
-     * whether to apply any clipping or add arrowheads.
+     * Draws the flows to the Graphics2D context. Retrieves settings from the
+     * model to determine flow width, length, as well as determining whether to
+     * apply any clipping or add arrowheads.
      */
     public void drawFlows() {
-        
+
         // Create an ArrayList to store the flows
         ArrayList<Flow> flows;
-        
+
         // Determine location of the end point of flows based on the model
         double r = model.getFlowDistanceFromEndPoint();
-        
+
         // Order the flows based on the model
         switch (model.getFlowOrder()) {
             case DECREASING:
@@ -184,16 +183,16 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             default:
                 flows = model.getFlows();
         }
-        
+
         // Iterate through the flows
         for (Flow flow : flows) {
-            
+
             // Create a GeneralPath for the flow
             GeneralPath flowPath;
-            
+
             // Create and initialize a GeneralPath for the arrowhead
             GeneralPath arrowPath = new GeneralPath();
-            
+
             // If flow is a CubicBezierFlow, just set the flowPath to 
             // the flow without any changes. 
             if (flow instanceof CubicBezierFlow) {
@@ -222,7 +221,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
                 // Draw arrows if the model says so
                 if (model.isDrawArrows()) {
-                    
+
                     // Instantiate an Arrow object, passing it the first of
                     // the split flows and the model
                     Arrow arrow = new Arrow((QuadraticBezierFlow) splitFlows[0],
@@ -258,10 +257,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             if (model.isDrawArrows()) {
                 if (flow.isSelected() && flow.isLocked()) {
                     g2d.setColor(Color.RED);
-                } else if ( flow.isSelected()){
+                } else if (flow.isSelected()) {
                     g2d.setColor(Color.CYAN);
-                } else if (flow.isLocked()){
-                    g2d.setColor(Color.GRAY);
+                } else if (flow.isLocked()) {
+                    g2d.setColor(Color.BLACK);
                 } else {
                     g2d.setColor(Color.BLACK);
                 }
@@ -281,14 +280,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 g2d.draw(flowPath);
                 drawControlPoint(flow);
             } else if (flow.isLocked()) {
-                g2d.setColor(Color.GRAY);
+                g2d.setColor(Color.BLACK);
                 g2d.draw(flowPath);
             } else {
                 g2d.setColor(Color.BLACK);
                 g2d.draw(flowPath);
             }
-            
-            
+
         }
     }
 
@@ -310,7 +308,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Draws the border of the canvas. 
+     * Draws the border of the canvas.
      */
     public void drawCanvasBorder() {
 
@@ -355,7 +353,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(line3);
             g2d.draw(line4);
 
-            
         }
 
     }
@@ -390,81 +387,54 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Draw control points of Bezier curves and lines connecting control points
-     * to start and end points.
+     * Call drawControlPoint for each flow in the model.
      */
     public void drawControlPoints() {
-        g2d.setStroke(new BasicStroke(1f));
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            Point startPt = flow.getStartPt();
-            Point endPt = flow.getEndPt();
-            if (flow instanceof CubicBezierFlow) {
-                Point cpt1 = ((CubicBezierFlow) flow).getcPt1();
-                Point cpt2 = ((CubicBezierFlow) flow).getcPt2();
-                g2d.setColor(Color.GRAY);
-                Line2D line1 = new Line2D.Double(xToPx(startPt.x),
-                        yToPx(startPt.y), xToPx(cpt1.x), yToPx(cpt1.y));
-                g2d.draw(line1);
-                Line2D line2 = new Line2D.Double(xToPx(endPt.x),
-                        yToPx(endPt.y), xToPx(cpt2.x), yToPx(cpt2.y));
-                g2d.draw(line2);
-                drawCircle(cpt1.x, cpt1.y, CR, Color.ORANGE, Color.GRAY);
-                drawCircle(cpt2.x, cpt2.y, CR, Color.ORANGE, Color.GRAY);
-            } else {
-                Point cpt = ((QuadraticBezierFlow) flow).getCtrlPt();
-                g2d.setColor(Color.GRAY);
-                Line2D line1 = new Line2D.Double(xToPx(startPt.x),
-                        yToPx(startPt.y), xToPx(cpt.x), yToPx(cpt.y));
-                g2d.draw(line1);
-                Line2D line2 = new Line2D.Double(xToPx(endPt.x),
-                        yToPx(endPt.y), xToPx(cpt.x), yToPx(cpt.y));
-                g2d.draw(line2);
-                if(cpt.isSelected()){
-                    drawCircle(cpt.x, cpt.y, CR, Color.CYAN, Color.GRAY);
-                } else {
-                    drawCircle(cpt.x, cpt.y, CR, Color.ORANGE, Color.GRAY);
-                }
-                
-            }
+            drawControlPoint(flow);
         }
     }
 
+    /**
+     * Draw the control point of a Bezier curve and lines connecting the control 
+     * point to the start and end points.
+     */
     public void drawControlPoint(Flow flow) {
         g2d.setStroke(new BasicStroke(1f));
         Point startPt = flow.getStartPt();
         Point endPt = flow.getEndPt();
         if (flow instanceof CubicBezierFlow) {
-                Point cpt1 = ((CubicBezierFlow) flow).getcPt1();
-                Point cpt2 = ((CubicBezierFlow) flow).getcPt2();
-                g2d.setColor(Color.GRAY);
-                Line2D line1 = new Line2D.Double(xToPx(startPt.x),
-                        yToPx(startPt.y), xToPx(cpt1.x), yToPx(cpt1.y));
-                g2d.draw(line1);
-                Line2D line2 = new Line2D.Double(xToPx(endPt.x),
-                        yToPx(endPt.y), xToPx(cpt2.x), yToPx(cpt2.y));
-                g2d.draw(line2);
-                drawCircle(cpt1.x, cpt1.y, CR, Color.ORANGE, Color.GRAY);
-                drawCircle(cpt2.x, cpt2.y, CR, Color.ORANGE, Color.GRAY);
+            Point cpt1 = ((CubicBezierFlow) flow).getcPt1();
+            Point cpt2 = ((CubicBezierFlow) flow).getcPt2();
+            g2d.setColor(Color.GRAY);
+            Line2D line1 = new Line2D.Double(xToPx(startPt.x),
+                    yToPx(startPt.y), xToPx(cpt1.x), yToPx(cpt1.y));
+            g2d.draw(line1);
+            Line2D line2 = new Line2D.Double(xToPx(endPt.x),
+                    yToPx(endPt.y), xToPx(cpt2.x), yToPx(cpt2.y));
+            g2d.draw(line2);
+            drawCircle(cpt1.x, cpt1.y, CR, Color.ORANGE, Color.GRAY);
+            drawCircle(cpt2.x, cpt2.y, CR, Color.ORANGE, Color.GRAY);
+        } else {
+            Point cpt = ((QuadraticBezierFlow) flow).getCtrlPt();
+            g2d.setColor(Color.GRAY);
+            Line2D line1 = new Line2D.Double(xToPx(startPt.x),
+                    yToPx(startPt.y), xToPx(cpt.x), yToPx(cpt.y));
+            g2d.draw(line1);
+            Line2D line2 = new Line2D.Double(xToPx(endPt.x),
+                    yToPx(endPt.y), xToPx(cpt.x), yToPx(cpt.y));
+            g2d.draw(line2);
+            if (cpt.isSelected()) {
+                drawCircle(cpt.x, cpt.y, CR, Color.CYAN, Color.GRAY);
             } else {
-                Point cpt = ((QuadraticBezierFlow) flow).getCtrlPt();
-                g2d.setColor(Color.GRAY);
-                Line2D line1 = new Line2D.Double(xToPx(startPt.x),
-                        yToPx(startPt.y), xToPx(cpt.x), yToPx(cpt.y));
-                g2d.draw(line1);
-                Line2D line2 = new Line2D.Double(xToPx(endPt.x),
-                        yToPx(endPt.y), xToPx(cpt.x), yToPx(cpt.y));
-                g2d.draw(line2);
-                if(cpt.isSelected()) {
-                    drawCircle(cpt.x, cpt.y, CR, Color.CYAN, Color.GRAY);
-                } else {
-                    drawCircle(cpt.x, cpt.y, CR, Color.ORANGE, Color.GRAY);
-                }
-                
+                drawCircle(cpt.x, cpt.y, CR, Color.ORANGE, Color.GRAY);
             }
+
+        }
     }
-    
+
     /**
      * Draw straight line segments for a Bezier curve. Useful for debugging.
      */

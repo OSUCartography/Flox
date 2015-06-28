@@ -32,6 +32,7 @@ public class FlowImporter {
         try (BufferedReader inputStream = new BufferedReader(new FileReader(filePath))) {
             String l;
             boolean hasControlPoint = false;
+            boolean locked = false;
             while ((l = inputStream.readLine()) != null) {
                 StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
                 double x1 = Double.parseDouble(tokenizer.nextToken());
@@ -49,13 +50,19 @@ public class FlowImporter {
                     c1y = Double.parseDouble(tokenizer.nextToken());
                 }
                 
+                if(tokenizer.hasMoreTokens()) {
+                    if(Double.parseDouble(tokenizer.nextToken())==1) {
+                        locked = true;
+                    }
+                }
+                
                 QuadraticBezierFlow flow = new QuadraticBezierFlow(new Point(x1, y1), new Point(x2, y2));
                 flow.setValue(value);
                 
                 if(hasControlPoint) {
                     Point cPt = new Point(c1x, c1y);
                     flow.setcPt(cPt);
-                    flow.setLocked(true);
+                    flow.setLocked(locked);
                 }
                 
                 flows.add(flow);

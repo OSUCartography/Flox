@@ -50,7 +50,15 @@ public class CSVFlowExporter {
                     str.append(",");
                     
                     str.append(cFlow.value);
+                    str.append(",");
+                    
+                    if(cFlow.isLocked()) {
+                        str.append(1);
+                    } else {
+                        str.append(0);
+                    }
                     str.append("\n");
+                    
                 } else {
                     QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
                     
@@ -70,6 +78,13 @@ public class CSVFlowExporter {
                     str.append(qFlow.cPt.x);
                     str.append(",");
                     str.append(qFlow.cPt.y);
+                    str.append(",");
+                    
+                    if(qFlow.isLocked()) {
+                        str.append(1);
+                    } else {
+                        str.append(0);
+                    }
                     
                     str.append("\n");
                 }
