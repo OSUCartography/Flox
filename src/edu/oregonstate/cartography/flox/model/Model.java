@@ -51,6 +51,20 @@ import org.jgrapht.graph.SimpleGraph;
 
 public class Model {
 
+    /**
+     * @return the flowNodeDensity
+     */
+    public String getFlowNodeDensity() {
+        return flowNodeDensity;
+    }
+
+    /**
+     * @param flowNodeDensity the flowNodeDensity to set
+     */
+    public void setFlowNodeDensity(String flowNodeDensity) {
+        this.flowNodeDensity = flowNodeDensity;
+    }
+
     public enum CurveType {
 
         CUBIC,
@@ -165,12 +179,13 @@ public class Model {
     private boolean flowIsSelected = false;
     
     private boolean controlPtIsSelected = false;
+    
     /**
-     * FIXME what is this? the minimum number of line segments? Why is not an
-     * integer?
+     * Determines the maximum number of intermediate nodes per flow.
+     * This is modified by a comboBox in the GUI (low, medium, high).
      */
-    private double minFlowNodes = 2.5;
-
+    private String flowNodeDensity = "medium";
+    
     // FIXME should not be transient
     @XmlTransient
     private Rectangle2D canvas;
@@ -207,6 +222,8 @@ public class Model {
      */
     private double endClipAreaBufferDistance = 0;
 
+    private double longestFlowLength;
+    
     /**
      * Constructor of the model.
      */
@@ -370,6 +387,7 @@ public class Model {
         flows.stream().forEach((flow) -> {
             addFlow(flow);
         });
+        setLongestFlowLength();
     }
 
     /**
@@ -644,6 +662,10 @@ public class Model {
      * @return The length of the longest base line.
      */
     public double getLongestFlowLength() {
+        return longestFlowLength;
+    }
+
+    public void setLongestFlowLength() {
         double maxLength = 0;
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
@@ -653,9 +675,9 @@ public class Model {
                 maxLength = l;
             }
         }
-        return maxLength;
+        longestFlowLength = maxLength;
     }
-
+    
     public double getShortestFlowLength() {
         double minLength = Double.POSITIVE_INFINITY;
         Iterator<Flow> iterator = flowIterator();
@@ -666,14 +688,38 @@ public class Model {
                 minLength = l;
             }
         }
+        
         return minLength == Double.POSITIVE_INFINITY ? null : minLength;
     }
 
-    public double getShortestFlowLengthDividedByMinFlowNodes() {
-        return getShortestFlowLength() / getMinFlowNodes();
+    public double getDeCasteljauTolerance() {
+        
+        double maxFlowNodes;
+        
+        if(flowNodeDensity == "low") {
+            maxFlowNodes = 10;
+        } else if (flowNodeDensity == "medium") {
+            maxFlowNodes = 25;
+        } else { // flowNodeDensity == "high"
+            maxFlowNodes = 40;
+        }
+        
+        double tol = getShortestFlowLength() / maxFlowNodes;
+        
+        double longestFlowLength = getLongestFlowLength();
+        
+        if(longestFlowLength / tol <= maxFlowNodes) {
+            return tol;
+        } else {
+            tol = longestFlowLength / maxFlowNodes;
+            return tol;
+        }
+        
     }
 
-    public double getLargestFlowValue() {
+    
+    
+    public double setLargestFlowValue() {
         double maxValue = 0;
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
@@ -1062,20 +1108,6 @@ public class Model {
      */
     public void setMinFlowLengthSpringConstant(double minFlowLengthSpringConstant) {
         this.minFlowLengthSpringConstant = minFlowLengthSpringConstant;
-    }
-
-    /**
-     * @return the minFlowNodes
-     */
-    public double getMinFlowNodes() {
-        return minFlowNodes;
-    }
-
-    /**
-     * @param minFlowNodes the minFlowNodes to set
-     */
-    public void setMinFlowNodes(double minFlowNodes) {
-        this.minFlowNodes = minFlowNodes;
     }
 
     /**

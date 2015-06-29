@@ -27,7 +27,7 @@ public class LayoutGrader {
 
         ArrayList<Geometry> flowPolylines = new ArrayList<>();
 
-        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+        double deCasteljauTol = model.getDeCasteljauTolerance();
         GeometryFactory geometryFactory = new GeometryFactory();
         LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
         for (Flow flow : model.getFlows()) {

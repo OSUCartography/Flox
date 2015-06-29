@@ -204,7 +204,7 @@ public class QuadraticBezierFlow extends Flow {
 
         ArrayList<Point> regularPoints = new ArrayList<>();
         ArrayList<Point> irregularPoints 
-                = toStraightLineSegmentsWithIrregularLength(deCasteljauTol);
+                = toStraightLineSegmentsWithIrregularLength(d);
 
         // create new point set with regularly distributed irregularPoints
         double startX = irregularPoints.get(0).x;

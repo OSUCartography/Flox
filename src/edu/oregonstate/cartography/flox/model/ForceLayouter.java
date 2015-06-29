@@ -39,7 +39,7 @@ public class ForceLayouter {
      */
     private void initStraightLinesHashMap(){
         straightLinesMap.clear();
-        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+        double deCasteljauTol = model.getDeCasteljauTolerance();
         Iterator<Flow> iter = model.flowIterator();
         while(iter.hasNext()) {
             Flow flow = iter.next();

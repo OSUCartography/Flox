@@ -148,7 +148,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         }
 
         // Select flows
-        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+        double deCasteljauTol = model.getDeCasteljauTolerance();
         boolean flowGotSelected = false;
         Iterator<Flow> flows = model.flowIterator();
         while (flows.hasNext()) {
@@ -262,7 +262,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         // Select flows
         Iterator<Flow> flows = model.flowIterator();
 
-        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+        double deCasteljauTol = model.getDeCasteljauTolerance();
         while (flows.hasNext()) {
             Flow flow = flows.next();
             if (flow.getBoundingBox().contains(point)) {

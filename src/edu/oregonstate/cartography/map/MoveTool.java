@@ -114,6 +114,10 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
         }
 
+        // Set the longestFlowLength needed to compute the maximum intermediate
+        // nodes. This may slow things down a lot.
+        model.setLongestFlowLength();
+        
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
 

@@ -122,8 +122,18 @@ public class AddFlowTool extends MapTool {
                 newFlow.setValue(maxFlowValue/2);
             }
         }
+        
+        // FIXME
+        // Calling bend because when a newFlow is created, a control point at
+        // an arbitrary location is set up. This was useful long ago, less so 
+        // now. 
         newFlow.bend(0, 0);
+        
         model.addFlow(newFlow);
+        
+        // Set the longestFlowLength field needed for computing intermediate
+        // nodes. 
+        model.setLongestFlowLength();
         
         // repaint the map
         fromNodeSelected = false;

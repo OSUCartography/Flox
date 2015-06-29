@@ -204,7 +204,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 // This gets a clipped flow using the clipping tool designed
                 // to clip flows to some map geometry. It returns the same
                 // flow if no clipping is applied.
-                double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+                double deCasteljauTol = model.getDeCasteljauTolerance();
                 f = f.getClippedFlow(deCasteljauTol);
                 if (f == null) {
                     continue;
@@ -439,9 +439,17 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Draw straight line segments for a Bezier curve. Useful for debugging.
      */
     public void drawStraightLinesSegments() {
-        setStrokeWidth(2f);
-        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+        
         Iterator<Flow> iter = model.flowIterator();
+        
+        // If there are no flows, stop
+        if(!iter.hasNext()) {
+            return;
+        }
+        
+        setStrokeWidth(2f);
+        double deCasteljauTol = model.getDeCasteljauTolerance();
+        
         while (iter.hasNext()) {
             Flow flow = iter.next();
             ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
@@ -460,7 +468,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         setStrokeWidth(1f);
         g2d.setColor(Color.RED);
 
-        double deCasteljauTol = model.getShortestFlowLengthDividedByMinFlowNodes();
+        double deCasteljauTol = model.getDeCasteljauTolerance();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();

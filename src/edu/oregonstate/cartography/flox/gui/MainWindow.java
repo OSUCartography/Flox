@@ -141,7 +141,13 @@ public class MainWindow extends javax.swing.JFrame {
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
-            minimumFlowNodesSlider.setValue((int) (model.getMinFlowNodes() * 10));
+            if(model.getFlowNodeDensity()=="low") {
+                flowNodeDensityComboBox.setSelectedIndex(0);
+            } else if (model.getFlowNodeDensity()=="medium") {
+                flowNodeDensityComboBox.setSelectedIndex(1);
+            } else {
+                flowNodeDensityComboBox.setSelectedIndex(2);
+            }
             updateClippingGUI();
         }
     }
@@ -216,9 +222,9 @@ public class MainWindow extends javax.swing.JFrame {
         flowRangeboxSizeSlider = new javax.swing.JSlider();
         jLabel13 = new javax.swing.JLabel();
         jLabel25 = new javax.swing.JLabel();
-        minimumFlowNodesSlider = new javax.swing.JSlider();
         lockSelectedFlowsButton = new javax.swing.JButton();
         keepForcesConstantToggleButton = new javax.swing.JToggleButton();
+        flowNodeDensityComboBox = new javax.swing.JComboBox();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -838,29 +844,13 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel13, gridBagConstraints);
 
-        jLabel25.setText("Minimum Flow Nodes");
+        jLabel25.setText("Flow node density");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 20;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
         forcesPanel.add(jLabel25, gridBagConstraints);
-
-        minimumFlowNodesSlider.setMajorTickSpacing(10);
-        minimumFlowNodesSlider.setMinorTickSpacing(100);
-        minimumFlowNodesSlider.setPaintLabels(true);
-        minimumFlowNodesSlider.setPaintTicks(true);
-        minimumFlowNodesSlider.setValue(40);
-        minimumFlowNodesSlider.setPreferredSize(new java.awt.Dimension(243, 38));
-        minimumFlowNodesSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                minimumFlowNodesSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-        forcesPanel.add(minimumFlowNodesSlider, gridBagConstraints);
 
         lockSelectedFlowsButton.setText("Lock/unlock selected flows");
         lockSelectedFlowsButton.addActionListener(new java.awt.event.ActionListener() {
@@ -871,6 +861,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 22;
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
         forcesPanel.add(lockSelectedFlowsButton, gridBagConstraints);
 
         keepForcesConstantToggleButton.setText("Apply Constant Forces");
@@ -883,6 +874,19 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 23;
         forcesPanel.add(keepForcesConstantToggleButton, gridBagConstraints);
+
+        flowNodeDensityComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Low", "Medium", "High" }));
+        flowNodeDensityComboBox.setSelectedIndex(1);
+        flowNodeDensityComboBox.setPreferredSize(new java.awt.Dimension(200, 27));
+        flowNodeDensityComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                flowNodeDensityComboBoxItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 21;
+        forcesPanel.add(flowNodeDensityComboBox, gridBagConstraints);
 
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
@@ -2391,14 +2395,6 @@ public class MainWindow extends javax.swing.JFrame {
         removeSelectedLayer();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void minimumFlowNodesSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_minimumFlowNodesSliderStateChanged
-        if (model != null) {
-            model.setMinFlowNodes((minimumFlowNodesSlider.getValue()) / 10d);
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
-        }
-    }//GEN-LAST:event_minimumFlowNodesSliderStateChanged
-
     private void openSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openSettingsMenuItemActionPerformed
         String filePath = FileUtils.askFile(null, "Load XML Settings", null, true, "xml");
         if (filePath != null) {
@@ -2565,6 +2561,23 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_straightenAllFlowsButtonActionPerformed
 
+    private void flowNodeDensityComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_flowNodeDensityComboBoxItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            switch (flowNodeDensityComboBox.getSelectedIndex()) {
+                case 0:
+                    model.setFlowNodeDensity("low");
+                    break;
+                case 1:
+                    model.setFlowNodeDensity("medium");
+                    break;
+                case 2:
+                    model.setFlowNodeDensity("high");
+            }
+        }
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_flowNodeDensityComboBoxItemStateChanged
+
     private void forceLayout() {
         
         // If there are no flows, exit the method.
@@ -2683,6 +2696,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField flowDistanceFromEndPointFormattedTextField;
     private javax.swing.JPanel flowLayoutPanel;
     private javax.swing.JSlider flowLengthSlider;
+    private javax.swing.JComboBox flowNodeDensityComboBox;
     private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JFormattedTextField flowScaleFormattedTextField;
     private javax.swing.JLabel flowsFilePathLabel;
@@ -2722,7 +2736,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel mapPanel;
     private javax.swing.ButtonGroup mapToolsButtonGroup;
     private javax.swing.JMenuBar menuBar;
-    private javax.swing.JSlider minimumFlowNodesSlider;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openSettingsMenuItem;
