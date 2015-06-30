@@ -70,12 +70,10 @@ public class Model {
     }
 
     /**
-     * Graph of edges (CubicBezierFlow) and nodes (Point)
+     * Graph of edges (BŽzier flows) and nodes (Point)
      */
     @XmlJavaTypeAdapter(GraphSerializer.class)
-    //private DirectedGraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
-
-    private Graph graph = new Graph();
+    private final Graph graph = new Graph();
     
     /**
      * Used by the Arrow class to determine the length of arrowheads.
@@ -638,26 +636,21 @@ public class Model {
     public double getDeCasteljauTolerance() {
 
         double maxFlowNodes;
-
-        if (getFlowNodeDensity() == FlowNodeDensity.LOW) {
+        if (flowNodeDensity== FlowNodeDensity.LOW) {
             maxFlowNodes = 10;
-        } else if (getFlowNodeDensity() == FlowNodeDensity.MEDIUM) {
+        } else if (flowNodeDensity == FlowNodeDensity.MEDIUM) {
             maxFlowNodes = 25;
-        } else { // flowNodeDensity == "high"
+        } else { // flowNodeDensity == FlowNodeDensity.HIGH
             maxFlowNodes = 40;
         }
 
         double tol = getShortestFlowLength() / maxFlowNodes;
-
-        double longestFlowLength = getLongestFlowLength();
-
         if (longestFlowLength / tol <= maxFlowNodes) {
             return tol;
         } else {
             tol = longestFlowLength / maxFlowNodes;
             return tol;
         }
-
     }
 
     public double setLargestFlowValue() {

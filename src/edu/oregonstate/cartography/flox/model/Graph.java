@@ -13,7 +13,7 @@ import org.jgrapht.graph.DirectedMultigraph;
  * University
  */
 public class Graph {
-    private final DirectedGraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
+    private DirectedGraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
     
     public Graph() {
     }
@@ -82,7 +82,7 @@ public class Graph {
      * Remove all flows.
      */
     public void clearFlows() {
-        // FIXME
+         graph = new DirectedMultigraph<>(Flow.class);
     }
     
     /**
