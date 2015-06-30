@@ -1966,10 +1966,12 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void flowScaleFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowScaleFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName())) {
-            double s = ((Number) flowScaleFormattedTextField.getValue()).doubleValue();
-            model.setFlowWidthScale(s);
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
+            if (flowScaleFormattedTextField.getValue() != null) {
+                double s = ((Number) flowScaleFormattedTextField.getValue()).doubleValue();
+                model.setFlowWidthScale(s);
+                mapComponent.eraseBufferImage();
+                mapComponent.repaint();
+            }
         }
     }//GEN-LAST:event_flowScaleFormattedTextFieldPropertyChange
 
@@ -2677,7 +2679,7 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
         addUndo(undoString);
-        
+
         // If there are no flows, exit the method.
         if (model.getNbrFlows() == 0) {
             return;
