@@ -30,11 +30,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DirectedMultigraph;
-import org.jgrapht.graph.Multigraph;
-import org.jgrapht.graph.SimpleGraph;
 
 /**
  * Model for Flox.
@@ -50,20 +48,6 @@ import org.jgrapht.graph.SimpleGraph;
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class Model {
-
-    /**
-     * @return the flowNodeDensity
-     */
-    public String getFlowNodeDensity() {
-        return flowNodeDensity;
-    }
-
-    /**
-     * @param flowNodeDensity the flowNodeDensity to set
-     */
-    public void setFlowNodeDensity(String flowNodeDensity) {
-        this.flowNodeDensity = flowNodeDensity;
-    }
 
     public enum CurveType {
 
@@ -81,10 +65,17 @@ public class Model {
         UNORDERED
     }
 
+    public enum FlowNodeDensity {
+
+        LOW,
+        MEDIUM,
+        HIGH
+    }
+
     /**
      * Graph of edges (CubicBezierFlow) and nodes (Point)
      */
-    @XmlTransient
+    @XmlJavaTypeAdapter(GraphSerializer.class)
     private DirectedGraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
 
     /**
@@ -175,19 +166,19 @@ public class Model {
     private double flowDistanceFromEndPoint = 0.5d;
 
     private boolean nodeIsSelected = false;
-    
+
     private boolean flowIsSelected = false;
-    
+
     private boolean controlPtIsSelected = false;
-    
+
     /**
-     * Determines the maximum number of intermediate nodes per flow.
-     * This is modified by a comboBox in the GUI (low, medium, high).
+     * Determines the maximum number of intermediate nodes per flow. This is
+     * modified by a comboBox in the GUI (low, medium, high).
      */
-    private String flowNodeDensity = "medium";
-    
+    private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
+
     // FIXME should not be transient
-    @XmlTransient
+    @XmlJavaTypeAdapter(RectangleSerializer.class)
     private Rectangle2D canvas;
 
     /**
@@ -223,7 +214,7 @@ public class Model {
     private double endClipAreaBufferDistance = 0;
 
     private double longestFlowLength;
-    
+
     /**
      * Constructor of the model.
      */
@@ -234,11 +225,11 @@ public class Model {
         graph.removeEdge(flow);
         // If no
     }
-    
+
     public void deleteNode(Point node) {
         graph.removeVertex(node);
     }
-    
+
     private static JAXBContext getJAXBContext() throws JAXBException {
         String packageName = Model.class.getPackage().getName();
         return JAXBContext.newInstance(packageName, Model.class.getClassLoader());
@@ -305,10 +296,9 @@ public class Model {
     }
 
     public void copyTransientFields(Model destination) {
-        destination.graph = graph;
         destination.map = map;
         destination.clipAreas = clipAreas;
-                
+
         // FIXME should not be transient
         destination.canvas = canvas;
     }
@@ -350,14 +340,19 @@ public class Model {
      * @param flow The flow to add.
      */
     public void addFlow(Flow flow) {
-        Point startPoint = findNodeInGraph(flow.getStartPt());
-        Point endPoint = findNodeInGraph(flow.getEndPt());
+        addFlow(flow, graph);
+    }
+    
+    public static void addFlow(Flow flow, DirectedGraph<Point, Flow> graph) {
+        Point startPoint = findNodeInGraph(flow.getStartPt(), graph);
+        Point endPoint = findNodeInGraph(flow.getEndPt(), graph);
         flow.setStartPt(startPoint);
         flow.setEndPt(endPoint);
         graph.addVertex(startPoint);
         graph.addVertex(endPoint);
         graph.addEdge(startPoint, endPoint, flow);
     }
+    
 
     /**
      * Searches for a point in the graph with the specified coordinates
@@ -367,6 +362,10 @@ public class Model {
      * point if no point with the same coordinates exist in the graph.
      */
     private Point findNodeInGraph(Point target) {
+        return findNodeInGraph(target, graph);
+    }
+    
+    static public Point findNodeInGraph(Point target, DirectedGraph<Point, Flow> graph) {
         Iterator<Point> iter = graph.vertexSet().iterator();
         while (iter.hasNext()) {
             Point pt = iter.next();
@@ -677,7 +676,7 @@ public class Model {
         }
         longestFlowLength = maxLength;
     }
-    
+
     public double getShortestFlowLength() {
         double minLength = Double.POSITIVE_INFINITY;
         Iterator<Flow> iterator = flowIterator();
@@ -688,37 +687,35 @@ public class Model {
                 minLength = l;
             }
         }
-        
+
         return minLength == Double.POSITIVE_INFINITY ? null : minLength;
     }
 
     public double getDeCasteljauTolerance() {
-        
+
         double maxFlowNodes;
-        
-        if(flowNodeDensity == "low") {
+
+        if (getFlowNodeDensity() == FlowNodeDensity.LOW) {
             maxFlowNodes = 10;
-        } else if (flowNodeDensity == "medium") {
+        } else if (getFlowNodeDensity() == FlowNodeDensity.MEDIUM) {
             maxFlowNodes = 25;
         } else { // flowNodeDensity == "high"
             maxFlowNodes = 40;
         }
-        
+
         double tol = getShortestFlowLength() / maxFlowNodes;
-        
+
         double longestFlowLength = getLongestFlowLength();
-        
-        if(longestFlowLength / tol <= maxFlowNodes) {
+
+        if (longestFlowLength / tol <= maxFlowNodes) {
             return tol;
         } else {
             tol = longestFlowLength / maxFlowNodes;
             return tol;
         }
-        
+
     }
 
-    
-    
     public double setLargestFlowValue() {
         double maxValue = 0;
         Iterator<Flow> iterator = flowIterator();
@@ -731,21 +728,21 @@ public class Model {
         }
         return maxValue;
     }
-    
-    public ArrayList<Flow> getSelectedFlows () {
-        
+
+    public ArrayList<Flow> getSelectedFlows() {
+
         ArrayList<Flow> selectedFlows = new ArrayList();
         Iterator flows = flowIterator();
-        while(flows.hasNext()) {
+        while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
-            if(flow.isSelected()) {
+            if (flow.isSelected()) {
                 selectedFlows.add(flow);
-                
+
             }
         }
         return selectedFlows;
     }
-    
+
     /**
      * Returns all map layers.
      *
@@ -1137,7 +1134,7 @@ public class Model {
     public void setArrowWidthScaleFactor(double arrowWidthScaleFactor) {
         this.arrowWidthScaleFactor = arrowWidthScaleFactor;
     }
-    
+
     /**
      * @return the somethingIsSelected
      */
@@ -1165,7 +1162,7 @@ public class Model {
     public void setFlowIsSelected(boolean flowIsSelected) {
         this.flowIsSelected = flowIsSelected;
     }
-    
+
     /**
      * @return the controlPtIsSelected
      */
@@ -1179,4 +1176,20 @@ public class Model {
     public void setControlPtIsSelected(boolean controlPtIsSelected) {
         this.controlPtIsSelected = controlPtIsSelected;
     }
+
+    /**
+     * @return the flowNodeDensity
+     */
+    public FlowNodeDensity getFlowNodeDensity() {
+        return flowNodeDensity;
+    }
+
+    /**
+     * @param flowNodeDensity the flowNodeDensity to set
+     */
+    public void setFlowNodeDensity(FlowNodeDensity flowNodeDensity) {
+        this.flowNodeDensity = flowNodeDensity;
+    }
+    
+    
 }

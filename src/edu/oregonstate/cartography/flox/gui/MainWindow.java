@@ -10,6 +10,7 @@ import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
+import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
 import edu.oregonstate.cartography.flox.model.Point;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
@@ -141,9 +142,9 @@ public class MainWindow extends javax.swing.JFrame {
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
-            if(model.getFlowNodeDensity()=="low") {
+            if(model.getFlowNodeDensity()==FlowNodeDensity.LOW) {
                 flowNodeDensityComboBox.setSelectedIndex(0);
-            } else if (model.getFlowNodeDensity()=="medium") {
+            } else if (model.getFlowNodeDensity()==FlowNodeDensity.MEDIUM) {
                 flowNodeDensityComboBox.setSelectedIndex(1);
             } else {
                 flowNodeDensityComboBox.setSelectedIndex(2);
@@ -1872,7 +1873,7 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
         Envelope bb = layer.getGeometry().getEnvelopeInternal();
-        Rectangle2D bbRect = new Rectangle2D.Double(bb.getMinX(), bb.getMinY(),
+        Rectangle2D.Double bbRect = new Rectangle2D.Double(bb.getMinX(), bb.getMinY(),
                 bb.getWidth(), bb.getHeight());
         mapComponent.zoomOnRectangle(bbRect);
     }//GEN-LAST:event_zoomOnSelectedLayerMenuItemActionPerformed
@@ -2451,7 +2452,7 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
             outFilePath = FileUtils.forceFileNameExtension(outFilePath, "csv");
-            CSVFlowExporter exporter = new CSVFlowExporter(model);
+            CSVFlowExporter exporter = new CSVFlowExporter(model.flowIterator());
             exporter.export(outFilePath);
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -2565,13 +2566,13 @@ public class MainWindow extends javax.swing.JFrame {
         if (evt.getStateChange() == ItemEvent.SELECTED) {
             switch (flowNodeDensityComboBox.getSelectedIndex()) {
                 case 0:
-                    model.setFlowNodeDensity("low");
+                    model.setFlowNodeDensity(FlowNodeDensity.LOW);
                     break;
                 case 1:
-                    model.setFlowNodeDensity("medium");
+                    model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
                     break;
                 case 2:
-                    model.setFlowNodeDensity("high");
+                    model.setFlowNodeDensity(FlowNodeDensity.HIGH);
             }
         }
         mapComponent.eraseBufferImage();
