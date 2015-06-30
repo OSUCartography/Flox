@@ -10,13 +10,10 @@ import java.util.Iterator;
  */
 public class CSVFlowExporter {
 
-    private final Iterator flows;
-
-    public CSVFlowExporter(Iterator flows) {
-        this.flows = flows;
+    private CSVFlowExporter() {
     }
 
-    public String exportToString() {
+    public static String exportToString(Iterator flows) {
         StringBuilder str = new StringBuilder();
 
         // Get a flow iterator
@@ -86,13 +83,13 @@ public class CSVFlowExporter {
      * FileUtils.askFile in the MainWindow.
      * @throws java.io.IOException
      */
-    public void export(String outFilePath) throws IOException {
+    public static void export(String outFilePath, Iterator flows) throws IOException {
 
         FileWriter fileWriter = null;
 
         try {
             fileWriter = new FileWriter(outFilePath);
-            fileWriter.append(exportToString());
+            fileWriter.append(exportToString(flows));
         } catch (Exception e) {
             String msg = e.getMessage() != null ? e.getMessage() : e.getClass().toString();
             throw new IOException("Export to CSV not possible. " + msg);

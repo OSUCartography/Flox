@@ -2452,8 +2452,7 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
             outFilePath = FileUtils.forceFileNameExtension(outFilePath, "csv");
-            CSVFlowExporter exporter = new CSVFlowExporter(model.flowIterator());
-            exporter.export(outFilePath);
+            CSVFlowExporter.export(outFilePath, model.flowIterator());
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -2464,8 +2463,8 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
     private void deleteSelectedFeaturesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteSelectedFeaturesButtonActionPerformed
-        ArrayList<Flow> flowsToRemove = new ArrayList<Flow>();
-        ArrayList<Point> nodesToRemove = new ArrayList<Point>();
+        ArrayList<Flow> flowsToRemove = new ArrayList<>();
+        ArrayList<Point> nodesToRemove = new ArrayList<>();
 
         Iterator flows = model.flowIterator();
         while (flows.hasNext()) {

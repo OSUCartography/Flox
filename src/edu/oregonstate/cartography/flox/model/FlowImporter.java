@@ -80,11 +80,9 @@ public class FlowImporter {
      * @throws IOException
      */
     public static ArrayList<Flow> readFlows(String filePath) throws IOException {
-        ArrayList<Flow> flows = new ArrayList<>();
         try (BufferedReader inputStream = new BufferedReader(new FileReader(filePath))) {
-            readFlows(inputStream);
+            return readFlows(inputStream);
         }
-        return flows;
     }
 
     /**
