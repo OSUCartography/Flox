@@ -31,8 +31,8 @@ public class FlowImporter {
         ArrayList<Flow> flows = new ArrayList<>();
 
         String l;
-        boolean locked = false;
         while ((l = reader.readLine()) != null) {
+            boolean locked = false;
             StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
             double x1 = Double.parseDouble(tokenizer.nextToken());
             double y1 = Double.parseDouble(tokenizer.nextToken());
