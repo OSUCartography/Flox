@@ -225,6 +225,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         west = cx - dx;
         north = cy - dy;
         scale = newScale;
+        System.out.println("Scale: " + scale);
         eraseBufferImage();
         repaint();
     }
@@ -243,6 +244,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         west = fixPoint.x - dx / zoomFactor;
         north = fixPoint.y + dy / zoomFactor;
 
+        System.out.println("Scale: " + scale);
         eraseBufferImage();
         repaint();
     }
@@ -280,6 +282,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
             scale = Math.min(horScale, verScale) * borderScale;
         }
         centerOnPoint(r.getCenterX(), r.getCenterY());
+        System.out.println("Scale: " + scale);
     }
 
     /**

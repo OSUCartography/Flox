@@ -150,7 +150,9 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void addUndo(String message) {
         try {
-            undo.add(message, model.marshal());
+            if (updatingGUI == false){
+                undo.add(message, model.marshal());
+            }
         } catch (JAXBException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -310,6 +312,7 @@ public class MainWindow extends javax.swing.JFrame {
         editFlowValueButton = new javax.swing.JButton();
         reverseFlowDirectionButton = new javax.swing.JButton();
         straightenAllFlowsButton = new javax.swing.JButton();
+        lockFlowWidthCheckbox = new javax.swing.JCheckBox();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -965,7 +968,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawControlPointsCheckBox, gridBagConstraints);
@@ -978,7 +981,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawLineSegmentsCheckBox, gridBagConstraints);
@@ -991,7 +994,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
@@ -999,7 +1002,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel9.setText("Map Layers");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel9, gridBagConstraints);
 
@@ -1014,7 +1017,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(3, 0, 5, 0);
@@ -1067,7 +1070,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1103,7 +1106,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawCanvasPaddingCheckbox, gridBagConstraints);
@@ -1116,7 +1119,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 22, 0);
@@ -1131,7 +1134,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
@@ -1146,7 +1149,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         mapControlPanel.add(jButton1, gridBagConstraints);
 
@@ -1159,7 +1162,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.insets = new java.awt.Insets(13, 0, 0, 0);
         mapControlPanel.add(deleteSelectedFeaturesButton, gridBagConstraints);
@@ -1172,7 +1175,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(editFlowValueButton, gridBagConstraints);
 
@@ -1185,7 +1188,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 12;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(reverseFlowDirectionButton, gridBagConstraints);
 
@@ -1197,9 +1200,22 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(straightenAllFlowsButton, gridBagConstraints);
+
+        lockFlowWidthCheckbox.setText("Lock Flow Width");
+        lockFlowWidthCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lockFlowWidthCheckboxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(lockFlowWidthCheckbox, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2265,10 +2281,14 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
 
     private void arrowheadSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadSizeSliderStateChanged
-        if (model.isDrawArrows() && model != null) {
+        if (updatingGUI == false && model.isDrawArrows() && model != null) {
             model.setArrowLengthScaleFactor((arrowheadSizeSlider.getValue() + 1) / 1000d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
+            if(!arrowheadSizeSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Head Size");
+            }
+            
         }
     }//GEN-LAST:event_arrowheadSizeSliderStateChanged
 
@@ -2674,6 +2694,22 @@ public class MainWindow extends javax.swing.JFrame {
         redo();
     }//GEN-LAST:event_redoMenuItemActionPerformed
 
+    private void lockFlowWidthCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFlowWidthCheckboxActionPerformed
+        // Checking?
+        if(lockFlowWidthCheckbox.isSelected()) {
+            // Set locked to true, pass current scale to model
+            model.setFlowWidthLocked(true);
+            model.setLockedMapScale(mapComponent.getScale());
+        } else {
+            model.setFlowWidthLocked(false);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+            
+        // unchecking? 
+            // Set locked to false, pass nothing!
+    }//GEN-LAST:event_lockFlowWidthCheckboxActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -2828,6 +2864,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton keepForcesConstantToggleButton;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
+    private javax.swing.JCheckBox lockFlowWidthCheckbox;
     private javax.swing.JButton lockSelectedFlowsButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;

@@ -169,6 +169,16 @@ public class Model {
     private boolean controlPtIsSelected = false;
 
     /**
+     * Flag to indicate when the flow width is locked to the current map scale.
+     */
+    private boolean flowWidthLocked = false;
+    
+    /**
+     * The map scale at the time it was locked.
+     */
+    private double lockedMapScale = 1;
+    
+    /**
      * Determines the maximum number of intermediate nodes per flow. This is
      * modified by a comboBox in the GUI (low, medium, high).
      */
@@ -1126,6 +1136,34 @@ public class Model {
      */
     public void setFlowNodeDensity(FlowNodeDensity flowNodeDensity) {
         this.flowNodeDensity = flowNodeDensity;
+    }
+
+    /**
+     * @return the flowWidthLocked
+     */
+    public boolean isFlowWidthLocked() {
+        return flowWidthLocked;
+    }
+
+    /**
+     * @param flowWidthLocked the flowWidthLocked to set
+     */
+    public void setFlowWidthLocked(boolean flowWidthLocked) {
+        this.flowWidthLocked = flowWidthLocked;
+    }
+
+    /**
+     * @return the lockedMapScale
+     */
+    public double getLockedMapScale() {
+        return lockedMapScale;
+    }
+
+    /**
+     * @param lockedMapScale the lockedMapScale to set
+     */
+    public void setLockedMapScale(double lockedMapScale) {
+        this.lockedMapScale = lockedMapScale;
     }
     
     

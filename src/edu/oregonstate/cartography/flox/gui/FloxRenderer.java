@@ -53,6 +53,16 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private final Model model;
 
     /**
+     * Flag to indicate when the flow width is locked to the current map scale.
+     */
+    private boolean flowWidthLocked = false;
+    
+    /**
+     * The map scale at the time it was locked.
+     */
+    private double lockedScale;
+    
+    /**
      * Renders the flows to an image.
      *
      * @param model The flows to render.
@@ -268,7 +278,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
 
             // Draw the flow
-            double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale();
+            double strokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale() 
+                    * getLockedFlowWidthScaleFactor();
             g2d.setStroke(new BasicStroke((float) strokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             if (flow.isSelected() && flow.isLocked()) {
@@ -531,6 +542,16 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             for (Geometry geometry : endClipAreas) {
                 draw(geometry, null, Color.GRAY);
             }
+        }
+    }
+    
+    private double getLockedFlowWidthScaleFactor() {
+        if(!model.isFlowWidthLocked()) {
+            return 1;
+        } else {
+            // compare the locked scale to the current scale
+            double lockedMapScale = model.getLockedMapScale();
+            return scale/lockedMapScale;
         }
     }
 }

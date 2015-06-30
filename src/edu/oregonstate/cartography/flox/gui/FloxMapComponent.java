@@ -59,6 +59,17 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     private boolean drawStartClipAreas = false;
     
+    /**
+     * Flag to indicate when the flow width is locked to the current map scale.
+     */
+    private boolean flowWidthLocked = false;
+    
+    /**
+     * The map scale at the time it was locked.
+     */
+    private double lockedScale;
+    
+    
     public FloxMapComponent() {
     }
 
