@@ -309,7 +309,7 @@ public class Model {
      * @return The number of flows.
      */
     public int getNbrFlows() {
-        return graph.getNbrFlows();
+        return graph.edgeSet().size();
     }
 
     /**
@@ -319,7 +319,7 @@ public class Model {
      * @return The number of nodes.
      */
     public int getNbrNodes() {
-        return graph.getNbrNodes();
+        return graph.vertexSet().size();
     }
 
     /**
@@ -332,11 +332,11 @@ public class Model {
     }
     
     public void deleteFlow(Flow flow) {
-        graph.deleteFlow(flow);
+        graph.removeEdge(flow);
     }
 
     public void deleteNode(Point node) {
-        graph.deleteNode(node);
+        graph.removeVertex(node);
     }
 
     /**

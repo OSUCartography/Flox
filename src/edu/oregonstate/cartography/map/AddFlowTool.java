@@ -129,6 +129,8 @@ public class AddFlowTool extends MapTool {
         // now. 
         newFlow.bend(0, 0);
         
+        // FIXME test whether start and end point are identical to avoid 
+        // exception due to the attempt of creating a loop
         model.addFlow(newFlow);
         
         // Set the longestFlowLength field needed for computing intermediate
