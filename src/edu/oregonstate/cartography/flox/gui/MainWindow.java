@@ -41,6 +41,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
@@ -63,6 +64,13 @@ public class MainWindow extends javax.swing.JFrame {
      * timer for animated drawing of layout process
      */
     private Timer timer = null;
+
+    /**
+     * Undo/redo manager.
+     */
+    private final Undo undo;
+
+    private boolean updatingGUI = false;
 
     /**
      * Creates new form MainWindow
@@ -102,6 +110,50 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.requestFocusInWindow();
 
         updateClippingGUI();
+
+        try {
+            this.undo = new Undo(new Model().marshal());
+            undo.registerUndoMenuItems(undoMenuItem, redoMenuItem);
+        } catch (JAXBException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    private void byteArrayToModel(byte[] buf) {
+        if (buf == null) {
+            return;
+        }
+        try {
+            setModel(Model.unmarshal(buf));
+        } catch (JAXBException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    protected void registerUndoMenuItems(JMenuItem undoMenuItem, JMenuItem redoMenuItem) {
+        undo.registerUndoMenuItems(undoMenuItem, redoMenuItem);
+    }
+
+    protected void undo() {
+        Object undoData = undo.getUndo();
+        if (undoData != null) {
+            byteArrayToModel((byte[]) undoData);
+        }
+    }
+
+    protected void redo() {
+        Object undoData = undo.getRedo();
+        if (undoData != null) {
+            byteArrayToModel((byte[]) undoData);
+        }
+    }
+
+    private void addUndo(String message) {
+        try {
+            undo.add(message, model.marshal());
+        } catch (JAXBException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -113,6 +165,8 @@ public class MainWindow extends javax.swing.JFrame {
         assert (model != null);
         this.model = model;
         mapComponent.setModel(model);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
         writeModelToGUI();
     }
 
@@ -120,7 +174,12 @@ public class MainWindow extends javax.swing.JFrame {
      * Write the data values from the model to the GUI elements
      */
     private void writeModelToGUI() {
-        if (model != null) {
+        if (model == null) {
+            return;
+        }
+
+        updatingGUI = true;
+        try {
             // Arrow Settings
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
             addArrowsCheckbox.setSelected(model.isDrawArrows());
@@ -142,14 +201,16 @@ public class MainWindow extends javax.swing.JFrame {
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
-            if(model.getFlowNodeDensity()==FlowNodeDensity.LOW) {
+            if (model.getFlowNodeDensity() == FlowNodeDensity.LOW) {
                 flowNodeDensityComboBox.setSelectedIndex(0);
-            } else if (model.getFlowNodeDensity()==FlowNodeDensity.MEDIUM) {
+            } else if (model.getFlowNodeDensity() == FlowNodeDensity.MEDIUM) {
                 flowNodeDensityComboBox.setSelectedIndex(1);
             } else {
                 flowNodeDensityComboBox.setSelectedIndex(2);
             }
             updateClippingGUI();
+        } finally {
+            updatingGUI = false;
         }
     }
 
@@ -295,6 +356,9 @@ public class MainWindow extends javax.swing.JFrame {
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportCSVMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
+        editMenu = new javax.swing.JMenu();
+        undoMenuItem = new javax.swing.JMenuItem();
+        redoMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
@@ -1541,6 +1605,28 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(fileMenu);
 
+        editMenu.setText("Edit");
+
+        undoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        undoMenuItem.setText("Undo");
+        undoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                undoMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(undoMenuItem);
+
+        redoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        redoMenuItem.setText("Redo");
+        redoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                redoMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(redoMenuItem);
+
+        menuBar.add(editMenu);
+
         mapMenu.setText("Map");
 
         removeAllLayersMenuItem.setText("Remove All Layers");
@@ -1719,7 +1805,7 @@ public class MainWindow extends javax.swing.JFrame {
             model.setFlowWidthScale(20 / maxFlowValue);
             flowScaleFormattedTextField.setValue(model.getFlowWidthScale());
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
-            forceLayout();
+            layout("Load Flows");
             mapComponent.showAll();
         }
     }
@@ -1962,21 +2048,21 @@ public class MainWindow extends javax.swing.JFrame {
     private void exponentSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_exponentSliderStateChanged
         if (exponentSlider.getValueIsAdjusting() == false) {
             model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
-            forceLayout();
+            layout("Exponent");
         }
     }//GEN-LAST:event_exponentSliderStateChanged
 
     private void longestFlowStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_longestFlowStiffnessSliderStateChanged
         if (longestFlowStiffnessSlider.getValueIsAdjusting() == false && model != null) {
             model.setMaxFlowLengthSpringConstant(longestFlowStiffnessSlider.getValue() / 100d);
-            forceLayout();
+            layout("Flow Stiffness");
         }
     }//GEN-LAST:event_longestFlowStiffnessSliderStateChanged
 
     private void zeroLengthStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_zeroLengthStiffnessSliderStateChanged
         if (zeroLengthStiffnessSlider.getValueIsAdjusting() == false && model != null) {
             model.setMinFlowLengthSpringConstant(zeroLengthStiffnessSlider.getValue() / 100d);
-            forceLayout();
+            layout("Zero Length Stiffness");
         }
     }//GEN-LAST:event_zeroLengthStiffnessSliderStateChanged
 
@@ -1995,7 +2081,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void selfForcesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selfForcesCheckBoxActionPerformed
         if (model != null) {
             model.setFlowExertingForcesOnItself(selfForcesCheckBox.isSelected());
-            forceLayout();
+            layout("Self-Forces");
         }
 
     }//GEN-LAST:event_selfForcesCheckBoxActionPerformed
@@ -2003,21 +2089,21 @@ public class MainWindow extends javax.swing.JFrame {
     private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
         if (nodeWeightSlider.getValueIsAdjusting() == false) {
             model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
-            forceLayout();
+            layout("Node Weight");
         }
     }//GEN-LAST:event_nodeWeightSliderStateChanged
 
     private void antiTorsionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_antiTorsionSliderStateChanged
         if (antiTorsionSlider.getValueIsAdjusting() == false) {
             model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
-            forceLayout();
+            layout("Anti-Torsion");
         }
     }//GEN-LAST:event_antiTorsionSliderStateChanged
 
     private void peripheralStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_peripheralStiffnessSliderStateChanged
         if (peripheralStiffnessSlider.getValueIsAdjusting() == false) {
             model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
-            forceLayout();
+            layout("Peripheral Stiffness");
         }
     }//GEN-LAST:event_peripheralStiffnessSliderStateChanged
 
@@ -2028,7 +2114,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void enforceRangeboxCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enforceRangeboxCheckboxActionPerformed
         if (model != null) {
             model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
-            forceLayout();
+            layout("Enforce Range Box");
         }
 
     }//GEN-LAST:event_enforceRangeboxCheckboxActionPerformed
@@ -2109,7 +2195,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.repaint();
         }
         if (canvasSizeSlider.getValueIsAdjusting() == false) {
-            forceLayout();
+            layout("Canvas Size");
         }
     }//GEN-LAST:event_canvasSizeSliderStateChanged
 
@@ -2124,7 +2210,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
         if (flowRangeboxSizeSlider.getValueIsAdjusting() == false) {
-            forceLayout();
+            layout("Flow Rangebox Size");
         }
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
@@ -2260,7 +2346,7 @@ public class MainWindow extends javax.swing.JFrame {
         } else {
             model.removeEndClipAreasFromFlows();
         }
-        forceLayout();
+        layout("Clip with End Areas");
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
         updateClippingGUI();
@@ -2270,7 +2356,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ("value".equals(evt.getPropertyName())) {
             double d = ((Number) endAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
             model.setEndClipAreaBufferDistance(d);
-            forceLayout();
+            layout("Buffered Distance");
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -2356,7 +2442,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ("value".equals(evt.getPropertyName())) {
             double d = ((Number) startAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
             model.setStartClipAreaBufferDistance(d);
-            forceLayout();
+            layout("Buffer Distance");
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -2374,7 +2460,7 @@ public class MainWindow extends javax.swing.JFrame {
         } else {
             model.removeStartClipAreasFromFlows();
         }
-        forceLayout();
+        layout("Clipe with Start Areas");
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
         updateClippingGUI();
@@ -2433,7 +2519,7 @@ public class MainWindow extends javax.swing.JFrame {
         while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
             if (flow.isSelected()) {
-                if(flow.isLocked()) {
+                if (flow.isLocked()) {
                     flow.setLocked(false);
                 } else {
                     flow.setLocked(true);
@@ -2503,7 +2589,7 @@ public class MainWindow extends javax.swing.JFrame {
                 double value = selectedFlows.get(0).getValue();
                 while (newValue <= 0) {
                     String userInput = (String) JOptionPane.showInputDialog(
-                            this, 
+                            this,
                             "Current Flow Value: " + value + "\n"
                             + "Input a new numerical value over zero");
                     try {
@@ -2522,7 +2608,7 @@ public class MainWindow extends javax.swing.JFrame {
                             "Input a new numerical value over zero");
                     try {
                         newValue = Double.parseDouble(userInput);
-                        for(Flow flow : selectedFlows) {
+                        for (Flow flow : selectedFlows) {
                             flow.setValue(newValue);
                         }
                     } catch (NumberFormatException nfe) {
@@ -2541,22 +2627,22 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void reverseFlowDirectionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionButtonActionPerformed
         ArrayList<Flow> flows = model.getSelectedFlows();
-        for(Flow flow: flows) {
+        for (Flow flow : flows) {
             flow.reverseFlow();
         }
-        
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_reverseFlowDirectionButtonActionPerformed
 
     private void keepForcesConstantToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_keepForcesConstantToggleButtonActionPerformed
-            forceLayout();
+        layout("Keep Forces Constant");
     }//GEN-LAST:event_keepForcesConstantToggleButtonActionPerformed
 
     private void straightenAllFlowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenAllFlowsButtonActionPerformed
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
-        
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_straightenAllFlowsButtonActionPerformed
@@ -2578,7 +2664,19 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_flowNodeDensityComboBoxItemStateChanged
 
-    private void forceLayout() {
+    private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoMenuItemActionPerformed
+        undo();
+    }//GEN-LAST:event_undoMenuItemActionPerformed
+
+    private void redoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redoMenuItemActionPerformed
+        redo();
+    }//GEN-LAST:event_redoMenuItemActionPerformed
+
+    private void layout(String undoString) {
+        if (updatingGUI) {
+            return;
+        }
+        addUndo(undoString);
         
         // If there are no flows, exit the method.
         if (model.getNbrFlows() == 0) {
@@ -2593,34 +2691,34 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
         ForceLayouter layouter = new ForceLayouter(model);
-        
-        if(!keepForcesConstantToggleButton.isSelected()) {
+
+        if (!keepForcesConstantToggleButton.isSelected()) {
             layouter.straightenFlows();
         }
-        
+
         model.setCanvas(model.getFlowsBoundingBox());
 
         if (timer != null) {
             timer.stop();
         }
         progressBar.setVisible(true);
-        LayoutActionListener listener = new LayoutActionListener(layouter, 
+        LayoutActionListener listener = new LayoutActionListener(layouter,
                 keepForcesConstantToggleButton.isSelected());
         timer = new Timer(0, listener);
         timer.start();
     }
 
     class LayoutActionListener implements ActionListener {
-        
+
         private int NBR_ITERATIONS;
         private final ForceLayouter layouter;
         private int counter = 0;
         private boolean constant = false;
         double weight;
-        
+
         public LayoutActionListener(ForceLayouter layouter, boolean constant) {
             this.layouter = layouter;
-            if(constant) {
+            if (constant) {
                 NBR_ITERATIONS = 100000;
                 weight = 0.75;
             } else {
@@ -2631,15 +2729,14 @@ public class MainWindow extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             mapComponent.eraseBufferImage();
-            
+
             //layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
-            
-            if(constant) {
+            if (constant) {
                 layouter.layoutAllFlows(weight);
             } else {
                 layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
             }
-            
+
             mapComponent.repaint();
             if (++counter > NBR_ITERATIONS) {
                 timer.stop();
@@ -2683,6 +2780,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JComboBox drawingOrderComboBox;
     private javax.swing.JButton editFlowValueButton;
+    private javax.swing.JMenu editMenu;
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
     private javax.swing.JSlider exponentSlider;
@@ -2745,6 +2843,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JPanel progressBarPanel;
     private javax.swing.JRadioButton quadraticCurvesRadioButton;
+    private javax.swing.JMenuItem redoMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JButton reverseFlowDirectionButton;
@@ -2762,6 +2861,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;
+    private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;

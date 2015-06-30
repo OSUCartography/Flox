@@ -58,9 +58,9 @@ public class CSVFlowExporter {
                 str.append(qFlow.value);
                 str.append(",");
 
-                str.append(qFlow.cPt.x);
+                str.append(qFlow.getCtrlPt().x);
                 str.append(",");
-                str.append(qFlow.cPt.y);
+                str.append(qFlow.getCtrlPt().y);
                 str.append(",");
 
                 if (qFlow.isLocked()) {

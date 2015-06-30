@@ -21,7 +21,7 @@ public class QuadraticBezierFlow extends Flow {
     /**
      * control point.
      */
-    public Point cPt;
+    private Point cPt;
 
     /**
      * Construct a QuadraticBezierFlow from 2 irregularPoints
@@ -122,7 +122,7 @@ public class QuadraticBezierFlow extends Flow {
     @Override
     public Rectangle2D.Double getBoundingBox() {
         // Bezier curve is guaranteed to be within the convex hull defined by 
-        // the four irregularPoints.
+        // the start, end and control points.
         Rectangle2D.Double bb = new Rectangle2D.Double(startPt.x, startPt.y, 0, 0);
         bb.add(endPt.x, endPt.y);
         bb.add(cPt.x, cPt.y);
@@ -143,7 +143,7 @@ public class QuadraticBezierFlow extends Flow {
      *
      * @param cPt the control point to set
      */
-    public void setcPt(Point cPt) {
+    public void setControlPoint(Point cPt) {
         this.cPt = cPt;
     }
 

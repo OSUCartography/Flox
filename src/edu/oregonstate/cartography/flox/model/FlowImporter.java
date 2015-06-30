@@ -31,7 +31,6 @@ public class FlowImporter {
         ArrayList<Flow> flows = new ArrayList<>();
 
         String l;
-        boolean hasControlPoint = false;
         boolean locked = false;
         while ((l = reader.readLine()) != null) {
             StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
@@ -40,14 +39,13 @@ public class FlowImporter {
             double x2 = Double.parseDouble(tokenizer.nextToken());
             double y2 = Double.parseDouble(tokenizer.nextToken());
             double value = Double.parseDouble(tokenizer.nextToken());
-            double c1x = 0;
-            double c1y = 0;
-
+            
             // Are there control point coordinates?
+            Point cPt = null;
             if (tokenizer.hasMoreTokens()) {
-                hasControlPoint = true;
-                c1x = Double.parseDouble(tokenizer.nextToken());
-                c1y = Double.parseDouble(tokenizer.nextToken());
+                double cx = Double.parseDouble(tokenizer.nextToken());
+                double cy = Double.parseDouble(tokenizer.nextToken());
+                cPt = new Point(cx, cy);
             }
 
             if (tokenizer.hasMoreTokens()) {
@@ -59,11 +57,10 @@ public class FlowImporter {
             QuadraticBezierFlow flow = new QuadraticBezierFlow(new Point(x1, y1), new Point(x2, y2));
             flow.setValue(value);
 
-            if (hasControlPoint) {
-                Point cPt = new Point(c1x, c1y);
-                flow.setcPt(cPt);
-                flow.setLocked(locked);
+            if (cPt != null) {                
+                flow.setControlPoint(cPt);
             }
+            flow.setLocked(locked);
 
             flows.add(flow);
         }
