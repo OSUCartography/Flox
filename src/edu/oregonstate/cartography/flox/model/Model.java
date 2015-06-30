@@ -18,7 +18,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,8 +30,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DirectedMultigraph;
 
 /**
  * Model for Flox.
@@ -76,8 +73,10 @@ public class Model {
      * Graph of edges (CubicBezierFlow) and nodes (Point)
      */
     @XmlJavaTypeAdapter(GraphSerializer.class)
-    private DirectedGraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
+    //private DirectedGraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
 
+    private Graph graph = new Graph();
+    
     /**
      * Used by the Arrow class to determine the length of arrowheads.
      */
@@ -221,15 +220,6 @@ public class Model {
     public Model() {
     }
 
-    public void deleteFlow(Flow flow) {
-        graph.removeEdge(flow);
-        // If no
-    }
-
-    public void deleteNode(Point node) {
-        graph.removeVertex(node);
-    }
-
     private static JAXBContext getJAXBContext() throws JAXBException {
         String packageName = Model.class.getPackage().getName();
         return JAXBContext.newInstance(packageName, Model.class.getClassLoader());
@@ -321,7 +311,7 @@ public class Model {
      * @return The number of flows.
      */
     public int getNbrFlows() {
-        return graph.edgeSet().size();
+        return graph.getNbrFlows();
     }
 
     /**
@@ -331,7 +321,7 @@ public class Model {
      * @return The number of nodes.
      */
     public int getNbrNodes() {
-        return graph.vertexSet().size();
+        return graph.getNbrNodes();
     }
 
     /**
@@ -340,19 +330,16 @@ public class Model {
      * @param flow The flow to add.
      */
     public void addFlow(Flow flow) {
-        addFlow(flow, graph);
+        graph.addFlow(flow);
     }
     
-    public static void addFlow(Flow flow, DirectedGraph<Point, Flow> graph) {
-        Point startPoint = findNodeInGraph(flow.getStartPt(), graph);
-        Point endPoint = findNodeInGraph(flow.getEndPt(), graph);
-        flow.setStartPt(startPoint);
-        flow.setEndPt(endPoint);
-        graph.addVertex(startPoint);
-        graph.addVertex(endPoint);
-        graph.addEdge(startPoint, endPoint, flow);
+    public void deleteFlow(Flow flow) {
+        graph.deleteFlow(flow);
     }
-    
+
+    public void deleteNode(Point node) {
+        graph.deleteNode(node);
+    }
 
     /**
      * Searches for a point in the graph with the specified coordinates
@@ -362,20 +349,9 @@ public class Model {
      * point if no point with the same coordinates exist in the graph.
      */
     private Point findNodeInGraph(Point target) {
-        return findNodeInGraph(target, graph);
+        return graph.findNodeInGraph(target);
     }
     
-    static public Point findNodeInGraph(Point target, DirectedGraph<Point, Flow> graph) {
-        Iterator<Point> iter = graph.vertexSet().iterator();
-        while (iter.hasNext()) {
-            Point pt = iter.next();
-            if (pt.x == target.x && pt.y == target.y) {
-                return pt;
-            }
-        }
-        return target;
-    }
-
     /**
      * Replace the current flows with new flows.
      *
@@ -393,7 +369,7 @@ public class Model {
      * Remove all flows.
      */
     public void clearFlows() {
-        graph = new DirectedMultigraph<>(CubicBezierFlow.class);
+        graph.clearFlows();
     }
 
     /**
@@ -551,16 +527,7 @@ public class Model {
      * @return
      */
     public Rectangle2D getFlowsBoundingBox() {
-        int nFlows = graph.edgeSet().size();
-        if (nFlows < 1) {
-            return null;
-        }
-        Iterator<Flow> iter = graph.edgeSet().iterator();
-        Rectangle2D bb = iter.next().getBoundingBox();
-        while (iter.hasNext()) {
-            bb = bb.createUnion(iter.next().getBoundingBox());
-        }
-        return bb;
+        return graph.getFlowsBoundingBox();
     }
 
     /**
@@ -583,7 +550,7 @@ public class Model {
      * @return The iterator.
      */
     public Iterator<Flow> flowIterator() {
-        return graph.edgeSet().iterator();
+        return graph.flowIterator();
     }
 
     /**
@@ -592,7 +559,7 @@ public class Model {
      * @return All flows.
      */
     public ArrayList<Flow> getFlows() {
-        return new ArrayList<>(graph.edgeSet());
+        return graph.getFlows();
     }
 
     /**
@@ -602,18 +569,7 @@ public class Model {
      * @return A list with all ordered flows.
      */
     public ArrayList<Flow> getOrderedFlows(boolean increasing) {
-        ArrayList<Flow> flows = new ArrayList<>(graph.edgeSet());
-        java.util.Collections.sort(flows, new Comparator<Flow>() {
-            @Override
-            public int compare(Flow flow1, Flow flow2) {
-                if (increasing) {
-                    return Double.compare(flow1.getValue(), flow2.getValue());
-                } else {
-                    return Double.compare(flow2.getValue(), flow1.getValue());
-                }
-            }
-        });
-        return flows;
+        return graph.getOrderedFlows(increasing);
     }
 
     /**
@@ -622,7 +578,7 @@ public class Model {
      * @return The iterator.
      */
     public Iterator<Point> nodeIterator() {
-        return graph.vertexSet().iterator();
+        return graph.nodeIterator();
     }
 
     /**
@@ -631,7 +587,7 @@ public class Model {
      * @return All nodes.
      */
     public ArrayList<Point> getNodes() {
-        return new ArrayList<>(graph.vertexSet());
+        return graph.getNodes();
     }
 
     /**
@@ -640,19 +596,7 @@ public class Model {
      * @return The maximum flow value.
      */
     public double getMaxFlowValue() {
-        int nFlows = graph.edgeSet().size();
-        if (nFlows < 1) {
-            return 0;
-        }
-        Iterator<Flow> iter = flowIterator();
-        double max = iter.next().value;
-        while (iter.hasNext()) {
-            double v = iter.next().getValue();
-            if (v > max) {
-                max = v;
-            }
-        }
-        return max;
+        return graph.getMaxFlowValue();
     }
 
     /**
