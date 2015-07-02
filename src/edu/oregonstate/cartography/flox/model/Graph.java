@@ -171,4 +171,20 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
         }
         return max;
     }
+    
+    public double getMaxNodeValue() {
+        int nNodes = vertexSet().size();
+        if (nNodes < 1) {
+            return 0;
+        }
+        Iterator<Point> iter = nodeIterator();
+        double max = iter.next().getValue();
+        while(iter.hasNext()) {
+            double v = iter.next().getValue();
+            if (v > max) {
+                max = v;
+            }
+        }
+        return max;
+    }
 }

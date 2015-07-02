@@ -175,6 +175,19 @@ public class Model {
     }
     
     /**
+     * Maximum allowed node radius in pixels.
+     */
+    private double maxNodeSize = 10;
+    
+    public double getNodeSizeScaleFactor () {
+        return getMaxNodeSize() / getMaxNodeValue();
+    }
+    
+    public double getMaxNodeValue() {
+        return graph.getMaxNodeValue();
+    }
+    
+    /**
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
@@ -1166,6 +1179,20 @@ public class Model {
      */
     public void setMaxFlowStrokeWidth(double maxFlowStrokeWidth) {
         this.maxFlowStrokeWidth = maxFlowStrokeWidth;
+    }
+
+    /**
+     * @return the maxNodeSize
+     */
+    public double getMaxNodeSize() {
+        return maxNodeSize;
+    }
+
+    /**
+     * @param maxNodeSize the maxNodeSize to set
+     */
+    public void setMaxNodeSize(double maxNodeSize) {
+        this.maxNodeSize = maxNodeSize;
     }
     
     

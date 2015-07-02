@@ -38,11 +38,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private final float NODE_STROKE_WIDTH = 2;
 
     /**
-     * Radius of circles for start and end points (in pixels)
-     */
-    private final double R = 10;
-
-    /**
      * Radius of circles for control points (in pixels)
      */
     private final double CR = 3;
@@ -221,8 +216,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 // Draw arrows if the model says so
                 if (model.isDrawArrows()) {
 
-                    // Clip the flow by the node
-                    f = clipFlowByNode(f);
+                    // Clip the flow by the end node
+                    f = clipFlowByEndNode(f);
                     
                     // Clip the flow by the clipping area
                     f = getClippedFlow(f);
@@ -304,10 +299,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Point> iter = model.nodeIterator();
         while (iter.hasNext()) {
             Point pt = iter.next();
+            double r = getNodeRadius(pt);
             if (pt.isSelected()) {
-                drawCircle(pt.x, pt.y, R, Color.WHITE, Color.CYAN);
+                drawCircle(pt.x, pt.y, r, Color.WHITE, Color.CYAN);
             } else {
-                drawCircle(pt.x, pt.y, R, Color.WHITE, Color.BLACK);
+                drawCircle(pt.x, pt.y, r, Color.WHITE, Color.BLACK);
             }
 
         }
@@ -556,18 +552,21 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         return flow;
     }
     
-    private QuadraticBezierFlow clipFlowByNode (QuadraticBezierFlow flow) {
+    private QuadraticBezierFlow clipFlowByEndNode (QuadraticBezierFlow flow) {
         
         // Scale the node's radius + stroke/2 distance to world distance
         // This will eventually use the radius that is calculated from the 
         // node's value, but for now it's just the current radius of 10.
-        double nodeR = ((NODE_STROKE_WIDTH/2) + R)/scale;
+        double nodeR = ((NODE_STROKE_WIDTH/2) + getNodeRadius(flow.getEndPt()))/scale;
         
         // Clip the flow by that distance.
         double t = flow.getIntersectionTWithCircleAroundEndPoint(nodeR);
         return flow.split(t)[0];
     }
     
-    
+    private double getNodeRadius(Point node) {
+        return  Math.abs(node.getValue() 
+                * model.getNodeSizeScaleFactor() * getLockedScaleFactor());
+    }
     
 }

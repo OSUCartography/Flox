@@ -12,9 +12,12 @@ public final class Point {
     
     private boolean selected = false;
     
+    private double value;
+    
     public Point(double x, double y) {
         this.x = x;
         this.y = y;
+        this.value = 1;
     }
     
     /**
@@ -52,6 +55,20 @@ public final class Point {
     @Override
     public String toString() {
         return "[" + x + "/" + y + "]";
+    }
+
+    /**
+     * @return the value
+     */
+    public double getValue() {
+        return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(double value) {
+        this.value = value;
     }
     
 }
