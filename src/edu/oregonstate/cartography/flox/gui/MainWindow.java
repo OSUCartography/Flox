@@ -1204,7 +1204,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(straightenAllFlowsButton, gridBagConstraints);
 
-        lockFlowWidthCheckbox.setText("Lock Flow Width");
+        lockFlowWidthCheckbox.setText("Lock Layout to Current Scale");
         lockFlowWidthCheckbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lockFlowWidthCheckboxActionPerformed(evt);

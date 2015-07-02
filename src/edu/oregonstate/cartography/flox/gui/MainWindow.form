@@ -1416,7 +1416,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="lockFlowWidthCheckbox">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Lock Flow Width"/>
+                        <Property name="text" type="java.lang.String" value="Lock Layout to Current Scale"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="lockFlowWidthCheckboxActionPerformed"/>

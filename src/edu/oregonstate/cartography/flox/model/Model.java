@@ -160,7 +160,7 @@ public class Model {
 
     private double flowRangeboxHeight = .5;
 
-    private double flowDistanceFromEndPoint = 0.5d;
+    private double flowDistanceFromEndPoint = 5.0d;
 
     private boolean nodeIsSelected = false;
 

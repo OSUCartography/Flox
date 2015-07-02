@@ -180,7 +180,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         ArrayList<Flow> flows;
 
         // Determine location of the end point of flows based on the model
-        double r = model.getFlowDistanceFromEndPoint();
+        double r = model.getFlowDistanceFromEndPoint() / scale 
+                * getLockedScaleFactor();
 
         // Order the flows based on the model
         switch (model.getFlowOrder()) {
@@ -207,7 +208,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // This is done here so that the Arrow class will have access to 
             // the stroke width.
             double flowStrokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale() 
-                    * getLockedFlowWidthScaleFactor();
+                    * getLockedScaleFactor();
             
             // If flow is a CubicBezierFlow, just set the flowPath to 
             // the flow without any changes. 
@@ -539,7 +540,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
     
-    private double getLockedFlowWidthScaleFactor() {
+    private double getLockedScaleFactor() {
         if(!model.isFlowWidthLocked()) {
             return 1;
         } else {
