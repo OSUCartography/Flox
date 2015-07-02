@@ -18,20 +18,17 @@ public class Arrow {
 
     /**
      * The length of the arrowhead.
-     *
      */
     private double arrowLengthInWorldCoordinates;
 
-    private double arrowLengthInPx;
-
     /**
-     * The width of the arrowhead
+     * The width of the arrowhead.
      */
     private double arrowWidth;
 
     /**
      * The position of the arrowheads corners relative to the base of the
-     * arrowhead
+     * arrowhead.
      */
     private double arrowCornerPosition;
 
@@ -41,23 +38,7 @@ public class Arrow {
      */
     private QuadraticBezierFlow flow;
 
-    /**
-     * Returns the flow
-     *
-     * @return
-     */
-    public QuadraticBezierFlow getFlow() {
-        return flow;
-    }
-
-    /**
-     * Sets the flow
-     *
-     * @param flow
-     */
-    public void setFlow(QuadraticBezierFlow flow) {
-        this.flow = flow;
-    }
+    
 
     /**
      * The location of the base of the Arrow in world coordinates. Used to split
@@ -87,43 +68,43 @@ public class Arrow {
      */
     public Point corner1cPt = new Point(0, 0);
     public Point corner2cPt = new Point(0, 0);
-
+    
     /**
-     * Constructor for the Arrow. Collects various parameters from the model and
-     * locates the vertices of the arrow shape.
-     *
-     * @param flow
-     * @param model
+     * Constructor for the Arrow. Computes the location of the points comprising
+     * the arrow head based on the stroke width and azimuth of the flow.
+     * 
+     * @param flow The flow an arrow will be created for
+     * @param model The complete data model. Needed for scaling up the smallest
+     *              arrows
+     * @param flowStrokeWidth Determines the size of the arrow
+     * @param mapScale Needed for scaling to pixel values
+     * @param west Needed for scaling to pixel values
+     * @param north Needed for scaling to pixel values
      */
     public Arrow(QuadraticBezierFlow flow, Model model, double flowStrokeWidth,
             double mapScale, double west, double north) {
+        
+        // Gets the ratio of the flows stroke width to it's value. This ratio
+        // is the same for all drawn flows.
+        double valueToStrokeRatio = flowStrokeWidth / flow.getValue();
 
-        // Stores the value of the flow
-        double value = flow.getValue();
-        double valueToStrokeRatio = flowStrokeWidth / value;
+        // Get the max flow value, and get the stroke value of that width 
+        // based on the valueToStrokeRatio
+        double maxFlowStrokeWidth = model.getMaxFlowValue() * valueToStrokeRatio;
 
-        double maxValue = model.getMaxFlowValue();
-        double maxFlowStrokeWidth = maxValue * valueToStrokeRatio;
-
-        double valRatio = model.getArrowSizeRatio();
-
-        double valDiff = maxValue - value;
-        double plusVal = valDiff * valRatio;
-
+        // Get the differnce between this flows stroke size and the biggest
+        // stroke size.
         double strokeDiff = maxFlowStrokeWidth - flowStrokeWidth;
-        double plusStroke = strokeDiff * valRatio;
-
-        // Stores the scale factor that the model is currently applying to
-        // the flow values to determine their width.
-        //double flowWidthScale = model.getFlowWidthScale();
- 
+        
+        // Get a percentage of that difference based on valRatio
+        double plusStroke = strokeDiff * (model.getArrowSizeRatio());
 
         // Determine the distance of the tip of the arrow from the base.
         // Is scaled to the value of the flow, which itself is scaled by the 
         // scale factor of the model.
         //arrowLength = (model.getShortestFlowLength()) * model.getArrowLengthScaleFactor() 
         //        * (value + plusVal) * flowWidthScale;
-        arrowLengthInPx = (flowStrokeWidth + plusStroke)
+        double arrowLengthInPx = (flowStrokeWidth + plusStroke)
                 * model.getArrowLengthScaleFactor();
 
         arrowLengthInWorldCoordinates = arrowLengthInPx / mapScale;
@@ -198,4 +179,44 @@ public class Arrow {
 
     }
 
+    /**
+     * Generate the path of the line that will draw the arrowhead.
+     * @return 
+     */
+    public GeneralPath getArrowPath () {
+        
+        GeneralPath arrowPath = new GeneralPath();
+        
+        arrowPath.moveTo((baseInPx.x), (baseInPx.y));
+                    arrowPath.lineTo(
+                            (corner1.x), (corner1.y));
+                    arrowPath.quadTo(
+                            (corner1cPt.x), (corner1cPt.y),
+                            (tip.x), (tip.y));
+                    arrowPath.quadTo(
+                            (corner2cPt.x), (corner2cPt.y),
+                            (corner2.x), (corner2.y));
+                    arrowPath.lineTo((baseInPx.x), (baseInPx.y));
+        
+        return arrowPath;
+    }
+    
+    /**
+     * Returns the flow
+     *
+     * @return
+     */
+    public QuadraticBezierFlow getFlow() {
+        return flow;
+    }
+
+    /**
+     * Sets the flow
+     *
+     * @param flow
+     */
+    public void setFlow(QuadraticBezierFlow flow) {
+        this.flow = flow;
+    }
+    
 }
