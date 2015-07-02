@@ -18,9 +18,11 @@ public class Arrow {
 
     /**
      * The length of the arrowhead.
-    *
+     *
      */
-    private double arrowLength;
+    private double arrowLengthInWorldCoordinates;
+
+    private double arrowLengthInPx;
 
     /**
      * The width of the arrowhead
@@ -58,9 +60,15 @@ public class Arrow {
     }
 
     /**
-     * The location of the base of the Arrow
+     * The location of the base of the Arrow in world coordinates. Used to split
+     * the flow.
      */
-    public Point base;
+    public Point baseInWorld;
+
+    /**
+     * The pixel location of th base of the arrow. Used to draw the arrow.
+     */
+    public Point baseInPx;
 
     /**
      * The location of the tip of the Arrow
@@ -87,30 +95,43 @@ public class Arrow {
      * @param flow
      * @param model
      */
-    public Arrow(QuadraticBezierFlow flow, Model model) {
+    public Arrow(QuadraticBezierFlow flow, Model model, double flowStrokeWidth,
+            double mapScale, double west, double north) {
 
         // Stores the value of the flow
         double value = flow.getValue();
+        double valueToStrokeRatio = flowStrokeWidth / value;
+
         double maxValue = model.getMaxFlowValue();
+        double maxFlowStrokeWidth = maxValue * valueToStrokeRatio;
+
         double valRatio = model.getArrowSizeRatio();
-        
+
         double valDiff = maxValue - value;
         double plusVal = valDiff * valRatio;
-        
+
+        double strokeDiff = maxFlowStrokeWidth - flowStrokeWidth;
+        double plusStroke = strokeDiff * valRatio;
+
         // Stores the scale factor that the model is currently applying to
         // the flow values to determine their width.
-        double scale = model.getFlowWidthScale();
+        //double flowWidthScale = model.getFlowWidthScale();
+ 
 
         // Determine the distance of the tip of the arrow from the base.
         // Is scaled to the value of the flow, which itself is scaled by the 
         // scale factor of the model.
-        //arrowLength = model.getArrowLength() * (value + plusVal) * scale;
-        arrowLength = (model.getShortestFlowLength()) * model.getArrowLengthScaleFactor() * (value + plusVal) * scale;
+        //arrowLength = (model.getShortestFlowLength()) * model.getArrowLengthScaleFactor() 
+        //        * (value + plusVal) * flowWidthScale;
+        arrowLengthInPx = (flowStrokeWidth + plusStroke)
+                * model.getArrowLengthScaleFactor();
+
+        arrowLengthInWorldCoordinates = arrowLengthInPx / mapScale;
 
         // Determine the perpendicular distance of the corners of the arrow from 
         // a line drawn between the base and tip of the arrow.
-        //arrowWidth = model.getArrowWidth() * (value + plusVal) * scale;
-        arrowWidth = (model.getShortestFlowLength()) * model.getArrowWidthScaleFactor() * (value + plusVal) * scale;
+        arrowWidth = (flowStrokeWidth + plusStroke)
+                * model.getArrowWidthScaleFactor();
 
         // Get the arrowCornerPosition from the model. This value determines
         // the horizontal location of the corners of the Arrow
@@ -118,10 +139,16 @@ public class Arrow {
 
         // Get the t value of the location on the flow where the base of the 
         // arrowhead will sit
-        double t = flow.getIntersectionTWithCircleAroundEndPoint(arrowLength);
+        double t = flow.getIntersectionTWithCircleAroundEndPoint(arrowLengthInWorldCoordinates);
 
         // Set the base of the Arrow to the point on the curve determined above.
-        base = flow.pointOnCurve(t);
+        baseInWorld = flow.pointOnCurve(t);
+
+        // get the pixel coordinates of base
+        // Gonna just make a new version of xToPx and yToPx here. This would be
+        // better if it was somehow able to use existing methods. 
+        baseInPx = new Point((baseInWorld.x - west) * mapScale,
+                (north - baseInWorld.y) * mapScale);
 
         // Split the flow at the base point of the Arrow, plus a little bit.
         // The little bit is to provide sufficient overlap of the flow with the
@@ -138,36 +165,36 @@ public class Arrow {
         // the Arrow. This pulls various parameters from the model that are 
         // themselves modified by the GUI to change the shape of the Arrows. 
         // Locate the tip
-        tip.x = base.x + arrowLength;
-        tip.y = base.y;
+        tip.x = baseInPx.x + arrowLengthInPx;
+        tip.y = baseInPx.y;
 
         // Locate the first corner
-        corner1.x = base.x + (arrowLength * arrowCornerPosition);
-        corner1.y = base.y + arrowWidth;
+        corner1.x = baseInPx.x + (arrowLengthInPx * arrowCornerPosition);
+        corner1.y = baseInPx.y + arrowWidth;
 
         // Locate the first control point
-        corner1cPt.x = base.x + (corner1.x - base.x) + ((tip.x - corner1.x) * model.getArrowEdgeCtrlLength());
-        corner1cPt.y = base.y + arrowWidth * model.getArrowEdgeCtrlWidth();
+        corner1cPt.x = baseInPx.x + (corner1.x - baseInPx.x) + ((tip.x - corner1.x) * model.getArrowEdgeCtrlLength());
+        corner1cPt.y = baseInPx.y + arrowWidth * model.getArrowEdgeCtrlWidth();
 
         // locate the second corner
-        corner2.x = base.x + (arrowLength * arrowCornerPosition);
-        corner2.y = base.y - arrowWidth;
+        corner2.x = baseInPx.x + (arrowLengthInPx * arrowCornerPosition);
+        corner2.y = baseInPx.y - arrowWidth;
 
         // locate the second control point
-        corner2cPt.x = base.x + (corner2.x - base.x) + ((tip.x - corner2.x) * model.getArrowEdgeCtrlLength());
-        corner2cPt.y = base.y - arrowWidth * model.getArrowEdgeCtrlWidth();
+        corner2cPt.x = baseInPx.x + (corner2.x - baseInPx.x) + ((tip.x - corner2.x) * model.getArrowEdgeCtrlLength());
+        corner2cPt.y = baseInPx.y - arrowWidth * model.getArrowEdgeCtrlWidth();
 
         // Get the azimuth of the line connecting the base of the arrow to the
         // endPoint of the flow. This determines the azimuth of the Arrow.
-        double azimuth = GeometryUtils.computeAzimuth(base, flow.getEndPt());
+        double azimuth = GeometryUtils.computeAzimuth(baseInWorld, flow.getEndPt());
 
         // Rotate all the points that make up the shape of the Arrow, using
         // the Arrow's base point as the pivot.  
-        tip = tip.rotatePoint(base, azimuth);
-        corner1 = corner1.rotatePoint(base, azimuth);
-        corner2 = corner2.rotatePoint(base, azimuth);
-        corner1cPt = corner1cPt.rotatePoint(base, azimuth);
-        corner2cPt = corner2cPt.rotatePoint(base, azimuth);
+        tip = tip.rotatePoint(baseInPx, -azimuth);
+        corner1 = corner1.rotatePoint(baseInPx, -azimuth);
+        corner2 = corner2.rotatePoint(baseInPx, -azimuth);
+        corner1cPt = corner1cPt.rotatePoint(baseInPx, -azimuth);
+        corner2cPt = corner2cPt.rotatePoint(baseInPx, -azimuth);
 
     }
 

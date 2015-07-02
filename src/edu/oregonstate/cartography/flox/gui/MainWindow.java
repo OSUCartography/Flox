@@ -185,8 +185,8 @@ public class MainWindow extends javax.swing.JFrame {
             // Arrow Settings
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
             addArrowsCheckbox.setSelected(model.isDrawArrows());
-            arrowheadSizeSlider.setValue((int) (model.getArrowLengthScaleFactor() * 1000));
-            arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 1000));
+            arrowheadSizeSlider.setValue((int) (model.getArrowLengthScaleFactor() * 10));
+            arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 10));
             arrowEdgeCtrlLengthSlider.setValue((int) (model.getArrowEdgeCtrlLength() * 100));
             arrowEdgeCtrlWidthSlider.setValue((int) (model.getArrowEdgeCtrlWidth() * 100));
             arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
@@ -1286,6 +1286,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowheadWidthSlider.setMajorTickSpacing(25);
         arrowheadWidthSlider.setPaintLabels(true);
         arrowheadWidthSlider.setPaintTicks(true);
+        arrowheadWidthSlider.setValue(25);
         arrowheadWidthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
         arrowheadWidthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -2282,7 +2283,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadSizeSliderStateChanged
         if (updatingGUI == false && model.isDrawArrows() && model != null) {
-            model.setArrowLengthScaleFactor((arrowheadSizeSlider.getValue() + 1) / 1000d);
+            model.setArrowLengthScaleFactor((arrowheadSizeSlider.getValue() + 1) / 10d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
             if(!arrowheadSizeSlider.getValueIsAdjusting()) {
@@ -2294,7 +2295,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (model.isDrawArrows()) {
-            model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 1000d);
+            model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 10d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }

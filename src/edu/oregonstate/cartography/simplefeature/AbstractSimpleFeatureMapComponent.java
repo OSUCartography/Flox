@@ -228,6 +228,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         System.out.println("Scale: " + scale);
         eraseBufferImage();
         repaint();
+
     }
 
     /**
@@ -247,6 +248,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         System.out.println("Scale: " + scale);
         eraseBufferImage();
         repaint();
+
     }
 
     /**
