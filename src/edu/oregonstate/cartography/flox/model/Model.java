@@ -108,11 +108,8 @@ public class Model {
      */
     private double arrowSizeRatio = 0.0;
 
-    /**
-     * Scale factor to transform flow values to flow stroke widths.
-     */
-    private double flowWidthScale = 1;
-
+    
+    
     /**
      * if true, a flow exerts forces on itself.
      */
@@ -168,6 +165,15 @@ public class Model {
 
     private boolean controlPtIsSelected = false;
 
+    /**
+     * Maximum allowed flow width in pixels.
+     */
+    private double maxFlowStrokeWidth = 20;
+    
+    public double getFlowWidthScaleFactor () {
+        return getMaxFlowStrokeWidth() / getMaxFlowValue(); 
+    }
+    
     /**
      * Flag to indicate when the flow width is locked to the current map scale.
      */
@@ -754,24 +760,6 @@ public class Model {
     }
 
     /**
-     * Returns the scale factor applied to flow values when drawing the flows.
-     *
-     * @return the flowWidthScale
-     */
-    public double getFlowWidthScale() {
-        return flowWidthScale;
-    }
-
-    /**
-     * Sets the scale factor applied to flow values when drawing the flows.
-     *
-     * @param flowWidthScale the flowWidthScale to set
-     */
-    public void setFlowWidthScale(double flowWidthScale) {
-        this.flowWidthScale = flowWidthScale;
-    }
-
-    /**
      * @return the curveType
      */
     public CurveType getCurveType() {
@@ -1164,6 +1152,20 @@ public class Model {
      */
     public void setLockedMapScale(double lockedMapScale) {
         this.lockedMapScale = lockedMapScale;
+    }
+
+    /**
+     * @return the maxFlowStrokeWidth
+     */
+    public double getMaxFlowStrokeWidth() {
+        return maxFlowStrokeWidth;
+    }
+
+    /**
+     * @param maxFlowStrokeWidth the maxFlowStrokeWidth to set
+     */
+    public void setMaxFlowStrokeWidth(double maxFlowStrokeWidth) {
+        this.maxFlowStrokeWidth = maxFlowStrokeWidth;
     }
     
     

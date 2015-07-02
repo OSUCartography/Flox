@@ -207,7 +207,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // Calculate the stroke width of the flow based on its value.
             // This is done here so that the Arrow class will have access to 
             // the stroke width.
-            double flowStrokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScale() 
+            double flowStrokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
                     * getLockedScaleFactor();
             
             // If flow is a CubicBezierFlow, just set the flowPath to 
