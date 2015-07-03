@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -93,7 +94,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             Iterator flows = model.flowIterator();
             while (flows.hasNext()) {
                 QuadraticBezierFlow flow = ((QuadraticBezierFlow) flows.next());
-                if (flow.isSelected()) {
+                if (flow.isSelected() || 
+                        ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                     Point cPt = flow.getCtrlPt();
                     if (cPt.isSelected()) {
                         cPt.x += (point.x - previousDrag_x);

@@ -5,6 +5,7 @@
  */
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -200,7 +201,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         // if the model says a flow is currently selected, check to see if a 
         // control point is nearby, and select it if so.
-        if (model.isFlowIsSelected()) {
+        if (model.isFlowIsSelected() 
+                || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
             // Iterate througth the flows, checking to see if it is selected.
             Iterator flows = model.flowIterator();
             while (flows.hasNext()) {
@@ -208,7 +210,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 if (flow instanceof CubicBezierFlow) {
                     break;
                 }
-                if (flow.isSelected()) {
+                if (flow.isSelected() || 
+                        ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                     // See if the event point is near the control point.
                     Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
 
