@@ -180,7 +180,11 @@ public class Model {
     private double maxNodeSize = 10;
     
     public double getNodeSizeScaleFactor () {
-        return getMaxNodeSize() / getMaxNodeValue();
+        
+        // Get the area needed to satisfy the radius
+        double area = Math.PI * (maxNodeSize * maxNodeSize);
+        
+        return area / getMaxNodeValue();
     }
     
     public double getMaxNodeValue() {
@@ -709,6 +713,19 @@ public class Model {
         return selectedFlows;
     }
 
+    public ArrayList<Point> getSelectedNodes() {
+        
+        ArrayList<Point> selectedNodes = new ArrayList();
+        Iterator nodes = nodeIterator();
+        while (nodes.hasNext()) {
+            Point node = (Point) nodes.next();
+            if (node.isSelected()) {
+                selectedNodes.add(node);
+            }
+        }
+        return selectedNodes;
+    }
+    
     /**
      * Returns all map layers.
      *

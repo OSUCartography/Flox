@@ -317,6 +317,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel26 = new javax.swing.JLabel();
         maximumNodeSizeSlider = new javax.swing.JSlider();
         jLabel27 = new javax.swing.JLabel();
+        editSelectedNodeValueButton = new javax.swing.JButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -988,7 +989,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel9, gridBagConstraints);
 
-        layerListScrollPane.setPreferredSize(new java.awt.Dimension(220, 100));
+        layerListScrollPane.setPreferredSize(new java.awt.Dimension(220, 80));
 
         layerList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
@@ -1002,7 +1003,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 13;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 5, 0);
         mapControlPanel.add(layerListScrollPane, gridBagConstraints);
 
         symbolPanel.setLayout(new java.awt.GridBagLayout());
@@ -1055,7 +1055,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 14;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
         mapControlPanel.add(symbolPanel, gridBagConstraints);
 
         drawingOrderComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Largest First", "Smallest First", "Unordered" }));
@@ -1104,7 +1103,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 11;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         mapControlPanel.add(drawFlowRangeboxCheckbox, gridBagConstraints);
 
         addLayerButton.setText("+");
@@ -1144,9 +1142,8 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridy = 19;
         gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.insets = new java.awt.Insets(13, 0, 0, 0);
         mapControlPanel.add(deleteSelectedFeaturesButton, gridBagConstraints);
 
         editFlowValueButton.setText("Edit Selected Flow Value");
@@ -1170,7 +1167,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 17;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(reverseFlowDirectionButton, gridBagConstraints);
 
@@ -1182,7 +1179,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 17;
+        gridBagConstraints.gridy = 18;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(straightenAllFlowsButton, gridBagConstraints);
 
@@ -1223,9 +1220,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel26, gridBagConstraints);
 
-        maximumNodeSizeSlider.setMajorTickSpacing(20);
-        maximumNodeSizeSlider.setMinorTickSpacing(10);
-        maximumNodeSizeSlider.setPaintLabels(true);
+        maximumNodeSizeSlider.setMajorTickSpacing(1000);
         maximumNodeSizeSlider.setPaintTicks(true);
         maximumNodeSizeSlider.setPreferredSize(new java.awt.Dimension(220, 37));
         maximumNodeSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -1247,6 +1242,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
         mapControlPanel.add(jLabel27, gridBagConstraints);
+
+        editSelectedNodeValueButton.setText("Edit Selected Node Value");
+        editSelectedNodeValueButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editSelectedNodeValueButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridwidth = 3;
+        mapControlPanel.add(editSelectedNodeValueButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2751,6 +2758,49 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_maximumNodeSizeSliderStateChanged
 
+    private void editSelectedNodeValueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editSelectedNodeValueButtonActionPerformed
+        if (model.isNodeIsSelected()) {
+            ArrayList<Point> selectedNodes = new ArrayList<>(model.getSelectedNodes());
+            double newValue = 0;
+            if (selectedNodes.size() == 1) {
+                double value = selectedNodes.get(0).getValue();
+                while (newValue <= 0) {
+                    String userInput = (String) JOptionPane.showInputDialog(
+                            this,
+                            "Current Node Value: " + value + "\n"
+                            + "Input a new number over zero");
+                    try {
+                        newValue = Double.parseDouble(userInput);
+                        selectedNodes.get(0).setValue(newValue);
+                    } catch (NumberFormatException nfe) {
+                        newValue = 0;
+                    }
+                }
+                mapComponent.eraseBufferImage();
+                mapComponent.repaint();
+            } else {
+                while (newValue <= 0) {
+                    String userInput = (String) JOptionPane.showInputDialog(
+                            this,
+                            "Input a new numerical value over zero");
+                    try {
+                        newValue = Double.parseDouble(userInput);
+                        for (Point node : selectedNodes) {
+                            node.setValue(newValue);
+                        }
+                    } catch (NumberFormatException nfe) {
+                        JOptionPane.showMessageDialog(this, "Please enter a "
+                                + "number over 0");
+                    }
+                }
+                mapComponent.eraseBufferImage();
+                mapComponent.repaint();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select one node");
+        }
+    }//GEN-LAST:event_editSelectedNodeValueButtonActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -2860,6 +2910,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JComboBox drawingOrderComboBox;
     private javax.swing.JButton editFlowValueButton;
     private javax.swing.JMenu editMenu;
+    private javax.swing.JButton editSelectedNodeValueButton;
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
     private javax.swing.JSlider exponentSlider;

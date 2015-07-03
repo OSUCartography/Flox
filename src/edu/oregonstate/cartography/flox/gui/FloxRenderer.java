@@ -565,8 +565,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
     
     private double getNodeRadius(Point node) {
-        return  Math.abs(node.getValue() 
-                * model.getNodeSizeScaleFactor() * getLockedScaleFactor());
+        double area =  Math.abs(node.getValue() 
+                * model.getNodeSizeScaleFactor());
+        
+        return (Math.sqrt(area/Math.PI)) * getLockedScaleFactor();
     }
     
 }
