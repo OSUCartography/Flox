@@ -114,8 +114,8 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         }
         
         return nodeStr.append(flowStr.toString()).toString();
-        */
-    }
+        
+   }*/ 
     
     
     
