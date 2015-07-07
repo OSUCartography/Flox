@@ -2537,6 +2537,7 @@ public class MainWindow extends javax.swing.JFrame {
                 Model newModel = Model.unmarshal(filePath);
                 model.copyTransientFields(newModel);
                 setModel(newModel);
+                mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
             } catch (JAXBException | FileNotFoundException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
                 String msg = "Could not load file";
