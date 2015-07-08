@@ -12,98 +12,66 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class GraphSerializer extends XmlAdapter<String, Graph> {
 
-    // The old version of this, commented out below, is saved here
-    // in case we want to go back to the old way.
-    /*
-     @Override
-     public Graph unmarshal(String s) throws IOException {
-     BufferedReader reader = new BufferedReader(new StringReader(s));
-     ArrayList<Flow> flows = FlowImporter.readFlows(reader);
-    
-     Graph graph = new Graph();
-     for (Flow flow : flows) {            
-     graph.addFlow(flow);
-     }
-     return graph;
-     }
-
-     @Override
-     public String marshal(Graph graph) {
-     return CSVFlowExporter.exportToString(graph.flowIterator());
-     }
-     */
-    
-    
     @Override
     public Graph unmarshal(String s) throws IOException {
         BufferedReader reader = new BufferedReader(new StringReader(s));
 
         HashMap<String, Point> points = new HashMap<>();
         ArrayList<Flow> flows = new ArrayList<>();
+        Graph graph = new Graph();
+        
+        int numberOfNodes = Integer.parseInt(reader.readLine());
 
-        boolean onFlows = false;
-
+        if(numberOfNodes == 0) {
+            return graph;
+        }
+        
         String l;
-        while ((l = reader.readLine()) != null) {
 
-            System.out.println(l);
-            boolean locked = false;
+        // Read node data
+        for (int i = 0; i < numberOfNodes; i++) {
+            l = reader.readLine();
             StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
-
-            if (!onFlows) {
-                // Read node data
-                String id = tokenizer.nextToken();
-                
-                //FIXME
-                //If the ID is -1, it means the next line is flow data, not
-                //node data. This -1 gets put in here by the serializer when
-                //settings are saved. 
-                //This seems like a crappy way to do this. I don't think there's
-                //any chance a node's id could be -1 in the settings, but it
-                //might be nice someday if nodes that were imported from CSV 
-                //with ID's got to keep their IDs and were saved with those IDs 
-                //in the settings. This won't work in that case if the ID is a 
-                //string. Or -1. 
-                if (Integer.parseInt(id) == -1) {
-                    onFlows = true;
-                    continue;
-                }
-                
-                double x = Double.parseDouble(tokenizer.nextToken());
-                double y = Double.parseDouble(tokenizer.nextToken());
-                double nodeValue = Double.parseDouble(tokenizer.nextToken());
-                Point point = new Point(x, y);
-                point.setValue(nodeValue);
-                points.put(id, point);
-
-            } else {
-                // Read flow data
-                String startPtID = tokenizer.nextToken();
-                String endPtID = tokenizer.nextToken();
-                double cPtX = Double.parseDouble(tokenizer.nextToken());
-                double cPtY = Double.parseDouble(tokenizer.nextToken());
-                double flowValue = Double.parseDouble(tokenizer.nextToken());
-
-                if (Double.parseDouble(tokenizer.nextToken()) == 1) {
-                    locked = true;
-                }
-
-                Point startPoint = points.get(startPtID);
-                Point endPoint = points.get(endPtID);
-                Point cPoint = new Point(cPtX, cPtY);
-                QuadraticBezierFlow flow = new QuadraticBezierFlow(startPoint, endPoint);
-                flow.setValue(flowValue);
-                flow.setControlPoint(cPoint);
-                flow.setLocked(locked);
-                flows.add(flow);
-            }
+            String id = tokenizer.nextToken();
+            double x = Double.parseDouble(tokenizer.nextToken());
+            double y = Double.parseDouble(tokenizer.nextToken());
+            double nodeValue = Double.parseDouble(tokenizer.nextToken());
+            Point point = new Point(x, y);
+            point.setValue(nodeValue);
+            points.put(id, point);
 
         }
 
-        Graph graph = new Graph();
+        // Read flow data
+        while ((l = reader.readLine()) != null) {
+
+            StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
+            boolean locked = false;
+
+            String startPtID = tokenizer.nextToken();
+            String endPtID = tokenizer.nextToken();
+            double cPtX = Double.parseDouble(tokenizer.nextToken());
+            double cPtY = Double.parseDouble(tokenizer.nextToken());
+            double flowValue = Double.parseDouble(tokenizer.nextToken());
+
+            if (Double.parseDouble(tokenizer.nextToken()) == 1) {
+                locked = true;
+            }
+
+            Point startPoint = points.get(startPtID);
+            Point endPoint = points.get(endPtID);
+            Point cPoint = new Point(cPtX, cPtY);
+            QuadraticBezierFlow flow = new QuadraticBezierFlow(startPoint, endPoint);
+            flow.setValue(flowValue);
+            flow.setControlPoint(cPoint);
+            flow.setLocked(locked);
+            flows.add(flow);
+        }
+
         for (Flow flow : flows) {
             graph.addFlow(flow);
         }
+
         return graph;
     }
 
@@ -114,16 +82,11 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         // The string will be a new ID number.
         HashMap<Point, String> nodeMap = new HashMap<>();
 
-        // Use this to populate the nodeMap. Maybe. Might not need it.
-        ArrayList<Point> nodes = graph.getNodes();
-
         // Get the flows
         Iterator flows = graph.flowIterator();
 
         StringBuilder nodeStr = new StringBuilder();
         StringBuilder flowStr = new StringBuilder();
-
-        flowStr.append("-1\n");
 
         int key = 0;
         while (flows.hasNext()) {
@@ -176,6 +139,8 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
         // Make a string of the nodes in nodeMap
         // Key first, then coordinates
+        nodeStr.append(nodeMap.size());
+        nodeStr.append("\n");
         for (Map.Entry<Point, String> entry : nodeMap.entrySet()) {
             String id = entry.getValue();
             double x = entry.getKey().x;
