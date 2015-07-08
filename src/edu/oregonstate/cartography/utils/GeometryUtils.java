@@ -1,6 +1,11 @@
 package edu.oregonstate.cartography.utils;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import edu.oregonstate.cartography.flox.model.Flow;
+import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import java.awt.geom.Rectangle2D;
 import static java.lang.Double.isNaN;
@@ -225,4 +230,81 @@ public class GeometryUtils {
         }
         return angle;
     }
+    
+    public static Geometry getFlowBuffer(Flow flow, double bufferSize,
+            double deCasteljauTol) {
+        
+        // Turn the flow into a jts geometry polyline.
+        GeometryFactory geoFactory = new GeometryFactory();
+        LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geoFactory);
+        
+        ArrayList<Point> flowPoints
+                    = new ArrayList<>(flow.toStraightLineSegments(deCasteljauTol));
+        
+        for(Point point : flowPoints) {
+            lineBuilder.add(new Coordinate(point.x, point.y));
+        }
+        
+        Geometry flowGeom = lineBuilder.getGeometry();
+        
+        return flowGeom.buffer(bufferSize);
+    }
+    
+    public static Geometry getNodeBuffer(Point node, double bufferSize) {
+        
+        GeometryFactory geoFactory = new GeometryFactory();
+        
+        // Turn the node into a jts geometry.
+        Geometry nodeGeom = geoFactory.createPoint(new Coordinate(node.x, node.y));
+        
+        return nodeGeom.buffer(bufferSize);
+        
+    }
+    
+    public static boolean detectFlowNodeOverlap(Flow flow, Point node, 
+            Model model, double mapScale) {
+        
+        // Get the locked scale factor needed to calculate buffer widths.
+        double lockedScaleFactor;
+        if(!model.isFlowWidthLocked()) {
+            lockedScaleFactor = 1;
+        } else {
+            // compare the locked scale to the current scale
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = mapScale/lockedMapScale;
+        }
+        
+        double deCasteljauTol = model.getDeCasteljauTolerance();
+        
+        // Get the current stroke width of the flow in pixels
+        double flowStrokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
+                * lockedScaleFactor;
+        
+        // Find out what that width is in world coordinates
+        // Add a few pixels to the strokeWidth to account for the 
+        double worldStrokeWidth = (flowStrokeWidth)/mapScale;
+        
+        // Produce a buffer at that width
+        Geometry flowBuffer = getFlowBuffer(flow, worldStrokeWidth/2, deCasteljauTol);
+
+        // Get the current pixel radius of the node
+        double nodeArea = Math.abs(node.getValue() 
+                * model.getNodeSizeScaleFactor());
+        
+        double nodeRadius = (Math.sqrt(nodeArea/Math.PI)) * lockedScaleFactor;
+        
+        // Find out what that radius is in world coordinates
+        // Add a bit to make the buffer radius a few pixels wider than the
+        // actual node (and to accound for the nodes stroke width). 
+        double nodeWorldRadius = (nodeRadius + 4)/mapScale;
+        
+        // Produce a buffer at that radius
+        //Geometry nodeBuffer = nodeGeom.buffer(nodeWorldRadius);
+        Geometry nodeBuffer = getNodeBuffer(node, nodeWorldRadius);
+        
+        // Use jts overlaps method on the buffers, return the result
+        return nodeBuffer.overlaps(flowBuffer);
+        
+    }
+    
 }

@@ -122,7 +122,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
             // draw flows and nodes
             renderer.drawFlows();
-
+            
             renderer.drawNodes();
 
             if (isDrawFlowRangebox()) {
@@ -147,7 +147,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 renderer.drawClipAreas(drawStartClipAreas, drawEndClipAreas);
             }
         }
-
+        
         // copy double buffer image to JComponent
         Insets insets = getInsets();
         ((Graphics2D) g).drawImage(bufferImage, insets.left, insets.top, this);

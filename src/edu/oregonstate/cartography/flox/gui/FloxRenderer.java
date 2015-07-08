@@ -564,6 +564,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         return flow.split(t)[0];
     }
     
+    /**
+     * Get a node's radius in pixels for drawing.
+     * @param node
+     * @return 
+     */
     private double getNodeRadius(Point node) {
         double area =  Math.abs(node.getValue() 
                 * model.getNodeSizeScaleFactor());

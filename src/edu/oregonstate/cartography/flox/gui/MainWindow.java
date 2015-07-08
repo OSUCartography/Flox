@@ -23,6 +23,7 @@ import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
+import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -150,7 +151,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void addUndo(String message) {
         try {
-            if (updatingGUI == false){
+            if (updatingGUI == false) {
                 undo.add(message, model.marshal());
             }
         } catch (JAXBException ex) {
@@ -318,6 +319,7 @@ public class MainWindow extends javax.swing.JFrame {
         maximumNodeSizeSlider = new javax.swing.JSlider();
         jLabel27 = new javax.swing.JLabel();
         editSelectedNodeValueButton = new javax.swing.JButton();
+        selectFlowsCrossingNodesButton = new javax.swing.JButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -1220,7 +1222,9 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel26, gridBagConstraints);
 
-        maximumNodeSizeSlider.setMajorTickSpacing(1000);
+        maximumNodeSizeSlider.setMajorTickSpacing(20);
+        maximumNodeSizeSlider.setMinorTickSpacing(10);
+        maximumNodeSizeSlider.setPaintLabels(true);
         maximumNodeSizeSlider.setPaintTicks(true);
         maximumNodeSizeSlider.setPreferredSize(new java.awt.Dimension(220, 37));
         maximumNodeSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -1254,6 +1258,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 16;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(editSelectedNodeValueButton, gridBagConstraints);
+
+        selectFlowsCrossingNodesButton.setText("Select Flows Crossing Nodes");
+        selectFlowsCrossingNodesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectFlowsCrossingNodesButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridwidth = 3;
+        mapControlPanel.add(selectFlowsCrossingNodesButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2311,10 +2327,10 @@ public class MainWindow extends javax.swing.JFrame {
             model.setArrowLengthScaleFactor((arrowheadSizeSlider.getValue() + 1) / 10d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
-            if(!arrowheadSizeSlider.getValueIsAdjusting()) {
+            if (!arrowheadSizeSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Head Size");
             }
-            
+
         }
     }//GEN-LAST:event_arrowheadSizeSliderStateChanged
 
@@ -2723,7 +2739,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void lockFlowWidthCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFlowWidthCheckboxActionPerformed
         // Checking?
-        if(lockFlowWidthCheckbox.isSelected()) {
+        if (lockFlowWidthCheckbox.isSelected()) {
             // Set locked to true, pass current scale to model
             model.setFlowWidthLocked(true);
             model.setLockedMapScale(mapComponent.getScale());
@@ -2732,9 +2748,9 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
-            
+
         // unchecking? 
-            // Set locked to false, pass nothing!
+        // Set locked to false, pass nothing!
     }//GEN-LAST:event_lockFlowWidthCheckboxActionPerformed
 
     private void maximumFlowWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maximumFlowWidthSliderStateChanged
@@ -2742,7 +2758,7 @@ public class MainWindow extends javax.swing.JFrame {
             model.setMaxFlowStrokeWidth(maximumFlowWidthSlider.getValue());
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
-            if(!maximumFlowWidthSlider.getValueIsAdjusting()) {
+            if (!maximumFlowWidthSlider.getValueIsAdjusting()) {
                 addUndo("Flow Width");
             }
         }
@@ -2753,7 +2769,7 @@ public class MainWindow extends javax.swing.JFrame {
             model.setMaxNodeSize(maximumNodeSizeSlider.getValue());
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
-            if(!maximumNodeSizeSlider.getValueIsAdjusting()) {
+            if (!maximumNodeSizeSlider.getValueIsAdjusting()) {
                 addUndo("Node Size");
             }
         }
@@ -2802,6 +2818,33 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_editSelectedNodeValueButtonActionPerformed
 
+    private void selectFlowsCrossingNodesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFlowsCrossingNodesButtonActionPerformed
+
+        ArrayList<Flow> flows = model.getFlows();
+        Iterator nodes = model.nodeIterator();
+
+        while (nodes.hasNext()) {
+            Point node = (Point) nodes.next();
+
+            for (int i = 0; i < flows.size(); i++) {
+
+                if (node != flows.get(i).getStartPt()
+                        && node != flows.get(i).getEndPt()) {
+                    if (GeometryUtils.detectFlowNodeOverlap(flows.get(i), node, model, mapComponent.getScale())) {
+                        flows.get(i).setSelected(true);
+                        flows.remove(i);
+                    } else {
+                        flows.get(i).setSelected(false);
+                    };
+                }
+
+            }
+        }
+
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_selectFlowsCrossingNodesButtonActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -2848,25 +2891,36 @@ public class MainWindow extends javax.swing.JFrame {
 
         public LayoutActionListener(ForceLayouter layouter, boolean constant) {
             this.layouter = layouter;
+
+            // If apply constant forces is turned on, make the number of iterations
+            // very large, and make the weight a little less than the normal
+            // starting weight. Otherwise, set the number of iterations to the 
+            // normal amount, and don't modify the weight here. 
             if (constant) {
                 NBR_ITERATIONS = 100000;
                 weight = 0.75;
             } else {
                 NBR_ITERATIONS = 100;
             }
+            progressBar.setMaximum(NBR_ITERATIONS);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             mapComponent.eraseBufferImage();
 
-            //layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
+            // Check to see if the apply constant forces toggle is active.
+            // If so, just pass the weight without any relationship to the 
+            // iterations. If not, decrease the weight with each iteration.
             if (constant) {
                 layouter.layoutAllFlows(weight);
             } else {
                 layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
             }
 
+            // Repaint the layout with each iteration to make an animation.
+            // Show a progress bar. 
+            // Stop after NBR_ITERATIONS.
             mapComponent.repaint();
             if (++counter > NBR_ITERATIONS) {
                 timer.stop();
@@ -2985,6 +3039,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveSettingsMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
+    private javax.swing.JButton selectFlowsCrossingNodesButton;
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JButton selectPointsFileButton;
     private javax.swing.JCheckBox selfForcesCheckBox;
