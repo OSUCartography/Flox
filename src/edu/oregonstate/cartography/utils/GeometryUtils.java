@@ -174,7 +174,8 @@ public class GeometryUtils {
     }
 
     /**
-     * Compute the shortest distance between a point and a line.
+     * Compute the shortest distance between a point and a line. Assumes a line
+     * of infinite length on which the 2nd and 3rd set of coordinates lie.
      *
      * @param x Point who's distance is being measured x
      * @param y Point who's distance is being measured y
@@ -190,10 +191,57 @@ public class GeometryUtils {
                 / (Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)))));
         return isNaN(distToLine) ? 0 : distToLine;
     }
-    
-    /** Compute the difference between two angles.
-     * The resulting angle is in the range of -pi..+pi if the input angle are
-     * also in this range.
+
+    /**
+     * Calculates the shortest distance from a point to a finite line. Copied
+     * from a stackoverflow forum post.
+     * http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+     * segment.
+     *
+     * @param x
+     * @param y
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @return
+     */
+    public static double getDistanceToLineSegment(double x, double y,
+            double x1, double y1, double x2, double y2) {
+        double A = x - x1;
+        double B = y - y1;
+        double C = x2 - x1;
+        double D = y2 - y1;
+
+        double dot = A * C + B * D;
+        double len_sq = C * C + D * D;
+        double param = -1;
+        if (len_sq != 0) {
+            param = dot / len_sq;
+        }
+
+        double xx, yy;
+
+        if (param < 0) {
+            xx = x1;
+            yy = y1;
+        } else if (param > 1) {
+            xx = x2;
+            yy = y2;
+        } else {
+            xx = x1 + param * C;
+            yy = y1 + param * D;
+        }
+
+        double dx = x - xx;
+        double dy = y - yy;
+        return Math.sqrt(dx * dx + dy * dy);
+
+    }
+
+    /**
+     * Compute the difference between two angles. The resulting angle is in the
+     * range of -pi..+pi if the input angle are also in this range.
      */
     public static double angleDif(double a1, double a2) {
         double val = a1 - a2;
@@ -206,9 +254,9 @@ public class GeometryUtils {
         return val;
     }
 
-    /** Sum of two angles.
-     * The resulting angle is in the range of -pi..+pi if the input angle are
-     * also in this range.
+    /**
+     * Sum of two angles. The resulting angle is in the range of -pi..+pi if the
+     * input angle are also in this range.
      */
     public static float angleSum(float a1, float a2) {
         double val = a1 + a2;
@@ -230,81 +278,77 @@ public class GeometryUtils {
         }
         return angle;
     }
-    
-    public static Geometry getFlowBuffer(Flow flow, double bufferSize,
-            double deCasteljauTol) {
-        
-        // Turn the flow into a jts geometry polyline.
-        GeometryFactory geoFactory = new GeometryFactory();
-        LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geoFactory);
-        
-        ArrayList<Point> flowPoints
-                    = new ArrayList<>(flow.toStraightLineSegments(deCasteljauTol));
-        
-        for(Point point : flowPoints) {
-            lineBuilder.add(new Coordinate(point.x, point.y));
-        }
-        
-        Geometry flowGeom = lineBuilder.getGeometry();
-        
-        return flowGeom.buffer(bufferSize);
-    }
-    
-    public static Geometry getNodeBuffer(Point node, double bufferSize) {
-        
-        GeometryFactory geoFactory = new GeometryFactory();
-        
-        // Turn the node into a jts geometry.
-        Geometry nodeGeom = geoFactory.createPoint(new Coordinate(node.x, node.y));
-        
-        return nodeGeom.buffer(bufferSize);
-        
-    }
-    
-    public static boolean detectFlowNodeOverlap(Flow flow, Point node, 
+
+    public static boolean flowIntersectsNode(Flow flow, Point node,
             Model model, double mapScale) {
-        
-        // Get the locked scale factor needed to calculate buffer widths.
+
+        // Get the pixel width of the flow
+        // Get the locked scale factor needed to calculate flow widths
         double lockedScaleFactor;
-        if(!model.isFlowWidthLocked()) {
+        if (!model.isFlowWidthLocked()) {
             lockedScaleFactor = 1;
         } else {
             // compare the locked scale to the current scale
             double lockedMapScale = model.getLockedMapScale();
-            lockedScaleFactor = mapScale/lockedMapScale;
+            lockedScaleFactor = mapScale / lockedMapScale;
         }
-        
+
         double deCasteljauTol = model.getDeCasteljauTolerance();
-        
+
         // Get the current stroke width of the flow in pixels
         double flowStrokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
                 * lockedScaleFactor;
-        
+
         // Find out what that width is in world coordinates
-        // Add a few pixels to the strokeWidth to account for the 
-        double worldStrokeWidth = (flowStrokeWidth)/mapScale;
-        
-        // Produce a buffer at that width
-        Geometry flowBuffer = getFlowBuffer(flow, worldStrokeWidth/2, deCasteljauTol);
+        double worldStrokeWidth = (flowStrokeWidth) / mapScale;
 
         // Get the current pixel radius of the node
-        double nodeArea = Math.abs(node.getValue() 
+        double nodeArea = Math.abs(node.getValue()
                 * model.getNodeSizeScaleFactor());
-        
-        double nodeRadius = (Math.sqrt(nodeArea/Math.PI)) * lockedScaleFactor;
-        
+
+        double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+
         // Find out what that radius is in world coordinates
-        // Add a bit to make the buffer radius a few pixels wider than the
-        // actual node (and to accound for the nodes stroke width). 
-        double nodeWorldRadius = (nodeRadius + 4)/mapScale;
+        // Add a bit to the pixel radius in order tomake the radius a few pixels 
+        // wider than the actual node and to account for the node's stroke width. 
+        double worldNodeRadius = (nodeRadius + 4) / mapScale;
+
+        // Add the worldNodeRadius to half the worldFlowWidth
+        double threshDist = (worldStrokeWidth / 2) + worldNodeRadius;
+
+        // Get the flow's bounding box, and add a padding to it of threshDist.
+        Rectangle2D flowBB = flow.getBoundingBox();
+        flowBB.add((flowBB.getMinX() - threshDist), (flowBB.getMinY() - threshDist));
+        flowBB.add((flowBB.getMaxX() + threshDist), (flowBB.getMaxY() + threshDist));
         
-        // Produce a buffer at that radius
-        //Geometry nodeBuffer = nodeGeom.buffer(nodeWorldRadius);
-        Geometry nodeBuffer = getNodeBuffer(node, nodeWorldRadius);
-        
-        // Use jts overlaps method on the buffers, return the result
-        return nodeBuffer.overlaps(flowBuffer);
-        
+        // If flowBB contains the node's coordinates, then check the shortest
+        // distance between the node and the flow. If it's less than the 
+        // threshold, then it intersects. 
+        double shortestDist = Double.POSITIVE_INFINITY;
+        if (flowBB.contains(node.x, node.y)) {
+
+            ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
+            for (int i = 0; i < (pts.size() - 1); i++) {
+
+                Point pt1 = pts.get(i);
+                Point pt2 = pts.get(i + 1);
+
+                double dist = getDistanceToLineSegment(node.x, node.y,
+                        pt1.x, pt1.y, pt2.x, pt2.y);
+                
+                if(dist < shortestDist) {
+                    shortestDist = dist;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if(shortestDist < threshDist) {
+            return true;
+        }
+        return false;
+
     }
-    
+
 }

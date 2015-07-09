@@ -2820,25 +2820,24 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void selectFlowsCrossingNodesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFlowsCrossingNodesButtonActionPerformed
 
-        ArrayList<Flow> flows = model.getFlows();
-        Iterator nodes = model.nodeIterator();
-
-        while (nodes.hasNext()) {
-            Point node = (Point) nodes.next();
-
-            for (int i = 0; i < flows.size(); i++) {
-
-                if (node != flows.get(i).getStartPt()
-                        && node != flows.get(i).getEndPt()) {
-                    if (GeometryUtils.detectFlowNodeOverlap(flows.get(i), node, model, mapComponent.getScale())) {
-                        flows.get(i).setSelected(true);
-                        flows.remove(i);
+        Iterator flows = model.flowIterator();
+        ArrayList<Point> nodes = model.getNodes();
+        
+        while(flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes.get(i) != flow.getStartPt()
+                        && nodes.get(i) != flow.getEndPt()) {
+                    if (GeometryUtils.flowIntersectsNode(flow, nodes.get(i), model, mapComponent.getScale())) {
+                        flow.setSelected(true);
+                        break;
                     } else {
-                        flows.get(i).setSelected(false);
+                        flow.setSelected(false);
                     };
                 }
-
             }
+            
         }
 
         mapComponent.eraseBufferImage();
