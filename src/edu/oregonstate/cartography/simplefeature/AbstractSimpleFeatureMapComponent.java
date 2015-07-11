@@ -322,6 +322,14 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         mapEventHandler.setMapTool(mapTool, false);
     }
 
+    /**
+     * Delete selected map elements.
+     * @return True if something was deleted.
+     */
+    public boolean deleteSelected() {    
+        return false;
+    }
+    
     public void removeMouseMotionListener(MapToolMouseMotionListener listener) {
         this.mapEventHandler.removeMouseMotionListener(listener);
     }

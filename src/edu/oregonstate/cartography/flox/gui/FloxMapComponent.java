@@ -48,7 +48,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing flow rangebox
      */
     private boolean drawFlowRangebox = false;
-    
+
     /**
      * flag for drawing clip areas around ends of flows
      */
@@ -58,18 +58,17 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing clip areas around starts of flows
      */
     private boolean drawStartClipAreas = false;
-    
+
     /**
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
-    
+
     /**
      * The map scale at the time it was locked.
      */
     private double lockedScale;
-    
-    
+
     public FloxMapComponent() {
     }
 
@@ -122,7 +121,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
             // draw flows and nodes
             renderer.drawFlows();
-            
+
             renderer.drawNodes();
 
             if (isDrawFlowRangebox()) {
@@ -142,12 +141,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             if (isDrawReconstructedBezier()) {
                 renderer.drawRebuiltBezierCurve();
             }
-            
+
             if (drawStartClipAreas || drawEndClipAreas) {
                 renderer.drawClipAreas(drawStartClipAreas, drawEndClipAreas);
             }
         }
-        
+
         // copy double buffer image to JComponent
         Insets insets = getInsets();
         ((Graphics2D) g).drawImage(bufferImage, insets.left, insets.top, this);
@@ -165,6 +164,22 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     public void setModel(Model model) {
         this.model = model;
+    }
+
+    /**
+     * Delete selected nodes and flows
+     *
+     * @return True if at least one flow or one node was deleted.
+     */
+    @Override
+    public boolean deleteSelected() {
+        if (model.deleteSelectedFlowsAndNodes() > 0) {
+            eraseBufferImage();
+            repaint();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

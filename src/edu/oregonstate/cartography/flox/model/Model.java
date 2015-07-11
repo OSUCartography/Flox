@@ -74,7 +74,7 @@ public class Model {
      */
     @XmlJavaTypeAdapter(GraphSerializer.class)
     private final Graph graph = new Graph();
-    
+
     /**
      * Used by the Arrow class to determine the length of arrowheads.
      */
@@ -108,8 +108,6 @@ public class Model {
      */
     private double arrowSizeRatio = 0.0;
 
-    
-    
     /**
      * if true, a flow exerts forces on itself.
      */
@@ -169,38 +167,38 @@ public class Model {
      * Maximum allowed flow width in pixels.
      */
     private double maxFlowStrokeWidth = 20;
-    
-    public double getFlowWidthScaleFactor () {
-        return getMaxFlowStrokeWidth() / getMaxFlowValue(); 
+
+    public double getFlowWidthScaleFactor() {
+        return getMaxFlowStrokeWidth() / getMaxFlowValue();
     }
-    
+
     /**
      * Maximum allowed node radius in pixels.
      */
     private double maxNodeSize = 10;
-    
-    public double getNodeSizeScaleFactor () {
-        
+
+    public double getNodeSizeScaleFactor() {
+
         // Get the area needed to satisfy the radius
         double area = Math.PI * (maxNodeSize * maxNodeSize);
-        
+
         return area / getMaxNodeValue();
     }
-    
+
     public double getMaxNodeValue() {
         return graph.getMaxNodeValue();
     }
-    
+
     /**
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
-    
+
     /**
      * The map scale at the time it was locked.
      */
     private double lockedMapScale = 1;
-    
+
     /**
      * Determines the maximum number of intermediate nodes per flow. This is
      * modified by a comboBox in the GUI (low, medium, high).
@@ -363,7 +361,7 @@ public class Model {
     public void addFlow(Flow flow) {
         graph.addFlow(flow);
     }
-    
+
     public void deleteFlow(Flow flow) {
         graph.removeEdge(flow);
     }
@@ -373,16 +371,40 @@ public class Model {
     }
 
     /**
-     * Searches for a point in the graph with the specified coordinates
-     *
-     * @param target A point with the coordinates to search.
-     * @return The point with coordinates x and y in the graph or the passed
-     * point if no point with the same coordinates exist in the graph.
+     * Removes all selected nodes and flows from the graph.
+     * @return The number of flows and nodes that were deleted.
      */
-    private Point findNodeInGraph(Point target) {
-        return graph.findNodeInGraph(target);
+    public int deleteSelectedFlowsAndNodes() {
+        ArrayList<Flow> flowsToRemove = new ArrayList<>();
+        ArrayList<Point> nodesToRemove = new ArrayList<>();
+
+        Iterator flows = flowIterator();
+        while (flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            if (flow.isSelected()) {
+                flowsToRemove.add(flow);
+            }
+        }
+
+        Iterator nodes = nodeIterator();
+        while (nodes.hasNext()) {
+            Point node = (Point) nodes.next();
+            if (node.isSelected()) {
+                nodesToRemove.add(node);
+            }
+        }
+
+        flowsToRemove.stream().forEach((flow) -> {
+            deleteFlow(flow);
+        });
+
+        nodesToRemove.stream().forEach((node) -> {
+            deleteNode(node);
+        });
+        
+        return flowsToRemove.size() + nodesToRemove.size();
     }
-    
+
     /**
      * Replace the current flows with new flows.
      *
@@ -669,7 +691,7 @@ public class Model {
     public double getDeCasteljauTolerance() {
 
         double maxFlowNodes;
-        if (flowNodeDensity== FlowNodeDensity.LOW) {
+        if (flowNodeDensity == FlowNodeDensity.LOW) {
             maxFlowNodes = 10;
         } else if (flowNodeDensity == FlowNodeDensity.MEDIUM) {
             maxFlowNodes = 25;
@@ -714,7 +736,7 @@ public class Model {
     }
 
     public ArrayList<Point> getSelectedNodes() {
-        
+
         ArrayList<Point> selectedNodes = new ArrayList();
         Iterator nodes = nodeIterator();
         while (nodes.hasNext()) {
@@ -725,7 +747,7 @@ public class Model {
         }
         return selectedNodes;
     }
-    
+
     /**
      * Returns all map layers.
      *
@@ -1211,6 +1233,5 @@ public class Model {
     public void setMaxNodeSize(double maxNodeSize) {
         this.maxNodeSize = maxNodeSize;
     }
-    
-    
+
 }

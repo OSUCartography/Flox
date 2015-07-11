@@ -391,8 +391,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
 
             // no other component is handling delete and backspace key strokes,
             // it is save to remove the currently selected objects from the map.
-            // FIXME
-            // return mapComponent.removeSelectedGeoObjects();
+            return mapComponent.deleteSelected();
         }
 
         // give current map tool a chance to consume the key event

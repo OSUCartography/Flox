@@ -309,7 +309,6 @@ public class MainWindow extends javax.swing.JFrame {
         drawFlowRangeboxCheckbox = new javax.swing.JCheckBox();
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
-        deleteSelectedFeaturesButton = new javax.swing.JButton();
         editFlowValueButton = new javax.swing.JButton();
         reverseFlowDirectionButton = new javax.swing.JButton();
         straightenAllFlowsButton = new javax.swing.JButton();
@@ -1134,19 +1133,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 12;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         mapControlPanel.add(jButton1, gridBagConstraints);
-
-        deleteSelectedFeaturesButton.setText("Delete Selected Features");
-        deleteSelectedFeaturesButton.setPreferredSize(new java.awt.Dimension(195, 29));
-        deleteSelectedFeaturesButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteSelectedFeaturesButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 19;
-        gridBagConstraints.gridwidth = 3;
-        mapControlPanel.add(deleteSelectedFeaturesButton, gridBagConstraints);
 
         editFlowValueButton.setText("Edit Selected Flow Value");
         editFlowValueButton.addActionListener(new java.awt.event.ActionListener() {
@@ -2613,38 +2599,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
-    private void deleteSelectedFeaturesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteSelectedFeaturesButtonActionPerformed
-        ArrayList<Flow> flowsToRemove = new ArrayList<>();
-        ArrayList<Point> nodesToRemove = new ArrayList<>();
-
-        Iterator flows = model.flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
-            if (flow.isSelected()) {
-                flowsToRemove.add(flow);
-            }
-        }
-
-        Iterator nodes = model.nodeIterator();
-        while (nodes.hasNext()) {
-            Point node = (Point) nodes.next();
-            if (node.isSelected()) {
-                nodesToRemove.add(node);
-            }
-        }
-
-        flowsToRemove.stream().forEach((flow) -> {
-            model.deleteFlow(flow);
-        });
-
-        nodesToRemove.stream().forEach((node) -> {
-            model.deleteNode(node);
-        });
-
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_deleteSelectedFeaturesButtonActionPerformed
-
     private void editFlowValueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editFlowValueButtonActionPerformed
 
         if (model.isFlowIsSelected()) {
@@ -2949,7 +2903,6 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
-    private javax.swing.JButton deleteSelectedFeaturesButton;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawCanvasPaddingCheckbox;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
