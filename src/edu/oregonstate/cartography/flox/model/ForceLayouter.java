@@ -402,7 +402,7 @@ public class ForceLayouter {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if(!flow.isLocked()){
+            if(flow.isSelected() && !flow.isLocked()){
                 flow.bend(0, 0);
             }
                 

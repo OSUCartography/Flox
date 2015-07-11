@@ -309,7 +309,6 @@ public class MainWindow extends javax.swing.JFrame {
         drawFlowRangeboxCheckbox = new javax.swing.JCheckBox();
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
-        straightenAllFlowsButton = new javax.swing.JButton();
         lockFlowWidthCheckbox = new javax.swing.JCheckBox();
         maximumFlowWidthSlider = new javax.swing.JSlider();
         jLabel26 = new javax.swing.JLabel();
@@ -373,6 +372,7 @@ public class MainWindow extends javax.swing.JFrame {
         nodeValueMenuItem = new javax.swing.JMenuItem();
         jSeparator9 = new javax.swing.JPopupMenu.Separator();
         reverseFlowDirectionMenuItem = new javax.swing.JMenuItem();
+        straightenFlowsMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
@@ -1139,18 +1139,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         mapControlPanel.add(jButton1, gridBagConstraints);
 
-        straightenAllFlowsButton.setText("Straighten All Flows");
-        straightenAllFlowsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                straightenAllFlowsButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
-        gridBagConstraints.gridwidth = 3;
-        mapControlPanel.add(straightenAllFlowsButton, gridBagConstraints);
-
         lockFlowWidthCheckbox.setText("Lock Layout to Current Scale");
         lockFlowWidthCheckbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1703,6 +1691,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(reverseFlowDirectionMenuItem);
+
+        straightenFlowsMenuItem.setText("Straigthen Flows");
+        straightenFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                straightenFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(straightenFlowsMenuItem);
 
         menuBar.add(editMenu);
 
@@ -2619,14 +2615,6 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Keep Forces Constant");
     }//GEN-LAST:event_keepForcesConstantToggleButtonActionPerformed
 
-    private void straightenAllFlowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenAllFlowsButtonActionPerformed
-        ForceLayouter layouter = new ForceLayouter(model);
-        layouter.straightenFlows();
-
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_straightenAllFlowsButtonActionPerformed
-
     private void flowNodeDensityComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_flowNodeDensityComboBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
             switch (flowNodeDensityComboBox.getSelectedIndex()) {
@@ -2731,6 +2719,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowValueMenuItem.setEnabled(hasSelectedFlow);
         nodeValueMenuItem.setEnabled(hasSelectedNode);
         reverseFlowDirectionMenuItem.setEnabled(hasSelectedFlow);
+        straightenFlowsMenuItem.setEnabled(hasSelectedFlow);
     }//GEN-LAST:event_editMenuMenuSelected
 
     private void flowValueMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowValueMenuItemActionPerformed
@@ -2832,6 +2821,13 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_selectNoneMenuItemActionPerformed
+
+    private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
+        ForceLayouter layouter = new ForceLayouter(model);
+        layouter.straightenFlows();
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -3039,7 +3035,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
-    private javax.swing.JButton straightenAllFlowsButton;
+    private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;
