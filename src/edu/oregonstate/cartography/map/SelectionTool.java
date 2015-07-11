@@ -179,17 +179,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
-        if (flowGotSelected || nodeGotSelected) {
-            model.setNodeIsSelected(nodeGotSelected);
-            model.setFlowIsSelected(flowGotSelected);
-            return true;
-        } else {
-            if (shiftDown == false) {
-                model.setNodeIsSelected(false);
-                model.setFlowIsSelected(false);
-            }
-            return false;
-        }
+        return (flowGotSelected || nodeGotSelected);
     }
 
     public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
@@ -201,7 +191,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         // if the model says a flow is currently selected, check to see if a 
         // control point is nearby, and select it if so.
-        if (model.isFlowIsSelected() 
+        if (model.isFlowSelected()
                 || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
             // Iterate througth the flows, checking to see if it is selected.
             Iterator flows = model.flowIterator();
@@ -326,17 +316,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
-        if (flowGotSelected || nodeGotSelected) {
-            model.setNodeIsSelected(nodeGotSelected);
-            model.setFlowIsSelected(flowGotSelected);
-            return true;
-        } else {
-            if (shiftDown == false) {
-                model.setNodeIsSelected(false);
-                model.setFlowIsSelected(false);
-            }
-            return false;
-        }
+        return (flowGotSelected || nodeGotSelected);
     }
 
     @Override

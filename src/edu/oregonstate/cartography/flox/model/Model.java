@@ -157,10 +157,7 @@ public class Model {
 
     private double flowDistanceFromEndPoint = 5.0d;
 
-    private boolean nodeIsSelected = false;
-
-    private boolean flowIsSelected = false;
-
+    // FIXME
     private boolean controlPtIsSelected = false;
 
     /**
@@ -720,9 +717,19 @@ public class Model {
         }
         return maxValue;
     }
+    
+    public boolean isFlowSelected() {
+        Iterator flows = flowIterator();
+        while (flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            if (flow.isSelected()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public ArrayList<Flow> getSelectedFlows() {
-
         ArrayList<Flow> selectedFlows = new ArrayList();
         Iterator flows = flowIterator();
         while (flows.hasNext()) {
@@ -735,6 +742,17 @@ public class Model {
         return selectedFlows;
     }
 
+    public boolean isNodeSelected() {
+        Iterator nodes = nodeIterator();
+        while (nodes.hasNext()) {
+            Point node = (Point) nodes.next();
+            if (node.isSelected()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public ArrayList<Point> getSelectedNodes() {
 
         ArrayList<Point> selectedNodes = new ArrayList();
@@ -1120,34 +1138,6 @@ public class Model {
      */
     public void setArrowWidthScaleFactor(double arrowWidthScaleFactor) {
         this.arrowWidthScaleFactor = arrowWidthScaleFactor;
-    }
-
-    /**
-     * @return the somethingIsSelected
-     */
-    public boolean isNodeIsSelected() {
-        return nodeIsSelected;
-    }
-
-    /**
-     * @param somethingIsSelected the somethingIsSelected to set
-     */
-    public void setNodeIsSelected(boolean somethingIsSelected) {
-        this.nodeIsSelected = somethingIsSelected;
-    }
-
-    /**
-     * @return the flowIsSelected
-     */
-    public boolean isFlowIsSelected() {
-        return flowIsSelected;
-    }
-
-    /**
-     * @param flowIsSelected the flowIsSelected to set
-     */
-    public void setFlowIsSelected(boolean flowIsSelected) {
-        this.flowIsSelected = flowIsSelected;
     }
 
     /**

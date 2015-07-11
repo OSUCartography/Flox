@@ -29,7 +29,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     @Override
     public void startDrag(Point2D.Double point, MouseEvent evt) {
 
-        if (model.isNodeIsSelected()) {
+        if (model.isNodeSelected()) {
             dragging = true;
         }
 
@@ -39,7 +39,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         
         previousDrag_x = point.x;
         previousDrag_y = point.y;
-
     }
 
     @Override

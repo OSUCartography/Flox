@@ -310,7 +310,6 @@ public class MainWindow extends javax.swing.JFrame {
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         editFlowValueButton = new javax.swing.JButton();
-        reverseFlowDirectionButton = new javax.swing.JButton();
         straightenAllFlowsButton = new javax.swing.JButton();
         lockFlowWidthCheckbox = new javax.swing.JCheckBox();
         maximumFlowWidthSlider = new javax.swing.JSlider();
@@ -368,6 +367,8 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu = new javax.swing.JMenu();
         undoMenuItem = new javax.swing.JMenuItem();
         redoMenuItem = new javax.swing.JMenuItem();
+        jSeparator8 = new javax.swing.JPopupMenu.Separator();
+        reverseFlowDirectionMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
@@ -1146,19 +1147,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(editFlowValueButton, gridBagConstraints);
 
-        reverseFlowDirectionButton.setText("Reverse Flow Direction");
-        reverseFlowDirectionButton.setPreferredSize(new java.awt.Dimension(195, 29));
-        reverseFlowDirectionButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                reverseFlowDirectionButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 17;
-        gridBagConstraints.gridwidth = 3;
-        mapControlPanel.add(reverseFlowDirectionButton, gridBagConstraints);
-
         straightenAllFlowsButton.setText("Straighten All Flows");
         straightenAllFlowsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1663,6 +1651,15 @@ public class MainWindow extends javax.swing.JFrame {
         menuBar.add(fileMenu);
 
         editMenu.setText("Edit");
+        editMenu.addMenuListener(new javax.swing.event.MenuListener() {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                editMenuMenuSelected(evt);
+            }
+            public void menuDeselected(javax.swing.event.MenuEvent evt) {
+            }
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            }
+        });
 
         undoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         undoMenuItem.setText("Undo");
@@ -1681,6 +1678,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(redoMenuItem);
+        editMenu.add(jSeparator8);
+
+        reverseFlowDirectionMenuItem.setText("Reverse Flow Direction");
+        reverseFlowDirectionMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                reverseFlowDirectionMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(reverseFlowDirectionMenuItem);
 
         menuBar.add(editMenu);
 
@@ -2601,58 +2607,48 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void editFlowValueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editFlowValueButtonActionPerformed
 
-        if (model.isFlowIsSelected()) {
-            ArrayList<Flow> selectedFlows = new ArrayList<>(model.getSelectedFlows());
-            double newValue = 0;
-            if (selectedFlows.size() == 1) {
-                double value = selectedFlows.get(0).getValue();
-                while (newValue <= 0) {
-                    String userInput = (String) JOptionPane.showInputDialog(
-                            this,
-                            "Current Flow Value: " + value + "\n"
-                            + "Input a new numerical value over zero");
-                    try {
-                        newValue = Double.parseDouble(userInput);
-                        selectedFlows.get(0).setValue(newValue);
-                    } catch (NumberFormatException nfe) {
-                        newValue = 0;
-                    }
-                }
-                mapComponent.eraseBufferImage();
-                mapComponent.repaint();
-            } else {
-                while (newValue <= 0) {
-                    String userInput = (String) JOptionPane.showInputDialog(
-                            this,
-                            "Input a new numerical value over zero");
-                    try {
-                        newValue = Double.parseDouble(userInput);
-                        for (Flow flow : selectedFlows) {
-                            flow.setValue(newValue);
-                        }
-                    } catch (NumberFormatException nfe) {
-                        JOptionPane.showMessageDialog(this, "Please enter a "
-                                + "number over 0");
-                    }
-                }
-                mapComponent.eraseBufferImage();
-                mapComponent.repaint();
-            }
-        } else {
+        ArrayList<Flow> selectedFlows = new ArrayList<>(model.getSelectedFlows());
+        if (selectedFlows.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select one flow");
+            return;
         }
 
+        double newValue = 0;
+        if (selectedFlows.size() == 1) {
+            double value = selectedFlows.get(0).getValue();
+            while (newValue <= 0) {
+                String userInput = (String) JOptionPane.showInputDialog(
+                        this,
+                        "Current Flow Value: " + value + "\n"
+                        + "Input a new numerical value over zero");
+                try {
+                    newValue = Double.parseDouble(userInput);
+                    selectedFlows.get(0).setValue(newValue);
+                } catch (NumberFormatException nfe) {
+                    newValue = 0;
+                }
+            }
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        } else {
+            while (newValue <= 0) {
+                String userInput = (String) JOptionPane.showInputDialog(
+                        this,
+                        "Input a new numerical value over zero");
+                try {
+                    newValue = Double.parseDouble(userInput);
+                    for (Flow flow : selectedFlows) {
+                        flow.setValue(newValue);
+                    }
+                } catch (NumberFormatException nfe) {
+                    JOptionPane.showMessageDialog(this, "Please enter a "
+                            + "number over 0");
+                }
+            }
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
     }//GEN-LAST:event_editFlowValueButtonActionPerformed
-
-    private void reverseFlowDirectionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionButtonActionPerformed
-        ArrayList<Flow> flows = model.getSelectedFlows();
-        for (Flow flow : flows) {
-            flow.reverseFlow();
-        }
-
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_reverseFlowDirectionButtonActionPerformed
 
     private void keepForcesConstantToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_keepForcesConstantToggleButtonActionPerformed
         layout("Keep Forces Constant");
@@ -2730,45 +2726,46 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_maximumNodeSizeSliderStateChanged
 
     private void editSelectedNodeValueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editSelectedNodeValueButtonActionPerformed
-        if (model.isNodeIsSelected()) {
-            ArrayList<Point> selectedNodes = new ArrayList<>(model.getSelectedNodes());
-            double newValue = 0;
-            if (selectedNodes.size() == 1) {
-                double value = selectedNodes.get(0).getValue();
-                while (newValue <= 0) {
-                    String userInput = (String) JOptionPane.showInputDialog(
-                            this,
-                            "Current Node Value: " + value + "\n"
-                            + "Input a new number over zero");
-                    try {
-                        newValue = Double.parseDouble(userInput);
-                        selectedNodes.get(0).setValue(newValue);
-                    } catch (NumberFormatException nfe) {
-                        newValue = 0;
-                    }
-                }
-                mapComponent.eraseBufferImage();
-                mapComponent.repaint();
-            } else {
-                while (newValue <= 0) {
-                    String userInput = (String) JOptionPane.showInputDialog(
-                            this,
-                            "Input a new numerical value over zero");
-                    try {
-                        newValue = Double.parseDouble(userInput);
-                        for (Point node : selectedNodes) {
-                            node.setValue(newValue);
-                        }
-                    } catch (NumberFormatException nfe) {
-                        JOptionPane.showMessageDialog(this, "Please enter a "
-                                + "number over 0");
-                    }
-                }
-                mapComponent.eraseBufferImage();
-                mapComponent.repaint();
-            }
-        } else {
+        ArrayList<Point> selectedNodes = new ArrayList<>(model.getSelectedNodes());
+        if (selectedNodes.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select one node");
+            return;
+        }
+
+        double newValue = 0;
+        if (selectedNodes.size() == 1) {
+            double value = selectedNodes.get(0).getValue();
+            while (newValue <= 0) {
+                String userInput = (String) JOptionPane.showInputDialog(
+                        this,
+                        "Current Node Value: " + value + "\n"
+                        + "Input a new number over zero");
+                try {
+                    newValue = Double.parseDouble(userInput);
+                    selectedNodes.get(0).setValue(newValue);
+                } catch (NumberFormatException nfe) {
+                    newValue = 0;
+                }
+            }
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        } else {
+            while (newValue <= 0) {
+                String userInput = (String) JOptionPane.showInputDialog(
+                        this,
+                        "Input a new numerical value over zero");
+                try {
+                    newValue = Double.parseDouble(userInput);
+                    for (Point node : selectedNodes) {
+                        node.setValue(newValue);
+                    }
+                } catch (NumberFormatException nfe) {
+                    JOptionPane.showMessageDialog(this, "Please enter a "
+                            + "number over 0");
+                }
+            }
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
         }
     }//GEN-LAST:event_editSelectedNodeValueButtonActionPerformed
 
@@ -2777,7 +2774,7 @@ public class MainWindow extends javax.swing.JFrame {
         Iterator flows = model.flowIterator();
         ArrayList<Point> nodes = model.getNodes();
         double scale = mapComponent.getScale();
-        while(flows.hasNext()) {
+        while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
             for (Point node : nodes) {
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
@@ -2788,12 +2785,27 @@ public class MainWindow extends javax.swing.JFrame {
                         flow.setSelected(false);
                     }
                 }
-            }           
+            }
         }
 
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_selectFlowsCrossingNodesButtonActionPerformed
+
+    private void reverseFlowDirectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        for (Flow flow : flows) {
+            flow.reverseFlow();
+        }
+
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_reverseFlowDirectionMenuItemActionPerformed
+
+    private void editMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_editMenuMenuSelected
+        boolean hasSelectedFlow = model.isFlowSelected();
+        reverseFlowDirectionMenuItem.setEnabled(hasSelectedFlow);
+    }//GEN-LAST:event_editMenuMenuSelected
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -2957,6 +2969,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JToggleButton keepForcesConstantToggleButton;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
@@ -2984,7 +2997,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem redoMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
-    private javax.swing.JButton reverseFlowDirectionButton;
+    private javax.swing.JMenuItem reverseFlowDirectionMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveSettingsMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
