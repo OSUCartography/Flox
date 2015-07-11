@@ -606,12 +606,13 @@ public class Model {
 
     /**
      * Returns true if the model contains at least one flow.
+     *
      * @return True if the model has at least one flow.
      */
     public boolean hasFlows() {
         return !graph.edgeSet().isEmpty();
     }
-    
+
     /**
      * Returns all flows in the graph. The flows are not ordered.
      *
@@ -642,12 +643,13 @@ public class Model {
 
     /**
      * Returns true if the model contains at least one node.
+     *
      * @return True if the model has at least one node.
      */
     public boolean hasNodes() {
         return !graph.vertexSet().isEmpty();
     }
-    
+
     /**
      * Returns all nodes in the graph.
      *
@@ -746,6 +748,28 @@ public class Model {
         return false;
     }
 
+    public boolean isLockedFlowSelected() {
+        Iterator flows = flowIterator();
+        while (flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            if (flow.isSelected() && flow.isLocked()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isUnlockedFlowSelected() {
+        Iterator flows = flowIterator();
+        while (flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            if (flow.isSelected() && !flow.isLocked()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ArrayList<Flow> getSelectedFlows() {
         ArrayList<Flow> selectedFlows = new ArrayList();
         Iterator flows = flowIterator();
@@ -785,8 +809,9 @@ public class Model {
 
     /**
      * Selects or deselects all flows and nodes.
-     * @param select If true, all flows and nodes are selected. All are deselected
-     * otherwise.
+     *
+     * @param select If true, all flows and nodes are selected. All are
+     * deselected otherwise.
      */
     public void setSelectionOfAllFlowsAndNodes(boolean select) {
         Iterator flows = flowIterator();
@@ -799,6 +824,20 @@ public class Model {
         while (nodes.hasNext()) {
             Point node = (Point) nodes.next();
             node.setSelected(select);
+        }
+    }
+
+    /**
+     * Set the lock for all selected flows.
+     * @param lock The new lock state.
+     */
+    public void setLockOfSelectedFlows(boolean lock) {
+        Iterator flows = flowIterator();
+        while (flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            if (flow.isSelected()) {
+                flow.setLocked(lock);
+            }
         }
     }
 

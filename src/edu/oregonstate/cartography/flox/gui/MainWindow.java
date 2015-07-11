@@ -287,7 +287,6 @@ public class MainWindow extends javax.swing.JFrame {
         flowRangeboxSizeSlider = new javax.swing.JSlider();
         jLabel13 = new javax.swing.JLabel();
         jLabel25 = new javax.swing.JLabel();
-        lockSelectedFlowsButton = new javax.swing.JButton();
         keepForcesConstantToggleButton = new javax.swing.JToggleButton();
         flowNodeDensityComboBox = new javax.swing.JComboBox();
         mapPanel = new TransparentMacPanel();
@@ -368,6 +367,9 @@ public class MainWindow extends javax.swing.JFrame {
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNoneMenuItem = new javax.swing.JMenuItem();
         jSeparator10 = new javax.swing.JPopupMenu.Separator();
+        lockMenuItem = new javax.swing.JMenuItem();
+        unlockMenuItem = new javax.swing.JMenuItem();
+        jSeparator11 = new javax.swing.JPopupMenu.Separator();
         flowValueMenuItem = new javax.swing.JMenuItem();
         nodeValueMenuItem = new javax.swing.JMenuItem();
         jSeparator9 = new javax.swing.JPopupMenu.Separator();
@@ -908,18 +910,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
         forcesPanel.add(jLabel25, gridBagConstraints);
-
-        lockSelectedFlowsButton.setText("Lock/unlock selected flows");
-        lockSelectedFlowsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lockSelectedFlowsButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 22;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
-        forcesPanel.add(lockSelectedFlowsButton, gridBagConstraints);
 
         keepForcesConstantToggleButton.setText("Apply Constant Forces");
         keepForcesConstantToggleButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1658,7 +1648,7 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu.add(selectAllMenuItem);
 
         selectNoneMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        selectNoneMenuItem.setText("Select None");
+        selectNoneMenuItem.setText("Deselect All");
         selectNoneMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectNoneMenuItemActionPerformed(evt);
@@ -1666,6 +1656,25 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(selectNoneMenuItem);
         editMenu.add(jSeparator10);
+
+        lockMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        lockMenuItem.setText("Lock");
+        lockMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lockMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(lockMenuItem);
+
+        unlockMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.SHIFT_MASK | java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        unlockMenuItem.setText("Unlock");
+        unlockMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                unlockMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(unlockMenuItem);
+        editMenu.add(jSeparator11);
 
         flowValueMenuItem.setText("Flow Value…");
         flowValueMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -1684,6 +1693,7 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu.add(nodeValueMenuItem);
         editMenu.add(jSeparator9);
 
+        reverseFlowDirectionMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         reverseFlowDirectionMenuItem.setText("Reverse Flow Direction");
         reverseFlowDirectionMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2576,22 +2586,6 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_saveSettingsMenuItemActionPerformed
 
-    private void lockSelectedFlowsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockSelectedFlowsButtonActionPerformed
-        // iterate through flows in the model. If it is selected, lock it.
-        Iterator flows = model.flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
-            if (flow.isSelected()) {
-                if (flow.isLocked()) {
-                    flow.setLocked(false);
-                } else {
-                    flow.setLocked(true);
-                }
-            }
-        }
-        mapComponent.repaint();
-    }//GEN-LAST:event_lockSelectedFlowsButtonActionPerformed
-
     private void exportCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportCSVMenuItemActionPerformed
         try {
             // ask for export file
@@ -2714,8 +2708,12 @@ public class MainWindow extends javax.swing.JFrame {
     private void editMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_editMenuMenuSelected
         boolean hasSelectedFlow = model.isFlowSelected();
         boolean hasSelectedNode = model.isNodeSelected();
+        boolean isLockedFlowSelected = model.isLockedFlowSelected();
+        boolean isUnlockedFlowSelected = model.isUnlockedFlowSelected();
         selectAllMenuItem.setEnabled(model.hasFlows() || model.hasNodes());
         selectNoneMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
+        lockMenuItem.setEnabled(isUnlockedFlowSelected);
+        unlockMenuItem.setEnabled(isLockedFlowSelected);
         flowValueMenuItem.setEnabled(hasSelectedFlow);
         nodeValueMenuItem.setEnabled(hasSelectedNode);
         reverseFlowDirectionMenuItem.setEnabled(hasSelectedFlow);
@@ -2828,6 +2826,18 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
+
+    private void lockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockMenuItemActionPerformed
+        model.setLockOfSelectedFlows(true);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_lockMenuItemActionPerformed
+
+    private void unlockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockMenuItemActionPerformed
+        model.setLockOfSelectedFlows(false);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_unlockMenuItemActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -2991,6 +3001,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel27;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator10;
+    private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JToolBar jToolBar1;
@@ -2998,7 +3009,7 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JCheckBox lockFlowWidthCheckbox;
-    private javax.swing.JButton lockSelectedFlowsButton;
+    private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JSlider longestFlowStiffnessSlider;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
     private javax.swing.JPanel mapControlPanel;
@@ -3040,6 +3051,7 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;
     private javax.swing.JMenuItem undoMenuItem;
+    private javax.swing.JMenuItem unlockMenuItem;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;
