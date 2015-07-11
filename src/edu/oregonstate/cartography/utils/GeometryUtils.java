@@ -198,13 +198,13 @@ public class GeometryUtils {
      * http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
      * segment.
      *
-     * @param x
-     * @param y
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @return
+     * @param x X coordinate of point.
+     * @param y Y coordinate of point.
+     * @param x1 X coordinate of start point of line segment.
+     * @param y1 Y coordinate of start point of line segment.
+     * @param x2 X coordinate of end point of line segment.
+     * @param y2 Y coordinate of end point of line segment.
+     * @return Distance between point and line segment.
      */
     public static double getDistanceToLineSegment(double x, double y,
             double x1, double y1, double x2, double y2) {
@@ -236,7 +236,52 @@ public class GeometryUtils {
         double dx = x - xx;
         double dy = y - yy;
         return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    /**
+     * Calculates the square value of the shortest distance from a point to a 
+     * finite line. Copied from a stackoverflow forum post.
+     * http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+     * segment.
+     *
+     * @param x X coordinate of point.
+     * @param y Y coordinate of point.
+     * @param x1 X coordinate of start point of line segment.
+     * @param y1 Y coordinate of start point of line segment.
+     * @param x2 X coordinate of end point of line segment.
+     * @param y2 Y coordinate of end point of line segment.
+     * @return Distance between point and line segment.
+     */
+    public static double getDistanceToLineSegmentSquare(double x, double y,
+            double x1, double y1, double x2, double y2) {
+        double A = x - x1;
+        double B = y - y1;
+        double C = x2 - x1;
+        double D = y2 - y1;
 
+        double dot = A * C + B * D;
+        double len_sq = C * C + D * D;
+        double param = -1;
+        if (len_sq != 0) {
+            param = dot / len_sq;
+        }
+
+        double xx, yy;
+
+        if (param < 0) {
+            xx = x1;
+            yy = y1;
+        } else if (param > 1) {
+            xx = x2;
+            yy = y2;
+        } else {
+            xx = x1 + param * C;
+            yy = y1 + param * D;
+        }
+
+        double dx = x - xx;
+        double dy = y - yy;
+        return dx * dx + dy * dy;
     }
 
     /**
@@ -324,7 +369,8 @@ public class GeometryUtils {
         // If flowBB contains the node's coordinates, then check the shortest
         // distance between the node and the flow. If it's less than the 
         // threshold, then it intersects. 
-        double shortestDist = Double.POSITIVE_INFINITY;
+        double shortestDistSquare = Double.POSITIVE_INFINITY;
+        
         if (flowBB.contains(node.x, node.y)) {
 
             ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
@@ -333,22 +379,18 @@ public class GeometryUtils {
                 Point pt1 = pts.get(i);
                 Point pt2 = pts.get(i + 1);
 
-                double dist = getDistanceToLineSegment(node.x, node.y,
+                double distSquare = getDistanceToLineSegmentSquare(node.x, node.y,
                         pt1.x, pt1.y, pt2.x, pt2.y);
                 
-                if(dist < shortestDist) {
-                    shortestDist = dist;
+                if(distSquare < shortestDistSquare) {
+                    shortestDistSquare = distSquare;
                 } else {
                     break;
                 }
             }
         }
 
-        if(shortestDist < threshDist) {
-            return true;
-        }
-        return false;
-
+        return (shortestDistSquare < threshDist * threshDist);
     }
 
 }

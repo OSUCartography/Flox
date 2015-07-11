@@ -19,8 +19,9 @@ public class FlowImporter {
     }
 
     /**
-     * Import flows from a reader. One flow per line.Format: startX, startY, endX,
-     * endY Values are separated by space, coma or tab.
+     * Import flows from a reader. One flow per line. 
+     * Format: startX, startY, endX, endY 
+     * Values are separated by space, coma or tab.
      *
      * @param reader
      * @return The imported flows.
@@ -48,12 +49,11 @@ public class FlowImporter {
             }
 
             if (tokenizer.hasMoreTokens()) {
-                if (Double.parseDouble(tokenizer.nextToken()) == 1) {
-                    locked = true;
-                }
+                locked = (Double.parseDouble(tokenizer.nextToken()) == 1);
             }
 
-            QuadraticBezierFlow flow = new QuadraticBezierFlow(new Point(x1, y1), new Point(x2, y2));
+            QuadraticBezierFlow flow = new QuadraticBezierFlow(new Point(x1, y1), 
+                    new Point(x2, y2));
             flow.setValue(value);
 
             if (cPt != null) {                
@@ -66,74 +66,11 @@ public class FlowImporter {
 
         return flows;
     }
-    
-    
+       
     /**
-     * Import flows from a reader. One flow per line.Format: startX, startY, endX,
-     * endY Values are separated by space, coma or tab.
-     *
-     * @param reader
-     * @return The imported flows.
-     * @throws IOException
-     */
-    /*
-    public static ArrayList<Flow> readFlows(BufferedReader reader) throws IOException {
-        HashMap<String, Point> points = new HashMap<>();
-        ArrayList<Flow> flows = new ArrayList<>();
-
-        String l;
-        while ((l = reader.readLine()) != null) {
-            System.out.println(l);
-            boolean locked = false;
-            StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
-            
-            while(l != "flows") {
-   
-                String id = tokenizer.nextToken();
-                double x = Double.parseDouble(tokenizer.nextToken());
-                double y = Double.parseDouble(tokenizer.nextToken());
-                double nodeValue = Double.parseDouble(tokenizer.nextToken());
-                Point point = new Point(x, y);
-                point.setValue(nodeValue);
-                points.put(id, point);
-                
-            }
-            
-            while((l = reader.readLine()) != null) {
-                
-                String startPtID = tokenizer.nextToken();
-                String endPtID = tokenizer.nextToken();
-                double cPtX = Double.parseDouble(tokenizer.nextToken());
-                double cPtY = Double.parseDouble(tokenizer.nextToken());
-                double flowValue = Double.parseDouble(tokenizer.nextToken());
-                
-                if (Double.parseDouble(tokenizer.nextToken()) == 1) {
-                    locked = true;
-                }
-            
-                
-                Point startPoint = points.get(startPtID);
-                Point endPoint = points.get(endPtID);
-                Point cPoint = new Point(cPtX, cPtY);
-                QuadraticBezierFlow flow = new QuadraticBezierFlow(startPoint, endPoint);
-                flow.setValue(flowValue);
-                flow.setControlPoint(cPoint);
-                flow.setLocked(locked);
-                flows.add(flow);
-                
-            }
-
-        }
-        return flows;
-    }
-    */
-    
-    
-    
-    
-    /**
-     * Import file with flows. One flow per line.Format: startX, startY, endX,
-     * endY Values are separated by space, coma or tab.
+     * Import file with flows. One flow per line.
+     * Format: startX, startY, endX, endY 
+     * Values are separated by space, coma or tab.
      *
      * @param filePath
      * @return The imported flows.

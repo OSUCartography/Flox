@@ -2822,22 +2822,19 @@ public class MainWindow extends javax.swing.JFrame {
 
         Iterator flows = model.flowIterator();
         ArrayList<Point> nodes = model.getNodes();
-        
+        double scale = mapComponent.getScale();
         while(flows.hasNext()) {
             Flow flow = (Flow) flows.next();
-            
-            for (int i = 0; i < nodes.size(); i++) {
-                if (nodes.get(i) != flow.getStartPt()
-                        && nodes.get(i) != flow.getEndPt()) {
-                    if (GeometryUtils.flowIntersectsNode(flow, nodes.get(i), model, mapComponent.getScale())) {
+            for (Point node : nodes) {
+                if (node != flow.getStartPt() && node != flow.getEndPt()) {
+                    if (GeometryUtils.flowIntersectsNode(flow, node, model, scale)) {
                         flow.setSelected(true);
                         break;
                     } else {
                         flow.setSelected(false);
-                    };
+                    }
                 }
-            }
-            
+            }           
         }
 
         mapComponent.eraseBufferImage();
