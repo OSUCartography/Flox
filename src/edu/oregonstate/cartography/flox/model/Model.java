@@ -369,6 +369,7 @@ public class Model {
 
     /**
      * Removes all selected nodes and flows from the graph.
+     *
      * @return The number of flows and nodes that were deleted.
      */
     public int deleteSelectedFlowsAndNodes() {
@@ -398,7 +399,7 @@ public class Model {
         nodesToRemove.stream().forEach((node) -> {
             deleteNode(node);
         });
-        
+
         return flowsToRemove.size() + nodesToRemove.size();
     }
 
@@ -604,6 +605,14 @@ public class Model {
     }
 
     /**
+     * Returns true if the model contains at least one flow.
+     * @return True if the model has at least one flow.
+     */
+    public boolean hasFlows() {
+        return !graph.edgeSet().isEmpty();
+    }
+    
+    /**
      * Returns all flows in the graph. The flows are not ordered.
      *
      * @return All flows.
@@ -631,6 +640,14 @@ public class Model {
         return graph.nodeIterator();
     }
 
+    /**
+     * Returns true if the model contains at least one node.
+     * @return True if the model has at least one node.
+     */
+    public boolean hasNodes() {
+        return !graph.vertexSet().isEmpty();
+    }
+    
     /**
      * Returns all nodes in the graph.
      *
@@ -717,7 +734,7 @@ public class Model {
         }
         return maxValue;
     }
-    
+
     public boolean isFlowSelected() {
         Iterator flows = flowIterator();
         while (flows.hasNext()) {
@@ -752,7 +769,7 @@ public class Model {
         }
         return false;
     }
-    
+
     public ArrayList<Point> getSelectedNodes() {
 
         ArrayList<Point> selectedNodes = new ArrayList();
@@ -764,6 +781,25 @@ public class Model {
             }
         }
         return selectedNodes;
+    }
+
+    /**
+     * Selects or deselects all flows and nodes.
+     * @param select If true, all flows and nodes are selected. All are deselected
+     * otherwise.
+     */
+    public void setSelectionOfAllFlowsAndNodes(boolean select) {
+        Iterator flows = flowIterator();
+        while (flows.hasNext()) {
+            Flow flow = (Flow) flows.next();
+            flow.setSelected(select);
+        }
+
+        Iterator nodes = nodeIterator();
+        while (nodes.hasNext()) {
+            Point node = (Point) nodes.next();
+            node.setSelected(select);
+        }
     }
 
     /**

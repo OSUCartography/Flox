@@ -366,6 +366,9 @@ public class MainWindow extends javax.swing.JFrame {
         undoMenuItem = new javax.swing.JMenuItem();
         redoMenuItem = new javax.swing.JMenuItem();
         jSeparator8 = new javax.swing.JPopupMenu.Separator();
+        selectAllMenuItem = new javax.swing.JMenuItem();
+        selectNoneMenuItem = new javax.swing.JMenuItem();
+        jSeparator10 = new javax.swing.JPopupMenu.Separator();
         flowValueMenuItem = new javax.swing.JMenuItem();
         nodeValueMenuItem = new javax.swing.JMenuItem();
         jSeparator9 = new javax.swing.JPopupMenu.Separator();
@@ -1657,6 +1660,25 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu.add(redoMenuItem);
         editMenu.add(jSeparator8);
 
+        selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        selectAllMenuItem.setText("Select All");
+        selectAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectAllMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectAllMenuItem);
+
+        selectNoneMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        selectNoneMenuItem.setText("Select None");
+        selectNoneMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectNoneMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectNoneMenuItem);
+        editMenu.add(jSeparator10);
+
         flowValueMenuItem.setText("Flow Value…");
         flowValueMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2047,12 +2069,6 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void showReport() {
-        ArrayList<Flow> flows = new ArrayList<>();
-        Iterator<Flow> iter = model.flowIterator();
-        while (iter.hasNext()) {
-            Flow flow = iter.next();
-            flows.add(flow);
-        }
         int nbrIntersections = LayoutGrader.countFlowIntersections(model);
         int nbrFlows = model.getNbrFlows();
         int nbrNodes = model.getNbrNodes();
@@ -2710,6 +2726,8 @@ public class MainWindow extends javax.swing.JFrame {
     private void editMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_editMenuMenuSelected
         boolean hasSelectedFlow = model.isFlowSelected();
         boolean hasSelectedNode = model.isNodeSelected();
+        selectAllMenuItem.setEnabled(model.hasFlows() || model.hasNodes());
+        selectNoneMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
         flowValueMenuItem.setEnabled(hasSelectedFlow);
         nodeValueMenuItem.setEnabled(hasSelectedNode);
         reverseFlowDirectionMenuItem.setEnabled(hasSelectedFlow);
@@ -2802,6 +2820,18 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.repaint();
         }
     }//GEN-LAST:event_nodeValueMenuItemActionPerformed
+
+    private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
+        model.setSelectionOfAllFlowsAndNodes(true);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_selectAllMenuItemActionPerformed
+
+    private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
+        model.setSelectionOfAllFlowsAndNodes(false);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_selectNoneMenuItemActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -2964,6 +2994,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JToolBar jToolBar1;
@@ -2997,9 +3028,11 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem reverseFlowDirectionMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveSettingsMenuItem;
+    private javax.swing.JMenuItem selectAllMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
     private javax.swing.JButton selectFlowsCrossingNodesButton;
     private javax.swing.JButton selectFlowsFileButton;
+    private javax.swing.JMenuItem selectNoneMenuItem;
     private javax.swing.JButton selectPointsFileButton;
     private javax.swing.JCheckBox selfForcesCheckBox;
     private javax.swing.JButton showAllButton;
