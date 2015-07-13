@@ -2709,7 +2709,7 @@ public class MainWindow extends javax.swing.JFrame {
         for (Flow flow : flows) {
             flow.reverseFlow();
         }
-
+        addUndo("Reverse Flow Direction");
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_reverseFlowDirectionMenuItemActionPerformed
@@ -2719,6 +2719,7 @@ public class MainWindow extends javax.swing.JFrame {
         boolean hasSelectedNode = model.isNodeSelected();
         boolean isLockedFlowSelected = model.isLockedFlowSelected();
         boolean isUnlockedFlowSelected = model.isUnlockedFlowSelected();
+        deleteMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
         selectAllMenuItem.setEnabled(model.hasFlows() || model.hasNodes());
         selectNoneMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
         lockMenuItem.setEnabled(isUnlockedFlowSelected);
@@ -2771,6 +2772,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
+        addUndo("Flow Value");
     }//GEN-LAST:event_flowValueMenuItemActionPerformed
 
     private void nodeValueMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nodeValueMenuItemActionPerformed
@@ -2815,6 +2817,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
+        addUndo("Node Value");
     }//GEN-LAST:event_nodeValueMenuItemActionPerformed
 
     private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
@@ -2832,24 +2835,28 @@ public class MainWindow extends javax.swing.JFrame {
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows();
+        addUndo("Straighten Flows");
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
 
     private void lockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockMenuItemActionPerformed
         model.setLockOfSelectedFlows(true);
+        addUndo("Lock");
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_lockMenuItemActionPerformed
 
     private void unlockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockMenuItemActionPerformed
         model.setLockOfSelectedFlows(false);
+        addUndo("Unlock");
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_unlockMenuItemActionPerformed
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
         model.deleteSelectedFlowsAndNodes();
+        addUndo("Delete");
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_deleteMenuItemActionPerformed
