@@ -33,6 +33,16 @@ import java.util.Iterator;
 public class FloxRenderer extends SimpleFeatureRenderer {
 
     /**
+     * Color for drawing selected flows.
+     */
+    private final Color SELECTION_COLOR = Color.decode("#59A4FF");
+
+    /**
+     * Color for drawing flows that are not selected
+     */
+    private final Color REGULAR_COLOR = Color.BLACK;
+
+    /**
      * Width of stroke line for nodes
      */
     private final float NODE_STROKE_WIDTH = 2;
@@ -51,12 +61,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
-    
-    /**
-     * The map scale at the time it was locked.
-     */
-    private double lockedScale;
-    
+
     /**
      * Renders the flows to an image.
      *
@@ -175,7 +180,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         ArrayList<Flow> flows;
 
         // Determine location of the end point of flows based on the model
-        double r = model.getFlowDistanceFromEndPoint() / scale 
+        double r = model.getFlowDistanceFromEndPoint() / scale
                 * getLockedScaleFactor();
 
         // Order the flows based on the model
@@ -204,7 +209,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // the stroke width.
             double flowStrokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
                     * getLockedScaleFactor();
-            
+
             // If flow is a CubicBezierFlow, just set the flowPath to 
             // the flow without any changes. 
             if (flow instanceof CubicBezierFlow) {
@@ -218,15 +223,14 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
                     // Clip the flow by the end node
                     f = clipFlowByEndNode(f);
-                    
+
                     // Clip the flow by the clipping area
                     f = getClippedFlow(f);
-                    
+
                     // Clip the flow by distance from endpoint
                     f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
-                    
+
                     // Add the arrow
-                    
                     // Instantiate an Arrow object, passing it the first of
                     // the split flows and the model. And everything else.
                     Arrow arrow = new Arrow((QuadraticBezierFlow) f,
@@ -239,15 +243,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                     // Arrow class shortens the flow it was passed based on the
                     // length of the arrowhead.
                     flowPath = flowToGeneralPath(arrow.getFlow());
-                    
+
                 } else {
-                    
+
                     // Clip the flow by clipping area
                     f = getClippedFlow(f);
-                    
+
                     // Clip the flow by distance from endpoint
                     f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
-                    
+
                     // If the model does not specify the drawing of arrows, set
                     // flowPath to the first of splitFlows
                     flowPath = flowToGeneralPath(f);
@@ -255,39 +259,28 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             }
 
-            // Draw the arrow if the model says so.
+            g2d.setColor(flow.isSelected() ? SELECTION_COLOR : REGULAR_COLOR);
+
+            // draw the arrow heads
             if (model.isDrawArrows()) {
-                if (flow.isSelected() && flow.isLocked()) {
-                    g2d.setColor(Color.RED);
-                } else if (flow.isSelected()) {
-                    g2d.setColor(Color.CYAN);
-                } else if (flow.isLocked()) {
-                    g2d.setColor(Color.BLACK);
-                } else {
-                    g2d.setColor(Color.BLACK);
-                }
                 g2d.fill(arrowPath);
             }
 
-            // Draw the flow
+            // draw the flow
             g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            if (flow.isSelected() && flow.isLocked()) {
-                g2d.setColor(Color.RED);
-                g2d.draw(flowPath);
-                drawControlPoint(flow);
-            } else if (flow.isSelected()) {
-                g2d.setColor(Color.CYAN);
-                g2d.draw(flowPath);
-                drawControlPoint(flow);
-            } else if (flow.isLocked()) {
-                g2d.setColor(Color.BLACK);
-                g2d.draw(flowPath);
-            } else {
-                g2d.setColor(Color.BLACK);
-                g2d.draw(flowPath);
+            g2d.draw(flowPath);
+
+            // draw symbol for locked flows
+            if (flow.isLocked()) {
+                Point pt = flow.pointOnCurve(0.5);
+                drawCross(pt.x, pt.y);
             }
 
+            // draw control points for selected flows
+            if (flow.isSelected()) {
+                drawControlPoints(flow);
+            }
         }
     }
 
@@ -300,12 +293,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         while (iter.hasNext()) {
             Point pt = iter.next();
             double r = getNodeRadius(pt);
-            if (pt.isSelected()) {
-                drawCircle(pt.x, pt.y, r, Color.WHITE, Color.CYAN);
-            } else {
-                drawCircle(pt.x, pt.y, r, Color.WHITE, Color.BLACK);
-            }
-
+            Color color = pt.isSelected() ? SELECTION_COLOR : REGULAR_COLOR;
+            drawCircle(pt.x, pt.y, r, Color.WHITE, color);
         }
     }
 
@@ -395,15 +384,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            drawControlPoint(flow);
+            drawControlPoints(flow);
         }
     }
 
     /**
-     * Draw the control point of a Bezier curve and lines connecting the control 
+     * Draw the control point of a Bezier curve and lines connecting the control
      * point to the start and end points.
      */
-    public void drawControlPoint(Flow flow) {
+    private void drawControlPoints(Flow flow) {
         g2d.setStroke(new BasicStroke(1f));
         Point startPt = flow.getStartPt();
         Point endPt = flow.getEndPt();
@@ -433,25 +422,43 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             } else {
                 drawCircle(cpt.x, cpt.y, CR, Color.ORANGE, Color.GRAY);
             }
-
         }
+    }
+
+    private void drawCross(double x, double y) {
+        final double L = 4;
+
+        Line2D line1 = new Line2D.Double(xToPx(x) - L, yToPx(y) - L,
+                xToPx(x) + L, yToPx(y) + L);
+        Line2D line2 = new Line2D.Double(xToPx(x) - L, yToPx(y) + L,
+                xToPx(x) + L, yToPx(y) - L);
+
+        g2d.setStroke(new BasicStroke(2f));
+        g2d.setColor(Color.WHITE);
+        g2d.draw(line1);
+        g2d.draw(line2);
+
+        g2d.setStroke(new BasicStroke(1f));
+        g2d.setColor(Color.BLACK);
+        g2d.draw(line1);
+        g2d.draw(line2);
     }
 
     /**
      * Draw straight line segments for a Bezier curve. Useful for debugging.
      */
     public void drawStraightLinesSegments() {
-        
+
         Iterator<Flow> iter = model.flowIterator();
-        
+
         // If there are no flows, stop
-        if(!iter.hasNext()) {
+        if (!iter.hasNext()) {
             return;
         }
-        
+
         setStrokeWidth(2f);
         double deCasteljauTol = model.getDeCasteljauTolerance();
-        
+
         while (iter.hasNext()) {
             Flow flow = iter.next();
             ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
@@ -535,45 +542,46 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
         }
     }
-    
+
     private double getLockedScaleFactor() {
-        if(!model.isFlowWidthLocked()) {
+        if (!model.isFlowWidthLocked()) {
             return 1;
         } else {
             // compare the locked scale to the current scale
             double lockedMapScale = model.getLockedMapScale();
-            return scale/lockedMapScale;
+            return scale / lockedMapScale;
         }
     }
-    
-    private QuadraticBezierFlow getClippedFlow (QuadraticBezierFlow flow) {
+
+    private QuadraticBezierFlow getClippedFlow(QuadraticBezierFlow flow) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
         flow = flow.getClippedFlow(deCasteljauTol);
         return flow;
     }
-    
-    private QuadraticBezierFlow clipFlowByEndNode (QuadraticBezierFlow flow) {
-        
+
+    private QuadraticBezierFlow clipFlowByEndNode(QuadraticBezierFlow flow) {
+
         // Scale the node's radius + stroke/2 distance to world distance
         // This will eventually use the radius that is calculated from the 
         // node's value, but for now it's just the current radius of 10.
-        double nodeR = ((NODE_STROKE_WIDTH/2) + getNodeRadius(flow.getEndPt()))/scale;
-        
+        double nodeR = ((NODE_STROKE_WIDTH / 2) + getNodeRadius(flow.getEndPt())) / scale;
+
         // Clip the flow by that distance.
         double t = flow.getIntersectionTWithCircleAroundEndPoint(nodeR);
         return flow.split(t)[0];
     }
-    
+
     /**
      * Get a node's radius in pixels for drawing.
+     *
      * @param node
-     * @return 
+     * @return
      */
     private double getNodeRadius(Point node) {
-        double area =  Math.abs(node.getValue() 
+        double area = Math.abs(node.getValue()
                 * model.getNodeSizeScaleFactor());
-        
-        return (Math.sqrt(area/Math.PI)) * getLockedScaleFactor();
+
+        return (Math.sqrt(area / Math.PI)) * getLockedScaleFactor();
     }
-    
+
 }

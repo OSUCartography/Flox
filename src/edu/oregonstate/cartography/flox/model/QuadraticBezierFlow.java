@@ -261,10 +261,10 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns
+     * Returns the location on the BŽzier curve at parameter value t.
      *
-     * @param t
-     * @return
+     * @param t Parameter [0..1]
+     * @return Location on curve.
      */
     public Point pointOnCurve(double t) {
         assert (t >= 0d && t <= 1d);
@@ -382,6 +382,7 @@ public class QuadraticBezierFlow extends Flow {
     /**
      * Returns a flow with the the start and/or end masking areas removed.
      *
+     * @param deCasteljauTol Tolerance for conversion to straight line segments.
      * @return A new flow object (if something was clipped), or this object.
      */
     public QuadraticBezierFlow getClippedFlow(double deCasteljauTol) {
@@ -399,7 +400,6 @@ public class QuadraticBezierFlow extends Flow {
         QuadraticBezierFlow splitFlow = this;
 
         // clip linestring with clip areas around start point
-        double startT = 0;
         if (clipWithStartArea) {
             Geometry clippedFlowLineGeometry = lineString.difference(getStartClipArea());
             double d = 0;
@@ -419,7 +419,7 @@ public class QuadraticBezierFlow extends Flow {
                     }
                 }
             }
-            startT = splitFlow.getIntersectionTWithCircleAroundStartPoint(d);
+            double startT = splitFlow.getIntersectionTWithCircleAroundStartPoint(d);
             splitFlow = split(startT)[1];
         }
 

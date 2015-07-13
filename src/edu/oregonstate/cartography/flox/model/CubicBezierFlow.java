@@ -221,4 +221,9 @@ public class CubicBezierFlow extends Flow {
         
         return new CubicBezierFlow(startPt, endPt, radians, distPerc, value);
     }
+
+    @Override
+    public Point pointOnCurve(double t) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

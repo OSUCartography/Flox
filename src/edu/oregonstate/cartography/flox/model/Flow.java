@@ -129,7 +129,7 @@ public abstract class Flow {
     }
     
     /**
-     * @return the value
+     * @return the flow value
      */
     public double getValue() {
         return value;
@@ -150,6 +150,14 @@ public abstract class Flow {
     */
     public abstract ArrayList<Point> toStraightLineSegments(double flatness);
 
+    /**
+     * Returns the location on the BŽzier curve at parameter value t.
+     *
+     * @param t Parameter [0..1]
+     * @return Location on curve.
+     */
+    public abstract Point pointOnCurve(double t);
+    
     /**
      * @return the startClipArea
      */
