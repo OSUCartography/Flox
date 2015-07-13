@@ -364,6 +364,7 @@ public class MainWindow extends javax.swing.JFrame {
         undoMenuItem = new javax.swing.JMenuItem();
         redoMenuItem = new javax.swing.JMenuItem();
         jSeparator8 = new javax.swing.JPopupMenu.Separator();
+        deleteMenuItem = new javax.swing.JMenuItem();
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNoneMenuItem = new javax.swing.JMenuItem();
         jSeparator10 = new javax.swing.JPopupMenu.Separator();
@@ -1638,6 +1639,14 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu.add(redoMenuItem);
         editMenu.add(jSeparator8);
 
+        deleteMenuItem.setText("Delete");
+        deleteMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(deleteMenuItem);
+
         selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         selectAllMenuItem.setText("Select All");
         selectAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2839,6 +2848,12 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_unlockMenuItemActionPerformed
 
+    private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
+        model.deleteSelectedFlowsAndNodes();
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_deleteMenuItemActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -2947,6 +2962,7 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
     private javax.swing.JRadioButton cubicCurvesRadioButton;
     private javax.swing.ButtonGroup curvesButtonGroup;
+    private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawCanvasPaddingCheckbox;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
