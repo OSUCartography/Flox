@@ -28,12 +28,17 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     /**
      * Tolerance for selection of objects by mouse clicks.
      */
-    protected static final int CLICK_PIXEL_TOLERANCE = 12;
+    protected static final int CLICK_PIXEL_TOLERANCE = 4;
 
     /**
      * Model with elements to select.
      */
     private final Model model;
+
+    /**
+     * The scale is used to convert pixel distances to world distances.
+     */
+    private double scale = mapComponent.getScale();
 
     /**
      * Create a new instance.
@@ -54,7 +59,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
-        
+
         Rectangle2D.Double rect = getRectangle();
         super.endDrag(point, evt);
 
@@ -62,15 +67,15 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             final boolean selectionChanged = selectByRectangle(rect, evt.isShiftDown());
         }
 
-        if(model.isControlPtIsSelected()) {
+        if (model.isControlPtIsSelected()) {
             // deselect all control points
             Iterator flows = model.flowIterator();
-            while(flows.hasNext()) {
+            while (flows.hasNext()) {
                 Flow flow = (Flow) flows.next();
-                if(flow instanceof CubicBezierFlow) {
+                if (flow instanceof CubicBezierFlow) {
                     break;
                 }
-                
+
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 cPt.setSelected(false);
             }
@@ -78,7 +83,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             mapComponent.repaint();
             model.setControlPtIsSelected(false);
         }
-        
+
         setDefaultCursor();
     }
 
@@ -92,23 +97,22 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
         super.mouseClicked(point, evt);
 
-        if(model.isControlPtIsSelected()) {
+        if (model.isControlPtIsSelected()) {
             // deselect all control points
             Iterator flows = model.flowIterator();
-            while(flows.hasNext()) {
+            while (flows.hasNext()) {
                 Flow flow = (Flow) flows.next();
-                if(flow instanceof CubicBezierFlow) {
+                if (flow instanceof CubicBezierFlow) {
                     break;
                 }
-                
+
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 cPt.setSelected(false);
-                
+
             }
             model.setControlPtIsSelected(false);
         }
-        
-        
+
     }
 
     /**
@@ -124,7 +128,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         boolean selectionChanged = selectByPoint(point, evt.isShiftDown(),
                 SelectionTool.CLICK_PIXEL_TOLERANCE);
     }
-    
+
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
 
         // Select nodes
@@ -183,8 +187,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     }
 
     public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
-        Iterator<Point> nodes = model.nodeIterator();
-        
+
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
@@ -200,8 +203,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 if (flow instanceof CubicBezierFlow) {
                     break;
                 }
-                if (flow.isSelected() || 
-                        ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
+                if (flow.isSelected()
+                        || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                     // See if the event point is near the control point.
                     Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
 
@@ -228,39 +231,72 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
         }
 
-        // Select nodes
-        while (nodes.hasNext()) {
-            Point pt = nodes.next();
+
+        // Get the locked scale factor needed to calculate node widths
+        double lockedScaleFactor;
+        if (!model.isFlowWidthLocked()) {
+            lockedScaleFactor = 1;
+        } else {
+            // compare the locked scale to the current scale
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = scale / lockedMapScale;
+        }
+        
+        // Iterate backwards through the nodes so that nodes drawn last (on top)
+        // get selected first.
+        ArrayList<Point> nodes = model.getNodes();
+        for (int i = nodes.size() - 1; i >= 0; i--) {
 
             // If a node was selected stop checking.
             if (nodeGotSelected && (shiftDown == false)) {
-                pt.setSelected(false);
+                nodes.get(i).setSelected(false);
                 continue;
             }
-
-            if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(point.x) - pixelTolerance)
-                    && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
-                    && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
-                    && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
-                pt.setSelected(true);
+            
+            // Get the radius of the node
+            double nodeArea = Math.abs(nodes.get(i).getValue()
+                    * model.getNodeSizeScaleFactor());
+            double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+            nodeRadius = (nodeRadius + pixelTolerance) / scale;
+            
+            // Calculate the distance of the click from the node center.
+            double dx = nodes.get(i).x - point.x;
+            double dy = nodes.get(i).y - point.y;
+            double distSquared = (dx * dx + dy * dy);
+            
+            if(distSquared <= nodeRadius * nodeRadius) {
+                nodes.get(i).setSelected(true);
                 nodeGotSelected = true;
             } else {
                 if (shiftDown == false) {
-                    pt.setSelected(false);
+                    nodes.get(i).setSelected(false);
                 }
             }
-
         }
-
+    
         // Select flows
         Iterator<Flow> flows = model.flowIterator();
 
         double deCasteljauTol = model.getDeCasteljauTolerance();
-        while (flows.hasNext()) {
-            Flow flow = flows.next();
-            if (flow.getBoundingBox().contains(point)) {
 
-                // iterate through the points along the flow
+        // The distance tolerance the click needs to be from the flow in order
+        // to be selected.
+        double tol = pixelTolerance / scale;
+
+        while (flows.hasNext() && !nodeGotSelected) {
+            Flow flow = flows.next();
+
+            // Add a little padding to the bounding box, 1 pixel will do.
+            Rectangle2D flowBB = flow.getBoundingBox();
+
+            flowBB.add(flowBB.getMinX() + (tol), flowBB.getMinY() + (tol));
+            flowBB.add(flowBB.getMaxX() + (tol), flowBB.getMaxY() + (tol));
+
+            if (flowBB.contains(point)) {
+
+                double shortestDistSquare = Double.POSITIVE_INFINITY;
+
+                // Get the shortest distance of the click to the flow
                 ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
                 for (int i = 0; i < (pts.size() - 1); i++) {
 
@@ -271,35 +307,24 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     segmentPts.add(pt1);
                     segmentPts.add(pt2);
 
-                    // Does the bounding box of the segment contain the click?
-                    if (GeometryUtils.getBoundingBoxOfPoints(segmentPts).contains(point)) {
-                        // Convert the point coordinates to pixel coordinates
-                        double x0px = mapComponent.xToPx(point.x);
-                        double y0px = mapComponent.yToPx(point.y);
-                        double x1px = mapComponent.xToPx(pt1.x);
-                        double y1px = mapComponent.yToPx(pt1.y);
-                        double x2px = mapComponent.xToPx(pt2.x);
-                        double y2px = mapComponent.yToPx(pt2.y);
+                    double distSquare = GeometryUtils.getDistanceToLineSegmentSquare(
+                            point.x, point.y, pt1.x, pt1.y, pt2.x, pt2.y);
 
-                        double dist = GeometryUtils.getDistanceToLine(x0px, y0px, x1px, y1px,
-                                x2px, y2px);
+                    if (distSquare < shortestDistSquare) {
+                        shortestDistSquare = distSquare;
+                    } else {
+                        break;
+                    }
 
-                        // select the flow if dist is below a tolorance
-                        // don't select a flow if a node got selected
-                        if (dist <= 4 && nodeGotSelected != true) {
-                            flow.setSelected(true);
-                            flowGotSelected = true;
-                        } else {
-                            if (shiftDown == false) {
-                                flow.setSelected(false);
-                            }
-
-                        }
-
+                    // If that shortest dist is less than the tolerance, select it
+                    if (distSquare <= tol * tol) {
+                        flow.setSelected(true);
+                        flowGotSelected = true;
                     } else {
                         if (shiftDown == false) {
                             flow.setSelected(false);
                         }
+
                     }
 
                     if (flowGotSelected) {
