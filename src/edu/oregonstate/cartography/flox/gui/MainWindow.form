@@ -1480,12 +1480,12 @@
                         </Constraint>
                       </Constraints>
                     </Component>
-                    <Component class="javax.swing.JButton" name="selectFlowsCrossingNodesButton">
+                    <Component class="javax.swing.JButton" name="moveFlowsThatCrossNodesButton">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Select Flows Crossing Nodes"/>
+                        <Property name="text" type="java.lang.String" value="Move Flows That Cross Nodes"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectFlowsCrossingNodesButtonActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="moveFlowsThatCrossNodesButtonActionPerformed"/>
                       </Events>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

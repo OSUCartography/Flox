@@ -314,7 +314,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel26 = new javax.swing.JLabel();
         maximumNodeSizeSlider = new javax.swing.JSlider();
         jLabel27 = new javax.swing.JLabel();
-        selectFlowsCrossingNodesButton = new javax.swing.JButton();
+        moveFlowsThatCrossNodesButton = new javax.swing.JButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -1193,17 +1193,17 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
         mapControlPanel.add(jLabel27, gridBagConstraints);
 
-        selectFlowsCrossingNodesButton.setText("Select Flows Crossing Nodes");
-        selectFlowsCrossingNodesButton.addActionListener(new java.awt.event.ActionListener() {
+        moveFlowsThatCrossNodesButton.setText("Move Flows That Cross Nodes");
+        moveFlowsThatCrossNodesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectFlowsCrossingNodesButtonActionPerformed(evt);
+                moveFlowsThatCrossNodesButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 20;
         gridBagConstraints.gridwidth = 3;
-        mapControlPanel.add(selectFlowsCrossingNodesButton, gridBagConstraints);
+        mapControlPanel.add(moveFlowsThatCrossNodesButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2682,7 +2682,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_maximumNodeSizeSliderStateChanged
 
-    private void selectFlowsCrossingNodesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFlowsCrossingNodesButtonActionPerformed
+    private void moveFlowsThatCrossNodesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveFlowsThatCrossNodesButtonActionPerformed
 
         // Get an ArrayList of all flows that intersect nodes.
         ArrayList<QuadraticBezierFlow> flowsArray
@@ -2698,7 +2698,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         layout("Move Flows");
 
-    }//GEN-LAST:event_selectFlowsCrossingNodesButtonActionPerformed
+    }//GEN-LAST:event_moveFlowsThatCrossNodesButtonActionPerformed
 
     /**
      * Moves the control point of a flow perpendicularly to the baseline by one
@@ -2765,9 +2765,27 @@ public class MainWindow extends javax.swing.JFrame {
                 unitVectorY = dx / dist;
             }
 
-            // Add the unitVectors to the control point.
-            pt0.x += (unitVectorX / mapComponent.getScale());
-            pt0.y += (unitVectorY / mapComponent.getScale());
+            // If the distance from the control point to the baseline is more 
+            // than twice the length of the baseline
+            // move the control point to the baseline centerpoint,
+            // and reverse the vectorUnits' polarity. This amounts to flipping
+            // the flow to the other side.
+            double distFromBaseline = GeometryUtils.getDistanceToLine(
+                    pt0.x, pt0.y, pt1.x, pt1.y, pt2.x, pt2.y);
+            
+            if(distFromBaseline > flow.getBaselineLength() * 2) {
+                System.out.println("flipped a flow");
+                pt0.x = flow.getBaseLineMidPoint().x;
+                pt0.y = flow.getBaseLineMidPoint().y;
+                unitVectorX *= -1;
+                unitVectorY *= -1;
+            }
+            
+            // Add the unitVectors to the control point. Also, multiply the
+            // unitVectors by 2. This will cut the iterations in half without
+            // losing significant fidelity. 
+            pt0.x += (unitVectorX * 2 / mapComponent.getScale());
+            pt0.y += (unitVectorY * 2 / mapComponent.getScale());
 
             // Lock the flow. This is to prevent it from moving when forces
             // are reapplied to the layout.
@@ -3118,6 +3136,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider maximumFlowWidthSlider;
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JButton moveFlowsThatCrossNodesButton;
     private javax.swing.JMenuItem nodeValueMenuItem;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
@@ -3136,7 +3155,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem saveSettingsMenuItem;
     private javax.swing.JMenuItem selectAllMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
-    private javax.swing.JButton selectFlowsCrossingNodesButton;
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JMenuItem selectNoneMenuItem;
     private javax.swing.JButton selectPointsFileButton;
