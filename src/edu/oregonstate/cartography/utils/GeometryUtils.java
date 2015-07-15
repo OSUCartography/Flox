@@ -7,10 +7,12 @@ import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
+import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import java.awt.geom.Rectangle2D;
 import static java.lang.Double.isNaN;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class GeometryUtils {
 
@@ -191,7 +193,7 @@ public class GeometryUtils {
                 / (Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)))));
         return isNaN(distToLine) ? 0 : distToLine;
     }
-
+    
     /**
      * Calculates the shortest distance from a point to a finite line. Copied
      * from a stackoverflow forum post.
@@ -324,6 +326,43 @@ public class GeometryUtils {
         return angle;
     }
 
+    /**
+     * Returns an ArrayList of all flows that intersect nodes in the provided
+     * data model.
+     * @param model The data model containing flows and nodes.
+     * @param scale The scale of the mapComponent.
+     * @return 
+     */
+    public static ArrayList<QuadraticBezierFlow> getFlowsThatIntersectNodes(Model model, double scale) {
+        
+        ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
+        
+        Iterator flows = model.flowIterator();
+        ArrayList<Point> nodes = model.getNodes();
+        while (flows.hasNext()) {
+            QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
+            for (Point node : nodes) {
+                if (node != flow.getStartPt() && node != flow.getEndPt()) {
+                    if (GeometryUtils.flowIntersectsNode(flow, node, model, scale)) {
+                        flowsArray.add(flow);
+                        break;
+                    } 
+                }
+            }
+        }
+        
+        return flowsArray;
+        
+    }
+    
+    /**
+     * Returns true if the provided flow intersects the provided node.
+     * @param flow A Flow.
+     * @param node A Node.
+     * @param model The current data model
+     * @param mapScale The current scale of the mapComponent
+     * @return 
+     */
     public static boolean flowIntersectsNode(Flow flow, Point node,
             Model model, double mapScale) {
 

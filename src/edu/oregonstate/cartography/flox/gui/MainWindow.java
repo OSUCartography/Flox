@@ -12,6 +12,7 @@ import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
 import edu.oregonstate.cartography.flox.model.Point;
+import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
@@ -2683,26 +2684,101 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void selectFlowsCrossingNodesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFlowsCrossingNodesButtonActionPerformed
 
-        Iterator flows = model.flowIterator();
-        ArrayList<Point> nodes = model.getNodes();
-        double scale = mapComponent.getScale();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
-            for (Point node : nodes) {
-                if (node != flow.getStartPt() && node != flow.getEndPt()) {
-                    if (GeometryUtils.flowIntersectsNode(flow, node, model, scale)) {
-                        flow.setSelected(true);
-                        break;
-                    } else {
-                        flow.setSelected(false);
-                    }
+        // Get an ArrayList of all flows that intersect nodes.
+        ArrayList<QuadraticBezierFlow> flowsArray
+                = GeometryUtils.getFlowsThatIntersectNodes(model, mapComponent.getScale());
+
+        // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
+        // flowsArray using getFlowsThatIntersectNodes, and repeat until 
+        // flowsArray is empty.
+        while (flowsArray.size() > 0) {
+            moveFlowsCrossingNodes(flowsArray);
+            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, mapComponent.getScale());
+        }
+
+        layout("Move Flows");
+
+    }//GEN-LAST:event_selectFlowsCrossingNodesButtonActionPerformed
+
+    /**
+     * Moves the control point of a flow perpendicularly to the baseline by one
+     * pixel.
+     *
+     * @param flows
+     */
+    private void moveFlowsCrossingNodes(ArrayList<QuadraticBezierFlow> flows) {
+
+        for (QuadraticBezierFlow flow : flows) {
+
+            // Collect needed points from the flow
+            Point pt0 = flow.getCtrlPt();
+            Point pt1 = flow.getStartPt();
+            Point pt2 = flow.getEndPt();
+
+            // Get the distance of startPt to endPt
+            double dx = pt2.x - pt1.x;
+            double dy = pt2.y - pt1.y;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Create a point known to be on the right side of the line.
+            Point rightPt;
+            if (dy > 0) {
+                rightPt = new Point(pt1.x + 1, pt1.y);
+            } else if (dy < 0) {
+                rightPt = new Point(pt1.x - 1, pt1.y);
+            } else {
+                // dy is 0
+                if (dx > 0) {
+                    rightPt = new Point(pt1.x, pt1.y - 1);
+                } else {
+                    rightPt = new Point(pt1.x, pt1.y + 1);
                 }
             }
+
+            // Get the d value of rightPt. The d value will be positive if it's
+            // on one side of the flow's baseline, and negative if it's on the 
+            // other, but we don't know if the right side is positive or
+            // negative. This will allow us to find out.
+            double rightPtD = (rightPt.x - pt1.x) * (pt2.y - pt1.y) - (rightPt.y - pt1.y) * (pt2.x - pt1.x);
+
+            // Get the d value of the flow's control point.
+            double pt0D = (pt0.x - pt1.x) * (pt2.y - pt1.y) - (pt0.y - pt1.y) * (pt2.x - pt1.x);
+
+            // Initiallize the perpendicular unitVector of the flow's baseline.
+            // The values assigned to these will depend on whether the control
+            // point is on the right or left side of the baseline.
+            double unitVectorX;
+            double unitVectorY;
+            
+            // if pt0D and rightPtD have the same polarity, than the conrol point
+            // is on the right side! Set the unitVector accordingly.
+            // If either d value is 0 (the point lies directly on top of the 
+            // baseline) move the control point to the left arbitrarily.  
+            if ((pt0D > 0 && rightPtD > 0) || (pt0D < 0 && rightPtD < 0)) {
+                unitVectorX = dy / dist;
+                unitVectorY = -dx / dist;
+            } else if (pt0D == 0 || rightPtD == 0) {
+                unitVectorX = -dy / dist;
+                unitVectorY = dx / dist;
+            } else {
+                unitVectorX = -dy / dist;
+                unitVectorY = dx / dist;
+            }
+
+            // Add the unitVectors to the control point.
+            pt0.x += (unitVectorX / mapComponent.getScale());
+            pt0.y += (unitVectorY / mapComponent.getScale());
+
+            // Lock the flow. This is to prevent it from moving when forces
+            // are reapplied to the layout.
+            flow.setLocked(true);
+
         }
 
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
-    }//GEN-LAST:event_selectFlowsCrossingNodesButtonActionPerformed
+
+    }
 
     private void reverseFlowDirectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionMenuItemActionPerformed
         ArrayList<Flow> flows = model.getSelectedFlows();
