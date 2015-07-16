@@ -16,11 +16,11 @@ public class ForceLayouter {
 
     // model with all map features.
     private final Model model;
-    
+
     /**
-     * hash map with a line string for each flow to accelerate computations.
-     * The content of the hash map needs to be updated whenever the start, end, 
-     * or control point of a BŽzier flow changes.
+     * hash map with a line string for each flow to accelerate computations. The
+     * content of the hash map needs to be updated whenever the start, end, or
+     * control point of a BŽzier flow changes.
      */
     HashMap<Flow, ArrayList<Point>> straightLinesMap = new HashMap<>();
 
@@ -33,15 +33,15 @@ public class ForceLayouter {
     public ForceLayouter(Model model) {
         this.model = model;
     }
-    
+
     /**
      * Updates the hash map with line strings for each flow.
      */
-    private void initStraightLinesHashMap(){
+    private void initStraightLinesHashMap() {
         straightLinesMap.clear();
         double deCasteljauTol = model.getDeCasteljauTolerance();
         Iterator<Flow> iter = model.flowIterator();
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             Flow flow = iter.next();
             ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
             straightLinesMap.put(flow, points);
@@ -50,13 +50,13 @@ public class ForceLayouter {
 
     /**
      * Computes the total acting force on a point as applied by neighboring
-     * points. This is used to calculate the forces applied to the
-     * control point(s) of a BŽzier flow. There are two forces that will be
-     * calculated for each control point: The combined force of all nodes on the
-     * target node, and the force of the spring that pulls the target node
-     * towards the center point between the start/end points of the flow. The
-     * force of the spring is stronger for flows with start/end points that are
-     * closer together.
+     * points. This is used to calculate the forces applied to the control
+     * point(s) of a BŽzier flow. There are two forces that will be calculated
+     * for each control point: The combined force of all nodes on the target
+     * node, and the force of the spring that pulls the target node towards the
+     * center point between the start/end points of the flow. The force of the
+     * spring is stronger for flows with start/end points that are closer
+     * together.
      *
      * @param targetPoint The point that will be moved.
      * @param targetFlow The flow that receives the forces.
@@ -71,7 +71,7 @@ public class ForceLayouter {
         double wTotal = 0; // sum of the weight of all forces
 
         double nodeWeight = model.getNodeWeightFactor();
-        
+
         // Iterate through the flows. The forces of each flow on the target is
         // calculated and added to the total force
         while (flowIterator.hasNext()) {
@@ -92,9 +92,10 @@ public class ForceLayouter {
                 boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
 
                 Point point = points.get(ptID);
-
+                
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
+                
                 double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
                 // avoid division by zero
                 if (l == 0) {
@@ -123,6 +124,80 @@ public class ForceLayouter {
             }
         }
 
+        // Calculate the final total force of all nodes on the target point
+        double fxFinal = fxTotal / wTotal;
+        double fyFinal = fyTotal / wTotal;
+
+        return new Force(fxFinal, fyFinal);
+    }
+
+    private Force computeForceOnNearestPointOnFlow(Flow targetFlow) {
+        Iterator<Flow> flowIterator = model.flowIterator();
+
+        double fxTotal = 0; // total force along the x axis
+        double fyTotal = 0; // total force along the y axis 
+        double wTotal = 0; // sum of the weight of all forces
+
+        double nodeWeight = model.getNodeWeightFactor();
+
+        // Iterate over all flows
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
+            if (!model.isFlowExertingForcesOnItself() && targetFlow == flow) {
+                continue;
+            }
+
+            // Get the points along this flow
+            ArrayList<Point> points = straightLinesMap.get(flow);
+            int nPoints = points.size();
+
+            // FIXME. i'm not sure this is necessary anymore.
+            if (nPoints > 200) {
+                System.err.println("flow lines with too many points");
+                return new Force();
+            }
+
+            // for each point on this flow...
+            for (int ptID =   0; ptID < nPoints; ptID++) {
+                boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
+
+                Point point = points.get(ptID);
+
+        	// Figure out the Target Point! Which requires finding the point on targetFlow that is nearest to point. I could write a method in geometryUtils that does this.
+                Point targetPoint = GeometryUtils.getClosestPointOnFlow(targetFlow, 
+                        point, model.getDeCasteljauTolerance());
+
+                //The rest of this code can stay the way it is.
+                double xDist = targetPoint.x - point.x; // x distance from node to target
+                double yDist = targetPoint.y - point.y; // y distance from node to target
+                double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
+                // avoid division by zero
+                if (l == 0) {
+                    continue;
+                }
+
+                //double w = gaussianWeight(l, maxFlowLength);
+                double w = inverseDistanceWeight(l);
+                //double fx = xDist / l; //normalized x distance
+                //double fy = yDist / l; //normalized y distance
+
+                // Apply the distance weight to each focre
+                xDist *= w; // The force along the x-axis after weighting
+                yDist *= w; // The force along the y-axix after weighting
+
+                // start and end points have bigger weight
+                if (startOrEndPoint) {
+                    xDist *= nodeWeight;
+                    yDist *= nodeWeight;
+                }
+
+                // Add forces to the totals
+                fxTotal += xDist;
+                fyTotal += yDist;
+                wTotal += w;
+            }
+
+        }
         // Calculate the final total force of all nodes on the target point
         double fxFinal = fxTotal / wTotal;
         double fyFinal = fyTotal / wTotal;
@@ -234,6 +309,10 @@ public class ForceLayouter {
         // flow segment
         Force externalF = new Force();
         double lengthOfForceVectorsSum = 0;
+
+        //externalF.add(computeForceOnNearestPointOnFlow(flow));
+        //lengthOfForceVectorsSum += externalF.length();
+        
         for (Point pt : flowPoints) {
             // compute force applied by nodes and flows
             Force f = computeForceOnPoint(pt, flow);
@@ -241,6 +320,8 @@ public class ForceLayouter {
             externalF.add(f);
             lengthOfForceVectorsSum += f.length();
         }
+        
+                
         // compute ratio between length of total vector and the summed
         // length of the shorter forces. This is a measure of how peripheral the 
         // flow is.
@@ -274,14 +355,14 @@ public class ForceLayouter {
         if (flows.size() < 2) {
             return;
         }
-        
+
         initStraightLinesHashMap();
-        
+
         double maxFlowLength = model.getLongestFlowLength();
 
         // compute force for each flow for current configuration
         ArrayList<Force> forces = new ArrayList<>();
-        
+
         for (Flow flow : flows) {
             if (flow instanceof QuadraticBezierFlow) {
                 QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
@@ -313,7 +394,7 @@ public class ForceLayouter {
                 }
 
                 computeAngularDistributionForce(qFlow);
-                
+
                 if (model.isEnforceCanvasRange()) {
                     Rectangle2D canvasRect = model.getCanvas();
                     Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
@@ -324,7 +405,7 @@ public class ForceLayouter {
 
         }
     }
-    
+
     private static double startToCtrlAngle(QuadraticBezierFlow flow) {
         Point ctrlPt = flow.getCtrlPt();
         Point startPt = flow.getStartPt();
@@ -332,7 +413,7 @@ public class ForceLayouter {
         double dy = ctrlPt.y - startPt.y;
         return Math.atan2(dy, dx);
     }
-    
+
     private static double endToCtrlAngle(QuadraticBezierFlow flow) {
         Point ctrlPt = flow.getCtrlPt();
         Point endPt = flow.getEndPt();
@@ -340,7 +421,7 @@ public class ForceLayouter {
         double dy = ctrlPt.y - endPt.y;
         return Math.atan2(dy, dx);
     }
-    
+
     private void computeAngularDistributionForce(QuadraticBezierFlow flow) {
         final double K = 8;
         Point startPoint = flow.getStartPt();
@@ -352,8 +433,8 @@ public class ForceLayouter {
         double startWSum = 0;
         double endSum = 0;
         double endWSum = 0;
-        while(iter.hasNext()) {
-            QuadraticBezierFlow f = (QuadraticBezierFlow)iter.next();
+        while (iter.hasNext()) {
+            QuadraticBezierFlow f = (QuadraticBezierFlow) iter.next();
             if (f == flow) {
                 continue;
             }
@@ -366,7 +447,7 @@ public class ForceLayouter {
                 startSum += d * w;
                 startWSum += w;
             }
-            
+
             if (startPoint == fEnd) {
                 double fEndToCtrlAngle = endToCtrlAngle(f);
                 double d = GeometryUtils.angleDif(startToCtrlAngle, fEndToCtrlAngle);
@@ -374,7 +455,7 @@ public class ForceLayouter {
                 startSum += d * w;
                 startWSum += w;
             }
-            
+
             if (endPoint == fStart) {
                 double fStartToCtrlAngle = startToCtrlAngle(f);
                 double d = GeometryUtils.angleDif(endToCtrlAngle, fStartToCtrlAngle);
@@ -382,7 +463,7 @@ public class ForceLayouter {
                 endSum += d * w;
                 endWSum += w;
             }
-            
+
             if (endPoint == fEnd) {
                 double fEndToCtrlAngle = endToCtrlAngle(f);
                 double d = GeometryUtils.angleDif(endToCtrlAngle, fEndToCtrlAngle);
@@ -402,10 +483,10 @@ public class ForceLayouter {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if(flow.isSelected() && !flow.isLocked()){
+            if (flow.isSelected() && !flow.isLocked()) {
                 flow.bend(0, 0);
             }
-                
+
         }
     }
 

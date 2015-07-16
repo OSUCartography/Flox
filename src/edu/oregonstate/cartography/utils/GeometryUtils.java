@@ -193,7 +193,7 @@ public class GeometryUtils {
                 / (Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)))));
         return isNaN(distToLine) ? 0 : distToLine;
     }
-    
+
     /**
      * Calculates the shortest distance from a point to a finite line. Copied
      * from a stackoverflow forum post.
@@ -239,9 +239,20 @@ public class GeometryUtils {
         double dy = y - yy;
         return Math.sqrt(dx * dx + dy * dy);
     }
+
+    /**
+     * Gets the squared distance to a line segment from a point.
+     * @param p Point to get the distance to the segment from
+     * @param sp Start point of line segment.
+     * @param ep End point of line segment.
+     * @return 
+     */
+    public static double getDistanceToLineSegementSquare(Point p, Point sp, Point ep) {
+        return getDistanceToLineSegmentSquare(p.x, p.y, sp.x, sp.y, ep.x, ep.y);
+    }
     
     /**
-     * Calculates the square value of the shortest distance from a point to a 
+     * Calculates the square value of the shortest distance from a point to a
      * finite line. Copied from a stackoverflow forum post.
      * http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
      * segment.
@@ -287,6 +298,93 @@ public class GeometryUtils {
     }
 
     /**
+     * Returns the closest Point on a line segment to a point.
+     * @param p point to find closest point on segment to
+     * @param sp segment start point
+     * @param ep segment end point
+     * @return closest point on segment to p
+     */
+    public static Point getClosestPointOnSegment(Point p, Point sp, Point ep) {
+        return getClosestPointOnSegment(p.x, p.y, sp.x, sp.y, ep.x, ep.y);
+    }
+
+    /**
+     * Returns the closest Point on a line segment to a point.
+     * @param px point x coordinate
+     * @param py point y coordinate
+     * @param spx segment start point x coordinate
+     * @param spy segment start point y coordinate
+     * @param epx segment end point x coordinate
+     * @param epy segment end point y coordinate
+     * @return closets point on segment to point
+     */
+    public static Point getClosestPointOnSegment(double px, double py, double spx, double spy,
+            double epx, double epy) {
+
+        double xDelta = epx - spx;
+        double yDelta = epy - spy;
+
+        if ((xDelta == 0) && (yDelta == 0)) {
+            throw new IllegalArgumentException("Segment start equals segment end");
+        }
+
+        double u = ((px - spx) * xDelta + (py - spy) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
+
+        final Point closestPoint;
+        if (u < 0) {
+            closestPoint = new Point(spx, spy);
+        } else if (u > 1) {
+            closestPoint = new Point(epx, epy);
+        } else {
+            closestPoint = new Point((spx + u * xDelta), (spy + u * yDelta));
+        }
+
+        return closestPoint;
+    }
+
+    /**
+     * Returns the closest point on a flow to a point. Actually finds the 
+     * nearest point on the nearest line segment along the flow to a point.
+     * @param flow The flow to find the closest point on.
+     * @param pt The point to find the point on the flow closest to.
+     * @param deCasteljauTol Determines how many segments are along the flow,
+     * value should be passed from the model.
+     * @return The Point along the flow closest to pt.
+     */
+    public static Point getClosestPointOnFlow(Flow flow, Point pt, double deCasteljauTol) {
+        
+        ArrayList<Point> flowPts = flow.toStraightLineSegments(deCasteljauTol);
+        
+        // Find the segment closest to pt
+        double shortestDistSquare = Double.POSITIVE_INFINITY;
+        
+        // This is redundant, this assignment is made in the for loop. But the
+        // points need to be initialized with something for NetBeans to be ok
+        // with the return statement at the end. There's probably a nicer way 
+        // to do this.
+        Point pt1 = flowPts.get(0);
+        Point pt2 = flowPts.get(1);
+        for (int i = 0; i < (flowPts.size() - 1); i++) {
+            pt1 = flowPts.get(i);
+            pt2 = flowPts.get(i + 1);
+            
+            double distSquare = GeometryUtils.getDistanceToLineSegmentSquare(
+                            pt.x, pt.y, pt1.x, pt1.y, pt2.x, pt2.y);
+            
+            if (distSquare < shortestDistSquare) {
+                shortestDistSquare = distSquare;
+            } else {
+                pt2 = flowPts.get(i - 1);
+                break;
+            }
+            
+        }
+
+        return getClosestPointOnSegment(pt, pt1, pt2);
+        
+    }
+    
+    /**
      * Compute the difference between two angles. The resulting angle is in the
      * range of -pi..+pi if the input angle are also in this range.
      */
@@ -329,14 +427,15 @@ public class GeometryUtils {
     /**
      * Returns an ArrayList of all flows that intersect nodes in the provided
      * data model.
+     *
      * @param model The data model containing flows and nodes.
      * @param scale The scale of the mapComponent.
-     * @return 
+     * @return
      */
     public static ArrayList<QuadraticBezierFlow> getFlowsThatIntersectNodes(Model model, double scale) {
-        
+
         ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
-        
+
         Iterator flows = model.flowIterator();
         ArrayList<Point> nodes = model.getNodes();
         while (flows.hasNext()) {
@@ -346,22 +445,23 @@ public class GeometryUtils {
                     if (GeometryUtils.flowIntersectsNode(flow, node, model, scale)) {
                         flowsArray.add(flow);
                         break;
-                    } 
+                    }
                 }
             }
         }
-        
+
         return flowsArray;
-        
+
     }
-    
+
     /**
      * Returns true if the provided flow intersects the provided node.
+     *
      * @param flow A Flow.
      * @param node A Node.
      * @param model The current data model
      * @param mapScale The current scale of the mapComponent
-     * @return 
+     * @return
      */
     public static boolean flowIntersectsNode(Flow flow, Point node,
             Model model, double mapScale) {
@@ -404,12 +504,12 @@ public class GeometryUtils {
         Rectangle2D flowBB = flow.getBoundingBox();
         flowBB.add((flowBB.getMinX() - threshDist), (flowBB.getMinY() - threshDist));
         flowBB.add((flowBB.getMaxX() + threshDist), (flowBB.getMaxY() + threshDist));
-        
+
         // If flowBB contains the node's coordinates, then check the shortest
         // distance between the node and the flow. If it's less than the 
         // threshold, then it intersects. 
         double shortestDistSquare = Double.POSITIVE_INFINITY;
-        
+
         if (flowBB.contains(node.x, node.y)) {
 
             ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
@@ -420,8 +520,8 @@ public class GeometryUtils {
 
                 double distSquare = getDistanceToLineSegmentSquare(node.x, node.y,
                         pt1.x, pt1.y, pt2.x, pt2.y);
-                
-                if(distSquare < shortestDistSquare) {
+
+                if (distSquare < shortestDistSquare) {
                     shortestDistSquare = distSquare;
                 } else {
                     break;

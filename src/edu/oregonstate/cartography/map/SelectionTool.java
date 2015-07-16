@@ -279,7 +279,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         double deCasteljauTol = model.getDeCasteljauTolerance();
 
-        // The distance tolerance the click needs to be from the flow in order
+        // The distance tolerance the click needs to be within the flow in order
         // to be selected.
         double tol = pixelTolerance / scale;
 
@@ -302,10 +302,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
                     Point pt1 = pts.get(i);
                     Point pt2 = pts.get(i + 1);
-
-                    ArrayList<Point> segmentPts = new ArrayList();
-                    segmentPts.add(pt1);
-                    segmentPts.add(pt2);
 
                     double distSquare = GeometryUtils.getDistanceToLineSegmentSquare(
                             point.x, point.y, pt1.x, pt1.y, pt2.x, pt2.y);
