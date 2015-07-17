@@ -145,26 +145,63 @@ public class Model {
      */
     private double distanceWeightExponent = 10.0;
 
+    /**
+     * If this is true, control points of flows are prevented from moving 
+     * outside of its flow's rangebox. Modified by a GUI checkbox.
+     */
     private boolean enforceRangebox = true;
 
+    /**
+     * If this is true, control points are prevented from moving outside of the
+     * canvas.
+     */
     private boolean enforceCanvasRange = true;
 
+    /**
+     * If this is true, arrows are drawn onto the end of flows. Modified by a
+     * GUI checkbox.
+     */
     private boolean drawArrows = true;
 
+    /**
+     * Determines the size of the canvas. The minimum canvas size is the bounding
+     * box of all flows. This value is used to increases the length and width of 
+     * the minimum canvas by (length * this value) and (width * this value).
+     * Modified currently by a GUI slider.
+     */
     private double canvasPadding = 0.5;
 
+    /**
+     * This value determines the width of a flows bounding box. The width of 
+     * the bounding box = this value * the length of the flow's baseline.
+     * Currently modified by a GUI slider.
+     */
     private double flowRangeboxHeight = .5;
 
+    /**
+     * Determines the distance (in pixels) a flow line stops before reaching
+     * its endpoint. If arrows are being drawn, this is the distance from
+     * the tip of the arrow to the outside of the node. If arrows are NOT being
+     * drawn, this is the distance from the end of the flow line to the center
+     * of the node. Currently modified by a GUI modifiable text field.
+     */
     private double flowDistanceFromEndPoint = 5.0d;
 
     // FIXME
     private boolean controlPtIsSelected = false;
 
     /**
-     * Maximum allowed flow width in pixels.
+     * Maximum allowed flow width in pixels. The flow with the highest value
+     * will have this width. All other flows are scaled down 
+     * relative to this value.
      */
     private double maxFlowStrokeWidth = 20;
 
+    /**
+     * Gets the ratio between the maximum permitted flow stroke width and the
+     * maximum current flow value.
+     * @return maxFlowStrokeWidth/maxFlowValue
+     */
     public double getFlowWidthScaleFactor() {
         return getMaxFlowStrokeWidth() / getMaxFlowValue();
     }
@@ -174,6 +211,10 @@ public class Model {
      */
     private double maxNodeSize = 10;
 
+    /**
+     * 
+     * @return 
+     */
     public double getNodeSizeScaleFactor() {
 
         // Get the area needed to satisfy the radius

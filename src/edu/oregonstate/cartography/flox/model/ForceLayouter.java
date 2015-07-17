@@ -92,7 +92,7 @@ public class ForceLayouter {
                 boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
 
                 Point point = points.get(ptID);
-                
+
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
                 
@@ -111,12 +111,15 @@ public class ForceLayouter {
                 xDist *= w; // The force along the x-axis after weighting
                 yDist *= w; // The force along the y-axix after weighting
 
-                // start and end points have bigger weight
+                //start and end points have bigger weight
+                /*
                 if (startOrEndPoint) {
                     xDist *= nodeWeight;
                     yDist *= nodeWeight;
                 }
+                */
 
+                
                 // Add forces to the totals
                 fxTotal += xDist;
                 fyTotal += yDist;
@@ -158,13 +161,13 @@ public class ForceLayouter {
             }
 
             // for each point on this flow...
-            for (int ptID =   0; ptID < nPoints; ptID++) {
+            for (int ptID = 0; ptID < nPoints; ptID++) {
                 boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
 
                 Point point = points.get(ptID);
 
-        	// Figure out the Target Point! Which requires finding the point on targetFlow that is nearest to point. I could write a method in geometryUtils that does this.
-                Point targetPoint = GeometryUtils.getClosestPointOnFlow(targetFlow, 
+                // Figure out the Target Point! Which requires finding the point on targetFlow that is nearest to point. I could write a method in geometryUtils that does this.
+                Point targetPoint = GeometryUtils.getClosestPointOnFlow(targetFlow,
                         point, model.getDeCasteljauTolerance());
 
                 //The rest of this code can stay the way it is.
@@ -305,23 +308,16 @@ public class ForceLayouter {
         Point cPt = flow.getCtrlPt();
         ArrayList<Point> flowPoints = straightLinesMap.get(flow);
 
-        // compute the sum of all force vectors that are applied on each 
-        // flow segment
+        // Compute forces applied by all flows on current flow
         Force externalF = new Force();
         double lengthOfForceVectorsSum = 0;
-
-        //externalF.add(computeForceOnNearestPointOnFlow(flow));
-        //lengthOfForceVectorsSum += externalF.length();
-        
         for (Point pt : flowPoints) {
-            // compute force applied by nodes and flows
             Force f = computeForceOnPoint(pt, flow);
             // add to totals
             externalF.add(f);
             lengthOfForceVectorsSum += f.length();
         }
-        
-                
+
         // compute ratio between length of total vector and the summed
         // length of the shorter forces. This is a measure of how peripheral the 
         // flow is.
@@ -330,6 +326,9 @@ public class ForceLayouter {
         externalF.fx /= flowPoints.size();
         externalF.fy /= flowPoints.size();
 
+        // compute force applied by all start and end nodes on current flow
+        Force nodeF = computeNodeForceOnFlow(flow);
+        
         // compute anti-torsion force of flow
         Force antiTorsionF = computeAntiTorsionForce(flow);
 
@@ -344,12 +343,64 @@ public class ForceLayouter {
         if (springFLength > externalFLength * K) {
             springF.scale(K * externalFLength / springFLength);
         }
+        
         // compute total force: external forces + spring force + anti-torsion force
-        double fx = externalF.fx + springF.fx + antiTorsionF.fx;
-        double fy = externalF.fy + springF.fy + antiTorsionF.fy;
+        // FIXME add nodes force with optional weight (maybe)
+        double fx = externalF.fx + springF.fx + antiTorsionF.fx + nodeF.fx;
+        double fy = externalF.fy + springF.fy + antiTorsionF.fy + nodeF.fy;
         return new Force(fx, fy);
     }
 
+    private Force computeNodeForceOnFlow(Flow flow) {
+        
+        double nodeWeight = model.getNodeWeightFactor();
+        
+        double wTotal = 0;
+        double fxTotal = 0;
+        double fyTotal = 0;
+        
+        // for each node: 
+        Iterator nodeIterator = model.nodeIterator();
+        while (nodeIterator.hasNext()) {
+            Point node = (Point) nodeIterator.next();
+            // find nearest point on target flow
+            Point nearestPt = GeometryUtils.getClosestPointOnFlow(flow, node, 
+                    model.getDeCasteljauTolerance());
+            // compute node-nearest-point distance 
+            double xDist = nearestPt.x - node.x;
+            double yDist = nearestPt.y - node.y;
+            double l = Math.sqrt((xDist * xDist) + (yDist * yDist));
+            
+            // Avoid division by zero
+            if (l == 0) {
+                continue;
+            }
+            
+            // compute idw from distance
+            // Maybe this could use a different method designed for nodes in
+            // order to get a different distance weight.
+            double w = inverseDistanceWeight(l);
+            xDist *= w;
+            yDist *= w;
+            
+            // Multiply by the value of the GUI slider for node weight.
+            xDist *= nodeWeight;
+            yDist *= nodeWeight;
+            
+            // add to nodes force sum
+            fxTotal += xDist;
+            fyTotal += yDist;
+            wTotal += w;
+
+        }
+        
+        double fxFinal = fxTotal/wTotal;
+        double fyFinal = fyTotal/wTotal;
+        
+        return new Force(fxFinal, fyFinal);
+        
+    }
+    
     public void layoutAllFlows(double weight) {
         ArrayList<Flow> flows = model.getFlows();
         if (flows.size() < 2) {

@@ -349,7 +349,7 @@ public class GeometryUtils {
      * @param pt The point to find the point on the flow closest to.
      * @param deCasteljauTol Determines how many segments are along the flow,
      * value should be passed from the model.
-     * @return The Point along the flow closest to pt.
+     * @return The Point along the flow closest to p.
      */
     public static Point getClosestPointOnFlow(Flow flow, Point pt, double deCasteljauTol) {
         
@@ -358,6 +358,7 @@ public class GeometryUtils {
         // Find the segment closest to pt
         double shortestDistSquare = Double.POSITIVE_INFINITY;
         
+        // FIXME
         // This is redundant, this assignment is made in the for loop. But the
         // points need to be initialized with something for NetBeans to be ok
         // with the return statement at the end. There's probably a nicer way 
@@ -373,6 +374,7 @@ public class GeometryUtils {
             
             if (distSquare < shortestDistSquare) {
                 shortestDistSquare = distSquare;
+                // save the endpoints of the nearest segment
             } else {
                 pt2 = flowPts.get(i - 1);
                 break;

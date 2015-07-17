@@ -288,8 +288,9 @@ public class MainWindow extends javax.swing.JFrame {
         flowRangeboxSizeSlider = new javax.swing.JSlider();
         jLabel13 = new javax.swing.JLabel();
         jLabel25 = new javax.swing.JLabel();
-        keepForcesConstantToggleButton = new javax.swing.JToggleButton();
+        applyConstantForcesToggleButton = new javax.swing.JToggleButton();
         flowNodeDensityComboBox = new javax.swing.JComboBox();
+        applyAdditionalNodeForcesButton = new javax.swing.JToggleButton();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -913,16 +914,16 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
         forcesPanel.add(jLabel25, gridBagConstraints);
 
-        keepForcesConstantToggleButton.setText("Apply Constant Forces");
-        keepForcesConstantToggleButton.addActionListener(new java.awt.event.ActionListener() {
+        applyConstantForcesToggleButton.setText("Apply Constant Forces");
+        applyConstantForcesToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                keepForcesConstantToggleButtonActionPerformed(evt);
+                applyConstantForcesToggleButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 23;
-        forcesPanel.add(keepForcesConstantToggleButton, gridBagConstraints);
+        forcesPanel.add(applyConstantForcesToggleButton, gridBagConstraints);
 
         flowNodeDensityComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Low", "Medium", "High" }));
         flowNodeDensityComboBox.setSelectedIndex(1);
@@ -936,6 +937,12 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 21;
         forcesPanel.add(flowNodeDensityComboBox, gridBagConstraints);
+
+        applyAdditionalNodeForcesButton.setText("Apply Additional Node Forces");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 24;
+        forcesPanel.add(applyAdditionalNodeForcesButton, gridBagConstraints);
 
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
@@ -2615,9 +2622,9 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
-    private void keepForcesConstantToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_keepForcesConstantToggleButtonActionPerformed
+    private void applyConstantForcesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyConstantForcesToggleButtonActionPerformed
         layout("Keep Forces Constant");
-    }//GEN-LAST:event_keepForcesConstantToggleButtonActionPerformed
+    }//GEN-LAST:event_applyConstantForcesToggleButtonActionPerformed
 
     private void flowNodeDensityComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_flowNodeDensityComboBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
@@ -2975,7 +2982,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         ForceLayouter layouter = new ForceLayouter(model);
 
-        if (!keepForcesConstantToggleButton.isSelected()) {
+        if (!applyConstantForcesToggleButton.isSelected()) {
             layouter.straightenFlows();
         }
 
@@ -2986,7 +2993,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         progressBar.setVisible(true);
         LayoutActionListener listener = new LayoutActionListener(layouter,
-                keepForcesConstantToggleButton.isSelected());
+                applyConstantForcesToggleButton.isSelected());
         timer = new Timer(0, listener);
         timer.start();
     }
@@ -3045,6 +3052,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
     private javax.swing.JSlider antiTorsionSlider;
+    private javax.swing.JToggleButton applyAdditionalNodeForcesButton;
+    private javax.swing.JToggleButton applyConstantForcesToggleButton;
     private javax.swing.JSlider arrowCornerPositionSlider;
     private javax.swing.JSlider arrowEdgeCtrlLengthSlider;
     private javax.swing.JSlider arrowEdgeCtrlWidthSlider;
@@ -3122,7 +3131,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JToolBar jToolBar1;
-    private javax.swing.JToggleButton keepForcesConstantToggleButton;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JCheckBox lockFlowWidthCheckbox;
