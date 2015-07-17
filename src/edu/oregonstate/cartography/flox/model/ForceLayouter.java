@@ -362,7 +362,15 @@ public class ForceLayouter {
         // for each node: 
         Iterator nodeIterator = model.nodeIterator();
         while (nodeIterator.hasNext()) {
+            
             Point node = (Point) nodeIterator.next();
+            
+            // If the node is the start or end point of the current flow
+            if(!model.isFlowExertingForcesOnItself() && 
+                    (node==flow.getStartPt() || node==flow.getEndPt())) {
+                continue;
+            }
+            
             // find nearest point on target flow
             Point nearestPt = GeometryUtils.getClosestPointOnFlow(flow, node, 
                     model.getDeCasteljauTolerance());
@@ -370,7 +378,6 @@ public class ForceLayouter {
             double xDist = nearestPt.x - node.x;
             double yDist = nearestPt.y - node.y;
             double l = Math.sqrt((xDist * xDist) + (yDist * yDist));
-            
             // Avoid division by zero
             if (l == 0) {
                 continue;

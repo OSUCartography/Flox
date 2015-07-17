@@ -35,4 +35,5 @@ public class Force {
     public static Force add(Force f1, Force f2) {
         return new Force(f1.fx + f2.fx, f1.fy + f2.fy);
     }
+    
 }

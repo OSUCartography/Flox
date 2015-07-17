@@ -2173,7 +2173,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
         if (nodeWeightSlider.getValueIsAdjusting() == false) {
-            model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d + 1d);
+            model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d );
             layout("Node Weight");
         }
     }//GEN-LAST:event_nodeWeightSliderStateChanged
