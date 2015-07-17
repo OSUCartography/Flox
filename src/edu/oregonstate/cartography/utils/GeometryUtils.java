@@ -1,9 +1,5 @@
 package edu.oregonstate.cartography.utils;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
@@ -534,4 +530,129 @@ public class GeometryUtils {
         return (shortestDistSquare < threshDist * threshDist);
     }
 
+    private static double cuberoot(double x) {
+        if (x < 0.0f) {
+            return -Math.pow(-x, 1.0 / 3.0);
+        }
+        return Math.pow(x, 1.0 / 3.0);
+    }
+
+    /**
+     * Find roots in cubic equation. From
+     * http://www.pouet.net/topic.php?which=9119&page=1
+     * @param a
+     * @param b
+     * @param c
+     * @param r Array that will receive solutions.
+     * @return The number of solutions.
+     */
+    private static int solveCubic(double a, double b, double c, double[] r) {
+        double p = b - a * a / 3.0;
+        double q = a * (2.0 * a * a - 9.0 * b) / 27.0 + c;
+        double p3 = p * p * p;
+        double d = q * q + 4.0 * p3 / 27.0;
+        double offset = -a / 3.0;
+        if (d >= 0) { // Single solution
+            double z = Math.sqrt(d);
+            double u = (-q + z) / 2.0;
+            double v = (-q - z) / 2.0;
+            u = cuberoot(u);
+            v = cuberoot(v);
+            r[0] = offset + u + v;
+            return 1;
+        }
+        double u = Math.sqrt(-p / 3);
+        double v = Math.acos(-Math.sqrt(-27.0 / p3) * q / 2.0) / 3.0;
+        double m = Math.cos(v), n = Math.sin(v) * 1.732050808;
+        r[0] = offset + u * (m + m);
+        r[1] = offset - u * (n + m);
+        r[2] = offset + u * (n - m);
+        return 3;
+    }
+
+    /**
+     * Computes the square of the shortest distance between a point and any 
+     * point on a quadratic BŽzier curve.
+     * Based on 
+     * http://blog.gludion.com/2009/08/distance-to-quadratic-bezier-curve.html
+     * and
+     * http://www.pouet.net/topic.php?which=9119&page=2
+     * @param p0x Start point x
+     * @param p0y Start point y
+     * @param p1x Control point x
+     * @param p1y Control point y
+     * @param p2x End point x
+     * @param p2y End point x
+     * @param x Point x
+     * @param y Point y
+     * @return The square distance between the point x/y and the quadratic Bezier curve.
+     */
+    public static double pointQuadraticBezierDistanceSq(double p0x, double p0y,
+            double p1x, double p1y,
+            double p2x, double p2y,
+            double x, double y) {
+        
+        double dx1 = p0x - x;
+        double dy1 = p0y - y;
+        double d0sq = dx1 * dx1 + dy1 * dy1;
+        double dx2 = p2x - x;
+        double dy2 = p2y - y;
+        double d2sq = dx2 * dx2 + dy2 * dy2;
+        double disSq = Math.min(d0sq, d2sq);
+
+        double ax = p0x - 2.0 * p1x + p2x;
+        double ay = p0y - 2.0 * p1y + p2y;
+        double bx = 2.0 * (p1x - p0x);
+        double by = 2.0 * (p1y - p0y);
+        double cx = p0x;
+        double cy = p0y;
+
+        double k3 = 2.0 * (ax * ax + ay * ay);
+        double k2 = 3.0 * (ax * bx + ay * by);
+        double k1 = bx * bx + by * by + 2.0 * ((cx - x) * ax + (cy - y) * ay);
+        double k0 = (cx - x) * bx + (cy - y) * by;
+
+        // FIXME allocating this array each time might not be efficient
+        double res[] = new double[3];
+        int n = solveCubic(k2 / k3, k1 / k3, k0 / k3, res);
+        for (int i = 0; i < n; i++) {
+            double t = res[i];
+            if (t >= 0.0 && t <= 1.0) {
+                double _1_t = 1.0 - t;
+                double w0 = _1_t * _1_t;
+                double w1 = 2.0 * t * _1_t;
+                double w2 = t * t;
+                // closest point on BŽzier curve
+                double posx = w0 * p0x + w1 * p1x + w2 * p2x;
+                double posy = w0 * p0y + w1 * p1y + w2 * p2y;
+
+                double dx = posx - x;
+                double dy = posy - y;
+                disSq = Math.min(disSq, dx * dx + dy * dy);
+            }
+        }
+
+        return disSq;
+    }
+    
+    /**
+     * Computes the shortest distance between a point and any point on a
+     * quadratic BŽzier curve.
+     * @param p0x Start point x
+     * @param p0y Start point y
+     * @param p1x Control point x
+     * @param p1y Control point y
+     * @param p2x End point x
+     * @param p2y End point x
+     * @param x Point x
+     * @param y Point y
+     * @return Distance between the point x/y and the quadratic Bezier curve.
+     */
+    public static double pointQuadraticBezierDistance(double p0x, double p0y,
+            double p1x, double p1y,
+            double p2x, double p2y,
+            double x, double y) {
+        double dSq = pointQuadraticBezierDistanceSq(p0x, p0y, p1x, p1y, p2x, p2y, x, y);
+        return Math.sqrt(dSq);
+    }
 }

@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
@@ -448,5 +449,29 @@ public class QuadraticBezierFlow extends Flow {
         }
 
         return splitFlow;
+    }
+    
+    /**
+     * Computes the shortest distance between a point and any point on this
+     * quadratic BŽzier curve.
+     * @param x Point x
+     * @param y Point y
+     * @return The distance.
+     */
+    public double distance(double x, double y) {
+           return GeometryUtils.pointQuadraticBezierDistance(startPt.x, startPt.y, 
+                cPt.x, cPt.y, endPt.x, endPt.y, x, y);
+    }
+    
+    /**
+     * Computes the square of the shortest distance between a point and any 
+     * point on this quadratic BŽzier curve.
+     * @param x Point x
+     * @param y Point y
+     * @return The distance.
+     */
+    public double distanceSq(double x, double y) {
+           return GeometryUtils.pointQuadraticBezierDistanceSq(startPt.x, startPt.y, 
+                cPt.x, cPt.y, endPt.x, endPt.y, x, y);
     }
 }
