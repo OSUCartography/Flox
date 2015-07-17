@@ -116,7 +116,7 @@ public class Model {
     /**
      * Start and end node exert a larger force than points along flow lines.
      */
-    private double nodeWeightFactor = 1.0;
+    private double nodeWeightFactor = 0.0;
 
     /**
      * Weight for the anti-torsion force.

@@ -35,11 +35,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     private final Model model;
 
     /**
-     * The scale is used to convert pixel distances to world distances.
-     */
-    private double scale = mapComponent.getScale();
-
-    /**
      * Create a new instance.
      *
      * @param mapComponent The MapComponent for which this MapTool provides its
@@ -187,10 +182,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
     public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
 
+        double scale = mapComponent.getScale();
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
-
+        
         // if the model says a flow is currently selected, check to see if a 
         // control point is nearby, and select it if so.
         if (model.isFlowSelected()
@@ -283,50 +279,32 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         double tol = pixelTolerance / scale;
 
         while (flows.hasNext() && !nodeGotSelected) {
-            Flow flow = flows.next();
+            QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
 
-            // Add a little padding to the bounding box, 1 pixel will do.
+            // Add a little padding to the bounding box in the amount of tol
             Rectangle2D flowBB = flow.getBoundingBox();
 
-            flowBB.add(flowBB.getMinX() + (tol), flowBB.getMinY() + (tol));
-            flowBB.add(flowBB.getMaxX() + (tol), flowBB.getMaxY() + (tol));
+            flowBB.add(flowBB.getMinX() - tol, flowBB.getMinY() - tol);
+            flowBB.add(flowBB.getMaxX() + tol, flowBB.getMaxY() + tol);
 
             if (flowBB.contains(point)) {
-
-                double shortestDistSquare = Double.POSITIVE_INFINITY;
-
-                // Get the shortest distance of the click to the flow
-                ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
-                for (int i = 0; i < (pts.size() - 1); i++) {
-
-                    Point pt1 = pts.get(i);
-                    Point pt2 = pts.get(i + 1);
-
-                    double distSquare = GeometryUtils.getDistanceToLineSegmentSquare(
-                            point.x, point.y, pt1.x, pt1.y, pt2.x, pt2.y);
-
-                    if (distSquare < shortestDistSquare) {
-                        shortestDistSquare = distSquare;
-                    } else {
-                        break;
+                
+                // Get the distance of the click to the flow.
+                double distance = flow.distance(point.x, point.y);
+                // If that distance is less than the tolerance, select it.
+                if (distance <= tol) {
+                    flow.setSelected(true);
+                    flowGotSelected = true;
+                } else {
+                    if (shiftDown == false) {
+                        flow.setSelected(false);
                     }
-
-                    // If that shortest dist is less than the tolerance, select it
-                    if (distSquare <= tol * tol) {
-                        flow.setSelected(true);
-                        flowGotSelected = true;
-                    } else {
-                        if (shiftDown == false) {
-                            flow.setSelected(false);
-                        }
-
-                    }
-
-                    if (flowGotSelected) {
-                        break;
-                    }
-
                 }
+                
+                if (flowGotSelected) {
+                    break;
+                }
+                
             } else {
                 if (shiftDown == false) {
                     flow.setSelected(false);
