@@ -290,7 +290,6 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel25 = new javax.swing.JLabel();
         applyConstantForcesToggleButton = new javax.swing.JToggleButton();
         flowNodeDensityComboBox = new javax.swing.JComboBox();
-        applyAdditionalNodeForcesButton = new javax.swing.JToggleButton();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -937,12 +936,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 21;
         forcesPanel.add(flowNodeDensityComboBox, gridBagConstraints);
-
-        applyAdditionalNodeForcesButton.setText("Apply Additional Node Forces");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 24;
-        forcesPanel.add(applyAdditionalNodeForcesButton, gridBagConstraints);
 
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
@@ -3052,7 +3045,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
     private javax.swing.JSlider antiTorsionSlider;
-    private javax.swing.JToggleButton applyAdditionalNodeForcesButton;
     private javax.swing.JToggleButton applyConstantForcesToggleButton;
     private javax.swing.JSlider arrowCornerPositionSlider;
     private javax.swing.JSlider arrowEdgeCtrlLengthSlider;
