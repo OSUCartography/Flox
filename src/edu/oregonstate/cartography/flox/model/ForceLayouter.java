@@ -339,7 +339,7 @@ public class ForceLayouter {
         // FIXME
         final double K = 10;
         if (springFLength > externalFLength * K) {
-            springF.scale(K * externalFLength / springFLength);
+            //springF.scale(K * externalFLength / springFLength);
         }
 
         // compute total force: external forces + spring force + anti-torsion force
@@ -369,12 +369,28 @@ public class ForceLayouter {
                 continue;
             }
 
+            // only consider start and end nodes that are above or below the 
+            // base line of the flow
+            double baseX = flow.endPt.x - flow.startPt.x;
+            double baseY = flow.endPt.y - flow.startPt.y;
+            double baseL = Math.sqrt(baseX * baseX + baseY * baseY);
+            double nodeX = node.x - flow.startPt.x;
+            double nodeY = node.y - flow.startPt.y;
+            double nodeL = Math.sqrt(nodeX * nodeX + nodeY * nodeY);
+            double cos = (baseX * nodeX + baseY * nodeY) / (baseL * nodeL);
+            if (cos < 0) {
+                continue;
+            }
+
             // find nearest point on target flow
             xy[0] = node.x;
             xy[1] = node.y;
             double d = flow.distance(xy);
-            double xDist = xy[0] - node.x;
-            double yDist = xy[1] - node.y;
+
+            // start with unary direction vector
+            double dx = (xy[0] - node.x) / d;
+            double dy = (xy[1] - node.y) / d;
+
             // avoid division by zero
             if (d == 0) {
                 continue;
@@ -383,22 +399,24 @@ public class ForceLayouter {
             // compute idw from distance
             // Maybe this could use a different method designed for nodes in
             // order to get a different distance weight.
+            // FIXME should we use a different IDW exponent than for flows?
             double w = inverseDistanceWeight(d);
-            xDist *= w;
-            yDist *= w;
-
-            // Multiply by the value of the GUI slider for node weight.
-            xDist *= nodeWeight;
-            yDist *= nodeWeight;
+            dx *= w;
+            dy *= w;
 
             // add to nodes force sum
-            fxTotal += xDist;
-            fyTotal += yDist;
+            fxTotal += dx;
+            fyTotal += dy;
             wTotal += w;
         }
 
         double fxFinal = fxTotal / wTotal;
         double fyFinal = fyTotal / wTotal;
+
+        // Multiply by the value of the GUI slider for node weight.
+        fxFinal *= nodeWeight;
+        fyFinal *= nodeWeight;
+
         return new Force(fxFinal, fyFinal);
     }
 
