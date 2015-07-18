@@ -339,7 +339,7 @@ public class ForceLayouter {
         // FIXME
         final double K = 10;
         if (springFLength > externalFLength * K) {
-            //springF.scale(K * externalFLength / springFLength);
+            springF.scale(K * externalFLength / springFLength);
         }
 
         // compute total force: external forces + spring force + anti-torsion force
@@ -370,16 +370,29 @@ public class ForceLayouter {
             }
 
             // only consider start and end nodes that are above or below the 
-            // base line of the flow
-            double baseX = flow.endPt.x - flow.startPt.x;
-            double baseY = flow.endPt.y - flow.startPt.y;
-            double baseL = Math.sqrt(baseX * baseX + baseY * baseY);
-            double nodeX = node.x - flow.startPt.x;
-            double nodeY = node.y - flow.startPt.y;
-            double nodeL = Math.sqrt(nodeX * nodeX + nodeY * nodeY);
-            double cos = (baseX * nodeX + baseY * nodeY) / (baseL * nodeL);
-            if (cos < 0) {
-                continue;
+            // base line of the flow.
+            // project vector 'a' from base point to the node point onto the 
+            // base line of the flow defined by vector 'b'.
+            // if the length of the projected vector > base line length / 2
+            // then the node is not vertically above or below the base line
+            Point baseLineMidPoint = flow.getBaseLineMidPoint();
+            Point endPoint = flow.getEndPt();
+            double ax = node.x - baseLineMidPoint.x;
+            double ay = node.y - baseLineMidPoint.y;
+            double baseLineLength = flow.getBaselineLength(); // twice the tolerance
+            double bx = endPoint.x - baseLineMidPoint.x;
+            double by = endPoint.y - baseLineMidPoint.y;
+            double projectedLength = Math.abs((ax * bx + ay * by) / baseLineLength);
+            // a node not vertically above or below the base line will have a 
+            // weight = 0.
+            // A node on the normal vector on the base line passing through the 
+            // base line mid point has a weight of 1 (i.e. projected Length = 0).
+            // A node with a projected length = baseLineLength / 2 has a weight of 0.
+            double wDist;
+            if (projectedLength > baseLineLength / 2) {
+                wDist = 0;
+            } else {
+                wDist = 1 - projectedLength / (baseLineLength / 2);
             }
 
             // find nearest point on target flow
@@ -400,14 +413,16 @@ public class ForceLayouter {
             // Maybe this could use a different method designed for nodes in
             // order to get a different distance weight.
             // FIXME should we use a different IDW exponent than for flows?
-            double w = inverseDistanceWeight(d);
-            dx *= w;
-            dy *= w;
+            double idw = inverseDistanceWeight(d);
+            
+            // apply IDW weight and distance-to-centra-normal weight
+            dx *= idw * wDist;
+            dy *= idw * wDist;
 
             // add to nodes force sum
             fxTotal += dx;
             fyTotal += dy;
-            wTotal += w;
+            wTotal += idw;
         }
 
         double fxFinal = fxTotal / wTotal;
