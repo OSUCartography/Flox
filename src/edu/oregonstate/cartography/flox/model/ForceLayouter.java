@@ -95,7 +95,7 @@ public class ForceLayouter {
 
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
-                
+
                 double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
                 // avoid division by zero
                 if (l == 0) {
@@ -113,13 +113,11 @@ public class ForceLayouter {
 
                 //start and end points have bigger weight
                 /*
-                if (startOrEndPoint) {
-                    xDist *= nodeWeight;
-                    yDist *= nodeWeight;
-                }
-                */
-
-                
+                 if (startOrEndPoint) {
+                 xDist *= nodeWeight;
+                 yDist *= nodeWeight;
+                 }
+                 */
                 // Add forces to the totals
                 fxTotal += xDist;
                 fyTotal += yDist;
@@ -328,7 +326,7 @@ public class ForceLayouter {
 
         // compute force applied by all start and end nodes on current flow
         Force nodeF = computeNodeForceOnFlow(flow);
-        
+
         // compute anti-torsion force of flow
         Force antiTorsionF = computeAntiTorsionForce(flow);
 
@@ -343,7 +341,7 @@ public class ForceLayouter {
         if (springFLength > externalFLength * K) {
             springF.scale(K * externalFLength / springFLength);
         }
-        
+
         // compute total force: external forces + spring force + anti-torsion force
         // FIXME add nodes force with optional weight (maybe)
         double fx = externalF.fx + springF.fx + antiTorsionF.fx + nodeF.fx;
@@ -351,63 +349,59 @@ public class ForceLayouter {
         return new Force(fx, fy);
     }
 
-    private Force computeNodeForceOnFlow(Flow flow) {
-        
+    private Force computeNodeForceOnFlow(QuadraticBezierFlow flow) {
+
         double nodeWeight = model.getNodeWeightFactor();
-        
+
+        double[] xy = new double[2];
         double wTotal = 0;
         double fxTotal = 0;
         double fyTotal = 0;
-        
+
         // for each node: 
         Iterator nodeIterator = model.nodeIterator();
         while (nodeIterator.hasNext()) {
-            
             Point node = (Point) nodeIterator.next();
-            
+
             // If the node is the start or end point of the current flow
-            if(!model.isFlowExertingForcesOnItself() && 
-                    (node==flow.getStartPt() || node==flow.getEndPt())) {
+            if (!model.isFlowExertingForcesOnItself()
+                    && (node == flow.getStartPt() || node == flow.getEndPt())) {
                 continue;
             }
-            
+
             // find nearest point on target flow
-            Point nearestPt = GeometryUtils.getClosestPointOnFlow(flow, node, 
-                    model.getDeCasteljauTolerance());
-            // compute node-nearest-point distance 
-            double xDist = nearestPt.x - node.x;
-            double yDist = nearestPt.y - node.y;
-            double l = Math.sqrt((xDist * xDist) + (yDist * yDist));
-            // Avoid division by zero
-            if (l == 0) {
+            xy[0] = node.x;
+            xy[1] = node.y;
+            double d = flow.distance(xy);
+            double xDist = xy[0] - node.x;
+            double yDist = xy[1] - node.y;
+            // avoid division by zero
+            if (d == 0) {
                 continue;
             }
-            
+
             // compute idw from distance
             // Maybe this could use a different method designed for nodes in
             // order to get a different distance weight.
-            double w = inverseDistanceWeight(l);
+            double w = inverseDistanceWeight(d);
             xDist *= w;
             yDist *= w;
-            
+
             // Multiply by the value of the GUI slider for node weight.
             xDist *= nodeWeight;
             yDist *= nodeWeight;
-            
+
             // add to nodes force sum
             fxTotal += xDist;
             fyTotal += yDist;
             wTotal += w;
-
         }
-        
-        double fxFinal = fxTotal/wTotal;
-        double fyFinal = fyTotal/wTotal;
-        
+
+        double fxFinal = fxTotal / wTotal;
+        double fyFinal = fyTotal / wTotal;
         return new Force(fxFinal, fyFinal);
-        
     }
-    
+
     public void layoutAllFlows(double weight) {
         ArrayList<Flow> flows = model.getFlows();
         if (flows.size() < 2) {

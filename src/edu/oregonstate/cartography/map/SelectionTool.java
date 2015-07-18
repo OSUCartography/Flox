@@ -278,6 +278,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         // to be selected.
         double tol = pixelTolerance / scale;
 
+        double[] xy = new double[2];
         while (flows.hasNext()) {
             QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
 
@@ -290,7 +291,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             if (flowBB.contains(point)) {
                 
                 // Get the distance of the click to the flow.
-                double distance = flow.distance(point.x, point.y);
+                xy[0] = point.x;
+                xy[1] = point.y;
+                double distance = flow.distance(xy);
                 // If that distance is less than the tolerance, select it.
                 if (distance <= tol && !nodeGotSelected) {
                     flow.setSelected(true);

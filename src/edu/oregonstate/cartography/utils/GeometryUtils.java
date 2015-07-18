@@ -592,7 +592,8 @@ public class GeometryUtils {
 
     /**
      * Computes the square of the shortest distance between a point and any
-     * point on a quadratic BŽzier curve. Based on
+     * point on a quadratic BŽzier curve. Attention: xy parameter is changed.
+     * Based on
      * http://blog.gludion.com/2009/08/distance-to-quadratic-bezier-curve.html
      * and http://www.pouet.net/topic.php?which=9119&page=2
      *
@@ -602,27 +603,26 @@ public class GeometryUtils {
      * @param p1y Control point y
      * @param p2x End point x
      * @param p2y End point x
-     * @param x Point x
-     * @param y Point y
+     * @param xy Point x and y on input; the closest point on the curve on output.
      * @return The square distance between the point x/y and the quadratic
      * Bezier curve.
      */
-    public static double pointQuadraticBezierDistanceSq(double p0x, double p0y,
+    public static double getDistanceToQuadraticBezierCurveSq(double p0x, double p0y,
             double p1x, double p1y,
             double p2x, double p2y,
-            double x, double y) {
+            double[] xy) {
 
         if (collinear(p0x, p0y, p1x, p1y, p2x, p2y)) {
-            return getDistanceToLineSegmentSquare(x, y, p0x, p0y, p2x, p2y);
+            return getDistanceToLineSegmentSquare(xy[0], xy[1], p0x, p0y, p2x, p2y);
         }
 
-        double dx1 = p0x - x;
-        double dy1 = p0y - y;
+        double dx1 = p0x - xy[0];
+        double dy1 = p0y - xy[1];
         double d0sq = dx1 * dx1 + dy1 * dy1;
-        double dx2 = p2x - x;
-        double dy2 = p2y - y;
+        double dx2 = p2x - xy[0];
+        double dy2 = p2y - xy[1];
         double d2sq = dx2 * dx2 + dy2 * dy2;
-        double disSq = Math.min(d0sq, d2sq);
+        double minDistSq = Math.min(d0sq, d2sq);
 
         double ax = p0x - 2.0 * p1x + p2x;
         double ay = p0y - 2.0 * p1y + p2y;
@@ -633,8 +633,8 @@ public class GeometryUtils {
 
         double k3 = 2.0 * (ax * ax + ay * ay);
         double k2 = 3.0 * (ax * bx + ay * by);
-        double k1 = bx * bx + by * by + 2.0 * ((cx - x) * ax + (cy - y) * ay);
-        double k0 = (cx - x) * bx + (cy - y) * by;
+        double k1 = bx * bx + by * by + 2.0 * ((cx - xy[0]) * ax + (cy - xy[1]) * ay);
+        double k0 = (cx - xy[0]) * bx + (cy - xy[1]) * by;
 
         // FIXME allocating this array each time might not be efficient
         double res[] = new double[3];
@@ -650,18 +650,23 @@ public class GeometryUtils {
                 double posx = w0 * p0x + w1 * p1x + w2 * p2x;
                 double posy = w0 * p0y + w1 * p1y + w2 * p2y;
 
-                double dx = posx - x;
-                double dy = posy - y;
-                disSq = Math.min(disSq, dx * dx + dy * dy);
+                double dx = posx - xy[0];
+                double dy = posy - xy[1];
+                double distSq = dx * dx + dy * dy;
+                if (distSq < minDistSq) {
+                    minDistSq = dx * dx + dy * dy;
+                    xy[0] = posx;
+                    xy[1] = posy;
+                }
             }
         }
 
-        return disSq;
+        return minDistSq;
     }
 
     /**
      * Computes the shortest distance between a point and any point on a
-     * quadratic BŽzier curve.
+     * quadratic BŽzier curve. Attention: xy parameter is changed.
      *
      * @param p0x Start point x
      * @param p0y Start point y
@@ -669,15 +674,14 @@ public class GeometryUtils {
      * @param p1y Control point y
      * @param p2x End point x
      * @param p2y End point x
-     * @param x Point x
-     * @param y Point y
+     * @param xy Point x and y on input; the closest point on the curve on output.
      * @return Distance between the point x/y and the quadratic Bezier curve.
      */
-    public static double pointQuadraticBezierDistance(double p0x, double p0y,
+    public static double getDistanceToQuadraticBezierCurve(double p0x, double p0y,
             double p1x, double p1y,
             double p2x, double p2y,
-            double x, double y) {
-        double dSq = pointQuadraticBezierDistanceSq(p0x, p0y, p1x, p1y, p2x, p2y, x, y);
+            double [] xy) {
+        double dSq = getDistanceToQuadraticBezierCurveSq(p0x, p0y, p1x, p1y, p2x, p2y, xy);
         return Math.sqrt(dSq);
     }
 
@@ -685,8 +689,9 @@ public class GeometryUtils {
         Point p0 = new Point(0, 0);
         Point p1 = new Point(0, 100);
         Point p2 = new Point(0, 200);
+        double[] xy = {1, 50};
         QuadraticBezierFlow flow = new QuadraticBezierFlow(p0, p1, p2);
-        double d = flow.distance(1, 50);
+        double d = flow.distance(xy);
         System.out.println(d);
     }
 }

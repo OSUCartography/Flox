@@ -453,25 +453,23 @@ public class QuadraticBezierFlow extends Flow {
     
     /**
      * Computes the shortest distance between a point and any point on this
-     * quadratic BŽzier curve.
-     * @param x Point x
-     * @param y Point y
+     * quadratic BŽzier curve. Attention: xy parameter is changed.
+     * @param xy Point x and y on input; the closest point on the curve on output.
      * @return The distance.
      */
-    public double distance(double x, double y) {
-           return GeometryUtils.pointQuadraticBezierDistance(startPt.x, startPt.y, 
-                cPt.x, cPt.y, endPt.x, endPt.y, x, y);
+    public double distance(double[] xy) {
+           return GeometryUtils.getDistanceToQuadraticBezierCurve(startPt.x, startPt.y, 
+                cPt.x, cPt.y, endPt.x, endPt.y, xy);
     }
     
     /**
      * Computes the square of the shortest distance between a point and any 
-     * point on this quadratic BŽzier curve.
-     * @param x Point x
-     * @param y Point y
+     * point on this quadratic BŽzier curve. Attention: xy parameter is changed.
+     * @param xy Point x and y on input; the closest point on the curve on output.
      * @return The distance.
      */
-    public double distanceSq(double x, double y) {
-           return GeometryUtils.pointQuadraticBezierDistanceSq(startPt.x, startPt.y, 
-                cPt.x, cPt.y, endPt.x, endPt.y, x, y);
+    public double distanceSq(double []xy) {
+           return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y, 
+                cPt.x, cPt.y, endPt.x, endPt.y, xy);
     }
 }
