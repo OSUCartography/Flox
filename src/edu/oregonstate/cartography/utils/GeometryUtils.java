@@ -238,15 +238,16 @@ public class GeometryUtils {
 
     /**
      * Gets the squared distance to a line segment from a point.
+     *
      * @param p Point to get the distance to the segment from
      * @param sp Start point of line segment.
      * @param ep End point of line segment.
-     * @return 
+     * @return
      */
     public static double getDistanceToLineSegementSquare(Point p, Point sp, Point ep) {
         return getDistanceToLineSegmentSquare(p.x, p.y, sp.x, sp.y, ep.x, ep.y);
     }
-    
+
     /**
      * Calculates the square value of the shortest distance from a point to a
      * finite line. Copied from a stackoverflow forum post.
@@ -295,6 +296,7 @@ public class GeometryUtils {
 
     /**
      * Returns the closest Point on a line segment to a point.
+     *
      * @param p point to find closest point on segment to
      * @param sp segment start point
      * @param ep segment end point
@@ -306,6 +308,7 @@ public class GeometryUtils {
 
     /**
      * Returns the closest Point on a line segment to a point.
+     *
      * @param px point x coordinate
      * @param py point y coordinate
      * @param spx segment start point x coordinate
@@ -339,8 +342,9 @@ public class GeometryUtils {
     }
 
     /**
-     * Returns the closest point on a flow to a point. Actually finds the 
+     * Returns the closest point on a flow to a point. Actually finds the
      * nearest point on the nearest line segment along the flow to a point.
+     *
      * @param flow The flow to find the closest point on.
      * @param pt The point to find the point on the flow closest to.
      * @param deCasteljauTol Determines how many segments are along the flow,
@@ -348,12 +352,12 @@ public class GeometryUtils {
      * @return The Point along the flow closest to p.
      */
     public static Point getClosestPointOnFlow(Flow flow, Point pt, double deCasteljauTol) {
-        
+
         ArrayList<Point> flowPts = flow.toStraightLineSegments(deCasteljauTol);
-        
+
         // Find the segment closest to pt
         double shortestDistSquare = Double.POSITIVE_INFINITY;
-        
+
         // FIXME
         // This is redundant, this assignment is made in the for loop. But the
         // points need to be initialized with something for NetBeans to be ok
@@ -364,10 +368,10 @@ public class GeometryUtils {
         for (int i = 0; i < (flowPts.size() - 1); i++) {
             pt1 = flowPts.get(i);
             pt2 = flowPts.get(i + 1);
-            
+
             double distSquare = GeometryUtils.getDistanceToLineSegmentSquare(
-                            pt.x, pt.y, pt1.x, pt1.y, pt2.x, pt2.y);
-            
+                    pt.x, pt.y, pt1.x, pt1.y, pt2.x, pt2.y);
+
             if (distSquare < shortestDistSquare) {
                 shortestDistSquare = distSquare;
                 // save the endpoints of the nearest segment
@@ -375,13 +379,13 @@ public class GeometryUtils {
                 pt2 = flowPts.get(i - 1);
                 break;
             }
-            
+
         }
 
         return getClosestPointOnSegment(pt, pt1, pt2);
-        
+
     }
-    
+
     /**
      * Compute the difference between two angles. The resulting angle is in the
      * range of -pi..+pi if the input angle are also in this range.
@@ -530,6 +534,21 @@ public class GeometryUtils {
         return (shortestDistSquare < threshDist * threshDist);
     }
 
+    /**
+     * Test whether three points align.
+     *
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param x3
+     * @param y3
+     * @return
+     */
+    public static boolean collinear(double x1, double y1, double x2, double y2, double x3, double y3) {
+        return Math.abs((y1 - y2) * (x1 - x3) - (y1 - y3) * (x1 - x2)) <= 1e-9;
+    }
+
     private static double cuberoot(double x) {
         if (x < 0.0f) {
             return -Math.pow(-x, 1.0 / 3.0);
@@ -538,8 +557,9 @@ public class GeometryUtils {
     }
 
     /**
-     * Find roots in cubic equation. From
+     * Find roots in cubic equation of the form x^3 + aáx^2 + báx + c = 0 From
      * http://www.pouet.net/topic.php?which=9119&page=1
+     *
      * @param a
      * @param b
      * @param c
@@ -571,12 +591,11 @@ public class GeometryUtils {
     }
 
     /**
-     * Computes the square of the shortest distance between a point and any 
-     * point on a quadratic BŽzier curve.
-     * Based on 
+     * Computes the square of the shortest distance between a point and any
+     * point on a quadratic BŽzier curve. Based on
      * http://blog.gludion.com/2009/08/distance-to-quadratic-bezier-curve.html
-     * and
-     * http://www.pouet.net/topic.php?which=9119&page=2
+     * and http://www.pouet.net/topic.php?which=9119&page=2
+     *
      * @param p0x Start point x
      * @param p0y Start point y
      * @param p1x Control point x
@@ -585,13 +604,18 @@ public class GeometryUtils {
      * @param p2y End point x
      * @param x Point x
      * @param y Point y
-     * @return The square distance between the point x/y and the quadratic Bezier curve.
+     * @return The square distance between the point x/y and the quadratic
+     * Bezier curve.
      */
     public static double pointQuadraticBezierDistanceSq(double p0x, double p0y,
             double p1x, double p1y,
             double p2x, double p2y,
             double x, double y) {
-        
+
+        if (collinear(p0x, p0y, p1x, p1y, p2x, p2y)) {
+            return getDistanceToLineSegmentSquare(x, y, p0x, p0y, p2x, p2y);
+        }
+
         double dx1 = p0x - x;
         double dy1 = p0y - y;
         double d0sq = dx1 * dx1 + dy1 * dy1;
@@ -622,7 +646,7 @@ public class GeometryUtils {
                 double w0 = _1_t * _1_t;
                 double w1 = 2.0 * t * _1_t;
                 double w2 = t * t;
-                // closest point on BŽzier curve
+                // point on BŽzier curve
                 double posx = w0 * p0x + w1 * p1x + w2 * p2x;
                 double posy = w0 * p0y + w1 * p1y + w2 * p2y;
 
@@ -634,10 +658,11 @@ public class GeometryUtils {
 
         return disSq;
     }
-    
+
     /**
      * Computes the shortest distance between a point and any point on a
      * quadratic BŽzier curve.
+     *
      * @param p0x Start point x
      * @param p0y Start point y
      * @param p1x Control point x
@@ -654,5 +679,14 @@ public class GeometryUtils {
             double x, double y) {
         double dSq = pointQuadraticBezierDistanceSq(p0x, p0y, p1x, p1y, p2x, p2y, x, y);
         return Math.sqrt(dSq);
+    }
+
+    public static void main(String[] args) {
+        Point p0 = new Point(0, 0);
+        Point p1 = new Point(0, 100);
+        Point p2 = new Point(0, 200);
+        QuadraticBezierFlow flow = new QuadraticBezierFlow(p0, p1, p2);
+        double d = flow.distance(1, 50);
+        System.out.println(d);
     }
 }
