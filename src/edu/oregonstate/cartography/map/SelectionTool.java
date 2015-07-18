@@ -27,7 +27,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     /**
      * Tolerance for selection of objects by mouse clicks.
      */
-    protected static final int CLICK_PIXEL_TOLERANCE = 4;
+    protected static final int CLICK_PIXEL_TOLERANCE = 3;
 
     /**
      * Model with elements to select.
@@ -278,7 +278,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         // to be selected.
         double tol = pixelTolerance / scale;
 
-        while (flows.hasNext() && !nodeGotSelected) {
+        while (flows.hasNext()) {
             QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
 
             // Add a little padding to the bounding box in the amount of tol
@@ -292,7 +292,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 // Get the distance of the click to the flow.
                 double distance = flow.distance(point.x, point.y);
                 // If that distance is less than the tolerance, select it.
-                if (distance <= tol) {
+                if (distance <= tol && !nodeGotSelected) {
                     flow.setSelected(true);
                     flowGotSelected = true;
                 } else {
@@ -301,9 +301,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     }
                 }
                 
-                if (flowGotSelected) {
-                    break;
-                }
+                
                 
             } else {
                 if (shiftDown == false) {
