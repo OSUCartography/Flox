@@ -2928,7 +2928,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
         ForceLayouter layouter = new ForceLayouter(model);
-        layouter.straightenFlows();
+        layouter.straightenFlows(true);
         addUndo("Straighten Flows");
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
@@ -2976,7 +2976,7 @@ public class MainWindow extends javax.swing.JFrame {
         ForceLayouter layouter = new ForceLayouter(model);
 
         if (!applyConstantForcesToggleButton.isSelected()) {
-            layouter.straightenFlows();
+            layouter.straightenFlows(false);
         }
 
         model.setCanvas(model.getFlowsBoundingBox());

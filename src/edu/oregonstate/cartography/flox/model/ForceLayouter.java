@@ -300,7 +300,7 @@ public class ForceLayouter {
      * @param maxFlowLength
      * @return The force that is exerted onto the control point
      */
-    public Force computeForceOnFlow(QuadraticBezierFlow flow, double maxFlowLength) {
+    private Force computeForceOnFlow(QuadraticBezierFlow flow, double maxFlowLength) {
 
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
@@ -414,7 +414,7 @@ public class ForceLayouter {
             // order to get a different distance weight.
             // FIXME should we use a different IDW exponent than for flows?
             double idw = inverseDistanceWeight(d);
-            
+
             // apply IDW weight and distance-to-centra-normal weight
             dx *= idw * wDist;
             dy *= idw * wDist;
@@ -435,7 +435,15 @@ public class ForceLayouter {
         return new Force(fxFinal, fyFinal);
     }
 
+    /**
+     * Applies a layout iteration to all unlocked flows. Requires that all flows 
+     * are instances of the QuadraticBezierFlow class (an exception will be 
+     * thrown otherwise).
+     * @param weight 
+     */
     public void layoutAllFlows(double weight) {
+        assert (model.getCurveType() == Model.CurveType.QUADRATIC);
+        
         ArrayList<Flow> flows = model.getFlows();
         if (flows.size() < 2) {
             return;
@@ -447,47 +455,44 @@ public class ForceLayouter {
 
         // compute force for each flow for current configuration
         ArrayList<Force> forces = new ArrayList<>();
-
         for (Flow flow : flows) {
-            if (flow instanceof QuadraticBezierFlow) {
-                QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                Force f = computeForceOnFlow(qFlow, maxFlowLength);
-                forces.add(f);
-            }
+            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
+            Force f = computeForceOnFlow(qFlow, maxFlowLength);
+            forces.add(f);
         }
 
         // apply forces onto control points of each flow
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
         int nbrFlows = flows.size();
         for (int i = 0; i < nbrFlows; i++) {
-            Flow flow = flows.get(i);
-            if (flow instanceof QuadraticBezierFlow && (!flow.isLocked())) {
-                QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-                Point ctrlPt = qFlow.getCtrlPt();
-                Force f = forces.get(i);
-
-                // Move the control point by the total force
-                ctrlPt.x += weight * f.fx;
-                ctrlPt.y += weight * f.fy;
-
-                // Enforce control point range if enforceRangebox
-                // is true
-                if (model.isEnforceRangebox()) {
-                    Point tempPoint = enforcer.enforceFlowControlPointRange(qFlow);
-                    ctrlPt.x = tempPoint.x;
-                    ctrlPt.y = tempPoint.y;
-                }
-
-                computeAngularDistributionForce(qFlow);
-
-                if (model.isEnforceCanvasRange()) {
-                    Rectangle2D canvasRect = model.getCanvas();
-                    Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
-                    ctrlPt.x = tempPoint.x;
-                    ctrlPt.y = tempPoint.y;
-                }
+            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flows.get(i);
+            if (qFlow.isLocked()) {
+                continue;
             }
 
+            Point ctrlPt = qFlow.getCtrlPt();
+            Force f = forces.get(i);
+
+            // Move the control point by the total force
+            ctrlPt.x += weight * f.fx;
+            ctrlPt.y += weight * f.fy;
+
+            // Enforce control point range if enforceRangebox
+            // is true
+            if (model.isEnforceRangebox()) {
+                Point tempPoint = enforcer.enforceFlowControlPointRange(qFlow);
+                ctrlPt.x = tempPoint.x;
+                ctrlPt.y = tempPoint.y;
+            }
+
+            // FIXME work in progress
+            // computeAngularDistributionForce(qFlow);
+            if (model.isEnforceCanvasRange()) {
+                Rectangle2D canvasRect = model.getCanvas();
+                Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
+                ctrlPt.x = tempPoint.x;
+                ctrlPt.y = tempPoint.y;
+            }
         }
     }
 
@@ -507,6 +512,10 @@ public class ForceLayouter {
         return Math.atan2(dy, dx);
     }
 
+    /**
+     * FIXME work in progress
+     * @param flow 
+     */
     private void computeAngularDistributionForce(QuadraticBezierFlow flow) {
         final double K = 8;
         Point startPoint = flow.getStartPt();
@@ -564,14 +573,21 @@ public class ForceLayouter {
 //        System.out.println ("end " + Math.toDegrees(e));
     }
 
-    public void straightenFlows() {
+    /**
+     * Converts all flows that are not locked to straight lines.
+     * @param onlySelected If true, only flows that are selected are converted
+     * to straight lines.
+     */
+    public void straightenFlows(boolean onlySelected) {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (flow.isSelected() && !flow.isLocked()) {
+            if (onlySelected && flow.isSelected() == false) {
+                continue;
+            }
+            if (!flow.isLocked()) {
                 flow.bend(0, 0);
             }
-
         }
     }
 
