@@ -127,9 +127,9 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     }
 
     // Constructor
-    public MoveTool(AbstractSimpleFeatureMapComponent mapComponent, Model model) {
+    public MoveTool(AbstractSimpleFeatureMapComponent mapComponent) {
         super(mapComponent);
-        this.model = model;
+        this.model = ((FloxMapComponent) mapComponent).getModel();
     }
 
     /**

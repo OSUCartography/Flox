@@ -21,15 +21,13 @@ public class ScaleMoveSelectionTool extends CombinedTool {
     /**
      * Creates a new instance of RotateScaleMoveSelectionTool
      */
-    public ScaleMoveSelectionTool(AbstractSimpleFeatureMapComponent mapComponent, Model model) {
+    public ScaleMoveSelectionTool(AbstractSimpleFeatureMapComponent mapComponent) {
         super(mapComponent, "Select - Move - Scale");
         
-        SelectionTool selectionTool = new SelectionTool(this.mapComponent, model);
-        MoveTool moveTool = new MoveTool(this.mapComponent, model);
-        //moveTool.setSelectOnDragStart(true);
-        //ScaleTool scaleTool = new ScaleTool(this.mapComponent);     
+        SelectionTool selectionTool = new SelectionTool(this.mapComponent);
+        MoveTool moveTool = new MoveTool(this.mapComponent);
+    
         
-        //this.addMapTool(scaleTool);
         this.addMapTool(moveTool);
         // selection tool must be added last
         this.addMapTool(selectionTool);

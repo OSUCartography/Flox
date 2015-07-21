@@ -78,12 +78,12 @@ public class Model {
     /**
      * Used by the Arrow class to determine the length of arrowheads.
      */
-    private double arrowLengthScaleFactor = 2.5;
+    private double arrowLengthScaleFactor = 1.6;
 
     /**
      * Used by the Arrow class to determine the width of arrowheads.
      */
-    private double arrowWidthScaleFactor = 1.3;
+    private double arrowWidthScaleFactor = 0.8;
 
     /**
      * Used by the Arrow class to determine the location of the arrow edge
@@ -106,7 +106,7 @@ public class Model {
     /**
      * Used by the Arrow class to determine the size of the smallest arrowhead.
      */
-    private double arrowSizeRatio = 0.0;
+    private double arrowSizeRatio = 0.1;
 
     /**
      * if true, a flow exerts forces on itself.
@@ -161,7 +161,7 @@ public class Model {
      * If this is true, arrows are drawn onto the end of flows. Modified by a
      * GUI checkbox.
      */
-    private boolean drawArrows = true;
+    private boolean drawArrows = false;
 
     /**
      * Determines the size of the canvas. The minimum canvas size is the bounding
@@ -185,7 +185,7 @@ public class Model {
      * drawn, this is the distance from the end of the flow line to the center
      * of the node. Currently modified by a GUI modifiable text field.
      */
-    private double flowDistanceFromEndPoint = 5.0d;
+    private double flowDistanceFromEndPoint = 0.0d;
 
     // FIXME
     private boolean controlPtIsSelected = false;

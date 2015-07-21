@@ -166,6 +166,10 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         this.model = model;
     }
 
+    public Model getModel() {
+        return model;
+    }
+    
     /**
      * Delete selected nodes and flows
      *

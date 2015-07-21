@@ -40,9 +40,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      * @param mapComponent The MapComponent for which this MapTool provides its
      * services.
      */
-    public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent, Model model) {
+    public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent) {
         super(mapComponent);
-        this.model = model;
+        this.model = ((FloxMapComponent) mapComponent).getModel();
+        
     }
 
     /**

@@ -110,7 +110,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
 
         mapComponent.requestFocusInWindow();
-
+        
         updateClippingGUI();
 
         try {
@@ -172,6 +172,13 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
         writeModelToGUI();
+        
+        //FIXME
+        //This activates the ScaleMoveSelectTool when settings are uploaded. 
+        //This was put here to activate the tool at startup, but it also
+        //activates the tool anytime settings are imported. There's probably
+        //a better place to put this.
+        arrowToggleButton.doClick();
     }
 
     /**
@@ -2293,7 +2300,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
-        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent, model));
+        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed

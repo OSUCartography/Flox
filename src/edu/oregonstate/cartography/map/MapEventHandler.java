@@ -92,7 +92,6 @@ public class MapEventHandler implements java.awt.event.MouseListener,
 
         KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         kfm.addKeyEventDispatcher(this);
-        mapTool = null;
     }
 
     /**
