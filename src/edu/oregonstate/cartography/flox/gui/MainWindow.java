@@ -262,6 +262,7 @@ public class MainWindow extends javax.swing.JFrame {
         selectFlowsFileButton = new javax.swing.JButton();
         importPanelOKButton = new javax.swing.JButton();
         importPanelCancelButton = new javax.swing.JButton();
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jToolBar1 = new javax.swing.JToolBar();
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
@@ -272,6 +273,7 @@ public class MainWindow extends javax.swing.JFrame {
         distanceToggleButton = new javax.swing.JToggleButton();
         showAllButton = new javax.swing.JButton();
         coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
+        valueFormattedTextField = new javax.swing.JFormattedTextField();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         rightPanel = new javax.swing.JPanel();
         controlsTabbedPane = new javax.swing.JTabbedPane();
@@ -400,6 +402,11 @@ public class MainWindow extends javax.swing.JFrame {
         floxReportMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        jRadioButtonMenuItem1 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem2 = new javax.swing.JRadioButtonMenuItem();
+        jRadioButtonMenuItem3 = new javax.swing.JRadioButtonMenuItem();
+        jMenu2 = new javax.swing.JMenu();
 
         flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -677,6 +684,16 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel2.add(showAllButton);
         jPanel2.add(coordinateInfoPanel);
 
+        valueFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        valueFormattedTextField.setFont(valueFormattedTextField.getFont().deriveFont(valueFormattedTextField.getFont().getSize()-2f));
+        valueFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        valueFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                valueFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(valueFormattedTextField);
+
         jToolBar1.add(jPanel2);
 
         getContentPane().add(jToolBar1, java.awt.BorderLayout.NORTH);
@@ -708,6 +725,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         forcesPanel.add(exponentSlider, gridBagConstraints);
 
@@ -732,6 +750,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
         forcesPanel.add(longestFlowStiffnessSlider, gridBagConstraints);
@@ -751,6 +770,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(zeroLengthStiffnessSlider, gridBagConstraints);
@@ -771,6 +791,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(selfForcesCheckBox, gridBagConstraints);
 
@@ -782,7 +803,6 @@ public class MainWindow extends javax.swing.JFrame {
         forcesPanel.add(jLabel6, gridBagConstraints);
 
         nodeWeightSlider.setMajorTickSpacing(50);
-        nodeWeightSlider.setMaximum(200);
         nodeWeightSlider.setMinorTickSpacing(10);
         nodeWeightSlider.setPaintLabels(true);
         nodeWeightSlider.setPaintTicks(true);
@@ -796,6 +816,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(nodeWeightSlider, gridBagConstraints);
@@ -821,6 +842,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(antiTorsionSlider, gridBagConstraints);
@@ -847,20 +869,20 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(peripheralStiffnessSlider, gridBagConstraints);
 
         enforceRangeboxCheckbox.setSelected(true);
-        enforceRangeboxCheckbox.setText("Enforce Control Point Range");
         enforceRangeboxCheckbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 enforceRangeboxCheckboxActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 19;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
         forcesPanel.add(enforceRangeboxCheckbox, gridBagConstraints);
@@ -877,6 +899,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 17;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(canvasSizeSlider, gridBagConstraints);
@@ -1220,11 +1243,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         flowDistanceFromEndPointFormattedTextField.setMinimumSize(new java.awt.Dimension(40, 30));
         flowDistanceFromEndPointFormattedTextField.setPreferredSize(new java.awt.Dimension(4, 30));
-        flowDistanceFromEndPointFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                flowDistanceFromEndPointFormattedTextFieldActionPerformed(evt);
-            }
-        });
         flowDistanceFromEndPointFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 flowDistanceFromEndPointFormattedTextFieldPropertyChange(evt);
@@ -1827,6 +1845,31 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(infoMenu);
 
+        jMenu1.setText("jMenu1");
+
+        buttonGroup1.add(jRadioButtonMenuItem1);
+        jRadioButtonMenuItem1.setText("jRadioButtonMenuItem1");
+        jRadioButtonMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jRadioButtonMenuItem1);
+
+        buttonGroup1.add(jRadioButtonMenuItem2);
+        jRadioButtonMenuItem2.setText("jRadioButtonMenuItem2");
+        jMenu1.add(jRadioButtonMenuItem2);
+
+        buttonGroup1.add(jRadioButtonMenuItem3);
+        jRadioButtonMenuItem3.setSelected(true);
+        jRadioButtonMenuItem3.setText("jRadioButtonMenuItem3");
+        jMenu1.add(jRadioButtonMenuItem3);
+
+        jMenu2.setText("jMenu2");
+        jMenu1.add(jMenu2);
+
+        menuBar.add(jMenu1);
+
         setJMenuBar(menuBar);
 
         pack();
@@ -2201,6 +2244,7 @@ public class MainWindow extends javax.swing.JFrame {
             model.setEnforceRangebox(enforceRangeboxCheckbox.isSelected());
             layout("Enforce Range Box");
         }
+        flowRangeboxSizeSlider.setEnabled(enforceRangeboxCheckbox.isSelected());
 
     }//GEN-LAST:event_enforceRangeboxCheckboxActionPerformed
 
@@ -2300,7 +2344,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
-        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent));
+        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent, valueFormattedTextField));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
@@ -2333,10 +2377,6 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.repaint();
         }
     }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
-
-    private void flowDistanceFromEndPointFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowDistanceFromEndPointFormattedTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldActionPerformed
 
     private void addArrowsCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addArrowsCheckboxActionPerformed
         if (model != null) {
@@ -2962,6 +3002,19 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_deleteMenuItemActionPerformed
 
+    private void jRadioButtonMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jRadioButtonMenuItem1ActionPerformed
+
+    private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName()) && model != null) {
+            double s = ((Number) valueFormattedTextField.getValue()).doubleValue();
+            // FIXME do something with the new value here
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_valueFormattedTextFieldPropertyChange
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3062,6 +3115,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadSizeSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JPanel clipAreaControlPanel;
     private javax.swing.JPanel clipAreaPanel;
@@ -3124,7 +3178,12 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem2;
+    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem3;
     private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator8;
@@ -3176,6 +3235,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel symbolPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
+    private javax.swing.JFormattedTextField valueFormattedTextField;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;

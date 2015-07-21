@@ -18,14 +18,17 @@ import java.util.Iterator;
 public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
     private final Model model;
-    private final static boolean VERBOSE = false;
     boolean dragging = false;
 
-    //Holds the coordinates of the user's last mouseDown event
-    double last_x, last_y;
 
+    // Stores the coordinates of the previous drag events.
     double previousDrag_x, previousDrag_y;
 
+    /**
+     * Called at the start of a mouse drag event. 
+     * @param point The location of the drag event.
+     * @param evt The drag event.
+     */
     @Override
     public void startDrag(Point2D.Double point, MouseEvent evt) {
 
@@ -37,10 +40,18 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             dragging = true;
         }
         
+        // Initializes the previousDrag coordinates to the location of this 
+        // first drag event.
         previousDrag_x = point.x;
         previousDrag_y = point.y;
     }
 
+    /**
+     * Updates the location of the drag to the coordinates of the most recent
+     * drag event.
+     * @param point
+     * @param evt 
+     */
     @Override
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
 
@@ -84,12 +95,14 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     }
 
     /**
-     *
+     * Updates the location of selected features to the current location of
+     * the drag event.
      * @param e
      */
     public void updateLocation(Point2D.Double point) {
 
         if (model.isControlPtIsSelected()) {
+            // If a control point is selected, move only the control point.
             Iterator flows = model.flowIterator();
             while (flows.hasNext()) {
                 QuadraticBezierFlow flow = ((QuadraticBezierFlow) flows.next());
@@ -105,6 +118,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
             
         } else {
+            // Move selected nodes
             Iterator nodes = model.nodeIterator();
             while (nodes.hasNext()) {
                 Point node = (Point) nodes.next();
@@ -115,13 +129,13 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
         }
 
-        // Set the longestFlowLength needed to compute the maximum intermediate
-        // nodes. This may slow things down a lot.
+        // Update the longest flow field in the model.
         model.setLongestFlowLength();
         
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
 
+        // Update the previousDrax coordinates.
         previousDrag_x = point.x;
         previousDrag_y = point.y;
     }

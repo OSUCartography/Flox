@@ -126,24 +126,24 @@ public class Model {
     /**
      * Stiffness factor for peripheral flows.
      */
-    private double peripheralStiffnessFactor = 0.0;
+    private double peripheralStiffnessFactor = 0.5;
 
     /**
      * spring stiffness of longest flow.
      */
-    private double maxFlowLengthSpringConstant = .2;
+    private double maxFlowLengthSpringConstant = .05;
 
     /**
      * spring stiffness of zero-length flow.
      */
-    private double minFlowLengthSpringConstant = 1.0;
+    private double minFlowLengthSpringConstant = 0.5;
 
     /**
      * This determines the amount of force that objects far away from the target
      * can apply to the target. The lower the distanceWeightExponent, the more
      * force distant objects are permitted to apply.
      */
-    private double distanceWeightExponent = 10.0;
+    private double distanceWeightExponent = 30.0;
 
     /**
      * If this is true, control points of flows are prevented from moving 
@@ -763,6 +763,7 @@ public class Model {
             tol = longestFlowLength / maxFlowNodes;
             return tol;
         }
+        
     }
 
     public double setLargestFlowValue() {

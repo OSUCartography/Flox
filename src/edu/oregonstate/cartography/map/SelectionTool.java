@@ -12,12 +12,12 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
-import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.swing.JFormattedTextField;
 
 /**
  * SelectionTool - a tool to select GeoObjects by mouse clicks and mouse drags.
@@ -34,18 +34,37 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     private final Model model;
 
+        protected final JFormattedTextField valueField;
+
     /**
      * Create a new instance.
      *
      * @param mapComponent The MapComponent for which this MapTool provides its
      * services.
      */
-    public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent) {
+    public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent,
+            JFormattedTextField valueField) {
         super(mapComponent);
+                this.valueField = valueField;
         this.model = ((FloxMapComponent) mapComponent).getModel();
-        
+
     }
 
+    private void updateValueField() {
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        ArrayList<Point> nodes = model.getSelectedNodes();
+        if (flows.size() + nodes.size() != 1) {
+            valueField.setValue(null);
+        } else {
+            double value;
+            if (flows.size() == 1) {
+                value = flows.get(0).getValue();
+            } else {
+                value = nodes.get(0).getValue();
+            }
+            valueField.setValue(value);
+        }
+    }
     /**
      * A drag ends, while this MapTool was the active one.
      *
@@ -122,6 +141,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         boolean selectionChanged = selectByPoint(point, evt.isShiftDown(),
                 SelectionTool.CLICK_PIXEL_TOLERANCE);
+        
+        if(selectionChanged) {
+            updateValueField();
+        }
     }
 
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
@@ -187,7 +210,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
-        
+
         // Get the locked scale factor needed to calculate feature sizes
         double lockedScaleFactor;
         if (!model.isFlowWidthLocked()) {
@@ -197,7 +220,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             double lockedMapScale = model.getLockedMapScale();
             lockedScaleFactor = scale / lockedMapScale;
         }
-        
+
         // if the model says a flow is currently selected, check to see if a 
         // control point is nearby, and select it if so.
         if (model.isFlowSelected()
@@ -237,41 +260,40 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
         }
 
-
-        
-        
         // Iterate backwards through the nodes so that nodes drawn last (on top)
         // get selected first.
         ArrayList<Point> nodes = model.getNodes();
         for (int i = nodes.size() - 1; i >= 0; i--) {
+            Point node = nodes.get(i);
 
             // If a node was selected stop checking.
             if (nodeGotSelected && (shiftDown == false)) {
-                nodes.get(i).setSelected(false);
+                node.setSelected(false);
                 continue;
             }
-            
+
             // Get the radius of the node
-            double nodeArea = Math.abs(nodes.get(i).getValue()
+            double nodeArea = Math.abs(node.getValue()
                     * model.getNodeSizeScaleFactor());
             double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
             nodeRadius = (nodeRadius + pixelTolerance) / scale;
-            
+
             // Calculate the distance of the click from the node center.
-            double dx = nodes.get(i).x - point.x;
-            double dy = nodes.get(i).y - point.y;
+            double dx = node.x - point.x;
+            double dy = node.y - point.y;
             double distSquared = (dx * dx + dy * dy);
-            
-            if(distSquared <= nodeRadius * nodeRadius) {
-                nodes.get(i).setSelected(true);
+
+            if (distSquared <= nodeRadius * nodeRadius) {
+                node.setSelected(!node.isSelected());
+                node.setSelected(true);
                 nodeGotSelected = true;
             } else {
-                if (shiftDown == false) {
-                    nodes.get(i).setSelected(false);
+                if (!shiftDown) {
+                    node.setSelected(false);
                 }
             }
         }
-    
+
         // Select flows
         Iterator<Flow> flows = model.flowIterator();
 
@@ -286,12 +308,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             // Get the flow's width.
             double width = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
                     * lockedScaleFactor;
-            
+
             // Add half the width to tol, scaled to the map scale
-            double totalTol = tol + ((width/2) / scale);
-            
-            
-            
+            double totalTol = tol + ((width / 2) / scale);
+
             // Add a little padding to the bounding box in the amount of tol
             Rectangle2D flowBB = flow.getBoundingBox();
 
@@ -299,23 +319,25 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             flowBB.add(flowBB.getMaxX() + totalTol, flowBB.getMaxY() + totalTol);
 
             if (flowBB.contains(point)) {
-                
+
                 // Get the distance of the click to the flow.
                 xy[0] = point.x;
                 xy[1] = point.y;
                 double distance = flow.distance(xy);
                 // If that distance is less than the tolerance, select it.
                 if (distance <= totalTol && !nodeGotSelected) {
-                    flow.setSelected(true);
+                    if (shiftDown) {
+                        flow.setSelected(!flow.isSelected());
+                    } else {
+                        flow.setSelected(true);
+                    }
                     flowGotSelected = true;
                 } else {
                     if (shiftDown == false) {
                         flow.setSelected(false);
                     }
                 }
-                
-                
-                
+
             } else {
                 if (shiftDown == false) {
                     flow.setSelected(false);
