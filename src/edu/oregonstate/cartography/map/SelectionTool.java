@@ -188,6 +188,16 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
         
+        // Get the locked scale factor needed to calculate feature sizes
+        double lockedScaleFactor;
+        if (!model.isFlowWidthLocked()) {
+            lockedScaleFactor = 1;
+        } else {
+            // compare the locked scale to the current scale
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = scale / lockedMapScale;
+        }
+        
         // if the model says a flow is currently selected, check to see if a 
         // control point is nearby, and select it if so.
         if (model.isFlowSelected()
@@ -228,15 +238,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         }
 
 
-        // Get the locked scale factor needed to calculate node widths
-        double lockedScaleFactor;
-        if (!model.isFlowWidthLocked()) {
-            lockedScaleFactor = 1;
-        } else {
-            // compare the locked scale to the current scale
-            double lockedMapScale = model.getLockedMapScale();
-            lockedScaleFactor = scale / lockedMapScale;
-        }
+        
         
         // Iterate backwards through the nodes so that nodes drawn last (on top)
         // get selected first.
@@ -273,21 +275,28 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         // Select flows
         Iterator<Flow> flows = model.flowIterator();
 
-        double deCasteljauTol = model.getDeCasteljauTolerance();
-
         // The distance tolerance the click needs to be within the flow in order
-        // to be selected.
+        // to be selected, scaled to the current map scale.
         double tol = pixelTolerance / scale;
 
         double[] xy = new double[2];
         while (flows.hasNext()) {
             QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
 
+            // Get the flow's width.
+            double width = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
+                    * lockedScaleFactor;
+            
+            // Add half the width to tol, scaled to the map scale
+            double totalTol = tol + ((width/2) / scale);
+            
+            
+            
             // Add a little padding to the bounding box in the amount of tol
             Rectangle2D flowBB = flow.getBoundingBox();
 
-            flowBB.add(flowBB.getMinX() - tol, flowBB.getMinY() - tol);
-            flowBB.add(flowBB.getMaxX() + tol, flowBB.getMaxY() + tol);
+            flowBB.add(flowBB.getMinX() - totalTol, flowBB.getMinY() - totalTol);
+            flowBB.add(flowBB.getMaxX() + totalTol, flowBB.getMaxY() + totalTol);
 
             if (flowBB.contains(point)) {
                 
@@ -296,7 +305,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 xy[1] = point.y;
                 double distance = flow.distance(xy);
                 // If that distance is less than the tolerance, select it.
-                if (distance <= tol && !nodeGotSelected) {
+                if (distance <= totalTol && !nodeGotSelected) {
                     flow.setSelected(true);
                     flowGotSelected = true;
                 } else {
