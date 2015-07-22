@@ -214,11 +214,11 @@ public class MainWindow extends javax.swing.JFrame {
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
             if (model.getFlowNodeDensity() == FlowNodeDensity.LOW) {
-                flowNodeDensityComboBox.setSelectedIndex(0);
+                flowNodeDensityMenuItemLow.setSelected(true);
             } else if (model.getFlowNodeDensity() == FlowNodeDensity.MEDIUM) {
-                flowNodeDensityComboBox.setSelectedIndex(1);
+                flowNodeDensityMenuItemMedium.setSelected(true);
             } else {
-                flowNodeDensityComboBox.setSelectedIndex(2);
+                flowNodeDensityMenuItemHigh.setSelected(true);
             }
             updateClippingGUI();
         } finally {
@@ -262,6 +262,7 @@ public class MainWindow extends javax.swing.JFrame {
         importPanelOKButton = new javax.swing.JButton();
         importPanelCancelButton = new javax.swing.JButton();
         buttonGroup1 = new javax.swing.ButtonGroup();
+        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
         jToolBar1 = new javax.swing.JToolBar();
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
@@ -294,13 +295,9 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         flowRangeboxSizeSlider = new javax.swing.JSlider();
         jLabel13 = new javax.swing.JLabel();
-        jLabel25 = new javax.swing.JLabel();
-        applyConstantForcesToggleButton = new javax.swing.JToggleButton();
-        flowNodeDensityComboBox = new javax.swing.JComboBox();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
-        drawLineSegmentsCheckBox = new javax.swing.JCheckBox();
         drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
         javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
         layerListScrollPane = new javax.swing.JScrollPane();
@@ -401,10 +398,12 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
-        jRadioButtonMenuItem1 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem2 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem3 = new javax.swing.JRadioButtonMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        FlowNodeDensityMenu = new javax.swing.JMenu();
+        flowNodeDensityMenuItemLow = new javax.swing.JRadioButtonMenuItem();
+        flowNodeDensityMenuItemMedium = new javax.swing.JRadioButtonMenuItem();
+        flowNodeDensityMenuItemHigh = new javax.swing.JRadioButtonMenuItem();
+        viewFlowPointsMenuItem = new javax.swing.JMenuItem();
+        applyConstantForceMenuCheckbox = new javax.swing.JCheckBoxMenuItem();
 
         flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -582,6 +581,9 @@ public class MainWindow extends javax.swing.JFrame {
                 importPanelCancelButtonActionPerformed(evt);
             }
         });
+
+        jCheckBoxMenuItem1.setSelected(true);
+        jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -920,38 +922,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel13, gridBagConstraints);
 
-        jLabel25.setText("Flow node density");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 20;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
-        forcesPanel.add(jLabel25, gridBagConstraints);
-
-        applyConstantForcesToggleButton.setText("Apply Constant Forces");
-        applyConstantForcesToggleButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                applyConstantForcesToggleButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 23;
-        forcesPanel.add(applyConstantForcesToggleButton, gridBagConstraints);
-
-        flowNodeDensityComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Low", "Medium", "High" }));
-        flowNodeDensityComboBox.setSelectedIndex(1);
-        flowNodeDensityComboBox.setPreferredSize(new java.awt.Dimension(200, 27));
-        flowNodeDensityComboBox.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                flowNodeDensityComboBoxItemStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
-        forcesPanel.add(flowNodeDensityComboBox, gridBagConstraints);
-
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
         mapControlPanel.setLayout(new java.awt.GridBagLayout());
@@ -968,19 +938,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(drawControlPointsCheckBox, gridBagConstraints);
-
-        drawLineSegmentsCheckBox.setText("Draw Line Segments");
-        drawLineSegmentsCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawLineSegmentsCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(drawLineSegmentsCheckBox, gridBagConstraints);
 
         drawReconstructedBezierCheckBox.setText("Draw Reconstructed BŽzier");
         drawReconstructedBezierCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1830,28 +1787,55 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(infoMenu);
 
-        jMenu1.setText("jMenu1");
+        jMenu1.setText("Debug");
 
-        buttonGroup1.add(jRadioButtonMenuItem1);
-        jRadioButtonMenuItem1.setText("jRadioButtonMenuItem1");
-        jRadioButtonMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        FlowNodeDensityMenu.setText("Flow Node Density");
+
+        buttonGroup1.add(flowNodeDensityMenuItemLow);
+        flowNodeDensityMenuItemLow.setSelected(true);
+        flowNodeDensityMenuItemLow.setText("Low");
+        flowNodeDensityMenuItemLow.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem1ActionPerformed(evt);
+                flowNodeDensityMenuItemLowActionPerformed(evt);
             }
         });
-        jMenu1.add(jRadioButtonMenuItem1);
+        FlowNodeDensityMenu.add(flowNodeDensityMenuItemLow);
 
-        buttonGroup1.add(jRadioButtonMenuItem2);
-        jRadioButtonMenuItem2.setText("jRadioButtonMenuItem2");
-        jMenu1.add(jRadioButtonMenuItem2);
+        buttonGroup1.add(flowNodeDensityMenuItemMedium);
+        flowNodeDensityMenuItemMedium.setText("Medium");
+        flowNodeDensityMenuItemMedium.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                flowNodeDensityMenuItemMediumActionPerformed(evt);
+            }
+        });
+        FlowNodeDensityMenu.add(flowNodeDensityMenuItemMedium);
 
-        buttonGroup1.add(jRadioButtonMenuItem3);
-        jRadioButtonMenuItem3.setSelected(true);
-        jRadioButtonMenuItem3.setText("jRadioButtonMenuItem3");
-        jMenu1.add(jRadioButtonMenuItem3);
+        buttonGroup1.add(flowNodeDensityMenuItemHigh);
+        flowNodeDensityMenuItemHigh.setText("High");
+        flowNodeDensityMenuItemHigh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                flowNodeDensityMenuItemHighActionPerformed(evt);
+            }
+        });
+        FlowNodeDensityMenu.add(flowNodeDensityMenuItemHigh);
 
-        jMenu2.setText("jMenu2");
-        jMenu1.add(jMenu2);
+        jMenu1.add(FlowNodeDensityMenu);
+
+        viewFlowPointsMenuItem.setText("Show Flow Points");
+        viewFlowPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewFlowPointsMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(viewFlowPointsMenuItem);
+
+        applyConstantForceMenuCheckbox.setText("Apply Constant Force");
+        applyConstantForceMenuCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                applyConstantForceMenuCheckboxActionPerformed(evt);
+            }
+        });
+        jMenu1.add(applyConstantForceMenuCheckbox);
 
         menuBar.add(jMenu1);
 
@@ -2178,12 +2162,6 @@ public class MainWindow extends javax.swing.JFrame {
             layout("Zero Length Stiffness");
         }
     }//GEN-LAST:event_zeroLengthStiffnessSliderStateChanged
-
-    private void drawLineSegmentsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawLineSegmentsCheckBoxActionPerformed
-        mapComponent.setDrawLineSegments(drawLineSegmentsCheckBox.isSelected());
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_drawLineSegmentsCheckBoxActionPerformed
 
     private void drawReconstructedBezierCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawReconstructedBezierCheckBoxActionPerformed
         mapComponent.setDrawReconstructedBezier(drawReconstructedBezierCheckBox.isSelected());
@@ -2639,27 +2617,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
-    private void applyConstantForcesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyConstantForcesToggleButtonActionPerformed
-        layout("Keep Forces Constant");
-    }//GEN-LAST:event_applyConstantForcesToggleButtonActionPerformed
-
-    private void flowNodeDensityComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_flowNodeDensityComboBoxItemStateChanged
-        if (evt.getStateChange() == ItemEvent.SELECTED) {
-            switch (flowNodeDensityComboBox.getSelectedIndex()) {
-                case 0:
-                    model.setFlowNodeDensity(FlowNodeDensity.LOW);
-                    break;
-                case 1:
-                    model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
-                    break;
-                case 2:
-                    model.setFlowNodeDensity(FlowNodeDensity.HIGH);
-            }
-        }
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_flowNodeDensityComboBoxItemStateChanged
-
     private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoMenuItemActionPerformed
         undo();
     }//GEN-LAST:event_undoMenuItemActionPerformed
@@ -2979,10 +2936,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_deleteMenuItemActionPerformed
 
-    private void jRadioButtonMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButtonMenuItem1ActionPerformed
-
     private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName()) && model != null) {
             double s = ((Number) valueFormattedTextField.getValue()).doubleValue();
@@ -2991,6 +2944,46 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.repaint();
         }
     }//GEN-LAST:event_valueFormattedTextFieldPropertyChange
+
+    private void flowNodeDensityMenuItemLowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowNodeDensityMenuItemLowActionPerformed
+        if(flowNodeDensityMenuItemLow.isSelected()) {
+            model.setFlowNodeDensity(FlowNodeDensity.LOW);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+        
+    }//GEN-LAST:event_flowNodeDensityMenuItemLowActionPerformed
+
+    private void flowNodeDensityMenuItemMediumActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowNodeDensityMenuItemMediumActionPerformed
+        if(flowNodeDensityMenuItemMedium.isSelected()) {
+            model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_flowNodeDensityMenuItemMediumActionPerformed
+
+    private void flowNodeDensityMenuItemHighActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowNodeDensityMenuItemHighActionPerformed
+        if(flowNodeDensityMenuItemHigh.isSelected()) {
+            model.setFlowNodeDensity(FlowNodeDensity.HIGH);
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_flowNodeDensityMenuItemHighActionPerformed
+
+    private void viewFlowPointsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewFlowPointsMenuItemActionPerformed
+        mapComponent.setDrawLineSegments(!mapComponent.isDrawLineSegments());
+        if(mapComponent.isDrawLineSegments()) {
+            viewFlowPointsMenuItem.setText("Hide Flow Points");
+        } else {
+            viewFlowPointsMenuItem.setText("Show Flow Points");
+        }
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_viewFlowPointsMenuItemActionPerformed
+
+    private void applyConstantForceMenuCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyConstantForceMenuCheckboxActionPerformed
+        layout("");
+    }//GEN-LAST:event_applyConstantForceMenuCheckboxActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -3012,7 +3005,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         ForceLayouter layouter = new ForceLayouter(model);
 
-        if (!applyConstantForcesToggleButton.isSelected()) {
+        if (!applyConstantForceMenuCheckbox.isSelected()) {
             layouter.straightenFlows(false);
         }
 
@@ -3023,7 +3016,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         progressBar.setVisible(true);
         LayoutActionListener listener = new LayoutActionListener(layouter,
-                applyConstantForcesToggleButton.isSelected());
+                applyConstantForceMenuCheckbox.isSelected());
         timer = new Timer(0, listener);
         timer.start();
     }
@@ -3078,11 +3071,12 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu FlowNodeDensityMenu;
     private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
     private javax.swing.JSlider antiTorsionSlider;
-    private javax.swing.JToggleButton applyConstantForcesToggleButton;
+    private javax.swing.JCheckBoxMenuItem applyConstantForceMenuCheckbox;
     private javax.swing.JSlider arrowCornerPositionSlider;
     private javax.swing.JSlider arrowEdgeCtrlLengthSlider;
     private javax.swing.JSlider arrowEdgeCtrlWidthSlider;
@@ -3108,7 +3102,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
     private javax.swing.JCheckBox drawFlowRangeboxCheckbox;
-    private javax.swing.JCheckBox drawLineSegmentsCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JComboBox drawingOrderComboBox;
@@ -3126,7 +3119,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField flowDistanceFromEndPointFormattedTextField;
     private javax.swing.JPanel flowLayoutPanel;
     private javax.swing.JSlider flowLengthSlider;
-    private javax.swing.JComboBox flowNodeDensityComboBox;
+    private javax.swing.JRadioButtonMenuItem flowNodeDensityMenuItemHigh;
+    private javax.swing.JRadioButtonMenuItem flowNodeDensityMenuItemLow;
+    private javax.swing.JRadioButtonMenuItem flowNodeDensityMenuItemMedium;
     private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JMenuItem flowValueMenuItem;
     private javax.swing.JLabel flowsFilePathLabel;
@@ -3141,6 +3136,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
     private javax.swing.JButton jButton1;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;
@@ -3152,15 +3148,10 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem2;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem3;
     private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator8;
@@ -3212,6 +3203,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
     private javax.swing.JFormattedTextField valueFormattedTextField;
+    private javax.swing.JMenuItem viewFlowPointsMenuItem;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;

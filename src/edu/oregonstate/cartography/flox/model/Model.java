@@ -62,6 +62,9 @@ public class Model {
         UNORDERED
     }
 
+    /**
+     * Density of points along flows
+     */
     public enum FlowNodeDensity {
 
         LOW,
