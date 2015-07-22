@@ -109,11 +109,6 @@ public class Model {
     private double arrowSizeRatio = 0.1;
 
     /**
-     * if true, a flow exerts forces on itself.
-     */
-    private boolean flowExertingForcesOnItself = false;
-
-    /**
      * Start and end node exert a larger force than points along flow lines.
      */
     private double nodeWeightFactor = 0.0;
@@ -958,20 +953,6 @@ public class Model {
      */
     public void setCurveType(CurveType curveType) {
         this.curveType = curveType;
-    }
-
-    /**
-     * @return the flowExertingForcesOnItself
-     */
-    public boolean isFlowExertingForcesOnItself() {
-        return flowExertingForcesOnItself;
-    }
-
-    /**
-     * @param flowExertingForcesOnItself the flowExertingForcesOnItself to set
-     */
-    public void setFlowExertingForcesOnItself(boolean flowExertingForcesOnItself) {
-        this.flowExertingForcesOnItself = flowExertingForcesOnItself;
     }
 
     /**

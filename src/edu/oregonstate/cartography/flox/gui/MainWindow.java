@@ -204,7 +204,6 @@ public class MainWindow extends javax.swing.JFrame {
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSize());
 
             // Force Settings
-            selfForcesCheckBox.setSelected(model.isFlowExertingForcesOnItself());
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
             zeroLengthStiffnessSlider.setValue((int) (model.getMinFlowLengthSpringConstant() * 100d));
@@ -284,7 +283,6 @@ public class MainWindow extends javax.swing.JFrame {
         longestFlowStiffnessSlider = new javax.swing.JSlider();
         zeroLengthStiffnessSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
-        selfForcesCheckBox = new javax.swing.JCheckBox();
         javax.swing.JLabel jLabel6 = new javax.swing.JLabel();
         nodeWeightSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel7 = new javax.swing.JLabel();
@@ -781,19 +779,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel5, gridBagConstraints);
-
-        selfForcesCheckBox.setText("Flows Exert Forces on Themselves");
-        selfForcesCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selfForcesCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(selfForcesCheckBox, gridBagConstraints);
 
         jLabel6.setText("Repulsion of Start and End Nodes");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -2206,14 +2191,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawReconstructedBezierCheckBoxActionPerformed
 
-    private void selfForcesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selfForcesCheckBoxActionPerformed
-        if (model != null) {
-            model.setFlowExertingForcesOnItself(selfForcesCheckBox.isSelected());
-            layout("Self-Forces");
-        }
-
-    }//GEN-LAST:event_selfForcesCheckBoxActionPerformed
-
     private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
         if (nodeWeightSlider.getValueIsAdjusting() == false) {
             model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d );
@@ -3224,7 +3201,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JMenuItem selectNoneMenuItem;
     private javax.swing.JButton selectPointsFileButton;
-    private javax.swing.JCheckBox selfForcesCheckBox;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;

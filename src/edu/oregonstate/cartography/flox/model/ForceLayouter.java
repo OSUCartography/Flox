@@ -76,7 +76,7 @@ public class ForceLayouter {
         // calculated and added to the total force
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            if (!model.isFlowExertingForcesOnItself() && targetFlow == flow) {
+            if (targetFlow == flow) {
                 continue;
             }
             ArrayList<Point> points = straightLinesMap.get(flow);
@@ -144,7 +144,7 @@ public class ForceLayouter {
         // Iterate over all flows
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            if (!model.isFlowExertingForcesOnItself() && targetFlow == flow) {
+            if (targetFlow == flow) {
                 continue;
             }
 
@@ -364,8 +364,7 @@ public class ForceLayouter {
             Point node = (Point) nodeIterator.next();
 
             // If the node is the start or end point of the current flow
-            if (!model.isFlowExertingForcesOnItself()
-                    && (node == flow.getStartPt() || node == flow.getEndPt())) {
+            if ((node == flow.getStartPt() || node == flow.getEndPt())) {
                 continue;
             }
 
