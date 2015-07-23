@@ -80,6 +80,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
             model.setControlPtSelected(false);
         }
+        
+        
     }
 
     /**

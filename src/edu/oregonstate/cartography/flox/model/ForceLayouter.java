@@ -486,6 +486,8 @@ public class ForceLayouter {
 
             // FIXME work in progress
             // computeAngularDistributionForce(qFlow);
+            
+            // Enforce the canvas range
             if (model.isEnforceCanvasRange()) {
                 Rectangle2D canvasRect = model.getCanvas();
                 Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);

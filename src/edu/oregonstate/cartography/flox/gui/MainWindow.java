@@ -111,7 +111,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
 
         mapComponent.requestFocusInWindow();
-        
+
         updateClippingGUI();
 
         try {
@@ -173,7 +173,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
         writeModelToGUI();
-        
+
         //FIXME
         //This activates the ScaleMoveSelectTool when settings are uploaded. 
         //This was put here to activate the tool at startup, but it also
@@ -2134,7 +2134,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
         if (nodeWeightSlider.getValueIsAdjusting() == false) {
-            model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d );
+            model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d);
             layout("Node Weight");
         }
     }//GEN-LAST:event_nodeWeightSliderStateChanged
@@ -2230,11 +2230,14 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_drawingOrderComboBoxItemStateChanged
 
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
-        if (mapComponent.isDrawCanvas()) {
-            model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
+
+        model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
+        
+        if(mapComponent.isDrawCanvas()) {
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
+        
         if (canvasSizeSlider.getValueIsAdjusting() == false) {
             layout("Canvas Size");
         }
@@ -2673,7 +2676,7 @@ public class MainWindow extends javax.swing.JFrame {
             // point is on the right or left side of the baseline.
             double unitVectorX;
             double unitVectorY;
-            
+
             // if pt0D and rightPtD have the same polarity, than the conrol point
             // is on the right side! Set the unitVector accordingly.
             // If either d value is 0 (the point lies directly on top of the 
@@ -2696,15 +2699,15 @@ public class MainWindow extends javax.swing.JFrame {
             // the flow to the other side.
             double distFromBaseline = GeometryUtils.getDistanceToLine(
                     pt0.x, pt0.y, pt1.x, pt1.y, pt2.x, pt2.y);
-            
-            if(distFromBaseline > flow.getBaselineLength() * 2) {
+
+            if (distFromBaseline > flow.getBaselineLength() * 2) {
                 System.out.println("flipped a flow");
                 pt0.x = flow.getBaseLineMidPoint().x;
                 pt0.y = flow.getBaseLineMidPoint().y;
                 unitVectorX *= -1;
                 unitVectorY *= -1;
             }
-            
+
             // Add the unitVectors to the control point. Also, multiply the
             // unitVectors by 2. This will cut the iterations in half without
             // losing significant fidelity. 
@@ -2745,16 +2748,16 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_valueFormattedTextFieldPropertyChange
 
     private void lowFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lowFlowSegmentationMenuItemActionPerformed
-        if(lowFlowSegmentationMenuItem.isSelected()) {
+        if (lowFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.LOW);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
-        
+
     }//GEN-LAST:event_lowFlowSegmentationMenuItemActionPerformed
 
     private void mediumFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mediumFlowSegmentationMenuItemActionPerformed
-        if(mediumFlowSegmentationMenuItem.isSelected()) {
+        if (mediumFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
@@ -2762,7 +2765,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_mediumFlowSegmentationMenuItemActionPerformed
 
     private void highFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_highFlowSegmentationMenuItemActionPerformed
-        if(highFlowSegmentationMenuItem.isSelected()) {
+        if (highFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.HIGH);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
@@ -2771,7 +2774,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void showFlowSegmentsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showFlowSegmentsMenuItemActionPerformed
         mapComponent.setDrawLineSegments(!mapComponent.isDrawLineSegments());
-        if(mapComponent.isDrawLineSegments()) {
+        if (mapComponent.isDrawLineSegments()) {
             showFlowSegmentsMenuItem.setText("Hide Flow Points");
         } else {
             showFlowSegmentsMenuItem.setText("Show Flow Points");
@@ -2899,7 +2902,7 @@ public class MainWindow extends javax.swing.JFrame {
             layouter.straightenFlows(false);
         }
 
-        model.setCanvas(model.getFlowsBoundingBox());
+        model.setCanvas(model.getCanvas());
 
         if (timer != null) {
             timer.stop();

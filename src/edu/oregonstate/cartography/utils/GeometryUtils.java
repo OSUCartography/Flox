@@ -162,6 +162,10 @@ public class GeometryUtils {
      */
     public static Rectangle2D getBoundingBoxOfPoints(ArrayList<Point> points) {
 
+        if(points.size() == 0) {
+            return null;
+        }
+        
         Rectangle2D.Double bb = new Rectangle2D.Double(points.get(0).x, points.get(0).y, 0, 0);
         for (int i = 1; i < points.size(); i++) {
             Point pt = points.get(i);

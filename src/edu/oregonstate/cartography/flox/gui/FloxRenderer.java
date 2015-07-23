@@ -305,7 +305,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getCanvas();
-
+        
         if (canvas == null) {
             System.out.println("No Canvas!");
         } else {
@@ -341,6 +341,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             canvasPath.lineTo(b1.x, b1.y);
             
             // Draw the canvas
+            g2d.setColor(Color.BLACK);
             g2d.draw(canvasPath);
             g2d.setColor(new Color(245,245,245));
             g2d.fill(canvasPath);

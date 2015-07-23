@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -1063,10 +1064,11 @@ public class Model {
     }
 
     /**
+     * The canvas is the bounding box of all start and end points.
      * @return the canvas
      */
     public Rectangle2D getCanvas() {
-        return canvas;
+        return GeometryUtils.getBoundingBoxOfPoints(getNodes());
     }
 
     public void setCanvas(Rectangle2D canvas) {

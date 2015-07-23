@@ -137,6 +137,9 @@ public class AddFlowTool extends MapTool {
         // nodes. 
         model.setLongestFlowLength();
         
+        // update the canvas to include the new flow
+        
+
         // repaint the map
         fromNodeSelected = false;
         mapComponent.repaint();
