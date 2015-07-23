@@ -153,7 +153,6 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
 
     /**
      * Returns the maximum flow value.
-     *
      * @return The maximum flow value.
      */
     public double getMaxFlowValue() {
