@@ -311,7 +311,6 @@ public class MainWindow extends javax.swing.JFrame {
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         drawingOrderComboBox = new javax.swing.JComboBox();
         javax.swing.JLabel jLabel12 = new javax.swing.JLabel();
-        drawFlowRangeboxCheckbox = new javax.swing.JCheckBox();
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         lockFlowWidthCheckbox = new javax.swing.JCheckBox();
@@ -1079,19 +1078,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel12, gridBagConstraints);
-
-        drawFlowRangeboxCheckbox.setText("Draw Flow Rangebox");
-        drawFlowRangeboxCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawFlowRangeboxCheckboxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(drawFlowRangeboxCheckbox, gridBagConstraints);
 
         addLayerButton.setText("+");
         addLayerButton.setPreferredSize(new java.awt.Dimension(22, 22));
@@ -2295,12 +2281,6 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_canvasSizeSliderStateChanged
 
-    private void drawFlowRangeboxCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawFlowRangeboxCheckboxActionPerformed
-        mapComponent.setDrawFlowRangebox(drawFlowRangeboxCheckbox.isSelected());
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_drawFlowRangeboxCheckboxActionPerformed
-
     private void flowRangeboxSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowRangeboxSizeSliderStateChanged
         model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
         mapComponent.eraseBufferImage();
@@ -3124,7 +3104,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
-    private javax.swing.JCheckBox drawFlowRangeboxCheckbox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JComboBox drawingOrderComboBox;
