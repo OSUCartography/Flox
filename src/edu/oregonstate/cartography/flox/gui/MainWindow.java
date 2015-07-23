@@ -2930,8 +2930,15 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName()) && model != null) {
-            double s = ((Number) valueFormattedTextField.getValue()).doubleValue();
-            // FIXME do something with the new value here
+            double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
+            ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+            for (Flow selectedFlow : selectedFlows) {
+                selectedFlow.setValue(v);
+            }
+            ArrayList<Point> selectedPoints = model.getSelectedNodes();
+            for (Point selectedPoint : selectedPoints) {
+                selectedPoint.setValue(v);
+            }
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
