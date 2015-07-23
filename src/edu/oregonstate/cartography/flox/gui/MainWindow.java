@@ -295,6 +295,8 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         flowRangeboxSizeSlider = new javax.swing.JSlider();
         jLabel13 = new javax.swing.JLabel();
+        viewCanvasToggleButton = new javax.swing.JToggleButton();
+        viewFlowRangeboxToggleButton = new javax.swing.JToggleButton();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         drawControlPointsCheckBox = new javax.swing.JCheckBox();
@@ -309,7 +311,6 @@ public class MainWindow extends javax.swing.JFrame {
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         drawingOrderComboBox = new javax.swing.JComboBox();
         javax.swing.JLabel jLabel12 = new javax.swing.JLabel();
-        drawCanvasPaddingCheckbox = new javax.swing.JCheckBox();
         drawFlowRangeboxCheckbox = new javax.swing.JCheckBox();
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
@@ -862,6 +863,7 @@ public class MainWindow extends javax.swing.JFrame {
         forcesPanel.add(peripheralStiffnessSlider, gridBagConstraints);
 
         enforceRangeboxCheckbox.setSelected(true);
+        enforceRangeboxCheckbox.setPreferredSize(new java.awt.Dimension(28, 17));
         enforceRangeboxCheckbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 enforceRangeboxCheckboxActionPerformed(evt);
@@ -871,7 +873,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 19;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
         forcesPanel.add(enforceRangeboxCheckbox, gridBagConstraints);
 
         canvasSizeSlider.setMajorTickSpacing(10);
@@ -886,7 +887,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 17;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(canvasSizeSlider, gridBagConstraints);
@@ -911,6 +911,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(flowRangeboxSizeSlider, gridBagConstraints);
@@ -921,6 +922,36 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 18;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel13, gridBagConstraints);
+
+        viewCanvasToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        viewCanvasToggleButton.setToolTipText("View");
+        viewCanvasToggleButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        viewCanvasToggleButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        viewCanvasToggleButton.setFocusable(false);
+        viewCanvasToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
+        viewCanvasToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewCanvasToggleButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 17;
+        forcesPanel.add(viewCanvasToggleButton, gridBagConstraints);
+
+        viewFlowRangeboxToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        viewFlowRangeboxToggleButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        viewFlowRangeboxToggleButton.setPreferredSize(new java.awt.Dimension(18, 15));
+        viewFlowRangeboxToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
+        viewFlowRangeboxToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewFlowRangeboxToggleButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 20;
+        forcesPanel.add(viewFlowRangeboxToggleButton, gridBagConstraints);
 
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
@@ -1048,19 +1079,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel12, gridBagConstraints);
-
-        drawCanvasPaddingCheckbox.setText("Draw Canvas Padding");
-        drawCanvasPaddingCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawCanvasPaddingCheckboxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(drawCanvasPaddingCheckbox, gridBagConstraints);
 
         drawFlowRangeboxCheckbox.setText("Draw Flow Rangebox");
         drawFlowRangeboxCheckbox.addActionListener(new java.awt.event.ActionListener() {
@@ -2266,14 +2284,8 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_drawingOrderComboBoxItemStateChanged
 
-    private void drawCanvasPaddingCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawCanvasPaddingCheckboxActionPerformed
-        mapComponent.setDrawCanvasPadding(drawCanvasPaddingCheckbox.isSelected());
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_drawCanvasPaddingCheckboxActionPerformed
-
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
-        if (mapComponent.isDrawCanvasPadding()) {
+        if (mapComponent.isDrawCanvas()) {
             model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
@@ -2985,6 +2997,18 @@ public class MainWindow extends javax.swing.JFrame {
         layout("");
     }//GEN-LAST:event_applyConstantForceMenuCheckboxActionPerformed
 
+    private void viewCanvasToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewCanvasToggleButtonActionPerformed
+        mapComponent.setDrawCanvas(viewCanvasToggleButton.isSelected());
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_viewCanvasToggleButtonActionPerformed
+
+    private void viewFlowRangeboxToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewFlowRangeboxToggleButtonActionPerformed
+        mapComponent.setDrawFlowRangebox(viewFlowRangeboxToggleButton.isSelected());
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_viewFlowRangeboxToggleButtonActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3098,7 +3122,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
-    private javax.swing.JCheckBox drawCanvasPaddingCheckbox;
     private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
     private javax.swing.JCheckBox drawFlowRangeboxCheckbox;
@@ -3203,7 +3226,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
     private javax.swing.JFormattedTextField valueFormattedTextField;
+    private javax.swing.JToggleButton viewCanvasToggleButton;
     private javax.swing.JMenuItem viewFlowPointsMenuItem;
+    private javax.swing.JToggleButton viewFlowRangeboxToggleButton;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;
