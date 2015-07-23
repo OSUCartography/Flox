@@ -13,64 +13,120 @@ import java.util.Iterator;
 import java.awt.Color;
 
 /**
- *
- * @author danielstephen
+ * Tool for adding flows.
+ * @author Dan
  */
 public class AddFlowTool extends MapTool {
     
+    /**
+     * The data model containing all flows.
+     */
     private final Model model;
-    private boolean fromNodeSelected = false;
-    Point fromNode;
-    Point toNode;
+    
+    /**
+     * Flag indicating that an origin node has been created. The next click 
+     * should create/assign a destinationNode if this is true.
+     */
+    private boolean originNodeCreated = false;
+    
+    /**
+     * The origin node of the new flow being added. An originNode is assigned
+     * on the first click of the AddFlowTool. If an existing node is clicked, 
+     * that Point is assigned to originNode. If an empty space is clicked, a new 
+     * Point is created and assigned to originNode.
+     */
+    Point originNode;
+    
+    /**
+     * The destination node of the new flow being added. A destinationNode is
+     * assigned on the second click of the AddFlowTool. If an existing node is 
+     * clicked, that Point is assigned to destinationNode. If an empty space is
+     * clicked, a new Point is created and assigned to destinationNode.
+     */
+    Point destinationNode;
+    
+    /**
+     * The distance from an existing node that a click must be within for that
+     * node to be assigned to originNode or destinationNode.
+     * FIXME The clicking distance should change with the size of the node.
+     */
     double pixelTolerance = 10;
     
+    /**
+     * Flag for indicating that an arbitrary value was assigned to a new 
+     * feature.
+     * FIXME is this necessary?
+     */
     private boolean hadToMakeUpValue = false;
+    
+    /**
+     * An arbitrary value to be assigned to new features when there are no 
+     * other features in the layout from which to derive new feature values. 
+     */
     private double newFlowValue = 2;
     
+    /**
+     * Constructor for AddFlowTool.
+     * @param mapComponent The current mapComponent.
+     * @param model The model containing flow data and settings.
+     */
     public AddFlowTool(AbstractSimpleFeatureMapComponent mapComponent, Model model) {
         super(mapComponent);
         this.model = model;
     }
     
+    /**
+     * Called after a mouse click. 
+     * @param point The location of the click.
+     * @param evt The mouse event.
+     */
     @Override
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
         
-        if (fromNodeSelected) {
+        // If an origin node was assigned, add a destination node. Otherwise, 
+        // add an origin node. Aka, if this is the first click, add an origin
+        // node. If this is the second click, add a destination node.
+        if (originNodeCreated) {
             addToNode(point);
         } else {
-            addFromNode(point);
+            addOriginNode(point);
         }
         
     }
     
-    private void addFromNode(Point2D.Double point) {
+    /**
+     * Adds an originNode to the map layout. Called on the first click while
+     * the addFlowTool is active.
+     * @param point The location of the new node.
+     */
+    private void addOriginNode(Point2D.Double point) {
 
+        destinationNode = null;
         Iterator<Point> nodes = model.nodeIterator();
         while(nodes.hasNext()) {
             Point pt = nodes.next();
             
             // Was an existing node clicked?
+            // FIXME this calculation should account for node size, and can
+            // be simplified by measuring destances rather than comparing
+            // extents.
             if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(point.x) - pixelTolerance)
                     && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
                     && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
                     && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
                 
-                // Set fromNode to it, select it
-                fromNode = pt;
-                //fromNode.setSelected(true);
+                // Assign the point to destinationNode and break the loop
+                originNode = pt;
                 break;
-            } else {                
-                // Set fromNode to point, select it
-                fromNode = new Point(point.x, point.y);
             }
         }
 
-        if(fromNode == null) {
-            fromNode = new Point(point.x, point.y);
+        if(originNode == null) {
+           originNode = new Point(point.x, point.y);
         }
         
         // repaint the map
-        fromNodeSelected = true;
+        originNodeCreated = true;
         mapComponent.repaint();
     }
     
@@ -88,21 +144,21 @@ public class AddFlowTool extends MapTool {
                     && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
                 
                 // Set toNode to it
-                toNode = pt;
+                destinationNode = pt;
                 break;
                 
             } else {                
                 // Set toNode to point, select it
-                toNode = new Point(point.x, point.y);
+                destinationNode = new Point(point.x, point.y);
             }
         }
         
-        if(toNode == null) {
-            toNode = new Point (point.x, point.y);
+        if(destinationNode == null) {
+            destinationNode = new Point (point.x, point.y);
         }
         
         // build a flow from the toNode and the fromNode, add it to the model
-        QuadraticBezierFlow newFlow = new QuadraticBezierFlow(fromNode, toNode);
+        QuadraticBezierFlow newFlow = new QuadraticBezierFlow(originNode, destinationNode);
         
         double maxFlowValue = model.getMaxFlowValue();
         
@@ -111,7 +167,7 @@ public class AddFlowTool extends MapTool {
         // If hadToMakeUpValue is set to true (there were no flows when a flow
         // was added) and then a dataset IS added, then the tool needs to be
         // deselected and reselected to get a reasonable flow value for new
-        // flows. Flow value should be settable when a flow is added eventually.
+        // flows. Flow value should be settable when a flow is added maybe.
         if(hadToMakeUpValue) {
             newFlow.setValue(newFlowValue);
         } else {
@@ -141,17 +197,18 @@ public class AddFlowTool extends MapTool {
         
 
         // repaint the map
-        fromNodeSelected = false;
+        originNodeCreated = false;
         mapComponent.repaint();
+        originNode = null;
     }
     
     public void draw(Graphics2D g2d) {
         // If a from node is selected, and it didn't already exist, draw it
-        if(fromNodeSelected) {
+        if(originNodeCreated) {
             double r = 10;
             g2d.setStroke(new BasicStroke(4));
-            double x = mapComponent.xToPx(fromNode.x);
-            double y = mapComponent.yToPx(fromNode.y);
+            double x = mapComponent.xToPx(originNode.x);
+            double y = mapComponent.yToPx(originNode.y);
             Ellipse2D circle = new Ellipse2D.Double(x-r, y-r, r*2, r*2);
             g2d.setColor(Color.WHITE);
             g2d.fill(circle);
