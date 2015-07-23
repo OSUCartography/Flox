@@ -186,7 +186,7 @@ public class Model {
     private double flowDistanceFromEndPoint = 0.0d;
 
     // FIXME
-    private boolean controlPtIsSelected = false;
+    private boolean controlPtSelected = false;
 
     /**
      * Maximum allowed flow width in pixels. The flow with the highest value
@@ -1244,15 +1244,15 @@ public class Model {
     /**
      * @return the controlPtIsSelected
      */
-    public boolean isControlPtIsSelected() {
-        return controlPtIsSelected;
+    public boolean isControlPtSelected() {
+        return controlPtSelected;
     }
 
     /**
-     * @param controlPtIsSelected the controlPtIsSelected to set
+     * @param controlPtSelected the controlPtIsSelected to set
      */
-    public void setControlPtIsSelected(boolean controlPtIsSelected) {
-        this.controlPtIsSelected = controlPtIsSelected;
+    public void setControlPtSelected(boolean controlPtSelected) {
+        this.controlPtSelected = controlPtSelected;
     }
 
     /**

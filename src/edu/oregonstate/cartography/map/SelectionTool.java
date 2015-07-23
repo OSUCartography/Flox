@@ -20,7 +20,7 @@ import java.util.Iterator;
 import javax.swing.JFormattedTextField;
 
 /**
- * SelectionTool - a tool to select GeoObjects by mouse clicks and mouse drags.
+ * SelectionTool - a tool to select map features by mouse clicks and mouse drags.
  */
 public class SelectionTool extends RectangleTool implements CombinableTool {
 
@@ -78,10 +78,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         super.endDrag(point, evt);
 
         if (rect != null) {
-            final boolean selectionChanged = selectByRectangle(rect, evt.isShiftDown());
+            boolean selectionChanged = selectByRectangle(rect, evt.isShiftDown());
+            if (selectionChanged) {
+                updateValueField();
+            }
         }
 
-        if (model.isControlPtIsSelected()) {
+        if (model.isControlPtSelected()) {
             // deselect all control points
             Iterator flows = model.flowIterator();
             while (flows.hasNext()) {
@@ -95,7 +98,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
-            model.setControlPtIsSelected(false);
+            model.setControlPtSelected(false);
         }
 
         setDefaultCursor();
@@ -111,7 +114,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
         super.mouseClicked(point, evt);
 
-        if (model.isControlPtIsSelected()) {
+        if (model.isControlPtSelected()) {
             // deselect all control points
             Iterator flows = model.flowIterator();
             while (flows.hasNext()) {
@@ -119,12 +122,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 if (flow instanceof CubicBezierFlow) {
                     break;
                 }
-
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 cPt.setSelected(false);
-
             }
-            model.setControlPtIsSelected(false);
+            model.setControlPtSelected(false);
         }
 
     }
@@ -248,13 +249,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             && (mapComponent.yToPx(cPt.y) <= mapComponent.yToPx(point.y) + 5))) {
                         cPt.setSelected(true);
                         controlPtGotSelected = true;
-                        model.setControlPtIsSelected(true);
+                        model.setControlPtSelected(true);
                         mapComponent.eraseBufferImage();
                         mapComponent.repaint();
                         return true;
                     } else {
                         cPt.setSelected(false);
-                        model.setControlPtIsSelected(false);
+                        model.setControlPtSelected(false);
                     }
                 }
             }

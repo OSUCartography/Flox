@@ -36,7 +36,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             dragging = true;
         }
 
-        if (model.isControlPtIsSelected()) {
+        if (model.isControlPtSelected()) {
             dragging = true;
         }
         
@@ -64,7 +64,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
         dragging = false;
 
-        if(model.isControlPtIsSelected()) {
+        if(model.isControlPtSelected()) {
             // deselect all control points
             Iterator flows = model.flowIterator();
             while(flows.hasNext()) {
@@ -78,7 +78,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 mapComponent.eraseBufferImage();
                 mapComponent.repaint();
             }
-            model.setControlPtIsSelected(false);
+            model.setControlPtSelected(false);
         }
     }
 
@@ -101,7 +101,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      */
     public void updateLocation(Point2D.Double point) {
 
-        if (model.isControlPtIsSelected()) {
+        if (model.isControlPtSelected()) {
             // If a control point is selected, move only the control point.
             Iterator flows = model.flowIterator();
             while (flows.hasNext()) {
