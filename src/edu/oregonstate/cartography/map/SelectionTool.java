@@ -20,7 +20,8 @@ import java.util.Iterator;
 import javax.swing.JFormattedTextField;
 
 /**
- * SelectionTool - a tool to select map features by mouse clicks and mouse drags.
+ * SelectionTool - a tool to select map features by mouse clicks and mouse
+ * drags.
  */
 public class SelectionTool extends RectangleTool implements CombinableTool {
 
@@ -34,20 +35,20 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     private final Model model;
 
-        protected final JFormattedTextField valueField;
+    protected final JFormattedTextField valueField;
 
     /**
      * Create a new instance.
      *
      * @param mapComponent The MapComponent for which this MapTool provides its
      * services.
+     * @param valueField Text field to display value of current node or flow.
      */
     public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent,
             JFormattedTextField valueField) {
         super(mapComponent);
-                this.valueField = valueField;
+        this.valueField = valueField;
         this.model = ((FloxMapComponent) mapComponent).getModel();
-
     }
 
     /**
@@ -56,7 +57,12 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     private void updateValueField() {
         ArrayList<Flow> flows = model.getSelectedFlows();
         ArrayList<Point> nodes = model.getSelectedNodes();
-        if (flows.size() + nodes.size() == 1) {
+        int nbrFlowsAndNodes = flows.size() + nodes.size();
+        valueField.setEnabled(nbrFlowsAndNodes > 0);
+        
+        if (nbrFlowsAndNodes == 0) {
+            valueField.setValue(null);
+        } else if (nbrFlowsAndNodes == 1) {
             double value;
             if (flows.size() == 1) {
                 value = flows.get(0).getValue();
@@ -64,12 +70,31 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 value = nodes.get(0).getValue();
             }
             valueField.setValue(value);
-        } else {
-            valueField.setValue(null);
+        } else if (flows.size() + nodes.size() > 1) {
+            // test whether all selected nodes and/or flows have the same value
+            double v = Double.NaN;
+            if (flows.size() > 0) {
+                v = flows.get(0).getValue();
+            }
+            if (nodes.size() > 0) {
+                v = nodes.get(0).getValue();
+            }
+            for (int i = 1; i < flows.size(); i++) {
+                if (flows.get(i).getValue() != v) {
+                    v = Double.NaN;
+                    break;
+                }
+            }
+            for (int i = 1; i < nodes.size(); i++) {
+                if (nodes.get(i).getValue() != v) {
+                    v = Double.NaN;
+                    break;
+                }
+            }
+            valueField.setValue(Double.isNaN(v) ? null : v);
         }
-        
-        valueField.setEnabled(flows.size() + nodes.size() > 0);
     }
+
     /**
      * A drag ends, while this MapTool was the active one.
      *
@@ -83,7 +108,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         super.endDrag(point, evt);
 
         if (rect != null) {
-            /*boolean selectionChanged = */selectByRectangle(rect, evt.isShiftDown());
+            /*boolean selectionChanged = */
+            selectByRectangle(rect, evt.isShiftDown());
             updateValueField();
         }
 
@@ -143,9 +169,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     @Override
     public void mouseDown(Point2D.Double point, MouseEvent evt) {
 
-        /*boolean selectionChanged = */selectByPoint(point, evt.isShiftDown(),
+        /*boolean selectionChanged = */ selectByPoint(point, evt.isShiftDown(),
                 SelectionTool.CLICK_PIXEL_TOLERANCE);
-        
+
         updateValueField();
     }
 
