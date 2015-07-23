@@ -215,11 +215,11 @@ public class MainWindow extends javax.swing.JFrame {
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
             if (model.getFlowNodeDensity() == FlowNodeDensity.LOW) {
-                flowNodeDensityMenuItemLow.setSelected(true);
+                lowFlowSegmentationMenuItem.setSelected(true);
             } else if (model.getFlowNodeDensity() == FlowNodeDensity.MEDIUM) {
-                flowNodeDensityMenuItemMedium.setSelected(true);
+                mediumFlowSegmentationMenuItem.setSelected(true);
             } else {
-                flowNodeDensityMenuItemHigh.setSelected(true);
+                highFlowSegmentationMenuItem.setSelected(true);
             }
             updateClippingGUI();
         } finally {
@@ -301,7 +301,6 @@ public class MainWindow extends javax.swing.JFrame {
         viewFlowRangeboxToggleButton = new javax.swing.JToggleButton();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
-        drawControlPointsCheckBox = new javax.swing.JCheckBox();
         drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
         javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
         layerListScrollPane = new javax.swing.JScrollPane();
@@ -400,12 +399,14 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
-        FlowNodeDensityMenu = new javax.swing.JMenu();
-        flowNodeDensityMenuItemLow = new javax.swing.JRadioButtonMenuItem();
-        flowNodeDensityMenuItemMedium = new javax.swing.JRadioButtonMenuItem();
-        flowNodeDensityMenuItemHigh = new javax.swing.JRadioButtonMenuItem();
-        viewFlowPointsMenuItem = new javax.swing.JMenuItem();
         applyConstantForceMenuCheckbox = new javax.swing.JCheckBoxMenuItem();
+        jSeparator12 = new javax.swing.JPopupMenu.Separator();
+        flowSegmentationMenu = new javax.swing.JMenu();
+        lowFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
+        mediumFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
+        highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
+        showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
+        showControlPointsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
 
         flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -963,19 +964,6 @@ public class MainWindow extends javax.swing.JFrame {
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
         mapControlPanel.setLayout(new java.awt.GridBagLayout());
-
-        drawControlPointsCheckBox.setText("Draw Control Points");
-        drawControlPointsCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawControlPointsCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(drawControlPointsCheckBox, gridBagConstraints);
 
         drawReconstructedBezierCheckBox.setText("Draw Reconstructed BŽzier");
         drawReconstructedBezierCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1801,46 +1789,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         jMenu1.setText("Debug");
 
-        FlowNodeDensityMenu.setText("Flow Node Density");
-
-        buttonGroup1.add(flowNodeDensityMenuItemLow);
-        flowNodeDensityMenuItemLow.setSelected(true);
-        flowNodeDensityMenuItemLow.setText("Low");
-        flowNodeDensityMenuItemLow.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                flowNodeDensityMenuItemLowActionPerformed(evt);
-            }
-        });
-        FlowNodeDensityMenu.add(flowNodeDensityMenuItemLow);
-
-        buttonGroup1.add(flowNodeDensityMenuItemMedium);
-        flowNodeDensityMenuItemMedium.setText("Medium");
-        flowNodeDensityMenuItemMedium.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                flowNodeDensityMenuItemMediumActionPerformed(evt);
-            }
-        });
-        FlowNodeDensityMenu.add(flowNodeDensityMenuItemMedium);
-
-        buttonGroup1.add(flowNodeDensityMenuItemHigh);
-        flowNodeDensityMenuItemHigh.setText("High");
-        flowNodeDensityMenuItemHigh.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                flowNodeDensityMenuItemHighActionPerformed(evt);
-            }
-        });
-        FlowNodeDensityMenu.add(flowNodeDensityMenuItemHigh);
-
-        jMenu1.add(FlowNodeDensityMenu);
-
-        viewFlowPointsMenuItem.setText("Show Flow Points");
-        viewFlowPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewFlowPointsMenuItemActionPerformed(evt);
-            }
-        });
-        jMenu1.add(viewFlowPointsMenuItem);
-
         applyConstantForceMenuCheckbox.setText("Apply Constant Force");
         applyConstantForceMenuCheckbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1848,6 +1796,55 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jMenu1.add(applyConstantForceMenuCheckbox);
+        jMenu1.add(jSeparator12);
+
+        flowSegmentationMenu.setText("Flow Segmentation");
+
+        buttonGroup1.add(lowFlowSegmentationMenuItem);
+        lowFlowSegmentationMenuItem.setSelected(true);
+        lowFlowSegmentationMenuItem.setText("Low");
+        lowFlowSegmentationMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lowFlowSegmentationMenuItemActionPerformed(evt);
+            }
+        });
+        flowSegmentationMenu.add(lowFlowSegmentationMenuItem);
+
+        buttonGroup1.add(mediumFlowSegmentationMenuItem);
+        mediumFlowSegmentationMenuItem.setText("Medium");
+        mediumFlowSegmentationMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mediumFlowSegmentationMenuItemActionPerformed(evt);
+            }
+        });
+        flowSegmentationMenu.add(mediumFlowSegmentationMenuItem);
+
+        buttonGroup1.add(highFlowSegmentationMenuItem);
+        highFlowSegmentationMenuItem.setText("High");
+        highFlowSegmentationMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                highFlowSegmentationMenuItemActionPerformed(evt);
+            }
+        });
+        flowSegmentationMenu.add(highFlowSegmentationMenuItem);
+
+        jMenu1.add(flowSegmentationMenu);
+
+        showFlowSegmentsMenuItem.setText("Show Flow Segments");
+        showFlowSegmentsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showFlowSegmentsMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(showFlowSegmentsMenuItem);
+
+        showControlPointsCheckBoxMenuItem.setText("Show Control Points");
+        showControlPointsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showControlPointsCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(showControlPointsCheckBoxMenuItem);
 
         menuBar.add(jMenu1);
 
@@ -2147,12 +2144,6 @@ public class MainWindow extends javax.swing.JFrame {
         model.setCurveType(Model.CurveType.QUADRATIC);
         layoutFlows();
     }//GEN-LAST:event_quadraticCurvesRadioButtonActionPerformed
-
-    private void drawControlPointsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawControlPointsCheckBoxActionPerformed
-        mapComponent.setDrawControlPoints(drawControlPointsCheckBox.isSelected());
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_drawControlPointsCheckBoxActionPerformed
 
     private void exponentSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_exponentSliderStateChanged
         if (exponentSlider.getValueIsAdjusting() == false) {
@@ -2958,41 +2949,41 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_valueFormattedTextFieldPropertyChange
 
-    private void flowNodeDensityMenuItemLowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowNodeDensityMenuItemLowActionPerformed
-        if(flowNodeDensityMenuItemLow.isSelected()) {
+    private void lowFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lowFlowSegmentationMenuItemActionPerformed
+        if(lowFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.LOW);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
         
-    }//GEN-LAST:event_flowNodeDensityMenuItemLowActionPerformed
+    }//GEN-LAST:event_lowFlowSegmentationMenuItemActionPerformed
 
-    private void flowNodeDensityMenuItemMediumActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowNodeDensityMenuItemMediumActionPerformed
-        if(flowNodeDensityMenuItemMedium.isSelected()) {
+    private void mediumFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mediumFlowSegmentationMenuItemActionPerformed
+        if(mediumFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
-    }//GEN-LAST:event_flowNodeDensityMenuItemMediumActionPerformed
+    }//GEN-LAST:event_mediumFlowSegmentationMenuItemActionPerformed
 
-    private void flowNodeDensityMenuItemHighActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowNodeDensityMenuItemHighActionPerformed
-        if(flowNodeDensityMenuItemHigh.isSelected()) {
+    private void highFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_highFlowSegmentationMenuItemActionPerformed
+        if(highFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.HIGH);
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
-    }//GEN-LAST:event_flowNodeDensityMenuItemHighActionPerformed
+    }//GEN-LAST:event_highFlowSegmentationMenuItemActionPerformed
 
-    private void viewFlowPointsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewFlowPointsMenuItemActionPerformed
+    private void showFlowSegmentsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showFlowSegmentsMenuItemActionPerformed
         mapComponent.setDrawLineSegments(!mapComponent.isDrawLineSegments());
         if(mapComponent.isDrawLineSegments()) {
-            viewFlowPointsMenuItem.setText("Hide Flow Points");
+            showFlowSegmentsMenuItem.setText("Hide Flow Points");
         } else {
-            viewFlowPointsMenuItem.setText("Show Flow Points");
+            showFlowSegmentsMenuItem.setText("Show Flow Points");
         }
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
-    }//GEN-LAST:event_viewFlowPointsMenuItemActionPerformed
+    }//GEN-LAST:event_showFlowSegmentsMenuItemActionPerformed
 
     private void applyConstantForceMenuCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyConstantForceMenuCheckboxActionPerformed
         layout("");
@@ -3009,6 +3000,12 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_viewFlowRangeboxToggleButtonActionPerformed
+
+    private void showControlPointsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showControlPointsCheckBoxMenuItemActionPerformed
+        mapComponent.setDrawControlPoints(showControlPointsCheckBoxMenuItem.isSelected());
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_showControlPointsCheckBoxMenuItemActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -3096,7 +3093,6 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu FlowNodeDensityMenu;
     private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
@@ -3123,7 +3119,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
-    private javax.swing.JCheckBox drawControlPointsCheckBox;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
     private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
@@ -3142,16 +3137,15 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField flowDistanceFromEndPointFormattedTextField;
     private javax.swing.JPanel flowLayoutPanel;
     private javax.swing.JSlider flowLengthSlider;
-    private javax.swing.JRadioButtonMenuItem flowNodeDensityMenuItemHigh;
-    private javax.swing.JRadioButtonMenuItem flowNodeDensityMenuItemLow;
-    private javax.swing.JRadioButtonMenuItem flowNodeDensityMenuItemMedium;
     private javax.swing.JSlider flowRangeboxSizeSlider;
+    private javax.swing.JMenu flowSegmentationMenu;
     private javax.swing.JMenuItem flowValueMenuItem;
     private javax.swing.JLabel flowsFilePathLabel;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JPanel forcesPanel;
     private javax.swing.JMenuItem geometricLayoutMenuItem;
     private javax.swing.JToggleButton handToggleButton;
+    private javax.swing.JRadioButtonMenuItem highFlowSegmentationMenuItem;
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JPanel importPanel;
     private javax.swing.JButton importPanelCancelButton;
@@ -3177,6 +3171,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
+    private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JToolBar jToolBar1;
@@ -3185,6 +3180,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox lockFlowWidthCheckbox;
     private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JSlider longestFlowStiffnessSlider;
+    private javax.swing.JRadioButtonMenuItem lowFlowSegmentationMenuItem;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
     private javax.swing.JPanel mapControlPanel;
     private javax.swing.JMenu mapMenu;
@@ -3192,6 +3188,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.ButtonGroup mapToolsButtonGroup;
     private javax.swing.JSlider maximumFlowWidthSlider;
     private javax.swing.JSlider maximumNodeSizeSlider;
+    private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JButton moveFlowsThatCrossNodesButton;
     private javax.swing.JMenuItem nodeValueMenuItem;
@@ -3218,6 +3215,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;
+    private javax.swing.JCheckBoxMenuItem showControlPointsCheckBoxMenuItem;
+    private javax.swing.JMenuItem showFlowSegmentsMenuItem;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
@@ -3228,7 +3227,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel vallueLabel;
     private javax.swing.JFormattedTextField valueFormattedTextField;
     private javax.swing.JToggleButton viewCanvasToggleButton;
-    private javax.swing.JMenuItem viewFlowPointsMenuItem;
     private javax.swing.JToggleButton viewFlowRangeboxToggleButton;
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;

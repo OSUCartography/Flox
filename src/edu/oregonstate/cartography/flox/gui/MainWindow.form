@@ -591,12 +591,22 @@
             <Property name="text" type="java.lang.String" value="Debug"/>
           </Properties>
           <SubComponents>
-            <Menu class="javax.swing.JMenu" name="FlowNodeDensityMenu">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="applyConstantForceMenuCheckbox">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Flow Node Density"/>
+                <Property name="text" type="java.lang.String" value="Apply Constant Force"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="applyConstantForceMenuCheckboxActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator12">
+            </MenuItem>
+            <Menu class="javax.swing.JMenu" name="flowSegmentationMenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Flow Segmentation"/>
               </Properties>
               <SubComponents>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="flowNodeDensityMenuItemLow">
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="lowFlowSegmentationMenuItem">
                   <Properties>
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="buttonGroup1"/>
@@ -605,10 +615,10 @@
                     <Property name="text" type="java.lang.String" value="Low"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="flowNodeDensityMenuItemLowActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="lowFlowSegmentationMenuItemActionPerformed"/>
                   </Events>
                 </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="flowNodeDensityMenuItemMedium">
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="mediumFlowSegmentationMenuItem">
                   <Properties>
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="buttonGroup1"/>
@@ -616,10 +626,10 @@
                     <Property name="text" type="java.lang.String" value="Medium"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="flowNodeDensityMenuItemMediumActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mediumFlowSegmentationMenuItemActionPerformed"/>
                   </Events>
                 </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="flowNodeDensityMenuItemHigh">
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="highFlowSegmentationMenuItem">
                   <Properties>
                     <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                       <ComponentRef name="buttonGroup1"/>
@@ -627,25 +637,25 @@
                     <Property name="text" type="java.lang.String" value="High"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="flowNodeDensityMenuItemHighActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="highFlowSegmentationMenuItemActionPerformed"/>
                   </Events>
                 </MenuItem>
               </SubComponents>
             </Menu>
-            <MenuItem class="javax.swing.JMenuItem" name="viewFlowPointsMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="showFlowSegmentsMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Show Flow Points"/>
+                <Property name="text" type="java.lang.String" value="Show Flow Segments"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewFlowPointsMenuItemActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showFlowSegmentsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="applyConstantForceMenuCheckbox">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="showControlPointsCheckBoxMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Apply Constant Force"/>
+                <Property name="text" type="java.lang.String" value="Show Control Points"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="applyConstantForceMenuCheckboxActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showControlPointsCheckBoxMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -1270,19 +1280,6 @@
 
                   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout"/>
                   <SubComponents>
-                    <Component class="javax.swing.JCheckBox" name="drawControlPointsCheckBox">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="Draw Control Points"/>
-                      </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="drawControlPointsCheckBoxActionPerformed"/>
-                      </Events>
-                      <Constraints>
-                        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
-                          <GridBagConstraints gridX="0" gridY="7" gridWidth="3" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="21" weightX="0.0" weightY="0.0"/>
-                        </Constraint>
-                      </Constraints>
-                    </Component>
                     <Component class="javax.swing.JCheckBox" name="drawReconstructedBezierCheckBox">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Draw Reconstructed B&#xe9;zier"/>
