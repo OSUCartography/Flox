@@ -50,12 +50,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
     }
 
+    /**
+     * Update the text field for changing the value of flows and nodes.
+     */
     private void updateValueField() {
         ArrayList<Flow> flows = model.getSelectedFlows();
         ArrayList<Point> nodes = model.getSelectedNodes();
-        if (flows.size() + nodes.size() != 1) {
-            valueField.setValue(null);
-        } else {
+        if (flows.size() + nodes.size() == 1) {
             double value;
             if (flows.size() == 1) {
                 value = flows.get(0).getValue();
@@ -63,7 +64,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 value = nodes.get(0).getValue();
             }
             valueField.setValue(value);
+        } else {
+            valueField.setValue(null);
         }
+        
+        valueField.setEnabled(flows.size() + nodes.size() > 0);
     }
     /**
      * A drag ends, while this MapTool was the active one.
@@ -78,10 +83,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         super.endDrag(point, evt);
 
         if (rect != null) {
-            boolean selectionChanged = selectByRectangle(rect, evt.isShiftDown());
-            if (selectionChanged) {
-                updateValueField();
-            }
+            /*boolean selectionChanged = */selectByRectangle(rect, evt.isShiftDown());
+            updateValueField();
         }
 
         if (model.isControlPtSelected()) {
@@ -140,12 +143,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     @Override
     public void mouseDown(Point2D.Double point, MouseEvent evt) {
 
-        boolean selectionChanged = selectByPoint(point, evt.isShiftDown(),
+        /*boolean selectionChanged = */selectByPoint(point, evt.isShiftDown(),
                 SelectionTool.CLICK_PIXEL_TOLERANCE);
         
-        if(selectionChanged) {
-            updateValueField();
-        }
+        updateValueField();
     }
 
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
@@ -205,7 +206,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         return (flowGotSelected || nodeGotSelected);
     }
 
-    public boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
+    private boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
 
         double scale = mapComponent.getScale();
         boolean nodeGotSelected = false;

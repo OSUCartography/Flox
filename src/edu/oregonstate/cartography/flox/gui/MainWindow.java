@@ -37,6 +37,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -273,6 +274,7 @@ public class MainWindow extends javax.swing.JFrame {
         distanceToggleButton = new javax.swing.JToggleButton();
         showAllButton = new javax.swing.JButton();
         coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
+        vallueLabel = new javax.swing.JLabel();
         valueFormattedTextField = new javax.swing.JFormattedTextField();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         rightPanel = new javax.swing.JPanel();
@@ -684,7 +686,13 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel2.add(showAllButton);
         jPanel2.add(coordinateInfoPanel);
 
+        vallueLabel.setFont(vallueLabel.getFont().deriveFont(vallueLabel.getFont().getSize()-2f));
+        vallueLabel.setText("Value");
+        vallueLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 20, 0, 0));
+        jPanel2.add(vallueLabel);
+
         valueFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        valueFormattedTextField.setEnabled(false);
         valueFormattedTextField.setFont(valueFormattedTextField.getFont().deriveFont(valueFormattedTextField.getFont().getSize()-2f));
         valueFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
         valueFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
@@ -2930,6 +2938,12 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName()) && model != null) {
+            try {
+                valueFormattedTextField.commitEdit();
+            } catch (ParseException ex) {
+                // the text field does not currently contain a valid value
+                return;
+            }
             double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
             ArrayList<Flow> selectedFlows = model.getSelectedFlows();
             for (Flow selectedFlow : selectedFlows) {
@@ -3211,6 +3225,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel symbolPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
+    private javax.swing.JLabel vallueLabel;
     private javax.swing.JFormattedTextField valueFormattedTextField;
     private javax.swing.JToggleButton viewCanvasToggleButton;
     private javax.swing.JMenuItem viewFlowPointsMenuItem;
