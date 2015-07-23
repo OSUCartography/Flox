@@ -301,7 +301,6 @@ public class MainWindow extends javax.swing.JFrame {
         viewFlowRangeboxToggleButton = new javax.swing.JToggleButton();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
-        drawReconstructedBezierCheckBox = new javax.swing.JCheckBox();
         javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
         layerListScrollPane = new javax.swing.JScrollPane();
         layerList = new edu.oregonstate.cartography.flox.gui.DraggableList();
@@ -377,9 +376,6 @@ public class MainWindow extends javax.swing.JFrame {
         lockMenuItem = new javax.swing.JMenuItem();
         unlockMenuItem = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JPopupMenu.Separator();
-        flowValueMenuItem = new javax.swing.JMenuItem();
-        nodeValueMenuItem = new javax.swing.JMenuItem();
-        jSeparator9 = new javax.swing.JPopupMenu.Separator();
         reverseFlowDirectionMenuItem = new javax.swing.JMenuItem();
         straightenFlowsMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
@@ -964,19 +960,6 @@ public class MainWindow extends javax.swing.JFrame {
         controlsTabbedPane.addTab("Forces", forcesPanel);
 
         mapControlPanel.setLayout(new java.awt.GridBagLayout());
-
-        drawReconstructedBezierCheckBox.setText("Draw Reconstructed Bézier");
-        drawReconstructedBezierCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawReconstructedBezierCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(drawReconstructedBezierCheckBox, gridBagConstraints);
 
         jLabel9.setText("Map Layers");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1653,23 +1636,6 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu.add(unlockMenuItem);
         editMenu.add(jSeparator11);
 
-        flowValueMenuItem.setText("Flow Value…");
-        flowValueMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                flowValueMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(flowValueMenuItem);
-
-        nodeValueMenuItem.setText("Node Value…");
-        nodeValueMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nodeValueMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(nodeValueMenuItem);
-        editMenu.add(jSeparator9);
-
         reverseFlowDirectionMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         reverseFlowDirectionMenuItem.setText("Reverse Flow Direction");
         reverseFlowDirectionMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2166,12 +2132,6 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_zeroLengthStiffnessSliderStateChanged
 
-    private void drawReconstructedBezierCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawReconstructedBezierCheckBoxActionPerformed
-        mapComponent.setDrawReconstructedBezier(drawReconstructedBezierCheckBox.isSelected());
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_drawReconstructedBezierCheckBoxActionPerformed
-
     private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
         if (nodeWeightSlider.getValueIsAdjusting() == false) {
             model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d );
@@ -2608,14 +2568,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
-    private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoMenuItemActionPerformed
-        undo();
-    }//GEN-LAST:event_undoMenuItemActionPerformed
-
-    private void redoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redoMenuItemActionPerformed
-        redo();
-    }//GEN-LAST:event_redoMenuItemActionPerformed
-
     private void lockFlowWidthCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFlowWidthCheckboxActionPerformed
         // Checking?
         if (lockFlowWidthCheckbox.isSelected()) {
@@ -2770,163 +2722,6 @@ public class MainWindow extends javax.swing.JFrame {
 
     }
 
-    private void reverseFlowDirectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionMenuItemActionPerformed
-        ArrayList<Flow> flows = model.getSelectedFlows();
-        for (Flow flow : flows) {
-            flow.reverseFlow();
-        }
-        addUndo("Reverse Flow Direction");
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_reverseFlowDirectionMenuItemActionPerformed
-
-    private void editMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_editMenuMenuSelected
-        boolean hasSelectedFlow = model.isFlowSelected();
-        boolean hasSelectedNode = model.isNodeSelected();
-        boolean isLockedFlowSelected = model.isLockedFlowSelected();
-        boolean isUnlockedFlowSelected = model.isUnlockedFlowSelected();
-        deleteMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
-        selectAllMenuItem.setEnabled(model.hasFlows() || model.hasNodes());
-        selectNoneMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
-        lockMenuItem.setEnabled(isUnlockedFlowSelected);
-        unlockMenuItem.setEnabled(isLockedFlowSelected);
-        flowValueMenuItem.setEnabled(hasSelectedFlow);
-        nodeValueMenuItem.setEnabled(hasSelectedNode);
-        reverseFlowDirectionMenuItem.setEnabled(hasSelectedFlow);
-        straightenFlowsMenuItem.setEnabled(hasSelectedFlow);
-    }//GEN-LAST:event_editMenuMenuSelected
-
-    private void flowValueMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowValueMenuItemActionPerformed
-        ArrayList<Flow> selectedFlows = new ArrayList<>(model.getSelectedFlows());
-        if (selectedFlows.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please select one flow");
-            return;
-        }
-
-        double newValue = 0;
-        if (selectedFlows.size() == 1) {
-            double value = selectedFlows.get(0).getValue();
-            while (newValue <= 0) {
-                String userInput = (String) JOptionPane.showInputDialog(
-                        this,
-                        "Current Flow Value: " + value + "\n"
-                        + "Input a new numerical value over zero");
-                try {
-                    newValue = Double.parseDouble(userInput);
-                    selectedFlows.get(0).setValue(newValue);
-                } catch (NumberFormatException nfe) {
-                    newValue = 0;
-                }
-            }
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
-        } else {
-            while (newValue <= 0) {
-                String userInput = (String) JOptionPane.showInputDialog(
-                        this,
-                        "Input a new numerical value over zero");
-                try {
-                    newValue = Double.parseDouble(userInput);
-                    for (Flow flow : selectedFlows) {
-                        flow.setValue(newValue);
-                    }
-                } catch (NumberFormatException nfe) {
-                    JOptionPane.showMessageDialog(this, "Please enter a "
-                            + "number over 0");
-                }
-            }
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
-        }
-        addUndo("Flow Value");
-    }//GEN-LAST:event_flowValueMenuItemActionPerformed
-
-    private void nodeValueMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nodeValueMenuItemActionPerformed
-        ArrayList<Point> selectedNodes = new ArrayList<>(model.getSelectedNodes());
-        if (selectedNodes.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please select one node");
-            return;
-        }
-
-        double newValue = 0;
-        if (selectedNodes.size() == 1) {
-            double value = selectedNodes.get(0).getValue();
-            while (newValue <= 0) {
-                String userInput = (String) JOptionPane.showInputDialog(
-                        this,
-                        "Current Node Value: " + value + "\n"
-                        + "Input a new number over zero");
-                try {
-                    newValue = Double.parseDouble(userInput);
-                    selectedNodes.get(0).setValue(newValue);
-                } catch (NumberFormatException nfe) {
-                    newValue = 0;
-                }
-            }
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
-        } else {
-            while (newValue <= 0) {
-                String userInput = (String) JOptionPane.showInputDialog(
-                        this,
-                        "Input a new numerical value over zero");
-                try {
-                    newValue = Double.parseDouble(userInput);
-                    for (Point node : selectedNodes) {
-                        node.setValue(newValue);
-                    }
-                } catch (NumberFormatException nfe) {
-                    JOptionPane.showMessageDialog(this, "Please enter a "
-                            + "number over 0");
-                }
-            }
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
-        }
-        addUndo("Node Value");
-    }//GEN-LAST:event_nodeValueMenuItemActionPerformed
-
-    private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
-        model.setSelectionOfAllFlowsAndNodes(true);
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_selectAllMenuItemActionPerformed
-
-    private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
-        model.setSelectionOfAllFlowsAndNodes(false);
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_selectNoneMenuItemActionPerformed
-
-    private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
-        ForceLayouter layouter = new ForceLayouter(model);
-        layouter.straightenFlows(true);
-        addUndo("Straighten Flows");
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
-
-    private void lockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockMenuItemActionPerformed
-        model.setLockOfSelectedFlows(true);
-        addUndo("Lock");
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_lockMenuItemActionPerformed
-
-    private void unlockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockMenuItemActionPerformed
-        model.setLockOfSelectedFlows(false);
-        addUndo("Unlock");
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_unlockMenuItemActionPerformed
-
-    private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
-        model.deleteSelectedFlowsAndNodes();
-        addUndo("Delete");
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_deleteMenuItemActionPerformed
-
     private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName()) && model != null) {
             try {
@@ -3006,6 +2801,79 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_showControlPointsCheckBoxMenuItemActionPerformed
+
+    private void editMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_editMenuMenuSelected
+        boolean hasSelectedFlow = model.isFlowSelected();
+        boolean hasSelectedNode = model.isNodeSelected();
+        boolean isLockedFlowSelected = model.isLockedFlowSelected();
+        boolean isUnlockedFlowSelected = model.isUnlockedFlowSelected();
+        deleteMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
+        selectAllMenuItem.setEnabled(model.hasFlows() || model.hasNodes());
+        selectNoneMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
+        lockMenuItem.setEnabled(isUnlockedFlowSelected);
+        unlockMenuItem.setEnabled(isLockedFlowSelected);
+        reverseFlowDirectionMenuItem.setEnabled(hasSelectedFlow);
+        straightenFlowsMenuItem.setEnabled(hasSelectedFlow);
+    }//GEN-LAST:event_editMenuMenuSelected
+
+    private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
+        ForceLayouter layouter = new ForceLayouter(model);
+        layouter.straightenFlows(true);
+        addUndo("Straighten Flows");
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
+
+    private void reverseFlowDirectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        for (Flow flow : flows) {
+            flow.reverseFlow();
+        }
+        addUndo("Reverse Flow Direction");
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_reverseFlowDirectionMenuItemActionPerformed
+
+    private void unlockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockMenuItemActionPerformed
+        model.setLockOfSelectedFlows(false);
+        addUndo("Unlock");
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_unlockMenuItemActionPerformed
+
+    private void lockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockMenuItemActionPerformed
+        model.setLockOfSelectedFlows(true);
+        addUndo("Lock");
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_lockMenuItemActionPerformed
+
+    private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
+        model.setSelectionOfAllFlowsAndNodes(false);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_selectNoneMenuItemActionPerformed
+
+    private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
+        model.setSelectionOfAllFlowsAndNodes(true);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_selectAllMenuItemActionPerformed
+
+    private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
+        model.deleteSelectedFlowsAndNodes();
+        addUndo("Delete");
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_deleteMenuItemActionPerformed
+
+    private void redoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redoMenuItemActionPerformed
+        redo();
+    }//GEN-LAST:event_redoMenuItemActionPerformed
+
+    private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoMenuItemActionPerformed
+        undo();
+    }//GEN-LAST:event_undoMenuItemActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -3120,7 +2988,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
-    private javax.swing.JCheckBox drawReconstructedBezierCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JComboBox drawingOrderComboBox;
     private javax.swing.JMenu editMenu;
@@ -3139,7 +3006,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider flowLengthSlider;
     private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JMenu flowSegmentationMenu;
-    private javax.swing.JMenuItem flowValueMenuItem;
     private javax.swing.JLabel flowsFilePathLabel;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JPanel forcesPanel;
@@ -3173,7 +3039,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator8;
-    private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
@@ -3191,7 +3056,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JButton moveFlowsThatCrossNodesButton;
-    private javax.swing.JMenuItem nodeValueMenuItem;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openSettingsMenuItem;

@@ -35,11 +35,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     private boolean drawLineSegments = false;
 
     /**
-     * flag for drawing reconstructed BŽzier curves
-     */
-    private boolean drawReconstructedBezier = false;
-
-    /**
      * flag for drawing canvas outline
      */
     private boolean drawCanvas = false;
@@ -138,10 +133,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 renderer.drawStraightLinesSegments();
             }
 
-            if (isDrawReconstructedBezier()) {
-                renderer.drawRebuiltBezierCurve();
-            }
-
             if (drawStartClipAreas || drawEndClipAreas) {
                 renderer.drawClipAreas(drawStartClipAreas, drawEndClipAreas);
             }
@@ -222,20 +213,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
     public void setDrawLineSegments(boolean drawLineSegments) {
         this.drawLineSegments = drawLineSegments;
-    }
-
-    /**
-     * @return the drawReconstructedBezier
-     */
-    public boolean isDrawReconstructedBezier() {
-        return drawReconstructedBezier;
-    }
-
-    /**
-     * @param drawReconstructedBezier the drawReconstructedBezier to set
-     */
-    public void setDrawReconstructedBezier(boolean drawReconstructedBezier) {
-        this.drawReconstructedBezier = drawReconstructedBezier;
     }
 
     /**

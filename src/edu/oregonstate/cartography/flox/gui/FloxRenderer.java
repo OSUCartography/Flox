@@ -471,6 +471,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     /**
      * Testing algorithm for reconstructing Bezier curves from straight line
      * segments.
+     * FIXME not currently used.
      */
     public void drawRebuiltBezierCurve() {
 
