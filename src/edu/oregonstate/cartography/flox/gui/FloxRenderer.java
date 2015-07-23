@@ -299,9 +299,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Draws the border of the canvas.
+     * Draws the canvas.
      */
-    public void drawCanvasBorder() {
+    public void drawCanvas() {
 
         g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getCanvas();
@@ -332,20 +332,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                     xToPx(canvas.getMaxX() + xPad),
                     yToPx(canvas.getMaxY() + yPad));
 
-            // Create the 4 lines of the canvas rectangle
-            Line2D line1 = new Line2D.Double(b1.x, b1.y, b2.x, b2.y);
-            Line2D line2 = new Line2D.Double(b2.x, b2.y, b4.x, b4.y);
-            Line2D line3 = new Line2D.Double(b3.x, b3.y, b4.x, b4.y);
-            Line2D line4 = new Line2D.Double(b1.x, b1.y, b3.x, b3.y);
-
-            // Draw the rectangle lines.
-            g2d.draw(line1);
-            g2d.draw(line2);
-            g2d.draw(line3);
-            g2d.draw(line4);
-
+            // Construct a GeneralPath from the canvas points
+            GeneralPath canvasPath = new GeneralPath();
+            canvasPath.moveTo(b1.x, b1.y);
+            canvasPath.lineTo(b2.x, b2.y);
+            canvasPath.lineTo(b4.x, b4.y);
+            canvasPath.lineTo(b3.x, b3.y);
+            canvasPath.lineTo(b1.x, b1.y);
+            
+            // Draw the canvas
+            g2d.draw(canvasPath);
+            g2d.setColor(new Color(245,245,245));
+            g2d.fill(canvasPath);
+            
         }
-
     }
 
     public void drawFlowRangebox() {

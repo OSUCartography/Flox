@@ -114,6 +114,10 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 }
             }
 
+            if (isDrawCanvas()) {
+                renderer.drawCanvas();
+            }
+            
             // draw flows and nodes
             renderer.drawFlows();
 
@@ -122,13 +126,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             if (isDrawFlowRangebox()) {
                 renderer.drawFlowRangebox();
             }
-
-            if (isDrawCanvas()) {
-                renderer.drawCanvasBorder();
-            }
+            
             if (isDrawControlPoints()) {
                 renderer.drawControlPoints();
             }
+            
             if (isDrawLineSegments()) {
                 renderer.drawStraightLinesSegments();
             }
