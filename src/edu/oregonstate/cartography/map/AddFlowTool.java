@@ -11,65 +11,68 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.awt.Color;
+import java.util.ArrayList;
 
 /**
  * Tool for adding flows.
+ *
  * @author Dan
  */
 public class AddFlowTool extends MapTool {
-    
+
     /**
      * The data model containing all flows.
      */
     private final Model model;
-    
+
     /**
-     * Flag indicating that an origin node has been created. The next click 
+     * Flag indicating that an origin node has been created. The next click
      * should create/assign a destinationNode if this is true.
      */
     private boolean originNodeCreated = false;
-    
+
     /**
-     * The origin node of the new flow being added. An originNode is assigned
-     * on the first click of the AddFlowTool. If an existing node is clicked, 
-     * that Point is assigned to originNode. If an empty space is clicked, a new 
+     * The origin node of the new flow being added. An originNode is assigned on
+     * the first click of the AddFlowTool. If an existing node is clicked, that
+     * Point is assigned to originNode. If an empty space is clicked, a new
      * Point is created and assigned to originNode.
      */
     Point originNode;
-    
+
     /**
      * The destination node of the new flow being added. A destinationNode is
-     * assigned on the second click of the AddFlowTool. If an existing node is 
+     * assigned on the second click of the AddFlowTool. If an existing node is
      * clicked, that Point is assigned to destinationNode. If an empty space is
      * clicked, a new Point is created and assigned to destinationNode.
      */
     Point destinationNode;
-    
+
     /**
      * The distance from an existing node that a click must be within for that
-     * node to be assigned to originNode or destinationNode.
-     * FIXME The clicking distance should change with the size of the node.
+     * node to be assigned to originNode or destinationNode. FIXME The clicking
+     * distance should change with the size of the node.
      */
-    double pixelTolerance = 10;
-    
+    double pixelTolerance = 3;
+
     /**
-     * Flag for indicating that an arbitrary value was assigned to a new 
-     * feature. FIXME This exists because every time a new flow is created, it is 
-     * assigned a value of half the maximum existing value. When there are no
+     * Flag for indicating that an arbitrary value was assigned to a new
+     * feature. FIXME This exists because every time a new flow is created, it
+     * is assigned a value of half the maximum existing value. When there are no
      * other existing flows, an arbitrary value is assigned. It was weird then
-     * for the second flow to be assigned a value of half the value of the 
-     * first flow. There is probably a better way to manage this.
+     * for the second flow to be assigned a value of half the value of the first
+     * flow. There is probably a better way to manage this.
      */
     private boolean hadToMakeUpValue = false;
-    
+
     /**
-     * An arbitrary value to be assigned to new features when there are no 
-     * other features in the layout from which to derive new feature values. 
+     * An arbitrary value to be assigned to new features when there are no other
+     * features in the layout from which to derive new feature values.
      */
     private double newFlowValue = 2;
-    
+
     /**
      * Constructor for AddFlowTool.
+     *
      * @param mapComponent The current mapComponent.
      * @param model The model containing flow data and settings.
      */
@@ -77,9 +80,10 @@ public class AddFlowTool extends MapTool {
         super(mapComponent);
         this.model = model;
     }
-    
+
     /**
-     * Called after a mouse click. 
+     * Called after a mouse click.
+     *
      * @param point The location of the click.
      * @param evt The mouse event.
      */
@@ -94,21 +98,64 @@ public class AddFlowTool extends MapTool {
             addOriginNode(point);
         }
     }
-    
+
     /**
-     * Adds an originNode to the map layout. Called on the first click while
-     * the addFlowTool is active. If an existing node was clicked, that Point is
-     * assigned to originNode. If a blank space was clicked, a new Point is 
+     * Adds an originNode to the map layout. Called on the first click while the
+     * addFlowTool is active. If an existing node was clicked, that Point is
+     * assigned to originNode. If a blank space was clicked, a new Point is
      * created and assigned to originNode.
+     *
      * @param point The location of the new node.
      */
     private void addOriginNode(Point2D.Double point) {
 
+        double scale = mapComponent.getScale();
+
+        // Get the locked scale factor needed to calculate feature sizes
+        double lockedScaleFactor;
+        if (!model.isFlowWidthLocked()) {
+            lockedScaleFactor = 1;
+        } else {
+            // compare the locked scale to the current scale
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = scale / lockedMapScale;
+        }
+
+        // Iterate backwards through the nodes so that node drawn last (on
+        // top) gets selected first.
+        /*
+        ArrayList<Point> nodes = model.getNodes();
+        for (int i = nodes.size() - 1; i >= 0; i--) {
+            Point node = nodes.get(i);
+
+            //get the radius of the node
+            //FIXME this exact code for finding the radius is used in the 
+            //selection tool and maybe other places. Maybe make a method in 
+            //FloxMapComponent.
+            double nodeArea = Math.abs(node.getValue())
+                    * model.getNodeSizeScaleFactor();
+            double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+            nodeRadius = (nodeRadius + pixelTolerance/ scale);
+            
+            // calculate the distance of the click from the node center
+            double dx = node.x - point.x;
+            double dy = node.y - point.y;
+            double distSquared = (dx * dx + dy * dy);
+            
+            if (distSquared <= nodeRadius * nodeRadius) {
+                originNode = node;
+                
+                // Stop checking nodes
+                break;
+            }
+        }*/
+
+        
         // Iterate over all nodes, checking to see if an existing node was
         // clicked.
-        Iterator<Point> nodes = model.nodeIterator();
-        while(nodes.hasNext()) {
-            Point pt = nodes.next();
+        Iterator<Point> nodesIterator = model.nodeIterator();
+        while (nodesIterator.hasNext()) {
+            Point pt = nodesIterator.next();
             // FIXME this calculation should account for node size, and can
             // be simplified by measuring destances rather than comparing
             // extents.
@@ -116,65 +163,73 @@ public class AddFlowTool extends MapTool {
                     && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
                     && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
                     && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
-                
+
                 // Existing node was clicked; assign it to originNode
                 originNode = pt;
                 // Stop checking nodes
                 break;
             }
-        } 
-        
-        // If an existing node was NOT assigned to originNode, create a new one 
-        // and assign it to originNode.
-        if(originNode == null) {
-           originNode = new Point(point.x, point.y);
         }
         
+        
+
+        // If an existing node was NOT assigned to originNode, create a new one 
+        // and assign it to originNode.
+        if (originNode == null) {
+            originNode = new Point(point.x, point.y);
+        }
+
         // repaint the map
         originNodeCreated = true;
         mapComponent.repaint();
+
+        // FIXME the new node needs to be assigned a value. Maybe whatever value
+        // will give it a radius of 10 pixels?
     }
-    
+
     /**
-     * Adds a destinationNode to the map layout. Called on the second click while
-     * the addFlowTool is active. If an existing node was clicked, that Point is
-     * assigned to destinationNode. If a blank space was clicked, a new Point is 
-     * created and assigned to destinationNode.
+     * Adds a destinationNode to the map layout. Called on the second click
+     * while the addFlowTool is active. If an existing node was clicked, that
+     * Point is assigned to destinationNode. If a blank space was clicked, a new
+     * Point is created and assigned to destinationNode.
+     *
      * @param point The location of the new node.
      */
     private void addDestinationNode(Point2D.Double point) {
-        
+
         // Iterate over existing nodes to see if it was clicked.
         Iterator<Point> nodes = model.nodeIterator();
-        while(nodes.hasNext()) {
+        while (nodes.hasNext()) {
             Point pt = nodes.next();
-            
+
             // FIXME This needs to account for node size.
             if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(point.x) - pixelTolerance)
                     && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
                     && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
                     && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
-                
+
                 // An existing node was clicked; assign it to destinationNode.
                 destinationNode = pt;
-                
+
                 // Stop checking nodes.
                 break;
-            } 
+            }
         }
-        
+
         // If an existing node was NOT assigned to destinationNode, make a new
         // Point and assign it to destinationNode.
-        if(destinationNode == null) {
-            destinationNode = new Point (point.x, point.y);
+        if (destinationNode == null) {
+            destinationNode = new Point(point.x, point.y);
         }
-        
+
+        // FIXME, the destinationNode needs to be assigned a value, maybe 
+        // whatever value would give it a radius of 10?
         // build a flow from the toNode and the fromNode, add it to the model
         QuadraticBezierFlow newFlow = new QuadraticBezierFlow(originNode, destinationNode);
-        
+
         // Get the maximum value of all flows in the model.
         double maxFlowValue = model.getMaxFlowValue();
-        
+
         // FIXME
         // Assign a value to the new flow that makes sense with the existing
         // dataset. 
@@ -182,29 +237,30 @@ public class AddFlowTool extends MapTool {
         // was added) and then a dataset IS added, then the tool needs to be
         // deselected and reselected to get a reasonable flow value for new
         // flows. Flow value should be settable when a flow is added maybe.
-        if(hadToMakeUpValue) {
+        // Maybe assign it whatever value will make it a certain stroke width?
+        // Something that fits with the default node radius perhaps.
+        if (hadToMakeUpValue) {
             newFlow.setValue(newFlowValue);
         } else {
-            if(maxFlowValue == 0.0) {
+            if (maxFlowValue == 0.0) {
                 newFlow.setValue(newFlowValue);
                 hadToMakeUpValue = true;
             } else {
-                newFlow.setValue(maxFlowValue/2);
+                newFlow.setValue(maxFlowValue / 2);
             }
         }
-        
+
         // FIXME
         // Straighten the new flow.
         // This is done because when a newFlow is created, the control point
         // is assigned a strange, arbitrary location.
         newFlow.bend(0, 0);
-        
+
         // FIXME test whether start and end point are identical to avoid 
         // exception due to the attempt of creating a loop
-        
         // Add the new flow to the data model.
         model.addFlow(newFlow);
-        
+
         // Update the longestFlowLength field in the model. This is needed for 
         // computing intermediate nodes. 
         // FIXME, could this be done by the model every time intermediate nodes 
@@ -217,23 +273,26 @@ public class AddFlowTool extends MapTool {
         originNodeCreated = false;
         originNode = null;
         destinationNode = null;
-        
+
         // repaint the map
         mapComponent.repaint();
     }
-    
+
     /**
-     * Draw the 
-     * @param g2d 
+     * Draw the origin node after the first click and highlight it. This is
+     * needed because the originNode isn't added to the model until after the
+     * destination node is assigned and the flow is added to the layout.
+     *
+     * @param g2d
      */
     public void draw(Graphics2D g2d) {
-        // If a destinationNode is selected, and it didn't already exist, draw it
-        if(originNodeCreated) {
+        // If an originNode is selected, and it didn't already exist, draw it
+        if (originNodeCreated) {
             double r = 10;
             g2d.setStroke(new BasicStroke(4));
             double x = mapComponent.xToPx(originNode.x);
             double y = mapComponent.yToPx(originNode.y);
-            Ellipse2D circle = new Ellipse2D.Double(x-r, y-r, r*2, r*2);
+            Ellipse2D circle = new Ellipse2D.Double(x - r, y - r, r * 2, r * 2);
             g2d.setColor(Color.WHITE);
             g2d.fill(circle);
             g2d.setColor(Color.RED);
