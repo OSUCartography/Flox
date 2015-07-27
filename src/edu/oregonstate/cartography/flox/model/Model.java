@@ -672,6 +672,10 @@ public class Model {
         return graph.getOrderedFlows(increasing);
     }
 
+    public ArrayList<Point> getOrderedNodes(boolean increading) {
+        return graph.getOrderedNodes(increading);
+    }
+    
     /**
      * Returns an iterator for the nodes.
      *

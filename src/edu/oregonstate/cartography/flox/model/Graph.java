@@ -133,6 +133,21 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
         return flows;
     }
 
+    public ArrayList<Point> getOrderedNodes(boolean increasing) {
+        ArrayList<Point> nodes = new ArrayList<>(vertexSet());
+        java.util.Collections.sort(nodes, new Comparator<Point>() {
+            @Override
+            public int compare(Point node1, Point node2) {
+                if (increasing) {
+                    return Double.compare(node1.getValue(), node2.getValue());
+                } else {
+                    return Double.compare(node2.getValue(), node1.getValue());
+                }
+            }
+        });
+        return nodes;
+    }
+    
     /**
      * Returns an iterator for the nodes.
      *

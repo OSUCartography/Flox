@@ -289,12 +289,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     public void drawNodes() {
         g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
-        Iterator<Point> iter = model.nodeIterator();
-        while (iter.hasNext()) {
-            Point pt = iter.next();
-            double r = getNodeRadius(pt);
-            Color color = pt.isSelected() ? SELECTION_COLOR : REGULAR_COLOR;
-            drawCircle(pt.x, pt.y, r, Color.WHITE, color);
+        ArrayList<Point> nodes = model.getOrderedNodes(false);
+        for (Point node : nodes) {
+            double r = getNodeRadius(node);
+            Color color = node.isSelected() ? SELECTION_COLOR : REGULAR_COLOR;
+            drawCircle(node.x, node.y, r, Color.WHITE, color);
         }
     }
 
