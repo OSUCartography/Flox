@@ -31,6 +31,8 @@ public class AddFlowTool extends MapTool {
      */
     private boolean originNodeCreated = false;
 
+    private double originNodeRadius = 10;
+    
     /**
      * The origin node of the new flow being added. An originNode is assigned on
      * the first click of the AddFlowTool. If an existing node is clicked, that
@@ -120,10 +122,7 @@ public class AddFlowTool extends MapTool {
             double lockedMapScale = model.getLockedMapScale();
             lockedScaleFactor = scale / lockedMapScale;
         }
-
-        // Iterate backwards through the nodes so that node drawn last (on
-        // top) gets selected first.
-        /*
+        
         ArrayList<Point> nodes = model.getNodes();
         for (int i = nodes.size() - 1; i >= 0; i--) {
             Point node = nodes.get(i);
@@ -134,8 +133,8 @@ public class AddFlowTool extends MapTool {
             //FloxMapComponent.
             double nodeArea = Math.abs(node.getValue())
                     * model.getNodeSizeScaleFactor();
-            double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-            nodeRadius = (nodeRadius + pixelTolerance/ scale);
+            double nodePxRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+            double nodeRadius = (nodePxRadius + pixelTolerance) / scale;
             
             // calculate the distance of the click from the node center
             double dx = node.x - point.x;
@@ -148,43 +147,28 @@ public class AddFlowTool extends MapTool {
                 // Stop checking nodes
                 break;
             }
-        }*/
-
-        
-        // Iterate over all nodes, checking to see if an existing node was
-        // clicked.
-        Iterator<Point> nodesIterator = model.nodeIterator();
-        while (nodesIterator.hasNext()) {
-            Point pt = nodesIterator.next();
-            // FIXME this calculation should account for node size, and can
-            // be simplified by measuring destances rather than comparing
-            // extents.
-            if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(point.x) - pixelTolerance)
-                    && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
-                    && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
-                    && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
-
-                // Existing node was clicked; assign it to originNode
-                originNode = pt;
-                // Stop checking nodes
-                break;
-            }
         }
-        
-        
-
+        // FIXME the new node needs to be assigned a value. Maybe whatever value
+        // will give it a radius of 10 pixels?
         // If an existing node was NOT assigned to originNode, create a new one 
         // and assign it to originNode.
+        
+        // This is an experiment here
         if (originNode == null) {
             originNode = new Point(point.x, point.y);
+            if(model.getNbrNodes()>0) {
+                double maxVal = model.getMaxNodeValue();
+                double maxRadius = model.getMaxNodeSize();
+                double newVal = maxVal * 10 / maxRadius;
+                originNode.setValue(newVal);
+            }
         }
 
         // repaint the map
         originNodeCreated = true;
         mapComponent.repaint();
 
-        // FIXME the new node needs to be assigned a value. Maybe whatever value
-        // will give it a radius of 10 pixels?
+
     }
 
     /**
@@ -197,29 +181,50 @@ public class AddFlowTool extends MapTool {
      */
     private void addDestinationNode(Point2D.Double point) {
 
-        // Iterate over existing nodes to see if it was clicked.
-        Iterator<Point> nodes = model.nodeIterator();
-        while (nodes.hasNext()) {
-            Point pt = nodes.next();
+        double scale = mapComponent.getScale();
+        
+        // Get the locked scale factor needed to calculate feature sizes
+        double lockedScaleFactor;
+        if (!model.isFlowWidthLocked()) {
+            lockedScaleFactor = 1;
+        } else {
+            // compare the locked scale to the current scale
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = scale / lockedMapScale;
+        }
+        
+        ArrayList<Point> nodes = model.getNodes();
+        for (int i = nodes.size() - 1; i >= 0; i--) {
+            Point node = nodes.get(i);
 
-            // FIXME This needs to account for node size.
-            if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(point.x) - pixelTolerance)
-                    && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(point.x) + pixelTolerance))
-                    && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(point.y) - pixelTolerance)
-                    && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(point.y) + pixelTolerance))) {
-
-                // An existing node was clicked; assign it to destinationNode.
-                destinationNode = pt;
-
-                // Stop checking nodes.
+            //get the radius of the node
+            //FIXME this exact code for finding the radius is used in the 
+            //selection tool and maybe other places. Perhaps make a method in 
+            //FloxMapComponent.
+            double nodeArea = Math.abs(node.getValue())
+                    * model.getNodeSizeScaleFactor();
+            double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+            nodeRadius = (nodeRadius + pixelTolerance) / scale;
+            
+            // calculate the distance of the click from the node center
+            double dx = node.x - point.x;
+            double dy = node.y - point.y;
+            double distSquared = (dx * dx + dy * dy);
+            
+            if (distSquared <= nodeRadius * nodeRadius) {
+                destinationNode = node;
+                
+                // Stop checking nodes
                 break;
             }
         }
-
+        
         // If an existing node was NOT assigned to destinationNode, make a new
         // Point and assign it to destinationNode.
         if (destinationNode == null) {
             destinationNode = new Point(point.x, point.y);
+            double maxNodeSize = model.getMaxNodeSize();
+            
         }
 
         // FIXME, the destinationNode needs to be assigned a value, maybe 
@@ -288,7 +293,7 @@ public class AddFlowTool extends MapTool {
     public void draw(Graphics2D g2d) {
         // If an originNode is selected, and it didn't already exist, draw it
         if (originNodeCreated) {
-            double r = 10;
+            double r = originNodeRadius;
             g2d.setStroke(new BasicStroke(4));
             double x = mapComponent.xToPx(originNode.x);
             double y = mapComponent.yToPx(originNode.y);
