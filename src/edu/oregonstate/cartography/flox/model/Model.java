@@ -142,7 +142,7 @@ public class Model {
      * can apply to the target. The lower the distanceWeightExponent, the more
      * force distant objects are permitted to apply.
      */
-    private double distanceWeightExponent = 30.0;
+    private double distanceWeightExponent = 10.0;
 
     /**
      * If this is true, control points of flows are prevented from moving 
