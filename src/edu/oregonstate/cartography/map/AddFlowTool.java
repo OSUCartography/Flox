@@ -30,8 +30,6 @@ public class AddFlowTool extends MapTool {
      * should create/assign a destinationNode if this is true.
      */
     private boolean originNodeCreated = false;
-
-    private double originNodeRadius = 10;
     
     /**
      * The origin node of the new flow being added. An originNode is assigned on
@@ -54,7 +52,7 @@ public class AddFlowTool extends MapTool {
      * node to be assigned to originNode or destinationNode. FIXME The clicking
      * distance should change with the size of the node.
      */
-    double pixelTolerance = 3;
+    private final double PIXEL_TOLERANCE = 3;
 
     /**
      * Flag for indicating that an arbitrary value was assigned to a new
@@ -129,12 +127,12 @@ public class AddFlowTool extends MapTool {
 
             //get the radius of the node
             //FIXME this exact code for finding the radius is used in the 
-            //selection tool and maybe other places. Maybe make a method in 
-            //FloxMapComponent.
+            //selection tool and some other places. Maybe make a method in 
+            //FloxMapComponent?
             double nodeArea = Math.abs(node.getValue())
                     * model.getNodeSizeScaleFactor();
             double nodePxRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-            double nodeRadius = (nodePxRadius + pixelTolerance) / scale;
+            double nodeRadius = (nodePxRadius + PIXEL_TOLERANCE) / scale;
             
             // calculate the distance of the click from the node center
             double dx = node.x - point.x;
@@ -204,7 +202,7 @@ public class AddFlowTool extends MapTool {
             double nodeArea = Math.abs(node.getValue())
                     * model.getNodeSizeScaleFactor();
             double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-            nodeRadius = (nodeRadius + pixelTolerance) / scale;
+            nodeRadius = (nodeRadius + PIXEL_TOLERANCE) / scale;
             
             // calculate the distance of the click from the node center
             double dx = node.x - point.x;
@@ -274,7 +272,7 @@ public class AddFlowTool extends MapTool {
 
         // Reinitialize flags, set origin and destination nodes to null. This
         // insures that new nodes will be assigned/created with successive
-        // clicks. 
+        // clicks. Set originNodeRadius back to the default value.
         originNodeCreated = false;
         originNode = null;
         destinationNode = null;
@@ -293,7 +291,21 @@ public class AddFlowTool extends MapTool {
     public void draw(Graphics2D g2d) {
         // If an originNode is selected, and it didn't already exist, draw it
         if (originNodeCreated) {
-            double r = originNodeRadius;
+            
+            double lockedScaleFactor;
+            if (!model.isFlowWidthLocked()) {
+                lockedScaleFactor = 1;
+            } else {
+                // compare the locked scale to the current scale
+                double lockedMapScale = model.getLockedMapScale();
+                lockedScaleFactor = mapComponent.getScale() / lockedMapScale;
+            }
+            
+            double nodeArea = Math.abs(originNode.getValue())
+                    * model.getNodeSizeScaleFactor();
+            double r = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+            
+            //double r = originNodeRadius * lockedScaleFactor;
             g2d.setStroke(new BasicStroke(4));
             double x = mapComponent.xToPx(originNode.x);
             double y = mapComponent.yToPx(originNode.y);
