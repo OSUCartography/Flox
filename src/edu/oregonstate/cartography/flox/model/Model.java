@@ -767,6 +767,10 @@ public class Model {
         return maxValue;
     }
 
+    /**
+     * Returns true if any flows are selected
+     * @return True if any flows are selected
+     */
     public boolean isFlowSelected() {
         Iterator flows = flowIterator();
         while (flows.hasNext()) {

@@ -265,11 +265,19 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 drawCross(pt.x, pt.y);
             }
 
-            // draw control points for selected flows
-            if (flow.isSelected()) {
-                drawControlPoints(flow);
+        }
+        
+        // Iterate through the flows again to draw control points for selected
+        // flows. This is done in a separate iteration to prevent control points
+        // from being drawn under flows.
+        if (model.isFlowSelected()) {
+            for(Flow flow : flows) {
+                if(flow.isSelected()) {
+                    drawControlPoints(flow);
+                }
             }
         }
+        
     }
 
     /**
