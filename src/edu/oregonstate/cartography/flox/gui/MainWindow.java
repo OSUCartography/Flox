@@ -309,8 +309,6 @@ public class MainWindow extends javax.swing.JFrame {
         strokeCheckBox = new javax.swing.JCheckBox();
         fillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
-        drawingOrderComboBox = new javax.swing.JComboBox();
-        javax.swing.JLabel jLabel12 = new javax.swing.JLabel();
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         lockFlowWidthCheckbox = new javax.swing.JCheckBox();
@@ -1035,28 +1033,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         mapControlPanel.add(symbolPanel, gridBagConstraints);
-
-        drawingOrderComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Largest First", "Smallest First", "Unordered" }));
-        drawingOrderComboBox.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                drawingOrderComboBoxItemStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(drawingOrderComboBox, gridBagConstraints);
-
-        jLabel12.setText("Drawing Order");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(jLabel12, gridBagConstraints);
 
         addLayerButton.setText("+");
         addLayerButton.setPreferredSize(new java.awt.Dimension(22, 22));
@@ -2212,23 +2188,6 @@ public class MainWindow extends javax.swing.JFrame {
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
     }//GEN-LAST:event_geometricLayoutMenuItemActionPerformed
 
-    private void drawingOrderComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_drawingOrderComboBoxItemStateChanged
-        if (evt.getStateChange() == ItemEvent.SELECTED) {
-            switch (drawingOrderComboBox.getSelectedIndex()) {
-                case 0:
-                    model.setFlowOrder(Model.FlowOrder.DECREASING);
-                    break;
-                case 1:
-                    model.setFlowOrder(Model.FlowOrder.INCREASING);
-                    break;
-                case 2:
-                    model.setFlowOrder(Model.FlowOrder.UNORDERED);
-            }
-        }
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_drawingOrderComboBoxItemStateChanged
-
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
 
         model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
@@ -2992,7 +2951,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
-    private javax.swing.JComboBox drawingOrderComboBox;
     private javax.swing.JMenu editMenu;
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;

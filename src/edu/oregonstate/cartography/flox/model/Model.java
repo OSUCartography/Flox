@@ -54,16 +54,6 @@ public class Model {
     }
 
     /**
-     * Order of drawing of flows
-     */
-    public enum FlowOrder {
-
-        INCREASING,
-        DECREASING,
-        UNORDERED
-    }
-
-    /**
      * Density of points along flows
      */
     public enum FlowNodeDensity {
@@ -256,11 +246,6 @@ public class Model {
      * Either work with cubic or quadratic curves
      */
     private CurveType curveType = CurveType.QUADRATIC;
-
-    /**
-     * Order of drawing of flows
-     */
-    private FlowOrder flowOrder = FlowOrder.DECREASING;
 
     /**
      * A geometry (collection) used for clipping start or end of flows
@@ -1091,20 +1076,6 @@ public class Model {
      */
     public double getMinFlowLengthSpringConstant() {
         return minFlowLengthSpringConstant;
-    }
-
-    /**
-     * @return the flowOrder
-     */
-    public FlowOrder getFlowOrder() {
-        return flowOrder;
-    }
-
-    /**
-     * @param flowOrder the flowOrder to set
-     */
-    public void setFlowOrder(FlowOrder flowOrder) {
-        this.flowOrder = flowOrder;
     }
 
     /**

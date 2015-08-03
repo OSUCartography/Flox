@@ -177,23 +177,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     public void drawFlows() {
 
         // Create an ArrayList to store the flows
-        ArrayList<Flow> flows;
+        ArrayList<Flow> flows = model.getFlows();
 
         // Determine location of the end point of flows based on the model
         double r = model.getFlowDistanceFromEndPoint() / scale
                 * getLockedScaleFactor();
-
-        // Order the flows based on the model
-        switch (model.getFlowOrder()) {
-            case DECREASING:
-                flows = model.getOrderedFlows(false);
-                break;
-            case INCREASING:
-                flows = model.getOrderedFlows(true);
-                break;
-            default:
-                flows = model.getFlows();
-        }
 
         // Iterate through the flows
         for (Flow flow : flows) {
