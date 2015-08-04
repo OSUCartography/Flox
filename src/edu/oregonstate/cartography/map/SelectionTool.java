@@ -127,7 +127,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
-            model.setControlPtSelected(false);
         }
 
         setDefaultCursor();
@@ -154,9 +153,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 cPt.setSelected(false);
             }
-            model.setControlPtSelected(false);
         }
-
     }
 
     /**
@@ -276,13 +273,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             && (mapComponent.yToPx(cPt.y) <= mapComponent.yToPx(point.y) + 5))) {
                         cPt.setSelected(true);
                         controlPtGotSelected = true;
-                        model.setControlPtSelected(true);
                         mapComponent.eraseBufferImage();
                         mapComponent.repaint();
                         return true;
                     } else {
                         cPt.setSelected(false);
-                        model.setControlPtSelected(false);
                     }
                 }
             }
