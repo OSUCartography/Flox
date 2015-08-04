@@ -21,13 +21,15 @@ public class ScaleMoveSelectionTool extends CombinedTool {
     /**
      * Creates a new instance of RotateScaleMoveSelectionTool
      */
-    public ScaleMoveSelectionTool(AbstractSimpleFeatureMapComponent mapComponent, JFormattedTextField valueField) {
+    public ScaleMoveSelectionTool(AbstractSimpleFeatureMapComponent mapComponent, 
+            JFormattedTextField valueField, JFormattedTextField xField, JFormattedTextField yField) {
         super(mapComponent, "Select - Move - Scale");
         
-        SelectionTool selectionTool = new SelectionTool(this.mapComponent, valueField);
-        MoveTool moveTool = new MoveTool(this.mapComponent);
-    
+        SelectionTool selectionTool = new SelectionTool(this.mapComponent, 
+                valueField, xField, yField);
         
+        MoveTool moveTool = new MoveTool(this.mapComponent, xField, yField);
+    
         this.addMapTool(moveTool);
         // selection tool must be added last
         this.addMapTool(selectionTool);
