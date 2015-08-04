@@ -750,7 +750,11 @@ public class Model {
 
 
 
-    
+    /**
+     * Get the length of longest flow baseline.
+     * 
+     * @return the length of the longest flow baseline 
+     */
     public double getLongestFlowLength() {
         double maxLength = 0;
         Iterator<Flow> iterator = flowIterator();
@@ -764,6 +768,11 @@ public class Model {
         return maxLength;
     }
 
+    /**
+     * Get the length of the shortest flow baseline.
+     * 
+     * @return the shortest flow baseline. 
+     */
     public double getShortestFlowLength() {
         double minLength = Double.POSITIVE_INFINITY;
         Iterator<Flow> iterator = flowIterator();
@@ -824,6 +833,7 @@ public class Model {
 
     /**
      * Returns true if a locked flow is selected
+     * 
      * @return 
      */
     public boolean isLockedFlowSelected() {
@@ -837,7 +847,11 @@ public class Model {
         return false;
     }
 
-    
+    /**
+     * Returns true if an unlocked flow is selected.
+     * 
+     * @return true if an unlocked flow is selected
+     */
     public boolean isUnlockedFlowSelected() {
         Iterator flows = flowIterator();
         while (flows.hasNext()) {
@@ -849,6 +863,11 @@ public class Model {
         return false;
     }
 
+    /**
+     * Gets an ArrayList containing all selected flows.
+     * 
+     * @return an ArrayList of all selected flows.
+     */
     public ArrayList<Flow> getSelectedFlows() {
         ArrayList<Flow> selectedFlows = new ArrayList();
         Iterator flows = flowIterator();
@@ -862,6 +881,11 @@ public class Model {
         return selectedFlows;
     }
 
+    /**
+     * Returns true if a node is selected.
+     * 
+     * @return True if a node is selected.
+     */
     public boolean isNodeSelected() {
         Iterator nodes = nodeIterator();
         while (nodes.hasNext()) {
@@ -873,6 +897,11 @@ public class Model {
         return false;
     }
 
+    /**
+     * Gets an ArrayList of all selected nodes.
+     * 
+     * @return ArrayList of all selected nodes. 
+     */
     public ArrayList<Point> getSelectedNodes() {
 
         ArrayList<Point> selectedNodes = new ArrayList();
@@ -1271,6 +1300,7 @@ public class Model {
 
     /**
      * Checks to see if any control points are selected.
+     * 
      * @return the controlPtIsSelected
      */
     public boolean isControlPtSelected() {
