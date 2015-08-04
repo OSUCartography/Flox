@@ -276,6 +276,10 @@ public class MainWindow extends javax.swing.JFrame {
         coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
         vallueLabel = new javax.swing.JLabel();
         valueFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel12 = new javax.swing.JLabel();
+        xFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel25 = new javax.swing.JLabel();
+        yFormattedTextField = new javax.swing.JFormattedTextField();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         rightPanel = new javax.swing.JPanel();
         controlsTabbedPane = new javax.swing.JTabbedPane();
@@ -682,20 +686,50 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel2.add(coordinateInfoPanel);
 
         vallueLabel.setFont(vallueLabel.getFont().deriveFont(vallueLabel.getFont().getSize()-2f));
-        vallueLabel.setText("Value");
+        vallueLabel.setText("Value:");
         vallueLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 20, 0, 0));
         jPanel2.add(vallueLabel);
 
         valueFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
         valueFormattedTextField.setEnabled(false);
         valueFormattedTextField.setFont(valueFormattedTextField.getFont().deriveFont(valueFormattedTextField.getFont().getSize()-2f));
-        valueFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        valueFormattedTextField.setPreferredSize(new java.awt.Dimension(80, 28));
         valueFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 valueFormattedTextFieldPropertyChange(evt);
             }
         });
         jPanel2.add(valueFormattedTextField);
+
+        jLabel12.setText("X:");
+        jPanel2.add(jLabel12);
+
+        xFormattedTextField.setBounds(new java.awt.Rectangle(0, 0, 0, 0));
+        xFormattedTextField.setEnabled(false);
+        xFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
+        xFormattedTextField.setLocation(new java.awt.Point(0, 0));
+        xFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        xFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                xFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(xFormattedTextField);
+
+        jLabel25.setText("Y:");
+        jPanel2.add(jLabel25);
+
+        yFormattedTextField.setBounds(new java.awt.Rectangle(0, 0, 0, 0));
+        yFormattedTextField.setEnabled(false);
+        yFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
+        yFormattedTextField.setLocation(new java.awt.Point(0, 0));
+        yFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        yFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                yFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(yFormattedTextField);
 
         jToolBar1.add(jPanel2);
 
@@ -2212,7 +2246,8 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
-        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent, valueFormattedTextField));
+        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent, 
+                valueFormattedTextField, xFormattedTextField, yFormattedTextField));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
@@ -2837,6 +2872,44 @@ public class MainWindow extends javax.swing.JFrame {
         undo();
     }//GEN-LAST:event_undoMenuItemActionPerformed
 
+    private void xFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_xFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName()) && model != null) {
+            try {
+                xFormattedTextField.commitEdit();
+            } catch (ParseException ex) {
+                // the text field does not currently contain a valid value
+                return;
+            }
+            double x = ((Number) xFormattedTextField.getValue()).doubleValue();
+            ArrayList<Point> selectedNodes = model.getSelectedNodes();
+            for(Point node : selectedNodes) {
+                node.x = x;
+            }
+            
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_xFormattedTextFieldPropertyChange
+
+    private void yFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_yFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName()) && model != null) {
+            try {
+                yFormattedTextField.commitEdit();
+            } catch (ParseException ex) {
+                // the text field does not currently contain a valid value
+                return;
+            }
+            double y = ((Number) yFormattedTextField.getValue()).doubleValue();
+            ArrayList<Point> selectedNodes = model.getSelectedNodes();
+            for(Point node : selectedNodes) {
+                node.y = y;
+            }
+            
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_yFormattedTextFieldPropertyChange
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -2983,6 +3056,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
@@ -2992,6 +3066,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JMenu jMenu1;
@@ -3056,6 +3131,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;
+    private javax.swing.JFormattedTextField xFormattedTextField;
+    private javax.swing.JFormattedTextField yFormattedTextField;
     private javax.swing.JSlider zeroLengthStiffnessSlider;
     private javax.swing.JToggleButton zoomInToggleButton;
     private javax.swing.JMenuItem zoomOnSelectedLayerMenuItem;
