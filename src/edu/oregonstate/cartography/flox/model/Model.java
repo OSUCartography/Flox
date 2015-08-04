@@ -54,7 +54,7 @@ public class Model {
     }
 
     /**
-     * Density of points along flows
+     * Density of points along flows.
      */
     public enum FlowNodeDensity {
 
@@ -64,7 +64,7 @@ public class Model {
     }
 
     /**
-     * Graph of edges (BŽzier flows) and nodes (Point)
+     * Graph of edges (BŽzier flows) and nodes (Point).
      */
     @XmlJavaTypeAdapter(GraphSerializer.class)
     private final Graph graph = new Graph();
@@ -176,9 +176,6 @@ public class Model {
      */
     private double flowDistanceFromEndPoint = 0.0d;
 
-    // FIXME
-    private boolean controlPtSelected = false;
-
     /**
      * Maximum allowed flow width in pixels. The flow with the highest value
      * will have this width. All other flows are scaled down relative to this
@@ -208,7 +205,7 @@ public class Model {
      * are no nodes on the map yet, it assumes a max node value of 1, which is
      * the default value of new Points.
      *
-     * @return
+     * @return node size scale factor
      */
     public double getNodeSizeScaleFactor() {
 
@@ -227,10 +224,20 @@ public class Model {
         }
     }
 
+    /**
+     * Gets the maximum value of all nodes on the map.
+     * 
+     * @return maximum node value
+     */
     public double getMaxNodeValue() {
         return graph.getMaxNodeValue();
     }
 
+    /**
+     * Gets the average value of all nodes on the map.
+     * 
+     * @return mean node value
+     */
     public double getMeanNodeValue() {
         ArrayList<Point> nodes = getNodes();
         double sum = 0;
@@ -240,6 +247,11 @@ public class Model {
         return sum / nodes.size();
     }
 
+    /**
+     * Gets the average value of all flows on the map.
+     * 
+     * @return 
+     */
     public double getMeanFlowValue() {
         ArrayList<Flow> flows = getFlows();
         double sum = 0;
@@ -276,12 +288,12 @@ public class Model {
     private Map map = new Map();
 
     /**
-     * Either work with cubic or quadratic curves
+     * Either work with cubic or quadratic curves.
      */
     private CurveType curveType = CurveType.QUADRATIC;
 
     /**
-     * A geometry (collection) used for clipping start or end of flows
+     * A geometry (collection) used for clipping start or end of flows.
      */
     @XmlTransient
     private Geometry clipAreas;
@@ -295,8 +307,6 @@ public class Model {
      * Buffer width for end clip areas.
      */
     private double endClipAreaBufferDistance = 0;
-
-    private double longestFlowLength;
 
     /**
      * Constructor of the model.
@@ -417,17 +427,26 @@ public class Model {
         graph.addFlow(flow);
     }
 
+    /**
+     * Delete a flow.
+     * 
+     * @param flow The flow to delete
+     */
     public void deleteFlow(Flow flow) {
         graph.removeEdge(flow);
     }
-
+    
+    /**
+     * Delete a node.
+     * @param node The node to delete.
+     */
     public void deleteNode(Point node) {
         graph.removeVertex(node);
     }
 
     /**
      * Removes all selected nodes and flows from the graph.
-     *
+     * 
      * @return The number of flows and nodes that were deleted.
      */
     public int deleteSelectedFlowsAndNodes() {
@@ -463,7 +482,7 @@ public class Model {
 
     /**
      * Replace the current flows with new flows.
-     *
+     * 
      * @param flows The new flows.
      */
     public void setFlows(Collection<Flow> flows) {
@@ -471,7 +490,6 @@ public class Model {
         flows.stream().forEach((flow) -> {
             addFlow(flow);
         });
-        setLongestFlowLength();
     }
 
     /**
@@ -572,7 +590,7 @@ public class Model {
     }
 
     /**
-     * Removes the end clip areas from all flows
+     * Removes the end clip areas from all flows.
      */
     public void removeEndClipAreasFromFlows() {
         Iterator<Flow> iterator = flowIterator();
@@ -582,7 +600,7 @@ public class Model {
     }
 
     /**
-     * Removes the start clip areas from all flows
+     * Removes the start clip areas from all flows.
      */
     public void removeStartClipAreasFromFlows() {
         Iterator<Flow> iterator = flowIterator();
@@ -730,16 +748,10 @@ public class Model {
         return graph.getMaxFlowValue();
     }
 
-    /**
-     * Returns the length of the longest flow base line.
-     *
-     * @return The length of the longest base line.
-     */
-    public double getLongestFlowLength() {
-        return longestFlowLength;
-    }
 
-    public void setLongestFlowLength() {
+
+    
+    public double getLongestFlowLength() {
         double maxLength = 0;
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
@@ -749,7 +761,7 @@ public class Model {
                 maxLength = l;
             }
         }
-        longestFlowLength = maxLength;
+        return maxLength;
     }
 
     public double getShortestFlowLength() {
@@ -766,6 +778,12 @@ public class Model {
         return minLength == Double.POSITIVE_INFINITY ? null : minLength;
     }
 
+    /**
+     * Sets the tolerance value needed for creating intermediate points along
+     * the flow. This value is determined by minimum/maximum flow lengths. Menu
+     * settings control the maximum number of nodes along a flow.
+     * @return 
+     */
     public double getDeCasteljauTolerance() {
 
         double maxFlowNodes;
@@ -776,7 +794,8 @@ public class Model {
         } else { // flowNodeDensity == FlowNodeDensity.HIGH
             maxFlowNodes = 40;
         }
-
+        
+        double longestFlowLength = getLongestFlowLength();
         double tol = getShortestFlowLength() / maxFlowNodes;
         if (longestFlowLength / tol <= maxFlowNodes) {
             return tol;
@@ -785,19 +804,6 @@ public class Model {
             return tol;
         }
 
-    }
-
-    public double setLargestFlowValue() {
-        double maxValue = 0;
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            double val = flow.getValue();
-            if (val < maxValue) {
-                maxValue = val;
-            }
-        }
-        return maxValue;
     }
 
     /**
@@ -816,6 +822,10 @@ public class Model {
         return false;
     }
 
+    /**
+     * Returns true if a locked flow is selected
+     * @return 
+     */
     public boolean isLockedFlowSelected() {
         Iterator flows = flowIterator();
         while (flows.hasNext()) {
@@ -827,6 +837,7 @@ public class Model {
         return false;
     }
 
+    
     public boolean isUnlockedFlowSelected() {
         Iterator flows = flowIterator();
         while (flows.hasNext()) {
@@ -1259,17 +1270,18 @@ public class Model {
     }
 
     /**
+     * Checks to see if any control points are selected.
      * @return the controlPtIsSelected
      */
     public boolean isControlPtSelected() {
-        return controlPtSelected;
-    }
-
-    /**
-     * @param controlPtSelected the controlPtIsSelected to set
-     */
-    public void setControlPtSelected(boolean controlPtSelected) {
-        this.controlPtSelected = controlPtSelected;
+        Iterator flows = flowIterator();
+        while (flows.hasNext()) {
+            QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
+            if (flow.getCtrlPt().isSelected()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

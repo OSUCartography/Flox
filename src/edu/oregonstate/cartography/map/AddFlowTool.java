@@ -224,16 +224,9 @@ public class AddFlowTool extends MapTool {
         
         // Add the new flow to the data model.
         model.addFlow(newFlow);
-        
-        // Update the longestFlowLength field in the model. This is needed for 
-        // computing intermediate nodes. 
-        // FIXME, could this be done by the model every time intermediate nodes 
-        // are created?
-        model.setLongestFlowLength();
 
         // Reinitialize flags, set origin and destination nodes to null. This
         // insures that new nodes will be assigned/created with successive
-        // clicks. Set originNodeRadius back to the default value.
         originNodeCreated = false;
         originNode = null;
         destinationNode = null;

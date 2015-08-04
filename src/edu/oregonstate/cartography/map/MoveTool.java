@@ -78,7 +78,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 mapComponent.eraseBufferImage();
                 mapComponent.repaint();
             }
-            model.setControlPtSelected(false);
         }
         
         
@@ -130,9 +129,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 }
             }
         }
-
-        // Update the longest flow field in the model.
-        model.setLongestFlowLength();
         
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
