@@ -9,7 +9,9 @@ import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Iterator;
+import javax.swing.JFormattedTextField;
 
 /**
  *
@@ -18,12 +20,33 @@ import java.util.Iterator;
 public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
     private final Model model;
+    
+    protected final JFormattedTextField xField;
+    protected final JFormattedTextField yField;
+    
     boolean dragging = false;
 
 
     // Stores the coordinates of the previous drag events.
     double previousDrag_x, previousDrag_y;
-
+    
+    private void updateCoordinateFields() {
+        ArrayList<Point> nodes = model.getSelectedNodes();
+        int nbrNodes = nodes.size();
+        xField.setEnabled(nbrNodes == 1);
+        yField.setEnabled(nbrNodes == 1);
+        
+        if (nbrNodes != 1) {
+            xField.setValue(null);
+            yField.setValue(null);
+        } else {
+            xField.setValue(nodes.get(0).x);
+            yField.setValue(nodes.get(0).y);
+        }
+        
+    }
+    
+    
     /**
      * Called at the start of a mouse drag event. 
      * @param point The location of the drag event.
@@ -130,6 +153,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
         }
         
+        updateCoordinateFields();
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
 
@@ -139,9 +163,12 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     }
 
     // Constructor
-    public MoveTool(AbstractSimpleFeatureMapComponent mapComponent) {
+    public MoveTool(AbstractSimpleFeatureMapComponent mapComponent, 
+            JFormattedTextField xField, JFormattedTextField yField) {
         super(mapComponent);
         this.model = ((FloxMapComponent) mapComponent).getModel();
+        this.xField = xField;
+        this.yField = yField;
     }
 
     /**

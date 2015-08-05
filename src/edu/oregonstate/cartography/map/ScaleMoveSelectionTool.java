@@ -8,6 +8,7 @@
 package edu.oregonstate.cartography.map;
 
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 
 
@@ -21,13 +22,16 @@ public class ScaleMoveSelectionTool extends CombinedTool {
     /**
      * Creates a new instance of RotateScaleMoveSelectionTool
      */
-    public ScaleMoveSelectionTool(AbstractSimpleFeatureMapComponent mapComponent, JFormattedTextField valueField) {
+    public ScaleMoveSelectionTool(AbstractSimpleFeatureMapComponent mapComponent, 
+            JFormattedTextField valueField, JFormattedTextField xField, 
+            JFormattedTextField yField, JButton lockUnlockButton) {
         super(mapComponent, "Select - Move - Scale");
         
-        SelectionTool selectionTool = new SelectionTool(this.mapComponent, valueField);
-        MoveTool moveTool = new MoveTool(this.mapComponent);
-    
+        SelectionTool selectionTool = new SelectionTool(this.mapComponent, 
+                valueField, xField, yField, lockUnlockButton);
         
+        MoveTool moveTool = new MoveTool(this.mapComponent, xField, yField);
+    
         this.addMapTool(moveTool);
         // selection tool must be added last
         this.addMapTool(selectionTool);

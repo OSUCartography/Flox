@@ -272,10 +272,15 @@ public class MainWindow extends javax.swing.JFrame {
         zoomOutToggleButton = new javax.swing.JToggleButton();
         handToggleButton = new javax.swing.JToggleButton();
         distanceToggleButton = new javax.swing.JToggleButton();
+        lockUnlockButton = new javax.swing.JButton();
         showAllButton = new javax.swing.JButton();
         coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
         vallueLabel = new javax.swing.JLabel();
         valueFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel12 = new javax.swing.JLabel();
+        xFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel25 = new javax.swing.JLabel();
+        yFormattedTextField = new javax.swing.JFormattedTextField();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         rightPanel = new javax.swing.JPanel();
         controlsTabbedPane = new javax.swing.JTabbedPane();
@@ -666,6 +671,18 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jPanel2.add(distanceToggleButton);
 
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Lockopened16x16.gif"))); // NOI18N
+        lockUnlockButton.setBorderPainted(false);
+        lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
+        lockUnlockButton.setEnabled(false);
+        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 20));
+        lockUnlockButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lockUnlockButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(lockUnlockButton);
+
         showAllButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ShowAll20x14.png"))); // NOI18N
         showAllButton.setToolTipText("Show All");
         showAllButton.setBorderPainted(false);
@@ -682,20 +699,46 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel2.add(coordinateInfoPanel);
 
         vallueLabel.setFont(vallueLabel.getFont().deriveFont(vallueLabel.getFont().getSize()-2f));
-        vallueLabel.setText("Value");
+        vallueLabel.setText("Value:");
         vallueLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 20, 0, 0));
         jPanel2.add(vallueLabel);
 
         valueFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
         valueFormattedTextField.setEnabled(false);
         valueFormattedTextField.setFont(valueFormattedTextField.getFont().deriveFont(valueFormattedTextField.getFont().getSize()-2f));
-        valueFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        valueFormattedTextField.setPreferredSize(new java.awt.Dimension(80, 28));
         valueFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 valueFormattedTextFieldPropertyChange(evt);
             }
         });
         jPanel2.add(valueFormattedTextField);
+
+        jLabel12.setText("X:");
+        jPanel2.add(jLabel12);
+
+        xFormattedTextField.setEnabled(false);
+        xFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
+        xFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        xFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                xFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(xFormattedTextField);
+
+        jLabel25.setText("Y:");
+        jPanel2.add(jLabel25);
+
+        yFormattedTextField.setEnabled(false);
+        yFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
+        yFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        yFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                yFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        jPanel2.add(yFormattedTextField);
 
         jToolBar1.add(jPanel2);
 
@@ -2191,12 +2234,12 @@ public class MainWindow extends javax.swing.JFrame {
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
 
         model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
-        
-        if(mapComponent.isDrawCanvas()) {
+
+        if (mapComponent.isDrawCanvas()) {
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
-        
+
         if (canvasSizeSlider.getValueIsAdjusting() == false) {
             layout("Canvas Size");
         }
@@ -2212,7 +2255,9 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
-        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent, valueFormattedTextField));
+        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent,
+                valueFormattedTextField, xFormattedTextField, yFormattedTextField,
+                lockUnlockButton));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
@@ -2799,6 +2844,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void unlockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockMenuItemActionPerformed
         model.setLockOfSelectedFlows(false);
         addUndo("Unlock");
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_unlockMenuItemActionPerformed
@@ -2806,21 +2852,64 @@ public class MainWindow extends javax.swing.JFrame {
     private void lockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockMenuItemActionPerformed
         model.setLockOfSelectedFlows(true);
         addUndo("Lock");
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
+
     }//GEN-LAST:event_lockMenuItemActionPerformed
 
     private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
+
+        setLockUnlockButtonIcon();
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_selectNoneMenuItemActionPerformed
 
     private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(true);
+
+        setLockUnlockButtonIcon();
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_selectAllMenuItemActionPerformed
+
+    /**
+     * Sets the icon of the lockUnlockButton to the appropriate icon for the 
+     * locked status of selected flows. 
+     * FIXME This code is repeated in the SelectionTool. Any way it could access
+     * this method here instead? Or is there some kind of action listener this
+     * code could go into that the SelectionTool could trigger?
+     */
+    private void setLockUnlockButtonIcon() {
+        ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+        if (selectedFlows.size() > 0) {
+            lockUnlockButton.setEnabled(true);
+
+            int locked = 0;
+            int unlocked = 0;
+            for (Flow flow : selectedFlows) {
+                if (flow.isLocked()) {
+                    locked++;
+                } else {
+                    unlocked++;
+                }
+            }
+            if (locked + unlocked == 0) {
+                lockUnlockButton.setEnabled(false);
+            } else if (locked > 0 && unlocked == 0) {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+            } else if (unlocked > 0 && locked == 0) {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
+            } else {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockedUnlocked16x16.gif")));
+            }
+        } else {
+            lockUnlockButton.setEnabled(false);
+        }
+    }
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
         model.deleteSelectedFlowsAndNodes();
@@ -2836,6 +2925,72 @@ public class MainWindow extends javax.swing.JFrame {
     private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoMenuItemActionPerformed
         undo();
     }//GEN-LAST:event_undoMenuItemActionPerformed
+
+    private void xFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_xFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName()) && model != null) {
+            try {
+                xFormattedTextField.commitEdit();
+            } catch (ParseException ex) {
+                // the text field does not currently contain a valid value
+                return;
+            }
+            if (xFormattedTextField.getValue() != null) {
+                double x = ((Number) xFormattedTextField.getValue()).doubleValue();
+                ArrayList<Point> selectedNodes = model.getSelectedNodes();
+                for (Point node : selectedNodes) {
+                    node.x = x;
+                }
+            }
+
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_xFormattedTextFieldPropertyChange
+
+    private void yFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_yFormattedTextFieldPropertyChange
+        if ("value".equals(evt.getPropertyName()) && model != null) {
+            try {
+                yFormattedTextField.commitEdit();
+            } catch (ParseException ex) {
+                // the text field does not currently contain a valid value
+                return;
+            }
+            if (yFormattedTextField.getValue() != null) {
+                double y = ((Number) yFormattedTextField.getValue()).doubleValue();
+                ArrayList<Point> selectedNodes = model.getSelectedNodes();
+                for (Point node : selectedNodes) {
+                    node.y = y;
+                }
+            }
+
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }//GEN-LAST:event_yFormattedTextFieldPropertyChange
+
+    private void lockUnlockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockUnlockButtonActionPerformed
+        ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+        int locked = 0;
+        int unlocked = 0;
+        for (Flow flow : selectedFlows) {
+            if (flow.isLocked()) {
+                locked++;
+            } else {
+                unlocked++;
+            }
+        }
+
+        if (unlocked == 0) {
+            model.setLockOfSelectedFlows(false);
+            lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
+        } else {
+            model.setLockOfSelectedFlows(true);
+            lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+        }
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+
+    }//GEN-LAST:event_lockUnlockButtonActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -2983,6 +3138,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
@@ -2992,6 +3148,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JMenu jMenu1;
@@ -3005,6 +3162,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JCheckBox lockFlowWidthCheckbox;
     private javax.swing.JMenuItem lockMenuItem;
+    private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;
     private javax.swing.JRadioButtonMenuItem lowFlowSegmentationMenuItem;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
@@ -3056,6 +3214,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu viewMenu;
     private javax.swing.JMenuItem viewZoomInMenuItem;
     private javax.swing.JMenuItem viewZoomOutMenuItem;
+    private javax.swing.JFormattedTextField xFormattedTextField;
+    private javax.swing.JFormattedTextField yFormattedTextField;
     private javax.swing.JSlider zeroLengthStiffnessSlider;
     private javax.swing.JToggleButton zoomInToggleButton;
     private javax.swing.JMenuItem zoomOnSelectedLayerMenuItem;
