@@ -232,7 +232,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         updateLockUnlockButton();
     }
 
-    public void selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
+    public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
 
         // Select nodes
         boolean nodeGotSelected = false;
@@ -286,9 +286,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
+        return (flowGotSelected || nodeGotSelected);
     }
 
-    private void selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
+    private boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
 
         double scale = mapComponent.getScale();
         boolean nodeGotSelected = false;
@@ -334,6 +335,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         controlPtGotSelected = true;
                         mapComponent.eraseBufferImage();
                         mapComponent.repaint();
+                        // A control point was selected, so exit the method to 
+                        // avoid deselecting flows
+                        return true;
                     } else {
                         cPt.setSelected(false);
                     }
@@ -365,7 +369,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             double distSquared = (dx * dx + dy * dy);
 
             if (distSquared <= nodeRadius * nodeRadius) {
-                //node.setSelected(!node.isSelected());
                 node.setSelected(true);
                 nodeGotSelected = true;
             } else {
@@ -428,6 +431,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
+        return (flowGotSelected || nodeGotSelected);
     }
 
     @Override

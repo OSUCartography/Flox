@@ -79,6 +79,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
 
         updateLocation(point);
+        updateCoordinateFields();
     }
 
     @Override
@@ -153,7 +154,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
         }
         
-        updateCoordinateFields();
+        
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
 
