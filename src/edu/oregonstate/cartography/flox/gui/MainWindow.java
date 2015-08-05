@@ -272,6 +272,7 @@ public class MainWindow extends javax.swing.JFrame {
         zoomOutToggleButton = new javax.swing.JToggleButton();
         handToggleButton = new javax.swing.JToggleButton();
         distanceToggleButton = new javax.swing.JToggleButton();
+        lockUnlockButton = new javax.swing.JButton();
         showAllButton = new javax.swing.JButton();
         coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
         vallueLabel = new javax.swing.JLabel();
@@ -670,6 +671,18 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jPanel2.add(distanceToggleButton);
 
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Lockopened16x16.gif"))); // NOI18N
+        lockUnlockButton.setBorderPainted(false);
+        lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
+        lockUnlockButton.setEnabled(false);
+        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 20));
+        lockUnlockButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lockUnlockButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(lockUnlockButton);
+
         showAllButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ShowAll20x14.png"))); // NOI18N
         showAllButton.setToolTipText("Show All");
         showAllButton.setBorderPainted(false);
@@ -704,10 +717,8 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel12.setText("X:");
         jPanel2.add(jLabel12);
 
-        xFormattedTextField.setBounds(new java.awt.Rectangle(0, 0, 0, 0));
         xFormattedTextField.setEnabled(false);
         xFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
-        xFormattedTextField.setLocation(new java.awt.Point(0, 0));
         xFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
         xFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -719,10 +730,8 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel25.setText("Y:");
         jPanel2.add(jLabel25);
 
-        yFormattedTextField.setBounds(new java.awt.Rectangle(0, 0, 0, 0));
         yFormattedTextField.setEnabled(false);
         yFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
-        yFormattedTextField.setLocation(new java.awt.Point(0, 0));
         yFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
         yFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -2225,12 +2234,12 @@ public class MainWindow extends javax.swing.JFrame {
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
 
         model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
-        
-        if(mapComponent.isDrawCanvas()) {
+
+        if (mapComponent.isDrawCanvas()) {
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
-        
+
         if (canvasSizeSlider.getValueIsAdjusting() == false) {
             layout("Canvas Size");
         }
@@ -2246,8 +2255,9 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
-        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent, 
-                valueFormattedTextField, xFormattedTextField, yFormattedTextField));
+        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent,
+                valueFormattedTextField, xFormattedTextField, yFormattedTextField,
+                lockUnlockButton));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
@@ -2834,6 +2844,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void unlockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockMenuItemActionPerformed
         model.setLockOfSelectedFlows(false);
         addUndo("Unlock");
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_unlockMenuItemActionPerformed
@@ -2841,21 +2852,64 @@ public class MainWindow extends javax.swing.JFrame {
     private void lockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockMenuItemActionPerformed
         model.setLockOfSelectedFlows(true);
         addUndo("Lock");
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
+
     }//GEN-LAST:event_lockMenuItemActionPerformed
 
     private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
+
+        setLockUnlockButtonIcon();
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_selectNoneMenuItemActionPerformed
 
     private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(true);
+
+        setLockUnlockButtonIcon();
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_selectAllMenuItemActionPerformed
+
+    /**
+     * Sets the icon of the lockUnlockButton to the appropriate icon for the 
+     * locked status of selected flows. 
+     * FIXME This code is repeated in the SelectionTool. Any way it could access
+     * this method here instead? Or is there some kind of action listener this
+     * code could go into that the SelectionTool could trigger?
+     */
+    private void setLockUnlockButtonIcon() {
+        ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+        if (selectedFlows.size() > 0) {
+            lockUnlockButton.setEnabled(true);
+
+            int locked = 0;
+            int unlocked = 0;
+            for (Flow flow : selectedFlows) {
+                if (flow.isLocked()) {
+                    locked++;
+                } else {
+                    unlocked++;
+                }
+            }
+            if (locked + unlocked == 0) {
+                lockUnlockButton.setEnabled(false);
+            } else if (locked > 0 && unlocked == 0) {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+            } else if (unlocked > 0 && locked == 0) {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
+            } else {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockedUnlocked16x16.gif")));
+            }
+        } else {
+            lockUnlockButton.setEnabled(false);
+        }
+    }
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
         model.deleteSelectedFlowsAndNodes();
@@ -2880,12 +2934,14 @@ public class MainWindow extends javax.swing.JFrame {
                 // the text field does not currently contain a valid value
                 return;
             }
-            double x = ((Number) xFormattedTextField.getValue()).doubleValue();
-            ArrayList<Point> selectedNodes = model.getSelectedNodes();
-            for(Point node : selectedNodes) {
-                node.x = x;
+            if (xFormattedTextField.getValue() != null) {
+                double x = ((Number) xFormattedTextField.getValue()).doubleValue();
+                ArrayList<Point> selectedNodes = model.getSelectedNodes();
+                for (Point node : selectedNodes) {
+                    node.x = x;
+                }
             }
-            
+
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
@@ -2899,16 +2955,42 @@ public class MainWindow extends javax.swing.JFrame {
                 // the text field does not currently contain a valid value
                 return;
             }
-            double y = ((Number) yFormattedTextField.getValue()).doubleValue();
-            ArrayList<Point> selectedNodes = model.getSelectedNodes();
-            for(Point node : selectedNodes) {
-                node.y = y;
+            if (yFormattedTextField.getValue() != null) {
+                double y = ((Number) yFormattedTextField.getValue()).doubleValue();
+                ArrayList<Point> selectedNodes = model.getSelectedNodes();
+                for (Point node : selectedNodes) {
+                    node.y = y;
+                }
             }
-            
+
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
         }
     }//GEN-LAST:event_yFormattedTextFieldPropertyChange
+
+    private void lockUnlockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockUnlockButtonActionPerformed
+        ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+        int locked = 0;
+        int unlocked = 0;
+        for (Flow flow : selectedFlows) {
+            if (flow.isLocked()) {
+                locked++;
+            } else {
+                unlocked++;
+            }
+        }
+
+        if (unlocked == 0) {
+            model.setLockOfSelectedFlows(false);
+            lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
+        } else {
+            model.setLockOfSelectedFlows(true);
+            lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+        }
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+
+    }//GEN-LAST:event_lockUnlockButtonActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -3080,6 +3162,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JCheckBox lockFlowWidthCheckbox;
     private javax.swing.JMenuItem lockMenuItem;
+    private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;
     private javax.swing.JRadioButtonMenuItem lowFlowSegmentationMenuItem;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;

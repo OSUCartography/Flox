@@ -17,6 +17,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 
 /**
@@ -38,6 +39,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     protected final JFormattedTextField valueField;
     protected final JFormattedTextField xField;
     protected final JFormattedTextField yField;
+    protected final JButton lockUnlockButton;
 
     /**
      * Create a new instance.
@@ -47,12 +49,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      * @param valueField Text field to display value of current node or flow.
      */
     public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent,
-            JFormattedTextField valueField, JFormattedTextField xField, 
-            JFormattedTextField yField) {
+            JFormattedTextField valueField, JFormattedTextField xField,
+            JFormattedTextField yField, JButton lockUnlockButton) {
         super(mapComponent);
         this.valueField = valueField;
         this.xField = xField;
         this.yField = yField;
+        this.lockUnlockButton = lockUnlockButton;
         this.model = ((FloxMapComponent) mapComponent).getModel();
     }
 
@@ -64,7 +67,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         ArrayList<Point> nodes = model.getSelectedNodes();
         int nbrFlowsAndNodes = flows.size() + nodes.size();
         valueField.setEnabled(nbrFlowsAndNodes > 0);
-        
+
         if (nbrFlowsAndNodes == 0) {
             valueField.setValue(null);
         } else if (nbrFlowsAndNodes == 1) {
@@ -101,21 +104,54 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     }
 
     private void updateCoordinateFields() {
-        ArrayList<Point> nodes = model.getSelectedNodes();
-        int nbrNodes = nodes.size();
+        ArrayList<Point> selectedNodes = model.getSelectedNodes();
+        int nbrNodes = selectedNodes.size();
         xField.setEnabled(nbrNodes == 1);
         yField.setEnabled(nbrNodes == 1);
-        
+
         if (nbrNodes != 1) {
             xField.setValue(null);
             yField.setValue(null);
         } else {
-            xField.setValue(nodes.get(0).x);
-            yField.setValue(nodes.get(0).y);
+            xField.setValue(selectedNodes.get(0).x);
+            yField.setValue(selectedNodes.get(0).y);
+        }
+
+    }
+
+    /**
+     * Sets the icon of the lockUnlockButton to the appropriate icon for the 
+     * locked status of selected flows.
+     */
+    private void updateLockUnlockButton() {
+        ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+        if (selectedFlows.size() > 0) {
+            lockUnlockButton.setEnabled(true);
+
+            int locked = 0;
+            int unlocked = 0;
+            for (Flow flow : selectedFlows) {
+                if (flow.isLocked()) {
+                    locked++;
+                } else {
+                    unlocked++;
+                }
+            }
+            if (locked + unlocked == 0) {
+                lockUnlockButton.setEnabled(false);
+            } else if (locked > 0 && unlocked == 0) {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+            } else if (unlocked > 0 && locked == 0) {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
+            } else {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockedUnlocked16x16.gif")));
+            }
+        } else {
+            lockUnlockButton.setEnabled(false);
         }
         
     }
-    
+
     /**
      * A drag ends, while this MapTool was the active one.
      *
@@ -133,6 +169,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             selectByRectangle(rect, evt.isShiftDown());
             updateValueField();
             updateCoordinateFields();
+            updateLockUnlockButton();
         }
 
         if (model.isControlPtSelected()) {
@@ -188,14 +225,14 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     @Override
     public void mouseDown(Point2D.Double point, MouseEvent evt) {
 
-        /*boolean selectionChanged = */ selectByPoint(point, evt.isShiftDown(),
-                SelectionTool.CLICK_PIXEL_TOLERANCE);
+        selectByPoint(point, evt.isShiftDown(), SelectionTool.CLICK_PIXEL_TOLERANCE);
 
         updateValueField();
         updateCoordinateFields();
+        updateLockUnlockButton();
     }
 
-    public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
+    public void selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
 
         // Select nodes
         boolean nodeGotSelected = false;
@@ -249,10 +286,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
-        return (flowGotSelected || nodeGotSelected);
     }
 
-    private boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
+    private void selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
 
         double scale = mapComponent.getScale();
         boolean nodeGotSelected = false;
@@ -298,7 +334,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         controlPtGotSelected = true;
                         mapComponent.eraseBufferImage();
                         mapComponent.repaint();
-                        return true;
                     } else {
                         cPt.setSelected(false);
                     }
@@ -330,7 +365,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             double distSquared = (dx * dx + dy * dy);
 
             if (distSquared <= nodeRadius * nodeRadius) {
-                node.setSelected(!node.isSelected());
+                //node.setSelected(!node.isSelected());
                 node.setSelected(true);
                 nodeGotSelected = true;
             } else {
@@ -393,7 +428,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
-        return (flowGotSelected || nodeGotSelected);
     }
 
     @Override
