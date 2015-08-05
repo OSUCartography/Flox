@@ -671,11 +671,11 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jPanel2.add(distanceToggleButton);
 
-        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Lockopened16x16.gif"))); // NOI18N
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif"))); // NOI18N
         lockUnlockButton.setBorderPainted(false);
         lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
         lockUnlockButton.setEnabled(false);
-        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 20));
+        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 24));
         lockUnlockButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lockUnlockButtonActionPerformed(evt);
@@ -1581,12 +1581,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         editMenu.setText("Edit");
         editMenu.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                editMenuMenuSelected(evt);
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
             }
             public void menuDeselected(javax.swing.event.MenuEvent evt) {
             }
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                editMenuMenuSelected(evt);
             }
         });
 
