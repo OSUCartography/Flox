@@ -1,12 +1,15 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
+import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
+import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.flox.model.bezier.Bezier;
 import edu.oregonstate.cartography.flox.model.bezier.BezierPath;
 import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
@@ -67,7 +70,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      *
      * @param model The flows to render.
      * @param maxDim The width or the height of the image will have this size.
-     * @param bb The bounding box of the map area that will be visible in the image
+     * @param bb The bounding box of the map area that will be visible in the
+     * image
      * @param antialias If true anti-aliasing is applied.
      * @return The new image.
      */
@@ -109,7 +113,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         // setup renderer
         FloxRenderer renderer = new FloxRenderer(model, g2d, bb.getMinX(), bb.getMaxY(), scale);
 
-        // render to image
+        // render background layers
+        int nbrLayers = model.getNbrLayers();
+        for (int i = nbrLayers - 1; i >= 0; i--) {
+            Layer layer = model.getLayer(i);
+            GeometryCollection geometry = layer.getGeometryCollection();
+            VectorSymbol symbol = layer.getVectorSymbol();
+            Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
+            Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
+            if (fillColor != null || strokeColor != null) {
+                renderer.draw(geometry, fillColor, strokeColor);
+            }
+        }
+
+        // render flows and nodes
         renderer.drawFlows();
         renderer.drawNodes();
         return bufferImage;
@@ -267,18 +284,18 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
 
         }
-        
+
         // Iterate through the flows again to draw control points for selected
         // flows. This is done in a separate iteration to prevent control points
         // from being drawn under flows.
         if (model.isFlowSelected()) {
-            for(Flow flow : flows) {
-                if(flow.isSelected()) {
+            for (Flow flow : flows) {
+                if (flow.isSelected()) {
                     drawControlPoints(flow);
                 }
             }
         }
-        
+
     }
 
     /**
@@ -301,7 +318,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getCanvas();
-        
+
         if (canvas == null) {
             System.out.println("No Canvas!");
         } else {
@@ -335,13 +352,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             canvasPath.lineTo(b4.x, b4.y);
             canvasPath.lineTo(b3.x, b3.y);
             canvasPath.lineTo(b1.x, b1.y);
-            
+
             // Draw the canvas
             g2d.setColor(Color.BLACK);
             g2d.draw(canvasPath);
-            g2d.setColor(new Color(245,245,245));
+            g2d.setColor(new Color(245, 245, 245));
             g2d.fill(canvasPath);
-            
+
         }
     }
 
@@ -467,8 +484,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
     /**
      * Testing algorithm for reconstructing Bezier curves from straight line
-     * segments.
-     * FIXME not currently used.
+     * segments. FIXME not currently used.
      */
     public void drawRebuiltBezierCurve() {
 
