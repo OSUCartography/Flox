@@ -2220,7 +2220,11 @@ public class MainWindow extends javax.swing.JFrame {
             ErrorDialog.showErrorDialog("The entered size is too large.");
             return;
         }
-        BufferedImage image = FloxRenderer.renderToImage(model, size, true);
+        
+        // Get the area of the map to be drawn to the image
+        Rectangle2D bb = mapComponent.getVisibleArea();
+        
+        BufferedImage image = FloxRenderer.renderToImage(model, size, bb, true);
         String filePath = FileUtils.askFile(this, "PNG Image", null, false, "png");
         {
             if (filePath != null) {

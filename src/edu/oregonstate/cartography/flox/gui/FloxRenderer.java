@@ -67,12 +67,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      *
      * @param model The flows to render.
      * @param maxDim The width or the height of the image will have this size.
+     * @param bb The bounding box of the map area that will be visible in the image
      * @param antialias If true anti-aliasing is applied.
      * @return The new image.
      */
-    public static BufferedImage renderToImage(Model model, int maxDim, boolean antialias) {
+    public static BufferedImage renderToImage(Model model, int maxDim, Rectangle2D bb, boolean antialias) {
         // find size of fitting image
-        Rectangle2D bb = model.getFlowsBoundingBox();
+        //Rectangle2D bb = model.getFlowsBoundingBox();
         double scale = maxDim / Math.max(bb.getWidth(), bb.getHeight());
         int w, h;
         if (bb.getWidth() > bb.getHeight()) {
