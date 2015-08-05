@@ -406,6 +406,7 @@ public class MainWindow extends javax.swing.JFrame {
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
         showControlPointsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
 
         flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1831,6 +1832,15 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(showControlPointsCheckBoxMenuItem);
 
+        enforceCanvasCheckBoxMenuItem.setSelected(true);
+        enforceCanvasCheckBoxMenuItem.setText("Enforce Canvas");
+        enforceCanvasCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                enforceCanvasCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(enforceCanvasCheckBoxMenuItem);
+
         menuBar.add(jMenu1);
 
         setJMenuBar(menuBar);
@@ -2992,6 +3002,11 @@ public class MainWindow extends javax.swing.JFrame {
 
     }//GEN-LAST:event_lockUnlockButtonActionPerformed
 
+    private void enforceCanvasCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enforceCanvasCheckBoxMenuItemActionPerformed
+        model.setEnforceCanvasRange(enforceCanvasCheckBoxMenuItem.isSelected());
+        layout("");
+    }//GEN-LAST:event_enforceCanvasCheckBoxMenuItemActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3108,6 +3123,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JMenu editMenu;
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
+    private javax.swing.JCheckBoxMenuItem enforceCanvasCheckBoxMenuItem;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
     private javax.swing.JSlider exponentSlider;
     private javax.swing.JMenuItem exportCSVMenuItem;
