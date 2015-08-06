@@ -30,7 +30,8 @@ public class ScaleMoveSelectionTool extends CombinedTool {
         SelectionTool selectionTool = new SelectionTool(this.mapComponent, 
                 valueField, xField, yField, lockUnlockButton);
         
-        MoveTool moveTool = new MoveTool(this.mapComponent, xField, yField);
+        MoveTool moveTool = new MoveTool(this.mapComponent, xField, yField, 
+                lockUnlockButton);
     
         this.addMapTool(moveTool);
         // selection tool must be added last

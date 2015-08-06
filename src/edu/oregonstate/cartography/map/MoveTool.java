@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 
 /**
@@ -20,22 +21,22 @@ import javax.swing.JFormattedTextField;
 public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
     private final Model model;
-    
+
     protected final JFormattedTextField xField;
     protected final JFormattedTextField yField;
-    
-    boolean dragging = false;
+    protected final JButton lockUnlockButton;
 
+    boolean dragging = false;
 
     // Stores the coordinates of the previous drag events.
     double previousDrag_x, previousDrag_y;
-    
+
     private void updateCoordinateFields() {
         ArrayList<Point> nodes = model.getSelectedNodes();
         int nbrNodes = nodes.size();
         xField.setEnabled(nbrNodes == 1);
         yField.setEnabled(nbrNodes == 1);
-        
+
         if (nbrNodes != 1) {
             xField.setValue(null);
             yField.setValue(null);
@@ -43,12 +44,12 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             xField.setValue(nodes.get(0).x);
             yField.setValue(nodes.get(0).y);
         }
-        
+
     }
-    
-    
+
     /**
-     * Called at the start of a mouse drag event. 
+     * Called at the start of a mouse drag event.
+     *
      * @param point The location of the drag event.
      * @param evt The drag event.
      */
@@ -62,7 +63,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         if (model.isControlPtSelected()) {
             dragging = true;
         }
-        
+
         // Initializes the previousDrag coordinates to the location of this 
         // first drag event.
         previousDrag_x = point.x;
@@ -72,8 +73,9 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     /**
      * Updates the location of the drag to the coordinates of the most recent
      * drag event.
+     *
      * @param point
-     * @param evt 
+     * @param evt
      */
     @Override
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
@@ -88,23 +90,27 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
         dragging = false;
 
-        if(model.isControlPtSelected()) {
+        if (model.isControlPtSelected()) {
             // deselect all control points
             Iterator flows = model.flowIterator();
-            while(flows.hasNext()) {
+            while (flows.hasNext()) {
                 Flow flow = (Flow) flows.next();
-                if(flow instanceof CubicBezierFlow) {
+                if (flow instanceof CubicBezierFlow) {
                     break;
                 }
-                
+
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
-                cPt.setSelected(false);
+                if (cPt.isSelected()) {
+                    flow.setLocked(true);
+                    lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+                    cPt.setSelected(false);
+                }
+
                 mapComponent.eraseBufferImage();
                 mapComponent.repaint();
             }
         }
-        
-        
+
     }
 
     /**
@@ -120,8 +126,9 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     }
 
     /**
-     * Updates the location of selected features to the current location of
-     * the drag event.
+     * Updates the location of selected features to the current location of the
+     * drag event.
+     *
      * @param e
      */
     public void updateLocation(Point2D.Double point) {
@@ -131,8 +138,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             Iterator flows = model.flowIterator();
             while (flows.hasNext()) {
                 QuadraticBezierFlow flow = ((QuadraticBezierFlow) flows.next());
-                if (flow.isSelected() || 
-                        ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
+                if (flow.isSelected()
+                        || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                     Point cPt = flow.getCtrlPt();
                     if (cPt.isSelected()) {
                         cPt.x += (point.x - previousDrag_x);
@@ -141,7 +148,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 }
 
             }
-            
+
         } else {
             // Move selected nodes
             Iterator nodes = model.nodeIterator();
@@ -153,8 +160,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 }
             }
         }
-        
-        
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
 
@@ -164,12 +170,14 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     }
 
     // Constructor
-    public MoveTool(AbstractSimpleFeatureMapComponent mapComponent, 
-            JFormattedTextField xField, JFormattedTextField yField) {
+    public MoveTool(AbstractSimpleFeatureMapComponent mapComponent,
+            JFormattedTextField xField, JFormattedTextField yField,
+            JButton lockUnlockButton) {
         super(mapComponent);
         this.model = ((FloxMapComponent) mapComponent).getModel();
         this.xField = xField;
         this.yField = yField;
+        this.lockUnlockButton = lockUnlockButton;
     }
 
     /**
