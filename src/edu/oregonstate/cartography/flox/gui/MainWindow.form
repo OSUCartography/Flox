@@ -814,6 +814,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/edu/oregonstate/cartography/icons/Unlocked16x16.gif"/>
                 </Property>
+                <Property name="toolTipText" type="java.lang.String" value="Lock/Unlock Flows"/>
                 <Property name="borderPainted" type="boolean" value="false"/>
                 <Property name="disabledIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"/>

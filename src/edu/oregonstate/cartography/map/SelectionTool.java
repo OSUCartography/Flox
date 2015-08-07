@@ -259,6 +259,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         double deCasteljauTol = model.getDeCasteljauTolerance();
         boolean flowGotSelected = false;
         Iterator<Flow> flows = model.flowIterator();
+        if(rect.height==0 || rect.width==0) {
+            rect.add(rect.getMaxX() + (1/mapComponent.getScale()), 
+                    rect.getMaxY() + (1/mapComponent.getScale()));
+        }
         while (flows.hasNext()) {
             Flow flow = flows.next();
             if (flow.getBoundingBox().intersects(rect)) {
