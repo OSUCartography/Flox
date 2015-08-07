@@ -240,8 +240,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                     // Add the arrow
                     // Instantiate an Arrow object, passing it the first of
                     // the split flows and the model. And everything else.
-                    Arrow arrow = new Arrow((QuadraticBezierFlow) f,
-                            model, flowStrokeWidth, scale, west, north);
+                    Arrow arrow = new Arrow(f, model, flowStrokeWidth, scale, 
+                            west, north);
 
                     // Get the GeneralPath needed to draw the arrowhead
                     arrowPath = arrow.getArrowPath();
