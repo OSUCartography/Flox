@@ -19,12 +19,12 @@ public class Arrow {
     /**
      * The length of the arrowhead.
      */
-    private double arrowLengthInWorldCoordinates;
+    private double arrowLengthInWorld;
 
     /**
      * The width of the arrowhead.
      */
-    private double arrowWidth;
+    private double arrowWidthInWorld;
 
     /**
      * The position of the arrowheads corners relative to the base of the
@@ -34,85 +34,102 @@ public class Arrow {
 
     /**
      * Stores a flow, which is needed to determine the position of the Arrow
-     * when it is drawn.
+     * when it is drawn. This flow is a clipped version of the flow that is
+     * passed into the Arrow class, and is returnable by getOutFlow().
      */
-    private QuadraticBezierFlow flow;
-
-    
-
-    /**
-     * The location of the base of the Arrow in world coordinates. Used to split
-     * the flow.
-     */
-    public Point baseInWorld;
+    private QuadraticBezierFlow outFlow;
 
     /**
-     * The pixel location of th base of the arrow. Used to draw the arrow.
+     * The QuadraticBezierFlow that is passed in at instantiation.
      */
-    public Point baseInPx;
+    private QuadraticBezierFlow inFlow;
 
     /**
-     * The location of the tip of the Arrow
+     * The location of the base of the Arrow in world coordinates. 
      */
-    public Point tip = new Point(0, 0);
+    private Point basePt;
 
     /**
-     * The locations of the 2 corners of the Arrow
+     * The location of the tip of the Arrow.
      */
-    public Point corner1 = new Point(0, 0);
-    public Point corner2 = new Point(0, 0);
+    private Point tipPt = new Point(0, 0);
+
+    /**
+     * The locations of the 2 corners of the Arrow.
+     */
+    private Point corner1Pt = new Point(0, 0);
+    private Point corner2Pt = new Point(0, 0);
 
     /**
      * The locations of the 2 control points that determine the curved shape of
-     * the sides of the Arrow
+     * the sides of the Arrow.
      */
-    public Point corner1cPt = new Point(0, 0);
-    public Point corner2cPt = new Point(0, 0);
-    
+    private Point corner1cPt = new Point(0, 0);
+    private Point corner2cPt = new Point(0, 0);
+
+    private double west;
+    private double north;
+    private double scale;
+    private double flowStrokeWidth;
+    private Model model;
+
     /**
      * Constructor for the Arrow. Computes the location of the points comprising
      * the arrow head based on the stroke width and azimuth of the flow.
-     * 
-     * @param flow The flow an arrow will be created for
+     *
+     * @param inFlow The flow an arrow will be created for
      * @param model The complete data model. Needed for scaling up the smallest
-     *              arrows
+     * arrows
      * @param flowStrokeWidth Determines the size of the arrow
      * @param mapScale Needed for scaling to pixel values
      * @param west Needed for scaling to pixel values
      * @param north Needed for scaling to pixel values
      */
-    public Arrow(QuadraticBezierFlow flow, Model model, double flowStrokeWidth,
-            double mapScale, double west, double north) {
-        
+    public Arrow(QuadraticBezierFlow inFlow, Model model, double flowStrokeWidth,
+            double scale, double west, double north) {
+
+        this.west = west;
+        this.north = north;
+        this.scale = scale;
+        this.flowStrokeWidth = flowStrokeWidth;
+        this.inFlow = inFlow;
+        this.model = model;
+
+        computeArrowPoints();
+
+    }
+
+    private void computeArrowPoints() {
+
         // Gets the ratio of the flows stroke width to it's value. This ratio
         // is the same for all drawn flows.
-        double valueToStrokeRatio = flowStrokeWidth / flow.getValue();
+        double valueToStrokeRatio = flowStrokeWidth / inFlow.getValue();
 
         // Get the max flow value, and get the stroke value of that width 
         // based on the valueToStrokeRatio
         double maxFlowStrokeWidth = model.getMaxFlowValue() * valueToStrokeRatio;
 
-        // Get the differnce between this flows stroke size and the biggest
+        // Get the differnce between this flow's stroke size and the biggest
         // stroke size.
         double strokeDiff = maxFlowStrokeWidth - flowStrokeWidth;
-        
+
         // Get a percentage of that difference based on valRatio
         double plusStroke = strokeDiff * (model.getArrowSizeRatio());
 
         // Determine the distance of the tip of the arrow from the base.
         // Is scaled to the value of the flow, which itself is scaled by the 
         // scale factor of the model.
-        //arrowLength = (model.getShortestFlowLength()) * model.getArrowLengthScaleFactor() 
-        //        * (value + plusVal) * flowWidthScale;
         double arrowLengthInPx = (flowStrokeWidth + plusStroke)
                 * model.getArrowLengthScaleFactor();
 
-        arrowLengthInWorldCoordinates = arrowLengthInPx / mapScale;
+        arrowLengthInWorld = arrowLengthInPx / scale;
 
         // Determine the perpendicular distance of the corners of the arrow from 
         // a line drawn between the base and tip of the arrow.
-        arrowWidth = (flowStrokeWidth + plusStroke)
+        double arrowWidthInPx = (flowStrokeWidth + plusStroke)
                 * model.getArrowWidthScaleFactor();
+
+        arrowWidthInWorld = arrowWidthInPx / scale;
 
         // Get the arrowCornerPosition from the model. This value determines
         // the horizontal location of the corners of the Arrow
@@ -120,103 +137,148 @@ public class Arrow {
 
         // Get the t value of the location on the flow where the base of the 
         // arrowhead will sit
-        double t = flow.getIntersectionTWithCircleAroundEndPoint(arrowLengthInWorldCoordinates);
+        double t = inFlow.getIntersectionTWithCircleAroundEndPoint(arrowLengthInWorld);
 
         // Set the base of the Arrow to the point on the curve determined above.
-        baseInWorld = flow.pointOnCurve(t);
-
-        // get the pixel coordinates of base
-        // Gonna just make a new version of xToPx and yToPx here. This would be
-        // better if it was somehow able to use existing methods. 
-        baseInPx = new Point((baseInWorld.x - west) * mapScale,
-                (north - baseInWorld.y) * mapScale);
+        basePt = inFlow.pointOnCurve(t);
 
         // Split the flow at the base point of the Arrow, plus a little bit.
         // The little bit is to provide sufficient overlap of the flow with the
         // arrowhead to prevent gaps between the flow and arrowhead when the
         // arrowhead is drawn along more curved parts of the flow
-        QuadraticBezierFlow[] splitFlows = flow.split(t + ((1 - t) * 0.1));
+        QuadraticBezierFlow[] splitFlows = inFlow.split(t + ((1 - t) * 0.1));
 
         // Set the flow to the section of the flow that travels from the 
         // start point to the base of the Arrow. The remaining section of the
         // flow will not be drawn.
-        this.setFlow(splitFlows[0]);
+        this.setOutFlow(splitFlows[0]);
 
         // Locate the various points that determine the shape and location of 
         // the Arrow. This pulls various parameters from the model that are 
         // themselves modified by the GUI to change the shape of the Arrows. 
         // Locate the tip
-        tip.x = baseInPx.x + arrowLengthInPx;
-        tip.y = baseInPx.y;
+        tipPt.x = getBasePt().x + arrowLengthInWorld;
+        tipPt.y = getBasePt().y;
 
         // Locate the first corner
-        corner1.x = baseInPx.x + (arrowLengthInPx * arrowCornerPosition);
-        corner1.y = baseInPx.y + arrowWidth;
+        corner1Pt.x = getBasePt().x + (arrowLengthInWorld * arrowCornerPosition);
+        corner1Pt.y = getBasePt().y + arrowWidthInWorld;
 
         // Locate the first control point
-        corner1cPt.x = baseInPx.x + (corner1.x - baseInPx.x) + ((tip.x - corner1.x) * model.getArrowEdgeCtrlLength());
-        corner1cPt.y = baseInPx.y + arrowWidth * model.getArrowEdgeCtrlWidth();
+        corner1cPt.x = getBasePt().x + (getCorner1Pt().x - getBasePt().x) + ((getTipPt().x - getCorner1Pt().x) * model.getArrowEdgeCtrlLength());
+        corner1cPt.y = getBasePt().y + arrowWidthInWorld * model.getArrowEdgeCtrlWidth();
 
         // locate the second corner
-        corner2.x = baseInPx.x + (arrowLengthInPx * arrowCornerPosition);
-        corner2.y = baseInPx.y - arrowWidth;
+        corner2Pt.x = getBasePt().x + (arrowLengthInWorld * arrowCornerPosition);
+        corner2Pt.y = getBasePt().y - arrowWidthInWorld;
 
         // locate the second control point
-        corner2cPt.x = baseInPx.x + (corner2.x - baseInPx.x) + ((tip.x - corner2.x) * model.getArrowEdgeCtrlLength());
-        corner2cPt.y = baseInPx.y - arrowWidth * model.getArrowEdgeCtrlWidth();
+        corner2cPt.x = getBasePt().x + (getCorner2Pt().x - getBasePt().x) + ((getTipPt().x - getCorner2Pt().x) * model.getArrowEdgeCtrlLength());
+        corner2cPt.y = getBasePt().y - arrowWidthInWorld * model.getArrowEdgeCtrlWidth();
 
         // Get the azimuth of the line connecting the base of the arrow to the
         // endPoint of the flow. This determines the azimuth of the Arrow.
-        double azimuth = GeometryUtils.computeAzimuth(baseInWorld, flow.getEndPt());
+        double azimuth = GeometryUtils.computeAzimuth(getBasePt(), inFlow.getEndPt());
 
         // Rotate all the points that make up the shape of the Arrow, using
         // the Arrow's base point as the pivot.  
-        tip = tip.rotatePoint(baseInPx, -azimuth);
-        corner1 = corner1.rotatePoint(baseInPx, -azimuth);
-        corner2 = corner2.rotatePoint(baseInPx, -azimuth);
-        corner1cPt = corner1cPt.rotatePoint(baseInPx, -azimuth);
-        corner2cPt = corner2cPt.rotatePoint(baseInPx, -azimuth);
-
+        tipPt = getTipPt().rotatePoint(getBasePt(), azimuth);
+        corner1Pt = getCorner1Pt().rotatePoint(getBasePt(), azimuth);
+        corner2Pt = getCorner2Pt().rotatePoint(getBasePt(), azimuth);
+        corner1cPt = getCorner1cPt().rotatePoint(getBasePt(), azimuth);
+        corner2cPt = getCorner2cPt().rotatePoint(getBasePt(), azimuth);
     }
 
     /**
-     * Generate the path of the line that will draw the arrowhead.
-     * @return 
+     * Generate a GeneralPath of the outline of the arrowhead.
+     *
+     * @return GeneralPath of the arrowhead.
      */
-    public GeneralPath getArrowPath () {
-        
+    public GeneralPath getArrowPath() {
+
         GeneralPath arrowPath = new GeneralPath();
+
+        arrowPath.moveTo(xToPx(getBasePt().x), yToPx(getBasePt().y));
         
-        arrowPath.moveTo((baseInPx.x), (baseInPx.y));
-                    arrowPath.lineTo(
-                            (corner1.x), (corner1.y));
-                    arrowPath.quadTo(
-                            (corner1cPt.x), (corner1cPt.y),
-                            (tip.x), (tip.y));
-                    arrowPath.quadTo(
-                            (corner2cPt.x), (corner2cPt.y),
-                            (corner2.x), (corner2.y));
-                    arrowPath.lineTo((baseInPx.x), (baseInPx.y));
+        arrowPath.lineTo((xToPx(getCorner1Pt().x)), (yToPx(getCorner1Pt().y)));
         
+        arrowPath.quadTo(xToPx(getCorner1cPt().x), yToPx(getCorner1cPt().y),
+                xToPx(getTipPt().x), yToPx(getTipPt().y));
+        
+        arrowPath.quadTo(xToPx(getCorner2cPt().x), yToPx(getCorner2cPt().y),
+                xToPx(getCorner2Pt().x), yToPx(getCorner2Pt().y));
+        
+        arrowPath.lineTo(xToPx(getBasePt().x), yToPx(getBasePt().y));
+
         return arrowPath;
     }
-    
+
     /**
-     * Returns the flow
+     * Returns the outFlow, which is a clipped version of the inFlow. This is
+     * the flow that will have an arrowhead attached to it.
      *
      * @return
      */
-    public QuadraticBezierFlow getFlow() {
-        return flow;
+    public QuadraticBezierFlow getOutFlow() {
+        return outFlow;
     }
 
     /**
-     * Sets the flow
+     * Sets the outFlow
      *
      * @param flow
      */
-    public void setFlow(QuadraticBezierFlow flow) {
-        this.flow = flow;
+    public void setOutFlow(QuadraticBezierFlow flow) {
+        this.outFlow = flow;
     }
-    
+
+    public double xToPx(double x) {
+        return (x - west) * scale;
+    }
+
+    public double yToPx(double y) {
+        return (north - y) * scale;
+    }
+
+    /**
+     * @return the basePt
+     */
+    public Point getBasePt() {
+        return basePt;
+    }
+
+    /**
+     * @return the tipPt
+     */
+    public Point getTipPt() {
+        return tipPt;
+    }
+
+    /**
+     * @return the corner1Pt
+     */
+    public Point getCorner1Pt() {
+        return corner1Pt;
+    }
+
+    /**
+     * @return the corner2Pt
+     */
+    public Point getCorner2Pt() {
+        return corner2Pt;
+    }
+
+    /**
+     * @return the corner1cPt
+     */
+    public Point getCorner1cPt() {
+        return corner1cPt;
+    }
+
+    /**
+     * @return the corner2cPt
+     */
+    public Point getCorner2cPt() {
+        return corner2cPt;
+    }
 }

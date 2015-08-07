@@ -673,6 +673,7 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel2.add(distanceToggleButton);
 
         lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif"))); // NOI18N
+        lockUnlockButton.setToolTipText("Lock/Unlock Flows");
         lockUnlockButton.setBorderPainted(false);
         lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
         lockUnlockButton.setEnabled(false);
@@ -1859,8 +1860,8 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
             outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
-            SVGFlowExporter exporter = new SVGFlowExporter(model);
-            exporter.setSVGCanvasSize(800, 550);
+            SVGFlowExporter exporter = new SVGFlowExporter(model, mapComponent);
+            exporter.setSVGCanvasSize(mapComponent.getWidth(), mapComponent.getHeight());
             outputStream = new FileOutputStream(outFilePath);
             exporter.export(outputStream);
         } catch (IOException ex) {
@@ -2012,11 +2013,13 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void fillCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillCheckBoxActionPerformed
         readSymbolGUI();
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_fillCheckBoxActionPerformed
 
     private void strokeCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeCheckBoxActionPerformed
         readSymbolGUI();
+        mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_strokeCheckBoxActionPerformed
 
