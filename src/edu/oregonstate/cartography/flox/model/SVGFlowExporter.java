@@ -26,7 +26,7 @@ public class SVGFlowExporter extends SVGExporter {
     public SVGFlowExporter(Model model, FloxMapComponent mapComponent) {
         super(model.getLayerGeometry(), "OSU Cartography Group", "Flox");
         this.model = model;
-        Rectangle2D b = model.getFlowsBoundingBox();
+        Rectangle2D b = mapComponent.getVisibleArea();
         bb.init(b.getMinX(), b.getMaxX(), b.getMinY(), b.getMaxY());
         this.mapComponent = mapComponent;
     }

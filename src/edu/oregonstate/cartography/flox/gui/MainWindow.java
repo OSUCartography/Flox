@@ -1860,7 +1860,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
             SVGFlowExporter exporter = new SVGFlowExporter(model, mapComponent);
-            exporter.setSVGCanvasSize(800, 550);
+            exporter.setSVGCanvasSize(mapComponent.getWidth(), mapComponent.getHeight());
             outputStream = new FileOutputStream(outFilePath);
             exporter.export(outputStream);
         } catch (IOException ex) {
