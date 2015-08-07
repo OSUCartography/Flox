@@ -305,6 +305,23 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
+     * Returns the western most point in geometry
+     * 
+     * @return western most point
+     */
+    public double getWest() {
+        return this.west;
+    }
+    
+    /**
+     * Returns the northern most point in geometry
+     * 
+     * @return northern most point
+     */
+    public double getNorth() {
+        return this.north;
+    }
+    /**
      * Returns the current MapTool
      *
      * @return The currently active MapTool.
