@@ -315,7 +315,7 @@ public class MainWindow extends javax.swing.JFrame {
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
-        lockFlowWidthCheckbox = new javax.swing.JCheckBox();
+        lockFeatureSizeToScaleCheckbox = new javax.swing.JCheckBox();
         maximumFlowWidthSlider = new javax.swing.JSlider();
         jLabel26 = new javax.swing.JLabel();
         maximumNodeSizeSlider = new javax.swing.JSlider();
@@ -1106,10 +1106,10 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         mapControlPanel.add(jButton1, gridBagConstraints);
 
-        lockFlowWidthCheckbox.setText("Lock Layout to Current Scale");
-        lockFlowWidthCheckbox.addActionListener(new java.awt.event.ActionListener() {
+        lockFeatureSizeToScaleCheckbox.setText("Lock Feature Sizes to Current Scale");
+        lockFeatureSizeToScaleCheckbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lockFlowWidthCheckboxActionPerformed(evt);
+                lockFeatureSizeToScaleCheckboxActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1117,7 +1117,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 6;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(lockFlowWidthCheckbox, gridBagConstraints);
+        mapControlPanel.add(lockFeatureSizeToScaleCheckbox, gridBagConstraints);
 
         maximumFlowWidthSlider.setMajorTickSpacing(20);
         maximumFlowWidthSlider.setMinorTickSpacing(10);
@@ -1939,6 +1939,8 @@ public class MainWindow extends javax.swing.JFrame {
             }
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             setFlows(flows, inFilePath);
+            sizeFeaturesToScale();
+            
         } catch (Exception ex) {
             ErrorDialog.showErrorDialog("The file could not be read.", "Flox Error", ex, null);
         }
@@ -2303,6 +2305,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (model != null) {
             model.setAddArrows(addArrowsCheckbox.isSelected());
             mapComponent.refreshMap();
+            addUndo("Add Arrows");
         }
 
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
@@ -2437,11 +2440,21 @@ public class MainWindow extends javax.swing.JFrame {
             String flowsFilePath = flowsFilePathLabel.getText();
             ArrayList<Flow> flows = FlowImporter.readFlows(pointsFilePath, flowsFilePath);
             setFlows(flows, flowsFilePath);
+            sizeFeaturesToScale();
         } catch (Exception ex) {
             ErrorDialog.showErrorDialog("The flows could not be imported.", "Flox Error", ex, this);
         }
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
 
+    private void sizeFeaturesToScale() {
+        if(lockFeatureSizeToScaleCheckbox.isSelected()) {
+                model.setLockedMapScale(mapComponent.getScale());
+                mapComponent.refreshMap();
+            } else {
+                lockFeatureSizeToScaleCheckbox.doClick();
+            }
+    }
+    
     private void selectPointsFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectPointsFileButtonActionPerformed
         String filePath = FileUtils.askFile(this, "Points File (CSV)", true);
         if (filePath == null) {
@@ -2567,12 +2580,12 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_exportCSVMenuItemActionPerformed
 
     private void addFlowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFlowToggleButtonActionPerformed
-        mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
+        mapComponent.setMapTool(new AddFlowTool(mapComponent,  model));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
-    private void lockFlowWidthCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFlowWidthCheckboxActionPerformed
+    private void lockFeatureSizeToScaleCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFeatureSizeToScaleCheckboxActionPerformed
         // Checking?
-        if (lockFlowWidthCheckbox.isSelected()) {
+        if (lockFeatureSizeToScaleCheckbox.isSelected()) {
             // Set locked to true, pass current scale to model
             model.setFlowWidthLocked(true);
             model.setLockedMapScale(mapComponent.getScale());
@@ -2583,7 +2596,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         // unchecking? 
         // Set locked to false, pass nothing!
-    }//GEN-LAST:event_lockFlowWidthCheckboxActionPerformed
+    }//GEN-LAST:event_lockFeatureSizeToScaleCheckboxActionPerformed
 
     private void maximumFlowWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maximumFlowWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
@@ -3139,7 +3152,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
-    private javax.swing.JCheckBox lockFlowWidthCheckbox;
+    private javax.swing.JCheckBox lockFeatureSizeToScaleCheckbox;
     private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;
