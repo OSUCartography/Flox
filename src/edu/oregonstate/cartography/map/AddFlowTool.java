@@ -142,7 +142,7 @@ public class AddFlowTool extends MapTool {
 
         // repaint the map
         originNodeCreated = true;
-        mapComponent.repaint();
+        mapComponent.refreshMap();
     }
 
     /**
@@ -232,7 +232,7 @@ public class AddFlowTool extends MapTool {
         destinationNode = null;
 
         // repaint the map
-        mapComponent.repaint();
+        mapComponent.refreshMap();
     }
 
     /**

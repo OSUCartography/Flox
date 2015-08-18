@@ -184,8 +184,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 cPt.setSelected(false);
             }
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
+            mapComponent.refreshMap();
         }
 
         setDefaultCursor();
@@ -213,6 +212,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 cPt.setSelected(false);
             }
         }
+        mapComponent.refreshMap();
     }
 
     /**
@@ -288,8 +288,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
         }
 
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
+        mapComponent.refreshMap();
         return (flowGotSelected || nodeGotSelected);
     }
 
@@ -326,6 +325,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     // See if the event point is near the control point.
                     Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
 
+                    // If a control point already got selected, exit the loop
                     if (controlPtGotSelected) {
                         cPt.setSelected(false);
                         continue;
@@ -336,9 +336,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             && ((mapComponent.yToPx(cPt.y) >= mapComponent.yToPx(point.y) - 5)
                             && (mapComponent.yToPx(cPt.y) <= mapComponent.yToPx(point.y) + 5))) {
                         cPt.setSelected(true);
+                        // Lock the flow
+                        flow.setLocked(true);
+                        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
                         controlPtGotSelected = true;
-                        mapComponent.eraseBufferImage();
-                        mapComponent.repaint();
+                        mapComponent.refreshMap();
                         // A control point was selected, so exit the method to 
                         // avoid deselecting flows
                         return true;
@@ -433,8 +435,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
         }
 
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
+        mapComponent.refreshMap();
         return (flowGotSelected || nodeGotSelected);
     }
 

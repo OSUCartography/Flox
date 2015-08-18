@@ -167,7 +167,7 @@ public class MeasureTool extends DoubleBufferedTool {
          */
         reportDistance(true);
         releaseBackground();
-        mapComponent.repaint();
+        mapComponent.refreshMap();
         setDefaultCursor();
     }
     
