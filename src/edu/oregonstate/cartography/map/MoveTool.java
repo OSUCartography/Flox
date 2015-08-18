@@ -101,13 +101,10 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 if (cPt.isSelected()) {
-                    flow.setLocked(true);
-                    lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
                     cPt.setSelected(false);
                 }
 
-                mapComponent.eraseBufferImage();
-                mapComponent.repaint();
+                mapComponent.refreshMap();
             }
         }
 
@@ -161,8 +158,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
         }
 
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
+        mapComponent.refreshMap();
 
         // Update the previousDrax coordinates.
         previousDrag_x = point.x;

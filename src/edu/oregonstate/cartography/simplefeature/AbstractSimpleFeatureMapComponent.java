@@ -226,8 +226,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         north = cy - dy;
         scale = newScale;
         System.out.println("Scale: " + scale);
-        eraseBufferImage();
-        repaint();
+        refreshMap();
 
     }
 
@@ -246,8 +245,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         north = fixPoint.y + dy / zoomFactor;
 
         System.out.println("Scale: " + scale);
-        eraseBufferImage();
-        repaint();
+        refreshMap();
 
     }
 
@@ -404,6 +402,11 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
         g2d.clearRect(0, 0, bufferImage.getWidth(), bufferImage.getHeight());
     }
 
+    public void refreshMap() {
+        eraseBufferImage();
+        repaint();
+    }
+    
     /**
      * Returns the image for buffering the map drawing.
      *
