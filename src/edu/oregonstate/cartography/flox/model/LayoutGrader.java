@@ -29,9 +29,9 @@ public class LayoutGrader {
 
         double deCasteljauTol = model.getDeCasteljauTolerance();
         GeometryFactory geometryFactory = new GeometryFactory();
-        LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
+        
         for (Flow flow : model.getFlows()) {
-
+            LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
             ArrayList<Point> flowPoints
                     = new ArrayList<>(flow.toStraightLineSegments(deCasteljauTol));
             for (Point point : flowPoints) {
