@@ -194,7 +194,7 @@ public class MainWindow extends javax.swing.JFrame {
             // Arrow Settings
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
             addArrowsCheckbox.setSelected(model.isDrawArrows());
-            arrowheadSizeSlider.setValue((int) (model.getArrowLengthScaleFactor() * 10));
+            arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 10));
             arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 10));
             arrowEdgeCtrlLengthSlider.setValue((int) (model.getArrowEdgeCtrlLength() * 100));
             arrowEdgeCtrlWidthSlider.setValue((int) (model.getArrowEdgeCtrlWidth() * 100));
@@ -326,7 +326,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
         jLabel14 = new javax.swing.JLabel();
         addArrowsCheckbox = new javax.swing.JCheckBox();
-        arrowheadSizeSlider = new javax.swing.JSlider();
+        arrowheadLengthSlider = new javax.swing.JSlider();
         jLabel10 = new javax.swing.JLabel();
         arrowheadWidthSlider = new javax.swing.JSlider();
         jLabel15 = new javax.swing.JLabel();
@@ -708,6 +708,11 @@ public class MainWindow extends javax.swing.JFrame {
         valueFormattedTextField.setEnabled(false);
         valueFormattedTextField.setFont(valueFormattedTextField.getFont().deriveFont(valueFormattedTextField.getFont().getSize()-2f));
         valueFormattedTextField.setPreferredSize(new java.awt.Dimension(80, 28));
+        valueFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                valueFormattedTextFieldActionPerformed(evt);
+            }
+        });
         valueFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 valueFormattedTextFieldPropertyChange(evt);
@@ -721,6 +726,11 @@ public class MainWindow extends javax.swing.JFrame {
         xFormattedTextField.setEnabled(false);
         xFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
         xFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        xFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                xFormattedTextFieldActionPerformed(evt);
+            }
+        });
         xFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 xFormattedTextFieldPropertyChange(evt);
@@ -734,6 +744,11 @@ public class MainWindow extends javax.swing.JFrame {
         yFormattedTextField.setEnabled(false);
         yFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
         yFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        yFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                yFormattedTextFieldActionPerformed(evt);
+            }
+        });
         yFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 yFormattedTextFieldPropertyChange(evt);
@@ -1219,20 +1234,20 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         arrowHeadsControlPanel.add(addArrowsCheckbox, gridBagConstraints);
 
-        arrowheadSizeSlider.setMajorTickSpacing(50);
-        arrowheadSizeSlider.setMaximum(200);
-        arrowheadSizeSlider.setPaintLabels(true);
-        arrowheadSizeSlider.setPaintTicks(true);
-        arrowheadSizeSlider.setPreferredSize(new java.awt.Dimension(240, 43));
-        arrowheadSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+        arrowheadLengthSlider.setMajorTickSpacing(50);
+        arrowheadLengthSlider.setMaximum(200);
+        arrowheadLengthSlider.setPaintLabels(true);
+        arrowheadLengthSlider.setPaintTicks(true);
+        arrowheadLengthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        arrowheadLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                arrowheadSizeSliderStateChanged(evt);
+                arrowheadLengthSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
-        arrowHeadsControlPanel.add(arrowheadSizeSlider, gridBagConstraints);
+        arrowHeadsControlPanel.add(arrowheadLengthSlider, gridBagConstraints);
 
         jLabel10.setText("Arrowhead Length");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1996,6 +2011,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void openShapefileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openShapefileMenuItemActionPerformed
         openShapefile();
+        // FIXME Shapefiles aren't added to the undo states
+        addUndo("Open Shapefile");
     }//GEN-LAST:event_openShapefileMenuItemActionPerformed
 
     private void removeAllLayersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAllLayersMenuItemActionPerformed
@@ -2003,6 +2020,9 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.showAll();
         mapComponent.refreshMap();
         updateLayerList();
+        // FIXME Shapefiles aren't added to the undo states. Maybe of the following
+        // methods have this same issue.
+        addUndo("Remove All Layers");
     }//GEN-LAST:event_removeAllLayersMenuItemActionPerformed
 
     private void layerListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_layerListValueChanged
@@ -2014,6 +2034,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void fillCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillCheckBoxActionPerformed
         readSymbolGUI();
         mapComponent.refreshMap();
+        addUndo("Add/remove Fill");
     }//GEN-LAST:event_fillCheckBoxActionPerformed
 
     private void strokeCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeCheckBoxActionPerformed
@@ -2307,24 +2328,26 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.refreshMap();
             addUndo("Add Arrows");
         }
-
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
 
-    private void arrowheadSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadSizeSliderStateChanged
+    private void arrowheadLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadLengthSliderStateChanged
         if (updatingGUI == false && model.isDrawArrows() && model != null) {
-            model.setArrowLengthScaleFactor((arrowheadSizeSlider.getValue() + 1) / 10d);
+            model.setArrowLengthScaleFactor((arrowheadLengthSlider.getValue() + 1) / 10d);
             mapComponent.refreshMap();
-            if (!arrowheadSizeSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Head Size");
+            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Length");
             }
 
         }
-    }//GEN-LAST:event_arrowheadSizeSliderStateChanged
+    }//GEN-LAST:event_arrowheadLengthSliderStateChanged
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (model.isDrawArrows()) {
             model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 10d);
             mapComponent.refreshMap();
+            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Width");
+            }
         }
     }//GEN-LAST:event_arrowheadWidthSliderStateChanged
 
@@ -2332,6 +2355,9 @@ public class MainWindow extends javax.swing.JFrame {
         if (model.isDrawArrows() && model != null) {
             model.setArrowEdgeCtrlLength((arrowEdgeCtrlLengthSlider.getValue()) / 100d);
             mapComponent.refreshMap();
+            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Shape");
+            }
         }
     }//GEN-LAST:event_arrowEdgeCtrlLengthSliderStateChanged
 
@@ -2339,6 +2365,9 @@ public class MainWindow extends javax.swing.JFrame {
         if (model.isDrawArrows() && model != null) {
             model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidthSlider.getValue()) / 100d);
             mapComponent.refreshMap();
+            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Shape");
+            }
         }
     }//GEN-LAST:event_arrowEdgeCtrlWidthSliderStateChanged
 
@@ -2346,6 +2375,9 @@ public class MainWindow extends javax.swing.JFrame {
         if (model.isDrawArrows() && model != null) {
             model.setArrowCornerPosition((arrowCornerPositionSlider.getValue()) / 100d);
             mapComponent.refreshMap();
+            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Shape");
+            }
         }
     }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
 
@@ -2521,6 +2553,9 @@ public class MainWindow extends javax.swing.JFrame {
         if (model.isDrawArrows() && model != null) {
             model.setArrowSizeRatio((arrowSizeRatioSlider.getValue()) / 100d);
             mapComponent.refreshMap();
+            if (!arrowSizeRatioSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Size Ratio");
+            }
         }
     }//GEN-LAST:event_arrowSizeRatioSliderStateChanged
 
@@ -2970,9 +3005,11 @@ public class MainWindow extends javax.swing.JFrame {
         if (unlocked == 0) {
             model.setLockOfSelectedFlows(false);
             lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
+            addUndo("Unlock");
         } else {
             model.setLockOfSelectedFlows(true);
             lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+            addUndo("Lock");
         }
         mapComponent.refreshMap();
 
@@ -2982,6 +3019,18 @@ public class MainWindow extends javax.swing.JFrame {
         model.setEnforceCanvasRange(enforceCanvasCheckBoxMenuItem.isSelected());
         layout("");
     }//GEN-LAST:event_enforceCanvasCheckBoxMenuItemActionPerformed
+
+    private void xFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xFormattedTextFieldActionPerformed
+        addUndo("Edit X Coordinate");
+    }//GEN-LAST:event_xFormattedTextFieldActionPerformed
+
+    private void yFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_yFormattedTextFieldActionPerformed
+        addUndo("Edit Y Coordinate");
+    }//GEN-LAST:event_yFormattedTextFieldActionPerformed
+
+    private void valueFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldActionPerformed
+        addUndo("Edit Value");
+    }//GEN-LAST:event_valueFormattedTextFieldActionPerformed
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -3081,7 +3130,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel arrowHeadsPanel;
     private javax.swing.JSlider arrowSizeRatioSlider;
     private javax.swing.JToggleButton arrowToggleButton;
-    private javax.swing.JSlider arrowheadSizeSlider;
+    private javax.swing.JSlider arrowheadLengthSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JSlider canvasSizeSlider;
