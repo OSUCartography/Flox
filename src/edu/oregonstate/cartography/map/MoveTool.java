@@ -1,6 +1,8 @@
 package edu.oregonstate.cartography.map;
 
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
+import edu.oregonstate.cartography.flox.gui.MainWindow;
+import edu.oregonstate.cartography.flox.gui.Undo;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -11,8 +13,11 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
+import javax.xml.bind.JAXBException;
 
 /**
  *
@@ -22,6 +27,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
     private final Model model;
 
+    private final Undo undo;
+    
     protected final JFormattedTextField xField;
     protected final JFormattedTextField yField;
     protected final JButton lockUnlockButton;
@@ -84,10 +91,21 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         updateCoordinateFields();
     }
 
+    private void addUndo(String message) {
+        try {
+            if (dragging == true) {
+                undo.add(message, model.marshal());
+            }
+        } catch (JAXBException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
         super.endDrag(point, evt);
 
+        addUndo("Move");
         dragging = false;
 
         if (model.isControlPtSelected()) {
@@ -168,12 +186,13 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     // Constructor
     public MoveTool(AbstractSimpleFeatureMapComponent mapComponent,
             JFormattedTextField xField, JFormattedTextField yField,
-            JButton lockUnlockButton) {
+            JButton lockUnlockButton, Undo undo) {
         super(mapComponent);
         this.model = ((FloxMapComponent) mapComponent).getModel();
         this.xField = xField;
         this.yField = yField;
         this.lockUnlockButton = lockUnlockButton;
+        this.undo = undo;
     }
 
     /**

@@ -1,5 +1,7 @@
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.MainWindow;
+import edu.oregonstate.cartography.flox.gui.Undo;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
@@ -12,6 +14,9 @@ import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.bind.JAXBException;
 
 /**
  * Tool for adding flows.
@@ -53,6 +58,8 @@ public class AddFlowTool extends MapTool {
      * distance should change with the size of the node.
      */
     private final double PIXEL_TOLERANCE = 3;
+    
+    private final Undo undo;
 
     /**
      * Constructor for AddFlowTool.
@@ -60,9 +67,11 @@ public class AddFlowTool extends MapTool {
      * @param mapComponent The current mapComponent.
      * @param model The model containing flow data and settings.
      */
-    public AddFlowTool(AbstractSimpleFeatureMapComponent mapComponent, Model model) {
+    public AddFlowTool(AbstractSimpleFeatureMapComponent mapComponent, Model model,
+            Undo undo) {
         super(mapComponent);
         this.model = model;
+        this.undo = undo;
     }
 
     /**
@@ -83,6 +92,14 @@ public class AddFlowTool extends MapTool {
         }
     }
 
+    private void addUndo(String message) {
+        try {
+                undo.add(message, model.marshal());
+        } catch (JAXBException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     /**
      * Adds an originNode to the map layout. Called on the first click while the
      * addFlowTool is active. If an existing node was clicked, that Point is
@@ -93,6 +110,8 @@ public class AddFlowTool extends MapTool {
      */
     private void addOriginNode(Point2D.Double point) {
 
+        addUndo("Add Flow");
+        
         double scale = mapComponent.getScale();
 
         // Get the locked scale factor needed to calculate feature sizes

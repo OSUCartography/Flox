@@ -141,6 +141,8 @@ public class MainWindow extends javax.swing.JFrame {
         Object undoData = undo.getUndo();
         if (undoData != null) {
             byteArrayToModel((byte[]) undoData);
+            
+            writeModelToGUI();
         }
     }
 
@@ -148,6 +150,8 @@ public class MainWindow extends javax.swing.JFrame {
         Object undoData = undo.getRedo();
         if (undoData != null) {
             byteArrayToModel((byte[]) undoData);
+            
+            writeModelToGUI();
         }
     }
 
@@ -221,6 +225,9 @@ public class MainWindow extends javax.swing.JFrame {
                 highFlowSegmentationMenuItem.setSelected(true);
             }
             updateClippingGUI();
+            
+            lockFeatureSizeToScaleCheckbox.setSelected(model.isFlowWidthLocked());
+            
         } finally {
             updatingGUI = false;
         }
@@ -2289,7 +2296,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
         mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent,
                 valueFormattedTextField, xFormattedTextField, yFormattedTextField,
-                lockUnlockButton));
+                lockUnlockButton, undo));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
@@ -2331,7 +2338,8 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
 
     private void arrowheadLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadLengthSliderStateChanged
-        if (updatingGUI == false && model.isDrawArrows() && model != null) {
+        
+        if (updatingGUI == false && model != null) {
             model.setArrowLengthScaleFactor((arrowheadLengthSlider.getValue() + 1) / 10d);
             mapComponent.refreshMap();
             if (!arrowheadLengthSlider.getValueIsAdjusting()) {
@@ -2342,41 +2350,41 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_arrowheadLengthSliderStateChanged
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
-        if (model.isDrawArrows()) {
+        if (updatingGUI == false && model != null) {
             model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 10d);
             mapComponent.refreshMap();
-            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
+            if (!arrowheadWidthSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Width");
             }
         }
     }//GEN-LAST:event_arrowheadWidthSliderStateChanged
 
     private void arrowEdgeCtrlLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlLengthSliderStateChanged
-        if (model.isDrawArrows() && model != null) {
+        if (updatingGUI == false && model != null) {
             model.setArrowEdgeCtrlLength((arrowEdgeCtrlLengthSlider.getValue()) / 100d);
             mapComponent.refreshMap();
-            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Shape");
+            if (!arrowEdgeCtrlLengthSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Edge Shape");
             }
         }
     }//GEN-LAST:event_arrowEdgeCtrlLengthSliderStateChanged
 
     private void arrowEdgeCtrlWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlWidthSliderStateChanged
-        if (model.isDrawArrows() && model != null) {
+        if (updatingGUI == false && model != null) {
             model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidthSlider.getValue()) / 100d);
             mapComponent.refreshMap();
-            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Shape");
+            if (!arrowEdgeCtrlWidthSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Edge Shape");
             }
         }
     }//GEN-LAST:event_arrowEdgeCtrlWidthSliderStateChanged
 
     private void arrowCornerPositionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowCornerPositionSliderStateChanged
-        if (model.isDrawArrows() && model != null) {
+        if (updatingGUI == false && model != null) {
             model.setArrowCornerPosition((arrowCornerPositionSlider.getValue()) / 100d);
             mapComponent.refreshMap();
-            if (!arrowheadLengthSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Shape");
+            if (!arrowCornerPositionSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Corner Position");
             }
         }
     }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
@@ -2550,7 +2558,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_clipWithStartAreasCheckBoxActionPerformed
 
     private void arrowSizeRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowSizeRatioSliderStateChanged
-        if (model.isDrawArrows() && model != null) {
+        if ( updatingGUI == false && model != null) {
             model.setArrowSizeRatio((arrowSizeRatioSlider.getValue()) / 100d);
             mapComponent.refreshMap();
             if (!arrowSizeRatioSlider.getValueIsAdjusting()) {
@@ -2615,11 +2623,10 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_exportCSVMenuItemActionPerformed
 
     private void addFlowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFlowToggleButtonActionPerformed
-        mapComponent.setMapTool(new AddFlowTool(mapComponent,  model));
+        mapComponent.setMapTool(new AddFlowTool(mapComponent,  model, undo));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
     private void lockFeatureSizeToScaleCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFeatureSizeToScaleCheckboxActionPerformed
-        // Checking?
         if (lockFeatureSizeToScaleCheckbox.isSelected()) {
             // Set locked to true, pass current scale to model
             model.setFlowWidthLocked(true);
@@ -2629,8 +2636,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.refreshMap();
         }
 
-        // unchecking? 
-        // Set locked to false, pass nothing!
+        addUndo("Lock/unlock Feature Size");
     }//GEN-LAST:event_lockFeatureSizeToScaleCheckboxActionPerformed
 
     private void maximumFlowWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maximumFlowWidthSliderStateChanged
