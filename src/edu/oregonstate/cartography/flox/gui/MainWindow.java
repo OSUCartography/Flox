@@ -328,6 +328,8 @@ public class MainWindow extends javax.swing.JFrame {
         maximumNodeSizeSlider = new javax.swing.JSlider();
         jLabel27 = new javax.swing.JLabel();
         moveFlowsThatCrossNodesButton = new javax.swing.JButton();
+        showNodesToggleButton = new javax.swing.JToggleButton();
+        showFlowsToggleButton = new javax.swing.JToggleButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -1154,7 +1156,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 2;
         mapControlPanel.add(maximumFlowWidthSlider, gridBagConstraints);
 
         jLabel26.setText("Maximum Flow Width");
@@ -1178,7 +1180,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 2;
         mapControlPanel.add(maximumNodeSizeSlider, gridBagConstraints);
 
         jLabel27.setText("Maximum Node Size");
@@ -1201,6 +1203,36 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 20;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(moveFlowsThatCrossNodesButton, gridBagConstraints);
+
+        showNodesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        showNodesToggleButton.setSelected(true);
+        showNodesToggleButton.setBorderPainted(false);
+        showNodesToggleButton.setPreferredSize(new java.awt.Dimension(20, 20));
+        showNodesToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
+        showNodesToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showNodesToggleButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 5;
+        mapControlPanel.add(showNodesToggleButton, gridBagConstraints);
+
+        showFlowsToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        showFlowsToggleButton.setSelected(true);
+        showFlowsToggleButton.setBorderPainted(false);
+        showFlowsToggleButton.setPreferredSize(new java.awt.Dimension(20, 20));
+        showFlowsToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
+        showFlowsToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showFlowsToggleButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        mapControlPanel.add(showFlowsToggleButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -1604,12 +1636,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         editMenu.setText("Edit");
         editMenu.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                editMenuMenuSelected(evt);
             }
             public void menuDeselected(javax.swing.event.MenuEvent evt) {
             }
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                editMenuMenuSelected(evt);
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
             }
         });
 
@@ -3038,6 +3070,16 @@ public class MainWindow extends javax.swing.JFrame {
         addUndo("Edit Value");
     }//GEN-LAST:event_valueFormattedTextFieldActionPerformed
 
+    private void showFlowsToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showFlowsToggleButtonActionPerformed
+        mapComponent.setDrawFlows(showFlowsToggleButton.isSelected());
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_showFlowsToggleButtonActionPerformed
+
+    private void showNodesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showNodesToggleButtonActionPerformed
+        mapComponent.setDrawNodes(showNodesToggleButton.isSelected());
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_showNodesToggleButtonActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3247,6 +3289,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem showAllMenuItem1;
     private javax.swing.JCheckBoxMenuItem showControlPointsCheckBoxMenuItem;
     private javax.swing.JMenuItem showFlowSegmentsMenuItem;
+    private javax.swing.JToggleButton showFlowsToggleButton;
+    private javax.swing.JToggleButton showNodesToggleButton;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;

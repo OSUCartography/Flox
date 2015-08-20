@@ -25,6 +25,16 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     private Model model;
 
     /**
+     * Flag for drawing flows
+     */
+    private boolean drawFlows = true;
+    
+    /**
+     * Flag for drawing nodes
+     */
+    private boolean drawNodes = true;
+    
+    /**
      * flag for drawing control points
      */
     private boolean drawControlPoints = false;
@@ -119,19 +129,23 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
             
             // draw flows and nodes
-            renderer.drawFlows();
+            if(isDrawFlows()) {
+                renderer.drawFlows();
+            }
+            
+            if(isDrawNodes()){
+                renderer.drawNodes();
+            }
 
-            renderer.drawNodes();
-
-            if (isDrawFlowRangebox()) {
+            if (drawFlowRangebox) {
                 renderer.drawFlowRangebox();
             }
             
-            if (isDrawControlPoints()) {
+            if (drawControlPoints) {
                 renderer.drawControlPoints();
             }
             
-            if (isDrawLineSegments()) {
+            if (drawLineSegments) {
                 renderer.drawStraightLinesSegments();
             }
 
@@ -249,6 +263,34 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     public void setDrawStartClipAreas(boolean drawStartClipAreas) {
         this.drawStartClipAreas = drawStartClipAreas;
+    }
+
+    /**
+     * @param drawFlows the drawFlows to set
+     */
+    public void setDrawFlows(boolean drawFlows) {
+        this.drawFlows = drawFlows;
+    }
+
+    /**
+     * @param drawNodes the drawNodes to set
+     */
+    public void setDrawNodes(boolean drawNodes) {
+        this.drawNodes = drawNodes;
+    }
+
+    /**
+     * @return the drawFlows
+     */
+    public boolean isDrawFlows() {
+        return drawFlows;
+    }
+
+    /**
+     * @return the drawNodes
+     */
+    public boolean isDrawNodes() {
+        return drawNodes;
     }
     
     
