@@ -7,6 +7,7 @@ import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
 import static edu.oregonstate.cartography.flox.model.CubicBezierFlow.bendCubicFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
+import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
@@ -1905,6 +1906,7 @@ public class MainWindow extends javax.swing.JFrame {
         jMenu1.add(enforceCanvasCheckBoxMenuItem);
         jMenu1.add(jSeparator13);
 
+        emptySpaceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         emptySpaceMenuItem.setText("Show Empty Space Image");
         emptySpaceMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2301,7 +2303,7 @@ public class MainWindow extends javax.swing.JFrame {
         // Get the area of the map to be drawn to the image
         Rectangle2D bb = mapComponent.getVisibleArea();
 
-        BufferedImage image = FloxRenderer.renderToImage(model, size, bb, 
+        BufferedImage image = FloxRenderer.renderToImage(model, size, bb,
                 true, // antialiasing
                 false, // draw GUI elements
                 true, // draw background 
@@ -3102,18 +3104,40 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_showNodesToggleButtonActionPerformed
 
+    private double inverseDistanceWeight(double d) {
+        // FIXME hard coded exponent value
+        double p = 2;
+        return 1. / Math.pow(d, p);
+    }
+
     private void emptySpaceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emptySpaceMenuItemActionPerformed
-        int size = 500;
+        // FIXME this is not the right class for this
+
+        // experiment for moving flow towards empty space. Attracting forces are 
+        // computed between white space and the control point of the flow.
+        // It might be better to compute forces between empty space and flow line
+        // segments, because the control point can be quite distant from the 
+        // flow line.
+        if (model.getSelectedFlows().size() < 1) {
+            System.err.println("no flow selected");
+            return;
+        }
+
+        // FIXME hard coded tesselation size of the map space
+        int size = 1000;
         Rectangle2D bb = mapComponent.getVisibleArea();
-        BufferedImage image = FloxRenderer.renderToImage(model, size, bb, 
+        BufferedImage image = FloxRenderer.renderToImage(model, size, bb,
                 false, // antialiasing
                 false, // draw GUI elements
                 false, // draw background 
                 true, // fill node circles
                 false); // draw selected flows 
-        edu.oregonstate.cartography.utils.ImageUtils.displayImageInWindow(image);
         
-        // convert image to boolean grid
+        // display the image
+        // edu.oregonstate.cartography.utils.ImageUtils.displayImageInWindow(image);
+
+        // convert image to a boolean grid
+        // false values are not occupied by flows or nodes, true values are occupied.
         int cols = image.getWidth();
         int rows = image.getHeight();
         double cellSize = bb.getWidth() / (cols - 1);
@@ -3131,12 +3155,53 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
         System.out.println(booleanGrid.toString());
+
+        // get first selected flow. 
+        // FIXME Ignore other selected flows for the moment.
+        QuadraticBezierFlow selectedFlow = (QuadraticBezierFlow) model.getSelectedFlows().get(0);
+        Point ctrlPt = selectedFlow.getCtrlPt();
         
-        // false values are not occupied by flows or nodes, true values are occupied.
-        // we could now iterate over all cells and check for false values, which 
-        // can function as attractors.
-        // TODO
+        // find attracting forces on the selected flow
+        double vx = 0;
+        double vy = 0;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                boolean attractor = booleanGrid.getValue(c, r) == false;
+                if (attractor) {
+                    double cellX = booleanGrid.getWest() + c * booleanGrid.getCellSize();
+                    double cellY = booleanGrid.getNorth() - r * booleanGrid.getCellSize();
+                    double dx = cellX - ctrlPt.x;
+                    double dy = cellY - ctrlPt.y;
+                    double d = Math.sqrt(dx * dx + dy * dy);
+                    double idw = inverseDistanceWeight(d);
+
+                    // direction vector with length == 1
+                    dx /= d;
+                    dy /= d;
+
+                    // weight direction vector with inverse distance weight
+                    vx += dx * idw;
+                    vy += dy * idw;
+                }
+            }
+        }
+
+        // FIXME hard-coded weight factor. Should be entered by user with GUI.
+        double attractorWeight = 0.2;
+
+        // we are only interested in the direction of the total attracting white space
+        Force v = new Force(vx, vy);
+        v.normalize();
         
+        // Multiply by the value of the GUI slider for attractor weight.
+        v.scale(attractorWeight);
+
+        // move control point
+        ctrlPt.x += v.fx;
+        ctrlPt.y += v.fy;
+
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
     }//GEN-LAST:event_emptySpaceMenuItemActionPerformed
 
     private void layout(String undoString) {

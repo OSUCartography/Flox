@@ -653,6 +653,9 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="emptySpaceMenuItem">
               <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Show Empty Space Image"/>
               </Properties>
               <Events>
