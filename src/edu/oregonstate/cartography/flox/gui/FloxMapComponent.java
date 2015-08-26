@@ -108,7 +108,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
         // paint the map if this has not been done by the current MapTool
         if (toolPaintedMap == false) {
-            FloxRenderer renderer = new FloxRenderer(model, g2d, west, north, scale);
+            FloxRenderer renderer = new FloxRenderer(model, g2d, 
+                    west, north, scale, true);
             renderer.setStrokeWidth(1f);
 
             // draw background map

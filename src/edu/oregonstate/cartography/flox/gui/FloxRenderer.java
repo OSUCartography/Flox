@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.flox.gui;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
@@ -11,8 +10,6 @@ import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
-import edu.oregonstate.cartography.flox.model.bezier.Bezier;
-import edu.oregonstate.cartography.flox.model.bezier.BezierPath;
 import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -20,8 +17,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -60,7 +55,33 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
+    
+    /**
+     * If true GUI elements to indicate selection or locked status are drawn.
+     */
+    private boolean drawGUIElements = true;
 
+    /**
+     * Creates a new renderer.
+     *
+     * @param model The model to render.
+     * @param g2d The graphics context to render to.
+     * @param west The left image border corresponds to this world coordinate
+     * position.
+     * @param north The top image border corresponds to this world coordinate
+     * position.
+     * @param scale The scale factor to apply when drawing.
+     * @param drawGUIElements If true GUI elements to indicate selection or 
+     * locked status are drawn. 
+     */
+    public FloxRenderer(Model model, Graphics2D g2d, 
+            double west, double north, double scale,
+            boolean drawGUIElements) {
+        super(g2d, west, north, scale);
+        this.model = model;
+        this.drawGUIElements = drawGUIElements;
+    }
+    
     /**
      * Renders the flows to an image.
      *
@@ -71,7 +92,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param antialias If true anti-aliasing is applied.
      * @return The new image.
      */
-    public static BufferedImage renderToImage(Model model, int maxDim, Rectangle2D bb, boolean antialias) {
+    public static BufferedImage renderToImage(Model model, int maxDim, 
+            Rectangle2D bb, boolean antialias, boolean drawGUIElements) {
         // find size of fitting image
         //Rectangle2D bb = model.getFlowsBoundingBox();
         double scale = maxDim / Math.max(bb.getWidth(), bb.getHeight());
@@ -107,7 +129,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         g2d.clearRect(0, 0, w, h);
 
         // setup renderer
-        FloxRenderer renderer = new FloxRenderer(model, g2d, bb.getMinX(), bb.getMaxY(), scale);
+        FloxRenderer renderer = new FloxRenderer(model, g2d, 
+                bb.getMinX(), bb.getMaxY(), scale, drawGUIElements);
 
         // render background layers
         int nbrLayers = model.getNbrLayers();
@@ -126,22 +149,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         renderer.drawFlows();
         renderer.drawNodes();
         return bufferImage;
-    }
-
-    /**
-     * Creates a new renderer.
-     *
-     * @param model The model to render.
-     * @param g2d The graphics context to render to.
-     * @param west The left image border corresponds to this world coordinate
-     * position.
-     * @param north The top image border corresponds to this world coordinate
-     * position.
-     * @param scale The scale factor to apply when drawing.
-     */
-    public FloxRenderer(Model model, Graphics2D g2d, double west, double north, double scale) {
-        super(g2d, west, north, scale);
-        this.model = model;
     }
 
     /**
@@ -261,7 +268,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             }
 
-            g2d.setColor(flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
+            g2d.setColor(drawGUIElements && flow.isSelected() ?
+                    SELECTION_COLOR : model.getFlowColor());
 
             // draw the arrow heads
             if (model.isDrawArrows()) {
@@ -274,7 +282,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(flowPath);
 
             // draw symbol for locked flows
-            if (flow.isLocked()) {
+            if (drawGUIElements && flow.isLocked()) {
                 Point pt = flow.pointOnCurve(0.5);
                 drawCross(pt.x, pt.y);
             }
@@ -284,7 +292,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         // Iterate through the flows again to draw control points for selected
         // flows. This is done in a separate iteration to prevent control points
         // from being drawn under flows.
-        if (model.isFlowSelected()) {
+        if (drawGUIElements && model.isFlowSelected()) {
             for (Flow flow : flows) {
                 if (flow.isSelected()) {
                     drawControlPoints(flow);
@@ -302,7 +310,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
             double r = getNodeRadius(node);
-            Color color = node.isSelected() ? SELECTION_COLOR : model.getFlowColor();
+            Color color = drawGUIElements && node.isSelected() ? 
+                    SELECTION_COLOR : model.getFlowColor();
             drawCircle(node.x, node.y, r, Color.WHITE, color);
         }
     }

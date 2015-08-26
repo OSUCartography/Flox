@@ -2284,14 +2284,14 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
         if (size > 5000) {
-            ErrorDialog.showErrorDialog("The entered size is too large.");
+            ErrorDialog.showErrorDialog("The entered size must be smaller than 5000.");
             return;
         }
         
         // Get the area of the map to be drawn to the image
         Rectangle2D bb = mapComponent.getVisibleArea();
         
-        BufferedImage image = FloxRenderer.renderToImage(model, size, bb, true);
+        BufferedImage image = FloxRenderer.renderToImage(model, size, bb, true, false);
         String filePath = FileUtils.askFile(this, "PNG Image", null, false, "png");
         {
             if (filePath != null) {
