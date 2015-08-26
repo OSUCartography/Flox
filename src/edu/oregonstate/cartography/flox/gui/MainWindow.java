@@ -414,6 +414,8 @@ public class MainWindow extends javax.swing.JFrame {
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
         showControlPointsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator13 = new javax.swing.JPopupMenu.Separator();
+        emptySpaceMenuItem = new javax.swing.JMenuItem();
 
         flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1900,6 +1902,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jMenu1.add(enforceCanvasCheckBoxMenuItem);
+        jMenu1.add(jSeparator13);
+
+        emptySpaceMenuItem.setText("Show Empty Space Image");
+        emptySpaceMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                emptySpaceMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(emptySpaceMenuItem);
 
         menuBar.add(jMenu1);
 
@@ -2289,7 +2300,12 @@ public class MainWindow extends javax.swing.JFrame {
         // Get the area of the map to be drawn to the image
         Rectangle2D bb = mapComponent.getVisibleArea();
 
-        BufferedImage image = FloxRenderer.renderToImage(model, size, bb, true, false);
+        BufferedImage image = FloxRenderer.renderToImage(model, size, bb, 
+                true, // antialiasing
+                false, // draw GUI elements
+                true, // draw background 
+                false, // fill node circles
+                true); // draw selected flows 
         String filePath = FileUtils.askFile(this, "PNG Image", null, false, "png");
         {
             if (filePath != null) {
@@ -3085,6 +3101,18 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_showNodesToggleButtonActionPerformed
 
+    private void emptySpaceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emptySpaceMenuItemActionPerformed
+        int size = 800;
+        Rectangle2D bb = mapComponent.getVisibleArea();
+        BufferedImage image = FloxRenderer.renderToImage(model, size, bb, 
+                false, // antialiasing
+                false, // draw GUI elements
+                false, // draw background 
+                true, // fill node circles
+                false); // draw selected flows 
+        edu.oregonstate.cartography.utils.ImageUtils.displayImageInWindow(image);
+    }//GEN-LAST:event_emptySpaceMenuItemActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3200,6 +3228,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JMenu editMenu;
+    private javax.swing.JMenuItem emptySpaceMenuItem;
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JCheckBoxMenuItem enforceCanvasCheckBoxMenuItem;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
@@ -3250,6 +3279,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator12;
+    private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
     private javax.swing.JToolBar jToolBar1;

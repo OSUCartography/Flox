@@ -90,10 +90,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param bb The bounding box of the map area that will be visible in the
      * image
      * @param antialias If true anti-aliasing is applied.
+     * @param drawGUIElements
+     * @param drawBackground
+     * @param fillNodes
+     * @param drawSelectedFlows
      * @return The new image.
      */
     public static BufferedImage renderToImage(Model model, int maxDim,
-            Rectangle2D bb, boolean antialias, boolean drawGUIElements) {
+            Rectangle2D bb,
+            boolean antialias,
+            boolean drawGUIElements,
+            boolean drawBackground,
+            boolean fillNodes,
+            boolean drawSelectedFlows) {
+        
         // find size of fitting image
         //Rectangle2D bb = model.getFlowsBoundingBox();
         double scale = maxDim / Math.max(bb.getWidth(), bb.getHeight());
@@ -133,21 +143,23 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 bb.getMinX(), bb.getMaxY(), scale, drawGUIElements);
 
         // render background layers
-        int nbrLayers = model.getNbrLayers();
-        for (int i = nbrLayers - 1; i >= 0; i--) {
-            Layer layer = model.getLayer(i);
-            GeometryCollection geometry = layer.getGeometryCollection();
-            VectorSymbol symbol = layer.getVectorSymbol();
-            Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
-            Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
-            if (fillColor != null || strokeColor != null) {
-                renderer.draw(geometry, fillColor, strokeColor);
+        if (drawBackground) {
+            int nbrLayers = model.getNbrLayers();
+            for (int i = nbrLayers - 1; i >= 0; i--) {
+                Layer layer = model.getLayer(i);
+                GeometryCollection geometry = layer.getGeometryCollection();
+                VectorSymbol symbol = layer.getVectorSymbol();
+                Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
+                Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
+                if (fillColor != null || strokeColor != null) {
+                    renderer.draw(geometry, fillColor, strokeColor);
+                }
             }
         }
-
+        
         // render flows and nodes
-        renderer.drawFlows();
-        renderer.drawNodes();
+        renderer.drawFlows(drawSelectedFlows);
+        renderer.drawNodes(fillNodes);
         return bufferImage;
     }
 
@@ -194,8 +206,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Draws the flows to the Graphics2D context. Retrieves settings from the
      * model to determine flow width, length, as well as determining whether to
      * apply any clipping or add arrowheads.
+     * @param drawSelectedFlows If false, selected flows are not drawn.
      */
-    public void drawFlows() {
+    public void drawFlows(boolean drawSelectedFlows) {
 
         // Create an ArrayList to store the flows
         ArrayList<Flow> flows = model.getFlows();
@@ -207,6 +220,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         // Iterate through the flows
         for (Flow flow : flows) {
 
+            if (flow.isSelected() && !drawSelectedFlows) {
+                continue;
+            }
+            
             // Create a GeneralPath for the flow
             GeneralPath flowPath;
 
@@ -304,15 +321,18 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
     /**
      * Draw all nodes to a Graphics2D context.
+     * @param fillNodes If true, the node circles are filled with the stroke 
+     * color. Otherwise they are filled with white.
      */
-    public void drawNodes() {
+    public void drawNodes(boolean fillNodes) {
         g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
             double r = getNodeRadius(node);
-            Color color = drawGUIElements && node.isSelected()
+            Color strokeColor = drawGUIElements && node.isSelected()
                     ? SELECTION_COLOR : model.getFlowColor();
-            drawCircle(node.x, node.y, r, Color.WHITE, color);
+            Color fillColor = fillNodes ? model.getFlowColor() : Color.WHITE;
+            drawCircle(node.x, node.y, r, fillColor, strokeColor);
         }
     }
 
@@ -329,12 +349,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         double cWidth = canvas.getWidth();
         double cHeight = canvas.getHeight();
 
-            // Get the additional padding around the canvas, which is a
+        // Get the additional padding around the canvas, which is a
         // percentage of the current canvas specified by the model.
         double xPad = cWidth * model.getCanvasPadding();
         double yPad = cHeight * model.getCanvasPadding();
 
-            // Calculate the points of the canvas rectangle, adding the 
+        // Calculate the points of the canvas rectangle, adding the 
         // canvasPadding.
         Point b1 = new Point(
                 xToPx(canvas.getX() - xPad),
