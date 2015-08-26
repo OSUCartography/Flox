@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import edu.oregonstate.cartography.utils.GeometryUtils;
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -62,6 +63,11 @@ public class Model {
         MEDIUM,
         HIGH
     }
+    
+    /**
+     * Color for drawing flows that are not selected
+     */
+    private final Color FLOW_COLOR = Color.BLACK;
 
     /**
      * Graph of edges (BŽzier flows) and nodes (Point).
@@ -1382,6 +1388,14 @@ public class Model {
      */
     public void setMaxNodeSize(double maxNodeSize) {
         this.maxNodeSize = maxNodeSize;
+    }
+
+    /**
+     * Returns the color for drawing flows.
+     * @return the color of flows
+     */
+    public Color getFlowColor() {
+        return FLOW_COLOR;
     }
 
 }

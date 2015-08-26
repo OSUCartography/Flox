@@ -42,11 +42,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private final Color SELECTION_COLOR = Color.decode("#59A4FF");
 
     /**
-     * Color for drawing flows that are not selected
-     */
-    private final Color REGULAR_COLOR = Color.BLACK;
-
-    /**
      * Width of stroke line for nodes
      */
     private final float NODE_STROKE_WIDTH = 2;
@@ -266,7 +261,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             }
 
-            g2d.setColor(flow.isSelected() ? SELECTION_COLOR : REGULAR_COLOR);
+            g2d.setColor(flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
 
             // draw the arrow heads
             if (model.isDrawArrows()) {
@@ -307,7 +302,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
             double r = getNodeRadius(node);
-            Color color = node.isSelected() ? SELECTION_COLOR : REGULAR_COLOR;
+            Color color = node.isSelected() ? SELECTION_COLOR : model.getFlowColor();
             drawCircle(node.x, node.y, r, Color.WHITE, color);
         }
     }

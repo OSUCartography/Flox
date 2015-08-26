@@ -1,10 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
-import com.vividsolutions.jts.geom.Envelope;
 import edu.oregonstate.cartography.flox.gui.Arrow;
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
-import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import org.w3c.dom.Document;
@@ -167,8 +166,24 @@ public class SVGFlowExporter extends SVGExporter {
     @Override
     protected void append(Element svgRootElement, Document document) {
 
+        // export map layers
+        int nbrLayers = model.getNbrLayers();
+        for (int i = nbrLayers - 1; i >= 0; i--) {
+            Layer layer = model.getLayer(i);
+            Element g = appendGeometryCollection(layer.getGeometryCollection(),
+                    svgRootElement, document);
+            g.setAttribute("id", layer.getName());
+            VectorSymbol symbol = layer.getVectorSymbol();
+            Color fillColor = symbol.isFilled()
+                    ? layer.getVectorSymbol().getFillColor() : null;
+            Color strokeColor = symbol.isStroked()
+                    ? layer.getVectorSymbol().getStrokeColor() : null;
+            setVectorStyle(g, strokeColor, 1, fillColor);
+        }
+
+        // export flows and nodes
         Element g = (Element) document.createElementNS(SVGNAMESPACE, "g");
-        setVectorStyle(g);
+        setVectorStyle(g, model.getFlowColor(), 1, null);
         svgRootElement.appendChild(g);
 
         double r = model.getFlowDistanceFromEndPoint() / mapComponent.getScale()
@@ -185,9 +200,9 @@ public class SVGFlowExporter extends SVGExporter {
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
                 g.appendChild(pathElement);
             } else {
-                
+
                 QuadraticBezierFlow f = (QuadraticBezierFlow) flow;
-                
+
                 if (model.isDrawArrows()) {
 
                     f = clipFlowByEndNode(f);

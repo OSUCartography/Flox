@@ -45,7 +45,7 @@ public class SVGExporter {
      * rounding of coordinates
      */
     protected final DecimalFormat df = new DecimalFormat("#.##");
-    
+
     /**
      * Name of the author creating the SVG document
      */
@@ -80,7 +80,7 @@ public class SVGExporter {
      * Height of the SVG canvas in pixel.
      */
     private double canvasHeight;
-    
+
     /**
      * Creates a new SVGExporter.
      *
@@ -99,7 +99,7 @@ public class SVGExporter {
         }
         setSVGCanvasSize(600, 450);
     }
-    
+
     public final void setSVGCanvasSize(double width, double height) {
         canvasWidth = width;
         canvasHeight = height;
@@ -129,9 +129,8 @@ public class SVGExporter {
             // add a description element
             appendDescription(svgRootElement, document);
 
-            // convert GeoSet to SVG DOM
-            appendGeometryCollection(this.collection, svgRootElement, document);
-
+            // convert GeometryCollection to SVG DOM
+            // appendGeometryCollection(this.collection, svgRootElement, document);
             append(svgRootElement, document);
 
             // Prepare the output file
@@ -246,15 +245,16 @@ public class SVGExporter {
      * @param parent The parent element that will contain the passed
      * GeometryCollection.
      * @param document The DOM.
+     * @return The element containing all geometry features.
      */
-    private void appendGeometryCollection(GeometryCollection collection,
-            Element parent, Document document) throws IOException {
+    protected Element appendGeometryCollection(GeometryCollection collection,
+            Element parent, Document document) {
 
         Element g = document.createElementNS(SVGNAMESPACE, "g");
         if (g == null) {
-            return;
+            return null;
         }
-        setVectorStyle(g);
+        setVectorStyle(g, Color.BLACK, 1, null);
         parent.appendChild(g);
 
         final int nbrObj = collection.getNumGeometries();
@@ -280,6 +280,7 @@ public class SVGExporter {
                 g.appendChild(pathElement);
             }
         }
+        return g;
     }
 
     /**
@@ -345,17 +346,41 @@ public class SVGExporter {
     }
 
     /**
-     * add vector style to element
+     * Define styling of an element
      *
-     * @param element
+     * @param element Element to set vector style for.
+     * @param strokeColor The color for lines. If null, no stroke is drawn.
+     * @param strokeWidth The width of lines.
+     * @param fillColor The fill color.
      */
-    protected void setVectorStyle(Element element) {
-        String strokeColor = ColorUtils.colorToCSSString(Color.BLACK);
-        element.setAttribute("stroke", strokeColor);
-        String fillColor = "none";
-        element.setAttribute("fill", fillColor);
-        double strokeWidth = 1;
-        element.setAttribute("stroke-width", Double.toString(strokeWidth));
+    protected void setVectorStyle(Element element,
+            Color strokeColor, double strokeWidth, Color fillColor) {
+
+        assert (element != null);
+
+        // stroke color
+        String strokeColorStr;
+        if (strokeColor == null) {
+            strokeColorStr = "none";
+        } else {
+            strokeColorStr = ColorUtils.colorToCSSString(strokeColor);
+        }
+
+        // stroke width
+        element.setAttribute("stroke", strokeColorStr);
+        if (strokeColor != null) {
+            strokeWidth = Double.max(0, strokeWidth);
+            element.setAttribute("stroke-width", Double.toString(strokeWidth));
+        }
+        
+        // fill color
+        String fillColorStr;
+        if (fillColor == null) {
+            fillColorStr = "none";
+        } else {
+            fillColorStr = ColorUtils.colorToCSSString(fillColor);
+        }
+        element.setAttribute("fill", fillColorStr);
     }
 
     /**
@@ -384,11 +409,12 @@ public class SVGExporter {
 
     /**
      * Give derived classes opportunity to add custom data.
+     *
      * @param svgRootElement
-     * @param document 
+     * @param document
      */
     protected void append(Element svgRootElement, Document document) {
-        
+
     }
 
 }

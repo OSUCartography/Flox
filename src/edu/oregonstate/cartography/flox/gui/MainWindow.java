@@ -330,6 +330,7 @@ public class MainWindow extends javax.swing.JFrame {
         moveFlowsThatCrossNodesButton = new javax.swing.JButton();
         showNodesToggleButton = new javax.swing.JToggleButton();
         showFlowsToggleButton = new javax.swing.JToggleButton();
+        jSeparator9 = new javax.swing.JSeparator();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -1233,6 +1234,13 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
         mapControlPanel.add(showFlowsToggleButton, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
+        mapControlPanel.add(jSeparator9, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -3246,6 +3254,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator8;
+    private javax.swing.JSeparator jSeparator9;
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
