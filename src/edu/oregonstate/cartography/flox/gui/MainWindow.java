@@ -2,6 +2,7 @@ package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import edu.oregonstate.cartography.flox.model.BooleanGrid;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
 import static edu.oregonstate.cartography.flox.model.CubicBezierFlow.bendCubicFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
@@ -3102,7 +3103,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_showNodesToggleButtonActionPerformed
 
     private void emptySpaceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emptySpaceMenuItemActionPerformed
-        int size = 800;
+        int size = 500;
         Rectangle2D bb = mapComponent.getVisibleArea();
         BufferedImage image = FloxRenderer.renderToImage(model, size, bb, 
                 false, // antialiasing
@@ -3111,6 +3112,31 @@ public class MainWindow extends javax.swing.JFrame {
                 true, // fill node circles
                 false); // draw selected flows 
         edu.oregonstate.cartography.utils.ImageUtils.displayImageInWindow(image);
+        
+        // convert image to boolean grid
+        int cols = image.getWidth();
+        int rows = image.getHeight();
+        double cellSize = bb.getWidth() / (cols - 1);
+        BooleanGrid booleanGrid = new BooleanGrid(cols, rows, cellSize);
+        booleanGrid.setWest(bb.getMinX());
+        booleanGrid.setNorth(bb.getMaxY());
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                // FIXME this is slow and could be accelarated by accessing the
+                // raster model.
+                // to acclerate, we could also render to a B/W image.
+                int rgb = image.getRGB(c, r);
+                int b = rgb & 0xFF;
+                booleanGrid.setValue(b == 0, c, r);
+            }
+        }
+        System.out.println(booleanGrid.toString());
+        
+        // false values are not occupied by flows or nodes, true values are occupied.
+        // we could now iterate over all cells and check for false values, which 
+        // can function as attractors.
+        // TODO
+        
     }//GEN-LAST:event_emptySpaceMenuItemActionPerformed
 
     private void layout(String undoString) {
