@@ -418,6 +418,7 @@ public class MainWindow extends javax.swing.JFrame {
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         emptySpaceMenuItem = new javax.swing.JMenuItem();
+        angularDistributionMenuItem = new javax.swing.JMenuItem();
 
         flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1907,13 +1908,22 @@ public class MainWindow extends javax.swing.JFrame {
         jMenu1.add(jSeparator13);
 
         emptySpaceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        emptySpaceMenuItem.setText("Show Empty Space Image");
+        emptySpaceMenuItem.setText("Attract First Selected Flow by Empty Space");
         emptySpaceMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 emptySpaceMenuItemActionPerformed(evt);
             }
         });
         jMenu1.add(emptySpaceMenuItem);
+
+        angularDistributionMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        angularDistributionMenuItem.setText("Adjust Angular Distribution of First Selected Flow");
+        angularDistributionMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                angularDistributionMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(angularDistributionMenuItem);
 
         menuBar.add(jMenu1);
 
@@ -3204,6 +3214,20 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_emptySpaceMenuItemActionPerformed
 
+    private void angularDistributionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_angularDistributionMenuItemActionPerformed
+        // FIXME work in progress
+        
+        if (model.getSelectedFlows().size() < 1) {
+            System.err.println("no flow selected");
+            return;
+        }
+        QuadraticBezierFlow flow = (QuadraticBezierFlow)model.getSelectedFlows().get(0);
+        ForceLayouter layouter = new ForceLayouter(model);
+        layouter.computeAngularDistributionForce(flow);
+        mapComponent.eraseBufferImage();
+        mapComponent.repaint();
+    }//GEN-LAST:event_angularDistributionMenuItemActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3293,6 +3317,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
+    private javax.swing.JMenuItem angularDistributionMenuItem;
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JCheckBoxMenuItem applyConstantForceMenuCheckbox;
     private javax.swing.JSlider arrowCornerPositionSlider;

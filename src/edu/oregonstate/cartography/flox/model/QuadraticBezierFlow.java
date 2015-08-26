@@ -47,7 +47,7 @@ public class QuadraticBezierFlow extends Flow {
 
         this.startPt = startPt;
         this.endPt = endPt;
-        
+
         // Angle between the straight line connecting start and end point and 
         // the line connecting the start/end point with the corresponding Bezier 
         // control point.
@@ -57,7 +57,7 @@ public class QuadraticBezierFlow extends Flow {
         double dist = getBaselineLength();
         double tangentLength = dist * .5;
         computeCtrlPt(alpha, tangentLength);
-        
+
     }
 
     /**
@@ -159,7 +159,7 @@ public class QuadraticBezierFlow extends Flow {
         GeneralPath path = new GeneralPath();
         path.moveTo(startPt.x, startPt.y);
         path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
-        PathIterator iter = path.getPathIterator(null, deCasteljauTol/100);
+        PathIterator iter = path.getPathIterator(null, deCasteljauTol / 100);
         double[] coords = new double[6];
         while (!iter.isDone()) {
             iter.currentSegment(coords);
@@ -192,19 +192,19 @@ public class QuadraticBezierFlow extends Flow {
     /**
      * Converts this Bezier curve to straight line segments.
      *
-     * @param deCasteljauTol The maximum distance between the curve and the straight
-     * line segments.
+     * @param deCasteljauTol The maximum distance between the curve and the
+     * straight line segments.
      * @return An list of irregularPoints, including copies of the start point
      * and the end point.
      */
-    public ArrayList<Point>toUnclippedStraightLineSegments (double deCasteljauTol) {
+    public ArrayList<Point> toUnclippedStraightLineSegments(double deCasteljauTol) {
         assert (deCasteljauTol > 0);
 
         // FIXME d should be a parameter
         double d = deCasteljauTol;
 
         ArrayList<Point> regularPoints = new ArrayList<>();
-        ArrayList<Point> irregularPoints 
+        ArrayList<Point> irregularPoints
                 = toStraightLineSegmentsWithIrregularLength(d);
 
         // create new point set with regularly distributed irregularPoints
@@ -450,26 +450,56 @@ public class QuadraticBezierFlow extends Flow {
 
         return splitFlow;
     }
-    
+
     /**
      * Computes the shortest distance between a point and any point on this
      * quadratic BŽzier curve. Attention: xy parameter is changed.
-     * @param xy Point x and y on input; the closest point on the curve on output.
+     *
+     * @param xy Point x and y on input; the closest point on the curve on
+     * output.
      * @return The distance.
      */
     public double distance(double[] xy) {
-           return GeometryUtils.getDistanceToQuadraticBezierCurve(startPt.x, startPt.y, 
+        return GeometryUtils.getDistanceToQuadraticBezierCurve(startPt.x, startPt.y,
                 cPt.x, cPt.y, endPt.x, endPt.y, xy);
     }
-    
+
     /**
-     * Computes the square of the shortest distance between a point and any 
+     * Computes the square of the shortest distance between a point and any
      * point on this quadratic BŽzier curve. Attention: xy parameter is changed.
-     * @param xy Point x and y on input; the closest point on the curve on output.
+     *
+     * @param xy Point x and y on input; the closest point on the curve on
+     * output.
      * @return The distance.
      */
-    public double distanceSq(double []xy) {
-           return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y, 
+    public double distanceSq(double[] xy) {
+        return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
                 cPt.x, cPt.y, endPt.x, endPt.y, xy);
+    }
+
+    public double getDistanceBetweenStartPointAndControlPoint() {
+        double dx = cPt.x - startPt.x;
+        double dy = cPt.y - startPt.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public double getDistanceBetweenEndPointAndControlPoint() {
+        double dx = cPt.x - endPt.x;
+        double dy = cPt.y - endPt.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public double[] getDirectionVectorFromStartPointToControlPoint() {
+        double dx = cPt.x - startPt.x;
+        double dy = cPt.y - startPt.y;
+        double d = Math.sqrt(dx * dx + dy * dy);
+        return new double[]{dx / d, dy / d};
+    }
+    
+    public double[] getDirectionVectorFromEndPointToControlPoint() {
+        double dx = cPt.x - endPt.x;
+        double dy = cPt.y - endPt.y;
+        double d = Math.sqrt(dx * dx + dy * dy);
+        return new double[]{dx / d, dy / d};
     }
 }

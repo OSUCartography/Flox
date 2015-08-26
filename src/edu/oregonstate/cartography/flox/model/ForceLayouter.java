@@ -435,14 +435,15 @@ public class ForceLayouter {
     }
 
     /**
-     * Applies a layout iteration to all unlocked flows. Requires that all flows 
-     * are instances of the QuadraticBezierFlow class (an exception will be 
+     * Applies a layout iteration to all unlocked flows. Requires that all flows
+     * are instances of the QuadraticBezierFlow class (an exception will be
      * thrown otherwise).
-     * @param weight 
+     *
+     * @param weight
      */
     public void layoutAllFlows(double weight) {
         assert (model.getCurveType() == Model.CurveType.QUADRATIC);
-        
+
         ArrayList<Flow> flows = model.getFlows();
         if (flows.size() < 2) {
             return;
@@ -484,9 +485,6 @@ public class ForceLayouter {
                 ctrlPt.y = tempPoint.y;
             }
 
-            // FIXME work in progress
-            // computeAngularDistributionForce(qFlow);
-            
             // Enforce the canvas range
             if (model.isEnforceCanvasRange()) {
                 Rectangle2D canvasRect = model.getCanvas();
@@ -514,20 +512,48 @@ public class ForceLayouter {
     }
 
     /**
-     * FIXME work in progress
-     * @param flow 
+     * Convert an angular difference to an angular force. A small difference
+     * results in a large force, and vice versa. The sign of the angular difference
+     * is retained by the angular force.
+     * 
+     * @param angleDiff An signed angular difference in radians.
+     * @return An signed angular force.
      */
-    private void computeAngularDistributionForce(QuadraticBezierFlow flow) {
+    private double angularW(double angleDiff) {
+        //FIXME hard-coded parameter
         final double K = 8;
+        double w = Math.exp(-K * angleDiff * angleDiff);
+        return angleDiff < 0 ? -w : w;
+    }
+
+    /**
+     * FIXME work in progress
+     * Minimize angular tensions for one flow.
+     *
+     * @param flow The flow for which the angular distances to its neighbors are 
+     * balanced.
+     */
+    public void computeAngularDistributionForce(QuadraticBezierFlow flow) {
+
         Point startPoint = flow.getStartPt();
         Point endPoint = flow.getEndPt();
+        Point ctrlPoint = flow.getCtrlPt();
+        // azimuthal angle for the line connecting the start point and the control point
         double startToCtrlAngle = startToCtrlAngle(flow);
-        double endToCtrlAngle = endToCtrlAngle(flow);
+        // azimuthal angle for the line connecting the end point and the control point
+        double endToCtrlAngle = endToCtrlAngle(flow); // FIXME this is = startToCtrlAngle - 180
+        
+        // loop over all other flows. Sum angular forces at start and end points of
+        // the passed flow. These angular forces are exerted by other flows ending
+        // or starting at the end or start nodes of the passed flow.
+        // The angular differences between the flow and each other flow at the 
+        // start and end nodes are computed. If the angular difference is small,
+        // the angular force is large, and vice versa. angularW() converts an
+        // angular difference to an angular force.
+        
+        double startAngleSum = 0;
+        double endAngleSum = 0;
         Iterator<Flow> iter = model.flowIterator();
-        double startSum = 0;
-        double startWSum = 0;
-        double endSum = 0;
-        double endWSum = 0;
         while (iter.hasNext()) {
             QuadraticBezierFlow f = (QuadraticBezierFlow) iter.next();
             if (f == flow) {
@@ -538,44 +564,65 @@ public class ForceLayouter {
             if (startPoint == fStart) {
                 double fStartToCtrlAngle = startToCtrlAngle(f);
                 double d = GeometryUtils.angleDif(startToCtrlAngle, fStartToCtrlAngle);
-                double w = Math.exp(-K * d * d);
-                startSum += d * w;
-                startWSum += w;
+                startAngleSum += angularW(d);
             }
 
             if (startPoint == fEnd) {
                 double fEndToCtrlAngle = endToCtrlAngle(f);
                 double d = GeometryUtils.angleDif(startToCtrlAngle, fEndToCtrlAngle);
-                double w = Math.exp(-K * d * d);
-                startSum += d * w;
-                startWSum += w;
+                startAngleSum += angularW(d);
             }
 
             if (endPoint == fStart) {
                 double fStartToCtrlAngle = startToCtrlAngle(f);
                 double d = GeometryUtils.angleDif(endToCtrlAngle, fStartToCtrlAngle);
-                double w = Math.exp(-K * d * d);
-                endSum += d * w;
-                endWSum += w;
+                endAngleSum += angularW(d);
             }
 
             if (endPoint == fEnd) {
                 double fEndToCtrlAngle = endToCtrlAngle(f);
                 double d = GeometryUtils.angleDif(endToCtrlAngle, fEndToCtrlAngle);
-                double w = Math.exp(-K * d * d);
-                endSum += d * w;
-                endWSum += w;
+                endAngleSum += angularW(d);
             }
         }
-        double s = startSum / startWSum;
-        double e = endSum / endWSum;
-//        System.out.println();
-//        System.out.println ("start " + Math.toDegrees(s));
-//        System.out.println ("end " + Math.toDegrees(e));
+
+        // FIXME should be parameter set in GUI by user
+        double angularWeight = 0.1;
+        
+        // Convert the angles to two vectors that are tangent to a circle around 
+        // the start / end nodes. The circles pass through the control point.
+        // The length of the tangent Vector is angle * r
+        // The direction of the tangent vector is normal to the vector connecting
+        // the start or end point and the control point
+        
+        // length of the two vectors between start/end points and the control point
+        double startVectorLength = startAngleSum * flow.getDistanceBetweenStartPointAndControlPoint();
+        double endVectorLength = endAngleSum * flow.getDistanceBetweenEndPointAndControlPoint();
+        
+        // direction vectors between start/end points and the control point
+        double [] startDir = flow.getDirectionVectorFromStartPointToControlPoint();
+        double [] endDir = flow.getDirectionVectorFromEndPointToControlPoint();
+        
+        // vector tangent to the circle around the start point
+        double startTangentX = -startDir[1] * startVectorLength;
+        double startTangentY = startDir[0] * startVectorLength;
+        
+        // vector tangent to the circle around the end point
+        double endTangentX = -endDir[1] * endVectorLength;
+        double endTangentY = endDir[0] * endVectorLength;
+        
+        // sum and weight the two vectors
+        double vectX = (startTangentX + endTangentX) * angularWeight;
+        double vectY = (startTangentY + endTangentY) * angularWeight;
+        
+        // move control point
+        ctrlPoint.x += vectX;
+        ctrlPoint.y += vectY;
     }
 
     /**
      * Converts all flows that are not locked to straight lines.
+     *
      * @param onlySelected If true, only flows that are selected are converted
      * to straight lines.
      */
