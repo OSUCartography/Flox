@@ -191,16 +191,6 @@ public class Model {
     private double maxFlowStrokeWidth = 20;
 
     /**
-     * Gets the ratio between the maximum permitted flow stroke width and the
-     * maximum current flow value.
-     *
-     * @return maxFlowStrokeWidth/maxFlowValue
-     */
-    public double getFlowWidthScaleFactor() {
-        return getMaxFlowStrokeWidth() / getMaxFlowValue();
-    }
-
-    /**
      * Maximum allowed node radius in pixels.
      */
     private double maxNodeSize = 10;
@@ -1387,6 +1377,16 @@ public class Model {
         this.maxNodeSize = maxNodeSize;
     }
 
+    /**
+     * Gets the ratio between the maximum permitted flow stroke width and the
+     * maximum current flow value.
+     *
+     * @return maxFlowStrokeWidth/maxFlowValue
+     */
+    public double getFlowWidthScaleFactor() {
+        return getMaxFlowStrokeWidth() / getMaxFlowValue();
+    }
+    
     /**
      * Returns the color for drawing flows.
      * @return the color of flows

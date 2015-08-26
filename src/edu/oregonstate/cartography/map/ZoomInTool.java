@@ -77,7 +77,6 @@ public class ZoomInTool extends RectangleTool {
         // temporarily change the mouse-cursor to the zoom-out icon
         CursorUtils.setCursor("zoomout", this.mapComponent);
         final String zoomoutCursorName = mapComponent.getCursor().getName();
-        System.out.println(zoomoutCursorName);
         new Timer().schedule(new TimerTask(){
             @Override
             public void run() {

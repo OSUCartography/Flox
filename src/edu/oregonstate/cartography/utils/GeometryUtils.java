@@ -689,13 +689,4 @@ public class GeometryUtils {
         return Math.sqrt(dSq);
     }
 
-    public static void main(String[] args) {
-        Point p0 = new Point(0, 0);
-        Point p1 = new Point(0, 100);
-        Point p2 = new Point(0, 200);
-        double[] xy = {1, 50};
-        QuadraticBezierFlow flow = new QuadraticBezierFlow(p0, p1, p2);
-        double d = flow.distance(xy);
-        System.out.println(d);
-    }
 }

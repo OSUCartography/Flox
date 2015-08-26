@@ -268,11 +268,11 @@ public class SVGExporter {
             } else if (geometry instanceof MultiPolygon) {
                 svgPath = convertToSVGPath((MultiPolygon) geometry);
             } else if (geometry instanceof Point) {
-                System.out.println("SVG export of points not supported yet");
+                System.err.println("SVG export of points not supported yet");
             } else if (geometry instanceof GeometryCollection) {
                 appendGeometryCollection((GeometryCollection) geometry, g, document);
             } else {
-                System.out.println("SVG export found unsupported geometry type");
+                System.err.println("SVG export found unsupported geometry type");
             }
             if (svgPath != null) {
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");

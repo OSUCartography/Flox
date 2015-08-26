@@ -223,9 +223,9 @@ public class MainWindow extends javax.swing.JFrame {
                 highFlowSegmentationMenuItem.setSelected(true);
             }
             updateClippingGUI();
-            
+
             lockFeatureSizeToScaleCheckbox.setSelected(model.isFlowWidthLocked());
-            
+
         } finally {
             updatingGUI = false;
         }
@@ -2000,7 +2000,7 @@ public class MainWindow extends javax.swing.JFrame {
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             setFlows(flows, inFilePath);
             sizeFeaturesToScale();
-            
+
         } catch (Exception ex) {
             ErrorDialog.showErrorDialog("The file could not be read.", "Flox Error", ex, null);
         }
@@ -2285,10 +2285,10 @@ public class MainWindow extends javax.swing.JFrame {
             ErrorDialog.showErrorDialog("The entered size must be smaller than 5000.");
             return;
         }
-        
+
         // Get the area of the map to be drawn to the image
         Rectangle2D bb = mapComponent.getVisibleArea();
-        
+
         BufferedImage image = FloxRenderer.renderToImage(model, size, bb, true, false);
         String filePath = FileUtils.askFile(this, "PNG Image", null, false, "png");
         {
@@ -2376,7 +2376,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
 
     private void arrowheadLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadLengthSliderStateChanged
-        
+
         if (updatingGUI == false && model != null) {
             model.setArrowLengthScaleFactor((arrowheadLengthSlider.getValue() + 1) / 10d);
             mapComponent.refreshMap();
@@ -2525,14 +2525,14 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
 
     private void sizeFeaturesToScale() {
-        if(lockFeatureSizeToScaleCheckbox.isSelected()) {
-                model.setLockedMapScale(mapComponent.getScale());
-                mapComponent.refreshMap();
-            } else {
-                lockFeatureSizeToScaleCheckbox.doClick();
-            }
+        if (lockFeatureSizeToScaleCheckbox.isSelected()) {
+            model.setLockedMapScale(mapComponent.getScale());
+            mapComponent.refreshMap();
+        } else {
+            lockFeatureSizeToScaleCheckbox.doClick();
+        }
     }
-    
+
     private void selectPointsFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectPointsFileButtonActionPerformed
         String filePath = FileUtils.askFile(this, "Nodes File (CSV)", true);
         if (filePath == null) {
@@ -2596,7 +2596,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_clipWithStartAreasCheckBoxActionPerformed
 
     private void arrowSizeRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowSizeRatioSliderStateChanged
-        if ( updatingGUI == false && model != null) {
+        if (updatingGUI == false && model != null) {
             model.setArrowSizeRatio((arrowSizeRatioSlider.getValue()) / 100d);
             mapComponent.refreshMap();
             if (!arrowSizeRatioSlider.getValueIsAdjusting()) {
@@ -2661,7 +2661,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_exportCSVMenuItemActionPerformed
 
     private void addFlowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFlowToggleButtonActionPerformed
-        mapComponent.setMapTool(new AddFlowTool(mapComponent,  model, undo));
+        mapComponent.setMapTool(new AddFlowTool(mapComponent, model, undo));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
     private void lockFeatureSizeToScaleCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFeatureSizeToScaleCheckboxActionPerformed
@@ -2789,7 +2789,6 @@ public class MainWindow extends javax.swing.JFrame {
                     pt0.x, pt0.y, pt1.x, pt1.y, pt2.x, pt2.y);
 
             if (distFromBaseline > flow.getBaselineLength() * 2) {
-                System.out.println("flipped a flow");
                 pt0.x = flow.getBaseLineMidPoint().x;
                 pt0.y = flow.getBaseLineMidPoint().y;
                 unitVectorX *= -1;
@@ -2946,11 +2945,11 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_selectAllMenuItemActionPerformed
 
     /**
-     * Sets the icon of the lockUnlockButton to the appropriate icon for the 
-     * locked status of selected flows. 
-     * FIXME This code is repeated in the SelectionTool. Any way it could access
-     * this method here instead? Or is there some kind of action listener this
-     * code could go into that the SelectionTool could trigger?
+     * Sets the icon of the lockUnlockButton to the appropriate icon for the
+     * locked status of selected flows. FIXME This code is repeated in the
+     * SelectionTool. Any way it could access this method here instead? Or is
+     * there some kind of action listener this code could go into that the
+     * SelectionTool could trigger?
      */
     private void setLockUnlockButtonIcon() {
         ArrayList<Flow> selectedFlows = model.getSelectedFlows();

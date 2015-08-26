@@ -55,7 +55,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
-    
+
     /**
      * If true GUI elements to indicate selection or locked status are drawn.
      */
@@ -71,17 +71,17 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param north The top image border corresponds to this world coordinate
      * position.
      * @param scale The scale factor to apply when drawing.
-     * @param drawGUIElements If true GUI elements to indicate selection or 
-     * locked status are drawn. 
+     * @param drawGUIElements If true GUI elements to indicate selection or
+     * locked status are drawn.
      */
-    public FloxRenderer(Model model, Graphics2D g2d, 
+    public FloxRenderer(Model model, Graphics2D g2d,
             double west, double north, double scale,
             boolean drawGUIElements) {
         super(g2d, west, north, scale);
         this.model = model;
         this.drawGUIElements = drawGUIElements;
     }
-    
+
     /**
      * Renders the flows to an image.
      *
@@ -92,7 +92,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param antialias If true anti-aliasing is applied.
      * @return The new image.
      */
-    public static BufferedImage renderToImage(Model model, int maxDim, 
+    public static BufferedImage renderToImage(Model model, int maxDim,
             Rectangle2D bb, boolean antialias, boolean drawGUIElements) {
         // find size of fitting image
         //Rectangle2D bb = model.getFlowsBoundingBox();
@@ -129,7 +129,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         g2d.clearRect(0, 0, w, h);
 
         // setup renderer
-        FloxRenderer renderer = new FloxRenderer(model, g2d, 
+        FloxRenderer renderer = new FloxRenderer(model, g2d,
                 bb.getMinX(), bb.getMaxY(), scale, drawGUIElements);
 
         // render background layers
@@ -268,8 +268,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             }
 
-            g2d.setColor(drawGUIElements && flow.isSelected() ?
-                    SELECTION_COLOR : model.getFlowColor());
+            g2d.setColor(drawGUIElements && flow.isSelected()
+                    ? SELECTION_COLOR : model.getFlowColor());
 
             // draw the arrow heads
             if (model.isDrawArrows()) {
@@ -310,8 +310,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
             double r = getNodeRadius(node);
-            Color color = drawGUIElements && node.isSelected() ? 
-                    SELECTION_COLOR : model.getFlowColor();
+            Color color = drawGUIElements && node.isSelected()
+                    ? SELECTION_COLOR : model.getFlowColor();
             drawCircle(node.x, node.y, r, Color.WHITE, color);
         }
     }
@@ -321,50 +321,47 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     public void drawCanvas() {
 
+        assert (model.getCanvas() != null);
+
         g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getCanvas();
 
-        if (canvas == null) {
-            System.out.println("No Canvas!");
-        } else {
-            double cWidth = canvas.getWidth();
-            double cHeight = canvas.getHeight();
+        double cWidth = canvas.getWidth();
+        double cHeight = canvas.getHeight();
 
             // Get the additional padding around the canvas, which is a
-            // percentage of the current canvas specified by the model.
-            double xPad = cWidth * model.getCanvasPadding();
-            double yPad = cHeight * model.getCanvasPadding();
+        // percentage of the current canvas specified by the model.
+        double xPad = cWidth * model.getCanvasPadding();
+        double yPad = cHeight * model.getCanvasPadding();
 
             // Calculate the points of the canvas rectangle, adding the 
-            // canvasPadding.
-            Point b1 = new Point(
-                    xToPx(canvas.getX() - xPad),
-                    yToPx(canvas.getY() - yPad));
-            Point b2 = new Point(
-                    xToPx(canvas.getMaxX() + xPad),
-                    yToPx(canvas.getY() - yPad));
-            Point b3 = new Point(
-                    xToPx(canvas.getX() - xPad),
-                    yToPx(canvas.getMaxY() + yPad));
-            Point b4 = new Point(
-                    xToPx(canvas.getMaxX() + xPad),
-                    yToPx(canvas.getMaxY() + yPad));
+        // canvasPadding.
+        Point b1 = new Point(
+                xToPx(canvas.getX() - xPad),
+                yToPx(canvas.getY() - yPad));
+        Point b2 = new Point(
+                xToPx(canvas.getMaxX() + xPad),
+                yToPx(canvas.getY() - yPad));
+        Point b3 = new Point(
+                xToPx(canvas.getX() - xPad),
+                yToPx(canvas.getMaxY() + yPad));
+        Point b4 = new Point(
+                xToPx(canvas.getMaxX() + xPad),
+                yToPx(canvas.getMaxY() + yPad));
 
-            // Construct a GeneralPath from the canvas points
-            GeneralPath canvasPath = new GeneralPath();
-            canvasPath.moveTo(b1.x, b1.y);
-            canvasPath.lineTo(b2.x, b2.y);
-            canvasPath.lineTo(b4.x, b4.y);
-            canvasPath.lineTo(b3.x, b3.y);
-            canvasPath.lineTo(b1.x, b1.y);
+        // Construct a GeneralPath from the canvas points
+        GeneralPath canvasPath = new GeneralPath();
+        canvasPath.moveTo(b1.x, b1.y);
+        canvasPath.lineTo(b2.x, b2.y);
+        canvasPath.lineTo(b4.x, b4.y);
+        canvasPath.lineTo(b3.x, b3.y);
+        canvasPath.lineTo(b1.x, b1.y);
 
-            // Draw the canvas
-            g2d.setColor(Color.BLACK);
-            g2d.draw(canvasPath);
-            g2d.setColor(new Color(245, 245, 245));
-            g2d.fill(canvasPath);
-
-        }
+        // Draw the canvas
+        g2d.setColor(Color.BLACK);
+        g2d.draw(canvasPath);
+        g2d.setColor(new Color(245, 245, 245));
+        g2d.fill(canvasPath);
     }
 
     public void drawFlowRangebox() {
