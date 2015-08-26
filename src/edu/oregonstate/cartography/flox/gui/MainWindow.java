@@ -141,7 +141,6 @@ public class MainWindow extends javax.swing.JFrame {
         Object undoData = undo.getUndo();
         if (undoData != null) {
             byteArrayToModel((byte[]) undoData);
-            
             writeModelToGUI();
         }
     }
@@ -150,7 +149,6 @@ public class MainWindow extends javax.swing.JFrame {
         Object undoData = undo.getRedo();
         if (undoData != null) {
             byteArrayToModel((byte[]) undoData);
-            
             writeModelToGUI();
         }
     }
@@ -525,7 +523,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
-        jLabel22.setText("Points File");
+        jLabel22.setText("Nodes File");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         importPanel.add(jLabel22, gridBagConstraints);
@@ -1578,7 +1576,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(importFlowsMenuItem);
 
-        openPointsAndFlowsMenuItem.setText("Open Points and Flows…");
+        openPointsAndFlowsMenuItem.setText("Open Nodes and Flows…");
         openPointsAndFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openPointsAndFlowsMenuItemActionPerformed(evt);
@@ -2498,7 +2496,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void openPointsAndFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openPointsAndFlowsMenuItemActionPerformed
-        String title = "Open Points and Flows";
+        String title = "Open Nodes and Flows";
         importPanelOKButton.setEnabled(false);
         pointsFilePathLabel.setText("–");
         flowsFilePathLabel.setText("–");
@@ -2536,7 +2534,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
     
     private void selectPointsFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectPointsFileButtonActionPerformed
-        String filePath = FileUtils.askFile(this, "Points File (CSV)", true);
+        String filePath = FileUtils.askFile(this, "Nodes File (CSV)", true);
         if (filePath == null) {
             // user canceled
             return;

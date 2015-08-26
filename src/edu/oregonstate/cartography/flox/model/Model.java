@@ -67,7 +67,8 @@ public class Model {
     /**
      * Color for drawing flows that are not selected
      */
-    private final Color FLOW_COLOR = Color.BLACK;
+    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
+    private Color FLOW_COLOR = Color.BLACK;
 
     /**
      * Graph of edges (BŽzier flows) and nodes (Point).
@@ -205,69 +206,6 @@ public class Model {
     private double maxNodeSize = 10;
 
     /**
-     * Calculates the ratio between the maximum allowed node size and the
-     * highest node value. Needed for drawing nodes to the correct radius
-     * relative to the maximum radius permitted by the GUI settings. If there
-     * are no nodes on the map yet, it assumes a max node value of 1, which is
-     * the default value of new Points.
-     *
-     * @return node size scale factor
-     */
-    public double getNodeSizeScaleFactor() {
-
-        // Find the maximum node area as permitted by settings
-        double area = Math.PI * (maxNodeSize * maxNodeSize);
-
-        // Get the maximum current node value
-        double maxVal = getMaxNodeValue();
-
-        // return the ratio of the maximum allowed node area and the current
-        // max node value.
-        if (maxVal == 0) { // There are no nodes yet
-            return area / 1; // The value of the new node will be 1 by default
-        } else {
-            return area / maxVal;
-        }
-    }
-
-    /**
-     * Gets the maximum value of all nodes on the map.
-     * 
-     * @return maximum node value
-     */
-    public double getMaxNodeValue() {
-        return graph.getMaxNodeValue();
-    }
-
-    /**
-     * Gets the average value of all nodes on the map.
-     * 
-     * @return mean node value
-     */
-    public double getMeanNodeValue() {
-        ArrayList<Point> nodes = getNodes();
-        double sum = 0;
-        for (Point node : nodes) {
-            sum += node.getValue();
-        }
-        return sum / nodes.size();
-    }
-
-    /**
-     * Gets the average value of all flows on the map.
-     * 
-     * @return 
-     */
-    public double getMeanFlowValue() {
-        ArrayList<Flow> flows = getFlows();
-        double sum = 0;
-        for (Flow flow : flows) {
-            sum += flow.getValue();
-        }
-        return sum / flows.size();
-    }
-
-    /**
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
@@ -283,7 +221,6 @@ public class Model {
      */
     private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
 
-    // FIXME should not be transient
     @XmlJavaTypeAdapter(RectangleSerializer.class)
     private Rectangle2D canvas;
 
@@ -388,9 +325,6 @@ public class Model {
     public void copyTransientFields(Model destination) {
         destination.map = map;
         destination.clipAreas = clipAreas;
-
-        // FIXME should not be transient
-        destination.canvas = canvas;
     }
 
     @Override
@@ -403,6 +337,69 @@ public class Model {
             Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
             return "could not marshal model";
         }
+    }
+
+    /**
+     * Calculates the ratio between the maximum allowed node size and the
+     * highest node value. Needed for drawing nodes to the correct radius
+     * relative to the maximum radius permitted by the GUI settings. If there
+     * are no nodes on the map yet, it assumes a max node value of 1, which is
+     * the default value of new Points.
+     *
+     * @return node size scale factor
+     */
+    public double getNodeSizeScaleFactor() {
+
+        // Find the maximum node area as permitted by settings
+        double area = Math.PI * (maxNodeSize * maxNodeSize);
+
+        // Get the maximum current node value
+        double maxVal = getMaxNodeValue();
+
+        // return the ratio of the maximum allowed node area and the current
+        // max node value.
+        if (maxVal == 0) { // There are no nodes yet
+            return area / 1; // The value of the new node will be 1 by default
+        } else {
+            return area / maxVal;
+        }
+    }
+
+    /**
+     * Gets the maximum value of all nodes on the map.
+     * 
+     * @return maximum node value
+     */
+    public double getMaxNodeValue() {
+        return graph.getMaxNodeValue();
+    }
+
+    /**
+     * Gets the average value of all nodes on the map.
+     * 
+     * @return mean node value
+     */
+    public double getMeanNodeValue() {
+        ArrayList<Point> nodes = getNodes();
+        double sum = 0;
+        for (Point node : nodes) {
+            sum += node.getValue();
+        }
+        return sum / nodes.size();
+    }
+
+    /**
+     * Gets the average value of all flows on the map.
+     * 
+     * @return 
+     */
+    public double getMeanFlowValue() {
+        ArrayList<Flow> flows = getFlows();
+        double sum = 0;
+        for (Flow flow : flows) {
+            sum += flow.getValue();
+        }
+        return sum / flows.size();
     }
 
     /**
