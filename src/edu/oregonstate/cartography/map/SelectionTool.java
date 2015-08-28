@@ -357,6 +357,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
         }
 
+        // Select nodes
         if (((FloxMapComponent) mapComponent).isDrawNodes()) {
             // Iterate backwards through the nodes so that nodes drawn last (on top)
             // get selected first.
@@ -364,13 +365,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             for (int i = nodes.size() - 1; i >= 0; i--) {
                 Point node = nodes.get(i);
 
-                // If a node was selected stop checking.
+                // If a node has already been selected, stop checking.
                 if (nodeGotSelected && (shiftDown == false)) {
-                    node.setSelected(false);
+                    //node.setSelected(false);
                     continue;
                 }
 
-                // Get the radius of the node
+                // Get the radius of the current node
                 double nodeArea = Math.abs(node.getValue()
                         * model.getNodeSizeScaleFactor());
                 double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
@@ -381,22 +382,62 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 double dy = node.y - point.y;
                 double distSquared = (dx * dx + dy * dy);
 
+                // If the click was within the radius of the node, do stuff
                 if (distSquared <= nodeRadius * nodeRadius) {
-                    node.setSelected(true);
-                    nodeGotSelected = true;
-                } else {
-                    if (!shiftDown) {
-                        node.setSelected(false);
+
+                    if (node.isSelected()) {
+                        // the node was clicked, and it is already selected
+                        
+                        if(shiftDown) {
+                            // shift is held down. 
+                            // deselect this node
+                            node.setSelected(false);
+                        }
+                        
+                        // Don't do anything else
+                        // Stop looking at other nodes.
+                        continue;
+                        //nodeGotSelected = true;
+                        // FIXME
+                        // nodeGotSelected is set to true even when a node is 
+                        // deselected by being shift-clicked, which is confusing.
+                        // That is done just to get the nodes for loop to stop.
+                        
+                    } else {
+                        // The node was clicked, and it isn't already selected
+                        // deselect all nodes, unless shift is held down
+                        
+                        if (!shiftDown) {
+                            // Shift is not held down.
+                            // deselect all nodes
+                            for (Point pt : nodes) {
+                                pt.setSelected(false);
+                            }
+                        }
+
+                        // select this one
+                        // stop looking at other nodes
+                        node.setSelected(true);
+                        nodeGotSelected = true;
                     }
                 }
             }
+
+            if (!nodeGotSelected && !shiftDown) {
+                // no nodes were clicked and shift isn't held down
+                // deselect all of them.
+                for (Point node : nodes) {
+                    node.setSelected(false);
+                }
+            }
+
         }
 
         if (((FloxMapComponent) mapComponent).isDrawFlows()) {
             // Select flows
             Iterator<Flow> flows = model.flowIterator();
 
-        // The distance tolerance the click needs to be within the flow in order
+            // The distance tolerance the click needs to be within the flow in order
             // to be selected, scaled to the current map scale.
             double tol = pixelTolerance / scale;
 
