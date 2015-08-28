@@ -28,7 +28,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     private final Model model;
 
     private final Undo undo;
-    
+
     protected final JFormattedTextField xField;
     protected final JFormattedTextField yField;
     protected final JButton lockUnlockButton;
@@ -55,6 +55,37 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     }
 
     /**
+     * The mouse was clicked, while this MapTool was active.
+     *
+     * @param point The location of the mouse in world coordinates.
+     * @param evt The original event.
+     */
+    @Override
+    public void mouseClicked(Point2D.Double point, MouseEvent evt) {
+
+        // If no dragging occured, deselect all nodes. If a node was clicked, 
+        // select that one. If shift is held down, don't do anything.
+        if (model.isNodeSelected() && !dragging && !(evt.isShiftDown())) {
+            // There are selected nodes, nothing was dragged,
+            // and shift isn't held down.
+            // deselect all nodes
+            ArrayList<Point> selectedNodes = model.getSelectedNodes();
+            for (Point pt : selectedNodes) {
+                pt.setSelected(false);
+            }
+
+            // Get an arraylist selectedNodes that were clicked
+            // FIXME, a magic number of 2 is passed in for the pixel tolorance
+            ArrayList<Point> clickedNodes = ((FloxMapComponent) mapComponent).getClickedNodes(selectedNodes, point, 2);
+
+            // If any nodes were clicked, select the first one
+            if (clickedNodes.size() > 0) {
+                clickedNodes.get(0).setSelected(true);
+            }
+        }
+    }
+
+    /**
      * Called at the start of a mouse drag event.
      *
      * @param point The location of the drag event.
@@ -62,12 +93,24 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      */
     @Override
     public void startDrag(Point2D.Double point, MouseEvent evt) {
-
+        
+        
         if (model.isNodeSelected()) {
-            dragging = true;
+            // There is at least one selected node
+            // Was one of them clicked?
+            ArrayList<Point> selectedNodes = model.getSelectedNodes();
+            if(((FloxMapComponent)mapComponent).getClickedNodes(selectedNodes, point, 2).size() > 0){
+                // FIXME, having to convert mapComponent to FloxMapComponent
+                // all the time is annoying.
+                // At least one selected node was clicked
+                // Allow dragging
+                dragging = true;
+            }
         }
-
+        
         if (model.isControlPtSelected()) {
+            // A control point is currently selected.
+            // Allow dragging
             dragging = true;
         }
 
@@ -100,10 +143,11 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
         super.endDrag(point, evt);
+        // this calls mouseClicked
 
         addUndo("Move");
         dragging = false;
@@ -125,19 +169,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 mapComponent.refreshMap();
             }
         }
-
-    }
-
-    /**
-     * Captures the world coordinates of the location where the mouse was first
-     * pressed down
-     *
-     * @param point
-     * @param evt
-     */
-    @Override
-    public void mouseDown(Point2D.Double point, MouseEvent evt) {
-
     }
 
     /**
@@ -161,11 +192,11 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                         cPt.y += (point.y - previousDrag_y);
                     }
                 }
-
             }
 
         } else {
             // Move selected nodes
+            // FIXME only if a node was clicked, and it is selected
             Iterator nodes = model.nodeIterator();
             while (nodes.hasNext()) {
                 Point node = (Point) nodes.next();
@@ -176,6 +207,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
         }
 
+        // Redraw the map
         mapComponent.refreshMap();
 
         // Update the previousDrax coordinates.

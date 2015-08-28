@@ -3,6 +3,7 @@ package edu.oregonstate.cartography.flox.gui;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
+import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
@@ -10,7 +11,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 
 /**
  *
@@ -28,12 +31,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * Flag for drawing flows
      */
     private boolean drawFlows = true;
-    
+
     /**
      * Flag for drawing nodes
      */
     private boolean drawNodes = true;
-    
+
     /**
      * flag for drawing control points
      */
@@ -108,7 +111,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
         // paint the map if this has not been done by the current MapTool
         if (toolPaintedMap == false) {
-            FloxRenderer renderer = new FloxRenderer(model, g2d, 
+            FloxRenderer renderer = new FloxRenderer(model, g2d,
                     west, north, scale, true);
             renderer.setStrokeWidth(1f);
 
@@ -128,24 +131,24 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             if (isDrawCanvas()) {
                 renderer.drawCanvas();
             }
-            
+
             // draw flows and nodes
-            if(isDrawFlows()) {
+            if (isDrawFlows()) {
                 renderer.drawFlows(true);
             }
-            
-            if(isDrawNodes()){
+
+            if (isDrawNodes()) {
                 renderer.drawNodes(false);
             }
 
             if (drawFlowRangebox) {
                 renderer.drawFlowRangebox();
             }
-            
+
             if (drawControlPoints) {
                 renderer.drawControlPoints();
             }
-            
+
             if (drawLineSegments) {
                 renderer.drawStraightLinesSegments();
             }
@@ -177,7 +180,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public Model getModel() {
         return model;
     }
-    
+
     /**
      * Delete selected nodes and flows
      *
@@ -191,6 +194,55 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Returns an ArrayList of nodes that were clicked.
+     * 
+     * @param nodes An ArrayList of nodes from which clicked nodes will be
+     * returned
+     * @param click a Point2D.Double at the location of the click
+     * @param pixelTolerance If the click is within this pixel tolerance
+     * of the node, it will be returned. This is mostly to account for the the
+     * stroke width of the node drawing.
+     * @return An ArrayList of nodes that were clicked.
+     */
+    public ArrayList<Point> getClickedNodes(ArrayList<Point> nodes,
+            Point2D.Double click, double pixelTolerance) {
+        // Create an empty ArrayList to store clicked nodes
+        ArrayList<Point> clickedNodes = new ArrayList<>();
+
+        double lockedScaleFactor;
+        if (!model.isFlowWidthLocked()) {
+            lockedScaleFactor = 1;
+        } else {
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = scale / lockedMapScale;
+        }
+
+        if (isDrawNodes()) {
+            for (int i = nodes.size() - 1; i >= 0; i--) {
+                Point node = nodes.get(i);
+
+                double nodeArea = Math.abs(node.getValue()
+                        * model.getNodeSizeScaleFactor());
+                double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+                nodeRadius = (nodeRadius + pixelTolerance) / scale;
+                
+                // Calculate the distance of the click from the node center.
+                double dx = node.x - click.x;
+                double dy = node.y - click.y;
+                double distSquared = (dx * dx + dy * dy);
+                
+                if (distSquared <= nodeRadius * nodeRadius) {
+                    // this node was clicked.
+                    // add it to clickedNodes
+                    clickedNodes.add(node);
+                }
+            }
+        }
+
+        return clickedNodes;
     }
 
     /**
@@ -293,7 +345,5 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public boolean isDrawNodes() {
         return drawNodes;
     }
-    
-    
-    
+
 }
