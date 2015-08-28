@@ -29,7 +29,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     /**
      * Tolerance for selection of objects by mouse clicks.
      */
-    protected static final int CLICK_PIXEL_TOLERANCE = 3;
+    protected static final int CLICK_PIXEL_TOLERANCE = 2;
 
     /**
      * Model with elements to select.
@@ -357,85 +357,52 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
         }
 
-        // Select nodes
-        if (((FloxMapComponent) mapComponent).isDrawNodes()) {
-            // Iterate backwards through the nodes so that nodes drawn last (on top)
-            // get selected first.
-            ArrayList<Point> nodes = model.getNodes();
-            for (int i = nodes.size() - 1; i >= 0; i--) {
-                Point node = nodes.get(i);
+        // SELECT NODES
+        // Get clicked nodes
+        ArrayList<Point> nodes = model.getNodes();
+        ArrayList<Point> clickedNodes = ((FloxMapComponent) mapComponent)
+                .getClickedNodes(nodes, point, pixelTolerance);
 
-                // If a node has already been selected, stop checking.
-                if (nodeGotSelected && (shiftDown == false)) {
-                    //node.setSelected(false);
-                    continue;
+        // If a node was clicked, select it. If it was already selected,
+        // deselect it if shift is held down. Deselect all other nodes unless
+        // shift is held down.
+        if (clickedNodes.size() > 0) { // At least one node was clicked.
+            if (clickedNodes.get(0).isSelected()) {// The first node is currently selected.
+                // Set nodeGotSelected to true so that flows aren't selected later.
+                nodeGotSelected = true;
+                if (shiftDown) {
+                    // Shift is held down.
+                    // Deselect it
+                    clickedNodes.get(0).setSelected(false);
                 }
-
-                // Get the radius of the current node
-                double nodeArea = Math.abs(node.getValue()
-                        * model.getNodeSizeScaleFactor());
-                double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-                nodeRadius = (nodeRadius + pixelTolerance) / scale;
-
-                // Calculate the distance of the click from the node center.
-                double dx = node.x - point.x;
-                double dy = node.y - point.y;
-                double distSquared = (dx * dx + dy * dy);
-
-                // If the click was within the radius of the node, do stuff
-                if (distSquared <= nodeRadius * nodeRadius) {
-
-                    if (node.isSelected()) {
-                        // the node was clicked, and it is already selected
-                        
-                        if(shiftDown) {
-                            // shift is held down. 
-                            // deselect this node
-                            node.setSelected(false);
-                        }
-                        
-                        // Don't do anything else
-                        // Stop looking at other nodes.
-                        nodeGotSelected = true;
-                        // FIXME
-                        // nodeGotSelected is set to true even when a node is 
-                        // deselected by being shift-clicked, which is confusing.
-                        // This is done just to stop iterating through nodes.
-                        // There's probably a better way, or this could be
-                        // renamed.
-                        
-                    } else {
-                        // The node was clicked, and it isn't already selected
-                        // deselect all nodes, unless shift is held down
-                        
-                        if (!shiftDown) {
-                            // Shift is not held down.
-                            // deselect all nodes
-                            for (Point pt : nodes) {
-                                pt.setSelected(false);
-                            }
-                        }
-
-                        // select this one
-                        // stop looking at other nodes
-                        node.setSelected(true);
-                        nodeGotSelected = true;
+                // set nodeGotSelected to true so that flows aren't 
+                // selected later. FIXME, this is weird.
+                nodeGotSelected = true;
+            } else { // The first node in clickedNodes is not currently selected.
+                if (!shiftDown) {
+                    // shift is not held down.
+                    // deselect all nodes
+                    for (Point node : nodes) {
+                        node.setSelected(false);
                     }
                 }
+                // select the first node in clickedNodes
+                clickedNodes.get(0).setSelected(true);
+                nodeGotSelected = true;
             }
-
-            if (!nodeGotSelected && !shiftDown) {
-                // no nodes were clicked and shift isn't held down
-                // deselect all of them.
+        } else { // No nodes were clicked.
+            if (!shiftDown) {
+                // Shift is not held down.
+                // Deselect all nodes.
                 for (Point node : nodes) {
                     node.setSelected(false);
                 }
             }
-
         }
 
+        // SELECT FLOWS
         if (((FloxMapComponent) mapComponent).isDrawFlows()) {
-            // Select flows
+
             Iterator<Flow> flows = model.flowIterator();
 
             // The distance tolerance the click needs to be within the flow in order
