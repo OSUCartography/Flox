@@ -396,12 +396,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         
                         // Don't do anything else
                         // Stop looking at other nodes.
-                        continue;
-                        //nodeGotSelected = true;
+                        nodeGotSelected = true;
                         // FIXME
                         // nodeGotSelected is set to true even when a node is 
                         // deselected by being shift-clicked, which is confusing.
-                        // That is done just to get the nodes for loop to stop.
+                        // This is done just to stop iterating through nodes.
+                        // There's probably a better way, or this could be
+                        // renamed.
                         
                     } else {
                         // The node was clicked, and it isn't already selected
