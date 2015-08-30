@@ -274,11 +274,11 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
         addFlowToggleButton = new javax.swing.JToggleButton();
+        lockUnlockButton = new javax.swing.JButton();
         zoomInToggleButton = new javax.swing.JToggleButton();
         zoomOutToggleButton = new javax.swing.JToggleButton();
         handToggleButton = new javax.swing.JToggleButton();
         distanceToggleButton = new javax.swing.JToggleButton();
-        lockUnlockButton = new javax.swing.JButton();
         showAllButton = new javax.swing.JButton();
         coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
         vallueLabel = new javax.swing.JLabel();
@@ -628,6 +628,19 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jPanel2.add(addFlowToggleButton);
 
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif"))); // NOI18N
+        lockUnlockButton.setToolTipText("Lock/Unlock Flows");
+        lockUnlockButton.setBorderPainted(false);
+        lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
+        lockUnlockButton.setEnabled(false);
+        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 24));
+        lockUnlockButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lockUnlockButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(lockUnlockButton);
+
         mapToolsButtonGroup.add(zoomInToggleButton);
         zoomInToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ZoomIn16x16.gif"))); // NOI18N
         zoomInToggleButton.setToolTipText("Zoom In");
@@ -683,19 +696,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jPanel2.add(distanceToggleButton);
-
-        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif"))); // NOI18N
-        lockUnlockButton.setToolTipText("Lock/Unlock Flows");
-        lockUnlockButton.setBorderPainted(false);
-        lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
-        lockUnlockButton.setEnabled(false);
-        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 24));
-        lockUnlockButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lockUnlockButtonActionPerformed(evt);
-            }
-        });
-        jPanel2.add(lockUnlockButton);
 
         showAllButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ShowAll20x14.png"))); // NOI18N
         showAllButton.setToolTipText("Show All");
@@ -1647,12 +1647,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         editMenu.setText("Edit");
         editMenu.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                editMenuMenuSelected(evt);
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
             }
             public void menuDeselected(javax.swing.event.MenuEvent evt) {
             }
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                editMenuMenuSelected(evt);
             }
         });
 
