@@ -1015,7 +1015,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         viewFlowRangeboxToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
         viewFlowRangeboxToggleButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        viewFlowRangeboxToggleButton.setPreferredSize(new java.awt.Dimension(18, 15));
         viewFlowRangeboxToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
         viewFlowRangeboxToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1187,7 +1186,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridwidth = 2;
         mapControlPanel.add(maximumNodeSizeSlider, gridBagConstraints);
 
-        jLabel27.setText("Maximum Node Size");
+        jLabel27.setText("Maximum Node Radius");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
