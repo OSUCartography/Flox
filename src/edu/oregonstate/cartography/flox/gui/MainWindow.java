@@ -1027,7 +1027,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 20;
         forcesPanel.add(viewFlowRangeboxToggleButton, gridBagConstraints);
 
-        controlsTabbedPane.addTab("Forces", forcesPanel);
+        controlsTabbedPane.addTab("Layout", forcesPanel);
 
         mapControlPanel.setLayout(new java.awt.GridBagLayout());
 
