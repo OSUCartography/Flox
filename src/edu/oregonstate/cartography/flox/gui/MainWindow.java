@@ -310,6 +310,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel13 = new javax.swing.JLabel();
         viewCanvasToggleButton = new javax.swing.JToggleButton();
         viewFlowRangeboxToggleButton = new javax.swing.JToggleButton();
+        moveFlowsThatCrossNodesButton = new javax.swing.JButton();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
@@ -327,7 +328,6 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel26 = new javax.swing.JLabel();
         maximumNodeSizeSlider = new javax.swing.JSlider();
         jLabel27 = new javax.swing.JLabel();
-        moveFlowsThatCrossNodesButton = new javax.swing.JButton();
         showNodesToggleButton = new javax.swing.JToggleButton();
         showFlowsToggleButton = new javax.swing.JToggleButton();
         jSeparator9 = new javax.swing.JSeparator();
@@ -1026,6 +1026,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 20;
         forcesPanel.add(viewFlowRangeboxToggleButton, gridBagConstraints);
 
+        moveFlowsThatCrossNodesButton.setText("Move Flows That Cross Nodes");
+        moveFlowsThatCrossNodesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                moveFlowsThatCrossNodesButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 21;
+        gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
+        forcesPanel.add(moveFlowsThatCrossNodesButton, gridBagConstraints);
+
         controlsTabbedPane.addTab("Layout", forcesPanel);
 
         mapControlPanel.setLayout(new java.awt.GridBagLayout());
@@ -1194,18 +1206,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
         mapControlPanel.add(jLabel27, gridBagConstraints);
-
-        moveFlowsThatCrossNodesButton.setText("Move Flows That Cross Nodes");
-        moveFlowsThatCrossNodesButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                moveFlowsThatCrossNodesButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 20;
-        gridBagConstraints.gridwidth = 3;
-        mapControlPanel.add(moveFlowsThatCrossNodesButton, gridBagConstraints);
 
         showNodesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
         showNodesToggleButton.setSelected(true);
