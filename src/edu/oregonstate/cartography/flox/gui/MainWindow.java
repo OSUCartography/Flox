@@ -2727,117 +2727,41 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void moveFlowsThatCrossNodesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveFlowsThatCrossNodesButtonActionPerformed
 
+        double scale = mapComponent.getScale();
         // Get an ArrayList of all flows that intersect nodes.
-        ArrayList<QuadraticBezierFlow> flowsArray
-                = GeometryUtils.getFlowsThatIntersectNodes(model, mapComponent.getScale());
-
+        ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
+        
+        try {
+            flowsArray
+                = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+        } catch (IOException e) {
+            System.out.println("Exception!");
+            JOptionPane.showMessageDialog(this, "At least one node crossing is "
+                        + "impossible to avoid because the nodes are too "
+                        + "close together.");
+            return;
+        }
+        
         // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
         // flowsArray using getFlowsThatIntersectNodes, and repeat until 
         // flowsArray is empty.
         while (flowsArray.size() > 0) {
-            moveFlowsCrossingNodes(flowsArray);
-            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, mapComponent.getScale());
+            GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
+            
+            try {
+                flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+            } catch (IOException e) {
+                System.out.println("Exception!");
+                JOptionPane.showMessageDialog(this, "At least one node "
+                        + "crossing is impossible to avoid because the nodes "
+                        + "are too close together.");
+                return;
+            }
         }
 
         layout("Move Flows");
-
-    }//GEN-LAST:event_moveFlowsThatCrossNodesButtonActionPerformed
-
-    /**
-     * Moves the control point of a flow perpendicularly to the baseline by one
-     * pixel.
-     *
-     * @param flows
-     */
-    private void moveFlowsCrossingNodes(ArrayList<QuadraticBezierFlow> flows) {
-
-        for (QuadraticBezierFlow flow : flows) {
-
-            // Collect needed points from the flow
-            Point pt0 = flow.getCtrlPt();
-            Point pt1 = flow.getStartPt();
-            Point pt2 = flow.getEndPt();
-
-            // Get the distance of startPt to endPt
-            double dx = pt2.x - pt1.x;
-            double dy = pt2.y - pt1.y;
-            double dist = Math.sqrt(dx * dx + dy * dy);
-
-            // Create a point known to be on the right side of the line.
-            Point rightPt;
-            if (dy > 0) {
-                rightPt = new Point(pt1.x + 1, pt1.y);
-            } else if (dy < 0) {
-                rightPt = new Point(pt1.x - 1, pt1.y);
-            } else {
-                // dy is 0
-                if (dx > 0) {
-                    rightPt = new Point(pt1.x, pt1.y - 1);
-                } else {
-                    rightPt = new Point(pt1.x, pt1.y + 1);
-                }
-            }
-
-            // Get the d value of rightPt. The d value will be positive if it's
-            // on one side of the flow's baseline, and negative if it's on the 
-            // other, but we don't know if the right side is positive or
-            // negative. This will allow us to find out.
-            double rightPtD = (rightPt.x - pt1.x) * (pt2.y - pt1.y) - (rightPt.y - pt1.y) * (pt2.x - pt1.x);
-
-            // Get the d value of the flow's control point.
-            double pt0D = (pt0.x - pt1.x) * (pt2.y - pt1.y) - (pt0.y - pt1.y) * (pt2.x - pt1.x);
-
-            // Initiallize the perpendicular unitVector of the flow's baseline.
-            // The values assigned to these will depend on whether the control
-            // point is on the right or left side of the baseline.
-            double unitVectorX;
-            double unitVectorY;
-
-            // if pt0D and rightPtD have the same polarity, than the conrol point
-            // is on the right side! Set the unitVector accordingly.
-            // If either d value is 0 (the point lies directly on top of the 
-            // baseline) move the control point to the left arbitrarily.  
-            if ((pt0D > 0 && rightPtD > 0) || (pt0D < 0 && rightPtD < 0)) {
-                unitVectorX = dy / dist;
-                unitVectorY = -dx / dist;
-            } else if (pt0D == 0 || rightPtD == 0) {
-                unitVectorX = -dy / dist;
-                unitVectorY = dx / dist;
-            } else {
-                unitVectorX = -dy / dist;
-                unitVectorY = dx / dist;
-            }
-
-            // If the distance from the control point to the baseline is more 
-            // than twice the length of the baseline
-            // move the control point to the baseline centerpoint,
-            // and reverse the vectorUnits' polarity. This amounts to flipping
-            // the flow to the other side.
-            double distFromBaseline = GeometryUtils.getDistanceToLine(
-                    pt0.x, pt0.y, pt1.x, pt1.y, pt2.x, pt2.y);
-
-            if (distFromBaseline > flow.getBaselineLength() * 2) {
-                pt0.x = flow.getBaseLineMidPoint().x;
-                pt0.y = flow.getBaseLineMidPoint().y;
-                unitVectorX *= -1;
-                unitVectorY *= -1;
-            }
-
-            // Add the unitVectors to the control point. Also, multiply the
-            // unitVectors by 2. This will cut the iterations in half without
-            // losing significant fidelity. 
-            pt0.x += (unitVectorX * 2 / mapComponent.getScale());
-            pt0.y += (unitVectorY * 2 / mapComponent.getScale());
-
-            // Lock the flow. This is to prevent it from moving when forces
-            // are reapplied to the layout.
-            flow.setLocked(true);
-
-        }
-
         mapComponent.refreshMap();
-
-    }
+    }//GEN-LAST:event_moveFlowsThatCrossNodesButtonActionPerformed
 
     private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName()) && model != null) {
