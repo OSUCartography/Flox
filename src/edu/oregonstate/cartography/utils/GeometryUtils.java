@@ -5,6 +5,7 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import static java.lang.Double.isNaN;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
@@ -438,7 +439,7 @@ public class GeometryUtils {
      * @param scale The scale of the mapComponent.
      * @return
      */
-    public static ArrayList<QuadraticBezierFlow> getFlowsThatIntersectNodes(Model model, double scale) {
+    public static ArrayList<QuadraticBezierFlow> getFlowsThatIntersectNodes(Model model, double scale) throws IOException {
 
         ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
 
@@ -448,6 +449,7 @@ public class GeometryUtils {
             QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
             for (Point node : nodes) {
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
+                    
                     if (GeometryUtils.flowIntersectsNode(flow, node, model, scale)) {
                         flowsArray.add(flow);
                         break;
@@ -469,8 +471,8 @@ public class GeometryUtils {
      * @param mapScale The current scale of the mapComponent
      * @return
      */
-    public static boolean flowIntersectsNode(Flow flow, Point node,
-            Model model, double mapScale) {
+    public static boolean flowIntersectsNode (Flow flow, Point node,
+            Model model, double mapScale) throws IOException {
 
         // Get the pixel width of the flow
         // Get the locked scale factor needed to calculate flow widths
@@ -535,9 +537,47 @@ public class GeometryUtils {
             }
         }
 
-        return (shortestDistSquare < threshDist * threshDist);
+        if (shortestDistSquare < threshDist * threshDist) {
+            
+            // It intersects the flow. Check to see if it's possible to move
+            // the flow off it. If it isn't, ERROR. If it is, return True.
+            
+            Point sPt = flow.getStartPt();
+            Point ePt = flow.getEndPt();
+            
+            
+            // world width of the flow being checked is worldStrokeWidth
+            // world radius of the node it crosses is worldNodeRadius
+
+            if (getDistanceBetweenPoints(sPt, node)
+                    - (worldNodeRadius + (worldStrokeWidth/2)) < 0) {
+                
+                System.out.println("Impossible!");
+                throw new IOException();
+                //return false;
+            } 
+            
+            if (getDistanceBetweenPoints(ePt, node)
+                    - (worldNodeRadius + (worldStrokeWidth/2)) < 0) {
+                System.out.println("Impossible!");
+                throw new IOException();
+                //return false;
+            } 
+            return true;
+            
+        } else {
+            return false;
+        }
+ 
+        //return (shortestDistSquare < threshDist * threshDist);
+        
     }
 
+    public static double getDistanceBetweenPoints(Point pt1, Point pt2) {
+        return Math.sqrt(((pt2.x - pt1.x) * (pt2.x - pt1.x)) 
+                + ((pt2.y - pt1.y) * (pt2.y - pt1.y)));
+    }
+    
     /**
      * Test whether three points align.
      *
@@ -689,4 +729,96 @@ public class GeometryUtils {
         return Math.sqrt(dSq);
     }
 
+    /**
+     * Moves the control point of a flow perpendicularly to the baseline by one
+     * pixel.
+     *
+     * @param flows
+     */
+    public static void moveFlowsThatCrossNodes(ArrayList<QuadraticBezierFlow> flows, double scale) {
+
+        for (QuadraticBezierFlow flow : flows) {
+
+            // Collect needed points from the flow
+            Point pt0 = flow.getCtrlPt();
+            Point pt1 = flow.getStartPt();
+            Point pt2 = flow.getEndPt();
+
+            // Get the distance of startPt to endPt
+            double dx = pt2.x - pt1.x;
+            double dy = pt2.y - pt1.y;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Create a point known to be on the right side of the line.
+            Point rightPt;
+            if (dy > 0) {
+                rightPt = new Point(pt1.x + 1, pt1.y);
+            } else if (dy < 0) {
+                rightPt = new Point(pt1.x - 1, pt1.y);
+            } else {
+                // dy is 0
+                if (dx > 0) {
+                    rightPt = new Point(pt1.x, pt1.y - 1);
+                } else {
+                    rightPt = new Point(pt1.x, pt1.y + 1);
+                }
+            }
+
+            // Get the d value of rightPt. The d value will be positive if it's
+            // on one side of the flow's baseline, and negative if it's on the 
+            // other, but we don't know if the right side is positive or
+            // negative. This will allow us to find out.
+            double rightPtD = (rightPt.x - pt1.x) * (pt2.y - pt1.y) - (rightPt.y - pt1.y) * (pt2.x - pt1.x);
+
+            // Get the d value of the flow's control point.
+            double pt0D = (pt0.x - pt1.x) * (pt2.y - pt1.y) - (pt0.y - pt1.y) * (pt2.x - pt1.x);
+
+            // Initiallize the perpendicular unitVector of the flow's baseline.
+            // The values assigned to these will depend on whether the control
+            // point is on the right or left side of the baseline.
+            double unitVectorX;
+            double unitVectorY;
+
+            // if pt0D and rightPtD have the same polarity, than the conrol point
+            // is on the right side! Set the unitVector accordingly.
+            // If either d value is 0 (the point lies directly on top of the 
+            // baseline) move the control point to the left arbitrarily.  
+            if ((pt0D > 0 && rightPtD > 0) || (pt0D < 0 && rightPtD < 0)) {
+                unitVectorX = dy / dist;
+                unitVectorY = -dx / dist;
+            } else if (pt0D == 0 || rightPtD == 0) {
+                unitVectorX = -dy / dist;
+                unitVectorY = dx / dist;
+            } else {
+                unitVectorX = -dy / dist;
+                unitVectorY = dx / dist;
+            }
+
+            // If the distance from the control point to the baseline is more 
+            // than twice the length of the baseline
+            // move the control point to the baseline centerpoint,
+            // and reverse the vectorUnits' polarity. This amounts to flipping
+            // the flow to the other side.
+            double distFromBaseline = GeometryUtils.getDistanceToLine(
+                    pt0.x, pt0.y, pt1.x, pt1.y, pt2.x, pt2.y);
+
+            if (distFromBaseline > flow.getBaselineLength() * 2) {
+                pt0.x = flow.getBaseLineMidPoint().x;
+                pt0.y = flow.getBaseLineMidPoint().y;
+                unitVectorX *= -1;
+                unitVectorY *= -1;
+            }
+
+            // Add the unitVectors to the control point. Also, multiply the
+            // unitVectors by 2. This will cut the iterations in half without
+            // losing significant fidelity. 
+            pt0.x += (unitVectorX * 2 / scale);
+            pt0.y += (unitVectorY * 2 / scale);
+
+            // Lock the flow. This is to prevent it from moving when forces
+            // are reapplied to the layout.
+            flow.setLocked(true);
+
+        }
+    }
 }
