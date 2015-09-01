@@ -145,10 +145,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 renderer.drawFlowRangebox();
             }
 
-            if (drawControlPoints) {
-                renderer.drawControlPoints();
-            }
-
+            renderer.drawControlPoints(drawControlPoints);
+            
             if (drawLineSegments) {
                 renderer.drawStraightLinesSegments();
             }

@@ -103,7 +103,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             boolean drawBackground,
             boolean fillNodes,
             boolean drawSelectedFlows) {
-        
+
         // find size of fitting image
         //Rectangle2D bb = model.getFlowsBoundingBox();
         double scale = maxDim / Math.max(bb.getWidth(), bb.getHeight());
@@ -156,7 +156,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 }
             }
         }
-        
+
         // render flows and nodes
         renderer.drawFlows(drawSelectedFlows);
         renderer.drawNodes(fillNodes);
@@ -206,6 +206,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Draws the flows to the Graphics2D context. Retrieves settings from the
      * model to determine flow width, length, as well as determining whether to
      * apply any clipping or add arrowheads.
+     *
      * @param drawSelectedFlows If false, selected flows are not drawn.
      */
     public void drawFlows(boolean drawSelectedFlows) {
@@ -223,7 +224,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             if (flow.isSelected() && !drawSelectedFlows) {
                 continue;
             }
-            
+
             // Create a GeneralPath for the flow
             GeneralPath flowPath;
 
@@ -306,22 +307,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         }
 
-        // Iterate through the flows again to draw control points for selected
-        // flows. This is done in a separate iteration to prevent control points
-        // from being drawn under flows.
-        if (drawGUIElements && model.isFlowSelected()) {
-            for (Flow flow : flows) {
-                if (flow.isSelected()) {
-                    drawControlPoints(flow);
-                }
-            }
-        }
-
     }
 
     /**
      * Draw all nodes to a Graphics2D context.
-     * @param fillNodes If true, the node circles are filled with the stroke 
+     *
+     * @param fillNodes If true, the node circles are filled with the stroke
      * color. Otherwise they are filled with white.
      */
     public void drawNodes(boolean fillNodes) {
@@ -417,14 +408,33 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Call drawControlPoint for each flow in the model.
+     * Draw the control points for flows.
+     * Only draws if the flow is selected or if the Show Control Points menu
+     * item is selected.
+     * @param drawControlPoints Flag for drawing all control points.
      */
-    public void drawControlPoints() {
-        Iterator<Flow> iter = model.flowIterator();
-        while (iter.hasNext()) {
-            Flow flow = iter.next();
-            drawControlPoints(flow);
+    public void drawControlPoints(boolean drawControlPoints) {
+
+        if (drawControlPoints) {
+            // The Show Control Points menu item is selected.
+            // draw them all!
+            Iterator<Flow> iter = model.flowIterator();
+            while (iter.hasNext()) {
+                Flow flow = iter.next();
+                drawControlPoints(flow);
+            }
+        } else {
+            // draw just the control points of selected flows.
+            if (drawGUIElements && model.isFlowSelected()) {
+                ArrayList<Flow> flows = model.getFlows();
+                for (Flow flow : flows) {
+                    if (flow.isSelected()) {
+                        drawControlPoints(flow);
+                    }
+                }
+            }
         }
+
     }
 
     /**
