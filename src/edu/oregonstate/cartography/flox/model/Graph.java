@@ -34,6 +34,15 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
     }
 
     /**
+     * Add a node
+     * @param node The node to add
+     */
+    public void addNode(Point node) {
+        Point newNode = findNodeInGraph(node);
+        addVertex(newNode);
+    }
+    
+    /**
      * Searches for a point in the graph with the specified coordinates
      *
      * @param target A point with the coordinates to search.

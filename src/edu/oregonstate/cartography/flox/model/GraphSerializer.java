@@ -28,7 +28,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         
         String l;
 
-        // Read node data
+        // Read node data, add nodes to the points HashMap
         for (int i = 0; i < numberOfNodes; i++) {
             l = reader.readLine();
             StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
@@ -39,9 +39,15 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             Point point = new Point(x, y);
             point.setValue(nodeValue);
             points.put(id, point);
-
         }
 
+        // Add all the points to the graph
+        for (Map.Entry<String, Point> entry : points.entrySet()) {
+            
+            graph.addNode(entry.getValue());
+
+        }
+        
         // Read flow data
         while ((l = reader.readLine()) != null) {
 
@@ -80,46 +86,38 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
         // A map of the nodes, with the node itself as the key.
         // The string will be a new ID number.
-        HashMap<Point, String> nodeMap = new HashMap<>();
+        HashMap<Point, String> points = new HashMap<>();
 
         // Get the flows
         Iterator flows = graph.flowIterator();
+        
+        // Get the nodes
+        Iterator nodes = graph.nodeIterator();
 
+        // Make stringbuilders for nodes and flows
         StringBuilder nodeStr = new StringBuilder();
         StringBuilder flowStr = new StringBuilder();
 
+        // Populate the nodeMap with all the nodes in the graph.
         int key = 0;
+        while (nodes.hasNext()) {
+            Point node = (Point) nodes.next();
+            points.put(node, Integer.toString(key));
+            key +=1;
+        }
+        
+        // Make a string of all the flows
         while (flows.hasNext()) {
 
             QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
 
-            // Check to see if flow.stPoint is in nodeMap
-            if (nodeMap.containsKey(flow.getStartPt())) {
-                // Append the key and a comma to flowStr
-                flowStr.append(nodeMap.get(flow.getStartPt()));
-                flowStr.append(",");
-            } else {
-                // Add startPt to nodeMap, give it a value of key.
-                nodeMap.put(flow.getStartPt(), Integer.toString(key));
-                flowStr.append(Integer.toString(key));
-                flowStr.append(",");
-                key += 1;
-            }
-
-            // Same thing for endPoint
-            // Check to see if flow.stPoint is in nodeMap
-            if (nodeMap.containsKey(flow.getEndPt())) {
-                // Append the key and a comma to flowStr
-                flowStr.append(nodeMap.get(flow.getEndPt()));
-                flowStr.append(",");
-            } else {
-                // Add startPt to nodeMap, give it a value of key.
-                nodeMap.put(flow.getEndPt(), Integer.toString(key));
-                flowStr.append(Integer.toString(key));
-                flowStr.append(",");
-                key += 1;
-            }
-
+            flowStr.append(points.get(flow.getStartPt()));
+            flowStr.append(",");
+            
+            // Append the key and a comma to flowStr
+            flowStr.append(points.get(flow.getEndPt()));
+            flowStr.append(",");
+             
             // Now the control point coordinates
             flowStr.append(flow.getCtrlPt().x);
             flowStr.append(",");
@@ -139,9 +137,9 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
         // Make a string of the nodes in nodeMap
         // Key first, then coordinates
-        nodeStr.append(nodeMap.size());
+        nodeStr.append(points.size());
         nodeStr.append("\n");
-        for (Map.Entry<Point, String> entry : nodeMap.entrySet()) {
+        for (Map.Entry<Point, String> entry : points.entrySet()) {
             String id = entry.getValue();
             double x = entry.getKey().x;
             double y = entry.getKey().y;
@@ -158,6 +156,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
         }
 
+        // Append the flowStr to the end of nodeStr and return the whole thing
         return nodeStr.append(flowStr.toString()).toString();
 
     }
