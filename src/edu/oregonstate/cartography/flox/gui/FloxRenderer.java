@@ -247,13 +247,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
                 // Draw arrows if the model says so
                 if (model.isDrawArrows()) {
-
-                    // Clip the flow by the end node
-                    f = clipFlowByEndNode(f);
-
+                    
                     // Clip the flow by the clipping area
                     f = getClippedFlow(f);
-
+                    
+                    // Clip the flow by the end node if clipping isn't happening?
+                    if (!model.isClippingFlowsByArea()) {
+                        f = clipFlowByEndNode(f);
+                    }
+                    
                     // Clip the flow by distance from endpoint
                     f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
 
@@ -408,9 +410,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Draw the control points for flows.
-     * Only draws if the flow is selected or if the Show Control Points menu
-     * item is selected.
+     * Draw the control points for flows. Only draws if the flow is selected or
+     * if the Show Control Points menu item is selected.
+     *
      * @param drawControlPoints Flag for drawing all control points.
      */
     public void drawControlPoints(boolean drawControlPoints) {

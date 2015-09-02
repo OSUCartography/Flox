@@ -2495,8 +2495,10 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void clipWithEndAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithEndAreasCheckBoxActionPerformed
         if (clipWithEndAreasCheckBox.isSelected()) {
+            model.setClippingFlowsByArea(true);
             model.updateEndClipAreas();
         } else {
+            model.setClippingFlowsByArea(false);
             model.removeEndClipAreasFromFlows();
         }
         layout("Clip with End Areas");

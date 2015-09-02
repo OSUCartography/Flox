@@ -206,6 +206,11 @@ public class Model {
     private double lockedMapScale = 1;
 
     /**
+     * Flag indicating that flows are being clipped by areas.
+     */
+    private boolean clippingFlowsByArea = false;
+    
+    /**
      * Determines the maximum number of intermediate nodes per flow. This is
      * modified by a comboBox in the GUI (low, medium, high).
      */
@@ -1393,6 +1398,20 @@ public class Model {
      */
     public Color getFlowColor() {
         return FLOW_COLOR;
+    }
+
+    /**
+     * @return the clippingFlowsByArea
+     */
+    public boolean isClippingFlowsByArea() {
+        return clippingFlowsByArea;
+    }
+
+    /**
+     * @param clippingFlowsByArea the clippingFlowsByArea to set
+     */
+    public void setClippingFlowsByArea(boolean clippingFlowsByArea) {
+        this.clippingFlowsByArea = clippingFlowsByArea;
     }
 
 }
