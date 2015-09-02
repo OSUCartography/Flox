@@ -5,6 +5,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import edu.oregonstate.cartography.flox.gui.MainWindow;
+import edu.oregonstate.cartography.flox.gui.Undo;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -48,8 +50,19 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
+    @XmlTransient
+    private Undo undo;
+    
+    public void addUndo(String message) {
+        try {
+            undo.add(message, marshal());
+        } catch (JAXBException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
     public enum CurveType {
-
         CUBIC,
         QUADRATIC
     }
@@ -58,7 +71,6 @@ public class Model {
      * Density of points along flows.
      */
     public enum FlowNodeDensity {
-
         LOW,
         MEDIUM,
         HIGH
@@ -1412,6 +1424,20 @@ public class Model {
      */
     public void setClippingFlowsByArea(boolean clippingFlowsByArea) {
         this.clippingFlowsByArea = clippingFlowsByArea;
+    }
+
+    /**
+     * @return the undo
+     */
+    public Undo getUndo() {
+        return undo;
+    }
+
+    /**
+     * @param undo the undo to set
+     */
+    public void setUndo(Undo undo) {
+        this.undo = undo;
     }
 
 }

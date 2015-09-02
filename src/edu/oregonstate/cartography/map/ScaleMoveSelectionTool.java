@@ -25,14 +25,14 @@ public class ScaleMoveSelectionTool extends CombinedTool {
      */
     public ScaleMoveSelectionTool(AbstractSimpleFeatureMapComponent mapComponent, 
             JFormattedTextField valueField, JFormattedTextField xField, 
-            JFormattedTextField yField, JButton lockUnlockButton, Undo undo) {
+            JFormattedTextField yField, JButton lockUnlockButton) {
         super(mapComponent, "Select - Move - Scale");
         
         SelectionTool selectionTool = new SelectionTool(this.mapComponent, 
                 valueField, xField, yField, lockUnlockButton);
         
         MoveTool moveTool = new MoveTool(this.mapComponent, xField, yField, 
-                lockUnlockButton, undo);
+                lockUnlockButton);
     
         this.addMapTool(moveTool);
         // selection tool must be added last

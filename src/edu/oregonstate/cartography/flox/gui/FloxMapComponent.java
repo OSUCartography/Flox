@@ -187,6 +187,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     @Override
     public boolean deleteSelected() {
         if (model.deleteSelectedFlowsAndNodes() > 0) {
+            model.addUndo("Delete");
             refreshMap();
             return true;
         } else {

@@ -71,7 +71,6 @@ public class Undo {
      */
     public void add(String name, Object undoItem) {
         
-        System.out.println("Adding an undo named " + name);
         // cut off all undoItems after undoID
         final int nbrItemsToRemove = list.size() - undoID - 1;
         for (int i = 0; i < nbrItemsToRemove; ++i) {
