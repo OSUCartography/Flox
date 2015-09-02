@@ -27,8 +27,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
     private final Model model;
 
-    private final Undo undo;
-
     protected final JFormattedTextField xField;
     protected final JFormattedTextField yField;
     protected final JButton lockUnlockButton;
@@ -93,13 +91,12 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      */
     @Override
     public void startDrag(Point2D.Double point, MouseEvent evt) {
-        
-        
+
         if (model.isNodeSelected()) {
             // There is at least one selected node
             // Was one of them clicked?
             ArrayList<Point> selectedNodes = model.getSelectedNodes();
-            if(((FloxMapComponent)mapComponent).getClickedNodes(selectedNodes, point, 2).size() > 0){
+            if (((FloxMapComponent) mapComponent).getClickedNodes(selectedNodes, point, 2).size() > 0) {
                 // FIXME, having to convert mapComponent to FloxMapComponent
                 // all the time is annoying.
                 // At least one selected node was clicked
@@ -107,7 +104,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 dragging = true;
             }
         }
-        
+
         if (model.isControlPtSelected()) {
             // A control point is currently selected.
             // Allow dragging
@@ -135,12 +132,9 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     }
 
     private void addUndo(String message) {
-        try {
-            if (dragging == true) {
-                undo.add(message, model.marshal());
-            }
-        } catch (JAXBException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+
+        if (dragging == true) {
+            model.addUndo("Move");
         }
     }
 
@@ -218,13 +212,12 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     // Constructor
     public MoveTool(AbstractSimpleFeatureMapComponent mapComponent,
             JFormattedTextField xField, JFormattedTextField yField,
-            JButton lockUnlockButton, Undo undo) {
+            JButton lockUnlockButton) {
         super(mapComponent);
         this.model = ((FloxMapComponent) mapComponent).getModel();
         this.xField = xField;
         this.yField = yField;
         this.lockUnlockButton = lockUnlockButton;
-        this.undo = undo;
     }
 
     /**

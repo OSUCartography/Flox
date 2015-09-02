@@ -174,6 +174,7 @@ public class MainWindow extends javax.swing.JFrame {
     public void setModel(Model model) {
         assert (model != null);
         this.model = model;
+        model.setUndo(undo);
         mapComponent.setModel(model);
         mapComponent.refreshMap();
         writeModelToGUI();
@@ -2365,7 +2366,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
         mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent,
                 valueFormattedTextField, xFormattedTextField, yFormattedTextField,
-                lockUnlockButton, undo));
+                lockUnlockButton));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
@@ -2694,7 +2695,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_exportCSVMenuItemActionPerformed
 
     private void addFlowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFlowToggleButtonActionPerformed
-        mapComponent.setMapTool(new AddFlowTool(mapComponent, model, undo));
+        mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
 
     private void lockFeatureSizeToScaleCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFeatureSizeToScaleCheckboxActionPerformed

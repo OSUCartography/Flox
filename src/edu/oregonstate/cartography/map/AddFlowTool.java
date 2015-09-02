@@ -58,8 +58,6 @@ public class AddFlowTool extends MapTool {
      * distance should change with the size of the node.
      */
     private final double PIXEL_TOLERANCE = 3;
-    
-    private final Undo undo;
 
     /**
      * Constructor for AddFlowTool.
@@ -67,11 +65,9 @@ public class AddFlowTool extends MapTool {
      * @param mapComponent The current mapComponent.
      * @param model The model containing flow data and settings.
      */
-    public AddFlowTool(AbstractSimpleFeatureMapComponent mapComponent, Model model,
-            Undo undo) {
+    public AddFlowTool(AbstractSimpleFeatureMapComponent mapComponent, Model model) {
         super(mapComponent);
         this.model = model;
-        this.undo = undo;
     }
 
     /**
@@ -89,14 +85,6 @@ public class AddFlowTool extends MapTool {
             addDestinationNode(point);
         } else {
             addOriginNode(point);
-        }
-    }
-
-    private void addUndo(String message) {
-        try {
-                undo.add(message, model.marshal());
-        } catch (JAXBException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -252,7 +240,7 @@ public class AddFlowTool extends MapTool {
 
         // repaint the map
         mapComponent.refreshMap();
-        addUndo("Add Flow");
+        model.addUndo("Add Flow");
     }
 
     /**
