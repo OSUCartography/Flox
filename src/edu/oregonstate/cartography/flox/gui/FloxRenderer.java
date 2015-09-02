@@ -102,7 +102,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             boolean drawGUIElements,
             boolean drawBackground,
             boolean fillNodes,
-            boolean drawSelectedFlows) {
+            boolean drawSelectedFlows,
+            boolean drawFlows,
+            boolean drawNodes) {
 
         // find size of fitting image
         //Rectangle2D bb = model.getFlowsBoundingBox();
@@ -156,10 +158,16 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 }
             }
         }
-
+        
         // render flows and nodes
-        renderer.drawFlows(drawSelectedFlows);
-        renderer.drawNodes(fillNodes);
+        if(drawFlows) {
+            renderer.drawFlows(drawSelectedFlows);
+        }
+        
+        if(drawNodes) {
+            renderer.drawNodes(fillNodes);
+        }
+        
         return bufferImage;
     }
 

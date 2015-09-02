@@ -2317,7 +2317,9 @@ public class MainWindow extends javax.swing.JFrame {
                 false, // draw GUI elements
                 true, // draw background 
                 false, // fill node circles
-                true); // draw selected flows 
+                true, // draw selected flows 
+                mapComponent.isDrawFlows(), // draw flows
+                mapComponent.isDrawNodes()); // draw nodes
         String filePath = FileUtils.askFile(this, "PNG Image", null, false, "png");
         {
             if (filePath != null) {
@@ -3066,7 +3068,9 @@ public class MainWindow extends javax.swing.JFrame {
                 false, // draw GUI elements
                 false, // draw background 
                 true, // fill node circles
-                false); // draw selected flows 
+                false, // draw selected flows 
+                true, // draw flows
+                true); // draw nodes
         
         // display the image
         // edu.oregonstate.cartography.utils.ImageUtils.displayImageInWindow(image);
