@@ -14,21 +14,31 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
     @Override
     public Graph unmarshal(String s) throws IOException {
+        
+        // Create a reader to interpret the xml
         BufferedReader reader = new BufferedReader(new StringReader(s));
 
+        // Create a hashmap to store the points with keys
         HashMap<String, Point> points = new HashMap<>();
+        
+        // Empty arraylist to store flows
         ArrayList<Flow> flows = new ArrayList<>();
+        
+        // Empty graph to add nodes and flows
         Graph graph = new Graph();
         
+        // The first line of the xml file is the number of nodes in the graph
         int numberOfNodes = Integer.parseInt(reader.readLine());
 
+        // If there are no nodes, return an empty graph
         if(numberOfNodes == 0) {
             return graph;
         }
         
+        // Create a String object to store text from the xml file
         String l;
 
-        // Read node data, add nodes to the points HashMap
+        // Read in node data, add nodes to the points HashMap
         for (int i = 0; i < numberOfNodes; i++) {
             l = reader.readLine();
             StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
@@ -43,12 +53,10 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
         // Add all the points to the graph
         for (Map.Entry<String, Point> entry : points.entrySet()) {
-            
             graph.addNode(entry.getValue());
-
         }
         
-        // Read flow data
+        // Read in flow data, add them to the flows ArrayList
         while ((l = reader.readLine()) != null) {
 
             StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
@@ -74,6 +82,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             flows.add(flow);
         }
 
+        // Add all the flows to the graph
         for (Flow flow : flows) {
             graph.addFlow(flow);
         }
@@ -98,7 +107,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         StringBuilder nodeStr = new StringBuilder();
         StringBuilder flowStr = new StringBuilder();
 
-        // Populate the nodeMap with all the nodes in the graph.
+        // Populate the points HashMap with all the nodes in the graph.
         int key = 0;
         while (nodes.hasNext()) {
             Point node = (Point) nodes.next();
@@ -118,7 +127,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             flowStr.append(points.get(flow.getEndPt()));
             flowStr.append(",");
              
-            // Now the control point coordinates
+            // Append the control point coordinates
             flowStr.append(flow.getCtrlPt().x);
             flowStr.append(",");
             flowStr.append(flow.getCtrlPt().y);
@@ -127,6 +136,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             flowStr.append(flow.getValue());
             flowStr.append(",");
 
+            // Append the locked status
             if (flow.isLocked()) {
                 flowStr.append(1);
             } else {
