@@ -156,6 +156,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void addUndo(String message) {
+        
         try {
             if (updatingGUI == false) {
                 undo.add(message, model.marshal());

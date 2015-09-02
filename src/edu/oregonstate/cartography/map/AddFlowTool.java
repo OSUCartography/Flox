@@ -110,7 +110,7 @@ public class AddFlowTool extends MapTool {
      */
     private void addOriginNode(Point2D.Double point) {
 
-        addUndo("Add Flow");
+        
         
         double scale = mapComponent.getScale();
 
@@ -252,6 +252,7 @@ public class AddFlowTool extends MapTool {
 
         // repaint the map
         mapComponent.refreshMap();
+        addUndo("Add Flow");
     }
 
     /**
