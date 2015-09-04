@@ -205,8 +205,8 @@ public class SVGFlowExporter extends SVGExporter {
 
                 if (model.isDrawArrows()) {
 
-                    f = clipFlowByEndNode(f);
                     f = getClippedFlow(f);
+                    f = clipFlowByEndNode(f);
                     f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
 
                     // make the arrow
