@@ -82,7 +82,7 @@ public class CubicBezierFlow extends Flow {
     public CubicBezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
         this.startPt = startPt;
         this.endPt = endPt;
-        this.value = value;
+        this.setValue(value);
         bend(alpha, distPerc);
     }
     

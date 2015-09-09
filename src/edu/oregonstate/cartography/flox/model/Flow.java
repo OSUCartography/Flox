@@ -24,7 +24,7 @@ public abstract class Flow {
     /**
      * mapped value.
      */
-    protected double value;
+    private double value;
     
     /**
      * clip area for the start of the flow.

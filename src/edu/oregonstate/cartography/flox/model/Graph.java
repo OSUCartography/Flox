@@ -184,7 +184,7 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
             return 0;
         }
         Iterator<Flow> iter = flowIterator();
-        double max = iter.next().value;
+        double max = iter.next().getValue();
         while (iter.hasNext()) {
             double v = iter.next().getValue();
             if (v > max) {

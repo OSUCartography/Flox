@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
@@ -60,46 +61,57 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     }
 
     /**
-     * Update the text field for changing the value of flows and nodes.
+     * Update the valueField's value.
+     * If the value of all selected features is the same, set the valueField
+     * to that value. Otherwise, set it to null.
      */
     private void updateValueField() {
         ArrayList<Flow> flows = model.getSelectedFlows();
         ArrayList<Point> nodes = model.getSelectedNodes();
+        
+        // get the number of selected features
         int nbrFlowsAndNodes = flows.size() + nodes.size();
+        
+        // enable the valueField if anything is selected
         valueField.setEnabled(nbrFlowsAndNodes > 0);
 
-        if (nbrFlowsAndNodes == 0) {
+        if (nbrFlowsAndNodes == 0) { // If nothing is selected
             valueField.setValue(null);
-        } else if (nbrFlowsAndNodes == 1) {
+        } else if (nbrFlowsAndNodes == 1) { // If just one feature is selected
             double value;
-            if (flows.size() == 1) {
+            if (flows.size() == 1) { // If the selected feature is a flow
                 value = flows.get(0).getValue();
-            } else {
+            } else { // The selected feature is a node
                 value = nodes.get(0).getValue();
             }
             valueField.setValue(value);
-        } else if (flows.size() + nodes.size() > 1) {
-            // test whether all selected nodes and/or flows have the same value
-            double v = Double.NaN;
-            if (flows.size() > 0) {
-                v = flows.get(0).getValue();
+        } else if (flows.size() + nodes.size() > 1) { // More than one thing is selected
+            // Check to see if all values are the same.
+            
+            // Make an ArrayList of all values.
+            ArrayList<Double> values = new ArrayList();
+            for (Flow flow : flows) {
+                values.add(flow.getValue());
             }
-            if (nodes.size() > 0) {
-                v = nodes.get(0).getValue();
+            for (Point node: nodes) {
+                values.add(node.getValue());
             }
-            for (int i = 1; i < flows.size(); i++) {
-                if (flows.get(i).getValue() != v) {
-                    v = Double.NaN;
-                    break;
+            
+            // Get the first value in Values
+            double v = values.get(0);
+            
+            // Compare v to all the other values.
+            // If any are different, set valueField to null and exit the method
+            for (double value : values) {
+                if (v != value) {
+                    valueField.setValue(null);
+                    return;
                 }
             }
-            for (int i = 1; i < nodes.size(); i++) {
-                if (nodes.get(i).getValue() != v) {
-                    v = Double.NaN;
-                    break;
-                }
-            }
-            valueField.setValue(Double.isNaN(v) ? null : v);
+            
+            // All values are the same, set valueField to v
+            valueField.setValue(v);
+            
         }
     }
 

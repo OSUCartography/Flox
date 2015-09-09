@@ -2770,24 +2770,35 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_moveFlowsThatCrossNodesButtonActionPerformed
 
     private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
-        if ("value".equals(evt.getPropertyName()) && model != null) {
+        /*if ("value".equals(evt.getPropertyName()) && model != null) {
+            // Makes sure the value of the box is the thing that changed.
             try {
                 valueFormattedTextField.commitEdit();
             } catch (ParseException ex) {
                 // the text field does not currently contain a valid value
                 return;
             }
+            
+            // Get the value of the field
             double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
+            
+            // Access all flows
             ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+            
+            // Change the value of selected flows to the value of the box
             for (Flow selectedFlow : selectedFlows) {
                 selectedFlow.setValue(v);
             }
+            
+            // Access all points
             ArrayList<Point> selectedPoints = model.getSelectedNodes();
+            
+            // Change the value of selected points to the value of the box.
             for (Point selectedPoint : selectedPoints) {
                 selectedPoint.setValue(v);
             }
             mapComponent.refreshMap();
-        }
+        }*/
     }//GEN-LAST:event_valueFormattedTextFieldPropertyChange
 
     private void lowFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lowFlowSegmentationMenuItemActionPerformed
@@ -3030,6 +3041,36 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_yFormattedTextFieldActionPerformed
 
     private void valueFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldActionPerformed
+        if (model != null) {
+            // Makes sure the value of the box is the thing that changed.
+            try {
+                valueFormattedTextField.commitEdit();
+            } catch (ParseException ex) {
+                // the text field does not currently contain a valid value
+                return;
+            }
+            
+            // Get the value of the field
+            double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
+            
+            // Access all flows
+            ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+            
+            // Change the value of selected flows to the value of the box
+            for (Flow selectedFlow : selectedFlows) {
+                selectedFlow.setValue(v);
+            }
+            
+            // Access all nodes
+            ArrayList<Point> selectedPoints = model.getSelectedNodes();
+            
+            // Change the value of selected points to the value of the box.
+            for (Point selectedPoint : selectedPoints) {
+                selectedPoint.setValue(v);
+            }
+            mapComponent.refreshMap();
+            this.requestFocus();
+        }
         addUndo("Edit Value");
     }//GEN-LAST:event_valueFormattedTextFieldActionPerformed
 

@@ -75,7 +75,7 @@ public class QuadraticBezierFlow extends Flow {
     public QuadraticBezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
         this.startPt = startPt;
         this.endPt = endPt;
-        this.value = value;
+        this.setValue(value);
         cPt = new Point(0, 0);
         bend(alpha, distPerc);
 
@@ -314,10 +314,10 @@ public class QuadraticBezierFlow extends Flow {
         Point end2 = new Point(endX2, endY2);
 
         QuadraticBezierFlow flow1 = new QuadraticBezierFlow(start1, ctrl1, end1);
-        flow1.value = value;
+        flow1.setValue(this.getValue());
 
         QuadraticBezierFlow flow2 = new QuadraticBezierFlow(start2, ctrl2, end2);
-        flow2.value = value;
+        flow2.setValue(this.getValue());
 
         return new QuadraticBezierFlow[]{flow1, flow2};
     }

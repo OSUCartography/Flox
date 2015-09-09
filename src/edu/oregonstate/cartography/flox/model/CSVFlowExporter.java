@@ -32,7 +32,7 @@ public class CSVFlowExporter {
                 str.append(cFlow.endPt.y);
                 str.append(",");
 
-                str.append(cFlow.value);
+                str.append(cFlow.getValue());
                 str.append(",");
 
                 if (cFlow.isLocked()) {
@@ -55,7 +55,7 @@ public class CSVFlowExporter {
                 str.append(qFlow.endPt.y);
                 str.append(",");
 
-                str.append(qFlow.value);
+                str.append(qFlow.getValue());
                 str.append(",");
 
                 str.append(qFlow.getCtrlPt().x);
