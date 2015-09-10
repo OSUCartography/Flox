@@ -728,11 +728,6 @@ public class MainWindow extends javax.swing.JFrame {
                 valueFormattedTextFieldActionPerformed(evt);
             }
         });
-        valueFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                valueFormattedTextFieldPropertyChange(evt);
-            }
-        });
         jPanel2.add(valueFormattedTextField);
 
         jLabel12.setText("X:");
@@ -746,11 +741,6 @@ public class MainWindow extends javax.swing.JFrame {
                 xFormattedTextFieldActionPerformed(evt);
             }
         });
-        xFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                xFormattedTextFieldPropertyChange(evt);
-            }
-        });
         jPanel2.add(xFormattedTextField);
 
         jLabel25.setText("Y:");
@@ -762,11 +752,6 @@ public class MainWindow extends javax.swing.JFrame {
         yFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 yFormattedTextFieldActionPerformed(evt);
-            }
-        });
-        yFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                yFormattedTextFieldPropertyChange(evt);
             }
         });
         jPanel2.add(yFormattedTextField);
@@ -1648,12 +1633,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         editMenu.setText("Edit");
         editMenu.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                editMenuMenuSelected(evt);
             }
             public void menuDeselected(javax.swing.event.MenuEvent evt) {
             }
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                editMenuMenuSelected(evt);
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
             }
         });
 
@@ -2769,38 +2754,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_moveFlowsThatCrossNodesButtonActionPerformed
 
-    private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
-        /*if ("value".equals(evt.getPropertyName()) && model != null) {
-            // Makes sure the value of the box is the thing that changed.
-            try {
-                valueFormattedTextField.commitEdit();
-            } catch (ParseException ex) {
-                // the text field does not currently contain a valid value
-                return;
-            }
-            
-            // Get the value of the field
-            double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
-            
-            // Access all flows
-            ArrayList<Flow> selectedFlows = model.getSelectedFlows();
-            
-            // Change the value of selected flows to the value of the box
-            for (Flow selectedFlow : selectedFlows) {
-                selectedFlow.setValue(v);
-            }
-            
-            // Access all points
-            ArrayList<Point> selectedPoints = model.getSelectedNodes();
-            
-            // Change the value of selected points to the value of the box.
-            for (Point selectedPoint : selectedPoints) {
-                selectedPoint.setValue(v);
-            }
-            mapComponent.refreshMap();
-        }*/
-    }//GEN-LAST:event_valueFormattedTextFieldPropertyChange
-
     private void lowFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lowFlowSegmentationMenuItemActionPerformed
         if (lowFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.LOW);
@@ -2962,46 +2915,6 @@ public class MainWindow extends javax.swing.JFrame {
         undo();
     }//GEN-LAST:event_undoMenuItemActionPerformed
 
-    private void xFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_xFormattedTextFieldPropertyChange
-        if ("value".equals(evt.getPropertyName()) && model != null) {
-            try {
-                xFormattedTextField.commitEdit();
-            } catch (ParseException ex) {
-                // the text field does not currently contain a valid value
-                return;
-            }
-            if (xFormattedTextField.getValue() != null) {
-                double x = ((Number) xFormattedTextField.getValue()).doubleValue();
-                ArrayList<Point> selectedNodes = model.getSelectedNodes();
-                for (Point node : selectedNodes) {
-                    node.x = x;
-                }
-            }
-
-            mapComponent.refreshMap();
-        }
-    }//GEN-LAST:event_xFormattedTextFieldPropertyChange
-
-    private void yFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_yFormattedTextFieldPropertyChange
-        if ("value".equals(evt.getPropertyName()) && model != null) {
-            try {
-                yFormattedTextField.commitEdit();
-            } catch (ParseException ex) {
-                // the text field does not currently contain a valid value
-                return;
-            }
-            if (yFormattedTextField.getValue() != null) {
-                double y = ((Number) yFormattedTextField.getValue()).doubleValue();
-                ArrayList<Point> selectedNodes = model.getSelectedNodes();
-                for (Point node : selectedNodes) {
-                    node.y = y;
-                }
-            }
-
-            mapComponent.refreshMap();
-        }
-    }//GEN-LAST:event_yFormattedTextFieldPropertyChange
-
     private void lockUnlockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockUnlockButtonActionPerformed
         ArrayList<Flow> selectedFlows = model.getSelectedFlows();
         int locked = 0;
@@ -3031,15 +2944,67 @@ public class MainWindow extends javax.swing.JFrame {
         model.setEnforceCanvasRange(enforceCanvasCheckBoxMenuItem.isSelected());
         layout("");
     }//GEN-LAST:event_enforceCanvasCheckBoxMenuItemActionPerformed
-
+    
+    /**
+     * Sets the x coordinate of selected nodes to the value that was just 
+     * entered into this text box.
+     * @param evt 
+     */
     private void xFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xFormattedTextFieldActionPerformed
+        
+        if (model != null) {
+            try {
+                xFormattedTextField.commitEdit();
+            } catch (ParseException ex) {
+                // the text field does not currently contain a valid value
+                return;
+            }
+            if (xFormattedTextField.getValue() != null) {
+                double x = ((Number) xFormattedTextField.getValue()).doubleValue();
+                ArrayList<Point> selectedNodes = model.getSelectedNodes();
+                for (Point node : selectedNodes) {
+                    node.x = x;
+                }
+            }
+            mapComponent.refreshMap();
+        }
+        // Move focus to MainWindow
+        this.requestFocus();
         addUndo("Edit X Coordinate");
     }//GEN-LAST:event_xFormattedTextFieldActionPerformed
 
+    /**
+     * Sets the Y coordinate of selected nodes to the value that was just 
+     * entered into this text box.
+     * @param evt 
+     */
     private void yFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_yFormattedTextFieldActionPerformed
+        if (model != null) {
+            try {
+                yFormattedTextField.commitEdit();
+            } catch (ParseException ex) {
+                // the text field does not currently contain a valid value
+                return;
+            }
+            if (yFormattedTextField.getValue() != null) {
+                double y = ((Number) yFormattedTextField.getValue()).doubleValue();
+                ArrayList<Point> selectedNodes = model.getSelectedNodes();
+                for (Point node : selectedNodes) {
+                    node.y = y;
+                }
+            }
+            mapComponent.refreshMap();
+        }
+        // Move focus to MainWindow
+        this.requestFocus();
         addUndo("Edit Y Coordinate");
     }//GEN-LAST:event_yFormattedTextFieldActionPerformed
 
+    /**
+     * Sets the value of any selected features to the value that was just 
+     * entered into this text box.
+     * @param evt 
+     */
     private void valueFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldActionPerformed
         if (model != null) {
             // Makes sure the value of the box is the thing that changed.
@@ -3049,7 +3014,6 @@ public class MainWindow extends javax.swing.JFrame {
                 // the text field does not currently contain a valid value
                 return;
             }
-            
             // Get the value of the field
             double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
             
@@ -3069,8 +3033,9 @@ public class MainWindow extends javax.swing.JFrame {
                 selectedPoint.setValue(v);
             }
             mapComponent.refreshMap();
-            this.requestFocus();
         }
+        // Move focus to MainWindow
+        this.requestFocus();
         addUndo("Edit Value");
     }//GEN-LAST:event_valueFormattedTextFieldActionPerformed
 
