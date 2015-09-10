@@ -104,7 +104,7 @@ public class AddFlowTool extends MapTool {
 
         // Get the locked scale factor needed to calculate feature sizes
         double lockedScaleFactor;
-        if (!model.isFlowWidthLocked()) {
+        if (!model.isScaleLocked()) {
             lockedScaleFactor = 1;
         } else {
             // compare the locked scale to the current scale
@@ -166,7 +166,7 @@ public class AddFlowTool extends MapTool {
         
         // Get the locked scale factor needed to calculate feature sizes
         double lockedScaleFactor;
-        if (!model.isFlowWidthLocked()) {
+        if (!model.isScaleLocked()) {
             lockedScaleFactor = 1;
         } else {
             // compare the locked scale to the current scale
@@ -253,7 +253,7 @@ public class AddFlowTool extends MapTool {
 
         if (originNodeCreated) {
             double lockedScaleFactor;
-            if (!model.isFlowWidthLocked()) {
+            if (!model.isScaleLocked()) {
                 lockedScaleFactor = 1;
             } else {
                 // compare the locked scale to the current scale

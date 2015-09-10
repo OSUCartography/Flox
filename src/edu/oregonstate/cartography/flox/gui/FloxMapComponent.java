@@ -212,7 +212,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         ArrayList<Point> clickedNodes = new ArrayList<>();
 
         double lockedScaleFactor;
-        if (!model.isFlowWidthLocked()) {
+        if (!model.isScaleLocked()) {
             lockedScaleFactor = 1;
         } else {
             double lockedMapScale = model.getLockedMapScale();

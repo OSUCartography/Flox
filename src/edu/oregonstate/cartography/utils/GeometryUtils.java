@@ -477,7 +477,7 @@ public class GeometryUtils {
         // Get the pixel width of the flow
         // Get the locked scale factor needed to calculate flow widths
         double lockedScaleFactor;
-        if (!model.isFlowWidthLocked()) {
+        if (!model.isScaleLocked()) {
             lockedScaleFactor = 1;
         } else {
             // compare the locked scale to the current scale

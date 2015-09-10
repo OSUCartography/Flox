@@ -228,7 +228,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             updateClippingGUI();
 
-            lockFeatureSizeToScaleCheckbox.setSelected(model.isFlowWidthLocked());
+            lockFeatureScaleToggleButton.setSelected(model.isScaleLocked());
 
         } finally {
             updatingGUI = false;
@@ -325,7 +325,6 @@ public class MainWindow extends javax.swing.JFrame {
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         addLayerButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
-        lockFeatureSizeToScaleCheckbox = new javax.swing.JCheckBox();
         maximumFlowWidthSlider = new javax.swing.JSlider();
         jLabel26 = new javax.swing.JLabel();
         maximumNodeSizeSlider = new javax.swing.JSlider();
@@ -333,6 +332,7 @@ public class MainWindow extends javax.swing.JFrame {
         showNodesToggleButton = new javax.swing.JToggleButton();
         showFlowsToggleButton = new javax.swing.JToggleButton();
         jSeparator9 = new javax.swing.JSeparator();
+        lockFeatureScaleToggleButton = new javax.swing.JToggleButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
@@ -1132,19 +1132,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         mapControlPanel.add(jButton1, gridBagConstraints);
 
-        lockFeatureSizeToScaleCheckbox.setText("Lock Feature Sizes to Current Scale");
-        lockFeatureSizeToScaleCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lockFeatureSizeToScaleCheckboxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(lockFeatureSizeToScaleCheckbox, gridBagConstraints);
-
         maximumFlowWidthSlider.setMajorTickSpacing(20);
         maximumFlowWidthSlider.setMinorTickSpacing(10);
         maximumFlowWidthSlider.setPaintLabels(true);
@@ -1230,6 +1217,19 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         mapControlPanel.add(jSeparator9, gridBagConstraints);
+
+        lockFeatureScaleToggleButton.setText("Lock Feature Scale");
+        lockFeatureScaleToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lockFeatureScaleToggleButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
+        mapControlPanel.add(lockFeatureScaleToggleButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2544,11 +2544,11 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
 
     private void sizeFeaturesToScale() {
-        if (lockFeatureSizeToScaleCheckbox.isSelected()) {
+        if (lockFeatureScaleToggleButton.isSelected()) {
             model.setLockedMapScale(mapComponent.getScale());
             mapComponent.refreshMap();
         } else {
-            lockFeatureSizeToScaleCheckbox.doClick();
+            lockFeatureScaleToggleButton.doClick();
         }
     }
 
@@ -2682,19 +2682,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void addFlowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFlowToggleButtonActionPerformed
         mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
     }//GEN-LAST:event_addFlowToggleButtonActionPerformed
-
-    private void lockFeatureSizeToScaleCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFeatureSizeToScaleCheckboxActionPerformed
-        if (lockFeatureSizeToScaleCheckbox.isSelected()) {
-            // Set locked to true, pass current scale to model
-            model.setFlowWidthLocked(true);
-            model.setLockedMapScale(mapComponent.getScale());
-        } else {
-            model.setFlowWidthLocked(false);
-            mapComponent.refreshMap();
-        }
-
-        addUndo("Lock/unlock Feature Size");
-    }//GEN-LAST:event_lockFeatureSizeToScaleCheckboxActionPerformed
 
     private void maximumFlowWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maximumFlowWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
@@ -3165,6 +3152,18 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_angularDistributionMenuItemActionPerformed
 
+    private void lockFeatureScaleToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFeatureScaleToggleButtonActionPerformed
+        if (lockFeatureScaleToggleButton.isSelected()) {
+            lockFeatureScaleToggleButton.setText("Unlock Feature Scale");
+            model.setScaleLocked(true);
+            model.setLockedMapScale(mapComponent.getScale());
+        } else {
+            lockFeatureScaleToggleButton.setText("Lock Feature Scale");
+            model.setScaleLocked(false);
+            mapComponent.refreshMap();
+        }
+    }//GEN-LAST:event_lockFeatureScaleToggleButtonActionPerformed
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3338,7 +3337,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
-    private javax.swing.JCheckBox lockFeatureSizeToScaleCheckbox;
+    private javax.swing.JToggleButton lockFeatureScaleToggleButton;
     private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;

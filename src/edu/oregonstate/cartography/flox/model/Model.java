@@ -210,7 +210,7 @@ public class Model {
     /**
      * Flag to indicate when the flow width is locked to the current map scale.
      */
-    private boolean flowWidthLocked = false;
+    private boolean scaleLocked = false;
 
     /**
      * The map scale at the time it was locked.
@@ -1341,15 +1341,15 @@ public class Model {
     /**
      * @return the flowWidthLocked
      */
-    public boolean isFlowWidthLocked() {
-        return flowWidthLocked;
+    public boolean isScaleLocked() {
+        return scaleLocked;
     }
 
     /**
-     * @param flowWidthLocked the flowWidthLocked to set
+     * @param scaleLocked the flowWidthLocked to set
      */
-    public void setFlowWidthLocked(boolean flowWidthLocked) {
-        this.flowWidthLocked = flowWidthLocked;
+    public void setScaleLocked(boolean scaleLocked) {
+        this.scaleLocked = scaleLocked;
     }
 
     /**

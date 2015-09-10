@@ -550,7 +550,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     private double getLockedScaleFactor() {
-        if (!model.isFlowWidthLocked()) {
+        if (!model.isScaleLocked()) {
             return 1;
         } else {
             // compare the locked scale to the current scale
