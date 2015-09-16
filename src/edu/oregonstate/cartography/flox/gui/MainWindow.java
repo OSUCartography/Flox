@@ -137,11 +137,13 @@ public class MainWindow extends javax.swing.JFrame {
                 // layer styles are not undoable).
                 model.copyTransientFields(newModel);
                 setModel(newModel);
+                layout(null);
             } catch (JAXBException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
+
     private void addUndo(String message) {
 
         try {
@@ -3152,7 +3154,9 @@ public class MainWindow extends javax.swing.JFrame {
         if (updatingGUI) {
             return;
         }
-        addUndo(undoString);
+        if (undoString != null) {
+            addUndo(undoString);
+        }
 
         // If there are no flows, exit the method.
         if (model.getNbrFlows() == 0) {
@@ -3161,7 +3165,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         // If the flows are not QuadraticBezierFlows, exit the method.
         if (model.getCurveType() != Model.CurveType.QUADRATIC) {
-            String msg = "Please switch to quadratic BŽzier curves first.\nUse Map > Geometric Flow LayoutÉ";
+            String msg = "Please switch to quadratic BŽzier curves first.\n"
+                    + "Use Map > Geometric Flow Layout";
             ErrorDialog.showErrorDialog(msg, "Flow Error", null, this);
             return;
         }
