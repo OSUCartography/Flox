@@ -124,39 +124,26 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
-    private void byteArrayToModel(byte[] buf) {
-        if (buf == null) {
-            return;
-        }
-        try {
-            setModel(Model.unmarshal(buf));
-        } catch (JAXBException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     protected void registerUndoMenuItems(JMenuItem undoMenuItem, JMenuItem redoMenuItem) {
         undo.registerUndoMenuItems(undoMenuItem, redoMenuItem);
     }
 
-    protected void undo() {
-        Object undoData = undo.getUndo();
+    private void undoRedo(boolean undoFlag) {
+        Object undoData = undoFlag ? undo.getUndo() : undo.getRedo();;
         if (undoData != null) {
-            byteArrayToModel((byte[]) undoData);
-            writeModelToGUI();
+            try {
+                Model newModel = Model.unmarshal((byte[]) undoData);
+                // copy map from previous model (changes to map layers and 
+                // layer styles are not undoable).
+                model.copyTransientFields(newModel);
+                setModel(newModel);
+            } catch (JAXBException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
-
-    protected void redo() {
-        Object undoData = undo.getRedo();
-        if (undoData != null) {
-            byteArrayToModel((byte[]) undoData);
-            writeModelToGUI();
-        }
-    }
-
     private void addUndo(String message) {
-        
+
         try {
             if (updatingGUI == false) {
                 undo.add(message, model.marshal());
@@ -1559,6 +1546,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         fileMenu.setText("File");
 
+        importFlowsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         importFlowsMenuItem.setText("Open Flows…");
         importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1595,7 +1583,6 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(saveSettingsMenuItem);
         fileMenu.add(jSeparator7);
 
-        openShapefileMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         openShapefileMenuItem.setText("Add Shapefile Layer…");
         openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2066,8 +2053,6 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void openShapefileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openShapefileMenuItemActionPerformed
         openShapefile();
-        // FIXME Shapefiles aren't added to the undo states
-        addUndo("Open Shapefile");
     }//GEN-LAST:event_openShapefileMenuItemActionPerformed
 
     private void removeAllLayersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAllLayersMenuItemActionPerformed
@@ -2075,9 +2060,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.showAll();
         mapComponent.refreshMap();
         updateLayerList();
-        // FIXME Shapefiles aren't added to the undo states. Maybe of the following
-        // methods have this same issue.
-        addUndo("Remove All Layers");
     }//GEN-LAST:event_removeAllLayersMenuItemActionPerformed
 
     private void layerListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_layerListValueChanged
@@ -2089,7 +2071,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void fillCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillCheckBoxActionPerformed
         readSymbolGUI();
         mapComponent.refreshMap();
-        addUndo("Add/remove Fill");
+        addUndo("Add/Remove Fill");
     }//GEN-LAST:event_fillCheckBoxActionPerformed
 
     private void strokeCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeCheckBoxActionPerformed
@@ -2708,24 +2690,24 @@ public class MainWindow extends javax.swing.JFrame {
         double scale = mapComponent.getScale();
         // Get an ArrayList of all flows that intersect nodes.
         ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
-        
+
         try {
             flowsArray
-                = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+                    = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
         } catch (IOException e) {
             System.out.println("Exception!");
             JOptionPane.showMessageDialog(this, "At least one node crossing is "
-                        + "impossible to avoid because the nodes are too "
-                        + "close together.");
+                    + "impossible to avoid because the nodes are too "
+                    + "close together.");
             return;
         }
-        
+
         // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
         // flowsArray using getFlowsThatIntersectNodes, and repeat until 
         // flowsArray is empty.
         while (flowsArray.size() > 0) {
             GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
-            
+
             try {
                 flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
             } catch (IOException e) {
@@ -2895,11 +2877,11 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_deleteMenuItemActionPerformed
 
     private void redoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redoMenuItemActionPerformed
-        redo();
+        undoRedo(false);
     }//GEN-LAST:event_redoMenuItemActionPerformed
 
     private void undoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoMenuItemActionPerformed
-        undo();
+        undoRedo(true);
     }//GEN-LAST:event_undoMenuItemActionPerformed
 
     private void lockUnlockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockUnlockButtonActionPerformed
@@ -2931,14 +2913,15 @@ public class MainWindow extends javax.swing.JFrame {
         model.setEnforceCanvasRange(enforceCanvasCheckBoxMenuItem.isSelected());
         layout("");
     }//GEN-LAST:event_enforceCanvasCheckBoxMenuItemActionPerformed
-    
+
     /**
-     * Sets the x coordinate of selected nodes to the value that was just 
+     * Sets the x coordinate of selected nodes to the value that was just
      * entered into this text box.
-     * @param evt 
+     *
+     * @param evt
      */
     private void xFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xFormattedTextFieldActionPerformed
-        
+
         if (model != null) {
             try {
                 xFormattedTextField.commitEdit();
@@ -2961,9 +2944,10 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_xFormattedTextFieldActionPerformed
 
     /**
-     * Sets the Y coordinate of selected nodes to the value that was just 
+     * Sets the Y coordinate of selected nodes to the value that was just
      * entered into this text box.
-     * @param evt 
+     *
+     * @param evt
      */
     private void yFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_yFormattedTextFieldActionPerformed
         if (model != null) {
@@ -2988,9 +2972,10 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_yFormattedTextFieldActionPerformed
 
     /**
-     * Sets the value of any selected features to the value that was just 
+     * Sets the value of any selected features to the value that was just
      * entered into this text box.
-     * @param evt 
+     *
+     * @param evt
      */
     private void valueFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldActionPerformed
         if (model != null) {
@@ -3003,18 +2988,18 @@ public class MainWindow extends javax.swing.JFrame {
             }
             // Get the value of the field
             double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
-            
+
             // Access all flows
             ArrayList<Flow> selectedFlows = model.getSelectedFlows();
-            
+
             // Change the value of selected flows to the value of the box
             for (Flow selectedFlow : selectedFlows) {
                 selectedFlow.setValue(v);
             }
-            
+
             // Access all nodes
             ArrayList<Point> selectedPoints = model.getSelectedNodes();
-            
+
             // Change the value of selected points to the value of the box.
             for (Point selectedPoint : selectedPoints) {
                 selectedPoint.setValue(v);
@@ -3066,10 +3051,9 @@ public class MainWindow extends javax.swing.JFrame {
                 false, // draw selected flows 
                 true, // draw flows
                 true); // draw nodes
-        
+
         // display the image
         // edu.oregonstate.cartography.utils.ImageUtils.displayImageInWindow(image);
-
         // convert image to a boolean grid
         // false values are not occupied by flows or nodes, true values are occupied.
         int cols = image.getWidth();
@@ -3094,7 +3078,7 @@ public class MainWindow extends javax.swing.JFrame {
         // FIXME Ignore other selected flows for the moment.
         QuadraticBezierFlow selectedFlow = (QuadraticBezierFlow) model.getSelectedFlows().get(0);
         Point ctrlPt = selectedFlow.getCtrlPt();
-        
+
         // find attracting forces on the selected flow
         double vx = 0;
         double vy = 0;
@@ -3126,7 +3110,7 @@ public class MainWindow extends javax.swing.JFrame {
         // we are only interested in the direction of the total attracting white space
         Force v = new Force(vx, vy);
         v.normalize();
-        
+
         // Multiply by the value of the GUI slider for attractor weight.
         v.scale(attractorWeight);
 
@@ -3140,12 +3124,12 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void angularDistributionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_angularDistributionMenuItemActionPerformed
         // FIXME work in progress
-        
+
         if (model.getSelectedFlows().size() < 1) {
             System.err.println("no flow selected");
             return;
         }
-        QuadraticBezierFlow flow = (QuadraticBezierFlow)model.getSelectedFlows().get(0);
+        QuadraticBezierFlow flow = (QuadraticBezierFlow) model.getSelectedFlows().get(0);
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.computeAngularDistributionForce(flow);
         mapComponent.eraseBufferImage();

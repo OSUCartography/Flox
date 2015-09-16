@@ -245,6 +245,7 @@ public class Model {
     /**
      * A geometry (collection) used for clipping start or end of flows.
      */
+    // FIXME should not be transient?
     @XmlTransient
     private Geometry clipAreas;
 
@@ -331,6 +332,7 @@ public class Model {
 
     public void copyTransientFields(Model destination) {
         destination.map = map;
+        // FIXME should not be transient?
         destination.clipAreas = clipAreas;
     }
 

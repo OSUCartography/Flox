@@ -240,6 +240,9 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="importFlowsMenuItem">
               <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Open Flows&#x2026;"/>
               </Properties>
               <Events>
@@ -290,9 +293,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="openShapefileMenuItem">
               <Properties>
-                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
-                </Property>
                 <Property name="text" type="java.lang.String" value="Add Shapefile Layer&#x2026;"/>
               </Properties>
               <Events>
