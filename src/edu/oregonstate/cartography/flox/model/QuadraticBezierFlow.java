@@ -502,4 +502,26 @@ public class QuadraticBezierFlow extends Flow {
         double d = Math.sqrt(dx * dx + dy * dy);
         return new double[]{dx / d, dy / d};
     }
+    
+    /**
+     * Orientation of the line between the start point and the control point.
+     * @return Angle in radians relative to horizontal x axis in counter-clockwise 
+     * direction.
+     */
+    public double startToCtrlAngle() {
+        double dx = cPt.x - startPt.x;
+        double dy = cPt.y - startPt.y;
+        return Math.atan2(dy, dx);
+    }
+
+    /**
+     * Orientation of the line between the end point and the control point.
+     * @return Angle in radians relative to horizontal x axis in counter-clockwise 
+     * direction.
+     */
+    public double endToCtrlAngle() {
+        double dx = cPt.x - endPt.x;
+        double dy = cPt.y - endPt.y;
+        return Math.atan2(dy, dx);
+    }
 }

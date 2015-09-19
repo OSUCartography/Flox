@@ -29,7 +29,6 @@ import edu.oregonstate.cartography.utils.FileUtils;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -215,6 +214,7 @@ public class MainWindow extends javax.swing.JFrame {
             } else {
                 highFlowSegmentationMenuItem.setSelected(true);
             }
+            angularDistributionSlider.setValue((int) (model.getAngularDistributionWeight() * 100));
             updateClippingGUI();
 
             lockFeatureScaleToggleButton.setSelected(model.isScaleLocked());
@@ -302,6 +302,8 @@ public class MainWindow extends javax.swing.JFrame {
         viewCanvasToggleButton = new javax.swing.JToggleButton();
         viewFlowRangeboxToggleButton = new javax.swing.JToggleButton();
         moveFlowsThatCrossNodesButton = new javax.swing.JButton();
+        angularDistributionSlider = new javax.swing.JSlider();
+        javax.swing.JLabel jLabel28 = new javax.swing.JLabel();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
@@ -360,13 +362,14 @@ public class MainWindow extends javax.swing.JFrame {
         importFlowsMenuItem = new javax.swing.JMenuItem();
         openPointsAndFlowsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        exportFlowsCSVMenuItem = new javax.swing.JMenuItem();
+        jSeparator14 = new javax.swing.JPopupMenu.Separator();
         openSettingsMenuItem = new javax.swing.JMenuItem();
         saveSettingsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator7 = new javax.swing.JPopupMenu.Separator();
         openShapefileMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
-        exportCSVMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
         undoMenuItem = new javax.swing.JMenuItem();
@@ -1014,6 +1017,32 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
         forcesPanel.add(moveFlowsThatCrossNodesButton, gridBagConstraints);
 
+        angularDistributionSlider.setMajorTickSpacing(10);
+        angularDistributionSlider.setMinorTickSpacing(5);
+        angularDistributionSlider.setPaintLabels(true);
+        angularDistributionSlider.setPaintTicks(true);
+        angularDistributionSlider.setValue(100);
+        angularDistributionSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        angularDistributionSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                angularDistributionSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 23;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        forcesPanel.add(angularDistributionSlider, gridBagConstraints);
+
+        jLabel28.setText("Angular Distribution");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 22;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        forcesPanel.add(jLabel28, gridBagConstraints);
+
         controlsTabbedPane.addTab("Layout", forcesPanel);
 
         mapControlPanel.setLayout(new java.awt.GridBagLayout());
@@ -1566,7 +1595,15 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(openPointsAndFlowsMenuItem);
         fileMenu.add(jSeparator4);
 
-        openSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        exportFlowsCSVMenuItem.setText("Export Flows to CSV...");
+        exportFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportFlowsCSVMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(exportFlowsCSVMenuItem);
+        fileMenu.add(jSeparator14);
+
         openSettingsMenuItem.setText("Open Settings…");
         openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1601,14 +1638,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(exportSVGMenuItem);
-
-        exportCSVMenuItem.setText("Export CSV...");
-        exportCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exportCSVMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(exportCSVMenuItem);
 
         exportImageMenuItem.setText("Export Image…");
         exportImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2489,7 +2518,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
 
     protected JOptionPane getOptionPane(JComponent parent) {
-        JOptionPane pane = null;
+        JOptionPane pane;
         if (!(parent instanceof JOptionPane)) {
             pane = getOptionPane((JComponent) parent.getParent());
         } else {
@@ -2648,7 +2677,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_saveSettingsMenuItemActionPerformed
 
-    private void exportCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportCSVMenuItemActionPerformed
+    private void exportFlowsCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFlowsCSVMenuItemActionPerformed
         try {
             // ask for export file
             String outFilePath = FileUtils.askFile(this, "CSV File", false);
@@ -2661,7 +2690,7 @@ public class MainWindow extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_exportCSVMenuItemActionPerformed
+    }//GEN-LAST:event_exportFlowsCSVMenuItemActionPerformed
 
     private void addFlowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFlowToggleButtonActionPerformed
         mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
@@ -2691,11 +2720,10 @@ public class MainWindow extends javax.swing.JFrame {
 
         double scale = mapComponent.getScale();
         // Get an ArrayList of all flows that intersect nodes.
-        ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
+        ArrayList<QuadraticBezierFlow> flowsArray;
 
         try {
-            flowsArray
-                    = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
         } catch (IOException e) {
             System.out.println("Exception!");
             JOptionPane.showMessageDialog(this, "At least one node crossing is "
@@ -3133,7 +3161,12 @@ public class MainWindow extends javax.swing.JFrame {
         }
         QuadraticBezierFlow flow = (QuadraticBezierFlow) model.getSelectedFlows().get(0);
         ForceLayouter layouter = new ForceLayouter(model);
-        layouter.computeAngularDistributionForce(flow);
+        Force f = layouter.computeAngularDistributionForce(flow);
+
+        // move control point
+        flow.getCtrlPt().x += f.fx;
+        flow.getCtrlPt().y += f.fy;
+
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_angularDistributionMenuItemActionPerformed
@@ -3149,6 +3182,14 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.refreshMap();
         }
     }//GEN-LAST:event_lockFeatureScaleToggleButtonActionPerformed
+
+    private void angularDistributionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_angularDistributionSliderStateChanged
+        model.setAngularDistributionWeight(angularDistributionSlider.getValue() / 100d);
+        mapComponent.refreshMap();
+        if (angularDistributionSlider.getValueIsAdjusting() == false) {
+            layout("Angular Distribution");
+        }
+    }//GEN-LAST:event_angularDistributionSliderStateChanged
 
     private void layout(String undoString) {
         if (updatingGUI) {
@@ -3191,10 +3232,10 @@ public class MainWindow extends javax.swing.JFrame {
 
     class LayoutActionListener implements ActionListener {
 
-        private int NBR_ITERATIONS;
+        private final int NBR_ITERATIONS;
         private final ForceLayouter layouter;
         private int counter = 0;
-        private boolean constant = false;
+        private final boolean constant = false;
         double weight;
 
         public LayoutActionListener(ForceLayouter layouter, boolean constant) {
@@ -3243,6 +3284,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
     private javax.swing.JMenuItem angularDistributionMenuItem;
+    private javax.swing.JSlider angularDistributionSlider;
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JCheckBoxMenuItem applyConstantForceMenuCheckbox;
     private javax.swing.JSlider arrowCornerPositionSlider;
@@ -3274,7 +3316,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem enforceCanvasCheckBoxMenuItem;
     private javax.swing.JCheckBox enforceRangeboxCheckbox;
     private javax.swing.JSlider exponentSlider;
-    private javax.swing.JMenuItem exportCSVMenuItem;
+    private javax.swing.JMenuItem exportFlowsCSVMenuItem;
     private javax.swing.JMenuItem exportImageMenuItem;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
@@ -3321,6 +3363,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator13;
+    private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
     private javax.swing.JToolBar jToolBar1;

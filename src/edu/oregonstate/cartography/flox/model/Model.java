@@ -80,7 +80,7 @@ public class Model {
      * Color for drawing flows that are not selected
      */
     @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
-    private Color FLOW_COLOR = Color.BLACK;
+    private final Color FLOW_COLOR = Color.BLACK;
 
     /**
      * Graph of edges (BŽzier flows) and nodes (Point).
@@ -184,7 +184,7 @@ public class Model {
      * bounding box = this value * the length of the flow's baseline. Currently
      * modified by a GUI slider.
      */
-    private double flowRangeboxHeight = .5;
+    private double flowRangeboxHeight = .2;
 
     /**
      * Determines the distance (in pixels) a flow line stops before reaching its
@@ -228,6 +228,7 @@ public class Model {
      */
     private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
 
+    // FIXME not used?
     @XmlJavaTypeAdapter(RectangleSerializer.class)
     private Rectangle2D canvas;
 
@@ -259,6 +260,11 @@ public class Model {
      */
     private double endClipAreaBufferDistance = 0;
 
+    /**
+     * Weight of angular distribution force. Currently modified by a GUI slider.
+     */
+    private double angularDistributionWeight = 0.5;
+    
     /**
      * Constructor of the model.
      */
@@ -1440,6 +1446,20 @@ public class Model {
      */
     public void setUndo(Undo undo) {
         this.undo = undo;
+    }
+
+    /**
+     * @return the angularDistributionWeight
+     */
+    public double getAngularDistributionWeight() {
+        return angularDistributionWeight;
+    }
+
+    /**
+     * @param angularDistributionWeight the angularDistributionWeight to set
+     */
+    public void setAngularDistributionWeight(double angularDistributionWeight) {
+        this.angularDistributionWeight = angularDistributionWeight;
     }
 
 }
