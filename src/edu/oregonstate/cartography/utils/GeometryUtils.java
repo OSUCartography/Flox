@@ -163,10 +163,10 @@ public class GeometryUtils {
      */
     public static Rectangle2D getBoundingBoxOfPoints(ArrayList<Point> points) {
 
-        if(points.size() == 0) {
+        if (points.size() == 0) {
             return null;
         }
-        
+
         Rectangle2D.Double bb = new Rectangle2D.Double(points.get(0).x, points.get(0).y, 0, 0);
         for (int i = 1; i < points.size(); i++) {
             Point pt = points.get(i);
@@ -449,7 +449,7 @@ public class GeometryUtils {
             QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
             for (Point node : nodes) {
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
-                    
+
                     if (GeometryUtils.flowIntersectsNode(flow, node, model, scale)) {
                         flowsArray.add(flow);
                         break;
@@ -471,8 +471,10 @@ public class GeometryUtils {
      * @param mapScale The current scale of the mapComponent
      * @return
      */
-    public static boolean flowIntersectsNode (Flow flow, Point node,
+    public static boolean flowIntersectsNode(Flow flow, Point node,
             Model model, double mapScale) throws IOException {
+
+        final double NODE_TOLERANCE_PX = 4;
 
         // Get the pixel width of the flow
         // Get the locked scale factor needed to calculate flow widths
@@ -488,22 +490,21 @@ public class GeometryUtils {
         double deCasteljauTol = model.getDeCasteljauTolerance();
 
         // Get the current stroke width of the flow in pixels
-        double flowStrokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
+        double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
                 * lockedScaleFactor;
 
         // Find out what that width is in world coordinates
-        double worldStrokeWidth = (flowStrokeWidth) / mapScale;
+        double worldStrokeWidth = (flowStrokeWidthPx) / mapScale;
 
         // Get the current pixel radius of the node
-        double nodeArea = Math.abs(node.getValue()
-                * model.getNodeSizeScaleFactor());
+        double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
 
-        double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+        double nodeRadiusPx = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
 
         // Find out what that radius is in world coordinates
-        // Add a bit to the pixel radius in order tomake the radius a few pixels 
+        // Add a bit to the pixel radius in order to make the radius a few pixels 
         // wider than the actual node and to account for the node's stroke width. 
-        double worldNodeRadius = (nodeRadius + 4) / mapScale;
+        double worldNodeRadius = (nodeRadiusPx + NODE_TOLERANCE_PX) / mapScale;
 
         // Add the worldNodeRadius to half the worldFlowWidth
         double threshDist = (worldStrokeWidth / 2) + worldNodeRadius;
@@ -520,6 +521,8 @@ public class GeometryUtils {
 
         if (flowBB.contains(node.x, node.y)) {
 
+            // FIXME Could we use flow.getDistanceToQuadraticBezierCurveSq instead here
+            // This would not require the conversion to line segments and therefore could be faster.
             ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
             for (int i = 0; i < (pts.size() - 1); i++) {
 
@@ -535,49 +538,55 @@ public class GeometryUtils {
                     break;
                 }
             }
-        }
-
-        if (shortestDistSquare < threshDist * threshDist) {
-            
-            // It intersects the flow. Check to see if it's possible to move
-            // the flow off it. If it isn't, ERROR. If it is, return True.
-            
-            Point sPt = flow.getStartPt();
-            Point ePt = flow.getEndPt();
-            
-            
-            // world width of the flow being checked is worldStrokeWidth
-            // world radius of the node it crosses is worldNodeRadius
-
-            if (getDistanceBetweenPoints(sPt, node)
-                    - (worldNodeRadius + (worldStrokeWidth/2)) < 0) {
-                
-                System.out.println("Impossible!");
-                throw new IOException();
-                //return false;
-            } 
-            
-            if (getDistanceBetweenPoints(ePt, node)
-                    - (worldNodeRadius + (worldStrokeWidth/2)) < 0) {
-                System.out.println("Impossible!");
-                throw new IOException();
-                //return false;
-            } 
-            return true;
-            
         } else {
             return false;
         }
- 
+
+        // FIXME 
+        // Comment by Bernie: The method name and the JavaDoc imply that the method is 
+        // performing a flow/node overlap test. The following code however seems 
+        // to be testing whether the flow can be moved, which I find confusing.
+        // Should this test be moved to a separate method?
+        if (shortestDistSquare < threshDist * threshDist) {
+
+            // It intersects the flow. Check to see if it's possible to move
+            // the flow off it. If it isn't, ERROR. If it is, return True.
+            Point sPt = flow.getStartPt();
+            Point ePt = flow.getEndPt();
+
+            // world width of the flow being checked is worldStrokeWidth
+            // world radius of the node it crosses is worldNodeRadius
+            // FIXME comment by Bernie: could you explain how this test works?
+            if (sPt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0) {
+
+                // FIXME System.out should not be used in productive code
+                System.out.println("Impossible!");
+                // FIXME comment by Bernie: IOException should be used when data
+                // cannot be read or written.
+                // This is also a misuse of exceptions. Exceptions should not be 
+                // used to indicate software states that commonly occur (they are 
+                // slow and it is considered poor style to use exceptions in this way).
+                // If this test ("isFlowMoveable") can be moved to a separate 
+                // method, the method can simply return true or false, and no 
+                // exception needs to be used.
+                throw new IOException();
+                //return false;
+            }
+
+            if (ePt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0) {
+                System.out.println("Impossible!");
+                throw new IOException();
+                //return false;
+            }
+            return true;
+
+        } else {
+            return false;
+        }
+
         //return (shortestDistSquare < threshDist * threshDist);
-        
     }
 
-    public static double getDistanceBetweenPoints(Point pt1, Point pt2) {
-        return Math.sqrt(((pt2.x - pt1.x) * (pt2.x - pt1.x)) 
-                + ((pt2.y - pt1.y) * (pt2.y - pt1.y)));
-    }
-    
     /**
      * Test whether three points align.
      *
@@ -647,7 +656,8 @@ public class GeometryUtils {
      * @param p1y Control point y
      * @param p2x End point x
      * @param p2y End point x
-     * @param xy Point x and y on input; the closest point on the curve on output.
+     * @param xy Point x and y on input; the closest point on the curve on
+     * output.
      * @return The square distance between the point x/y and the quadratic
      * Bezier curve.
      */
@@ -718,13 +728,14 @@ public class GeometryUtils {
      * @param p1y Control point y
      * @param p2x End point x
      * @param p2y End point x
-     * @param xy Point x and y on input; the closest point on the curve on output.
+     * @param xy Point x and y on input; the closest point on the curve on
+     * output.
      * @return Distance between the point x/y and the quadratic Bezier curve.
      */
     public static double getDistanceToQuadraticBezierCurve(double p0x, double p0y,
             double p1x, double p1y,
             double p2x, double p2y,
-            double [] xy) {
+            double[] xy) {
         double dSq = getDistanceToQuadraticBezierCurveSq(p0x, p0y, p1x, p1y, p2x, p2y, xy);
         return Math.sqrt(dSq);
     }
@@ -740,27 +751,27 @@ public class GeometryUtils {
         for (QuadraticBezierFlow flow : flows) {
 
             // Collect needed points from the flow
-            Point pt0 = flow.getCtrlPt();
-            Point pt1 = flow.getStartPt();
-            Point pt2 = flow.getEndPt();
+            Point cPt = flow.getCtrlPt();
+            Point sPt = flow.getStartPt();
+            Point ePt = flow.getEndPt();
 
             // Get the distance of startPt to endPt
-            double dx = pt2.x - pt1.x;
-            double dy = pt2.y - pt1.y;
+            double dx = ePt.x - sPt.x;
+            double dy = ePt.y - sPt.y;
             double dist = Math.sqrt(dx * dx + dy * dy);
 
             // Create a point known to be on the right side of the line.
             Point rightPt;
             if (dy > 0) {
-                rightPt = new Point(pt1.x + 1, pt1.y);
+                rightPt = new Point(sPt.x + 1, sPt.y);
             } else if (dy < 0) {
-                rightPt = new Point(pt1.x - 1, pt1.y);
+                rightPt = new Point(sPt.x - 1, sPt.y);
             } else {
                 // dy is 0
                 if (dx > 0) {
-                    rightPt = new Point(pt1.x, pt1.y - 1);
+                    rightPt = new Point(sPt.x, sPt.y - 1);
                 } else {
-                    rightPt = new Point(pt1.x, pt1.y + 1);
+                    rightPt = new Point(sPt.x, sPt.y + 1);
                 }
             }
 
@@ -768,10 +779,10 @@ public class GeometryUtils {
             // on one side of the flow's baseline, and negative if it's on the 
             // other, but we don't know if the right side is positive or
             // negative. This will allow us to find out.
-            double rightPtD = (rightPt.x - pt1.x) * (pt2.y - pt1.y) - (rightPt.y - pt1.y) * (pt2.x - pt1.x);
+            double rightPtD = (rightPt.x - sPt.x) * (ePt.y - sPt.y) - (rightPt.y - sPt.y) * (ePt.x - sPt.x);
 
             // Get the d value of the flow's control point.
-            double pt0D = (pt0.x - pt1.x) * (pt2.y - pt1.y) - (pt0.y - pt1.y) * (pt2.x - pt1.x);
+            double pt0D = (cPt.x - sPt.x) * (ePt.y - sPt.y) - (cPt.y - sPt.y) * (ePt.x - sPt.x);
 
             // Initiallize the perpendicular unitVector of the flow's baseline.
             // The values assigned to these will depend on whether the control
@@ -799,12 +810,11 @@ public class GeometryUtils {
             // move the control point to the baseline centerpoint,
             // and reverse the vectorUnits' polarity. This amounts to flipping
             // the flow to the other side.
-            double distFromBaseline = GeometryUtils.getDistanceToLine(
-                    pt0.x, pt0.y, pt1.x, pt1.y, pt2.x, pt2.y);
+            double distFromBaseline = GeometryUtils.getDistanceToLine(cPt.x, cPt.y, sPt.x, sPt.y, ePt.x, ePt.y);
 
             if (distFromBaseline > flow.getBaselineLength() * 2) {
-                pt0.x = flow.getBaseLineMidPoint().x;
-                pt0.y = flow.getBaseLineMidPoint().y;
+                cPt.x = flow.getBaseLineMidPoint().x;
+                cPt.y = flow.getBaseLineMidPoint().y;
                 unitVectorX *= -1;
                 unitVectorY *= -1;
             }
@@ -812,8 +822,8 @@ public class GeometryUtils {
             // Add the unitVectors to the control point. Also, multiply the
             // unitVectors by 2. This will cut the iterations in half without
             // losing significant fidelity. 
-            pt0.x += (unitVectorX * 2 / scale);
-            pt0.y += (unitVectorY * 2 / scale);
+            cPt.x += (unitVectorX * 2 / scale);
+            cPt.y += (unitVectorY * 2 / scale);
 
             // Lock the flow. This is to prevent it from moving when forces
             // are reapplied to the layout.

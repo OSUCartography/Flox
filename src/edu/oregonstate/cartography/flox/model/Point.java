@@ -2,31 +2,33 @@ package edu.oregonstate.cartography.flox.model;
 
 /**
  * Two-dimensional point.
- * 
- * @author Bernhard Jenny and Dan Stephen, Cartography and Geovisualization 
+ *
+ * @author Bernhard Jenny and Dan Stephen, Cartography and Geovisualization
  * Group, Oregon State University
  */
 public final class Point {
+
     public double x;
     public double y;
-    
+
     private boolean selected = false;
-    
+
     private double value;
-    
+
     public Point(double x, double y) {
         this.x = x;
         this.y = y;
         this.value = 1;
     }
-    
+
     /**
-     * Rotates this point by the provided angle around an origin point and returns
-     * the rotated point. The position of this point is not changed.
+     * Rotates this point by the provided angle around an origin point and
+     * returns the rotated point. The position of this point is not changed.
+     *
      * @param origin Pivot around which the point will be rotated
-     * @param angle Rotation angle in radians. Positive numbers will rotate counter-
-     * clockwise, negative numbers will rotate clockwise. 
-     * @return 
+     * @param angle Rotation angle in radians. Positive numbers will rotate
+     * counter- clockwise, negative numbers will rotate clockwise.
+     * @return
      */
     public Point rotatePoint(Point origin, double angle) {
         double tempX = x - origin.x;
@@ -51,7 +53,7 @@ public final class Point {
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
-    
+
     @Override
     public String toString() {
         return "[" + x + "/" + y + "]";
@@ -70,5 +72,16 @@ public final class Point {
     public void setValue(double value) {
         this.value = value;
     }
-    
+
+    /**
+     * Distance to another point.
+     *
+     * @param p Another point.
+     * @return The distance to the other point.
+     */
+    public double distance(Point p) {
+        double dx = x - p.x;
+        double dy = y - p.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
 }
