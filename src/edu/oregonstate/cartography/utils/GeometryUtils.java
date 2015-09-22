@@ -446,7 +446,7 @@ public class GeometryUtils {
      * @param mapScale The current scale of the mapComponent
      * @return
      */
-    public static boolean flowIntersectsNode(Flow flow, Point node,
+    public static boolean flowIntersectsNode(QuadraticBezierFlow flow, Point node,
             Model model, double mapScale) throws IOException {
 
         final double NODE_TOLERANCE_PX = 4;
@@ -495,24 +495,27 @@ public class GeometryUtils {
         double shortestDistSquare = Double.POSITIVE_INFINITY;
 
         if (flowBB.contains(node.x, node.y)) {
+            double[] xy = {node.x, node.y};
+            shortestDistSquare = flow.distanceSq(xy);
+            
+            /*
+             // FIXME Could we use flow.getDistanceToQuadraticBezierCurveSq instead here
+             // This would not require the conversion to line segments and therefore could be faster.
+             ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
+             for (int i = 0; i < (pts.size() - 1); i++) {
 
-            // FIXME Could we use flow.getDistanceToQuadraticBezierCurveSq instead here
-            // This would not require the conversion to line segments and therefore could be faster.
-            ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
-            for (int i = 0; i < (pts.size() - 1); i++) {
+             Point pt1 = pts.get(i);
+             Point pt2 = pts.get(i + 1);
 
-                Point pt1 = pts.get(i);
-                Point pt2 = pts.get(i + 1);
+             double distSquare = getDistanceToLineSegmentSquare(node.x, node.y,
+             pt1.x, pt1.y, pt2.x, pt2.y);
 
-                double distSquare = getDistanceToLineSegmentSquare(node.x, node.y,
-                        pt1.x, pt1.y, pt2.x, pt2.y);
-
-                if (distSquare < shortestDistSquare) {
-                    shortestDistSquare = distSquare;
-                } else {
-                    break;
-                }
-            }
+             if (distSquare < shortestDistSquare) {
+             shortestDistSquare = distSquare;
+             } else {
+             break;
+             }
+             }*/
         } else {
             return false;
         }
@@ -718,9 +721,9 @@ public class GeometryUtils {
     /**
      * Moves the control point of a flow perpendicularly to the baseline by one
      * pixel.
-     * 
-     * FIXME The statement above is probably not correct, as coordinates
-     * of flows are not in pixels. See FIXME comment below.
+     *
+     * FIXME The statement above is probably not correct, as coordinates of
+     * flows are not in pixels. See FIXME comment below.
      *
      * @param flows
      */

@@ -2736,7 +2736,7 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
 
-        layout("Move Flows");
+        //layout("Move Flows");
         mapComponent.refreshMap();
     }//GEN-LAST:event_moveFlowsThatCrossNodesButtonActionPerformed
 

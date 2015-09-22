@@ -370,6 +370,9 @@ public class ForceLayouter {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             QuadraticBezierFlow qFlow = (QuadraticBezierFlow) iterator.next();
+            if (qFlow.isLocked()) {
+                continue;
+            }
             // compute force exerted by flows and nodes
             forces.add(computeForceOnFlow(qFlow, maxFlowLength));
             // compute force creating an even angular distribution of flows around 
