@@ -256,7 +256,7 @@ public class Model {
      */
     public Model() {
     }
-    
+
     private static JAXBContext getJAXBContext() throws JAXBException {
         String packageName = Model.class.getPackage().getName();
         return JAXBContext.newInstance(packageName, Model.class.getClassLoader());
@@ -483,7 +483,7 @@ public class Model {
     public void setFlows(Collection<Flow> flows) {
         // reset the graph
         graph = new Graph();
-        
+
         // add new flows
         flows.stream().forEach((flow) -> {
             addFlow(flow);
@@ -670,7 +670,7 @@ public class Model {
     public Iterator<Flow> flowIterator() {
         return graph.flowIterator();
     }
-   
+
     /**
      * Returns a new ArrayList with references to the flows in increasing or
      * decreasing order.
@@ -703,9 +703,8 @@ public class Model {
     }
 
     /**
-     * Returns all nodes in the graph. 
-     * FIXME getNodes should not be needed, as an
-     * extra ArrayList is created with this call. An iterator should be used
+     * Returns all nodes in the graph. FIXME getNodes should not be needed, as
+     * an extra ArrayList is created with this call. An iterator should be used
      * instead. However, some applications (e.g. selection tool) require a
      * reverse iteration.
      *
@@ -902,6 +901,35 @@ public class Model {
             if (flow.isSelected()) {
                 flow.setLocked(lock);
             }
+        }
+    }
+
+    /**
+     * Returns the lock flags of all flows.
+     *
+     * @return An array with all lock flags in the order of the iterator
+     * returned by flowIterator().
+     */
+    public boolean[] getLocks() {
+        boolean[] locks = new boolean[getNbrFlows()];
+        Iterator<Flow> flowIterator = flowIterator();
+        int i = 0;
+        while (flowIterator.hasNext()) {
+            locks[i++] = flowIterator.next().isLocked();
+        }
+        return locks;
+    }
+
+    /**
+     * Apply lock flags to all flows. Flags must be in the order of an iterator
+     * returned by flowIterator().
+     * @param locks An array with lock flags.
+     */
+    public void applyLocks(boolean[] locks) {
+        Iterator<Flow> flowIterator = flowIterator();
+        int i = 0;
+        while (flowIterator.hasNext()) {
+            flowIterator.next().setLocked(locks[i++]);
         }
     }
 

@@ -449,7 +449,8 @@ public class GeometryUtils {
     public static boolean flowIntersectsNode(QuadraticBezierFlow flow, Point node,
             Model model, double mapScale) throws IOException {
 
-        final double NODE_TOLERANCE_PX = 4;
+        // TODO this could be a user specifiable parameter.
+        final double NODE_TOLERANCE_PX = 10;
 
         // Get the pixel width of the flow
         // Get the locked scale factor needed to calculate flow widths
@@ -461,8 +462,6 @@ public class GeometryUtils {
             double lockedMapScale = model.getLockedMapScale();
             lockedScaleFactor = mapScale / lockedMapScale;
         }
-
-        double deCasteljauTol = model.getDeCasteljauTolerance();
 
         // Get the current stroke width of the flow in pixels
         double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
@@ -489,43 +488,23 @@ public class GeometryUtils {
         flowBB.add((flowBB.getMinX() - threshDist), (flowBB.getMinY() - threshDist));
         flowBB.add((flowBB.getMaxX() + threshDist), (flowBB.getMaxY() + threshDist));
 
-        // If flowBB contains the node's coordinates, then check the shortest
-        // distance between the node and the flow. If it's less than the 
-        // threshold, then it intersects. 
-        double shortestDistSquare = Double.POSITIVE_INFINITY;
-
-        if (flowBB.contains(node.x, node.y)) {
-            double[] xy = {node.x, node.y};
-            shortestDistSquare = flow.distanceSq(xy);
-            
-            /*
-             // FIXME Could we use flow.getDistanceToQuadraticBezierCurveSq instead here
-             // This would not require the conversion to line segments and therefore could be faster.
-             ArrayList<Point> pts = flow.toStraightLineSegments(deCasteljauTol);
-             for (int i = 0; i < (pts.size() - 1); i++) {
-
-             Point pt1 = pts.get(i);
-             Point pt2 = pts.get(i + 1);
-
-             double distSquare = getDistanceToLineSegmentSquare(node.x, node.y,
-             pt1.x, pt1.y, pt2.x, pt2.y);
-
-             if (distSquare < shortestDistSquare) {
-             shortestDistSquare = distSquare;
-             } else {
-             break;
-             }
-             }*/
-        } else {
+        // the node must be inside the extended bounding box
+        if (flowBB.contains(node.x, node.y) == false) {
             return false;
         }
+
+        // Check the shortest distance between the node and the flow. If it's 
+        // less than the threshold, then the flow intersects the node. 
+        double[] xy = {node.x, node.y};
+        double shortestDistSquare = flow.distanceSq(xy);
+        boolean intersect = shortestDistSquare < threshDist * threshDist;
 
         // FIXME 
         // Comment by Bernie: The method name and the JavaDoc imply that the method is 
         // performing a flow/node overlap test. The following code however seems 
         // to be testing whether the flow can be moved, which I find confusing.
         // Should this test be moved to a separate method?
-        if (shortestDistSquare < threshDist * threshDist) {
+        if (intersect) {
 
             // It intersects the flow. Check to see if it's possible to move
             // the flow off it. If it isn't, ERROR. If it is, return True.
@@ -561,8 +540,6 @@ public class GeometryUtils {
         } else {
             return false;
         }
-
-        //return (shortestDistSquare < threshDist * threshDist);
     }
 
     /**

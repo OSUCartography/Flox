@@ -2736,7 +2736,7 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
 
-        //layout("Move Flows");
+        layout("Move Flows");
         mapComponent.refreshMap();
     }//GEN-LAST:event_moveFlowsThatCrossNodesButtonActionPerformed
 
@@ -2818,7 +2818,7 @@ public class MainWindow extends javax.swing.JFrame {
             flow.reverseFlow();
         }
         // FIXME the graph stores oriented edges, so needs to be updated here
-        
+
         addUndo("Reverse Flow Direction");
         mapComponent.refreshMap();
     }//GEN-LAST:event_reverseFlowDirectionMenuItemActionPerformed
@@ -3181,15 +3181,13 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_angularDistributionSliderStateChanged
 
     /**
-     * FIXME This will result in concurrent unsynchronized modifications of the model.
-     * The Event Dispatch Thread is drawing the model, while the worker is 
-     * simultaneously changing it.
+     * FIXME This will result in concurrent unsynchronized modifications of the
+     * model. The Event Dispatch Thread is drawing the model, while the worker
+     * is simultaneously changing it.
      */
     private class LayoutWorker extends SwingWorker<Void, Void> {
 
         private final ForceLayouter layouter;
-
-        private int counter = 0;
 
         public LayoutWorker(ForceLayouter layouter) {
             this.layouter = layouter;
@@ -3204,19 +3202,17 @@ public class MainWindow extends javax.swing.JFrame {
             });
         }
 
-        @Override
-        public Void doInBackground() {
-            // initialize progress property.
-            setProgress(0);
-
-            // iterative layout procedure
-            while (counter++ < ForceLayouter.NBR_ITERATIONS) {
+        /**
+         * Apply layout iterations to all non-locked flows.
+         */
+        private void layout(int start, int end) {
+            for (int i = start; i < end; i++) {
                 if (isCancelled()) {
                     break;
                 }
 
                 // compute an iteration with decreasing weight
-                double weight = 1d - (double) counter / ForceLayouter.NBR_ITERATIONS;
+                double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
                 layouter.layoutAllFlows(weight);
 
                 // publish intermediate results in map. This will call process() 
@@ -3224,11 +3220,38 @@ public class MainWindow extends javax.swing.JFrame {
                 publish();
 
                 // update progress indicator
-                double progress = 100d * counter / ForceLayouter.NBR_ITERATIONS;
+                double progress = 100d * i / ForceLayouter.NBR_ITERATIONS;
                 setProgress((int) Math.round(progress));
             }
+        }
 
-            // return final result
+        @Override
+        public Void doInBackground() {
+            // initialize progress property.
+            setProgress(0);
+
+            // first half of iterations
+            layout(0, ForceLayouter.NBR_ITERATIONS / 2);
+
+            // store initial lock flags of all flows
+            boolean moveFlowsOverlappingNodes = true;
+            boolean[] initialLocks = null;
+            if (moveFlowsOverlappingNodes) {
+                initialLocks = model.getLocks();
+
+                // move flows: this will lock flows that have been moved
+                double scale = mapComponent.getScale();
+                layouter.moveFlowsOverlappingNodes(scale);
+            }
+
+            // second half of iterations
+            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS);
+
+            // reset lock flags to initial values
+            if (moveFlowsOverlappingNodes) {
+                model.applyLocks(initialLocks);
+            }
+
             return null;
         }
 

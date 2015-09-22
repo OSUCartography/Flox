@@ -2,9 +2,11 @@ package edu.oregonstate.cartography.flox.model;
 
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import javax.swing.JOptionPane;
 
 /**
  * ForceLayouter contains the algorithms that compute the total force that each
@@ -16,10 +18,10 @@ import java.util.Iterator;
 public class ForceLayouter {
 
     public static final int NBR_ITERATIONS = 100;
-    
+
     // model with all map features.
     private Model model;
-    
+
     /**
      * hash map with a line string for each flow to accelerate computations. The
      * content of the hash map needs to be updated whenever the start, end, or
@@ -36,15 +38,15 @@ public class ForceLayouter {
     public ForceLayouter(Model model) {
         this.model = model;
     }
-    
+
     public Model getModel() {
         return model;
     }
-    
+
     public void setModel(Model model) {
         this.model = model;
     }
-    
+
     /**
      * Updates the hash map with line strings for each flow.
      */
@@ -469,11 +471,10 @@ public class ForceLayouter {
         // angular difference to an angular force.
         double startAngleSum = 0;
         double endAngleSum = 0;
-        
+
         // TODO instead of iterating over all flows, better use
         // graph.incomingEdgesOf() and graph.outgoingEdgesOf(endPoint)
         // to find edges connected to the start node and the end node
-        
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             QuadraticBezierFlow f = (QuadraticBezierFlow) iter.next();
@@ -570,4 +571,25 @@ public class ForceLayouter {
         }
     }
 
+    public void moveFlowsOverlappingNodes(double scale) {
+        // FIXME should not use exceptions here
+        try {
+            // Get an ArrayList of all flows that intersect nodes.
+            ArrayList<QuadraticBezierFlow> flowsArray;
+
+            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+            // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
+            // flowsArray using getFlowsThatIntersectNodes, and repeat until 
+            // flowsArray is empty.
+            while (flowsArray.size() > 0) {
+                GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
+                flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+            }
+        } catch (IOException e) {
+            System.out.println("Exception!");
+            JOptionPane.showMessageDialog(null, "At least one node crossing is "
+                    + "impossible to avoid because the nodes are too "
+                    + "close together.");
+        }
+    }
 }
