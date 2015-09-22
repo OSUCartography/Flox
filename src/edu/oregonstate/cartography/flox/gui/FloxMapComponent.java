@@ -79,9 +79,15 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     private double lockedScale;
 
+    private MainWindow mainWindow;
+    
     public FloxMapComponent() {
     }
 
+    public void setMainWindow(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
+    }
+    
     /**
      * Returns the bounding box of the geometry that is drawn by the map.
      *
@@ -189,6 +195,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     @Override
     public boolean deleteSelected() {
         if (model.deleteSelectedFlowsAndNodes() > 0) {
+            mainWindow.addUndo("Delete");
             refreshMap();
             return true;
         } else {

@@ -718,6 +718,9 @@ public class GeometryUtils {
     /**
      * Moves the control point of a flow perpendicularly to the baseline by one
      * pixel.
+     * 
+     * FIXME The statement above is probably not correct, as coordinates
+     * of flows are not in pixels. See FIXME comment below.
      *
      * @param flows
      */
@@ -737,6 +740,7 @@ public class GeometryUtils {
 
             // Create a point known to be on the right side of the line.
             Point rightPt;
+            // FIXME +1 and -1 seem to be in ground coordinates of the flow, not in pixels.
             if (dy > 0) {
                 rightPt = new Point(sPt.x + 1, sPt.y);
             } else if (dy < 0) {
@@ -803,7 +807,6 @@ public class GeometryUtils {
             // Lock the flow. This is to prevent it from moving when forces
             // are reapplied to the layout.
             flow.setLocked(true);
-
         }
     }
 

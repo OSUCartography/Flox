@@ -107,7 +107,7 @@ public class MainWindow extends javax.swing.JFrame {
                     }
                 });
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
-
+        mapComponent.setMainWindow(this);
         mapComponent.requestFocusInWindow();
 
         updateClippingGUI();
@@ -140,9 +140,9 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
-    private void addUndo(String message) {
+    protected void addUndo(String message) {
         try {
-            if (model.getNbrFlows() > 0 && updatingGUI == false) {
+            if (updatingGUI == false) {
                 undo.add(message, model.marshal());
             }
         } catch (JAXBException ex) {
@@ -2817,6 +2817,8 @@ public class MainWindow extends javax.swing.JFrame {
         for (Flow flow : flows) {
             flow.reverseFlow();
         }
+        // FIXME the graph stores oriented edges, so needs to be updated here
+        
         addUndo("Reverse Flow Direction");
         mapComponent.refreshMap();
     }//GEN-LAST:event_reverseFlowDirectionMenuItemActionPerformed
