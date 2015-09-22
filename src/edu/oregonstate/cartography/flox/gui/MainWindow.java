@@ -9,6 +9,7 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
+import edu.oregonstate.cartography.flox.model.Graph;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -27,8 +28,6 @@ import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
 import edu.oregonstate.cartography.utils.GeometryUtils;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -41,6 +40,7 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -49,7 +49,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+import javax.swing.SwingWorker;
 import javax.xml.bind.JAXBException;
 
 /**
@@ -65,16 +65,13 @@ public class MainWindow extends javax.swing.JFrame {
     private Model model;
 
     /**
-     * timer for animated drawing of layout process
-     */
-    private Timer timer = null;
-
-    /**
      * Undo/redo manager.
      */
     private final Undo undo;
 
     private boolean updatingGUI = false;
+
+    private LayoutWorker layoutWorker = null;
 
     /**
      * Creates new form MainWindow
@@ -144,9 +141,8 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void addUndo(String message) {
-
         try {
-            if (updatingGUI == false) {
+            if (model.getNbrFlows() > 0 && updatingGUI == false) {
                 undo.add(message, model.marshal());
             }
         } catch (JAXBException ex) {
@@ -162,7 +158,6 @@ public class MainWindow extends javax.swing.JFrame {
     public void setModel(Model model) {
         assert (model != null);
         this.model = model;
-        model.setUndo(undo);
         mapComponent.setModel(model);
         mapComponent.refreshMap();
         writeModelToGUI();
@@ -179,6 +174,8 @@ public class MainWindow extends javax.swing.JFrame {
      * Write the data values from the model to the GUI elements
      */
     private void writeModelToGUI() {
+        // TODO could disable GUI elements when no flows are defined
+
         if (model == null) {
             return;
         }
@@ -186,7 +183,7 @@ public class MainWindow extends javax.swing.JFrame {
         updatingGUI = true;
         try {
             // Arrow Settings
-            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
+            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPointPixel());
             addArrowsCheckbox.setSelected(model.isDrawArrows());
             arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 10));
             arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 10));
@@ -194,15 +191,15 @@ public class MainWindow extends javax.swing.JFrame {
             arrowEdgeCtrlWidthSlider.setValue((int) (model.getArrowEdgeCtrlWidth() * 100));
             arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
             arrowSizeRatioSlider.setValue((int) (model.getArrowSizeRatio() * 100));
-            maximumFlowWidthSlider.setValue((int) model.getMaxFlowStrokeWidth());
-            maximumNodeSizeSlider.setValue((int) model.getMaxNodeSize());
+            maximumFlowWidthSlider.setValue((int) model.getMaxFlowStrokeWidthPixel());
+            maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
 
             // Force Settings
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
             zeroLengthStiffnessSlider.setValue((int) (model.getMinFlowLengthSpringConstant() * 100d));
             exponentSlider.setValue((int) (model.getDistanceWeightExponent() * 10d));
-            nodeWeightSlider.setValue((int) (model.getNodeWeightFactor() * 10d));
+            nodeWeightSlider.setValue((int) (model.getNodesWeight() * 10d));
             antiTorsionSlider.setValue((int) (model.getAntiTorsionWeight() * 100d));
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
@@ -2008,7 +2005,7 @@ public class MainWindow extends javax.swing.JFrame {
             setTitle(FileUtils.getFileNameWithoutExtension(filePath));
             model.setFlows(flows);
             double maxFlowValue = model.getMaxFlowValue();
-            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPoint());
+            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPointPixel());
             layout("Load Flows");
             mapComponent.showAll();
         }
@@ -2251,7 +2248,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
         if (nodeWeightSlider.getValueIsAdjusting() == false) {
-            model.setNodeWeightFactor(nodeWeightSlider.getValue() / 10d);
+            model.setNodesWeight(nodeWeightSlider.getValue() / 10d);
             layout("Node Weight");
         }
     }//GEN-LAST:event_nodeWeightSliderStateChanged
@@ -2392,7 +2389,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void flowDistanceFromEndPointFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
         if ("value".equals(evt.getPropertyName()) && model != null) {
             double s = ((Number) flowDistanceFromEndPointFormattedTextField.getValue()).doubleValue();
-            model.setFlowDistanceFromEndPoint(s);
+            model.setFlowDistanceFromEndPointPixel(s);
             mapComponent.refreshMap();
         }
     }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
@@ -2458,7 +2455,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
 
     private void updateClippingGUI() {
-        boolean hasClipAreas = model != null && model.getFlows().size() > 0 && model.hasClipAreas();
+        boolean hasClipAreas = model != null && model.getNbrFlows() > 0 && model.hasClipAreas();
         boolean clipStart = clipWithStartAreasCheckBox.isSelected();
         boolean clipEnd = clipWithEndAreasCheckBox.isSelected();
         clipWithEndAreasCheckBox.setEnabled(hasClipAreas);
@@ -2698,7 +2695,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void maximumFlowWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maximumFlowWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
-            model.setMaxFlowStrokeWidth(maximumFlowWidthSlider.getValue());
+            model.setMaxFlowStrokeWidthPixel(maximumFlowWidthSlider.getValue());
             mapComponent.refreshMap();
             if (!maximumFlowWidthSlider.getValueIsAdjusting()) {
                 addUndo("Flow Width");
@@ -2708,7 +2705,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void maximumNodeSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maximumNodeSizeSliderStateChanged
         if (updatingGUI == false && model != null) {
-            model.setMaxNodeSize(maximumNodeSizeSlider.getValue());
+            model.setMaxNodeSizePx(maximumNodeSizeSlider.getValue());
             mapComponent.refreshMap();
             if (!maximumNodeSizeSlider.getValueIsAdjusting()) {
                 addUndo("Node Size");
@@ -2800,7 +2797,7 @@ public class MainWindow extends javax.swing.JFrame {
         boolean isLockedFlowSelected = model.isLockedFlowSelected();
         boolean isUnlockedFlowSelected = model.isUnlockedFlowSelected();
         deleteMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
-        selectAllMenuItem.setEnabled(model.hasFlows() || model.hasNodes());
+        selectAllMenuItem.setEnabled(model.getNbrFlows() > 1 || model.getNbrNodes() > 1);
         selectNoneMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
         lockMenuItem.setEnabled(isUnlockedFlowSelected);
         unlockMenuItem.setEnabled(isLockedFlowSelected);
@@ -2891,8 +2888,8 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
-        model.deleteSelectedFlowsAndNodes();
         addUndo("Delete");
+        model.deleteSelectedFlowsAndNodes();
         mapComponent.refreshMap();
     }//GEN-LAST:event_deleteMenuItemActionPerformed
 
@@ -2906,7 +2903,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void lockUnlockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockUnlockButtonActionPerformed
         ArrayList<Flow> selectedFlows = model.getSelectedFlows();
-        int locked = 0;
+        int locked = 0; // FIXME not used
         int unlocked = 0;
         for (Flow flow : selectedFlows) {
             if (flow.isLocked()) {
@@ -3181,6 +3178,94 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_angularDistributionSliderStateChanged
 
+    /**
+     * FIXME This will result in concurrent unsynchronized modifications of the model.
+     * The Event Dispatch Thread is drawing the model, while the worker is 
+     * simultaneously changing it.
+     */
+    private class LayoutWorker extends SwingWorker<Graph, Graph> {
+
+        private final ForceLayouter layouter;
+
+        private int counter = 0;
+
+        public LayoutWorker(ForceLayouter layouter) {
+            this.layouter = layouter;
+            this.addPropertyChangeListener(new PropertyChangeListener() {
+
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if ("progress".equals(evt.getPropertyName())) {
+                        progressBar.setValue((Integer) evt.getNewValue());
+                    }
+                }
+            });
+        }
+
+        @Override
+        public Graph doInBackground() {
+            // initialize progress property.
+            setProgress(0);
+
+            // iterative layout procedure
+            while (counter++ < ForceLayouter.NBR_ITERATIONS) {
+                if (isCancelled()) {
+                    break;
+                }
+
+                // compute an iteration with decreasing weight
+                double weight = 1d - (double) counter / ForceLayouter.NBR_ITERATIONS;
+                layouter.layoutAllFlows(weight);
+
+                // publish intermediate results in map. This will call process() 
+                // on the Event Dispatch Thread.
+                publish(layouter.getModel().getGraph());
+
+                // update progress indicator
+                double progress = 100d * counter / ForceLayouter.NBR_ITERATIONS;
+                setProgress((int) Math.round(progress));
+            }
+
+            // return final result
+            return layouter.getModel().getGraph();
+        }
+
+        /**
+         * Finished computations. This is invoked on the Event Dispatch Thread.
+         */
+        @Override
+        public void done() {
+            try {
+                if (!isCancelled()) {
+                    model.setGraph(get());
+                    mapComponent.eraseBufferImage();
+                    mapComponent.repaint();
+                    progressBar.setVisible(false);
+                }
+            } catch (Throwable t) {
+                ErrorDialog.showErrorDialog("Flox Error", t);
+            }
+        }
+
+        /**
+         * Process intermediate results. This is invoked on the Event Dispatch
+         * Thread.
+         *
+         * @param models
+         */
+        @Override
+        protected void process(List<Graph> graphs) {
+            // fetch the last graph created by the layouter and replace 
+            // the graph of the model
+            Graph lastGraphCreated = graphs.get(graphs.size() - 1);
+            model.setGraph(lastGraphCreated);
+
+            // draw the new graph on the map
+            mapComponent.eraseBufferImage();
+            mapComponent.repaint();
+        }
+    }
+
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3202,72 +3287,66 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
 
-        ForceLayouter layouter = new ForceLayouter(model);
-
-        if (!applyConstantForceMenuCheckbox.isSelected()) {
-            layouter.straightenFlows(false);
-        }
-
-        model.setCanvas(model.getCanvas());
-
-        if (timer != null) {
-            timer.stop();
-        }
         progressBar.setVisible(true);
-        LayoutActionListener listener = new LayoutActionListener(layouter,
-                applyConstantForceMenuCheckbox.isSelected());
-        timer = new Timer(0, listener);
-        timer.start();
-    }
-
-    class LayoutActionListener implements ActionListener {
-
-        private final int NBR_ITERATIONS;
-        private final ForceLayouter layouter;
-        private int counter = 0;
-        private final boolean constant = false;
-        double weight;
-
-        public LayoutActionListener(ForceLayouter layouter, boolean constant) {
-            this.layouter = layouter;
-
-            // If apply constant forces is turned on, make the number of iterations
-            // very large, and make the weight a little less than the normal
-            // starting weight. Otherwise, set the number of iterations to the 
-            // normal amount, and don't modify the weight here. 
-            if (constant) {
-                NBR_ITERATIONS = 100000;
-                weight = 0.75;
-            } else {
-                NBR_ITERATIONS = 100;
-            }
-            progressBar.setMaximum(NBR_ITERATIONS);
+        if (layoutWorker != null && !layoutWorker.isDone()) {
+            layoutWorker.cancel(false);
         }
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            mapComponent.eraseBufferImage();
-
-            // Check to see if the apply constant forces toggle is active.
-            // If so, just pass the weight without any relationship to the 
-            // iterations. If not, decrease the weight with each iteration.
-            if (constant) {
-                layouter.layoutAllFlows(weight);
-            } else {
-                layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
-            }
-
-            // Repaint the layout with each iteration to make an animation.
-            // Show a progress bar. 
-            // Stop after NBR_ITERATIONS.
-            mapComponent.repaint();
-            if (++counter > NBR_ITERATIONS) {
-                timer.stop();
-                progressBar.setVisible(false);
-            }
-            progressBar.setValue(counter);
-        }
+        // Create a layouter and pass it the model.
+        ForceLayouter layouter = new ForceLayouter(model);
+        layouter.straightenFlows(false);
+        layoutWorker = new LayoutWorker(layouter);
+        layoutWorker.execute();
     }
+
+//    class LayoutActionListener implements ActionListener {
+//
+//        private final int NBR_ITERATIONS;
+//        private final ForceLayouter layouter;
+//        private int counter = 0;
+//        private final boolean constant = false;
+//        double weight;
+//
+//        public LayoutActionListener(ForceLayouter layouter, boolean constant) {
+//            this.layouter = layouter;
+//
+//            // If apply constant forces is turned on, make the number of iterations
+//            // very large, and make the weight a little less than the normal
+//            // starting weight. Otherwise, set the number of iterations to the 
+//            // normal amount, and don't modify the weight here. 
+//            if (constant) {
+//                NBR_ITERATIONS = 100000;
+//                weight = 0.75;
+//            } else {
+//                NBR_ITERATIONS = 100;
+//            }
+//            progressBar.setMaximum(NBR_ITERATIONS);
+//        }
+//
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            mapComponent.eraseBufferImage();
+//
+//            // Check to see if the apply constant forces toggle is active.
+//            // If so, just pass the weight without any relationship to the 
+//            // iterations. If not, decrease the weight with each iteration.
+//            if (constant) {
+//                layouter.layoutAllFlows(weight);
+//            } else {
+//                layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
+//            }
+//
+//            // Repaint the layout with each iteration to make an animation.
+//            // Show a progress bar. 
+//            // Stop after NBR_ITERATIONS.
+//            mapComponent.repaint();
+//            if (++counter > NBR_ITERATIONS) {
+//                //timer.stop();
+//                progressBar.setVisible(false);
+//            }
+//            progressBar.setValue(counter);
+//        }
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox addArrowsCheckbox;

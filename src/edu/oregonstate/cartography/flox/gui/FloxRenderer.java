@@ -158,16 +158,16 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 }
             }
         }
-        
+
         // render flows and nodes
-        if(drawFlows) {
+        if (drawFlows) {
             renderer.drawFlows(drawSelectedFlows);
         }
-        
-        if(drawNodes) {
+
+        if (drawNodes) {
             renderer.drawNodes(fillNodes);
         }
-        
+
         return bufferImage;
     }
 
@@ -218,17 +218,14 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param drawSelectedFlows If false, selected flows are not drawn.
      */
     public void drawFlows(boolean drawSelectedFlows) {
-
-        // Create an ArrayList to store the flows
-        ArrayList<Flow> flows = model.getFlows();
-
         // Determine location of the end point of flows based on the model
-        double r = model.getFlowDistanceFromEndPoint() / scale
+        double r = model.getFlowDistanceFromEndPointPixel() / scale
                 * getLockedScaleFactor();
 
         // Iterate through the flows
-        for (Flow flow : flows) {
-
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             if (flow.isSelected() && !drawSelectedFlows) {
                 continue;
             }
@@ -255,15 +252,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
                 // Draw arrows if the model says so
                 if (model.isDrawArrows()) {
-                    
+
                     // Clip the flow by the clipping area
                     f = getClippedFlow(f);
-                    
+
                     // Clip the flow by the end node if clipping isn't happening?
                     if (!model.isClippingFlowsByArea()) {
                         f = clipFlowByEndNode(f);
                     }
-                    
+
                     // Clip the flow by distance from endpoint
                     f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
 
@@ -342,10 +339,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     public void drawCanvas() {
 
-        assert (model.getCanvas() != null);
-
         g2d.setStroke(new BasicStroke(1));
-        Rectangle2D canvas = model.getCanvas();
+        Rectangle2D canvas = model.getNodesBoundingBox();
 
         double cWidth = canvas.getWidth();
         double cHeight = canvas.getHeight();
@@ -436,8 +431,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         } else {
             // draw just the control points of selected flows.
             if (drawGUIElements && model.isFlowSelected()) {
-                ArrayList<Flow> flows = model.getFlows();
-                for (Flow flow : flows) {
+                Iterator<Flow> iterator = model.flowIterator();
+                while (iterator.hasNext()) {
+                    Flow flow = iterator.next();
                     if (flow.isSelected()) {
                         drawControlPoints(flow);
                     }
@@ -528,10 +524,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     public void drawClipAreas(boolean drawStartClipAreas, boolean drawEndClipAreas) {
-        ArrayList<Flow> flows = model.getFlows();
         HashSet<Geometry> endClipAreas = new HashSet<>();
         HashSet<Geometry> startClipAreas = new HashSet<>();
-        for (Flow flow : flows) {
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             endClipAreas.add(flow.getEndClipArea());
             startClipAreas.add(flow.getStartClipArea());
         }

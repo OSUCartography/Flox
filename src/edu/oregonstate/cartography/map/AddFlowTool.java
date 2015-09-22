@@ -1,7 +1,5 @@
 package edu.oregonstate.cartography.map;
 
-import edu.oregonstate.cartography.flox.gui.MainWindow;
-import edu.oregonstate.cartography.flox.gui.Undo;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
@@ -14,9 +12,6 @@ import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.bind.JAXBException;
 
 /**
  * Tool for adding flows.
@@ -112,9 +107,9 @@ public class AddFlowTool extends MapTool {
             lockedScaleFactor = scale / lockedMapScale;
         }
         
-        ArrayList<Point> nodes = model.getNodes();
-        for (int i = nodes.size() - 1; i >= 0; i--) {
-            Point node = nodes.get(i);
+        Iterator<Point> iterator = model.nodeIterator();
+        while (iterator.hasNext()) {
+            Point node = iterator.next();
 
             //get the radius of the node
             //FIXME this exact code for finding the radius is used in the 
@@ -240,7 +235,7 @@ public class AddFlowTool extends MapTool {
 
         // repaint the map
         mapComponent.refreshMap();
-        model.addUndo("Add Flow");
+        // FIXME         model.addUndo("Add Flow");
     }
 
     /**

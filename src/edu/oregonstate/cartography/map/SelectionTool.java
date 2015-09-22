@@ -61,17 +61,16 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     }
 
     /**
-     * Update the valueField's value.
-     * If the value of all selected features is the same, set the valueField
-     * to that value. Otherwise, set it to null.
+     * Update the valueField's value. If the value of all selected features is
+     * the same, set the valueField to that value. Otherwise, set it to null.
      */
     private void updateValueField() {
         ArrayList<Flow> flows = model.getSelectedFlows();
         ArrayList<Point> nodes = model.getSelectedNodes();
-        
+
         // get the number of selected features
         int nbrFlowsAndNodes = flows.size() + nodes.size();
-        
+
         // enable the valueField if anything is selected
         valueField.setEnabled(nbrFlowsAndNodes > 0);
 
@@ -87,19 +86,19 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             valueField.setValue(value);
         } else if (flows.size() + nodes.size() > 1) { // More than one thing is selected
             // Check to see if all values are the same.
-            
+
             // Make an ArrayList of all values.
             ArrayList<Double> values = new ArrayList();
             for (Flow flow : flows) {
                 values.add(flow.getValue());
             }
-            for (Point node: nodes) {
+            for (Point node : nodes) {
                 values.add(node.getValue());
             }
-            
+
             // Get the first value in Values
             double v = values.get(0);
-            
+
             // Compare v to all the other values.
             // If any are different, set valueField to null and exit the method
             for (double value : values) {
@@ -108,10 +107,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     return;
                 }
             }
-            
+
             // All values are the same, set valueField to v
             valueField.setValue(v);
-            
+
         }
     }
 
@@ -186,9 +185,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         if (model.isControlPtSelected()) {
             // deselect all control points
-            Iterator flows = model.flowIterator();
-            while (flows.hasNext()) {
-                Flow flow = (Flow) flows.next();
+            Iterator<Flow> iterator = model.flowIterator();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
                 if (flow instanceof CubicBezierFlow) {
                     break;
                 }
@@ -214,9 +213,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         if (model.isControlPtSelected()) {
             // deselect all control points
-            Iterator flows = model.flowIterator();
-            while (flows.hasNext()) {
-                Flow flow = (Flow) flows.next();
+            Iterator<Flow> iterator = model.flowIterator();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
                 if (flow instanceof CubicBezierFlow) {
                     break;
                 }
@@ -331,9 +330,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             if (model.isFlowSelected()
                     || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                 // Iterate througth the flows, checking to see if it is selected.
-                Iterator flows = model.flowIterator();
-                while (flows.hasNext()) {
-                    Flow flow = (Flow) flows.next();
+                Iterator<Flow> iterator = model.flowIterator();
+                while (iterator.hasNext()) {
+                    Flow flow = iterator.next();
                     if (flow instanceof CubicBezierFlow) {
                         break;
                     }
@@ -422,7 +421,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             double tol = pixelTolerance / scale;
 
             double[] xy = new double[2];
-            
+
             while (flows.hasNext()) {
                 QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
 

@@ -10,13 +10,16 @@ import java.util.Iterator;
  * ForceLayouter contains the algorithms that compute the total force that each
  * map feature emits and receives.
  *
+ * @author Bernhard Jenny
  * @author danielstephen
  */
 public class ForceLayouter {
 
+    public static final int NBR_ITERATIONS = 100;
+    
     // model with all map features.
-    private final Model model;
-
+    private Model model;
+    
     /**
      * hash map with a line string for each flow to accelerate computations. The
      * content of the hash map needs to be updated whenever the start, end, or
@@ -33,7 +36,15 @@ public class ForceLayouter {
     public ForceLayouter(Model model) {
         this.model = model;
     }
-
+    
+    public Model getModel() {
+        return model;
+    }
+    
+    public void setModel(Model model) {
+        this.model = model;
+    }
+    
     /**
      * Updates the hash map with line strings for each flow.
      */
@@ -70,8 +81,6 @@ public class ForceLayouter {
         double fyTotal = 0; // total force along the y axis 
         double wTotal = 0; // sum of the weight of all forces
 
-        double nodeWeight = model.getNodeWeightFactor();
-
         // Iterate through the flows. The forces of each flow on the target is
         // calculated and added to the total force
         while (flowIterator.hasNext()) {
@@ -89,8 +98,6 @@ public class ForceLayouter {
             }
 
             for (int ptID = 0; ptID < nPoints; ptID++) {
-                boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
-
                 Point point = points.get(ptID);
 
                 double xDist = targetPoint.x - point.x; // x distance from node to target
@@ -111,13 +118,6 @@ public class ForceLayouter {
                 xDist *= w; // The force along the x-axis after weighting
                 yDist *= w; // The force along the y-axix after weighting
 
-                //start and end points have bigger weight
-                /*
-                 if (startOrEndPoint) {
-                 xDist *= nodeWeight;
-                 yDist *= nodeWeight;
-                 }
-                 */
                 // Add forces to the totals
                 fxTotal += xDist;
                 fyTotal += yDist;
@@ -132,81 +132,7 @@ public class ForceLayouter {
         return new Force(fxFinal, fyFinal);
     }
 
-    private Force computeForceOnNearestPointOnFlow(Flow targetFlow) {
-        Iterator<Flow> flowIterator = model.flowIterator();
-
-        double fxTotal = 0; // total force along the x axis
-        double fyTotal = 0; // total force along the y axis 
-        double wTotal = 0; // sum of the weight of all forces
-
-        double nodeWeight = model.getNodeWeightFactor();
-
-        // Iterate over all flows
-        while (flowIterator.hasNext()) {
-            Flow flow = flowIterator.next();
-            if (targetFlow == flow) {
-                continue;
-            }
-
-            // Get the points along this flow
-            ArrayList<Point> points = straightLinesMap.get(flow);
-            int nPoints = points.size();
-
-            // FIXME. i'm not sure this is necessary anymore.
-            if (nPoints > 200) {
-                System.err.println("flow lines with too many points");
-                return new Force();
-            }
-
-            // for each point on this flow...
-            for (int ptID = 0; ptID < nPoints; ptID++) {
-                boolean startOrEndPoint = (ptID == 0 || ptID == nPoints - 1);
-
-                Point point = points.get(ptID);
-
-                // Figure out the Target Point! Which requires finding the point on targetFlow that is nearest to point. I could write a method in geometryUtils that does this.
-                Point targetPoint = GeometryUtils.getClosestPointOnFlow(targetFlow,
-                        point, model.getDeCasteljauTolerance());
-
-                //The rest of this code can stay the way it is.
-                double xDist = targetPoint.x - point.x; // x distance from node to target
-                double yDist = targetPoint.y - point.y; // y distance from node to target
-                double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
-                // avoid division by zero
-                if (l == 0) {
-                    continue;
-                }
-
-                //double w = gaussianWeight(l, maxFlowLength);
-                double w = inverseDistanceWeight(l);
-                //double fx = xDist / l; //normalized x distance
-                //double fy = yDist / l; //normalized y distance
-
-                // Apply the distance weight to each focre
-                xDist *= w; // The force along the x-axis after weighting
-                yDist *= w; // The force along the y-axix after weighting
-
-                // start and end points have bigger weight
-                if (startOrEndPoint) {
-                    xDist *= nodeWeight;
-                    yDist *= nodeWeight;
-                }
-
-                // Add forces to the totals
-                fxTotal += xDist;
-                fyTotal += yDist;
-                wTotal += w;
-            }
-
-        }
-        // Calculate the final total force of all nodes on the target point
-        double fxFinal = fxTotal / wTotal;
-        double fyFinal = fyTotal / wTotal;
-
-        return new Force(fxFinal, fyFinal);
-    }
-
-    private Force computeSpringForce(Point startPt, Point endPt, double springConstant) {
+    private static Force computeSpringForce(Point startPt, Point endPt, double springConstant) {
         // Calculates the length of the spring.  The spring is a vector connecting
         // the two points.
         double springLengthX = startPt.x - endPt.x; // x-length of the spring
@@ -240,26 +166,7 @@ public class ForceLayouter {
     }
 
     /**
-     * S-shaped smooth function using cubic Hermite interpolation
-     * http://en.wikipedia.org/wiki/Smoothstep
-     *
-     * @param edge0 interpolated values for x below edge0 will be 0.
-     * @param edge1 interpolated values for x above edge1 will be 1.
-     * @param x The x value to interpolate a value for.
-     * @return
-     */
-    private static double smoothstep(double edge0, double edge1, double x) {
-        // scale, bias and saturate x to 0..1 range
-        x = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
-        // evaluate polynomial
-        return x * x * (3 - 2 * x);
-
-        // alternative smootherstep
-        // return x * x * x * (x * (x * 6 - 15) + 10);
-    }
-
-    /**
-     * Computes the anti-torsion force for a quadratic BŽzier flow
+     * Computes the anti-torsion force for a quadratic BŽzier flow.
      *
      * @param flow
      * @return A force pulling the control point towards a perpendicular line on
@@ -351,7 +258,7 @@ public class ForceLayouter {
 
     private Force computeNodeForceOnFlow(QuadraticBezierFlow flow) {
 
-        double nodeWeight = model.getNodeWeightFactor();
+        double nodeWeight = model.getNodesWeight();
 
         double[] xy = new double[2];
         double wTotal = 0;
@@ -443,8 +350,8 @@ public class ForceLayouter {
     public void layoutAllFlows(double weight) {
         assert (model.getCurveType() == Model.CurveType.QUADRATIC);
 
-        ArrayList<Flow> flows = model.getFlows();
-        if (flows.size() < 2) {
+        int nbrFlows = model.getNbrFlows();
+        if (nbrFlows < 2) {
             return;
         }
 
@@ -453,15 +360,16 @@ public class ForceLayouter {
         double maxFlowLength = model.getLongestFlowLength();
 
         // store force for each flow for current configuration in this array
-        ArrayList<Force> forces = new ArrayList<>(flows.size());
+        ArrayList<Force> forces = new ArrayList<>(nbrFlows);
 
         // store angular distribution force for each flow in this array
         // Angular distribution forces are computed separately, because they 
         // require a different weight than the other forces.
-        ArrayList<Force> angularDistForces = new ArrayList<>(flows.size());
+        ArrayList<Force> angularDistForces = new ArrayList<>(nbrFlows);
 
-        for (Flow flow : flows) {
-            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) iterator.next();
             // compute force exerted by flows and nodes
             forces.add(computeForceOnFlow(qFlow, maxFlowLength));
             // compute force creating an even angular distribution of flows around 
@@ -471,9 +379,10 @@ public class ForceLayouter {
 
         // apply forces onto control points of each flow
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
-        int nbrFlows = flows.size();
-        for (int i = 0; i < nbrFlows; i++) {
-            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flows.get(i);
+        iterator = model.flowIterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) iterator.next();
             if (qFlow.isLocked()) {
                 continue;
             }
@@ -507,11 +416,12 @@ public class ForceLayouter {
 
             // Enforce the canvas range
             if (model.isEnforceCanvasRange()) {
-                Rectangle2D canvasRect = model.getCanvas();
+                Rectangle2D canvasRect = model.getNodesBoundingBox();
                 Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
                 ctrlPt.x = tempPoint.x;
                 ctrlPt.y = tempPoint.y;
             }
+            i++;
         }
     }
 
@@ -556,6 +466,11 @@ public class ForceLayouter {
         // angular difference to an angular force.
         double startAngleSum = 0;
         double endAngleSum = 0;
+        
+        // TODO instead of iterating over all flows, better use
+        // graph.incomingEdgesOf() and graph.outgoingEdgesOf(endPoint)
+        // to find edges connected to the start node and the end node
+        
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             QuadraticBezierFlow f = (QuadraticBezierFlow) iter.next();

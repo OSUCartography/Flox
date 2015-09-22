@@ -5,9 +5,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import edu.oregonstate.cartography.flox.gui.MainWindow;
-import edu.oregonstate.cartography.flox.gui.Undo;
-import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
@@ -50,86 +47,53 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
-    @XmlTransient
-    private Undo undo;
-    
-    public void addUndo(String message) {
-        try {
-            undo.add(message, marshal());
-        } catch (JAXBException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    
     public enum CurveType {
+
         CUBIC,
         QUADRATIC
     }
 
     /**
+     * Either work with cubic or quadratic curves.
+     */
+    private CurveType curveType = CurveType.QUADRATIC;
+
+    /**
      * Density of points along flows.
      */
     public enum FlowNodeDensity {
+
         LOW,
         MEDIUM,
         HIGH
     }
-    
+
     /**
-     * Color for drawing flows that are not selected
+     * Determines the maximum number of intermediate nodes per flow. This is
+     * modified by a comboBox in the GUI (low, medium, high).
      */
-    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
-    private final Color FLOW_COLOR = Color.BLACK;
+    private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
 
     /**
      * Graph of edges (BŽzier flows) and nodes (Point).
      */
     @XmlJavaTypeAdapter(GraphSerializer.class)
-    private final Graph graph = new Graph();
-
-    /**
-     * Used by the Arrow class to determine the length of arrowheads.
-     */
-    private double arrowLengthScaleFactor = 1.6;
-
-    /**
-     * Used by the Arrow class to determine the width of arrowheads.
-     */
-    private double arrowWidthScaleFactor = 0.8;
-
-    /**
-     * Used by the Arrow class to determine the location of the arrow edge
-     * control points.
-     */
-    private double arrowEdgeCtrlLength = 0.5;
-
-    /**
-     * Used by the Arrow class to determine the location of the arrow edge
-     * control points.
-     */
-    private double arrowEdgeCtrlWidth = 0.5;
-
-    /**
-     * Used by the Arrow class to determine the horizontal postion of the
-     * arrow's corners relative to the base.
-     */
-    private double arrowCornerPosition = 0.0;
-
-    /**
-     * Used by the Arrow class to determine the size of the smallest arrowhead.
-     */
-    private double arrowSizeRatio = 0.1;
+    private Graph graph = new Graph();
 
     /**
      * Start and end node exert a larger force than points along flow lines.
      */
-    private double nodeWeightFactor = 0.0;
+    private double nodesWeight = 0.0;
 
     /**
      * Weight for the anti-torsion force.
      */
-    private double antiTorsionWeight = .8;
+    private double antiTorsionWeight = 0.8;
+
+    /**
+     * Weight of angular distribution force. Currently modified by a GUI slider.
+     */
+    private double angularDistributionWeight = 0.5;
 
     /**
      * Stiffness factor for peripheral flows.
@@ -139,7 +103,7 @@ public class Model {
     /**
      * spring stiffness of longest flow.
      */
-    private double maxFlowLengthSpringConstant = .05;
+    private double maxFlowLengthSpringConstant = 0.05;
 
     /**
      * spring stiffness of zero-length flow.
@@ -160,16 +124,17 @@ public class Model {
     private boolean enforceRangebox = true;
 
     /**
+     * This value determines the width of a flows bounding box. The width of the
+     * bounding box = this value * the length of the flow's baseline. Currently
+     * modified by a GUI slider.
+     */
+    private double flowRangeboxHeight = 0.2;
+
+    /**
      * If this is true, control points are prevented from moving outside of the
      * canvas.
      */
     private boolean enforceCanvasRange = true;
-
-    /**
-     * If this is true, arrows are drawn onto the end of flows. Modified by a
-     * GUI checkbox.
-     */
-    private boolean drawArrows = false;
 
     /**
      * Determines the size of the canvas. The minimum canvas size is the
@@ -180,11 +145,52 @@ public class Model {
     private double canvasPadding = 0.5;
 
     /**
-     * This value determines the width of a flows bounding box. The width of the
-     * bounding box = this value * the length of the flow's baseline. Currently
-     * modified by a GUI slider.
+     * Color for drawing flows that are not selected
      */
-    private double flowRangeboxHeight = .2;
+    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
+    private final Color FLOW_COLOR = Color.BLACK;
+
+    /**
+     * If this is true, arrows are drawn onto the end of flows. Modified by a
+     * GUI checkbox.
+     */
+    private boolean drawArrows = false;
+
+    /**
+     * Used by the Arrow class to determine the length of arrowheads.
+     */
+    private double arrowLengthScaleFactor = 1.6;
+
+    /**
+     * Used by the Arrow class to determine the width of arrowheads.
+     */
+    private double arrowWidthScaleFactor = 0.8;
+
+    /**
+     * Used by the Arrow class to determine the location of the arrow edge
+     * control points. FIXME: missing documentation - is this in pixels or
+     * relative to the line width?
+     */
+    private double arrowEdgeCtrlLength = 0.5;
+
+    /**
+     * Used by the Arrow class to determine the location of the arrow edge
+     * control points. FIXME: missing documentation - is this in pixels or
+     * relative to the line width?
+     */
+    private double arrowEdgeCtrlWidth = 0.5;
+
+    /**
+     * Used by the Arrow class to determine the horizontal position of the
+     * arrow's corners relative to the base. FIXME: missing documentation - is
+     * this in pixels or relative to the line width?
+     */
+    private double arrowCornerPosition = 0.0;
+
+    /**
+     * Used by the Arrow class to determine the size of the smallest arrowhead.
+     */
+    private double arrowSizeRatio = 0.1;
 
     /**
      * Determines the distance (in pixels) a flow line stops before reaching its
@@ -193,19 +199,19 @@ public class Model {
      * is the distance from the end of the flow line to the center of the node.
      * Currently modified by a GUI modifiable text field.
      */
-    private double flowDistanceFromEndPoint = 0.0d;
+    private double flowDistanceFromEndPointPx = 0.0d;
 
     /**
      * Maximum allowed flow width in pixels. The flow with the highest value
      * will have this width. All other flows are scaled down relative to this
      * value.
      */
-    private double maxFlowStrokeWidth = 20;
+    private double maxFlowStrokeWidthPx = 20;
 
     /**
      * Maximum allowed node radius in pixels.
      */
-    private double maxNodeSize = 10;
+    private double maxNodeSizePx = 10;
 
     /**
      * Flag to indicate when the flow width is locked to the current map scale.
@@ -221,27 +227,6 @@ public class Model {
      * Flag indicating that flows are being clipped by areas.
      */
     private boolean clippingFlowsByArea = false;
-    
-    /**
-     * Determines the maximum number of intermediate nodes per flow. This is
-     * modified by a comboBox in the GUI (low, medium, high).
-     */
-    private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
-
-    // FIXME not used?
-    @XmlJavaTypeAdapter(RectangleSerializer.class)
-    private Rectangle2D canvas;
-
-    /**
-     * A reference to the map with layers and geometry.
-     */
-    @XmlTransient
-    private Map map = new Map();
-
-    /**
-     * Either work with cubic or quadratic curves.
-     */
-    private CurveType curveType = CurveType.QUADRATIC;
 
     /**
      * A geometry (collection) used for clipping start or end of flows.
@@ -261,16 +246,17 @@ public class Model {
     private double endClipAreaBufferDistance = 0;
 
     /**
-     * Weight of angular distribution force. Currently modified by a GUI slider.
+     * A map with a set of symbolized layers.
      */
-    private double angularDistributionWeight = 0.5;
-    
+    @XmlTransient
+    private Map map = new Map();
+
     /**
      * Constructor of the model.
      */
     public Model() {
     }
-
+    
     private static JAXBContext getJAXBContext() throws JAXBException {
         String packageName = Model.class.getPackage().getName();
         return JAXBContext.newInstance(packageName, Model.class.getClassLoader());
@@ -337,6 +323,7 @@ public class Model {
     }
 
     public void copyTransientFields(Model destination) {
+        // map layers are not currently serialized
         destination.map = map;
         // FIXME should not be transient?
         destination.clipAreas = clipAreas;
@@ -350,7 +337,7 @@ public class Model {
             return sw.toString();
         } catch (JAXBException ex) {
             Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
-            return "could not marshal model";
+            return "could not serliaze model";
         }
     }
 
@@ -366,7 +353,7 @@ public class Model {
     public double getNodeSizeScaleFactor() {
 
         // Find the maximum node area as permitted by settings
-        double area = Math.PI * (maxNodeSize * maxNodeSize);
+        double area = Math.PI * (maxNodeSizePx * maxNodeSizePx);
 
         // Get the maximum current node value
         double maxVal = getMaxNodeValue();
@@ -382,7 +369,7 @@ public class Model {
 
     /**
      * Gets the maximum value of all nodes on the map.
-     * 
+     *
      * @return maximum node value
      */
     public double getMaxNodeValue() {
@@ -391,30 +378,20 @@ public class Model {
 
     /**
      * Gets the average value of all nodes on the map.
-     * 
+     *
      * @return mean node value
      */
     public double getMeanNodeValue() {
-        ArrayList<Point> nodes = getNodes();
-        double sum = 0;
-        for (Point node : nodes) {
-            sum += node.getValue();
-        }
-        return sum / nodes.size();
+        return graph.getMeanNodeValue();
     }
 
     /**
      * Gets the average value of all flows on the map.
-     * 
-     * @return 
+     *
+     * @return
      */
     public double getMeanFlowValue() {
-        ArrayList<Flow> flows = getFlows();
-        double sum = 0;
-        for (Flow flow : flows) {
-            sum += flow.getValue();
-        }
-        return sum / flows.size();
+        return graph.getMeanFlowValue();
     }
 
     /**
@@ -423,17 +400,16 @@ public class Model {
      * @return The number of flows.
      */
     public int getNbrFlows() {
-        return graph.edgeSet().size();
+        return graph.getNbrFlows();
     }
 
     /**
-     * Returns the number of nodes in the graph. This is different from
-     * getNbrFlows() * 2.
+     * Returns the number of nodes in the graph.
      *
      * @return The number of nodes.
      */
     public int getNbrNodes() {
-        return graph.vertexSet().size();
+        return graph.getNbrNodes();
     }
 
     /**
@@ -447,15 +423,16 @@ public class Model {
 
     /**
      * Delete a flow.
-     * 
+     *
      * @param flow The flow to delete
      */
     public void deleteFlow(Flow flow) {
         graph.removeEdge(flow);
     }
-    
+
     /**
      * Delete a node.
+     *
      * @param node The node to delete.
      */
     public void deleteNode(Point node) {
@@ -464,16 +441,16 @@ public class Model {
 
     /**
      * Removes all selected nodes and flows from the graph.
-     * 
+     *
      * @return The number of flows and nodes that were deleted.
      */
     public int deleteSelectedFlowsAndNodes() {
         ArrayList<Flow> flowsToRemove = new ArrayList<>();
         ArrayList<Point> nodesToRemove = new ArrayList<>();
 
-        Iterator flows = flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
+        Iterator<Flow> iter = flowIterator();
+        while (iter.hasNext()) {
+            Flow flow = iter.next();
             if (flow.isSelected()) {
                 flowsToRemove.add(flow);
             }
@@ -500,21 +477,17 @@ public class Model {
 
     /**
      * Replace the current flows with new flows.
-     * 
+     *
      * @param flows The new flows.
      */
     public void setFlows(Collection<Flow> flows) {
-        clearFlows();
+        // reset the graph
+        graph = new Graph();
+        
+        // add new flows
         flows.stream().forEach((flow) -> {
             addFlow(flow);
         });
-    }
-
-    /**
-     * Remove all flows.
-     */
-    public void clearFlows() {
-        graph.clearFlows();
     }
 
     /**
@@ -697,37 +670,27 @@ public class Model {
     public Iterator<Flow> flowIterator() {
         return graph.flowIterator();
     }
-
+   
     /**
-     * Returns true if the model contains at least one flow.
+     * Returns a new ArrayList with references to the flows in increasing or
+     * decreasing order.
      *
-     * @return True if the model has at least one flow.
-     */
-    public boolean hasFlows() {
-        return !graph.edgeSet().isEmpty();
-    }
-
-    /**
-     * Returns all flows in the graph. The flows are not ordered.
-     *
-     * @return All flows.
-     */
-    public ArrayList<Flow> getFlows() {
-        return graph.getFlows();
-    }
-
-    /**
-     * Get an ordered list of all flows.
-     *
-     * @param increasing Increasing or decreasing list.
-     * @return A list with all ordered flows.
+     * @param increasing If true, the flows are arranged in increasing order.
+     * @return A new ArrayList with references to the flows in the graph.
      */
     public ArrayList<Flow> getOrderedFlows(boolean increasing) {
         return graph.getOrderedFlows(increasing);
     }
 
-    public ArrayList<Point> getOrderedNodes(boolean increading) {
-        return graph.getOrderedNodes(increading);
+    /**
+     * Returns a new ArrayList with references to the nodes in increasing or
+     * decreasing order.
+     *
+     * @param increasing If true, the nodes are arranged in increasing order.
+     * @return A new ArrayList with references to the nodes in the graph.
+     */
+    public ArrayList<Point> getOrderedNodes(boolean increasing) {
+        return graph.getOrderedNodes(increasing);
     }
 
     /**
@@ -740,16 +703,11 @@ public class Model {
     }
 
     /**
-     * Returns true if the model contains at least one node.
-     *
-     * @return True if the model has at least one node.
-     */
-    public boolean hasNodes() {
-        return !graph.vertexSet().isEmpty();
-    }
-
-    /**
-     * Returns all nodes in the graph.
+     * Returns all nodes in the graph. 
+     * FIXME getNodes should not be needed, as an
+     * extra ArrayList is created with this call. An iterator should be used
+     * instead. However, some applications (e.g. selection tool) require a
+     * reverse iteration.
      *
      * @return All nodes.
      */
@@ -766,50 +724,30 @@ public class Model {
         return graph.getMaxFlowValue();
     }
 
-
-
     /**
      * Get the length of longest flow baseline.
-     * 
-     * @return the length of the longest flow baseline 
+     *
+     * @return the length of the longest flow baseline
      */
     public double getLongestFlowLength() {
-        double maxLength = 0;
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            double l = flow.getBaselineLength();
-            if (l > maxLength) {
-                maxLength = l;
-            }
-        }
-        return maxLength;
+        return graph.getLongestFlowLength();
     }
 
     /**
      * Get the length of the shortest flow baseline.
-     * 
-     * @return the shortest flow baseline. 
+     *
+     * @return the shortest flow baseline.
      */
     public double getShortestFlowLength() {
-        double minLength = Double.POSITIVE_INFINITY;
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            double l = flow.getBaselineLength();
-            if (l < minLength) {
-                minLength = l;
-            }
-        }
-
-        return minLength == Double.POSITIVE_INFINITY ? null : minLength;
+        return graph.getShortestFlowLength();
     }
 
     /**
      * Sets the tolerance value needed for creating intermediate points along
      * the flow. This value is determined by minimum/maximum flow lengths. Menu
      * settings control the maximum number of nodes along a flow.
-     * @return 
+     *
+     * @return
      */
     public double getDeCasteljauTolerance() {
 
@@ -821,7 +759,7 @@ public class Model {
         } else { // flowNodeDensity == FlowNodeDensity.HIGH
             maxFlowNodes = 40;
         }
-        
+
         double longestFlowLength = getLongestFlowLength();
         double tol = getShortestFlowLength() / maxFlowNodes;
         if (longestFlowLength / tol <= maxFlowNodes) {
@@ -839,9 +777,9 @@ public class Model {
      * @return True if any flows are selected
      */
     public boolean isFlowSelected() {
-        Iterator flows = flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             if (flow.isSelected()) {
                 return true;
             }
@@ -851,13 +789,13 @@ public class Model {
 
     /**
      * Returns true if a locked flow is selected
-     * 
-     * @return 
+     *
+     * @return
      */
     public boolean isLockedFlowSelected() {
-        Iterator flows = flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             if (flow.isSelected() && flow.isLocked()) {
                 return true;
             }
@@ -867,13 +805,13 @@ public class Model {
 
     /**
      * Returns true if an unlocked flow is selected.
-     * 
+     *
      * @return true if an unlocked flow is selected
      */
     public boolean isUnlockedFlowSelected() {
-        Iterator flows = flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             if (flow.isSelected() && !flow.isLocked()) {
                 return true;
             }
@@ -883,14 +821,14 @@ public class Model {
 
     /**
      * Gets an ArrayList containing all selected flows.
-     * 
+     *
      * @return an ArrayList of all selected flows.
      */
     public ArrayList<Flow> getSelectedFlows() {
         ArrayList<Flow> selectedFlows = new ArrayList();
-        Iterator flows = flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             if (flow.isSelected()) {
                 selectedFlows.add(flow);
 
@@ -901,7 +839,7 @@ public class Model {
 
     /**
      * Returns true if a node is selected.
-     * 
+     *
      * @return True if a node is selected.
      */
     public boolean isNodeSelected() {
@@ -917,8 +855,8 @@ public class Model {
 
     /**
      * Gets an ArrayList of all selected nodes.
-     * 
-     * @return ArrayList of all selected nodes. 
+     *
+     * @return ArrayList of all selected nodes.
      */
     public ArrayList<Point> getSelectedNodes() {
 
@@ -940,10 +878,9 @@ public class Model {
      * deselected otherwise.
      */
     public void setSelectionOfAllFlowsAndNodes(boolean select) {
-        Iterator flows = flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
-            flow.setSelected(select);
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            iterator.next().setSelected(select);
         }
 
         Iterator nodes = nodeIterator();
@@ -959,9 +896,9 @@ public class Model {
      * @param lock The new lock state.
      */
     public void setLockOfSelectedFlows(boolean lock) {
-        Iterator flows = flowIterator();
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             if (flow.isSelected()) {
                 flow.setLocked(lock);
             }
@@ -1046,17 +983,17 @@ public class Model {
     }
 
     /**
-     * @return the nodeWeightFactor
+     * @return the nodesWeight
      */
-    public double getNodeWeightFactor() {
-        return nodeWeightFactor;
+    public double getNodesWeight() {
+        return nodesWeight;
     }
 
     /**
-     * @param nodeWeightFactor the nodeWeightFactor to set
+     * @param nodesWeight the nodesWeight to set
      */
-    public void setNodeWeightFactor(double nodeWeightFactor) {
-        this.nodeWeightFactor = nodeWeightFactor;
+    public void setNodesWeight(double nodesWeight) {
+        this.nodesWeight = nodesWeight;
     }
 
     /**
@@ -1150,16 +1087,22 @@ public class Model {
     }
 
     /**
-     * The canvas is the bounding box of all start and end points.
+     * Returns the bounding box containing all start and end points.
      *
-     * @return the canvas
+     * @return the bounding box
      */
-    public Rectangle2D getCanvas() {
-        return GeometryUtils.getBoundingBoxOfPoints(getNodes());
-    }
-
-    public void setCanvas(Rectangle2D canvas) {
-        this.canvas = canvas;
+    public Rectangle2D getNodesBoundingBox() {
+        Iterator<Point> iterator = nodeIterator();
+        if (iterator.hasNext() == false) {
+            return null;
+        }
+        Point pt = iterator.next();
+        Rectangle2D.Double bb = new Rectangle2D.Double(pt.x, pt.y, 0, 0);
+        while (iterator.hasNext()) {
+            pt = iterator.next();
+            bb.add(pt.x, pt.y);
+        }
+        return bb;
     }
 
     /**
@@ -1193,15 +1136,15 @@ public class Model {
     /**
      * @return the flowArrowEndPointRadius
      */
-    public double getFlowDistanceFromEndPoint() {
-        return flowDistanceFromEndPoint;
+    public double getFlowDistanceFromEndPointPixel() {
+        return flowDistanceFromEndPointPx;
     }
 
     /**
      * @param flowArrowEndPointRadius the flowArrowEndPointRadius to set
      */
-    public void setFlowDistanceFromEndPoint(double flowArrowEndPointRadius) {
-        this.flowDistanceFromEndPoint = flowArrowEndPointRadius;
+    public void setFlowDistanceFromEndPointPixel(double flowArrowEndPointRadius) {
+        this.flowDistanceFromEndPointPx = flowArrowEndPointRadius;
     }
 
     /**
@@ -1318,13 +1261,13 @@ public class Model {
 
     /**
      * Checks to see if any control points are selected.
-     * 
+     *
      * @return the controlPtIsSelected
      */
     public boolean isControlPtSelected() {
-        Iterator flows = flowIterator();
-        while (flows.hasNext()) {
-            QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            QuadraticBezierFlow flow = (QuadraticBezierFlow) iterator.next();
             if (flow.getCtrlPt().isSelected()) {
                 return true;
             }
@@ -1375,45 +1318,46 @@ public class Model {
     }
 
     /**
-     * @return the maxFlowStrokeWidth
+     * @return the maxFlowStrokeWidthPx
      */
-    public double getMaxFlowStrokeWidth() {
-        return maxFlowStrokeWidth;
+    public double getMaxFlowStrokeWidthPixel() {
+        return maxFlowStrokeWidthPx;
     }
 
     /**
-     * @param maxFlowStrokeWidth the maxFlowStrokeWidth to set
+     * @param maxFlowStrokeWidthPixel the maxFlowStrokeWidthPx to set
      */
-    public void setMaxFlowStrokeWidth(double maxFlowStrokeWidth) {
-        this.maxFlowStrokeWidth = maxFlowStrokeWidth;
+    public void setMaxFlowStrokeWidthPixel(double maxFlowStrokeWidthPixel) {
+        this.maxFlowStrokeWidthPx = maxFlowStrokeWidthPixel;
     }
 
     /**
-     * @return the maxNodeSize
+     * @return the maxNodeSizePx
      */
-    public double getMaxNodeSize() {
-        return maxNodeSize;
+    public double getMaxNodeSizePx() {
+        return maxNodeSizePx;
     }
 
     /**
-     * @param maxNodeSize the maxNodeSize to set
+     * @param maxNodeSizePx the maxNodeSizePx to set
      */
-    public void setMaxNodeSize(double maxNodeSize) {
-        this.maxNodeSize = maxNodeSize;
+    public void setMaxNodeSizePx(double maxNodeSizePx) {
+        this.maxNodeSizePx = maxNodeSizePx;
     }
 
     /**
      * Gets the ratio between the maximum permitted flow stroke width and the
      * maximum current flow value.
      *
-     * @return maxFlowStrokeWidth/maxFlowValue
+     * @return maxFlowStrokeWidthPx/maxFlowValue
      */
     public double getFlowWidthScaleFactor() {
-        return getMaxFlowStrokeWidth() / getMaxFlowValue();
+        return getMaxFlowStrokeWidthPixel() / getMaxFlowValue();
     }
-    
+
     /**
      * Returns the color for drawing flows.
+     *
      * @return the color of flows
      */
     public Color getFlowColor() {
@@ -1435,20 +1379,6 @@ public class Model {
     }
 
     /**
-     * @return the undo
-     */
-    public Undo getUndo() {
-        return undo;
-    }
-
-    /**
-     * @param undo the undo to set
-     */
-    public void setUndo(Undo undo) {
-        this.undo = undo;
-    }
-
-    /**
      * @return the angularDistributionWeight
      */
     public double getAngularDistributionWeight() {
@@ -1460,6 +1390,21 @@ public class Model {
      */
     public void setAngularDistributionWeight(double angularDistributionWeight) {
         this.angularDistributionWeight = angularDistributionWeight;
+    }
+
+    /**
+     * @return the graph
+     */
+    public Graph getGraph() {
+        return graph;
+    }
+
+    /**
+     * @param graph the graph to set
+     */
+    public void setGraph(Graph graph) {
+        assert(graph != null);
+        this.graph = graph;
     }
 
 }

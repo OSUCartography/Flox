@@ -6,6 +6,7 @@ import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -186,12 +187,12 @@ public class SVGFlowExporter extends SVGExporter {
         setVectorStyle(g, model.getFlowColor(), 1, null);
         svgRootElement.appendChild(g);
 
-        double r = model.getFlowDistanceFromEndPoint() / mapComponent.getScale()
+        double r = model.getFlowDistanceFromEndPointPixel() / mapComponent.getScale()
                 * getLockedScaleFactor();
 
-        ArrayList<Flow> flows = model.getFlows();
-        for (Flow flow : flows) {
-
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             double flowWidth = getFlowWidth(flow);
 
             if (flow instanceof CubicBezierFlow) {

@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -30,7 +31,9 @@ public class LayoutGrader {
         double deCasteljauTol = model.getDeCasteljauTolerance();
         GeometryFactory geometryFactory = new GeometryFactory();
         
-        for (Flow flow : model.getFlows()) {
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
             ArrayList<Point> flowPoints
                     = new ArrayList<>(flow.toStraightLineSegments(deCasteljauTol));

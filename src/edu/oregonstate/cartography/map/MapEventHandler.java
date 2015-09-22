@@ -5,7 +5,6 @@
  */
 package edu.oregonstate.cartography.map;
 
-import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import edu.oregonstate.cartography.utils.FocusUtils;
 import java.awt.geom.*;

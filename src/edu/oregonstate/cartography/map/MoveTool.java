@@ -131,26 +131,21 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         updateCoordinateFields();
     }
 
-    private void addUndo(String message) {
-
-        if (dragging == true) {
-            model.addUndo("Move");
-        }
-    }
-
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
         super.endDrag(point, evt);
         // this calls mouseClicked
-
-        addUndo("Move");
+        
+        if (dragging == true) {
+            // FIXME    model.addUndo("Move");
+        }
         dragging = false;
 
         if (model.isControlPtSelected()) {
             // deselect all control points
-            Iterator flows = model.flowIterator();
-            while (flows.hasNext()) {
-                Flow flow = (Flow) flows.next();
+            Iterator<Flow> iterator = model.flowIterator();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
                 if (flow instanceof CubicBezierFlow) {
                     break;
                 }
@@ -175,9 +170,9 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
         if (model.isControlPtSelected()) {
             // If a control point is selected, move only the control point.
-            Iterator flows = model.flowIterator();
-            while (flows.hasNext()) {
-                QuadraticBezierFlow flow = ((QuadraticBezierFlow) flows.next());
+            Iterator<Flow> iterator = model.flowIterator();
+            while (iterator.hasNext()) {
+                QuadraticBezierFlow flow = (QuadraticBezierFlow) iterator.next();
                 if (flow.isSelected()
                         || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                     Point cPt = flow.getCtrlPt();

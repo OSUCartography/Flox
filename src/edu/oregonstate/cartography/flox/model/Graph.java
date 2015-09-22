@@ -4,7 +4,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import org.jgrapht.graph.DirectedMultigraph;
 
 /**
@@ -12,10 +11,25 @@ import org.jgrapht.graph.DirectedMultigraph;
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
-public class Graph extends DirectedMultigraph<Point, Flow> {
+public final class Graph extends DirectedMultigraph<Point, Flow> {
 
     public Graph() {
         super(Flow.class);
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param original
+     */
+    public Graph(Graph original) {
+        super(Flow.class);
+        
+        Iterator<Flow> flowIterator = original.flowIterator();
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
+            addFlow(flow);
+        }
     }
 
     /**
@@ -35,13 +49,14 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
 
     /**
      * Add a node
+     *
      * @param node The node to add
      */
     public void addNode(Point node) {
         Point newNode = findNodeInGraph(node);
         addVertex(newNode);
     }
-    
+
     /**
      * Searches for a point in the graph with the specified coordinates
      *
@@ -60,30 +75,14 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
         return target;
     }
 
-    /**
-     * Remove all flows.
-     */
-    public void clearFlows() {
-        removeAllEdges();
-        removeAllVertices();
+    public int getNbrFlows() {
+        return edgeSet().size();
     }
-
-    public void removeAllEdges() {
-        LinkedList<Flow> copy = new LinkedList<>();
-        for (Flow e : edgeSet()) {
-            copy.add(e);
-        }
-        removeAllEdges(copy);
+    
+    public int getNbrNodes() {
+        return vertexSet().size();
     }
-
-    public void removeAllVertices() {
-        LinkedList<Point> copy = new LinkedList<>();
-        for (Point v : vertexSet()) {
-            copy.add(v);
-        }
-        removeAllVertices(copy);
-    }
-
+    
     /**
      * Returns the bounding box of all flows, excluding the other geometry.
      *
@@ -109,15 +108,6 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
      */
     public Iterator<Flow> flowIterator() {
         return edgeSet().iterator();
-    }
-
-    /**
-     * Returns all flows in the graph. The flows are not ordered.
-     *
-     * @return All flows.
-     */
-    public ArrayList<Flow> getFlows() {
-        return new ArrayList<>(edgeSet());
     }
 
     /**
@@ -155,7 +145,7 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
         });
         return nodes;
     }
-    
+
     /**
      * Returns an iterator for the nodes.
      *
@@ -176,6 +166,7 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
 
     /**
      * Returns the maximum flow value.
+     *
      * @return The maximum flow value.
      */
     public double getMaxFlowValue() {
@@ -193,7 +184,7 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
         }
         return max;
     }
-    
+
     public double getMaxNodeValue() {
         int nNodes = vertexSet().size();
         if (nNodes < 1) {
@@ -201,7 +192,7 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
         }
         Iterator<Point> iter = nodeIterator();
         double max = iter.next().getValue();
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             double v = iter.next().getValue();
             if (v > max) {
                 max = v;
@@ -209,4 +200,72 @@ public class Graph extends DirectedMultigraph<Point, Flow> {
         }
         return max;
     }
+    
+     /**
+     * Gets the average value of all nodes on the map.
+     *
+     * @return mean node value
+     */
+    public double getMeanNodeValue() {
+        double sum = 0;
+        int counter = 0;
+        Iterator<Point> iterator = nodeIterator();
+        while (iterator.hasNext()) {
+            sum += iterator.next().getValue();
+            counter++;
+        }
+        return sum / counter;
+    }
+
+    /**
+     * Gets the average value of all flows on the map.
+     *
+     * @return
+     */
+    public double getMeanFlowValue() {
+
+        Iterator<Flow> flowIterator = flowIterator();
+        double sum = 0;
+        int counter = 0;
+        while (flowIterator.hasNext()) {
+            sum += flowIterator.next().getValue();
+            counter++;
+        }
+        return sum / counter;
+    }
+    
+     /**
+     * Get the length of longest flow baseline.
+     *
+     * @return the length of the longest flow baseline
+     */
+    public double getLongestFlowLength() {
+        double maxLength = 0;
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            double l = iterator.next().getBaselineLength();
+            if (l > maxLength) {
+                maxLength = l;
+            }
+        }
+        return maxLength;
+    }
+
+    /**
+     * Get the length of the shortest flow baseline.
+     *
+     * @return the shortest flow baseline.
+     */
+    public double getShortestFlowLength() {
+        double minLength = Double.MAX_VALUE;
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            double l = iterator.next().getBaselineLength();
+            if (l < minLength) {
+                minLength = l;
+            }
+        }
+        return minLength;
+    }
+
 }

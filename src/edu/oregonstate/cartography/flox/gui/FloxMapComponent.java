@@ -17,6 +17,8 @@ import java.util.ArrayList;
 
 /**
  *
+ * @beaninfo
+ *      attribute: isContainer false
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
@@ -187,7 +189,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     @Override
     public boolean deleteSelected() {
         if (model.deleteSelectedFlowsAndNodes() > 0) {
-            model.addUndo("Delete");
             refreshMap();
             return true;
         } else {

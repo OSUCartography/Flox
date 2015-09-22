@@ -156,27 +156,6 @@ public class GeometryUtils {
     }
 
     /**
-     * Get the bounding box for an ArrayList of Points.
-     *
-     * @param points An ArrayList of Points
-     * @return A Rectangle2D object that contains all the Points.
-     */
-    public static Rectangle2D getBoundingBoxOfPoints(ArrayList<Point> points) {
-
-        if (points.size() == 0) {
-            return null;
-        }
-
-        Rectangle2D.Double bb = new Rectangle2D.Double(points.get(0).x, points.get(0).y, 0, 0);
-        for (int i = 1; i < points.size(); i++) {
-            Point pt = points.get(i);
-            bb.add(pt.x, pt.y);
-        }
-
-        return bb;
-    }
-
-    /**
      * Compute the shortest distance between a point and a line. Assumes a line
      * of infinite length on which the 2nd and 3rd set of coordinates lie.
      *
@@ -440,16 +419,14 @@ public class GeometryUtils {
      * @return
      */
     public static ArrayList<QuadraticBezierFlow> getFlowsThatIntersectNodes(Model model, double scale) throws IOException {
-
         ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
-
-        Iterator flows = model.flowIterator();
-        ArrayList<Point> nodes = model.getNodes();
-        while (flows.hasNext()) {
-            QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
-            for (Point node : nodes) {
+        Iterator<Flow> flowIterator = model.flowIterator();
+        while (flowIterator.hasNext()) {
+            QuadraticBezierFlow flow = (QuadraticBezierFlow) flowIterator.next();
+            Iterator<Point> nodeIterator = model.nodeIterator();
+            while (nodeIterator.hasNext()) {
+                Point node = nodeIterator.next();
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
-
                     if (GeometryUtils.flowIntersectsNode(flow, node, model, scale)) {
                         flowsArray.add(flow);
                         break;
@@ -457,9 +434,7 @@ public class GeometryUtils {
                 }
             }
         }
-
         return flowsArray;
-
     }
 
     /**
@@ -831,4 +806,24 @@ public class GeometryUtils {
 
         }
     }
+
+    /**
+     * S-shaped smooth function using cubic Hermite interpolation
+     * http://en.wikipedia.org/wiki/Smoothstep
+     *
+     * @param edge0 interpolated values for x below edge0 will be 0.
+     * @param edge1 interpolated values for x above edge1 will be 1.
+     * @param x The x value to interpolate a value for.
+     * @return
+     */
+    public static double smoothstep(double edge0, double edge1, double x) {
+        // scale, bias and saturate x to 0..1 range
+        x = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+        // evaluate polynomial
+        return x * x * (3 - 2 * x);
+
+        // alternative smootherstep
+        // return x * x * x * (x * (x * 6 - 15) + 10);
+    }
+
 }
