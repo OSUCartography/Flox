@@ -1392,19 +1392,4 @@ public class Model {
         this.angularDistributionWeight = angularDistributionWeight;
     }
 
-    /**
-     * @return the graph
-     */
-    public Graph getGraph() {
-        return graph;
-    }
-
-    /**
-     * @param graph the graph to set
-     */
-    public void setGraph(Graph graph) {
-        assert(graph != null);
-        this.graph = graph;
-    }
-
 }

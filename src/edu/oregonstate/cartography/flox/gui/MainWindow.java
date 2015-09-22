@@ -3183,7 +3183,7 @@ public class MainWindow extends javax.swing.JFrame {
      * The Event Dispatch Thread is drawing the model, while the worker is 
      * simultaneously changing it.
      */
-    private class LayoutWorker extends SwingWorker<Graph, Graph> {
+    private class LayoutWorker extends SwingWorker<Void, Void> {
 
         private final ForceLayouter layouter;
 
@@ -3203,7 +3203,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
         @Override
-        public Graph doInBackground() {
+        public Void doInBackground() {
             // initialize progress property.
             setProgress(0);
 
@@ -3219,7 +3219,7 @@ public class MainWindow extends javax.swing.JFrame {
 
                 // publish intermediate results in map. This will call process() 
                 // on the Event Dispatch Thread.
-                publish(layouter.getModel().getGraph());
+                publish();
 
                 // update progress indicator
                 double progress = 100d * counter / ForceLayouter.NBR_ITERATIONS;
@@ -3227,7 +3227,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
 
             // return final result
-            return layouter.getModel().getGraph();
+            return null;
         }
 
         /**
@@ -3237,13 +3237,14 @@ public class MainWindow extends javax.swing.JFrame {
         public void done() {
             try {
                 if (!isCancelled()) {
-                    model.setGraph(get());
+                    get();
                     mapComponent.eraseBufferImage();
                     mapComponent.repaint();
                     progressBar.setVisible(false);
                 }
             } catch (Throwable t) {
                 ErrorDialog.showErrorDialog("Flox Error", t);
+                t.printStackTrace();
             }
         }
 
@@ -3254,12 +3255,7 @@ public class MainWindow extends javax.swing.JFrame {
          * @param models
          */
         @Override
-        protected void process(List<Graph> graphs) {
-            // fetch the last graph created by the layouter and replace 
-            // the graph of the model
-            Graph lastGraphCreated = graphs.get(graphs.size() - 1);
-            model.setGraph(lastGraphCreated);
-
+        protected void process(List<Void> ignore) {
             // draw the new graph on the map
             mapComponent.eraseBufferImage();
             mapComponent.repaint();
