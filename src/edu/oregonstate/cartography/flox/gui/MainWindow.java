@@ -3205,7 +3205,7 @@ public class MainWindow extends javax.swing.JFrame {
         /**
          * Apply layout iterations to all non-locked flows.
          */
-        private void layout(int start, int end) {
+        private void layout(int start, int end, boolean moveFlowsOverlappingNodes, double scale) {
             for (int i = start; i < end; i++) {
                 if (isCancelled()) {
                     break;
@@ -3214,6 +3214,17 @@ public class MainWindow extends javax.swing.JFrame {
                 // compute an iteration with decreasing weight
                 double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
                 layouter.layoutAllFlows(weight);
+                
+                if (moveFlowsOverlappingNodes) {
+                    // store initial lock flags of all flows
+                    boolean[] initialLocks = model.getLocks();
+
+                    // move flows: this will lock flows that have been moved
+                    layouter.moveFlowsOverlappingNodes(scale);
+               
+                    // reset lock flags to initial values
+                    model.applyLocks(initialLocks);
+                }
 
                 // publish intermediate results in map. This will call process() 
                 // on the Event Dispatch Thread.
@@ -3230,28 +3241,12 @@ public class MainWindow extends javax.swing.JFrame {
             // initialize progress property.
             setProgress(0);
 
-            // first half of iterations
-            layout(0, ForceLayouter.NBR_ITERATIONS / 2);
-
-            // store initial lock flags of all flows
-            boolean moveFlowsOverlappingNodes = true;
-            boolean[] initialLocks = null;
-            if (moveFlowsOverlappingNodes) {
-                initialLocks = model.getLocks();
-
-                // move flows: this will lock flows that have been moved
-                double scale = mapComponent.getScale();
-                layouter.moveFlowsOverlappingNodes(scale);
-            }
-
-            // second half of iterations
-            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS);
-
-            // reset lock flags to initial values
-            if (moveFlowsOverlappingNodes) {
-                model.applyLocks(initialLocks);
-            }
-
+            double scale = mapComponent.getScale();
+            // first half of iterations. Flows are not moved away from overlapped nodes.
+            layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale);
+            
+            // second half of iterations: Flows are moved away from overlapped nodes.
+            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, true, scale);
             return null;
         }
 
