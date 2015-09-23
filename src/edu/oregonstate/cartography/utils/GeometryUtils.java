@@ -418,7 +418,7 @@ public class GeometryUtils {
      * @param scale The scale of the mapComponent.
      * @return
      */
-    public static ArrayList<QuadraticBezierFlow> getFlowsThatIntersectNodes(Model model, double scale) throws IOException {
+    public static ArrayList<QuadraticBezierFlow> getFlowsThatIntersectNodes(Model model, double scale) {
         ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
@@ -428,8 +428,12 @@ public class GeometryUtils {
                 Point node = nodeIterator.next();
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
                     if (GeometryUtils.flowIntersectsNode(flow, node, model, scale)) {
-                        flowsArray.add(flow);
-                        break;
+                        // check to see if the flow can be moved off the node
+                        if (GeometryUtils.isFlowMovable(flow, node, model, scale)) {
+                            flowsArray.add(flow);
+                            break;
+                        }
+
                     }
                 }
             }
@@ -447,12 +451,11 @@ public class GeometryUtils {
      * @return
      */
     public static boolean flowIntersectsNode(QuadraticBezierFlow flow, Point node,
-            Model model, double mapScale) throws IOException {
+            Model model, double mapScale) {
 
         // TODO this could be a user specifiable parameter.
         final double NODE_TOLERANCE_PX = 10;
 
-        // Get the pixel width of the flow
         // Get the locked scale factor needed to calculate flow widths
         double lockedScaleFactor;
         if (!model.isScaleLocked()) {
@@ -497,49 +500,56 @@ public class GeometryUtils {
         // less than the threshold, then the flow intersects the node. 
         double[] xy = {node.x, node.y};
         double shortestDistSquare = flow.distanceSq(xy);
-        boolean intersect = shortestDistSquare < threshDist * threshDist;
+        return shortestDistSquare < threshDist * threshDist;
 
-        // FIXME 
-        // Comment by Bernie: The method name and the JavaDoc imply that the method is 
-        // performing a flow/node overlap test. The following code however seems 
-        // to be testing whether the flow can be moved, which I find confusing.
-        // Should this test be moved to a separate method?
-        if (intersect) {
+    }
 
-            // It intersects the flow. Check to see if it's possible to move
-            // the flow off it. If it isn't, ERROR. If it is, return True.
-            Point sPt = flow.getStartPt();
-            Point ePt = flow.getEndPt();
+    /**
+     * Test whether a flow can be moved off a node. A flow cannot be moved off a
+     * node if the node overlaps the center of the flow's start or end point.
+     *
+     * @return
+     */
+    public static boolean isFlowMovable(Flow flow, Point node, Model model,
+            double mapScale) {
 
-            // world width of the flow being checked is worldStrokeWidth
-            // world radius of the node it crosses is worldNodeRadius
-            // FIXME comment by Bernie: could you explain how this test works?
-            if (sPt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0) {
+        double NODE_TOLERANCE_PX = 10;
 
-                // FIXME System.out should not be used in productive code
-                System.out.println("Impossible!");
-                // FIXME comment by Bernie: IOException should be used when data
-                // cannot be read or written.
-                // This is also a misuse of exceptions. Exceptions should not be 
-                // used to indicate software states that commonly occur (they are 
-                // slow and it is considered poor style to use exceptions in this way).
-                // If this test ("isFlowMoveable") can be moved to a separate 
-                // method, the method can simply return true or false, and no 
-                // exception needs to be used.
-                throw new IOException();
-                //return false;
-            }
+        Point sPt = flow.getStartPt();
+        Point ePt = flow.getEndPt();
 
-            if (ePt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0) {
-                System.out.println("Impossible!");
-                throw new IOException();
-                //return false;
-            }
-            return true;
-
+        // TODO
+        // Dan Comment: All this code involved in getting the pixel and world 
+        // coordinates of flow width and node radius is repeated in several 
+        // places. It might be better if it lived in just one place. 
+        // Get the locked scale factor needed to calculate flow widths
+        double lockedScaleFactor;
+        if (!model.isScaleLocked()) {
+            lockedScaleFactor = 1;
         } else {
-            return false;
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = mapScale / lockedMapScale;
         }
+
+        double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
+                * lockedScaleFactor;
+
+        double worldStrokeWidth = (flowStrokeWidthPx) / mapScale;
+
+        double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
+
+        double nodeRadiusPx = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+
+        double worldNodeRadius = (nodeRadiusPx + NODE_TOLERANCE_PX) / mapScale;
+
+        // Comment by Dan: This checks to see if the node overlaps the center
+        // of the flow's start point or end point. If it does, then there is 
+        // no way (yet) to move the flow such that it no
+        // longer intersects the node, and should not be attempted. Before this 
+        // test was implemented, it would keep trying forever to move it off 
+        // the node and crash.
+        return !(sPt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0
+                || ePt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0);
     }
 
     /**
