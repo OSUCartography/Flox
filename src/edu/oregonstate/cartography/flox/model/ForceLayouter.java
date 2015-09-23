@@ -572,24 +572,18 @@ public class ForceLayouter {
     }
 
     public void moveFlowsOverlappingNodes(double scale) {
-        // FIXME should not use exceptions here
-        try {
-            // Get an ArrayList of all flows that intersect nodes.
-            ArrayList<QuadraticBezierFlow> flowsArray;
 
-            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+        // Get an ArrayList of all flows that intersect nodes.
+        ArrayList<QuadraticBezierFlow> flowsArray;
+
+        flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
             // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
-            // flowsArray using getFlowsThatIntersectNodes, and repeat until 
-            // flowsArray is empty.
-            while (flowsArray.size() > 0) {
-                GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
-                flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
-            }
-        } catch (IOException e) {
-            System.out.println("Exception!");
-            JOptionPane.showMessageDialog(null, "At least one node crossing is "
-                    + "impossible to avoid because the nodes are too "
-                    + "close together.");
+        // flowsArray using getFlowsThatIntersectNodes, and repeat until 
+        // flowsArray is empty.
+        while (flowsArray.size() > 0) {
+            GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
+            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
         }
     }
+
 }
