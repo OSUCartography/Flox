@@ -2714,26 +2714,12 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_maximumNodeSizeSliderStateChanged
 
     private void moveFlowsThatCrossNodesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveFlowsThatCrossNodesButtonActionPerformed
-        try {
-            double scale = mapComponent.getScale();
-            // Get an ArrayList of all flows that intersect nodes.
-            ArrayList<QuadraticBezierFlow> flowsArray;
-
+        double scale = mapComponent.getScale();
+        ArrayList<QuadraticBezierFlow> flowsArray;
+        flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+        while (flowsArray.size() > 0) {
+            GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
             flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
-            // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
-            // flowsArray using getFlowsThatIntersectNodes, and repeat until 
-            // flowsArray is empty.
-            while (flowsArray.size() > 0) {
-                GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
-                flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
-            }
-            // FIXME should not use exceptions here
-        } catch (IOException e) {
-            System.out.println("Exception!");
-            JOptionPane.showMessageDialog(this, "At least one node crossing is "
-                    + "impossible to avoid because the nodes are too "
-                    + "close together.");
-            return;
         }
 
         layout("Move Flows");
