@@ -221,7 +221,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         // Determine location of the end point of flows based on the model
         double r = model.getFlowDistanceFromEndPointPixel() / scale
                 * getLockedScaleFactor();
-
+        double flowWidthScaleFactor = model.getFlowWidthScaleFactor();
         // Iterate through the flows
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
@@ -239,7 +239,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // Calculate the stroke width of the flow based on its value.
             // This is done here so that the Arrow class will have access to 
             // the stroke width.
-            double flowStrokeWidth = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
+            double flowStrokeWidth = Math.abs(flow.getValue()) * flowWidthScaleFactor
                     * getLockedScaleFactor();
 
             // If flow is a CubicBezierFlow, just set the flowPath to 

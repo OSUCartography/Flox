@@ -83,7 +83,7 @@ public class Model {
     /**
      * Start and end node exert a larger force than points along flow lines.
      */
-    private double nodesWeight = 0.0;
+    private double nodesWeight = 1;
 
     /**
      * Weight for the anti-torsion force.
@@ -115,7 +115,7 @@ public class Model {
      * can apply to the target. The lower the distanceWeightExponent, the more
      * force distant objects are permitted to apply.
      */
-    private double distanceWeightExponent = 10.0;
+    private int distanceWeightExponent = 10;
 
     /**
      * If this is true, control points of flows are prevented from moving
@@ -1070,7 +1070,7 @@ public class Model {
     /**
      * @return the distanceWeightExponent
      */
-    public double getDistanceWeightExponent() {
+    public int getDistanceWeightExponent() {
         return distanceWeightExponent;
     }
 
@@ -1080,7 +1080,7 @@ public class Model {
      *
      * @param idwExponent The distanceWeightExponent to set
      */
-    public void setDistanceWeightExponent(double idwExponent) {
+    public void setDistanceWeightExponent(int idwExponent) {
         this.distanceWeightExponent = idwExponent;
     }
 

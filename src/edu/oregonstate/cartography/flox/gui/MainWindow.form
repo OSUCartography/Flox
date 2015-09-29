@@ -572,16 +572,6 @@
             <Property name="text" type="java.lang.String" value="Debug"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="applyConstantForceMenuCheckbox">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Apply Constant Force"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="applyConstantForceMenuCheckboxActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator12">
-            </MenuItem>
             <Menu class="javax.swing.JMenu" name="flowSegmentationMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Flow Segmentation"/>
@@ -1011,8 +1001,9 @@
                 </Component>
                 <Component class="javax.swing.JSlider" name="exponentSlider">
                   <Properties>
-                    <Property name="majorTickSpacing" type="int" value="100"/>
-                    <Property name="maximum" type="int" value="500"/>
+                    <Property name="majorTickSpacing" type="int" value="10"/>
+                    <Property name="maximum" type="int" value="50"/>
+                    <Property name="minorTickSpacing" type="int" value="1"/>
                     <Property name="paintLabels" type="boolean" value="true"/>
                     <Property name="paintTicks" type="boolean" value="true"/>
                     <Property name="value" type="int" value="0"/>

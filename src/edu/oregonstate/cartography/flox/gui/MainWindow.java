@@ -9,7 +9,6 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
-import edu.oregonstate.cartography.flox.model.Graph;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -125,7 +124,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void undoRedo(boolean undoFlag) {
-        Object undoData = undoFlag ? undo.getUndo() : undo.getRedo();;
+        Object undoData = undoFlag ? undo.getUndo() : undo.getRedo();
         if (undoData != null) {
             try {
                 Model newModel = Model.unmarshal((byte[]) undoData);
@@ -198,7 +197,7 @@ public class MainWindow extends javax.swing.JFrame {
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
             zeroLengthStiffnessSlider.setValue((int) (model.getMinFlowLengthSpringConstant() * 100d));
-            exponentSlider.setValue((int) (model.getDistanceWeightExponent() * 10d));
+            exponentSlider.setValue(model.getDistanceWeightExponent());
             nodeWeightSlider.setValue((int) (model.getNodesWeight() * 10d));
             antiTorsionSlider.setValue((int) (model.getAntiTorsionWeight() * 100d));
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
@@ -398,8 +397,6 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
-        applyConstantForceMenuCheckbox = new javax.swing.JCheckBoxMenuItem();
-        jSeparator12 = new javax.swing.JPopupMenu.Separator();
         flowSegmentationMenu = new javax.swing.JMenu();
         lowFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         mediumFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
@@ -762,8 +759,9 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel3, gridBagConstraints);
 
-        exponentSlider.setMajorTickSpacing(100);
-        exponentSlider.setMaximum(500);
+        exponentSlider.setMajorTickSpacing(10);
+        exponentSlider.setMaximum(50);
+        exponentSlider.setMinorTickSpacing(1);
         exponentSlider.setPaintLabels(true);
         exponentSlider.setPaintTicks(true);
         exponentSlider.setValue(0);
@@ -1841,15 +1839,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         jMenu1.setText("Debug");
 
-        applyConstantForceMenuCheckbox.setText("Apply Constant Force");
-        applyConstantForceMenuCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                applyConstantForceMenuCheckboxActionPerformed(evt);
-            }
-        });
-        jMenu1.add(applyConstantForceMenuCheckbox);
-        jMenu1.add(jSeparator12);
-
         flowSegmentationMenu.setText("Flow Segmentation");
 
         buttonGroup1.add(lowFlowSegmentationMenuItem);
@@ -2004,7 +1993,6 @@ public class MainWindow extends javax.swing.JFrame {
         if (flows != null) {
             setTitle(FileUtils.getFileNameWithoutExtension(filePath));
             model.setFlows(flows);
-            double maxFlowValue = model.getMaxFlowValue();
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPointPixel());
             layout("Load Flows");
             mapComponent.showAll();
@@ -2167,9 +2155,10 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_zoomOnSelectedLayerMenuItemActionPerformed
 
     /**
-     * Change the flow layout based on current GUI parameters
+     * symmetric layout for quadratic or cubic Bezier curves.
+     * TODO remove?
      */
-    private void layoutFlows() {
+    private void symmetricalLayout() {
         int angleDeg = flowAngleSlider.getValue();
         int distPerc = flowLengthSlider.getValue();
         ArrayList<Flow> flows = new ArrayList<>();
@@ -2208,26 +2197,26 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void flowAngleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowAngleSliderStateChanged
-        layoutFlows();
+        symmetricalLayout();
     }//GEN-LAST:event_flowAngleSliderStateChanged
 
     private void flowLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowLengthSliderStateChanged
-        layoutFlows();
+        symmetricalLayout();
     }//GEN-LAST:event_flowLengthSliderStateChanged
 
     private void cubicCurvesRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cubicCurvesRadioButtonActionPerformed
         model.setCurveType(Model.CurveType.CUBIC);
-        layoutFlows();
+        symmetricalLayout();
     }//GEN-LAST:event_cubicCurvesRadioButtonActionPerformed
 
     private void quadraticCurvesRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quadraticCurvesRadioButtonActionPerformed
         model.setCurveType(Model.CurveType.QUADRATIC);
-        layoutFlows();
+        symmetricalLayout();
     }//GEN-LAST:event_quadraticCurvesRadioButtonActionPerformed
 
     private void exponentSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_exponentSliderStateChanged
         if (exponentSlider.getValueIsAdjusting() == false) {
-            model.setDistanceWeightExponent((double) exponentSlider.getValue() / 10);
+            model.setDistanceWeightExponent(exponentSlider.getValue());
             layout("Exponent");
         }
     }//GEN-LAST:event_exponentSliderStateChanged
@@ -2758,10 +2747,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_showFlowSegmentsMenuItemActionPerformed
 
-    private void applyConstantForceMenuCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyConstantForceMenuCheckboxActionPerformed
-        layout("");
-    }//GEN-LAST:event_applyConstantForceMenuCheckboxActionPerformed
-
     private void viewCanvasToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewCanvasToggleButtonActionPerformed
         mapComponent.setDrawCanvas(viewCanvasToggleButton.isSelected());
         mapComponent.refreshMap();
@@ -3227,10 +3212,12 @@ public class MainWindow extends javax.swing.JFrame {
             // initialize progress property.
             setProgress(0);
 
+            long startTime = System.currentTimeMillis();
             double scale = mapComponent.getScale();
             // first half of iterations. Flows are not moved away from overlapped nodes.
             layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale);
-            
+            long endTime = System.currentTimeMillis();
+            System.out.println((endTime - startTime) / 1000.);
             // second half of iterations: Flows are moved away from overlapped nodes.
             layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, true, scale);
             return null;
@@ -3250,7 +3237,6 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             } catch (Throwable t) {
                 ErrorDialog.showErrorDialog("Flox Error", t);
-                t.printStackTrace();
             }
         }
 
@@ -3268,7 +3254,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
-    private void layout(String undoString) {
+    private void layout(String undoString) {        
         if (updatingGUI) {
             return;
         }
@@ -3301,55 +3287,6 @@ public class MainWindow extends javax.swing.JFrame {
         layoutWorker.execute();
     }
 
-//    class LayoutActionListener implements ActionListener {
-//
-//        private final int NBR_ITERATIONS;
-//        private final ForceLayouter layouter;
-//        private int counter = 0;
-//        private final boolean constant = false;
-//        double weight;
-//
-//        public LayoutActionListener(ForceLayouter layouter, boolean constant) {
-//            this.layouter = layouter;
-//
-//            // If apply constant forces is turned on, make the number of iterations
-//            // very large, and make the weight a little less than the normal
-//            // starting weight. Otherwise, set the number of iterations to the 
-//            // normal amount, and don't modify the weight here. 
-//            if (constant) {
-//                NBR_ITERATIONS = 100000;
-//                weight = 0.75;
-//            } else {
-//                NBR_ITERATIONS = 100;
-//            }
-//            progressBar.setMaximum(NBR_ITERATIONS);
-//        }
-//
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            mapComponent.eraseBufferImage();
-//
-//            // Check to see if the apply constant forces toggle is active.
-//            // If so, just pass the weight without any relationship to the 
-//            // iterations. If not, decrease the weight with each iteration.
-//            if (constant) {
-//                layouter.layoutAllFlows(weight);
-//            } else {
-//                layouter.layoutAllFlows(1 - counter / (double) NBR_ITERATIONS);
-//            }
-//
-//            // Repaint the layout with each iteration to make an animation.
-//            // Show a progress bar. 
-//            // Stop after NBR_ITERATIONS.
-//            mapComponent.repaint();
-//            if (++counter > NBR_ITERATIONS) {
-//                //timer.stop();
-//                progressBar.setVisible(false);
-//            }
-//            progressBar.setValue(counter);
-//        }
-//    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JToggleButton addFlowToggleButton;
@@ -3357,7 +3294,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem angularDistributionMenuItem;
     private javax.swing.JSlider angularDistributionSlider;
     private javax.swing.JSlider antiTorsionSlider;
-    private javax.swing.JCheckBoxMenuItem applyConstantForceMenuCheckbox;
     private javax.swing.JSlider arrowCornerPositionSlider;
     private javax.swing.JSlider arrowEdgeCtrlLengthSlider;
     private javax.swing.JSlider arrowEdgeCtrlWidthSlider;
@@ -3432,7 +3368,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
-    private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator8;

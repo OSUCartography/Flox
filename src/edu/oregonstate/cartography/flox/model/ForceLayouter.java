@@ -2,11 +2,9 @@ package edu.oregonstate.cartography.flox.model;
 
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import javax.swing.JOptionPane;
 
 /**
  * ForceLayouter contains the algorithms that compute the total force that each
@@ -195,8 +193,30 @@ public class ForceLayouter {
         return Math.exp(-K * d * d);
     }
 
+    private boolean isEven(int i) {
+        return (i % 2) == 0;
+    }
+
+    private double pow(double a, int b) {
+        if (b == 0) {
+            return 1;
+        }
+        if (b == 1) {
+            return a;
+        }
+        if (isEven(b)) {
+            return pow(a * a, b / 2); //even a=(a^2)^b/2
+        } else {
+            return a * pow(a * a, b / 2); //odd  a=a*(a^2)^b/2
+        }
+    }
+
     private double inverseDistanceWeight(double d) {
-        return 1. / Math.pow(d, model.getDistanceWeightExponent());
+        // distance weigth exponent is an integer. The recursive pow function 
+        // with an int exponent is faster than Math.pow(d, -(double)exp)
+        int exp = model.getDistanceWeightExponent();
+        return 1d / pow(d, exp);
+        // return Math.pow(d, -(double)model.getDistanceWeightExponent());
     }
 
     /**
@@ -243,13 +263,6 @@ public class ForceLayouter {
         double flowSpringConstant = computeSpringConstant(flow, maxFlowLength);
         flowSpringConstant *= forceRatio * forceRatio * model.getPeripheralStiffnessFactor() + 1;
         Force springF = computeSpringForce(basePt, cPt, flowSpringConstant);
-        double springFLength = springF.length();
-        double externalFLength = externalF.length();
-        // FIXME
-        final double K = 10;
-        if (springFLength > externalFLength * K) {
-            springF.scale(K * externalFLength / springFLength);
-        }
 
         // compute total force: external forces + spring force + anti-torsion force
         // FIXME add nodes force with optional weight (maybe)
@@ -577,7 +590,7 @@ public class ForceLayouter {
         ArrayList<QuadraticBezierFlow> flowsArray;
 
         flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
-            // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
+        // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
         // flowsArray using getFlowsThatIntersectNodes, and repeat until 
         // flowsArray is empty.
         while (flowsArray.size() > 0) {
