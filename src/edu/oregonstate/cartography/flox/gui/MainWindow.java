@@ -3212,12 +3212,12 @@ public class MainWindow extends javax.swing.JFrame {
             // initialize progress property.
             setProgress(0);
 
-            long startTime = System.currentTimeMillis();
+            //long startTime = System.currentTimeMillis();
             double scale = mapComponent.getScale();
             // first half of iterations. Flows are not moved away from overlapped nodes.
             layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale);
-            long endTime = System.currentTimeMillis();
-            System.out.println((endTime - startTime) / 1000.);
+            //long endTime = System.currentTimeMillis();
+            //System.out.println(model.getDistanceWeightExponent() + " " + (endTime - startTime) / 1000.);
             // second half of iterations: Flows are moved away from overlapped nodes.
             layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, true, scale);
             return null;
@@ -3237,6 +3237,7 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             } catch (Throwable t) {
                 ErrorDialog.showErrorDialog("Flox Error", t);
+                t.printStackTrace();
             }
         }
 

@@ -3,6 +3,7 @@ package edu.oregonstate.cartography.flox.model;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -25,7 +26,7 @@ public class ForceLayouter {
      * content of the hash map needs to be updated whenever the start, end, or
      * control point of a BŽzier flow changes.
      */
-    HashMap<Flow, ArrayList<Point>> straightLinesMap = new HashMap<>();
+    HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
 
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
@@ -55,7 +56,7 @@ public class ForceLayouter {
         while (iter.hasNext()) {
             Flow flow = iter.next();
             ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
-            straightLinesMap.put(flow, points);
+            straightLinesMap.put(flow, points.toArray(new Point[points.size()]));
         }
     }
 
@@ -76,6 +77,7 @@ public class ForceLayouter {
     private Force computeForceOnPoint(Point targetPoint, Flow targetFlow) {
 
         Iterator<Flow> flowIterator = model.flowIterator();
+        int distWeightExponent = model.getDistanceWeightExponent();
 
         double fxTotal = 0; // total force along the x axis
         double fyTotal = 0; // total force along the y axis 
@@ -88,31 +90,28 @@ public class ForceLayouter {
             if (targetFlow == flow) {
                 continue;
             }
-            ArrayList<Point> points = straightLinesMap.get(flow);
-            int nPoints = points.size();
+            Point[] points = straightLinesMap.get(flow);
 
             // FIXME
-            if (nPoints > 200) {
+            if (points.length > 200) {
                 System.err.println("flow lines with too many points");
                 return new Force();
             }
 
-            for (int ptID = 0; ptID < nPoints; ptID++) {
-                Point point = points.get(ptID);
-
+            for (int ptID = 0; ptID < points.length; ptID++) {
+                Point point = points[ptID];
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
 
-                double l = Math.sqrt((xDist * xDist) + (yDist * yDist)); // euclidean distance from node to target
+                // square of euclidean distance from node to target
+                double lSq = xDist * xDist + yDist * yDist;
                 // avoid division by zero
-                if (l == 0) {
+                if (lSq == 0) {
                     continue;
                 }
 
-                //double w = gaussianWeight(l, maxFlowLength);
-                double w = inverseDistanceWeight(l);
-                //double fx = xDist / l; //normalized x distance
-                //double fy = yDist / l; //normalized y distance
+                // inverse distance weighting
+                double w = 1d / geometricSeriesPower(lSq, distWeightExponent);
 
                 // Apply the distance weight to each focre
                 xDist *= w; // The force along the x-axis after weighting
@@ -125,7 +124,7 @@ public class ForceLayouter {
             }
         }
 
-        // Calculate the final total force of all nodes on the target point
+        // Calculate the final force of all nodes on the target point
         double fxFinal = fxTotal / wTotal;
         double fyFinal = fyTotal / wTotal;
 
@@ -188,35 +187,56 @@ public class ForceLayouter {
         return new Force(torsionFx, torsionFy);
     }
 
-    private double gaussianWeight(double d, double maxFlowLength) {
-        double K = model.getDistanceWeightExponent() / maxFlowLength;
-        return Math.exp(-K * d * d);
-    }
-
-    private boolean isEven(int i) {
+    private static boolean isEven(int i) {
         return (i % 2) == 0;
     }
 
-    private double pow(double a, int b) {
-        if (b == 0) {
+    private static double pow(double a, int exp) {
+        if (exp == 0) {
             return 1;
         }
-        if (b == 1) {
+        if (exp == 1) {
             return a;
         }
-        if (isEven(b)) {
-            return pow(a * a, b / 2); //even a=(a^2)^b/2
+        if (isEven(exp)) {
+            return pow(a * a, exp / 2); //even a=(a^2)^exp/2
         } else {
-            return a * pow(a * a, b / 2); //odd  a=a*(a^2)^b/2
+            return a * pow(a * a, exp / 2); //odd  a=a*(a^2)^exp/2
         }
     }
 
-    private double inverseDistanceWeight(double d) {
-        // distance weigth exponent is an integer. The recursive pow function 
-        // with an int exponent is faster than Math.pow(d, -(double)exp)
-        int exp = model.getDistanceWeightExponent();
-        return 1d / pow(d, exp);
-        // return Math.pow(d, -(double)model.getDistanceWeightExponent());
+    /**
+     * Returns a2 raised to the next geometric power. Example: a2^6 returns
+     * a2^8. Note 1: a2 is the squared value: a2= a^2 Note 2: exp is clamped to
+     * 32.
+     *
+     * @param a2 The square of a.
+     * @param exp The exponent. Clamped to 32 if larger than 32
+     * @return Parameter a raised to the next geometric power.
+     */
+    private static double geometricSeriesPower(double a2, int exp) {
+        if (exp == 0) {
+            return 1;
+        }
+        if (exp == 1) {
+            return Math.sqrt(a2);
+        }
+        if (exp == 2) {
+            return a2;
+        }
+        double a4 = a2 * a2;
+        if (exp <= 4) {
+            return a4;
+        }
+        double a8 = a4 * a4;
+        if (exp <= 8) {
+            return a8;
+        }
+        double a16 = a8 * a8;
+        if (exp <= 16) {
+            return a16;
+        }
+        return a16 * a16;
     }
 
     /**
@@ -233,7 +253,7 @@ public class ForceLayouter {
 
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
-        ArrayList<Point> flowPoints = straightLinesMap.get(flow);
+        Point[] flowPoints = straightLinesMap.get(flow);
 
         // Compute forces applied by all flows on current flow
         Force externalF = new Force();
@@ -250,8 +270,8 @@ public class ForceLayouter {
         // flow is.
         double forceRatio = externalF.length() / lengthOfForceVectorsSum;
 
-        externalF.fx /= flowPoints.size();
-        externalF.fy /= flowPoints.size();
+        externalF.fx /= flowPoints.length;
+        externalF.fy /= flowPoints.length;
 
         // compute force applied by all start and end nodes on current flow
         Force nodeF = computeNodeForceOnFlow(flow);
@@ -274,6 +294,7 @@ public class ForceLayouter {
     private Force computeNodeForceOnFlow(QuadraticBezierFlow flow) {
 
         double nodeWeight = model.getNodesWeight();
+        int distWeightExponent = model.getDistanceWeightExponent();
 
         double[] xy = new double[2];
         double wTotal = 0;
@@ -334,7 +355,7 @@ public class ForceLayouter {
             // Maybe this could use a different method designed for nodes in
             // order to get a different distance weight.
             // FIXME should we use a different IDW exponent than for flows?
-            double idw = inverseDistanceWeight(d);
+            double idw = 1d / pow(d, distWeightExponent); // inverseDistanceWeight(d);
 
             // apply IDW weight and distance-to-centra-normal weight
             dx *= idw * wDist;
