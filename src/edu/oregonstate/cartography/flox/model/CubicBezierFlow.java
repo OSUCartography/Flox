@@ -134,7 +134,7 @@ public class CubicBezierFlow extends Flow {
     }
 
     /**
-     * Returns a bounding box, which is usually larger than the actual curve.
+     * Returns a bounding box, which can be larger than the actual curve.
      * Does not take the line width into account.
      *
      * @return Bounding box.
@@ -143,8 +143,7 @@ public class CubicBezierFlow extends Flow {
     public Rectangle2D.Double getBoundingBox() {
         // Bezier curve is guaranteed to be within the convex hull defined by 
         // the four points.
-        Rectangle2D.Double bb = new Rectangle2D.Double(startPt.x, startPt.y, 0, 0);
-        bb.add(endPt.x, endPt.y);
+        Rectangle2D.Double bb = new Rectangle2D.Double(startPt.x, startPt.y, endPt.x, endPt.y);
         bb.add(cPt1.x, cPt1.y);
         bb.add(cPt2.x, cPt2.y);
         return bb;
