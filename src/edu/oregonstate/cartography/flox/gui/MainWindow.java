@@ -406,7 +406,6 @@ public class MainWindow extends javax.swing.JFrame {
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         emptySpaceMenuItem = new javax.swing.JMenuItem();
-        angularDistributionMenuItem = new javax.swing.JMenuItem();
 
         flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1906,15 +1905,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(emptySpaceMenuItem);
 
-        angularDistributionMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        angularDistributionMenuItem.setText("Adjust Angular Distribution of First Selected Flow");
-        angularDistributionMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                angularDistributionMenuItemActionPerformed(evt);
-            }
-        });
-        jMenu1.add(angularDistributionMenuItem);
-
         menuBar.add(jMenu1);
 
         setJMenuBar(menuBar);
@@ -3107,25 +3097,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.repaint();
     }//GEN-LAST:event_emptySpaceMenuItemActionPerformed
 
-    private void angularDistributionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_angularDistributionMenuItemActionPerformed
-        // FIXME work in progress
-
-        if (model.getSelectedFlows().size() < 1) {
-            System.err.println("no flow selected");
-            return;
-        }
-        QuadraticBezierFlow flow = (QuadraticBezierFlow) model.getSelectedFlows().get(0);
-        ForceLayouter layouter = new ForceLayouter(model);
-        Force f = layouter.computeAngularDistributionForce(flow);
-
-        // move control point
-        flow.getCtrlPt().x += f.fx;
-        flow.getCtrlPt().y += f.fy;
-
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_angularDistributionMenuItemActionPerformed
-
     private void lockFeatureScaleToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFeatureScaleToggleButtonActionPerformed
         if (lockFeatureScaleToggleButton.isSelected()) {
             lockFeatureScaleToggleButton.setText("Unlock Feature Scale");
@@ -3287,7 +3258,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
-    private javax.swing.JMenuItem angularDistributionMenuItem;
     private javax.swing.JSlider angularDistributionSlider;
     private javax.swing.JSlider antiTorsionSlider;
     private javax.swing.JSlider arrowCornerPositionSlider;
