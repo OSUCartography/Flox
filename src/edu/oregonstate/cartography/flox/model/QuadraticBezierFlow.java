@@ -115,19 +115,58 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns a bounding box, which is usually larger than the actual curve.
-     * Does not take the line width into account.
+     * Returns a bounding box containing the curve. The control point can
+     * be outside of the bounding box returned by this method.
+     * Does not take any line width into account.
+     * Based on http://pomax.github.io/bezierinfo/#boundingbox
      *
      * @return Bounding box.
      */
     @Override
     public Rectangle2D.Double getBoundingBox() {
-        // Bezier curve is guaranteed to be within the convex hull defined by 
-        // the start, end and control points.
-        Rectangle2D.Double bb = new Rectangle2D.Double(startPt.x, startPt.y, 0, 0);
-        bb.add(endPt.x, endPt.y);
-        bb.add(cPt.x, cPt.y);
-        return bb;
+        // initialize bounding box with start and end points
+        double xmin, xmax, ymin, ymax;
+        if (startPt.x > endPt.x) {
+            xmin = endPt.x;
+            xmax = startPt.x;
+        } else {
+            xmin = startPt.x;
+            xmax = endPt.x;
+        }
+        if (startPt.y > endPt.y) {
+            ymin = endPt.y;
+            ymax = startPt.y;
+        } else {
+            ymin = startPt.y;
+            ymax = endPt.y;
+        }
+        
+        // Compute parameter t for the root of the first derivative of the x 
+        // position. This is the t parameter for the extremum in x of the curve, 
+        // as the first derivative is 0 at the extremum.
+        double tx = (startPt.x - cPt.x) / (startPt.x - 2 * cPt.x + endPt.x);
+        // t must be in [0,1]
+        if (Double.isFinite(tx) && tx >= 0 && tx <= 1) {
+            double one_minus_tx = 1d - tx;
+            // compute x position of extrema
+            double x = one_minus_tx * one_minus_tx * startPt.x
+                    + 2 * one_minus_tx * tx * cPt.x + tx * tx * endPt.x;
+            // extend bounding box
+            xmin = Math.min(xmin, x);
+            xmax = Math.max(xmax, x);
+        }
+        
+        // repeat for y
+        double ty = (startPt.y - cPt.y) / (startPt.y - 2 * cPt.y + endPt.y);
+        if (Double.isFinite(ty) && ty >= 0 && ty <= 1) {
+            double one_minus_ty = 1d - ty;
+            double y = one_minus_ty * one_minus_ty * startPt.y
+                    + 2 * one_minus_ty * ty * cPt.y + ty * ty * endPt.y;
+            ymin = Math.min(ymin, y);
+            ymax = Math.max(ymax, y);
+        }
+        
+        return new Rectangle2D.Double(xmin, ymin, xmax - xmin, ymax - ymin);
     }
 
     /**
@@ -262,7 +301,7 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns the location on the BŽzier curve at parameter value t.
+     * Returns the location on the BŽzier curve at parameter value tx.
      *
      * @param t Parameter [0..1]
      * @return Location on curve.
@@ -283,8 +322,8 @@ public class QuadraticBezierFlow extends Flow {
      * http://pomax.github.io/bezierinfo/#matrixsplit
      *
      * @param t Parametric position [0..1]
-     * @return Two new flows if t is > 0 and t < 1. Otherwise two references to
-     * this.
+     * @return Two new flows if tx is > 0 and tx < 1. Otherwise two references
+     * to this.
      */
     public QuadraticBezierFlow[] split(double t) {
         if (t <= 0 || t >= 1) {
@@ -327,11 +366,11 @@ public class QuadraticBezierFlow extends Flow {
      * point intersects the BŽzier curve.
      *
      * @param r Radius of circle
-     * @return t parameter where the circle intersects the flow.
+     * @return tx parameter where the circle intersects the flow.
      */
     public double getIntersectionTWithCircleAroundEndPoint(double r) {
         if (r <= 0) {
-            return 1;   // t = 1: end of curve
+            return 1;   // tx = 1: end of curve
         }
         double t = 0.5;
         double t_step = 0.25;
@@ -356,11 +395,11 @@ public class QuadraticBezierFlow extends Flow {
      * point intersects the BŽzier curve.
      *
      * @param r Radius of circle
-     * @return t parameter where the circle intersects the flow.
+     * @return tx parameter where the circle intersects the flow.
      */
     public double getIntersectionTWithCircleAroundStartPoint(double r) {
         if (r <= 0) {
-            return 0;   // t = 0: start of curve
+            return 0;   // tx = 0: start of curve
         }
         double t = 0.5;
         double t_step = 0.25;
@@ -495,18 +534,19 @@ public class QuadraticBezierFlow extends Flow {
         double d = Math.sqrt(dx * dx + dy * dy);
         return new double[]{dx / d, dy / d};
     }
-    
+
     public double[] getDirectionVectorFromEndPointToControlPoint() {
         double dx = cPt.x - endPt.x;
         double dy = cPt.y - endPt.y;
         double d = Math.sqrt(dx * dx + dy * dy);
         return new double[]{dx / d, dy / d};
     }
-    
+
     /**
      * Orientation of the line between the start point and the control point.
-     * @return Angle in radians relative to horizontal x axis in counter-clockwise 
-     * direction.
+     *
+     * @return Angle in radians relative to horizontal x axis in
+     * counter-clockwise direction.
      */
     public double startToCtrlAngle() {
         double dx = cPt.x - startPt.x;
@@ -516,8 +556,9 @@ public class QuadraticBezierFlow extends Flow {
 
     /**
      * Orientation of the line between the end point and the control point.
-     * @return Angle in radians relative to horizontal x axis in counter-clockwise 
-     * direction.
+     *
+     * @return Angle in radians relative to horizontal x axis in
+     * counter-clockwise direction.
      */
     public double endToCtrlAngle() {
         double dx = cPt.x - endPt.x;

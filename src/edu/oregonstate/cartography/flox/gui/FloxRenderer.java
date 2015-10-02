@@ -14,6 +14,7 @@ import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
@@ -229,12 +230,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             if (flow.isSelected() && !drawSelectedFlows) {
                 continue;
             }
-
-            // Create a GeneralPath for the flow
+            
+            // will create Swing paths for the flow line and and the arrowhead
             GeneralPath flowPath;
-
-            // Create and initialize a GeneralPath for the arrowhead
-            GeneralPath arrowPath = new GeneralPath();
+            GeneralPath arrowPath = null;
 
             // Calculate the stroke width of the flow based on its value.
             // This is done here so that the Arrow class will have access to 
