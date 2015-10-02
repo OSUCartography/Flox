@@ -2784,12 +2784,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
 
     private void reverseFlowDirectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionMenuItemActionPerformed
-        ArrayList<Flow> flows = model.getSelectedFlows();
-        for (Flow flow : flows) {
-            flow.reverseFlow();
-        }
-        // FIXME the graph stores oriented edges, so needs to be updated here
-
+        model.reverseSelectedFlows();
         addUndo("Reverse Flow Direction");
         mapComponent.refreshMap();
     }//GEN-LAST:event_reverseFlowDirectionMenuItemActionPerformed

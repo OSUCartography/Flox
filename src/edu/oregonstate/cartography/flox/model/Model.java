@@ -430,6 +430,15 @@ public class Model {
         graph.removeEdge(flow);
     }
 
+    public void reverseSelectedFlows() {
+        ArrayList<Flow> flows = getSelectedFlows();
+        for (Flow flow : flows) {
+            graph.removeEdge(flow);
+            flow.reverseFlow();
+            graph.addFlow(flow);
+        }        
+    }
+    
     /**
      * Delete a node.
      *

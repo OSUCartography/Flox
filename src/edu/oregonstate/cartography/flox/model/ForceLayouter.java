@@ -3,7 +3,6 @@ package edu.oregonstate.cartography.flox.model;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
