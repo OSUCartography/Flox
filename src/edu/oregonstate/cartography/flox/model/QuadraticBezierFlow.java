@@ -55,9 +55,8 @@ public class QuadraticBezierFlow extends Flow {
 
         // Distance between startPt and endPt
         double dist = getBaselineLength();
-        double tangentLength = dist * .5;
+        double tangentLength = dist * 0.5;
         computeCtrlPt(alpha, tangentLength);
-
     }
 
     /**
@@ -78,9 +77,12 @@ public class QuadraticBezierFlow extends Flow {
         this.setValue(value);
         cPt = new Point(0, 0);
         bend(alpha, distPerc);
-
     }
 
+    public void straighten() {
+        bend(0, 0);
+    }
+    
     /**
      * Bend flow
      *
@@ -284,20 +286,6 @@ public class QuadraticBezierFlow extends Flow {
         // add end point
         regularPoints.add(irregularPoints.get(irregularPoints.size() - 1));
         return regularPoints;
-    }
-
-    // FIXME
-    public static QuadraticBezierFlow bendQuadraticFlow(Flow flow, int angleDeg, int distPerc) {
-
-        // Convert angleDeg into radians
-        double radians = angleDeg * (Math.PI / 180);
-
-        //get the start and end irregularPoints
-        Point startPt = flow.getStartPt();
-        Point endPt = flow.getEndPt();
-        double value = flow.getValue();
-
-        return new QuadraticBezierFlow(startPt, endPt, radians, distPerc, value);
     }
 
     /**

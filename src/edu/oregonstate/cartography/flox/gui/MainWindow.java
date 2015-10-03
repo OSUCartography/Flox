@@ -4,7 +4,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.BooleanGrid;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
-import static edu.oregonstate.cartography.flox.model.CubicBezierFlow.bendCubicFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.Force;
@@ -15,7 +14,6 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
-import static edu.oregonstate.cartography.flox.model.QuadraticBezierFlow.bendQuadraticFlow;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.AddFlowTool;
@@ -38,7 +36,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -237,14 +234,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        curvesButtonGroup = new javax.swing.ButtonGroup();
-        flowLayoutPanel = new javax.swing.JPanel();
-        javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
-        flowAngleSlider = new javax.swing.JSlider();
-        javax.swing.JLabel jLabel2 = new javax.swing.JLabel();
-        flowLengthSlider = new javax.swing.JSlider();
-        cubicCurvesRadioButton = new javax.swing.JRadioButton();
-        quadraticCurvesRadioButton = new javax.swing.JRadioButton();
         mapToolsButtonGroup = new javax.swing.ButtonGroup();
         importPanel = new javax.swing.JPanel();
         jLabel22 = new javax.swing.JLabel();
@@ -383,8 +372,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapMenu = new javax.swing.JMenu();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
-        javax.swing.JPopupMenu.Separator jSeparator1 = new javax.swing.JPopupMenu.Separator();
-        geometricLayoutMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
         showAllMenuItem1 = new javax.swing.JMenuItem();
@@ -406,112 +393,6 @@ public class MainWindow extends javax.swing.JFrame {
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         emptySpaceMenuItem = new javax.swing.JMenuItem();
-
-        flowLayoutPanel.setLayout(new java.awt.GridBagLayout());
-
-        jLabel1.setText("Flow Angle");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
-        flowLayoutPanel.add(jLabel1, gridBagConstraints);
-
-        flowAngleSlider.setMajorTickSpacing(45);
-        flowAngleSlider.setMaximum(90);
-        flowAngleSlider.setMinimum(-90);
-        flowAngleSlider.setPaintLabels(true);
-        flowAngleSlider.setPaintTicks(true);
-        flowAngleSlider.setValue(30);
-        flowAngleSlider.setPreferredSize(new java.awt.Dimension(250, 37));
-        {
-            java.util.Hashtable labels = flowAngleSlider.createStandardLabels(flowAngleSlider.getMajorTickSpacing());
-            java.util.Enumeration e = labels.elements();
-            while(e.hasMoreElements()) {
-                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
-                if (comp instanceof javax.swing.JLabel) {
-                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
-                    label.setText(label.getText() + "\u00b0");
-                }
-            }
-            flowAngleSlider.setLabelTable(labels);
-        }
-        flowAngleSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                flowAngleSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        flowLayoutPanel.add(flowAngleSlider, gridBagConstraints);
-
-        jLabel2.setText("Flow Length");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        flowLayoutPanel.add(jLabel2, gridBagConstraints);
-
-        flowLengthSlider.setMajorTickSpacing(25);
-        flowLengthSlider.setPaintLabels(true);
-        flowLengthSlider.setPaintTicks(true);
-        flowLengthSlider.setValue(33);
-        flowLengthSlider.setPreferredSize(new java.awt.Dimension(190, 37));
-        {
-            java.util.Hashtable labels = flowLengthSlider.createStandardLabels(flowLengthSlider.getMajorTickSpacing());
-            java.util.Enumeration e = labels.elements();
-            while(e.hasMoreElements()) {
-                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
-                if (comp instanceof javax.swing.JLabel) {
-                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
-                    label.setText(label.getText() + "%");
-                }
-            }
-            flowLengthSlider.setLabelTable(labels);
-        }
-        flowLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                flowLengthSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
-        flowLayoutPanel.add(flowLengthSlider, gridBagConstraints);
-
-        curvesButtonGroup.add(cubicCurvesRadioButton);
-        cubicCurvesRadioButton.setText("Cubic Curves");
-        cubicCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cubicCurvesRadioButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        flowLayoutPanel.add(cubicCurvesRadioButton, gridBagConstraints);
-
-        curvesButtonGroup.add(quadraticCurvesRadioButton);
-        quadraticCurvesRadioButton.setSelected(true);
-        quadraticCurvesRadioButton.setText("Quadratic Curves");
-        quadraticCurvesRadioButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                quadraticCurvesRadioButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        flowLayoutPanel.add(quadraticCurvesRadioButton, gridBagConstraints);
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1755,15 +1636,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         mapMenu.add(removeSelectedLayerMenuItem);
-        mapMenu.add(jSeparator1);
-
-        geometricLayoutMenuItem.setText("Geometric Flow Layout…");
-        geometricLayoutMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                geometricLayoutMenuItemActionPerformed(evt);
-            }
-        });
-        mapMenu.add(geometricLayoutMenuItem);
 
         menuBar.add(mapMenu);
 
@@ -2144,33 +2016,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.zoomOnRectangle(bbRect);
     }//GEN-LAST:event_zoomOnSelectedLayerMenuItemActionPerformed
 
-    /**
-     * symmetric layout for quadratic or cubic Bezier curves.
-     * TODO remove?
-     */
-    private void symmetricalLayout() {
-        int angleDeg = flowAngleSlider.getValue();
-        int distPerc = flowLengthSlider.getValue();
-        ArrayList<Flow> flows = new ArrayList<>();
-        Model.CurveType curveType = model.getCurveType();
-
-        Iterator<Flow> iter = model.flowIterator();
-        while (iter.hasNext()) {
-            Flow flow = iter.next();
-            if (curveType == Model.CurveType.CUBIC) {
-                flow = bendCubicFlow(flow, angleDeg, distPerc);
-            } else {
-                flow = bendQuadraticFlow(flow, angleDeg, distPerc);
-            }
-            flows.add(flow);
-        }
-
-        model.setFlows(flows);
-
-        // repaint the map
-        mapComponent.refreshMap();
-    }
-
     private void showReport() {
         int nbrIntersections = LayoutGrader.countFlowIntersections(model);
         int nbrFlows = model.getNbrFlows();
@@ -2185,24 +2030,6 @@ public class MainWindow extends javax.swing.JFrame {
         sb.append(nbrIntersections);
         JOptionPane.showMessageDialog(mapComponent, sb.toString(), "Flox", JOptionPane.INFORMATION_MESSAGE);
     }
-
-    private void flowAngleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowAngleSliderStateChanged
-        symmetricalLayout();
-    }//GEN-LAST:event_flowAngleSliderStateChanged
-
-    private void flowLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowLengthSliderStateChanged
-        symmetricalLayout();
-    }//GEN-LAST:event_flowLengthSliderStateChanged
-
-    private void cubicCurvesRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cubicCurvesRadioButtonActionPerformed
-        model.setCurveType(Model.CurveType.CUBIC);
-        symmetricalLayout();
-    }//GEN-LAST:event_cubicCurvesRadioButtonActionPerformed
-
-    private void quadraticCurvesRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quadraticCurvesRadioButtonActionPerformed
-        model.setCurveType(Model.CurveType.QUADRATIC);
-        symmetricalLayout();
-    }//GEN-LAST:event_quadraticCurvesRadioButtonActionPerformed
 
     private void exponentSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_exponentSliderStateChanged
         if (exponentSlider.getValueIsAdjusting() == false) {
@@ -2309,12 +2136,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_exportImageMenuItemActionPerformed
-
-    private void geometricLayoutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_geometricLayoutMenuItemActionPerformed
-        String title = "Geometric Layout";
-        JOptionPane.showOptionDialog(this, flowLayoutPanel, title,
-                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
-    }//GEN-LAST:event_geometricLayoutMenuItemActionPerformed
 
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
 
@@ -3277,8 +3098,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox clipWithStartAreasCheckBox;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
-    private javax.swing.JRadioButton cubicCurvesRadioButton;
-    private javax.swing.ButtonGroup curvesButtonGroup;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
@@ -3295,16 +3114,12 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
     private edu.oregonstate.cartography.flox.gui.ColorButton fillColorButton;
-    private javax.swing.JSlider flowAngleSlider;
     private javax.swing.JFormattedTextField flowDistanceFromEndPointFormattedTextField;
-    private javax.swing.JPanel flowLayoutPanel;
-    private javax.swing.JSlider flowLengthSlider;
     private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JMenu flowSegmentationMenu;
     private javax.swing.JLabel flowsFilePathLabel;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JPanel forcesPanel;
-    private javax.swing.JMenuItem geometricLayoutMenuItem;
     private javax.swing.JToggleButton handToggleButton;
     private javax.swing.JRadioButtonMenuItem highFlowSegmentationMenuItem;
     private javax.swing.JMenuItem importFlowsMenuItem;
@@ -3364,7 +3179,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel pointsFilePathLabel;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JPanel progressBarPanel;
-    private javax.swing.JRadioButton quadraticCurvesRadioButton;
     private javax.swing.JMenuItem redoMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
