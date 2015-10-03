@@ -83,22 +83,13 @@ public class CubicBezierFlow extends Flow {
         this.startPt = startPt;
         this.endPt = endPt;
         this.setValue(value);
-        bend(alpha, distPerc);
-    }
-    
-    /**
-     * Bend flow
-     * @param alpha Angle between base line and lines to control points
-     * @param distPerc Length of lines to control points.
-     */
-    @Override
-    public final void bend(double alpha, int distPerc) {
+        // bend the flow
         double dist = getBaselineLength();
         double tangentLength = dist * distPerc / 100d;
         computeStartCtrlPt(alpha, tangentLength);
         computeEndCtrlPt(alpha, tangentLength);
     }
-
+   
     /**
      * Compute first control point from orientation of base line
      *

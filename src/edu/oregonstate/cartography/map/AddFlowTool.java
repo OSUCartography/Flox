@@ -221,7 +221,7 @@ public class AddFlowTool extends MapTool {
         // Straighten the new flow.
         // This is done because when a newFlow is created, the control point
         // is assigned a strange, arbitrary location.
-        newFlow.bend(0, 0);
+        newFlow.straighten();
 
         // FIXME test whether start and end point are identical to avoid 
         // exception due to the attempt of creating a loop

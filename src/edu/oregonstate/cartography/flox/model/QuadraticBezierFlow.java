@@ -51,7 +51,7 @@ public class QuadraticBezierFlow extends Flow {
         // Angle between the straight line connecting start and end point and 
         // the line connecting the start/end point with the corresponding Bezier 
         // control point.
-        double alpha = .5;
+        double alpha = 0.5;
 
         // Distance between startPt and endPt
         double dist = getBaselineLength();
@@ -60,45 +60,14 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Construct a QuadraticBezierFlow
-     *
-     * @param startPt Start point
-     * @param endPt End point
-     * @param alpha Angle around the point between the start point and the end
-     * point, relative to the normal on the line connecting start point and end
-     * point. 0 is perpendicular to this line. +/-PI/2 or is on the line.
-     * @param distPerc The distance of the control point to the point between
-     * the start and the end point (percentage).
-     * @param value Value for line width.
+     * Creates a straight flow line by placing the control between the start 
+     * point and the end point.
      */
-    public QuadraticBezierFlow(Point startPt, Point endPt, double alpha, int distPerc, double value) {
-        this.startPt = startPt;
-        this.endPt = endPt;
-        this.setValue(value);
-        cPt = new Point(0, 0);
-        bend(alpha, distPerc);
-    }
-
     public void straighten() {
-        bend(0, 0);
+        cPt.x = (startPt.x + endPt.x) / 2;
+        cPt.y = (startPt.y + endPt.y) / 2;
     }
-    
-    /**
-     * Bend flow
-     *
-     * @param alpha Angle relative to perpendicular line on base line.
-     * @param distPerc Distance from base point.
-     */
-    @Override
-    public final void bend(double alpha, int distPerc) {
-        double dist = getBaselineLength() * distPerc / 100d;
-        double beta = getBaselineAzimuth();
-        double dx = dist * Math.cos(Math.PI / 2 - alpha + beta);
-        double dy = dist * Math.sin(Math.PI / 2 - alpha + beta);
-        cPt.x = (startPt.x + endPt.x) / 2 + dx;
-        cPt.y = (startPt.y + endPt.y) / 2 + dy;
-    }
-
+   
     /**
      * Compute first control point from orientation of base line
      *

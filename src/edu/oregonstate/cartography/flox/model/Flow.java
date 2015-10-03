@@ -53,14 +53,7 @@ public abstract class Flow {
      * @return
      */
     public abstract Rectangle2D.Double getBoundingBox();
-    
-    /**
-     * Apply bending to flow
-     * @param alpha Angle parameter
-     * @param distPerc Distance parameter
-     */
-    public abstract void bend(double alpha, int distPerc);
-
+  
     /**
      * Returns the start point of the flow.
      *
