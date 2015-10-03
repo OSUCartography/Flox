@@ -351,7 +351,6 @@ public class MainWindow extends javax.swing.JFrame {
         openSettingsMenuItem = new javax.swing.JMenuItem();
         saveSettingsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator7 = new javax.swing.JPopupMenu.Separator();
-        openShapefileMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
@@ -369,6 +368,8 @@ public class MainWindow extends javax.swing.JFrame {
         reverseFlowDirectionMenuItem = new javax.swing.JMenuItem();
         straightenFlowsMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
+        openShapefileMenuItem = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
@@ -1483,14 +1484,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(saveSettingsMenuItem);
         fileMenu.add(jSeparator7);
-
-        openShapefileMenuItem.setText("Add Shapefile Layer…");
-        openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openShapefileMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(openShapefileMenuItem);
         fileMenu.add(jSeparator3);
 
         exportSVGMenuItem.setText("Export SVG…");
@@ -1606,7 +1599,16 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(editMenu);
 
-        mapMenu.setText("Map");
+        mapMenu.setText("Layers");
+
+        openShapefileMenuItem.setText("Add Layer from Shapefile…");
+        openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openShapefileMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(openShapefileMenuItem);
+        mapMenu.add(jSeparator1);
 
         removeAllLayersMenuItem.setText("Remove All Layers");
         removeAllLayersMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -3121,6 +3123,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel27;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator13;
