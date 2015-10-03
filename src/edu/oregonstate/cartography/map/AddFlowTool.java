@@ -12,12 +12,13 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 /**
  * Tool for adding flows.
  *
- * @author Dan 
+ * @author Dan Stephen
  */
 public class AddFlowTool extends MapTool {
 
@@ -74,6 +75,8 @@ public class AddFlowTool extends MapTool {
      */
     @Override
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
+        // deselect all nodes and flows
+        model.setSelectionOfAllFlowsAndNodes(false);
         // If an origin node was assigned, add a destination node. Otherwise, 
         // add an origin node. Aka, if this is the first click, add an origin
         // node. If this is the second click, add a destination node.
@@ -141,8 +144,9 @@ public class AddFlowTool extends MapTool {
             }
         }
 
-        // repaint the map
         originNodeCreated = true;
+        
+        // repaint the map
         mapComponent.refreshMap();
     }
 
@@ -214,7 +218,6 @@ public class AddFlowTool extends MapTool {
             newFlow.setValue(model.getMeanFlowValue());
         }
 
-        // FIXME
         // Straighten the new flow.
         // This is done because when a newFlow is created, the control point
         // is assigned a strange, arbitrary location.
@@ -247,7 +250,7 @@ public class AddFlowTool extends MapTool {
     public void draw(Graphics2D g2d) {
 
         if (originNodeCreated) {
-            
+
             // enable antialiasing
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
@@ -256,7 +259,7 @@ public class AddFlowTool extends MapTool {
                     RenderingHints.VALUE_RENDER_QUALITY);
             g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                     RenderingHints.VALUE_STROKE_PURE);
-            
+
             double lockedScaleFactor;
             if (!model.isScaleLocked()) {
                 lockedScaleFactor = 1;
@@ -277,5 +280,34 @@ public class AddFlowTool extends MapTool {
             g2d.setStroke(new BasicStroke(FloxRenderer.NODE_STROKE_WIDTH));
             g2d.draw(circle);
         }
+    }
+
+    /**
+     * Treat key events. The event can be consumed (return true) or be delegated
+     * to other listeners (return false).
+     *
+     * @param keyEvent The new key event.
+     * @return True if the key event has been consumed, false otherwise.
+     */
+    @Override
+    public boolean keyEvent(KeyEvent keyEvent) {
+        if (originNodeCreated) {
+
+            // treat backspace and delete key release events
+            boolean keyReleased = keyEvent.getID() == KeyEvent.KEY_RELEASED;
+            boolean isDeleteKey = keyEvent.getKeyCode() == KeyEvent.VK_DELETE;
+            boolean isBackspaceKey = keyEvent.getKeyCode() == KeyEvent.VK_BACK_SPACE;
+            if (keyReleased && (isDeleteKey || isBackspaceKey)) {
+                // delete new origin node
+                originNode = null;
+                originNodeCreated = false;
+                // repaint the map
+                mapComponent.refreshMap();
+                return true;
+            }
+        }
+
+        // default: delegate key event to other components
+        return false;
     }
 }
