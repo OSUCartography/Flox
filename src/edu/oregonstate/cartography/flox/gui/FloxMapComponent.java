@@ -115,7 +115,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         // Returns true if the the tool also painted the map, i.e. there is no
         // need to paint the map.
         MapTool mapTool = getMapTool();
-        boolean toolPaintedMap = mapTool == null ? false : mapTool.drawBackground(g2d);
+        boolean toolPaintedMap = (mapTool == null) ? false : mapTool.drawBackground(g2d);
 
         // paint the map if this has not been done by the current MapTool
         if (toolPaintedMap == false) {

@@ -14,7 +14,6 @@ import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
@@ -35,17 +34,22 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     /**
      * Color for drawing selected flows.
      */
-    private final Color SELECTION_COLOR = Color.decode("#59A4FF");
+    public static final Color SELECTION_COLOR = Color.decode("#59A4FF");
+    
+    /**
+     * Color for drawing interior of nodes.
+     */
+    public static final Color NODE_FILL_COLOR = Color.WHITE;
 
     /**
      * Width of stroke line for nodes
      */
-    private final float NODE_STROKE_WIDTH = 2;
+    public static final float NODE_STROKE_WIDTH = 2;
 
     /**
      * Radius of circles for control points (in pixels)
      */
-    private final double CR = 3;
+    private static final double CR = 3;
 
     /**
      * The model containing all the map data
@@ -328,7 +332,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             double r = getNodeRadius(node);
             Color strokeColor = drawGUIElements && node.isSelected()
                     ? SELECTION_COLOR : model.getFlowColor();
-            Color fillColor = fillNodes ? model.getFlowColor() : Color.WHITE;
+            Color fillColor = fillNodes ? model.getFlowColor() : NODE_FILL_COLOR;
             drawCircle(node.x, node.y, r, fillColor, strokeColor);
         }
     }

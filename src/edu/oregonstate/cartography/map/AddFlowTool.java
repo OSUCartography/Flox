@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
@@ -10,13 +11,13 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
-import java.awt.Color;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 
 /**
  * Tool for adding flows.
  *
- * @author Dan
+ * @author Dan 
  */
 public class AddFlowTool extends MapTool {
 
@@ -30,7 +31,7 @@ public class AddFlowTool extends MapTool {
      * should create/assign a destinationNode if this is true.
      */
     private boolean originNodeCreated = false;
-    
+
     /**
      * The origin node of the new flow being added. An originNode is assigned on
      * the first click of the AddFlowTool. If an existing node is clicked, that
@@ -82,7 +83,7 @@ public class AddFlowTool extends MapTool {
             addOriginNode(point);
         }
     }
-    
+
     /**
      * Adds an originNode to the map layout. Called on the first click while the
      * addFlowTool is active. If an existing node was clicked, that Point is
@@ -93,8 +94,6 @@ public class AddFlowTool extends MapTool {
      */
     private void addOriginNode(Point2D.Double point) {
 
-        
-        
         double scale = mapComponent.getScale();
 
         // Get the locked scale factor needed to calculate feature sizes
@@ -106,7 +105,7 @@ public class AddFlowTool extends MapTool {
             double lockedMapScale = model.getLockedMapScale();
             lockedScaleFactor = scale / lockedMapScale;
         }
-        
+
         Iterator<Point> iterator = model.nodeIterator();
         while (iterator.hasNext()) {
             Point node = iterator.next();
@@ -119,15 +118,15 @@ public class AddFlowTool extends MapTool {
                     * model.getNodeSizeScaleFactor();
             double nodePxRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
             double nodeRadius = (nodePxRadius + PIXEL_TOLERANCE) / scale;
-            
+
             // calculate the distance of the click from the node center
             double dx = node.x - point.x;
             double dy = node.y - point.y;
             double distSquared = (dx * dx + dy * dy);
-            
+
             if (distSquared <= nodeRadius * nodeRadius) {
                 originNode = node;
-                
+
                 // Stop checking nodes
                 break;
             }
@@ -137,9 +136,9 @@ public class AddFlowTool extends MapTool {
         // and assign it to originNode.
         if (originNode == null) {
             originNode = new Point(point.x, point.y);
-            if(model.getNbrNodes() > 0) {
+            if (model.getNbrNodes() > 0) {
                 originNode.setValue(model.getMeanNodeValue());
-            } 
+            }
         }
 
         // repaint the map
@@ -158,7 +157,7 @@ public class AddFlowTool extends MapTool {
     private void addDestinationNode(Point2D.Double point) {
 
         double scale = mapComponent.getScale();
-        
+
         // Get the locked scale factor needed to calculate feature sizes
         double lockedScaleFactor;
         if (!model.isScaleLocked()) {
@@ -168,7 +167,7 @@ public class AddFlowTool extends MapTool {
             double lockedMapScale = model.getLockedMapScale();
             lockedScaleFactor = scale / lockedMapScale;
         }
-        
+
         ArrayList<Point> nodes = model.getNodes();
         for (int i = nodes.size() - 1; i >= 0; i--) {
             Point node = nodes.get(i);
@@ -181,29 +180,29 @@ public class AddFlowTool extends MapTool {
                     * model.getNodeSizeScaleFactor();
             double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
             nodeRadius = (nodeRadius + PIXEL_TOLERANCE) / scale;
-            
+
             // calculate the distance of the click from the node center
             double dx = node.x - point.x;
             double dy = node.y - point.y;
             double distSquared = (dx * dx + dy * dy);
-            
+
             if (distSquared <= nodeRadius * nodeRadius) {
                 destinationNode = node;
-                
+
                 // Stop checking nodes
                 break;
             }
         }
-        
+
         // If an existing node was NOT assigned to destinationNode, make a new
         // Point and assign it to destinationNode.
         if (destinationNode == null) {
             destinationNode = new Point(point.x, point.y);
-            if(model.getNbrNodes() > 0) {
+            if (model.getNbrNodes() > 0) {
                 destinationNode.setValue(model.getMeanNodeValue());
             }
         }
-        
+
         // build a flow from the toNode and the fromNode, add it to the model
         QuadraticBezierFlow newFlow = new QuadraticBezierFlow(originNode, destinationNode);
 
@@ -223,7 +222,6 @@ public class AddFlowTool extends MapTool {
 
         // FIXME test whether start and end point are identical to avoid 
         // exception due to the attempt of creating a loop
-        
         // Add the new flow to the data model.
         model.addFlow(newFlow);
 
@@ -242,11 +240,23 @@ public class AddFlowTool extends MapTool {
      * Draw the origin node after the first click and highlight it. If an
      * existing node was clicked, this draws a highlighted node of the same
      * radius on top of it.
+     *
      * @param g2d
      */
+    @Override
     public void draw(Graphics2D g2d) {
 
         if (originNodeCreated) {
+            
+            // enable antialiasing
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            // enable high quality rendering
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
+                    RenderingHints.VALUE_RENDER_QUALITY);
+            g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+                    RenderingHints.VALUE_STROKE_PURE);
+            
             double lockedScaleFactor;
             if (!model.isScaleLocked()) {
                 lockedScaleFactor = 1;
@@ -255,18 +265,16 @@ public class AddFlowTool extends MapTool {
                 double lockedMapScale = model.getLockedMapScale();
                 lockedScaleFactor = mapComponent.getScale() / lockedMapScale;
             }
-            
-            double nodeArea = Math.abs(originNode.getValue())
-                    * model.getNodeSizeScaleFactor();            
+
+            double nodeArea = Math.abs(originNode.getValue()) * model.getNodeSizeScaleFactor();
             double r = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-            
-            g2d.setStroke(new BasicStroke(4));
             double x = mapComponent.xToPx(originNode.x);
             double y = mapComponent.yToPx(originNode.y);
             Ellipse2D circle = new Ellipse2D.Double(x - r, y - r, r * 2, r * 2);
-            g2d.setColor(Color.WHITE);
+            g2d.setColor(FloxRenderer.NODE_FILL_COLOR);
             g2d.fill(circle);
-            g2d.setColor(Color.RED);
+            g2d.setColor(FloxRenderer.SELECTION_COLOR);
+            g2d.setStroke(new BasicStroke(FloxRenderer.NODE_STROKE_WIDTH));
             g2d.draw(circle);
         }
     }
