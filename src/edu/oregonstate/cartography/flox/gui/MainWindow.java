@@ -286,7 +286,6 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel13 = new javax.swing.JLabel();
         viewCanvasToggleButton = new javax.swing.JToggleButton();
         viewFlowRangeboxToggleButton = new javax.swing.JToggleButton();
-        moveFlowsThatCrossNodesButton = new javax.swing.JButton();
         angularDistributionSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel28 = new javax.swing.JLabel();
         mapPanel = new TransparentMacPanel();
@@ -879,18 +878,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 20;
         forcesPanel.add(viewFlowRangeboxToggleButton, gridBagConstraints);
-
-        moveFlowsThatCrossNodesButton.setText("Move Flows That Cross Nodes");
-        moveFlowsThatCrossNodesButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                moveFlowsThatCrossNodesButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
-        gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
-        forcesPanel.add(moveFlowsThatCrossNodesButton, gridBagConstraints);
 
         angularDistributionSlider.setMajorTickSpacing(10);
         angularDistributionSlider.setMinorTickSpacing(5);
@@ -2513,19 +2500,6 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_maximumNodeSizeSliderStateChanged
 
-    private void moveFlowsThatCrossNodesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveFlowsThatCrossNodesButtonActionPerformed
-        double scale = mapComponent.getScale();
-        ArrayList<QuadraticBezierFlow> flowsArray;
-        flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
-        while (flowsArray.size() > 0) {
-            GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
-            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
-        }
-
-        layout("Move Flows");
-        mapComponent.refreshMap();
-    }//GEN-LAST:event_moveFlowsThatCrossNodesButtonActionPerformed
-
     private void lowFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lowFlowSegmentationMenuItemActionPerformed
         if (lowFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.LOW);
@@ -3170,7 +3144,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
-    private javax.swing.JButton moveFlowsThatCrossNodesButton;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openSettingsMenuItem;

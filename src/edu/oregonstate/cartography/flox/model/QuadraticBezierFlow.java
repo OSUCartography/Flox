@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
+ * A flow modeled by a quadratic BŽzier curve.
  *
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
@@ -25,7 +26,7 @@ public class QuadraticBezierFlow extends Flow {
     private Point cPt;
 
     /**
-     * Construct a QuadraticBezierFlow from 2 irregularPoints
+     * Construct a QuadraticBezierFlow from 3 points.
      *
      * @param startPt Start point
      * @param ctrlPt Control point
@@ -38,7 +39,7 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Construct a QuadraticBezierFlow from 2 irregularPoints
+     * Construct a QuadraticBezierFlow from a start point and an end point.
      *
      * @param startPt Start point
      * @param endPt End point
@@ -60,14 +61,14 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Creates a straight flow line by placing the control between the start 
+     * Creates a straight flow line by placing the control between the start
      * point and the end point.
      */
     public void straighten() {
         cPt.x = (startPt.x + endPt.x) / 2;
         cPt.y = (startPt.y + endPt.y) / 2;
     }
-   
+
     /**
      * Compute first control point from orientation of base line
      *
@@ -86,10 +87,10 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns a bounding box containing the curve. The control point can
-     * be outside of the bounding box returned by this method.
-     * Does not take any line width into account.
-     * Based on http://pomax.github.io/bezierinfo/#boundingbox
+     * Returns a bounding box containing the curve. The control point can be
+     * outside of the bounding box returned by this method. Does not take any
+     * line width into account. Based on
+     * http://pomax.github.io/bezierinfo/#boundingbox
      *
      * @return Bounding box.
      */
@@ -111,7 +112,7 @@ public class QuadraticBezierFlow extends Flow {
             ymin = startPt.y;
             ymax = endPt.y;
         }
-        
+
         // Compute parameter t for the root of the first derivative of the x 
         // position. This is the t parameter for the extremum in x of the curve, 
         // as the first derivative is 0 at the extremum.
@@ -126,7 +127,7 @@ public class QuadraticBezierFlow extends Flow {
             xmin = Math.min(xmin, x);
             xmax = Math.max(xmax, x);
         }
-        
+
         // repeat for y
         double ty = (startPt.y - cPt.y) / (startPt.y - 2 * cPt.y + endPt.y);
         if (Double.isFinite(ty) && ty >= 0 && ty <= 1) {
@@ -136,7 +137,7 @@ public class QuadraticBezierFlow extends Flow {
             ymin = Math.min(ymin, y);
             ymax = Math.max(ymax, y);
         }
-        
+
         return new Rectangle2D.Double(xmin, ymin, xmax - xmin, ymax - ymin);
     }
 
@@ -158,17 +159,20 @@ public class QuadraticBezierFlow extends Flow {
         this.cPt = cPt;
     }
 
+    /**
+     * 
+     * @param deCasteljauTol
+     * @return 
+     */
     public ArrayList<Point> toStraightLineSegmentsWithIrregularLength(
             double deCasteljauTol) {
         assert (deCasteljauTol > 0);
-
-        // FIXME d should be a parameter
-        double d = deCasteljauTol;
 
         ArrayList<Point> irregularPoints = new ArrayList<>();
         GeneralPath path = new GeneralPath();
         path.moveTo(startPt.x, startPt.y);
         path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
+        // FIXME division by 100?
         PathIterator iter = path.getPathIterator(null, deCasteljauTol / 100);
         double[] coords = new double[6];
         while (!iter.isDone()) {
@@ -210,12 +214,9 @@ public class QuadraticBezierFlow extends Flow {
     public ArrayList<Point> toUnclippedStraightLineSegments(double deCasteljauTol) {
         assert (deCasteljauTol > 0);
 
-        // FIXME d should be a parameter
-        double d = deCasteljauTol;
-
         ArrayList<Point> regularPoints = new ArrayList<>();
         ArrayList<Point> irregularPoints
-                = toStraightLineSegmentsWithIrregularLength(d);
+                = toStraightLineSegmentsWithIrregularLength(deCasteljauTol);
 
         // create new point set with regularly distributed irregularPoints
         double startX = irregularPoints.get(0).x;
@@ -240,11 +241,11 @@ public class QuadraticBezierFlow extends Flow {
 
             double rest = length;
             length += l;
-            while (length >= d) {
+            while (length >= deCasteljauTol) {
                 // compute new point
-                length -= d;
-                startX += dx * (d - rest);
-                startY += dy * (d - rest);
+                length -= deCasteljauTol;
+                startX += dx * (deCasteljauTol - rest);
+                startY += dy * (deCasteljauTol - rest);
                 rest = 0;
                 regularPoints.add(new Point(startX, startY));
             }
@@ -263,6 +264,7 @@ public class QuadraticBezierFlow extends Flow {
      * @param t Parameter [0..1]
      * @return Location on curve.
      */
+    @Override
     public Point pointOnCurve(double t) {
         assert (t >= 0d && t <= 1d);
 
@@ -377,7 +379,7 @@ public class QuadraticBezierFlow extends Flow {
     }
 
     /**
-     * Returns a flow with the the start and/or end masking areas removed.
+     * Returns a flow with the start and/or end masking areas removed.
      *
      * @param deCasteljauTol Tolerance for conversion to straight line segments.
      * @return A new flow object (if something was clipped), or this object.

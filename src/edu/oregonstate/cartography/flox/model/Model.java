@@ -751,9 +751,10 @@ public class Model {
     }
 
     /**
-     * Sets the tolerance value needed for creating intermediate points along
-     * the flow. This value is determined by minimum/maximum flow lengths. Menu
-     * settings control the maximum number of nodes along a flow.
+     * Empirically computes the tolerance value needed for the De Casteljau 
+     * algorithm, which converts a Bezier curve to straight line segments.
+     * This value is determined by minimum/maximum flow lengths. The
+     * flowNodeDensity field controls the maximum number of nodes along a flow.
      *
      * @return
      */
