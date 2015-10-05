@@ -536,7 +536,7 @@ public class Model {
             Flow flow = flowIterator.next();
             Geometry startClipArea = findContainingGeometry(clipAreas, flow.getStartPt(), f);
             if (startClipArea != null) {
-                startClipArea = startClipArea.buffer(startClipAreaBufferDistance);
+                startClipArea = startClipArea.buffer(-startClipAreaBufferDistance);
             }
             flow.setStartClipArea(startClipArea);
         }
@@ -558,7 +558,7 @@ public class Model {
             Flow flow = flowIterator.next();
             Geometry endClipArea = findContainingGeometry(clipAreas, flow.getEndPt(), f);
             if (endClipArea != null) {
-                endClipArea = endClipArea.buffer(endClipAreaBufferDistance);
+                endClipArea = endClipArea.buffer(-endClipAreaBufferDistance);
             }
             flow.setEndClipArea(endClipArea);
         }
