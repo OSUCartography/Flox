@@ -28,7 +28,6 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -114,6 +113,17 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Shows a dialog with an error message, and logs error to default Logger.
+     * @param msg The message to display.
+     * @param ex An optional exception with additional information.
+     */
+    private void showErrorDialog(String msg, Throwable ex) {
+        Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        String title = "Flox Error";
+        ErrorDialog.showErrorDialog(msg, title, ex, this);
+    }
+
     protected void registerUndoMenuItems(JMenuItem undoMenuItem, JMenuItem redoMenuItem) {
         undo.registerUndoMenuItems(undoMenuItem, redoMenuItem);
     }
@@ -128,8 +138,8 @@ public class MainWindow extends javax.swing.JFrame {
                 model.copyTransientFields(newModel);
                 setModel(newModel);
                 layout(null);
-            } catch (JAXBException ex) {
-                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Throwable ex) {
+                showErrorDialog("Could not undo or redo the command.", ex);
             }
         }
     }
@@ -343,15 +353,14 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu = new javax.swing.JMenu();
         importFlowsMenuItem = new javax.swing.JMenuItem();
         openPointsAndFlowsMenuItem = new javax.swing.JMenuItem();
-        javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
-        exportFlowsCSVMenuItem = new javax.swing.JMenuItem();
         jSeparator14 = new javax.swing.JPopupMenu.Separator();
         openSettingsMenuItem = new javax.swing.JMenuItem();
         saveSettingsMenuItem = new javax.swing.JMenuItem();
-        javax.swing.JPopupMenu.Separator jSeparator7 = new javax.swing.JPopupMenu.Separator();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        exportFlowsCSVMenuItem = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
         undoMenuItem = new javax.swing.JMenuItem();
         redoMenuItem = new javax.swing.JMenuItem();
@@ -1454,15 +1463,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(openPointsAndFlowsMenuItem);
-        fileMenu.add(jSeparator4);
-
-        exportFlowsCSVMenuItem.setText("Export Flows to CSV...");
-        exportFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exportFlowsCSVMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(exportFlowsCSVMenuItem);
         fileMenu.add(jSeparator14);
 
         openSettingsMenuItem.setText("Open SettingsÉ");
@@ -1481,7 +1481,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(saveSettingsMenuItem);
-        fileMenu.add(jSeparator7);
         fileMenu.add(jSeparator3);
 
         exportSVGMenuItem.setText("Export SVGÉ");
@@ -1499,6 +1498,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(exportImageMenuItem);
+        fileMenu.add(jSeparator4);
+
+        exportFlowsCSVMenuItem.setText("Export Flows to CSV...");
+        exportFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportFlowsCSVMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(exportFlowsCSVMenuItem);
 
         menuBar.add(fileMenu);
 
@@ -1776,19 +1784,18 @@ public class MainWindow extends javax.swing.JFrame {
         OutputStream outputStream = null;
         try {
             // ask for export file
-            String outFilePath = FileUtils.askFile(this, "SVG File", false);
+            String name = getTitle() + ".svg";
+            String outFilePath = FileUtils.askFile(this, "SVG File", name, false, "svg");
             if (outFilePath == null) {
                 // user canceled
                 return;
             }
-            outFilePath = FileUtils.forceFileNameExtension(outFilePath, "svg");
             SVGFlowExporter exporter = new SVGFlowExporter(model, mapComponent);
             exporter.setSVGCanvasSize(mapComponent.getWidth(), mapComponent.getHeight());
             outputStream = new FileOutputStream(outFilePath);
             exporter.export(outputStream);
-        } catch (IOException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
+        } catch (Throwable ex) {
+            showErrorDialog("Could not export to a SVG file.", ex);
         } finally {
             try {
                 if (outputStream != null) {
@@ -1816,7 +1823,7 @@ public class MainWindow extends javax.swing.JFrame {
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
             if (collection == null) {
-                ErrorDialog.showErrorDialog("The selected file is not a shapefile.", "Flox Error");
+                showErrorDialog("The selected file is not a shapefile.", null);
                 return;
             }
             Layer layer = model.addLayer(collection);
@@ -1824,9 +1831,8 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.showAll();
             updateLayerList();
             layerList.setSelectedIndex(0);
-        } catch (IOException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
+        } catch (Throwable ex) {
+            showErrorDialog("Could not open the Shapefile.", ex);
         } finally {
             writeSymbolGUI();
         }
@@ -1863,8 +1869,8 @@ public class MainWindow extends javax.swing.JFrame {
             setFlows(flows, inFilePath);
             sizeFeaturesToScale();
 
-        } catch (Exception ex) {
-            ErrorDialog.showErrorDialog("The file could not be read.", "Flox Error", ex, null);
+        } catch (Throwable ex) {
+            showErrorDialog("The file could not be read.", ex);
         }
     }
 
@@ -2082,45 +2088,49 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_infoMenuItemActionPerformed
 
     private void exportImageMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportImageMenuItemActionPerformed
-        int size = Math.max(mapComponent.getWidth(), mapComponent.getHeight());
-        String msg = "Length of longer side in pixels.";
-        String input = JOptionPane.showInputDialog(this, msg, size);
-        if (input == null) {
-            return;
-        }
         try {
-            size = Math.abs(Integer.parseInt(input));
-        } catch (NumberFormatException ex) {
-            ErrorDialog.showErrorDialog("Invalid image size.", "Error", ex, this);
-            return;
-        }
-        if (size > 5000) {
-            ErrorDialog.showErrorDialog("The entered size must be smaller than 5000.");
-            return;
-        }
-
-        // Get the area of the map to be drawn to the image
-        Rectangle2D bb = mapComponent.getVisibleArea();
-
-        BufferedImage image = FloxRenderer.renderToImage(model, size, bb,
-                true, // antialiasing
-                false, // draw GUI elements
-                true, // draw background 
-                false, // fill node circles
-                true, // draw selected flows 
-                mapComponent.isDrawFlows(), // draw flows
-                mapComponent.isDrawNodes()); // draw nodes
-        String filePath = FileUtils.askFile(this, "PNG Image", null, false, "png");
-        {
-            if (filePath != null) {
-                try {
-                    filePath = FileUtils.forceFileNameExtension(filePath, "png");
-                    ImageIO.write(image, "png", new File(filePath));
-                } catch (IOException ex) {
-                    msg = "Could not export the image.";
-                    ErrorDialog.showErrorDialog(msg, "Error", ex, this);
-                }
+            int size = Math.max(mapComponent.getWidth(), mapComponent.getHeight());
+            String msg = "Length of longer side in pixels.";
+            String input = JOptionPane.showInputDialog(this, msg, size);
+            if (input == null) {
+                return;
             }
+            try {
+                size = Math.abs(Integer.parseInt(input));
+            } catch (NumberFormatException ex) {
+                showErrorDialog("Invalid image size.",ex);
+                return;
+            }
+            if (size > 5000) {
+                showErrorDialog("The entered size must be smaller than 5000.", null);
+                return;
+            }
+
+            // Get the area of the map to be drawn to the image
+            Rectangle2D bb = mapComponent.getVisibleArea();
+
+            // ask user for file
+            String name = getTitle() + ".png";
+            String filePath = FileUtils.askFile(this, "PNG Image File", name, false, "png");
+            if (filePath == null) {
+                // user canceled
+                return;
+            }
+
+            // render image
+            BufferedImage image = FloxRenderer.renderToImage(model, size, bb,
+                    true, // antialiasing
+                    false, // draw GUI elements
+                    true, // draw background 
+                    false, // fill node circles
+                    true, // draw selected flows 
+                    mapComponent.isDrawFlows(), // draw flows
+                    mapComponent.isDrawNodes()); // draw nodes
+
+            // write image to file
+            ImageIO.write(image, "png", new File(filePath));
+        } catch (Throwable ex) {
+            showErrorDialog("Could not export the image.", ex);
         }
     }//GEN-LAST:event_exportImageMenuItemActionPerformed
 
@@ -2265,15 +2275,14 @@ public class MainWindow extends javax.swing.JFrame {
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
             if (collection == null) {
-                ErrorDialog.showErrorDialog("The selected file is not a shapefile.", "Flox Error");
+                showErrorDialog("The selected file is not a shapefile.", null);
                 return;
             }
 
             model.setClipAreas(collection);
             updateClippingGUI();
-        } catch (IOException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            ErrorDialog.showErrorDialog("An error occured.", "Flox Error", ex, null);
+        } catch (Throwable ex) {
+            showErrorDialog("An error occured.", ex);
         } finally {
             writeSymbolGUI();
         }
@@ -2335,8 +2344,8 @@ public class MainWindow extends javax.swing.JFrame {
             ArrayList<Flow> flows = FlowImporter.readFlows(pointsFilePath, flowsFilePath);
             setFlows(flows, flowsFilePath);
             sizeFeaturesToScale();
-        } catch (Exception ex) {
-            ErrorDialog.showErrorDialog("The flows could not be imported.", "Flox Error", ex, this);
+        } catch (Throwable ex) {
+            showErrorDialog("The flows could not be imported.", ex);
         }
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
 
@@ -2437,42 +2446,40 @@ public class MainWindow extends javax.swing.JFrame {
                 model.copyTransientFields(newModel);
                 setModel(newModel);
                 mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
-            } catch (JAXBException | FileNotFoundException ex) {
-                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-                String msg = "Could not load file";
-                String title = "Flox Error";
-                ErrorDialog.showErrorDialog(msg, title, ex, rootPane);
+            } catch (Throwable ex) {
+                showErrorDialog("Could not read the file.", ex);
             }
         }
     }//GEN-LAST:event_openSettingsMenuItemActionPerformed
 
     private void saveSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveSettingsMenuItemActionPerformed
-        String filePath = FileUtils.askFile(null, "Save XML Settings", null, false, "xml");
-        if (filePath == null) {
-            return;
-        }
-        File file = new File(filePath);
         try {
+            // ask user for file
+            String name = getTitle() + ".xml";
+            String filePath = FileUtils.askFile(this, "Save Settings to XML File", name, false, "xml");
+            if (filePath == null) {
+                // user canceled
+                return;
+            }
+            File file = new File(filePath);
             model.marshal(file.getAbsolutePath());
-        } catch (JAXBException | FileNotFoundException ex) {
-            String msg = "Could not save file";
-            String title = "Flox Error";
-            ErrorDialog.showErrorDialog(msg, title, ex, rootPane);
+        } catch (Throwable ex) {
+            showErrorDialog("Could not save settings to XML file.", ex);
         }
     }//GEN-LAST:event_saveSettingsMenuItemActionPerformed
 
     private void exportFlowsCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFlowsCSVMenuItemActionPerformed
         try {
             // ask for export file
-            String outFilePath = FileUtils.askFile(this, "CSV File", false);
+            String name = getTitle() + ".csv";
+            String outFilePath = FileUtils.askFile(this, "CSV Text File", name, false, "csv");
             if (outFilePath == null) {
                 // user canceled
                 return;
             }
-            outFilePath = FileUtils.forceFileNameExtension(outFilePath, "csv");
             CSVFlowExporter.export(outFilePath, model.flowIterator());
-        } catch (IOException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Throwable ex) {
+            showErrorDialog("Could not export flows to CSV text file.", ex);
         }
     }//GEN-LAST:event_exportFlowsCSVMenuItemActionPerformed
 
@@ -2946,14 +2953,14 @@ public class MainWindow extends javax.swing.JFrame {
                 // compute an iteration with decreasing weight
                 double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
                 layouter.layoutAllFlows(weight);
-                
+
                 if (moveFlowsOverlappingNodes) {
                     // store initial lock flags of all flows
                     boolean[] initialLocks = model.getLocks();
 
                     // move flows: this will lock flows that have been moved
                     layouter.moveFlowsOverlappingNodes(scale);
-               
+
                     // reset lock flags to initial values
                     model.applyLocks(initialLocks);
                 }
@@ -2997,8 +3004,7 @@ public class MainWindow extends javax.swing.JFrame {
                     progressBar.setVisible(false);
                 }
             } catch (Throwable t) {
-                ErrorDialog.showErrorDialog("Flox Error", t);
-                t.printStackTrace();
+                showErrorDialog("An error occured while computing a new layout.", t);
             }
         }
 
@@ -3016,7 +3022,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
-    private void layout(String undoString) {        
+    private void layout(String undoString) {
         if (updatingGUI) {
             return;
         }
