@@ -1,13 +1,9 @@
 package edu.oregonstate.cartography.flox.gui;
 
-import com.vividsolutions.jts.geom.GeometryCollection;
-import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -40,11 +36,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     private boolean drawNodes = true;
 
     /**
-     * flag for drawing control points
-     */
-    private boolean drawControlPoints = false;
-
-    /**
      * flag for drawing line segments
      */
     private boolean drawLineSegments = false;
@@ -73,11 +64,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
-
-    /**
-     * The map scale at the time it was locked.
-     */
-    private double lockedScale;
 
     private MainWindow mainWindow;
     
@@ -120,7 +106,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         // paint the map if this has not been done by the current MapTool
         if (toolPaintedMap == false) {
             FloxRenderer renderer = new FloxRenderer(model, g2d,
-                    west, north, scale, true);
+                    west, north, scale);
             renderer.setStrokeWidth(1f);
             renderer.render(
                     true, // renderBackgroundLayers
@@ -128,8 +114,10 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                     isDrawFlows(),
                     isDrawNodes(),
                     isDrawFlowRangebox(),
-                    isDrawControlPoints(),
+                    true, // draw control points
                     isDrawLineSegments(),
+                    true, // draw symbol for locked flows
+                    true, // highlight selected flows and nodes
                     isDrawStartClipAreas(),
                     isDrawEndClipAreas());
         }
@@ -222,13 +210,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         return clickedNodes;
     }
 
-    /**
-     * @return the drawControlPoints
-     */
-    public boolean isDrawControlPoints() {
-        return drawControlPoints;
-    }
-
     public boolean isDrawCanvas() {
         return drawCanvas;
     }
@@ -239,14 +220,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
     public boolean isDrawFlowRangebox() {
         return drawFlowRangebox;
-    }
-
-    /**
-     *
-     * @param drawControlPoints
-     */
-    public void setDrawControlPoints(boolean drawControlPoints) {
-        this.drawControlPoints = drawControlPoints;
     }
 
     /**

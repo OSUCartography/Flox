@@ -161,8 +161,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                if (flow.isSelected()
-                        || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
+                if (flow.isSelected()) {
                     Point cPt = flow.getCtrlPt();
                     if (cPt.isSelected()) {
                         cPt.x += (point.x - previousDrag_x);

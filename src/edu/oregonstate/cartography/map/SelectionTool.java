@@ -317,14 +317,12 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         // Select Control Point
         if (((FloxMapComponent) mapComponent).isDrawFlows()) {
-            if (model.isFlowSelected()
-                    || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
+            if (model.isFlowSelected()) {
                 // Iterate througth the flows, checking to see if it is selected.
                 Iterator<Flow> iterator = model.flowIterator();
                 while (iterator.hasNext()) {
                     Flow flow = iterator.next();
-                    if (flow.isSelected()
-                            || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
+                    if (flow.isSelected()) {
                         // See if the event point is near the control point.
                         Point cPt = flow.getCtrlPt();
 

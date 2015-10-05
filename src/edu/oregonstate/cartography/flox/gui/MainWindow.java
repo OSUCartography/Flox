@@ -396,7 +396,6 @@ public class MainWindow extends javax.swing.JFrame {
         mediumFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
-        showControlPointsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         emptySpaceMenuItem = new javax.swing.JMenuItem();
@@ -1745,14 +1744,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(showFlowSegmentsMenuItem);
 
-        showControlPointsCheckBoxMenuItem.setText("Show Control Points");
-        showControlPointsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showControlPointsCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        jMenu1.add(showControlPointsCheckBoxMenuItem);
-
         enforceCanvasCheckBoxMenuItem.setSelected(true);
         enforceCanvasCheckBoxMenuItem.setText("Enforce Canvas");
         enforceCanvasCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2120,7 +2111,6 @@ public class MainWindow extends javax.swing.JFrame {
             // render image
             BufferedImage image = FloxRenderer.renderToImage(model, size, bb,
                     true, // antialiasing
-                    false, // draw GUI elements
                     true, // draw background 
                     false, // fill node circles
                     true, // draw selected flows 
@@ -2549,11 +2539,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_viewFlowRangeboxToggleButtonActionPerformed
 
-    private void showControlPointsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showControlPointsCheckBoxMenuItemActionPerformed
-        mapComponent.setDrawControlPoints(showControlPointsCheckBoxMenuItem.isSelected());
-        mapComponent.refreshMap();
-    }//GEN-LAST:event_showControlPointsCheckBoxMenuItemActionPerformed
-
     private void editMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_editMenuMenuSelected
         boolean hasSelectedFlow = model.isFlowSelected();
         boolean hasSelectedNode = model.isNodeSelected();
@@ -2822,7 +2807,6 @@ public class MainWindow extends javax.swing.JFrame {
         Rectangle2D bb = mapComponent.getVisibleArea();
         BufferedImage image = FloxRenderer.renderToImage(model, size, bb,
                 false, // antialiasing
-                false, // draw GUI elements
                 false, // draw background 
                 true, // fill node circles
                 false, // draw selected flows 
@@ -3165,7 +3149,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;
-    private javax.swing.JCheckBoxMenuItem showControlPointsCheckBoxMenuItem;
     private javax.swing.JMenuItem showFlowSegmentsMenuItem;
     private javax.swing.JToggleButton showFlowsToggleButton;
     private javax.swing.JToggleButton showNodesToggleButton;

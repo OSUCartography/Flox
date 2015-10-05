@@ -488,14 +488,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showFlowSegmentsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="showControlPointsCheckBoxMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Show Control Points"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showControlPointsCheckBoxMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="enforceCanvasCheckBoxMenuItem">
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>

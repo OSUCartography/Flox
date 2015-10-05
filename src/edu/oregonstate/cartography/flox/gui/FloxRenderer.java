@@ -59,12 +59,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private boolean flowWidthLocked = false;
 
     /**
-     * If true GUI elements to indicate selection or locked status are drawn.
-     * FIXME remove?
-     */
-    private boolean drawGUIElements = true;
-
-    /**
      * Creates a new renderer.
      *
      * @param model The model to render.
@@ -74,15 +68,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param north The top image border corresponds to this world coordinate
      * position.
      * @param scale The scale factor to apply when drawing.
-     * @param drawGUIElements If true GUI elements to indicate selection or
-     * locked status are drawn.
      */
     public FloxRenderer(Model model, Graphics2D g2d,
-            double west, double north, double scale,
-            boolean drawGUIElements) {
+            double west, double north, double scale) {
         super(g2d, west, north, scale);
         this.model = model;
-        this.drawGUIElements = drawGUIElements;
     }
 
     public void render(boolean renderBackgroundLayers,
@@ -92,6 +82,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             boolean drawFlowRangebox,
             boolean drawControlPoints,
             boolean drawLineSegments,
+            boolean drawLocks,
+            boolean highlightSelected,
             boolean drawStartClipAreas,
             boolean drawEndClipAreas) {
 
@@ -113,20 +105,21 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             drawCanvas();
         }
 
-        // draw flows and nodes
         if (drawFlows) {
-            drawFlows(true);
+            drawFlows(highlightSelected, drawLocks);
         }
 
         if (drawNodes) {
-            drawNodes(false);
+            drawNodes(highlightSelected, false);
         }
 
         if (drawFlowRangebox) {
             drawFlowRangebox();
         }
 
-        drawControlPoints(drawControlPoints);
+        if (drawControlPoints) {
+            drawControlPoints();
+        }
 
         if (drawLineSegments) {
             drawStraightLinesSegments();
@@ -145,8 +138,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param bb The bounding box of the map area that will be visible in the
      * image
      * @param antialias If true anti-aliasing is applied.
-     * @param drawGUIElements If true GUI elements to indicate selection or
-     * locked status are drawn.
      * @param drawBackgroundLayers If true, map layers are rendered.
      * @param fillNodes If true, nodes are filled.
      * @param drawSelectedFlows If false, selected flows are not drawn.
@@ -157,7 +148,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     public static BufferedImage renderToImage(Model model, int maxDim,
             Rectangle2D bb,
             boolean antialias,
-            boolean drawGUIElements,
             boolean drawBackgroundLayers,
             boolean fillNodes,
             boolean drawSelectedFlows,
@@ -189,7 +179,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         // setup renderer
         FloxRenderer renderer = new FloxRenderer(model, g2d,
-                bb.getMinX(), bb.getMaxY(), scale, drawGUIElements);
+                bb.getMinX(), bb.getMaxY(), scale);
         FloxRenderer.enableHighQualityRenderingHints(g2d, antialias);
         renderer.render(drawBackgroundLayers,
                 false, // drawCanvas
@@ -197,7 +187,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 drawNodes,
                 false, // drawFlowRangebox, 
                 false, // drawControlPoints 
-                false, // drawLineSegments 
+                false, // drawLineSegments
+                false, // drawLocks
+                false, // highlightSelected
                 false, // drawStartClipAreas
                 false // drawEndClipAreas
         );
@@ -206,10 +198,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Constructs a GeneralPath object for drawing from a Flow.
+     * Constructs a GeneralPath object for drawing a Flow.
      *
-     * @param flow The flow to convert.
-     * @return A GeneralPath for drawing.
+     * @param flow The flow to convert in world coordinats.
+     * @return A GeneralPath for drawing in pixel coordinates.
      */
     private GeneralPath flowToGeneralPath(Flow flow) {
         if (flow == null) {
@@ -230,9 +222,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * model to determine flow width, length, as well as determining whether to
      * apply any clipping or add arrowheads.
      *
-     * @param drawSelectedFlows If false, selected flows are not drawn.
+     * @param highlightSelected If true, selected flows are drawn with SELECTION_COLOR.
      */
-    public void drawFlows(boolean drawSelectedFlows) {
+    private void drawFlows(boolean highlightSelected, boolean drawLocks) {
         // Determine location of the end point of flows based on the model
         double r = model.getFlowDistanceFromEndPointPixel() / scale
                 * getLockedScaleFactor();
@@ -242,10 +234,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (flow.isSelected() && !drawSelectedFlows) {
-                continue;
-            }
-
+            
             // will create Swing paths for the flow line and the arrowhead
             GeneralPath flowPath;
             GeneralPath arrowPath = null;
@@ -296,8 +285,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 flowPath = flowToGeneralPath(flow);
             }
 
-            g2d.setColor(drawGUIElements && flow.isSelected()
-                    ? SELECTION_COLOR : model.getFlowColor());
+            g2d.setColor(highlightSelected && flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
 
             // draw the arrow heads
             if (model.isDrawArrows()) {
@@ -310,7 +298,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.draw(flowPath);
 
             // draw symbol for locked flows
-            if (drawGUIElements && flow.isLocked()) {
+            if (drawLocks && flow.isLocked()) {
                 Point pt = flow.pointOnCurve(0.5);
                 drawCross(pt.x, pt.y);
             }
@@ -324,12 +312,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param fillNodes If true, the node circles are filled with the stroke
      * color. Otherwise they are filled with white.
      */
-    public void drawNodes(boolean fillNodes) {
+    private void drawNodes(boolean highlightSelected, boolean fillNodes) {
         g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
             double r = getNodeRadius(node);
-            Color strokeColor = drawGUIElements && node.isSelected()
+            Color strokeColor = highlightSelected && node.isSelected()
                     ? SELECTION_COLOR : model.getFlowColor();
             Color fillColor = fillNodes ? model.getFlowColor() : NODE_FILL_COLOR;
             drawCircle(node.x, node.y, r, fillColor, strokeColor);
@@ -339,7 +327,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     /**
      * Draws the canvas.
      */
-    public void drawCanvas() {
+    private void drawCanvas() {
         g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getNodesBoundingBox();
 
@@ -381,7 +369,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         g2d.fill(canvasPath);
     }
 
-    public void drawFlowRangebox() {
+    private void drawFlowRangebox() {
         g2d.setStroke(new BasicStroke(1f));
         g2d.setColor(Color.GRAY);
         Iterator<Flow> iter = model.flowIterator();
@@ -413,34 +401,17 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Draw the control points for flows. Only draws if the flow is selected or
-     * if the Show Control Points menu item is selected.
-     *
-     * @param drawControlPoints Flag for drawing all control points.
+     * Draw the control points of selected flows.
      */
-    public void drawControlPoints(boolean drawControlPoints) {
-
-        if (drawControlPoints) {
-            // The Show Control Points menu item is selected.
-            // draw them all!
-            Iterator<Flow> iter = model.flowIterator();
-            while (iter.hasNext()) {
-                Flow flow = iter.next();
+    private void drawControlPoints() {
+        // draw just the control points of selected flows.
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.isSelected()) {
                 drawControlPoints(flow);
             }
-        } else {
-            // draw just the control points of selected flows.
-            if (drawGUIElements && model.isFlowSelected()) {
-                Iterator<Flow> iterator = model.flowIterator();
-                while (iterator.hasNext()) {
-                    Flow flow = iterator.next();
-                    if (flow.isSelected()) {
-                        drawControlPoints(flow);
-                    }
-                }
-            }
         }
-
     }
 
     /**
@@ -488,7 +459,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     /**
      * Draw straight line segments for a Bezier curve. Useful for debugging.
      */
-    public void drawStraightLinesSegments() {
+    private void drawStraightLinesSegments() {
 
         Iterator<Flow> iter = model.flowIterator();
 
@@ -509,7 +480,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
 
-    public void drawClipAreas(boolean drawStartClipAreas, boolean drawEndClipAreas) {
+    private void drawClipAreas(boolean drawStartClipAreas, boolean drawEndClipAreas) {
         HashSet<Geometry> endClipAreas = new HashSet<>();
         HashSet<Geometry> startClipAreas = new HashSet<>();
         Iterator<Flow> iterator = model.flowIterator();
@@ -567,7 +538,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private double getNodeRadius(Point node) {
         double area = Math.abs(node.getValue()
                 * model.getNodeSizeScaleFactor());
-
         return (Math.sqrt(area / Math.PI)) * getLockedScaleFactor();
     }
 
