@@ -14,6 +14,7 @@ import java.util.Iterator;
 
 /**
  * A flow based on a quadratic BŽzier curve.
+ *
  * @author Bernhard Jenny
  * @author Daniel Stephen
  */
@@ -28,7 +29,7 @@ public final class Flow {
      * end point of flow.
      */
     protected Point endPt;
-    
+
     /**
      * control point.
      */
@@ -38,12 +39,12 @@ public final class Flow {
      * mapped value.
      */
     private double value;
-    
+
     /**
      * clip area for the start of the flow.
      */
     private Geometry startClipArea;
-    
+
     /**
      * clip area for the end of the flow.
      */
@@ -53,13 +54,13 @@ public final class Flow {
      * selection flag
      */
     private boolean selected = false;
-    
+
     /**
-     * Locked flag. Locked flows are not affected by forces, but still
-     * emit forces onto other flows. 
+     * Locked flag. Locked flows are not affected by forces, but still emit
+     * forces onto other flows.
      */
     private boolean locked = false;
-    
+
     /**
      * Construct a Flow from 3 points.
      *
@@ -94,7 +95,7 @@ public final class Flow {
         double tangentLength = dist * 0.5;
         computeCtrlPt(alpha, tangentLength);
     }
-    
+
     /**
      * Returns the start point of the flow.
      *
@@ -133,14 +134,15 @@ public final class Flow {
 
     /**
      * Returns the distance between start and end point
-     * @return 
+     *
+     * @return
      */
     public double getBaselineLength() {
         double dx = startPt.x - endPt.x;
         double dy = startPt.y - endPt.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
-   
+
     /**
      * Returns the azimuthal angle for a line between a start and end point
      *
@@ -155,13 +157,13 @@ public final class Flow {
     public Point getBaseLineMidPoint() {
         return new Point((endPt.x + startPt.x) / 2, (endPt.y + startPt.y) / 2);
     }
-    
+
     public void reverseFlow() {
         Point temp = startPt;
         startPt = endPt;
         endPt = temp;
     }
-    
+
     /**
      * @return the flow value
      */
@@ -175,7 +177,7 @@ public final class Flow {
     public void setValue(double value) {
         this.value = value;
     }
-    
+
     /**
      * @return the startClipArea
      */
@@ -231,7 +233,7 @@ public final class Flow {
     public void setLocked(boolean locked) {
         this.locked = locked;
     }
-    
+
     /**
      * Creates a straight flow line by placing the control between the start
      * point and the end point.
@@ -331,9 +333,9 @@ public final class Flow {
     }
 
     /**
-     * 
+     *
      * @param deCasteljauTol
-     * @return 
+     * @return
      */
     public ArrayList<Point> toStraightLineSegmentsWithIrregularLength(
             double deCasteljauTol) {
@@ -446,11 +448,11 @@ public final class Flow {
     }
 
     /**
-     * Split a flow into two new flows. The new flows have the same value, 
-     * selection and lock state as this flow. The split flows have new start, end,
-     * and control points, which do not have the value and selection state of
-     * the points of this flow.
-     * 
+     * Split a flow into two new flows. The new flows have the same value,
+     * selection and lock state as this flow. The split flows have new start,
+     * end, and control points. The first flow has the same start clip area as
+     * this flow. The second flow has the same end clip area as this flow.
+     *
      * Maths based on http://pomax.github.io/bezierinfo/#matrixsplit
      *
      * @param t Parametric position [0..1]
@@ -488,11 +490,13 @@ public final class Flow {
         flow1.setValue(getValue());
         flow1.setSelected(isSelected());
         flow1.setLocked(isLocked());
+        flow1.setStartClipArea(getStartClipArea());
 
         Flow flow2 = new Flow(start2, ctrl2, end2);
-        flow2.setValue(this.getValue());
+        flow2.setValue(getValue());
         flow2.setSelected(isSelected());
         flow2.setLocked(isLocked());
+        flow2.setEndClipArea(getEndClipArea());
 
         return new Flow[]{flow1, flow2};
     }
@@ -556,7 +560,8 @@ public final class Flow {
     }
 
     /**
-     * Returns a flow with the start and/or end masking areas removed.
+     * Returns a flow with the start and/or end masking areas removed. If no
+     * masking areas are defined, returns this.
      *
      * @param deCasteljauTol Tolerance for conversion to straight line segments.
      * @return A new flow object (if something was clipped), or this object.
@@ -565,7 +570,6 @@ public final class Flow {
 
         boolean clipWithStartArea = getStartClipArea() != null;
         boolean clipWithEndArea = getEndClipArea() != null;
-
         if (clipWithStartArea == false && clipWithEndArea == false) {
             return this;
         }
@@ -574,56 +578,55 @@ public final class Flow {
         ArrayList<Point> points = toUnclippedStraightLineSegments(deCasteljauTol);
         LineString lineString = pointsToLineString(points);
         Flow splitFlow = this;
-
-        // clip linestring with clip areas around start point
+        
+        // clip start area
         if (clipWithStartArea) {
-            Geometry clippedFlowLineGeometry = lineString.difference(getStartClipArea());
-            double d = 0;
-            Iterator geomi = new GeometryCollectionIterator(clippedFlowLineGeometry);
-            while (geomi.hasNext()) {
-                Geometry geometry = (Geometry) geomi.next();
-                if (geometry instanceof LineString) {
-                    LineString l = (LineString) geometry;
-                    com.vividsolutions.jts.geom.Point pt = l.getStartPoint();
-                    if (l.getNumPoints() >= 2) {
-                        double dx = startPt.x - pt.getX();
-                        double dy = startPt.y - pt.getY();
-                        double dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist > d) {
-                            d = dist;
-                        }
-                    }
-                }
-            }
-            double startT = splitFlow.getIntersectionTWithCircleAroundStartPoint(d);
-            splitFlow = split(startT)[1];
+            double t = splitFlow.clippingT(lineString, true);
+            splitFlow = splitFlow.split(t)[1];
         }
-
-        // clip linestring with clip areas around end point
+        
+        // clip end area
         if (clipWithEndArea) {
-            Geometry clippedFlowLineGeometry = lineString.difference(getEndClipArea());
-            double d = 0;
-            Iterator geomi = new GeometryCollectionIterator(clippedFlowLineGeometry);
-            while (geomi.hasNext()) {
-                Geometry geometry = (Geometry) geomi.next();
-                if (geometry instanceof LineString) {
-                    LineString l = (LineString) geometry;
-                    com.vividsolutions.jts.geom.Point pt = l.getEndPoint();
-                    if (l.getNumPoints() >= 2) {
-                        double dx = endPt.x - pt.getX();
-                        double dy = endPt.y - pt.getY();
-                        double dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist > d) {
-                            d = dist;
-                        }
+            double t = splitFlow.clippingT(lineString, false);
+            splitFlow = splitFlow.split(t)[0];
+        }
+        
+        return splitFlow;
+    }
+
+    /**
+     * Computes the parameter t for the location where the flow needs to be
+     * split for masking with the start or the end clip area.
+     * @param lineString This flow's geometry converted to straight line segments.
+     * @param clipWithStartArea If true, clip with start clip area, otherwise with
+     * the end clip area.
+     * @return The parameter t in [0, 1]
+     */
+    private double clippingT(LineString lineString, boolean clipWithStartArea) {
+        Geometry clipArea = clipWithStartArea ? getStartClipArea() : getEndClipArea();
+        Geometry clippedFlowLineGeometry = lineString.difference(clipArea);
+        double d = 0;
+        Iterator geometryIterator = new GeometryCollectionIterator(clippedFlowLineGeometry);
+        while (geometryIterator.hasNext()) {
+            Geometry geometry = (Geometry) geometryIterator.next();
+            if (geometry instanceof LineString) {
+                LineString l = (LineString) geometry;
+                if (l.getNumPoints() >= 2) {
+                    com.vividsolutions.jts.geom.Point linePoint
+                        = clipWithStartArea ? l.getStartPoint() : l.getEndPoint();
+                    Point flowPoint = clipWithStartArea ? startPt : endPt;
+                    double dx = flowPoint.x - linePoint.getX();
+                    double dy = flowPoint.y - linePoint.getY();
+                    double dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > d) {
+                        d = dist;
                     }
                 }
             }
-            double endT = splitFlow.getIntersectionTWithCircleAroundEndPoint(d);
-            splitFlow = splitFlow.split(endT)[0];
         }
-
-        return splitFlow;
+        return clipWithStartArea
+                ? getIntersectionTWithCircleAroundStartPoint(d)
+                : getIntersectionTWithCircleAroundEndPoint(d);
     }
 
     /**
