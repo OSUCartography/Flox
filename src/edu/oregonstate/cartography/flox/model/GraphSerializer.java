@@ -21,10 +21,10 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         // Create a hashmap to store the points with keys
         HashMap<String, Point> points = new HashMap<>();
         
-        // Empty arraylist to store flows
+        // Empty arraylist to store flowIterator
         ArrayList<Flow> flows = new ArrayList<>();
         
-        // Empty graph to add nodes and flows
+        // Empty graph to add nodes and flowIterator
         Graph graph = new Graph();
         
         // The first line of the xml file is the number of nodes in the graph
@@ -56,7 +56,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             graph.addNode(entry.getValue());
         }
         
-        // Read in flow data, add them to the flows ArrayList
+        // Read in flow data, add them to the flowIterator ArrayList
         while ((l = reader.readLine()) != null) {
 
             StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
@@ -75,14 +75,14 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             Point startPoint = points.get(startPtID);
             Point endPoint = points.get(endPtID);
             Point cPoint = new Point(cPtX, cPtY);
-            QuadraticBezierFlow flow = new QuadraticBezierFlow(startPoint, endPoint);
+            Flow flow = new Flow(startPoint, endPoint);
             flow.setValue(flowValue);
             flow.setControlPoint(cPoint);
             flow.setLocked(locked);
             flows.add(flow);
         }
 
-        // Add all the flows to the graph
+        // Add all the flowIterator to the graph
         for (Flow flow : flows) {
             graph.addFlow(flow);
         }
@@ -97,13 +97,13 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         // The string will be a new ID number.
         HashMap<Point, String> points = new HashMap<>();
 
-        // Get the flows
-        Iterator flows = graph.flowIterator();
+        // Get the flowIterator
+        Iterator<Flow> flowIterator = graph.flowIterator();
         
         // Get the nodes
         Iterator nodes = graph.nodeIterator();
 
-        // Make stringbuilders for nodes and flows
+        // Make stringbuilders for nodes and flowIterator
         StringBuilder nodeStr = new StringBuilder();
         StringBuilder flowStr = new StringBuilder();
 
@@ -115,10 +115,9 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             key +=1;
         }
         
-        // Make a string of all the flows
-        while (flows.hasNext()) {
-
-            QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
+        // Make a string of all the flowIterator
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
 
             flowStr.append(points.get(flow.getStartPt()));
             flowStr.append(",");

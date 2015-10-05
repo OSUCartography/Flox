@@ -22,10 +22,10 @@ public class RangeboxEnforcer {
      * border where the line crosses. Checks each side of the range rectangle
      * one at a time.
      *
-     * @param flow A QuadraticBezierFlow
+     * @param flow A Flow
      * @return
      */
-    public Point enforceFlowControlPointRange(QuadraticBezierFlow flow) {
+    public Point enforceFlowControlPointRange(Flow flow) {
 
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();
@@ -83,7 +83,7 @@ public class RangeboxEnforcer {
         return cPt;
     }
 
-    public Point enforceCanvasBoundingBox(QuadraticBezierFlow flow, Rectangle2D canvas) {
+    public Point enforceCanvasBoundingBox(Flow flow, Rectangle2D canvas) {
 
         double cWidth = canvas.getWidth();
         double cHeight = canvas.getHeight();

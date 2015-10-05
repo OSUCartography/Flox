@@ -33,7 +33,6 @@ public class SVGFlowExporter extends SVGExporter {
 
     private String flowToPath(Flow flow) {
 
-        QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
         StringBuilder str = new StringBuilder();
         str.append("M");
         str.append(df.format(xToPagePx(flow.getStartPt().x)));
@@ -41,9 +40,9 @@ public class SVGFlowExporter extends SVGExporter {
         str.append(df.format(yToPagePx(flow.getStartPt().y)));
 
         str.append(" Q");
-        str.append(df.format(xToPagePx(qFlow.getCtrlPt().x)));
+        str.append(df.format(xToPagePx(flow.getCtrlPt().x)));
         str.append(" ");
-        str.append(df.format(yToPagePx(qFlow.getCtrlPt().y)));
+        str.append(df.format(yToPagePx(flow.getCtrlPt().y)));
         str.append(", ");
         str.append(df.format(xToPagePx(flow.getEndPt().x)));
         str.append(", ");
@@ -119,7 +118,7 @@ public class SVGFlowExporter extends SVGExporter {
         return (Math.sqrt(area / Math.PI)) * getLockedScaleFactor();
     }
 
-    private QuadraticBezierFlow clipFlowByEndNode(QuadraticBezierFlow flow) {
+    private Flow clipFlowByEndNode(Flow flow) {
         // Scale the node's radius + stroke/2 distance to world distance
         double nodeR = ((NODE_STROKE_WIDTH / 2) + getNodeRadius(flow.getEndPt())) / mapComponent.getScale();
 
@@ -128,7 +127,7 @@ public class SVGFlowExporter extends SVGExporter {
         return flow.split(t)[0];
     }
 
-    private QuadraticBezierFlow getClippedFlow(QuadraticBezierFlow flow) {
+    private Flow getClippedFlow(Flow flow) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
         flow = flow.getClippedFlow(deCasteljauTol);
         return flow;
@@ -168,10 +167,8 @@ public class SVGFlowExporter extends SVGExporter {
 
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            double flowWidth = getFlowWidth(flow);
-
-            QuadraticBezierFlow f = (QuadraticBezierFlow) flow;
+            Flow f = iterator.next();
+            double flowWidth = getFlowWidth(f);
 
             if (model.isDrawArrows()) {
 
@@ -196,11 +193,10 @@ public class SVGFlowExporter extends SVGExporter {
                 g.appendChild(arrowPathElement);
 
             } else {
-                //FIXME clip the flow
                 f = getClippedFlow(f);
                 f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                pathElement.setAttribute("d", flowToPath(flow));
+                pathElement.setAttribute("d", flowToPath(f));
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
                 g.appendChild(pathElement);
             }

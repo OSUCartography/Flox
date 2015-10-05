@@ -47,17 +47,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
-    public enum CurveType {
-
-        CUBIC,
-        QUADRATIC
-    }
-
-    /**
-     * Either work with cubic or quadratic curves.
-     */
-    private CurveType curveType = CurveType.QUADRATIC;
-
     /**
      * Density of points along flows.
      */
@@ -1007,20 +996,6 @@ public class Model {
     }
 
     /**
-     * @return the curveType
-     */
-    public CurveType getCurveType() {
-        return curveType;
-    }
-
-    /**
-     * @param curveType the curveType to set
-     */
-    public void setCurveType(CurveType curveType) {
-        this.curveType = curveType;
-    }
-
-    /**
      * @return the nodesWeight
      */
     public double getNodesWeight() {
@@ -1305,7 +1280,7 @@ public class Model {
     public boolean isControlPtSelected() {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
-            QuadraticBezierFlow flow = (QuadraticBezierFlow) iterator.next();
+            Flow flow = iterator.next();
             if (flow.getCtrlPt().isSelected()) {
                 return true;
             }

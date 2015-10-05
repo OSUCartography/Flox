@@ -1,9 +1,9 @@
 package edu.oregonstate.cartography.map;
 
 import edu.oregonstate.cartography.flox.gui.FloxRenderer;
+import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
@@ -208,7 +208,7 @@ public class AddFlowTool extends MapTool {
         }
 
         // build a flow from the toNode and the fromNode, add it to the model
-        QuadraticBezierFlow newFlow = new QuadraticBezierFlow(originNode, destinationNode);
+        Flow newFlow = new Flow(originNode, destinationNode);
 
         // Set the value of newFlow to the mean of existing flow values.
         // If no other flows exist, set the value of newFlow to 1.

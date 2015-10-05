@@ -9,7 +9,6 @@ import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -186,7 +185,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
+                Point cPt = flow.getCtrlPt();
                 cPt.setSelected(false);
             }
             mapComponent.refreshMap();
@@ -210,7 +209,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
+                Point cPt = flow.getCtrlPt();
                 cPt.setSelected(false);
             }
         }
@@ -327,7 +326,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     if (flow.isSelected()
                             || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                         // See if the event point is near the control point.
-                        Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
+                        Point cPt = flow.getCtrlPt();
 
                         // If a control point already got selected, exit the loop
                         if (controlPtGotSelected) {
@@ -411,7 +410,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             double[] xy = new double[2];
 
             while (flows.hasNext()) {
-                QuadraticBezierFlow flow = (QuadraticBezierFlow) flows.next();
+                Flow flow = flows.next();
 
                 // Get the flow's width.
                 double width = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()

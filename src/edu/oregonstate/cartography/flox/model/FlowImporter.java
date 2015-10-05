@@ -52,8 +52,7 @@ public class FlowImporter {
                 locked = (Double.parseDouble(tokenizer.nextToken()) == 1);
             }
 
-            QuadraticBezierFlow flow = new QuadraticBezierFlow(new Point(x1, y1), 
-                    new Point(x2, y2));
+            Flow flow = new Flow(new Point(x1, y1), new Point(x2, y2));
             flow.setValue(value);
 
             if (cPt != null) {                
@@ -118,7 +117,7 @@ public class FlowImporter {
                 double value = Double.parseDouble(tokenizer.nextToken());
                 Point startPoint = points.get(startPtID);
                 Point endPoint = points.get(endPtID);
-                Flow flow = new QuadraticBezierFlow(startPoint, endPoint);
+                Flow flow = new Flow(startPoint, endPoint);
                 flow.setValue(value);
                 flows.add(flow);
             }

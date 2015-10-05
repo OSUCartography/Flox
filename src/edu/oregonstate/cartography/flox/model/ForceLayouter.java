@@ -153,7 +153,7 @@ public class ForceLayouter {
      * @param maxFlowLength
      * @return
      */
-    private double computeSpringConstant(QuadraticBezierFlow flow, double maxFlowLength) {
+    private double computeSpringConstant(Flow flow, double maxFlowLength) {
 
         double flowBaseLength = flow.getBaselineLength();
         double relativeFlowLength = flowBaseLength / maxFlowLength;
@@ -170,7 +170,7 @@ public class ForceLayouter {
      * @return A force pulling the control point towards a perpendicular line on
      * the base line.
      */
-    private Force computeAntiTorsionForce(QuadraticBezierFlow flow) {
+    private Force computeAntiTorsionForce(Flow flow) {
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
         double dx = basePt.x - cPt.x;
@@ -248,7 +248,7 @@ public class ForceLayouter {
      * @param maxFlowLength
      * @return The force that is exerted onto the control point
      */
-    private Force computeForceOnFlow(QuadraticBezierFlow flow, double maxFlowLength) {
+    private Force computeForceOnFlow(Flow flow, double maxFlowLength) {
 
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
@@ -290,7 +290,7 @@ public class ForceLayouter {
         return new Force(fx, fy);
     }
 
-    private Force computeNodeForceOnFlow(QuadraticBezierFlow flow) {
+    private Force computeNodeForceOnFlow(Flow flow) {
 
         double nodeWeight = model.getNodesWeight();
         int distWeightExponent = model.getDistanceWeightExponent();
@@ -378,13 +378,12 @@ public class ForceLayouter {
 
     /**
      * Applies a layout iteration to all unlocked flows. Requires that all flows
-     * are instances of the QuadraticBezierFlow class.
+     * are instances of the Flow class.
      *
      * @param weight
      */
     public void layoutAllFlows(double weight) {
-        assert (model.getCurveType() == Model.CurveType.QUADRATIC);
-
+        
         int nbrFlows = model.getNbrFlows();
         if (nbrFlows < 2) {
             return;
@@ -404,7 +403,7 @@ public class ForceLayouter {
 
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) iterator.next();
+            Flow qFlow = iterator.next();
             if (qFlow.isLocked()) {
                 continue;
             }
@@ -420,7 +419,7 @@ public class ForceLayouter {
         iterator = model.flowIterator();
         int i = 0;
         while (iterator.hasNext()) {
-            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) iterator.next();
+            Flow qFlow = iterator.next();
             if (qFlow.isLocked()) {
                 continue;
             }
@@ -485,7 +484,7 @@ public class ForceLayouter {
      * balanced.
      * @return Force to be applied as displacement on control point.
      */
-    public Force computeAngularDistributionForce(QuadraticBezierFlow flow) {
+    public Force computeAngularDistributionForce(Flow flow) {
 
         Point startPoint = flow.getStartPt();
         Point endPoint = flow.getEndPt();
@@ -510,7 +509,7 @@ public class ForceLayouter {
         // to find edges connected to the start node and the end node
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
-            QuadraticBezierFlow f = (QuadraticBezierFlow) iter.next();
+            Flow f = iter.next();
             if (f == flow) {
                 continue;
             }
@@ -594,7 +593,7 @@ public class ForceLayouter {
     public void straightenFlows(boolean onlySelected) {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            QuadraticBezierFlow flow = (QuadraticBezierFlow)iterator.next();
+            Flow flow = iterator.next();
             if (onlySelected && flow.isSelected() == false) {
                 continue;
             }
@@ -607,7 +606,7 @@ public class ForceLayouter {
     public void moveFlowsOverlappingNodes(double scale) {
 
         // Get an ArrayList of all flows that intersect nodes.
-        ArrayList<QuadraticBezierFlow> flowsArray;
+        ArrayList<Flow> flowsArray;
 
         flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
         // If flowsArray has anything in it, call moveFlowsCrossingNodes, update

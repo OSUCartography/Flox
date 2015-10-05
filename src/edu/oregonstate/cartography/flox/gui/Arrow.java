@@ -3,7 +3,6 @@ package edu.oregonstate.cartography.flox.gui;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
 
@@ -37,12 +36,12 @@ public class Arrow {
      * when it is drawn. This flow is a clipped version of the flow that is
      * passed into the Arrow class, and is returnable by getOutFlow().
      */
-    private QuadraticBezierFlow outFlow;
+    private Flow outFlow;
 
     /**
-     * The QuadraticBezierFlow that is passed in at instantiation.
+     * The flow that is passed in at instantiation.
      */
-    private QuadraticBezierFlow inFlow;
+    private final Flow inFlow;
 
     /**
      * The location of the base of the Arrow in world coordinates. 
@@ -85,7 +84,7 @@ public class Arrow {
      * @param west Needed for scaling to pixel values
      * @param north Needed for scaling to pixel values
      */
-    public Arrow(QuadraticBezierFlow inFlow, Model model, double flowStrokeWidth,
+    public Arrow(Flow inFlow, Model model, double flowStrokeWidth,
             double scale, double west, double north) {
 
         this.west = west;
@@ -146,7 +145,7 @@ public class Arrow {
         // The little bit is to provide sufficient overlap of the flow with the
         // arrowhead to prevent gaps between the flow and arrowhead when the
         // arrowhead is drawn along more curved parts of the flow
-        QuadraticBezierFlow[] splitFlows = inFlow.split(t + ((1 - t) * 0.1));
+        Flow[] splitFlows = inFlow.split(t + ((1 - t) * 0.1));
 
         // Set the flow to the section of the flow that travels from the 
         // start point to the base of the Arrow. The remaining section of the
@@ -219,7 +218,7 @@ public class Arrow {
      *
      * @return
      */
-    public QuadraticBezierFlow getOutFlow() {
+    public Flow getOutFlow() {
         return outFlow;
     }
 
@@ -228,7 +227,7 @@ public class Arrow {
      *
      * @param flow
      */
-    public void setOutFlow(QuadraticBezierFlow flow) {
+    public void setOutFlow(Flow flow) {
         this.outFlow = flow;
     }
 

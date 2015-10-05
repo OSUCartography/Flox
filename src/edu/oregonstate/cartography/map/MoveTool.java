@@ -4,7 +4,6 @@ import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -140,7 +139,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
+                Point cPt = flow.getCtrlPt();
                 if (cPt.isSelected()) {
                     cPt.setSelected(false);
                 }
@@ -161,7 +160,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             // If a control point is selected, move only the control point.
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
-                QuadraticBezierFlow flow = (QuadraticBezierFlow) iterator.next();
+                Flow flow = iterator.next();
                 if (flow.isSelected()
                         || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                     Point cPt = flow.getCtrlPt();

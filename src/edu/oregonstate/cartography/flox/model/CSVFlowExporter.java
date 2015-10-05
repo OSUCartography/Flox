@@ -19,27 +19,26 @@ public class CSVFlowExporter {
         // Get a flow iterator
         while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
-            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
 
-            str.append(qFlow.startPt.x);
+            str.append(flow.startPt.x);
             str.append(",");
-            str.append(qFlow.startPt.y);
-            str.append(",");
-
-            str.append(qFlow.endPt.x);
-            str.append(",");
-            str.append(qFlow.endPt.y);
+            str.append(flow.startPt.y);
             str.append(",");
 
-            str.append(qFlow.getValue());
+            str.append(flow.endPt.x);
+            str.append(",");
+            str.append(flow.endPt.y);
             str.append(",");
 
-            str.append(qFlow.getCtrlPt().x);
-            str.append(",");
-            str.append(qFlow.getCtrlPt().y);
+            str.append(flow.getValue());
             str.append(",");
 
-            if (qFlow.isLocked()) {
+            str.append(flow.getCtrlPt().x);
+            str.append(",");
+            str.append(flow.getCtrlPt().y);
+            str.append(",");
+
+            if (flow.isLocked()) {
                 str.append(1);
             } else {
                 str.append(0);

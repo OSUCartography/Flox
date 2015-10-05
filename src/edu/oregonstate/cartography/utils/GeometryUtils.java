@@ -3,9 +3,7 @@ package edu.oregonstate.cartography.utils;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
 import static java.lang.Double.isNaN;
 import static java.lang.Math.abs;
 import java.util.ArrayList;
@@ -418,11 +416,11 @@ public class GeometryUtils {
      * @param scale The scale of the mapComponent.
      * @return
      */
-    public static ArrayList<QuadraticBezierFlow> getFlowsThatIntersectNodes(Model model, double scale) {
-        ArrayList<QuadraticBezierFlow> flowsArray = new ArrayList();
+    public static ArrayList<Flow> getFlowsThatIntersectNodes(Model model, double scale) {
+        ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
-            QuadraticBezierFlow flow = (QuadraticBezierFlow) flowIterator.next();
+            Flow flow = flowIterator.next();
             Iterator<Point> nodeIterator = model.nodeIterator();
             while (nodeIterator.hasNext()) {
                 Point node = nodeIterator.next();
@@ -450,7 +448,7 @@ public class GeometryUtils {
      * @param mapScale The current scale of the mapComponent
      * @return
      */
-    public static boolean flowIntersectsNode(QuadraticBezierFlow flow, Point node,
+    public static boolean flowIntersectsNode(Flow flow, Point node,
             Model model, double mapScale) {
 
         // TODO this could be a user specifiable parameter.
@@ -714,9 +712,9 @@ public class GeometryUtils {
      *
      * @param flows
      */
-    public static void moveFlowsThatCrossNodes(ArrayList<QuadraticBezierFlow> flows, double scale) {
+    public static void moveFlowsThatCrossNodes(ArrayList<Flow> flows, double scale) {
 
-        for (QuadraticBezierFlow flow : flows) {
+        for (Flow flow : flows) {
 
             // Collect needed points from the flow
             Point cPt = flow.getCtrlPt();

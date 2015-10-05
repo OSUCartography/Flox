@@ -13,7 +13,6 @@ import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
 import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.QuadraticBezierFlow;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.AddFlowTool;
@@ -24,7 +23,6 @@ import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
-import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -2848,7 +2846,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         // get first selected flow. 
         // FIXME Ignore other selected flows for the moment.
-        QuadraticBezierFlow selectedFlow = (QuadraticBezierFlow) model.getSelectedFlows().get(0);
+        Flow selectedFlow = model.getSelectedFlows().get(0);
         Point ctrlPt = selectedFlow.getCtrlPt();
 
         // find attracting forces on the selected flow
@@ -3028,14 +3026,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         // If there are no flows, exit the method.
         if (model.getNbrFlows() == 0) {
-            return;
-        }
-
-        // If the flows are not QuadraticBezierFlows, exit the method.
-        if (model.getCurveType() != Model.CurveType.QUADRATIC) {
-            String msg = "Please switch to quadratic BŽzier curves first.\n"
-                    + "Use Map > Geometric Flow Layout";
-            ErrorDialog.showErrorDialog(msg, "Flow Error", null, this);
             return;
         }
 
