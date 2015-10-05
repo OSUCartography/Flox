@@ -1874,6 +1874,9 @@ public class MainWindow extends javax.swing.JFrame {
             setFlows(flows, inFilePath);
             sizeFeaturesToScale();
 
+            // the user might have loaded clipping areas before. Apply these
+            // clipping area to the new flows.
+            applyClippingSettings();
         } catch (Throwable ex) {
             showErrorDialog("The file could not be read.", ex);
         }
@@ -2290,7 +2293,7 @@ public class MainWindow extends javax.swing.JFrame {
             String fileName = FileUtils.getFileNameWithoutExtension(inFilePath);
             Layer layer = model.getLayer(fileName);
             if (layer == null) {
-                String msg = "Do you want to add the layer to the map?";
+                String msg = "Do you want to add the clipping areas as a layer to the map?";
                 String title = "Flox";
                 Object[] options = {"Add as Layer", "No"};
                 int res = JOptionPane.showOptionDialog(this, msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
@@ -2361,10 +2364,25 @@ public class MainWindow extends javax.swing.JFrame {
             ArrayList<Flow> flows = FlowImporter.readFlows(pointsFilePath, flowsFilePath);
             setFlows(flows, flowsFilePath);
             sizeFeaturesToScale();
+            // the user might have loaded clipping areas before. Apply these
+            // clipping area to the new flows.
+            applyClippingSettings();
         } catch (Throwable ex) {
             showErrorDialog("The flows could not be imported.", ex);
         }
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
+
+    private void applyClippingSettings() {
+        if (clipWithStartAreasCheckBox.isSelected()) {
+            model.setClippingFlowsByArea(true);
+            model.updateStartClipAreas();
+        }
+        if (clipWithEndAreasCheckBox.isSelected()) {
+            model.setClippingFlowsByArea(true);
+            model.updateEndClipAreas();
+        }
+        updateClippingGUI();
+    }
 
     private void sizeFeaturesToScale() {
         if (lockFeatureScaleToggleButton.isSelected()) {

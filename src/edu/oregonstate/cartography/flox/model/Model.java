@@ -214,6 +214,7 @@ public class Model {
 
     /**
      * Flag indicating that flows are being clipped by areas.
+     * FIXME remove?
      */
     private boolean clippingFlowsByArea = false;
 
