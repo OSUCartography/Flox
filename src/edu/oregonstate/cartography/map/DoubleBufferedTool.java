@@ -6,6 +6,7 @@
 
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import edu.oregonstate.cartography.utils.ImageUtils;
 import java.awt.image.*;
@@ -90,17 +91,7 @@ public abstract class DoubleBufferedTool extends MapTool {
         if (!this.backgroundCaptured) {
             return false;
         }
-        
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_OFF);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_SPEED);
-        g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,
-                RenderingHints.VALUE_COLOR_RENDER_SPEED);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
-                RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+        FloxRenderer.enableFastRenderingHints(g2d);
         
         Insets insets = mapComponent.getInsets();
         BufferedImage backImg = mapComponent.getBufferImage();

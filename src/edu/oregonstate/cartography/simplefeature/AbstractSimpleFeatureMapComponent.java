@@ -4,6 +4,7 @@ import edu.oregonstate.cartography.map.MapEventHandler;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.map.MapToolMouseMotionListener;
 import edu.oregonstate.cartography.flox.gui.CoordinateFormatter;
+import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -376,17 +377,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
             eraseBufferImage();
         }
 
-        // enable antialiasing
-        g2dBuffer.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        // enable high quality rendering
-        g2dBuffer.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
-        g2dBuffer.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-                RenderingHints.VALUE_STROKE_PURE);
-        // enable bicubic interpolation of images
-        g2dBuffer.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        FloxRenderer.enableHighQualityRenderingHints(g2dBuffer, true);
 
         return g2dBuffer;
     }

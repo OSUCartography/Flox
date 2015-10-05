@@ -251,14 +251,7 @@ public class AddFlowTool extends MapTool {
 
         if (originNodeCreated) {
 
-            // enable antialiasing
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-            // enable high quality rendering
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-                    RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-                    RenderingHints.VALUE_STROKE_PURE);
+            FloxRenderer.enableHighQualityRenderingHints(g2d, true);
 
             double lockedScaleFactor;
             if (!model.isScaleLocked()) {

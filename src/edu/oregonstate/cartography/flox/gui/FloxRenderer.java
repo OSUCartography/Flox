@@ -12,7 +12,6 @@ import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -61,6 +60,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
     /**
      * If true GUI elements to indicate selection or locked status are drawn.
+     * FIXME remove?
      */
     private boolean drawGUIElements = true;
 
@@ -85,6 +85,58 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         this.drawGUIElements = drawGUIElements;
     }
 
+    public void render(boolean renderBackgroundLayers,
+            boolean drawCanvas,
+            boolean drawFlows,
+            boolean drawNodes,
+            boolean drawFlowRangebox,
+            boolean drawControlPoints,
+            boolean drawLineSegments,
+            boolean drawStartClipAreas,
+            boolean drawEndClipAreas) {
+
+        if (renderBackgroundLayers) {
+            int nbrLayers = model.getNbrLayers();
+            for (int i = nbrLayers - 1; i >= 0; i--) {
+                Layer layer = model.getLayer(i);
+                GeometryCollection geometry = layer.getGeometryCollection();
+                VectorSymbol symbol = layer.getVectorSymbol();
+                Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
+                Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
+                if (fillColor != null || strokeColor != null) {
+                    draw(geometry, fillColor, strokeColor);
+                }
+            }
+        }
+
+        if (drawCanvas) {
+            drawCanvas();
+        }
+
+        // draw flows and nodes
+        if (drawFlows) {
+            drawFlows(true);
+        }
+
+        if (drawNodes) {
+            drawNodes(false);
+        }
+
+        if (drawFlowRangebox) {
+            drawFlowRangebox();
+        }
+
+        drawControlPoints(drawControlPoints);
+
+        if (drawLineSegments) {
+            drawStraightLinesSegments();
+        }
+
+        if (drawStartClipAreas || drawEndClipAreas) {
+            drawClipAreas(drawStartClipAreas, drawEndClipAreas);
+        }
+    }
+
     /**
      * Renders the flows to an image.
      *
@@ -93,17 +145,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param bb The bounding box of the map area that will be visible in the
      * image
      * @param antialias If true anti-aliasing is applied.
-     * @param drawGUIElements
-     * @param drawBackground
-     * @param fillNodes
-     * @param drawSelectedFlows
+     * @param drawGUIElements If true GUI elements to indicate selection or
+     * locked status are drawn.
+     * @param drawBackgroundLayers If true, map layers are rendered.
+     * @param fillNodes If true, nodes are filled.
+     * @param drawSelectedFlows If false, selected flows are not drawn.
+     * @param drawFlows If true, flows are rendered.
+     * @param drawNodes If true, nodes are rendered.
      * @return The new image.
      */
     public static BufferedImage renderToImage(Model model, int maxDim,
             Rectangle2D bb,
             boolean antialias,
             boolean drawGUIElements,
-            boolean drawBackground,
+            boolean drawBackgroundLayers,
             boolean fillNodes,
             boolean drawSelectedFlows,
             boolean drawFlows,
@@ -125,17 +180,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         BufferedImage bufferImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = bufferImage.createGraphics();
 
-        // enable antialiasing
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                antialias ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
-        // enable high quality rendering
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-                RenderingHints.VALUE_STROKE_PURE);
-        // enable bicubic interpolation of images
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         // set default appearance of vector elements
         g2d.setStroke(new BasicStroke(1));
         g2d.setColor(Color.black);
@@ -146,30 +190,17 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         // setup renderer
         FloxRenderer renderer = new FloxRenderer(model, g2d,
                 bb.getMinX(), bb.getMaxY(), scale, drawGUIElements);
-
-        // render background layers
-        if (drawBackground) {
-            int nbrLayers = model.getNbrLayers();
-            for (int i = nbrLayers - 1; i >= 0; i--) {
-                Layer layer = model.getLayer(i);
-                GeometryCollection geometry = layer.getGeometryCollection();
-                VectorSymbol symbol = layer.getVectorSymbol();
-                Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
-                Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
-                if (fillColor != null || strokeColor != null) {
-                    renderer.draw(geometry, fillColor, strokeColor);
-                }
-            }
-        }
-
-        // render flows and nodes
-        if (drawFlows) {
-            renderer.drawFlows(drawSelectedFlows);
-        }
-
-        if (drawNodes) {
-            renderer.drawNodes(fillNodes);
-        }
+        FloxRenderer.enableHighQualityRenderingHints(g2d, antialias);
+        renderer.render(drawBackgroundLayers,
+                false, // drawCanvas
+                drawFlows,
+                drawNodes,
+                false, // drawFlowRangebox, 
+                false, // drawControlPoints 
+                false, // drawLineSegments 
+                false, // drawStartClipAreas
+                false // drawEndClipAreas
+        );
 
         return bufferImage;
     }
@@ -206,6 +237,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         double r = model.getFlowDistanceFromEndPointPixel() / scale
                 * getLockedScaleFactor();
         double flowWidthScaleFactor = model.getFlowWidthScaleFactor();
+
         // Iterate through the flows
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
@@ -214,7 +246,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 continue;
             }
 
-            // will create Swing paths for the flow line and and the arrowhead
+            // will create Swing paths for the flow line and the arrowhead
             GeneralPath flowPath;
             GeneralPath arrowPath = null;
 
@@ -224,8 +256,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             double flowStrokeWidth = Math.abs(flow.getValue()) * flowWidthScaleFactor
                     * getLockedScaleFactor();
 
-            // If flow is a CubicBezierFlow, just set the flowPath to 
-            // the flow without any changes. 
             // Draw arrows if the model says so
             if (model.isDrawArrows()) {
 

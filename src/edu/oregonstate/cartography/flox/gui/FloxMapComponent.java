@@ -122,46 +122,16 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             FloxRenderer renderer = new FloxRenderer(model, g2d,
                     west, north, scale, true);
             renderer.setStrokeWidth(1f);
-
-            // draw background map
-            int nbrLayers = model.getNbrLayers();
-            for (int i = nbrLayers - 1; i >= 0; i--) {
-                Layer layer = model.getLayer(i);
-                GeometryCollection geometry = layer.getGeometryCollection();
-                VectorSymbol symbol = layer.getVectorSymbol();
-                Color fillColor = symbol.isFilled() ? layer.getVectorSymbol().getFillColor() : null;
-                Color strokeColor = symbol.isStroked() ? layer.getVectorSymbol().getStrokeColor() : null;
-                if (fillColor != null || strokeColor != null) {
-                    renderer.draw(geometry, fillColor, strokeColor);
-                }
-            }
-
-            if (isDrawCanvas()) {
-                renderer.drawCanvas();
-            }
-
-            // draw flows and nodes
-            if (isDrawFlows()) {
-                renderer.drawFlows(true);
-            }
-
-            if (isDrawNodes()) {
-                renderer.drawNodes(false);
-            }
-
-            if (drawFlowRangebox) {
-                renderer.drawFlowRangebox();
-            }
-
-            renderer.drawControlPoints(drawControlPoints);
-            
-            if (drawLineSegments) {
-                renderer.drawStraightLinesSegments();
-            }
-
-            if (drawStartClipAreas || drawEndClipAreas) {
-                renderer.drawClipAreas(drawStartClipAreas, drawEndClipAreas);
-            }
+            renderer.render(
+                    true, // renderBackgroundLayers
+                    isDrawCanvas(),
+                    isDrawFlows(),
+                    isDrawNodes(),
+                    isDrawFlowRangebox(),
+                    isDrawControlPoints(),
+                    isDrawLineSegments(),
+                    isDrawStartClipAreas(),
+                    isDrawEndClipAreas());
         }
 
         // copy double buffer image to JComponent

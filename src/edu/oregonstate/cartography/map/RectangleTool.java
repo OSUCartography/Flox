@@ -5,6 +5,7 @@
  */
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -166,12 +167,8 @@ public abstract class RectangleTool extends DoubleBufferedTool {
         }
 
         // disable antialiasing
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_OFF);
-        // disable high quality rendering
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_SPEED);
-
+        FloxRenderer.enableFastRenderingHints(g2d);
+        
         // setup stroke
         g2d.setColor(Color.black);
         float[] dashArray = new float[]{DASH_LENGTH, DASH_LENGTH};

@@ -6,6 +6,7 @@
 
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -203,10 +204,7 @@ public class MeasureTool extends DoubleBufferedTool {
             return;
         }
         
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
+        FloxRenderer.enableHighQualityRenderingHints(g2d, true);
         
         g2d.setColor(Color.black);
         BasicStroke stroke = new BasicStroke(1);

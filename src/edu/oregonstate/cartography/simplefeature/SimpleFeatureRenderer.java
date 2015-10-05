@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
@@ -262,4 +263,44 @@ public class SimpleFeatureRenderer {
         return g2d;
     }
 
+    /** 
+     * Set rendering hints for a graphics context to "fast and less accurate".
+     * @param g2d The graphics context
+     */
+    public static void enableFastRenderingHints(Graphics2D g2d) {
+        // antialiasing
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                RenderingHints.VALUE_ANTIALIAS_OFF);
+        // high quality rendering
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, 
+                RenderingHints.VALUE_RENDER_SPEED);
+        // bicubic interpolation of images
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, 
+                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        // alpha blending
+        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, 
+                RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED);
+    }
+
+    /**
+     * Set rendering hints for a graphics context to "accurate and slow".
+     * @param g2d The graphics context.
+     * @param antialias If true, anti-aliasing is enabled.
+     */
+    public static void enableHighQualityRenderingHints(Graphics2D g2d, boolean antialias) {
+        // antialiasing
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+                antialias ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
+        // high quality rendering
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, 
+                RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, 
+                RenderingHints.VALUE_STROKE_PURE);
+        // bicubic interpolation of images
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, 
+                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        // alpha blending
+        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, 
+                RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+    }
 }
