@@ -115,6 +115,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     /**
      * Shows a dialog with an error message, and logs error to default Logger.
+     *
      * @param msg The message to display.
      * @param ex An optional exception with additional information.
      */
@@ -397,6 +398,7 @@ public class MainWindow extends javax.swing.JFrame {
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         emptySpaceMenuItem = new javax.swing.JMenuItem();
 
@@ -1752,6 +1754,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jMenu1.add(enforceCanvasCheckBoxMenuItem);
+
+        moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
+        moveFlowsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                moveFlowsCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(moveFlowsCheckBoxMenuItem);
         jMenu1.add(jSeparator13);
 
         emptySpaceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2089,7 +2099,7 @@ public class MainWindow extends javax.swing.JFrame {
             try {
                 size = Math.abs(Integer.parseInt(input));
             } catch (NumberFormatException ex) {
-                showErrorDialog("Invalid image size.",ex);
+                showErrorDialog("Invalid image size.", ex);
                 return;
             }
             if (size > 5000) {
@@ -2903,6 +2913,10 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_angularDistributionSliderStateChanged
 
+    private void moveFlowsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveFlowsCheckBoxMenuItemActionPerformed
+        layout("Move Flows");
+    }//GEN-LAST:event_moveFlowsCheckBoxMenuItemActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -2971,7 +2985,8 @@ public class MainWindow extends javax.swing.JFrame {
             //long endTime = System.currentTimeMillis();
             //System.out.println(model.getDistanceWeightExponent() + " " + (endTime - startTime) / 1000.);
             // second half of iterations: Flows are moved away from overlapped nodes.
-            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, true, scale);
+            boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
+            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, moveFlowsOverlappingNodes, scale);
             return null;
         }
 
@@ -3127,6 +3142,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openSettingsMenuItem;

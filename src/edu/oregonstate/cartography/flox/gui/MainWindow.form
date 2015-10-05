@@ -497,6 +497,14 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="enforceCanvasCheckBoxMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="moveFlowsCheckBoxMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Move Flows Overlapping Nodes"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="moveFlowsCheckBoxMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator13">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="emptySpaceMenuItem">

@@ -64,7 +64,7 @@ public class Model {
     private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
 
     /**
-     * Graph of edges (BŽzier flows) and nodes (Point).
+     * Graph of edges (Flow class) and nodes (Point class).
      */
     @XmlJavaTypeAdapter(GraphSerializer.class)
     private Graph graph = new Graph();
@@ -240,6 +240,9 @@ public class Model {
     @XmlTransient
     private Map map = new Map();
 
+    // TODO temporary hack to enable the "move flows that overlapp nodes" function
+    public boolean moveFlowsOverlappingNodes = false;
+    
     /**
      * Constructor of the model.
      */
