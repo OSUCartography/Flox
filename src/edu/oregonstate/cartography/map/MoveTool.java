@@ -1,9 +1,6 @@
 package edu.oregonstate.cartography.map;
 
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
-import edu.oregonstate.cartography.flox.gui.MainWindow;
-import edu.oregonstate.cartography.flox.gui.Undo;
-import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
@@ -13,11 +10,8 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
-import javax.xml.bind.JAXBException;
 
 /**
  *
@@ -146,10 +140,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                if (flow instanceof CubicBezierFlow) {
-                    break;
-                }
-
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 if (cPt.isSelected()) {
                     cPt.setSelected(false);
@@ -164,7 +154,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      * Updates the location of selected features to the current location of the
      * drag event.
      *
-     * @param e
      */
     public void updateLocation(Point2D.Double point) {
 

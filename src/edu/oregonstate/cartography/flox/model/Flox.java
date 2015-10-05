@@ -12,23 +12,9 @@ import javax.swing.UIManager;
  * University
  */
 public class Flox {
-
+    
     /**
-     * Flox model
-     */
-    private static Model initModel() {
-        Model model = new Model();
-
-        Point p1 = new Point(0, 0);
-        Point p2 = new Point(100, 30);
-
-        CubicBezierFlow flow = new CubicBezierFlow(p1, p2);
-        flow.setValue(1);
-        //model.addFlow(flow);
-        return model;
-    }
-
-    /**
+     * Main entry point for Flox.
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -41,7 +27,7 @@ public class Flox {
         }
 
         // initialize model
-        Model model = initModel();
+        Model model = new Model();
 
         // initialize GUI
         java.awt.EventQueue.invokeLater(new Runnable() {

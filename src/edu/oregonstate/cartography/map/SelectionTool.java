@@ -6,7 +6,6 @@
 package edu.oregonstate.cartography.map;
 
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
-import edu.oregonstate.cartography.flox.model.CubicBezierFlow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
@@ -16,7 +15,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
@@ -188,10 +186,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                if (flow instanceof CubicBezierFlow) {
-                    break;
-                }
-
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 cPt.setSelected(false);
             }
@@ -216,9 +210,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                if (flow instanceof CubicBezierFlow) {
-                    break;
-                }
                 Point cPt = ((QuadraticBezierFlow) flow).getCtrlPt();
                 cPt.setSelected(false);
             }
@@ -333,9 +324,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 Iterator<Flow> iterator = model.flowIterator();
                 while (iterator.hasNext()) {
                     Flow flow = iterator.next();
-                    if (flow instanceof CubicBezierFlow) {
-                        break;
-                    }
                     if (flow.isSelected()
                             || ((FloxMapComponent) mapComponent).isDrawControlPoints()) {
                         // See if the event point is near the control point.

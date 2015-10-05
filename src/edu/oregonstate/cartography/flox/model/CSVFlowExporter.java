@@ -19,58 +19,33 @@ public class CSVFlowExporter {
         // Get a flow iterator
         while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
-            if (flow instanceof CubicBezierFlow) {
-                CubicBezierFlow cFlow = (CubicBezierFlow) flow;
+            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
 
-                str.append(cFlow.startPt.x);
-                str.append(",");
-                str.append(cFlow.startPt.y);
-                str.append(",");
+            str.append(qFlow.startPt.x);
+            str.append(",");
+            str.append(qFlow.startPt.y);
+            str.append(",");
 
-                str.append(cFlow.endPt.x);
-                str.append(",");
-                str.append(cFlow.endPt.y);
-                str.append(",");
+            str.append(qFlow.endPt.x);
+            str.append(",");
+            str.append(qFlow.endPt.y);
+            str.append(",");
 
-                str.append(cFlow.getValue());
-                str.append(",");
+            str.append(qFlow.getValue());
+            str.append(",");
 
-                if (cFlow.isLocked()) {
-                    str.append(1);
-                } else {
-                    str.append(0);
-                }
-                str.append("\n");
+            str.append(qFlow.getCtrlPt().x);
+            str.append(",");
+            str.append(qFlow.getCtrlPt().y);
+            str.append(",");
 
+            if (qFlow.isLocked()) {
+                str.append(1);
             } else {
-                QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-
-                str.append(qFlow.startPt.x);
-                str.append(",");
-                str.append(qFlow.startPt.y);
-                str.append(",");
-
-                str.append(qFlow.endPt.x);
-                str.append(",");
-                str.append(qFlow.endPt.y);
-                str.append(",");
-
-                str.append(qFlow.getValue());
-                str.append(",");
-
-                str.append(qFlow.getCtrlPt().x);
-                str.append(",");
-                str.append(qFlow.getCtrlPt().y);
-                str.append(",");
-
-                if (qFlow.isLocked()) {
-                    str.append(1);
-                } else {
-                    str.append(0);
-                }
-
-                str.append("\n");
+                str.append(0);
             }
+
+            str.append("\n");
         }
 
         return str.toString();

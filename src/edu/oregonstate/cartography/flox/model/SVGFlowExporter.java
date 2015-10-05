@@ -32,47 +32,23 @@ public class SVGFlowExporter extends SVGExporter {
     }
 
     private String flowToPath(Flow flow) {
-        if (flow instanceof CubicBezierFlow) {
-            CubicBezierFlow cFlow = (CubicBezierFlow) flow;
-            StringBuilder str = new StringBuilder();
-            str.append("M");
-            str.append(df.format(xToPagePx(flow.getStartPt().x)));
-            str.append(" ");
-            str.append(df.format(yToPagePx(flow.getStartPt().y)));
 
-            str.append(" C");
-            str.append(df.format(xToPagePx(cFlow.getcPt1().x)));
-            str.append(" ");
-            str.append(df.format(yToPagePx(cFlow.getcPt1().y)));
-            str.append(", ");
+        QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
+        StringBuilder str = new StringBuilder();
+        str.append("M");
+        str.append(df.format(xToPagePx(flow.getStartPt().x)));
+        str.append(" ");
+        str.append(df.format(yToPagePx(flow.getStartPt().y)));
 
-            str.append(df.format(xToPagePx(cFlow.getcPt2().x)));
-            str.append(" ");
-            str.append(df.format(yToPagePx(cFlow.getcPt2().y)));
-            str.append(", ");
-
-            str.append(df.format(xToPagePx(flow.getEndPt().x)));
-            str.append(", ");
-            str.append(df.format(yToPagePx(flow.getEndPt().y)));
-            return str.toString();
-        } else {
-            QuadraticBezierFlow qFlow = (QuadraticBezierFlow) flow;
-            StringBuilder str = new StringBuilder();
-            str.append("M");
-            str.append(df.format(xToPagePx(flow.getStartPt().x)));
-            str.append(" ");
-            str.append(df.format(yToPagePx(flow.getStartPt().y)));
-
-            str.append(" Q");
-            str.append(df.format(xToPagePx(qFlow.getCtrlPt().x)));
-            str.append(" ");
-            str.append(df.format(yToPagePx(qFlow.getCtrlPt().y)));
-            str.append(", ");
-            str.append(df.format(xToPagePx(flow.getEndPt().x)));
-            str.append(", ");
-            str.append(df.format(yToPagePx(flow.getEndPt().y)));
-            return str.toString();
-        }
+        str.append(" Q");
+        str.append(df.format(xToPagePx(qFlow.getCtrlPt().x)));
+        str.append(" ");
+        str.append(df.format(yToPagePx(qFlow.getCtrlPt().y)));
+        str.append(", ");
+        str.append(df.format(xToPagePx(flow.getEndPt().x)));
+        str.append(", ");
+        str.append(df.format(yToPagePx(flow.getEndPt().y)));
+        return str.toString();
     }
 
     private String arrowToPath(Arrow arrow) {
@@ -195,48 +171,39 @@ public class SVGFlowExporter extends SVGExporter {
             Flow flow = iterator.next();
             double flowWidth = getFlowWidth(flow);
 
-            if (flow instanceof CubicBezierFlow) {
+            QuadraticBezierFlow f = (QuadraticBezierFlow) flow;
+
+            if (model.isDrawArrows()) {
+
+                f = getClippedFlow(f);
+                f = clipFlowByEndNode(f);
+                f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
+
+                // make the arrow
+                Arrow arrow = new Arrow(f, model, flowWidth, mapComponent.getScale(),
+                        mapComponent.getWest(), mapComponent.getNorth());
+
+                // Get the flow SVG
+                Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
+                pathElement.setAttribute("d", flowToPath(arrow.getOutFlow()));
+                pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
+                g.appendChild(pathElement);
+
+                // get the arrow
+                Element arrowPathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
+                arrowPathElement.setAttribute("d", arrowToPath(arrow));
+                arrowPathElement.setAttribute("fill", "black");
+                g.appendChild(arrowPathElement);
+
+            } else {
+                //FIXME clip the flow
+                f = getClippedFlow(f);
+                f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 pathElement.setAttribute("d", flowToPath(flow));
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
                 g.appendChild(pathElement);
-            } else {
-
-                QuadraticBezierFlow f = (QuadraticBezierFlow) flow;
-
-                if (model.isDrawArrows()) {
-
-                    f = getClippedFlow(f);
-                    f = clipFlowByEndNode(f);
-                    f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
-
-                    // make the arrow
-                    Arrow arrow = new Arrow(f, model, flowWidth, mapComponent.getScale(),
-                            mapComponent.getWest(), mapComponent.getNorth());
-
-                    // Get the flow SVG
-                    Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                    pathElement.setAttribute("d", flowToPath(arrow.getOutFlow()));
-                    pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
-                    g.appendChild(pathElement);
-
-                    // get the arrow
-                    Element arrowPathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                    arrowPathElement.setAttribute("d", arrowToPath(arrow));
-                    arrowPathElement.setAttribute("fill", "black");
-                    g.appendChild(arrowPathElement);
-
-                } else {
-                    //FIXME clip the flow
-                    f = getClippedFlow(f);
-                    f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
-                    Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                    pathElement.setAttribute("d", flowToPath(flow));
-                    pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
-                    g.appendChild(pathElement);
-                }
             }
-
         }
 
         ArrayList<Point> nodes = model.getOrderedNodes(false);
