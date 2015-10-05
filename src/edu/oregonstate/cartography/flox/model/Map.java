@@ -10,7 +10,7 @@ import java.util.Iterator;
 
 /**
  * A map contains a set of layers with symbolization.
- * 
+ *
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
@@ -27,9 +27,10 @@ public class Map {
     int getNbrLayers() {
         return layers.size();
     }
-    
+
     /**
      * Add a layer to the map.
+     *
      * @param geometry the geometry to set
      * @return The new layer.
      */
@@ -38,22 +39,43 @@ public class Map {
         layers.add(0, layer);
         return layer;
     }
-    
+
     /**
      * Add a layer to the map.
+     *
      * @param layer The layer to add.
      */
     public void addLayer(Layer layer) {
         layers.add(layer);
     }
-    
+
     /**
      * Returns a layer specified by an id.
+     *
      * @param id
-     * @return 
+     * @return
      */
     public Layer getLayer(int id) {
         return layers.get(id);
+    }
+
+    /**
+     * Returns a layer by its name.
+     * @param name Name must contain at least one non-empty character.
+     * @return The found layer or null if non is found.
+     */
+    public Layer getLayer(String name) {
+        if (name != null) {
+            name = name.trim();
+            if (name.length() > 0) {
+                for (Layer layer : layers) {
+                    if (name.equals(name)) {
+                        return layer;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -65,24 +87,26 @@ public class Map {
 
     /**
      * Returns an iterator for all layers.
-     * @return 
+     *
+     * @return
      */
     public Iterator<Layer> layerIterator() {
         return layers.iterator();
     }
-    
+
     public Collection<Layer> getLayers() {
         return layers;
     }
-    
+
     void removeLayer(int id) {
         layers.remove(id);
     }
 
     /**
-     * Returns a OGC Simple Feature geometry collection with all geometry 
+     * Returns a OGC Simple Feature geometry collection with all geometry
      * features of the map.
-     * @return 
+     *
+     * @return
      */
     public GeometryCollection getGeometryCollection() {
         ArrayList<Geometry> layerGeometries = new ArrayList<>();

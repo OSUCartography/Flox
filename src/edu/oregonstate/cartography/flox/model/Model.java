@@ -522,7 +522,7 @@ public class Model {
     /**
      * Finds the clip areas for the start of flows. First buffers the clip area
      * geometry, then finds containing geometry for the start point of each
-     * flow.
+     * flow, then assigns a start clip area to the flows.
      */
     public void updateStartClipAreas() {
         if (clipAreas == null) {
@@ -544,7 +544,7 @@ public class Model {
     /**
      * Finds the clip areas for the the end of flows. First buffers the clip
      * area geometry, then finds containing geometry for the end point of each
-     * flow.
+     * flow, then assigns an end clip area to the flows.
      */
     public void updateEndClipAreas() {
         if (clipAreas == null) {
@@ -942,6 +942,15 @@ public class Model {
      */
     public Collection<Layer> getLayers() {
         return map.getLayers();
+    }
+    
+    /**
+     * Returns a layer by its name.
+     * @param name Name must contain at least one non-empty character.
+     * @return The found layer or null if non is found.
+     */
+    public Layer getLayer(String name) {
+        return map.getLayer(name);
     }
 
     /**

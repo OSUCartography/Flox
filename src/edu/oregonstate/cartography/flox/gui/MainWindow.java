@@ -1809,6 +1809,14 @@ public class MainWindow extends javax.swing.JFrame {
 
     }//GEN-LAST:event_exportSVGMenuItemActionPerformed
 
+    private void addLayer(GeometryCollection geometry, String name) {
+        Layer layer = model.addLayer(geometry);
+        layer.setName(name);
+        updateLayerList();
+        layerList.setSelectedIndex(0);
+        mapComponent.showAll();
+    }
+
     /**
      * Open an Esri shapefile
      */
@@ -1827,11 +1835,7 @@ public class MainWindow extends javax.swing.JFrame {
                 showErrorDialog("The selected file is not a shapefile.", null);
                 return;
             }
-            Layer layer = model.addLayer(collection);
-            layer.setName(FileUtils.getFileNameWithoutExtension(inFilePath));
-            mapComponent.showAll();
-            updateLayerList();
-            layerList.setSelectedIndex(0);
+            addLayer(collection, FileUtils.getFileNameWithoutExtension(inFilePath));
         } catch (Throwable ex) {
             showErrorDialog("Could not open the Shapefile.", ex);
         } finally {
@@ -2281,6 +2285,19 @@ public class MainWindow extends javax.swing.JFrame {
 
             model.setClipAreas(collection);
             updateClippingGUI();
+            clipWithEndAreasCheckBox.doClick();
+
+            String fileName = FileUtils.getFileNameWithoutExtension(inFilePath);
+            Layer layer = model.getLayer(fileName);
+            if (layer == null) {
+                String msg = "Do you want to add the layer to the map?";
+                String title = "Flox";
+                Object[] options = {"Add as Layer", "No"};
+                int res = JOptionPane.showOptionDialog(this, msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+                if (res == 0) {
+                    addLayer(collection, fileName);
+                }
+            }
         } catch (Throwable ex) {
             showErrorDialog("An error occured.", ex);
         } finally {
