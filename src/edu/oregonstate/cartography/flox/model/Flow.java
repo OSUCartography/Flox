@@ -446,8 +446,12 @@ public final class Flow {
     }
 
     /**
-     * Split a flow into two new flows.
-     * http://pomax.github.io/bezierinfo/#matrixsplit
+     * Split a flow into two new flows. The new flows have the same value, 
+     * selection and lock state as this flow. The split flows have new start, end,
+     * and control points, which do not have the value and selection state of
+     * the points of this flow.
+     * 
+     * Maths based on http://pomax.github.io/bezierinfo/#matrixsplit
      *
      * @param t Parametric position [0..1]
      * @return Two new flows if tx is > 0 and tx < 1. Otherwise two references
@@ -481,10 +485,14 @@ public final class Flow {
         Point end2 = new Point(endX2, endY2);
 
         Flow flow1 = new Flow(start1, ctrl1, end1);
-        flow1.setValue(this.getValue());
+        flow1.setValue(getValue());
+        flow1.setSelected(isSelected());
+        flow1.setLocked(isLocked());
 
         Flow flow2 = new Flow(start2, ctrl2, end2);
         flow2.setValue(this.getValue());
+        flow2.setSelected(isSelected());
+        flow2.setLocked(isLocked());
 
         return new Flow[]{flow1, flow2};
     }
