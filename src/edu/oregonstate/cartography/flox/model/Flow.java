@@ -389,8 +389,33 @@ public final class Flow {
     }
 
     /**
-     * Converts this Bezier curve to straight line segments. Does not apply clipping
-     * with start and end nodes. Does not apply clipping for arrowheads.
+     * Returns the length of a simple line string defined by a series of points.
+     *
+     * @param lineString
+     * @return The length.
+     */
+    private double lineStringLength(ArrayList<Point> lineString) {
+        double l = 0;
+        int nPoints = lineString.size();
+        double x0 = lineString.get(0).x;
+        double y0 = lineString.get(0).y;
+
+        for (int i = 1; i < nPoints; i++) {
+            double x1 = lineString.get(i).x;
+            double y1 = lineString.get(i).y;
+            double dx = x0 - x1;
+            double dy = y0 - y1;
+            l += Math.sqrt(dx * dx + dy * dy);
+            x0 = x1;
+            y0 = y1;
+        }
+        return l;
+    }
+
+    /**
+     * Converts this Bezier curve to straight line segments. Does not apply
+     * clipping with start and end nodes. Does not apply clipping for
+     * arrowheads.
      *
      * @param deCasteljauTol The maximum distance between the curve and the
      * straight line segments.
@@ -403,7 +428,13 @@ public final class Flow {
         ArrayList<Point> regularPoints = new ArrayList<>();
         ArrayList<Point> irregularPoints
                 = toStraightLineSegmentsWithIrregularLength(deCasteljauTol);
-
+        
+        // compute distance between points in regular line string
+        double totalLength = lineStringLength(irregularPoints);
+        // FIXME abusing the deCasteljauTol, which is not really the tolerance
+        // for de Casteljau's algorithm (it is devided by 100).
+        double targetDist = totalLength / Math.round(totalLength / deCasteljauTol);
+        
         // create new point set with regularly distributed irregularPoints
         double startX = irregularPoints.get(0).x;
         double startY = irregularPoints.get(0).y;
@@ -427,11 +458,11 @@ public final class Flow {
 
             double rest = length;
             length += l;
-            while (length >= deCasteljauTol) {
+            while (length >= targetDist) {
                 // compute new point
-                length -= deCasteljauTol;
-                startX += dx * (deCasteljauTol - rest);
-                startY += dy * (deCasteljauTol - rest);
+                length -= targetDist;
+                startX += dx * (targetDist - rest);
+                startY += dy * (targetDist - rest);
                 rest = 0;
                 regularPoints.add(new Point(startX, startY));
             }
