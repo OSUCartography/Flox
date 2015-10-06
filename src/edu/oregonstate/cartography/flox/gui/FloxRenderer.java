@@ -217,6 +217,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         return path;
     }
 
+    /**
+     * Computes clipping radius for an end node. Takes size of node and distance to
+     * end node into account.
+     *
+     * @param endNode The end node of the flow.
+     * @return Clipping radius in world coordinates.
+     */
     private double endClipRadius(Point endNode) {
         // distance between end of flows and their end points
         double gapDistanceToEndNodes = model.getFlowDistanceFromEndPointPixel() / scale
@@ -235,7 +242,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * SELECTION_COLOR.
      */
     private void drawFlows(boolean highlightSelected, boolean drawLocks) {
-        
+
         double flowWidthScaleFactor = model.getFlowWidthScaleFactor();
 
         // Iterate through the flows

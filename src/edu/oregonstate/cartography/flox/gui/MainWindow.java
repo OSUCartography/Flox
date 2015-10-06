@@ -203,7 +203,15 @@ public class MainWindow extends javax.swing.JFrame {
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
             zeroLengthStiffnessSlider.setValue((int) (model.getMinFlowLengthSpringConstant() * 100d));
-            exponentSlider.setValue(model.getDistanceWeightExponent());
+
+            int[] v = {0, 1, 2, 4, 6, 8, 16, 32};
+            int w = model.getDistanceWeightExponent();
+            for (int i = 0; i < v.length; i++) {
+                if (w == v[i]) {
+                    exponentSlider.setValue(i);
+                }
+            }
+
             nodeWeightSlider.setValue((int) (model.getNodesWeight() * 10d));
             antiTorsionSlider.setValue((int) (model.getAntiTorsionWeight() * 100d));
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
@@ -651,13 +659,27 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel3, gridBagConstraints);
 
-        exponentSlider.setMajorTickSpacing(10);
-        exponentSlider.setMaximum(50);
-        exponentSlider.setMinorTickSpacing(1);
+        exponentSlider.setMajorTickSpacing(1);
+        exponentSlider.setMaximum(6);
+        exponentSlider.setMinimum(1);
         exponentSlider.setPaintLabels(true);
         exponentSlider.setPaintTicks(true);
-        exponentSlider.setValue(0);
+        exponentSlider.setSnapToTicks(true);
         exponentSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = exponentSlider.createStandardLabels(exponentSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    int i = Integer.parseInt(label.getText());
+                    int p = (int)Math.round(Math.pow(2, i-1));
+                    label.setText(Integer.toString(p));
+                }
+            }
+            exponentSlider.setLabelTable(labels);
+        }
         exponentSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 exponentSliderStateChanged(evt);
@@ -2081,7 +2103,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void exponentSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_exponentSliderStateChanged
         if (exponentSlider.getValueIsAdjusting() == false) {
-            model.setDistanceWeightExponent(exponentSlider.getValue());
+            int v = (int) Math.round(Math.pow(2, exponentSlider.getValue() - 1));
+            model.setDistanceWeightExponent(v);
             layout("Exponent");
         }
     }//GEN-LAST:event_exponentSliderStateChanged

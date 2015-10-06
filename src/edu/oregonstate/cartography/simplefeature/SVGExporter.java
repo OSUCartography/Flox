@@ -39,7 +39,7 @@ public class SVGExporter {
     /**
      * Factor to convert from millimeter to pixels. Assumes 72 pixels per inch.
      */
-    private static final double MM2PX = 72. / 2.54 / 10.;
+    protected static final double MM2PX = 72. / 2.54 / 10.;
 
     /**
      * rounding of coordinates
@@ -69,7 +69,7 @@ public class SVGExporter {
     /**
      * Scale factor to fit geometry to SVG canvas.
      */
-    private double scale;
+    protected double scale;
 
     /**
      * Width of the SVG canvas in pixel.
