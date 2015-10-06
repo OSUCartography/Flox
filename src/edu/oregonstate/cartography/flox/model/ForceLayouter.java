@@ -54,7 +54,8 @@ public class ForceLayouter {
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
+            // FIXME value for first parameter is 0.
+            ArrayList<Point> points = flow.toClippedStraightLineSegments(0, deCasteljauTol);
             straightLinesMap.put(flow, points.toArray(new Point[points.size()]));
         }
     }

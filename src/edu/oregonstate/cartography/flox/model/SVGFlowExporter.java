@@ -127,10 +127,9 @@ public class SVGFlowExporter extends SVGExporter {
         return flow.split(t)[0];
     }
 
-    private Flow getClippedFlow(Flow flow) {
+    private Flow getClippedFlow(Flow flow, double endClipRadius) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
-        flow = flow.getClippedFlow(deCasteljauTol);
-        return flow;
+        return flow.getClippedFlow(endClipRadius, deCasteljauTol);
     }
 
     /**
@@ -172,9 +171,10 @@ public class SVGFlowExporter extends SVGExporter {
 
             if (model.isDrawArrows()) {
 
-                f = getClippedFlow(f);
-                f = clipFlowByEndNode(f);
-                f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
+                f = getClippedFlow(f, r);
+                // FIXME
+//                f = clipFlowByEndNode(f);
+//                f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
 
                 // make the arrow
                 Arrow arrow = new Arrow(f, model, flowWidth, mapComponent.getScale(),
@@ -193,7 +193,7 @@ public class SVGFlowExporter extends SVGExporter {
                 g.appendChild(arrowPathElement);
 
             } else {
-                f = getClippedFlow(f);
+                f = getClippedFlow(f, 0);
                 f = f.split(f.getIntersectionTWithCircleAroundEndPoint(r))[0];
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 pathElement.setAttribute("d", flowToPath(f));

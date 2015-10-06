@@ -217,24 +217,32 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         return path;
     }
 
+    private double endClipRadius(Point endNode) {
+        // distance between end of flows and their end points
+        double gapDistanceToEndNodes = model.getFlowDistanceFromEndPointPixel() / scale
+                * getLockedScaleFactor();
+        // Compute the radius of the end node (add stroke width / 2 to radius)
+        double endNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(endNode)) / scale;
+        return gapDistanceToEndNodes + endNodeRadius;
+    }
+
     /**
      * Draws the flows to the Graphics2D context. Retrieves settings from the
      * model to determine flow width, length, as well as determining whether to
      * apply any clipping or add arrowheads.
      *
-     * @param highlightSelected If true, selected flows are drawn with SELECTION_COLOR.
+     * @param highlightSelected If true, selected flows are drawn with
+     * SELECTION_COLOR.
      */
     private void drawFlows(boolean highlightSelected, boolean drawLocks) {
-        // Determine location of the end point of flows based on the model
-        double r = model.getFlowDistanceFromEndPointPixel() / scale
-                * getLockedScaleFactor();
+        
         double flowWidthScaleFactor = model.getFlowWidthScaleFactor();
 
         // Iterate through the flows
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            
+
             // will create Swing paths for the flow line and the arrowhead
             GeneralPath flowPath;
             GeneralPath arrowPath = null;
@@ -248,22 +256,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // Draw arrows if the model says so
             if (model.isDrawArrows()) {
 
-                // Clip the flow by the clipping area
-                flow = getClippedFlow(flow);
+                // Compute radius of clipping circle around end point.
+                // Clip the flow with the clipping area and a circle around the end node
+                flow = getClippedFlow(flow, endClipRadius(flow.getEndPt()));
 
-                // Clip the flow by the end node if clipping isn't happening?
-                if (!model.isClippingFlowsByArea()) {
-                    flow = clipFlowByEndNode(flow);
-                }
-
-                // Clip the flow by distance from endpoint
-                flow = flow.split(flow.getIntersectionTWithCircleAroundEndPoint(r))[0];
-
-                // Add the arrow
-                // Instantiate an Arrow object, passing it the first of
-                // the split flows and the model. And everything else.
-                Arrow arrow = new Arrow(flow, model, flowStrokeWidth, scale,
-                        west, north);
+                // Create an arrowhead
+                Arrow arrow = new Arrow(flow, model, flowStrokeWidth, scale, west, north);
 
                 // Get the GeneralPath needed to draw the arrowhead
                 arrowPath = arrow.getArrowPath();
@@ -273,21 +271,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 // length of the arrowhead.
                 flowPath = flowToGeneralPath(arrow.getOutFlow());
             } else {
-
-                // Clip the flow by clipping area
-                flow = getClippedFlow(flow);
-
-                // Clip the flow by distance from endpoint
-                flow = flow.split(flow.getIntersectionTWithCircleAroundEndPoint(r))[0];
-
-                // If the model does not specify the drawing of arrows, set
-                // flowPath to the first of splitFlows
+                // Clip the flow with the clipping area
+                double r = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
+                flow = getClippedFlow(flow, r);
                 flowPath = flowToGeneralPath(flow);
             }
 
             g2d.setColor(highlightSelected && flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
 
-            // draw the arrow heads
+            // draw the arrow head
             if (model.isDrawArrows()) {
                 g2d.fill(arrowPath);
             }
@@ -473,7 +465,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            ArrayList<Point> points = flow.toStraightLineSegments(deCasteljauTol);
+            double endClipRadius = endClipRadius(flow.getEndPt());
+            ArrayList<Point> points = flow.toClippedStraightLineSegments(endClipRadius, deCasteljauTol);
             for (Point point : points) {
                 drawCircle(point.x, point.y, CR, Color.pink, Color.white);
             }
@@ -513,20 +506,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
 
-    private Flow getClippedFlow(Flow flow) {
+    private Flow getClippedFlow(Flow flow, double endClipRadius) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
-        flow = flow.getClippedFlow(deCasteljauTol);
-        return flow;
-    }
-
-    private Flow clipFlowByEndNode(Flow flow) {
-
-        // Scale the node's radius + stroke/2 distance to world distance
-        double nodeR = ((NODE_STROKE_WIDTH / 2) + getNodeRadius(flow.getEndPt())) / scale;
-
-        // Clip the flow by that distance.
-        double t = flow.getIntersectionTWithCircleAroundEndPoint(nodeR);
-        return flow.split(t)[0];
+        return flow.getClippedFlow(endClipRadius, deCasteljauTol);
     }
 
     /**

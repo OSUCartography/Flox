@@ -357,7 +357,7 @@ public final class Flow {
         return irregularPoints;
     }
 
-    private LineString pointsToLineString(ArrayList<Point> points) {
+    private static LineString pointsToLineString(ArrayList<Point> points) {
         // construct LineString from the current Bezier flow geometry
         GeometryFactory geometryFactory = new GeometryFactory();
         int numPoints = points.size();
@@ -370,13 +370,27 @@ public final class Flow {
         return geometryFactory.createLineString(xy);
     }
 
-    public ArrayList<Point> toStraightLineSegments(double deCasteljauTol) {
-        Flow clippedFlow = getClippedFlow(deCasteljauTol);
+    /**
+     * Converts this Bezier curve to straight line segments. Applies clipping
+     * with start and end nodes and arrowheads.
+     *
+     * @param endClipRadius Clip the end of the flow with a circle of this
+     * radius.
+     * @param deCasteljauTol The maximum distance between the curve and the
+     * straight line segments.
+     * @return An list of irregularPoints, including copies of the start point
+     * and the end point.
+     */
+    public ArrayList<Point> toClippedStraightLineSegments(double endClipRadius, double deCasteljauTol) {
+
+        // FIXME 0 parameter
+        Flow clippedFlow = Flow.clipFlow(this, endClipRadius, deCasteljauTol);
         return clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
     }
 
     /**
-     * Converts this Bezier curve to straight line segments.
+     * Converts this Bezier curve to straight line segments. Does not apply clipping
+     * with start and end nodes. Does not apply clipping for arrowheads.
      *
      * @param deCasteljauTol The maximum distance between the curve and the
      * straight line segments.
@@ -561,45 +575,77 @@ public final class Flow {
 
     /**
      * Returns a flow with the start and/or end masking areas removed. If no
-     * masking areas are defined, returns this.
+     * masking areas are defined, returns a reference to this flow.
      *
+     * @param endClipRadius Clip the end of the flow with a circle of this
+     * radius.
      * @param deCasteljauTol Tolerance for conversion to straight line segments.
-     * @return A new flow object (if something was clipped), or this object.
+     * @return A new flow (if something was clipped), or the passed flow.
      */
-    public Flow getClippedFlow(double deCasteljauTol) {
+    public Flow getClippedFlow(double endClipRadius, double deCasteljauTol) {
+        return Flow.clipFlow(this, endClipRadius, deCasteljauTol);
+    }
 
-        boolean clipWithStartArea = getStartClipArea() != null;
-        boolean clipWithEndArea = getEndClipArea() != null;
-        if (clipWithStartArea == false && clipWithEndArea == false) {
-            return this;
+    /**
+     * Returns a flow with the start and/or end masking areas removed. If no
+     * masking areas are defined, returns the passed flow.
+     *
+     * @param flow The flow to clip
+     * @param endClipRadius Clip the end of the flow with a circle of this
+     * radius.
+     * @param deCasteljauTol Tolerance for conversion to straight line segments.
+     * @return A new flow (if something was clipped), or the passed flow.
+     */
+    private static Flow clipFlow(Flow flow, double endClipRadius, double deCasteljauTol) {
+
+        // Test whether start or end clip areas are defined.
+        // If none is defined, the flow is not converted to straight line segments,
+        // which is potentially expensive.
+        boolean clipWithStartArea = flow.getStartClipArea() != null;
+        boolean clipWithEndArea = flow.getEndClipArea() != null;
+
+        // t parameter for location of end clipping
+        double endT = 1;
+
+        if (clipWithStartArea || clipWithEndArea) {
+
+            // construct LineString from the current Bezier flow geometry
+            ArrayList<Point> points = flow.toUnclippedStraightLineSegments(deCasteljauTol);
+            LineString lineString = pointsToLineString(points);
+
+            // clip with start area
+            if (clipWithStartArea) {
+                double startT = flow.clippingT(lineString, true);
+                flow = flow.split(startT)[1];
+            }
+
+            // compute t parameter for clipping with the end area
+            if (clipWithEndArea) {
+                endT = flow.clippingT(lineString, false);
+            }
         }
 
-        // construct LineString from the current Bezier flow geometry
-        ArrayList<Point> points = toUnclippedStraightLineSegments(deCasteljauTol);
-        LineString lineString = pointsToLineString(points);
-        Flow splitFlow = this;
-        
-        // clip start area
-        if (clipWithStartArea) {
-            double t = splitFlow.clippingT(lineString, true);
-            splitFlow = splitFlow.split(t)[1];
+        if (endClipRadius > 0) {
+            // compute t parameter for clipping with the circle around the end point
+            double endNodeT = flow.getIntersectionTWithCircleAroundEndPoint(endClipRadius);
+            // find the smaller of the two t parameters
+            endT = Math.min(endT, endNodeT);
         }
-        
-        // clip end area
-        if (clipWithEndArea) {
-            double t = splitFlow.clippingT(lineString, false);
-            splitFlow = splitFlow.split(t)[0];
-        }
-        
-        return splitFlow;
+
+        // cut off the end piece
+        flow = flow.split(endT)[0];
+
+        return flow;
     }
 
     /**
      * Computes the parameter t for the location where the flow needs to be
      * split for masking with the start or the end clip area.
-     * @param lineString This flow's geometry converted to straight line segments.
-     * @param clipWithStartArea If true, clip with start clip area, otherwise with
-     * the end clip area.
+     *
+     * @param lineString This flow's geometry converted to straight line
+     * segments.
+     * @param clipWithStartArea If true, clip with start clip area, otherwise
+     * clip with the end clip area.
      * @return The parameter t in [0, 1]
      */
     private double clippingT(LineString lineString, boolean clipWithStartArea) {
@@ -613,7 +659,7 @@ public final class Flow {
                 LineString l = (LineString) geometry;
                 if (l.getNumPoints() >= 2) {
                     com.vividsolutions.jts.geom.Point linePoint
-                        = clipWithStartArea ? l.getStartPoint() : l.getEndPoint();
+                            = clipWithStartArea ? l.getStartPoint() : l.getEndPoint();
                     Point flowPoint = clipWithStartArea ? startPt : endPt;
                     double dx = flowPoint.x - linePoint.getX();
                     double dy = flowPoint.y - linePoint.getY();

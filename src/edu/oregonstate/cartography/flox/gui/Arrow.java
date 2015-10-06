@@ -80,7 +80,7 @@ public class Arrow {
      * @param model The complete data model. Needed for scaling up the smallest
      * arrows
      * @param flowStrokeWidth Determines the size of the arrow
-     * @param mapScale Needed for scaling to pixel values
+     * @param scale Needed for scaling to pixel values
      * @param west Needed for scaling to pixel values
      * @param north Needed for scaling to pixel values
      */
