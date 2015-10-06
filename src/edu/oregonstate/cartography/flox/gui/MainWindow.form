@@ -1827,7 +1827,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="clipWithEndAreasCheckBox">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Clip"/>
+                        <Property name="text" type="java.lang.String" value="Clip Ends"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clipWithEndAreasCheckBoxActionPerformed"/>
@@ -1921,7 +1921,7 @@
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="clipWithStartAreasCheckBox">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Clip"/>
+                        <Property name="text" type="java.lang.String" value="Clip Beginnings"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clipWithStartAreasCheckBoxActionPerformed"/>

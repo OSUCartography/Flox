@@ -1,5 +1,8 @@
 package edu.oregonstate.cartography.flox.model;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -12,36 +15,40 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class GraphSerializer extends XmlAdapter<String, Graph> {
 
+    // Separate values by this character. This character cannot be part of a WKT
+    // string.
+    private static final String SEPARATOR = ";";
+
     @Override
-    public Graph unmarshal(String s) throws IOException {
-        
+    public Graph unmarshal(String s) throws IOException, ParseException {
+
         // Create a reader to interpret the xml
         BufferedReader reader = new BufferedReader(new StringReader(s));
 
         // Create a hashmap to store the points with keys
         HashMap<String, Point> points = new HashMap<>();
-        
+
         // Empty arraylist to store flowIterator
         ArrayList<Flow> flows = new ArrayList<>();
-        
+
         // Empty graph to add nodes and flowIterator
         Graph graph = new Graph();
-        
+
         // The first line of the xml file is the number of nodes in the graph
         int numberOfNodes = Integer.parseInt(reader.readLine());
 
         // If there are no nodes, return an empty graph
-        if(numberOfNodes == 0) {
+        if (numberOfNodes == 0) {
             return graph;
         }
-        
+
         // Create a String object to store text from the xml file
         String l;
 
         // Read in node data, add nodes to the points HashMap
         for (int i = 0; i < numberOfNodes; i++) {
             l = reader.readLine();
-            StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
+            StringTokenizer tokenizer = new StringTokenizer(l, SEPARATOR);
             String id = tokenizer.nextToken();
             double x = Double.parseDouble(tokenizer.nextToken());
             double y = Double.parseDouble(tokenizer.nextToken());
@@ -55,11 +62,11 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         for (Map.Entry<String, Point> entry : points.entrySet()) {
             graph.addNode(entry.getValue());
         }
-        
+
         // Read in flow data, add them to the flowIterator ArrayList
         while ((l = reader.readLine()) != null) {
 
-            StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
+            StringTokenizer tokenizer = new StringTokenizer(l, SEPARATOR);
             boolean locked = false;
 
             String startPtID = tokenizer.nextToken();
@@ -79,6 +86,17 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             flow.setValue(flowValue);
             flow.setControlPoint(cPoint);
             flow.setLocked(locked);
+            String startClipAreaWKT = tokenizer.nextToken();
+            if (startClipAreaWKT.startsWith("POLYGON")) {
+                Geometry startClipArea = new WKTReader().read(startClipAreaWKT);
+                flow.setStartClipArea(startClipArea);
+            }
+
+            String endClipAreaWKT = tokenizer.nextToken();
+            if (endClipAreaWKT.startsWith("POLYGON")) {
+                Geometry endClipArea = new WKTReader().read(endClipAreaWKT);
+                flow.setEndClipArea(endClipArea);
+            }
             flows.add(flow);
         }
 
@@ -99,7 +117,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
         // Get the flowIterator
         Iterator<Flow> flowIterator = graph.flowIterator();
-        
+
         // Get the nodes
         Iterator nodes = graph.nodeIterator();
 
@@ -112,28 +130,28 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         while (nodes.hasNext()) {
             Point node = (Point) nodes.next();
             points.put(node, Integer.toString(key));
-            key +=1;
+            key += 1;
         }
-        
-        // Make a string of all the flowIterator
+
+        // Make a string of all the flows
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
 
             flowStr.append(points.get(flow.getStartPt()));
-            flowStr.append(",");
-            
+            flowStr.append(SEPARATOR);
+
             // Append the key and a comma to flowStr
             flowStr.append(points.get(flow.getEndPt()));
-            flowStr.append(",");
-             
+            flowStr.append(SEPARATOR);
+
             // Append the control point coordinates
             flowStr.append(flow.getCtrlPt().x);
-            flowStr.append(",");
+            flowStr.append(SEPARATOR);
             flowStr.append(flow.getCtrlPt().y);
-            flowStr.append(",");
+            flowStr.append(SEPARATOR);
 
             flowStr.append(flow.getValue());
-            flowStr.append(",");
+            flowStr.append(SEPARATOR);
 
             // Append the locked status
             if (flow.isLocked()) {
@@ -141,6 +159,11 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             } else {
                 flowStr.append(0);
             }
+            flowStr.append(SEPARATOR);
+
+            flowStr.append(flow.getStartClipAreaWKT());
+            flowStr.append(SEPARATOR);
+            flowStr.append(flow.getEndClipAreaWKT());
             flowStr.append("\n");
         }
 
@@ -155,11 +178,11 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             double val = entry.getKey().getValue();
 
             nodeStr.append(id);
-            nodeStr.append(",");
+            nodeStr.append(SEPARATOR);
             nodeStr.append(x);
-            nodeStr.append(",");
+            nodeStr.append(SEPARATOR);
             nodeStr.append(y);
-            nodeStr.append(",");
+            nodeStr.append(SEPARATOR);
             nodeStr.append(val);
             nodeStr.append("\n");
 

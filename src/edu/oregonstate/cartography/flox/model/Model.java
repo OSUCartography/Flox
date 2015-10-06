@@ -213,10 +213,14 @@ public class Model {
     private double lockedMapScale = 1;
 
     /**
-     * Flag indicating that flows are being clipped by areas.
-     * FIXME remove?
+     * Clip the ends of flows. This flags is only used to update the GUI.
      */
-    private boolean clippingFlowsByArea = false;
+    private boolean clipFlowEnds = false;
+    
+    /**
+     * Clip the beginnings of flows. This flags is only used to update the GUI.
+     */
+    private boolean clipFlowStarts = false;
 
     /**
      * A geometry (collection) used for clipping start or end of flows.
@@ -1391,20 +1395,6 @@ public class Model {
     }
 
     /**
-     * @return the clippingFlowsByArea
-     */
-    public boolean isClippingFlowsByArea() {
-        return clippingFlowsByArea;
-    }
-
-    /**
-     * @param clippingFlowsByArea the clippingFlowsByArea to set
-     */
-    public void setClippingFlowsByArea(boolean clippingFlowsByArea) {
-        this.clippingFlowsByArea = clippingFlowsByArea;
-    }
-
-    /**
      * @return the angularDistributionWeight
      */
     public double getAngularDistributionWeight() {
@@ -1416,6 +1406,34 @@ public class Model {
      */
     public void setAngularDistributionWeight(double angularDistributionWeight) {
         this.angularDistributionWeight = angularDistributionWeight;
+    }
+
+    /**
+     * @return the clipFlowEnds
+     */
+    public boolean isClipFlowEnds() {
+        return clipFlowEnds;
+    }
+
+    /**
+     * @param clipFlowEnds the clipFlowEnds to set
+     */
+    public void setClipFlowEnds(boolean clipFlowEnds) {
+        this.clipFlowEnds = clipFlowEnds;
+    }
+
+    /**
+     * @return the clipFlowStarts
+     */
+    public boolean isClipFlowStarts() {
+        return clipFlowStarts;
+    }
+
+    /**
+     * @param clipFlowStarts the clipFlowStarts to set
+     */
+    public void setClipFlowStarts(boolean clipFlowStarts) {
+        this.clipFlowStarts = clipFlowStarts;
     }
 
 }

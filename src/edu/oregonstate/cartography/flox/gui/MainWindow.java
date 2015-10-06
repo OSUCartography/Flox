@@ -103,8 +103,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.setMainWindow(this);
         mapComponent.requestFocusInWindow();
 
-        updateClippingGUI();
-
         try {
             this.undo = new Undo(new Model().marshal());
             undo.registerUndoMenuItems(undoMenuItem, redoMenuItem);
@@ -225,8 +223,31 @@ public class MainWindow extends javax.swing.JFrame {
                 highFlowSegmentationMenuItem.setSelected(true);
             }
             angularDistributionSlider.setValue((int) (model.getAngularDistributionWeight() * 100));
-            updateClippingGUI();
 
+            // clipping
+            boolean hasFlowsAndClipAreas = model.hasClipAreas() && model.getNbrFlows() > 0;
+            boolean clipStart = model.isClipFlowStarts();
+            boolean clipEnd = model.isClipFlowEnds();
+
+            clipWithStartAreasCheckBox.setSelected(clipStart);
+            clipWithEndAreasCheckBox.setSelected(clipEnd);
+
+            clipWithEndAreasCheckBox.setEnabled(hasFlowsAndClipAreas);
+            clipWithStartAreasCheckBox.setEnabled(hasFlowsAndClipAreas);
+
+            endAreasBufferDistanceFormattedTextField.setEnabled(hasFlowsAndClipAreas && clipEnd);
+            startAreasBufferDistanceFormattedTextField.setEnabled(hasFlowsAndClipAreas && clipStart);
+
+            
+            endAreasBufferDistanceFormattedTextField.setValue(
+                    model.getEndClipAreaBufferDistance());
+            startAreasBufferDistanceFormattedTextField.setValue(
+                    model.getStartClipAreaBufferDistance());
+
+            drawEndClipAreasCheckBox.setEnabled(hasFlowsAndClipAreas && clipEnd);
+            drawStartClipAreasCheckBox.setEnabled(hasFlowsAndClipAreas && clipStart);
+
+            // reference scale
             lockFeatureScaleToggleButton.setSelected(model.isScaleLocked());
 
         } finally {
@@ -1367,7 +1388,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         clipAreaControlPanel.add(endAreasBufferDistanceFormattedTextField, gridBagConstraints);
 
-        clipWithEndAreasCheckBox.setText("Clip");
+        clipWithEndAreasCheckBox.setText("Clip Ends");
         clipWithEndAreasCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clipWithEndAreasCheckBoxActionPerformed(evt);
@@ -1440,7 +1461,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         clipAreaControlPanel.add(drawStartClipAreasCheckBox, gridBagConstraints);
 
-        clipWithStartAreasCheckBox.setText("Clip");
+        clipWithStartAreasCheckBox.setText("Clip Beginnings");
         clipWithStartAreasCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clipWithStartAreasCheckBoxActionPerformed(evt);
@@ -2328,18 +2349,6 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
 
-    private void updateClippingGUI() {
-        boolean hasClipAreas = model != null && model.getNbrFlows() > 0 && model.hasClipAreas();
-        boolean clipStart = clipWithStartAreasCheckBox.isSelected();
-        boolean clipEnd = clipWithEndAreasCheckBox.isSelected();
-        clipWithEndAreasCheckBox.setEnabled(hasClipAreas);
-        endAreasBufferDistanceFormattedTextField.setEnabled(hasClipAreas && clipEnd);
-        drawEndClipAreasCheckBox.setEnabled(hasClipAreas && clipEnd);
-        clipWithStartAreasCheckBox.setEnabled(hasClipAreas);
-        startAreasBufferDistanceFormattedTextField.setEnabled(hasClipAreas && clipStart);
-        drawStartClipAreasCheckBox.setEnabled(hasClipAreas && clipStart);
-    }
-
     private void selectEndClipAreaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectEndClipAreaButtonActionPerformed
         try {
             // ask for import file
@@ -2357,7 +2366,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
 
             model.setClipAreas(collection);
-            updateClippingGUI();
+            writeModelToGUI();
             clipWithEndAreasCheckBox.doClick();
 
             String fileName = FileUtils.getFileNameWithoutExtension(inFilePath);
@@ -2379,24 +2388,28 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_selectEndClipAreaButtonActionPerformed
 
     private void clipWithEndAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithEndAreasCheckBoxActionPerformed
-        if (clipWithEndAreasCheckBox.isSelected()) {
-            model.setClippingFlowsByArea(true);
-            model.updateEndClipAreas();
-        } else {
-            model.setClippingFlowsByArea(false);
-            model.removeEndClipAreasFromFlows();
+        if (updatingGUI == false && model != null) {
+            boolean clipEnds = clipWithEndAreasCheckBox.isSelected();
+            model.setClipFlowEnds(clipEnds);
+            if (clipEnds) {
+                model.updateEndClipAreas();
+            } else {
+                model.removeEndClipAreasFromFlows();
+            }
+            layout("Clip with End Areas");
+            mapComponent.refreshMap();
+            writeModelToGUI();
         }
-        layout("Clip with End Areas");
-        mapComponent.refreshMap();
-        updateClippingGUI();
     }//GEN-LAST:event_clipWithEndAreasCheckBoxActionPerformed
 
     private void endAreasBufferDistanceFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
-        if ("value".equals(evt.getPropertyName())) {
-            double d = ((Number) endAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
-            model.setEndClipAreaBufferDistance(d);
-            layout("Buffered Distance");
-            mapComponent.refreshMap();
+        if (updatingGUI == false && model != null) {
+            if ("value".equals(evt.getPropertyName())) {
+                double d = ((Number) endAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
+                model.setEndClipAreaBufferDistance(d);
+                layout("Buffered Distance");
+                mapComponent.refreshMap();
+            }
         }
     }//GEN-LAST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
 
@@ -2444,14 +2457,16 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void applyClippingSettings() {
         if (clipWithStartAreasCheckBox.isSelected()) {
-            model.setClippingFlowsByArea(true);
             model.updateStartClipAreas();
         }
+        model.setClipFlowStarts(clipWithStartAreasCheckBox.isSelected());
+
         if (clipWithEndAreasCheckBox.isSelected()) {
-            model.setClippingFlowsByArea(true);
             model.updateEndClipAreas();
         }
-        updateClippingGUI();
+        model.setClipFlowEnds(clipWithEndAreasCheckBox.isSelected());
+
+        writeModelToGUI();
     }
 
     private void sizeFeaturesToScale() {
@@ -2501,11 +2516,13 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_drawEndClipAreasCheckBoxActionPerformed
 
     private void startAreasBufferDistanceFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_startAreasBufferDistanceFormattedTextFieldPropertyChange
-        if ("value".equals(evt.getPropertyName())) {
-            double d = ((Number) startAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
-            model.setStartClipAreaBufferDistance(d);
-            layout("Buffer Distance");
-            mapComponent.refreshMap();
+        if (updatingGUI == false && model != null) {
+            if ("value".equals(evt.getPropertyName())) {
+                double d = ((Number) startAreasBufferDistanceFormattedTextField.getValue()).doubleValue();
+                model.setStartClipAreaBufferDistance(d);
+                layout("Buffer Distance");
+                mapComponent.refreshMap();
+            }
         }
     }//GEN-LAST:event_startAreasBufferDistanceFormattedTextFieldPropertyChange
 
@@ -2515,14 +2532,18 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_drawStartClipAreasCheckBoxActionPerformed
 
     private void clipWithStartAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithStartAreasCheckBoxActionPerformed
-        if (clipWithStartAreasCheckBox.isSelected()) {
-            model.updateStartClipAreas();
-        } else {
-            model.removeStartClipAreasFromFlows();
+        if (updatingGUI == false && model != null) {
+            boolean clip = clipWithStartAreasCheckBox.isSelected();
+            model.setClipFlowStarts(clip);
+            if (clip) {
+                model.updateStartClipAreas();
+            } else {
+                model.removeStartClipAreasFromFlows();
+            }
+            layout("Clip with Start Areas");
+            mapComponent.refreshMap();
+            writeModelToGUI();
         }
-        layout("Clipe with Start Areas");
-        mapComponent.refreshMap();
-        updateClippingGUI();
     }//GEN-LAST:event_clipWithStartAreasCheckBoxActionPerformed
 
     private void arrowSizeRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowSizeRatioSliderStateChanged

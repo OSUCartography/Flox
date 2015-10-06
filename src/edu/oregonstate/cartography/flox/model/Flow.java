@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.WKTWriter;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
@@ -46,9 +47,18 @@ public final class Flow {
     private Geometry startClipArea;
 
     /**
+     * startClipArea serialized to WKT format
+     */
+    private String startClipAreaWKT;
+    /**
      * clip area for the end of the flow.
      */
     private Geometry endClipArea;
+
+    /**
+     * endClipArea serialized to WKT format
+     */
+    private String endClipAreaWKT;
 
     /**
      * selection flag
@@ -190,6 +200,11 @@ public final class Flow {
      */
     public void setStartClipArea(Geometry startClipArea) {
         this.startClipArea = startClipArea;
+        if (startClipArea != null) {
+            startClipAreaWKT = new WKTWriter().write(startClipArea);
+        } else {
+            startClipAreaWKT = null;
+        }
     }
 
     /**
@@ -204,6 +219,11 @@ public final class Flow {
      */
     public void setEndClipArea(Geometry endClipArea) {
         this.endClipArea = endClipArea;
+        if (endClipArea != null) {
+            this.endClipAreaWKT = new WKTWriter().write(endClipArea);
+        } else {
+            endClipAreaWKT = null;
+        }
     }
 
     /**
@@ -428,13 +448,13 @@ public final class Flow {
         ArrayList<Point> regularPoints = new ArrayList<>();
         ArrayList<Point> irregularPoints
                 = toStraightLineSegmentsWithIrregularLength(deCasteljauTol);
-        
+
         // compute distance between points in regular line string
         double totalLength = lineStringLength(irregularPoints);
         // FIXME abusing the deCasteljauTol, which is not really the tolerance
         // for de Casteljau's algorithm (it is devided by 100).
         double targetDist = totalLength / Math.round(totalLength / deCasteljauTol);
-        
+
         // create new point set with regularly distributed irregularPoints
         double startX = irregularPoints.get(0).x;
         double startY = irregularPoints.get(0).y;
@@ -780,5 +800,19 @@ public final class Flow {
         double dx = cPt.x - endPt.x;
         double dy = cPt.y - endPt.y;
         return Math.atan2(dy, dx);
+    }
+
+    /**
+     * @return the startClipAreaWKT
+     */
+    public String getStartClipAreaWKT() {
+        return startClipAreaWKT;
+    }
+
+    /**
+     * @return the endClipAreaWKT
+     */
+    public String getEndClipAreaWKT() {
+        return endClipAreaWKT;
     }
 }
