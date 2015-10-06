@@ -472,8 +472,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            double endClipRadius = endClipRadius(flow.getEndPt());
-            ArrayList<Point> points = flow.toClippedStraightLineSegments(endClipRadius, deCasteljauTol);
+            double r = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;            
+            ArrayList<Point> points = flow.toClippedStraightLineSegments(r, deCasteljauTol);
             for (Point point : points) {
                 drawCircle(point.x, point.y, CR, Color.pink, Color.white);
             }
