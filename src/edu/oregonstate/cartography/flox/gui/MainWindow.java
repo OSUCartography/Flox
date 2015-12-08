@@ -431,9 +431,12 @@ public class MainWindow extends javax.swing.JFrame {
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        useFrictionCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         emptySpaceMenuItem = new javax.swing.JMenuItem();
+        jSeparator7 = new javax.swing.JPopupMenu.Separator();
+        recomputeMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1845,6 +1848,15 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(enforceCanvasCheckBoxMenuItem);
 
+        useFrictionCheckBoxMenuItem.setSelected(true);
+        useFrictionCheckBoxMenuItem.setText("Use Friction");
+        useFrictionCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                useFrictionCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(useFrictionCheckBoxMenuItem);
+
         moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
         moveFlowsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1862,6 +1874,16 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jMenu1.add(emptySpaceMenuItem);
+        jMenu1.add(jSeparator7);
+
+        recomputeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        recomputeMenuItem.setText("Recompute");
+        recomputeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                recomputeMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(recomputeMenuItem);
 
         menuBar.add(jMenu1);
 
@@ -3043,6 +3065,15 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Move Flows");
     }//GEN-LAST:event_moveFlowsCheckBoxMenuItemActionPerformed
 
+    private void useFrictionCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useFrictionCheckBoxMenuItemActionPerformed
+        model.useFrictionHack = useFrictionCheckBoxMenuItem.isSelected();
+        layout("Use Friction");
+    }//GEN-LAST:event_useFrictionCheckBoxMenuItemActionPerformed
+
+    private void recomputeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recomputeMenuItemActionPerformed
+       layout(null);
+    }//GEN-LAST:event_recomputeMenuItemActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3068,7 +3099,7 @@ public class MainWindow extends javax.swing.JFrame {
         /**
          * Apply layout iterations to all non-locked flows.
          */
-        private void layout(int start, int end, boolean moveFlowsOverlappingNodes, double scale) {
+        private void layout(int start, int end, boolean moveFlowsOverlappingNodes, double scale, ArrayList<Force> forces) {
             for (int i = start; i < end; i++) {
                 if (isCancelled()) {
                     break;
@@ -3076,7 +3107,7 @@ public class MainWindow extends javax.swing.JFrame {
 
                 // compute an iteration with decreasing weight
                 double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
-                layouter.layoutAllFlows(weight);
+                layouter.layoutAllFlows(weight, forces);
 
                 if (moveFlowsOverlappingNodes) {
                     // store initial lock flags of all flows
@@ -3106,13 +3137,19 @@ public class MainWindow extends javax.swing.JFrame {
 
             //long startTime = System.currentTimeMillis();
             double scale = mapComponent.getScale();
+            // store force for each flow for current configuration in this array
+            int nFlows = model.getNbrFlows();
+            ArrayList<Force> forces = new ArrayList<>(nFlows);
+            for (int i = 0; i < nFlows; i++) {
+                forces.add(new Force());
+            }
             // first half of iterations. Flows are not moved away from overlapped nodes.
-            layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale);
+            layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale, forces);
             //long endTime = System.currentTimeMillis();
             //System.out.println(model.getDistanceWeightExponent() + " " + (endTime - startTime) / 1000.);
             // second half of iterations: Flows are moved away from overlapped nodes.
             boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
-            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, moveFlowsOverlappingNodes, scale);
+            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, moveFlowsOverlappingNodes, scale, forces);
             return null;
         }
 
@@ -3251,6 +3288,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
+    private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
@@ -3281,6 +3319,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel pointsFilePathLabel;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JPanel progressBarPanel;
+    private javax.swing.JMenuItem recomputeMenuItem;
     private javax.swing.JMenuItem redoMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
@@ -3305,6 +3344,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel symbolPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
+    private javax.swing.JCheckBoxMenuItem useFrictionCheckBoxMenuItem;
     private javax.swing.JLabel vallueLabel;
     private javax.swing.JFormattedTextField valueFormattedTextField;
     private javax.swing.JToggleButton viewCanvasToggleButton;

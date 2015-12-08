@@ -47,6 +47,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
+    public boolean useFrictionHack = true;
+
     /**
      * Density of points along flows.
      */
@@ -497,7 +499,7 @@ public class Model {
     }
 
     /**
-     * Finds an OGC simple feature that contains a point.
+     * Finds the first OGC simple feature that contains a point.
      *
      * @param geometry A geometry or geometry collection to search through.
      * @param point The point for which a containing geometry is to be searched.

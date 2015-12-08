@@ -383,8 +383,12 @@ public class ForceLayouter {
      *
      * @param weight
      */
-    public void layoutAllFlows(double weight) {
-        
+    public void layoutAllFlows(double weight, ArrayList<Force> forces) {
+        if (model.useFrictionHack) {
+            // no need for weights as friction will smooth out forces over time
+            weight = 1;
+        }
+
         int nbrFlows = model.getNbrFlows();
         if (nbrFlows < 2) {
             return;
@@ -394,22 +398,32 @@ public class ForceLayouter {
 
         double maxFlowLength = model.getLongestFlowLength();
 
-        // store force for each flow for current configuration in this array
-        ArrayList<Force> forces = new ArrayList<>(nbrFlows);
-
         // store angular distribution force for each flow in this array
         // Angular distribution forces are computed separately, because they 
         // require a different weight than the other forces.
         ArrayList<Force> angularDistForces = new ArrayList<>(nbrFlows);
 
         Iterator<Flow> iterator = model.flowIterator();
+        int j = 0;
         while (iterator.hasNext()) {
             Flow qFlow = iterator.next();
             if (qFlow.isLocked()) {
                 continue;
             }
             // compute force exerted by flows and nodes
-            forces.add(computeForceOnFlow(qFlow, maxFlowLength));
+            Force fnew = computeForceOnFlow(qFlow, maxFlowLength);
+            Force f = forces.get(j++);
+            if (model.useFrictionHack) {
+                double friction = 0.25; // FIXME should be a field
+                // TODO Dorling used 0.25, but other values might work better?
+                // blend the new vector with previous vector, and scale it down.
+                f.fx = friction * (f.fx + fnew.fx);
+                f.fy = friction * (f.fy + fnew.fy);                
+                // FIXME should use friction also for angular distribution forces
+            } else {
+                f.fx = fnew.fx;
+                f.fy = fnew.fy;
+            }
             // compute force creating an even angular distribution of flows around 
             // start and end nodes
             angularDistForces.add(computeAngularDistributionForce(qFlow));
