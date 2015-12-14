@@ -378,17 +378,11 @@ public class ForceLayouter {
     }
 
     /**
-     * Applies a layout iteration to all unlocked flows. Requires that all flows
-     * are instances of the Flow class.
+     * Applies a layout iteration to all unlocked flows.
      *
      * @param weight
      */
     public void layoutAllFlows(double weight, ArrayList<Force> forces) {
-        if (model.useFrictionHack) {
-            // no need for weights as friction will smooth out forces over time
-            weight = 1;
-        }
-
         int nbrFlows = model.getNbrFlows();
         if (nbrFlows < 2) {
             return;
@@ -406,27 +400,27 @@ public class ForceLayouter {
         Iterator<Flow> iterator = model.flowIterator();
         int j = 0;
         while (iterator.hasNext()) {
-            Flow qFlow = iterator.next();
-            if (qFlow.isLocked()) {
+            Flow flow = iterator.next();
+            if (flow.isLocked()) {
                 continue;
             }
             // compute force exerted by flows and nodes
-            Force fnew = computeForceOnFlow(qFlow, maxFlowLength);
+            Force fnew = computeForceOnFlow(flow, maxFlowLength);
             Force f = forces.get(j++);
             if (model.useFrictionHack) {
                 double friction = 0.25; // FIXME should be a field
                 // TODO Dorling used 0.25, but other values might work better?
-                // blend the new vector with previous vector, and scale it down.
+                // add the new vector to the previous vector, and scale the sum.
                 f.fx = friction * (f.fx + fnew.fx);
-                f.fy = friction * (f.fy + fnew.fy);                
+                f.fy = friction * (f.fy + fnew.fy);
                 // FIXME should use friction also for angular distribution forces
             } else {
                 f.fx = fnew.fx;
                 f.fy = fnew.fy;
             }
             // compute force creating an even angular distribution of flows around 
-            // start and end nodes
-            angularDistForces.add(computeAngularDistributionForce(qFlow));
+            // nodes
+            angularDistForces.add(computeAngularDistributionForce(flow));
         }
 
         // apply forces onto control points of each flow
@@ -434,20 +428,25 @@ public class ForceLayouter {
         iterator = model.flowIterator();
         int i = 0;
         while (iterator.hasNext()) {
-            Flow qFlow = iterator.next();
-            if (qFlow.isLocked()) {
+            Flow flow = iterator.next();
+            if (flow.isLocked()) {
                 continue;
             }
 
-            Point ctrlPt = qFlow.getCtrlPt();
+            Point ctrlPt = flow.getCtrlPt();
 
             // Move the control point by the total force
             Force f = forces.get(i);
-            ctrlPt.x += weight * f.fx;
-            ctrlPt.y += weight * f.fy;
-
+            if (model.useFrictionHack) {
+                ctrlPt.x += f.fx;
+                ctrlPt.y += f.fy;
+            } else {
+                ctrlPt.x += weight * f.fx;
+                ctrlPt.y += weight * f.fy;
+            }
+            
             // Move the control point by the angular distribution force.
-            // Angular distribution forces are not be applied from the beginning 
+            // Angular distribution forces are not applied from the beginning 
             // of the iterative layout computation. Angular distribution forces 
             // kick in slowly to avoid creating crossing flows. 
             // The weight for regular forces varies from 
@@ -458,10 +457,9 @@ public class ForceLayouter {
             ctrlPt.x += angularDistWeight * angularDistForce.fx;
             ctrlPt.y += angularDistWeight * angularDistForce.fy;
 
-            // Enforce control point range if enforceRangebox
-            // is true
+            // Enforce control point range if enforceRangebox is true
             if (model.isEnforceRangebox()) {
-                Point tempPoint = enforcer.enforceFlowControlPointRange(qFlow);
+                Point tempPoint = enforcer.enforceFlowControlPointRange(flow);
                 ctrlPt.x = tempPoint.x;
                 ctrlPt.y = tempPoint.y;
             }
@@ -469,7 +467,7 @@ public class ForceLayouter {
             // Enforce the canvas range
             if (model.isEnforceCanvasRange()) {
                 Rectangle2D canvasRect = model.getNodesBoundingBox();
-                Point tempPoint = enforcer.enforceCanvasBoundingBox(qFlow, canvasRect);
+                Point tempPoint = enforcer.enforceCanvasBoundingBox(flow, canvasRect);
                 ctrlPt.x = tempPoint.x;
                 ctrlPt.y = tempPoint.y;
             }
