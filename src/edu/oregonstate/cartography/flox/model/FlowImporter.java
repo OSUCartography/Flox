@@ -102,7 +102,14 @@ public class FlowImporter {
                 String id = tokenizer.nextToken();
                 double x = Double.parseDouble(tokenizer.nextToken());
                 double y = Double.parseDouble(tokenizer.nextToken());
+                double val = 1;
+                
+                if (tokenizer.hasMoreTokens()) {
+                    val = Double.parseDouble(tokenizer.nextToken());
+                };
+                
                 Point point = new Point(x, y);
+                point.setValue(val);
                 points.put(id, point);
             }
         }
