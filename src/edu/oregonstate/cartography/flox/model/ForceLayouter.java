@@ -113,7 +113,7 @@ public class ForceLayouter {
                 // inverse distance weighting
                 double w = 1d / geometricSeriesPower(lSq, distWeightExponent);
 
-                // Apply the distance weight to each focre
+                // Apply the distance weight to each force
                 xDist *= w; // The force along the x-axis after weighting
                 yDist *= w; // The force along the y-axix after weighting
 
@@ -236,6 +236,7 @@ public class ForceLayouter {
         if (exp <= 16) {
             return a16;
         }
+        assert (exp <= 32);
         return a16 * a16;
     }
 
@@ -258,8 +259,13 @@ public class ForceLayouter {
         // Compute forces applied by all flows on current flow
         Force externalF = new Force();
         double lengthOfForceVectorsSum = 0;
+        int counter = 0;
         for (Point pt : flowPoints) {
             Force f = computeForceOnPoint(pt, flow);
+            if (Double.isNaN(f.fx)) {
+                System.out.println("problem " + counter);
+            }
+            counter++;
             // add to totals
             externalF.add(f);
             lengthOfForceVectorsSum += f.length();
@@ -406,6 +412,7 @@ public class ForceLayouter {
             }
             // compute force exerted by flows and nodes
             Force fnew = computeForceOnFlow(flow, maxFlowLength);
+            System.out.println(fnew);
             Force f = forces.get(j++);
             if (model.useFrictionHack) {
                 double friction = 0.25; // FIXME should be a field

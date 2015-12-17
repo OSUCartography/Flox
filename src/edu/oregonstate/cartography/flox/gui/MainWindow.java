@@ -684,11 +684,12 @@ public class MainWindow extends javax.swing.JFrame {
         forcesPanel.add(jLabel3, gridBagConstraints);
 
         exponentSlider.setMajorTickSpacing(1);
-        exponentSlider.setMaximum(6);
+        exponentSlider.setMaximum(5);
         exponentSlider.setMinimum(1);
         exponentSlider.setPaintLabels(true);
         exponentSlider.setPaintTicks(true);
         exponentSlider.setSnapToTicks(true);
+        exponentSlider.setValue(3);
         exponentSlider.setPreferredSize(new java.awt.Dimension(190, 38));
         {
             java.util.Hashtable labels = exponentSlider.createStandardLabels(exponentSlider.getMajorTickSpacing());

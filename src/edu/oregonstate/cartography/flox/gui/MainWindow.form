@@ -880,11 +880,12 @@
                 <Component class="javax.swing.JSlider" name="exponentSlider">
                   <Properties>
                     <Property name="majorTickSpacing" type="int" value="1"/>
-                    <Property name="maximum" type="int" value="6"/>
+                    <Property name="maximum" type="int" value="5"/>
                     <Property name="minimum" type="int" value="1"/>
                     <Property name="paintLabels" type="boolean" value="true"/>
                     <Property name="paintTicks" type="boolean" value="true"/>
                     <Property name="snapToTicks" type="boolean" value="true"/>
+                    <Property name="value" type="int" value="3"/>
                     <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[190, 38]"/>
                     </Property>

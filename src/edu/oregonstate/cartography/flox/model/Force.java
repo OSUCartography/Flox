@@ -43,4 +43,8 @@ public class Force {
         return new Force(f1.fx + f2.fx, f1.fy + f2.fy);
     }
 
+    @Override
+    public String toString() {
+        return fx + "|" + fy;
+    }
 }
