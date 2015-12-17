@@ -32,7 +32,13 @@ public class CSVFlowExporter {
 
             str.append(flow.getValue());
             str.append(",");
-
+            
+            str.append(flow.getStartPt().getValue());
+            str.append(",");
+            
+            str.append(flow.getEndPt().getValue());
+            str.append(",");
+            
             str.append(flow.getCtrlPt().x);
             str.append(",");
             str.append(flow.getCtrlPt().y);
@@ -53,8 +59,7 @@ public class CSVFlowExporter {
     /**
      * Export a CSV file containing the current flow model
      *
-     * @param outFilePath The file to be exported to. This will be built by
-     * FileUtils.askFile in the MainWindow.
+     * @param outFilePath The file to export to.
      * @throws java.io.IOException
      */
     public static void export(String outFilePath, Iterator flows) throws IOException {
