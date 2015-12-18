@@ -37,7 +37,7 @@ public class LayoutGrader {
             LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
             
             // FIXME value for first parameter is 0.
-            ArrayList<Point> flowPoints = flow.toClippedStraightLineSegments(0, deCasteljauTol);
+            ArrayList<Point> flowPoints = flow.toClippedStraightLineSegments(0, 0, deCasteljauTol);
             
             for (Point point : flowPoints) {
                 lineBuilder.add(new Coordinate(point.x, point.y));

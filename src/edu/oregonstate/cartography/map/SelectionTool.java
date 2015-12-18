@@ -272,7 +272,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 Flow flow = flows.next();
                 if (flow.getBoundingBox().intersects(rect)) {
                     // FIXME value for first parameter is 0
-                    ArrayList<Point> pts = flow.toClippedStraightLineSegments(0, deCasteljauTol);
+                    ArrayList<Point> pts = flow.toClippedStraightLineSegments(0, 0, deCasteljauTol);
                     for (int i = 0; i < pts.size() - 1; i++) {
                         // Get the points
                         Point pt1 = pts.get(i);

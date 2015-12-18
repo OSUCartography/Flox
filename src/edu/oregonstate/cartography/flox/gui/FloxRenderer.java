@@ -233,6 +233,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         return gapDistanceToEndNodes + endNodeRadius;
     }
 
+    private double startClipRadius(Point startNode) {
+        // distance between end of flows and their end points
+        double gapDistanceToStartNodes = model.getFlowDistanceFromStartPointPixel() / scale
+                * getLockedScaleFactor();
+        // Compute the radius of the end node (add stroke width / 2 to radius)
+        double startNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode)) / scale;
+        return gapDistanceToStartNodes + startNodeRadius;
+    }
+    
     /**
      * Draws the flows to the Graphics2D context. Retrieves settings from the
      * model to determine flow width, length, as well as determining whether to
@@ -265,7 +274,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
                 // Compute radius of clipping circle around end point.
                 // Clip the flow with the clipping area and a circle around the end node
-                flow = getClippedFlow(flow, endClipRadius(flow.getEndPt()));
+                flow = getClippedFlow(flow, startClipRadius(flow.getStartPt()),endClipRadius(flow.getEndPt()));
 
                 // Create an arrowhead
                 Arrow arrow = new Arrow(flow, model, flowStrokeWidth, scale, west, north);
@@ -279,8 +288,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 flowPath = flowToGeneralPath(arrow.getOutFlow());
             } else {
                 // Clip the flow with the clipping area
-                double r = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
-                flow = getClippedFlow(flow, r);
+                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
+                double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
+                flow = getClippedFlow(flow, rs, re);
                 flowPath = flowToGeneralPath(flow);
             }
 
@@ -472,8 +482,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            double r = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;            
-            ArrayList<Point> points = flow.toClippedStraightLineSegments(r, deCasteljauTol);
+            double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0; 
+            double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;            
+            ArrayList<Point> points = flow.toClippedStraightLineSegments(rs, re, deCasteljauTol);
             for (Point point : points) {
                 drawCircle(point.x, point.y, CR, Color.pink, Color.white);
             }
@@ -513,9 +524,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
 
-    private Flow getClippedFlow(Flow flow, double endClipRadius) {
+    private Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
-        return flow.getClippedFlow(endClipRadius, deCasteljauTol);
+        
+        return flow.getClippedFlow(startClipRadius, endClipRadius, deCasteljauTol);
     }
 
     /**

@@ -401,10 +401,10 @@ public final class Flow {
      * @return An list of irregularPoints, including copies of the start point
      * and the end point.
      */
-    public ArrayList<Point> toClippedStraightLineSegments(double endClipRadius, double deCasteljauTol) {
+    public ArrayList<Point> toClippedStraightLineSegments(double startClipRadius, double endClipRadius, double deCasteljauTol) {
 
         // FIXME 0 parameter
-        Flow clippedFlow = Flow.clipFlow(this, endClipRadius, deCasteljauTol);
+        Flow clippedFlow = Flow.clipFlow(this, startClipRadius, endClipRadius, deCasteljauTol);
         return clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
     }
 
@@ -633,8 +633,8 @@ public final class Flow {
      * @param deCasteljauTol Tolerance for conversion to straight line segments.
      * @return A new flow (if something was clipped), or the passed flow.
      */
-    public Flow getClippedFlow(double endClipRadius, double deCasteljauTol) {
-        return Flow.clipFlow(this, endClipRadius, deCasteljauTol);
+    public Flow getClippedFlow(double startClipRadius, double endClipRadius, double deCasteljauTol) {
+        return Flow.clipFlow(this, startClipRadius, endClipRadius, deCasteljauTol);
     }
 
     /**
@@ -647,7 +647,7 @@ public final class Flow {
      * @param deCasteljauTol Tolerance for conversion to straight line segments.
      * @return A new flow (if something was clipped), or the passed flow.
      */
-    private static Flow clipFlow(Flow flow, double endClipRadius, double deCasteljauTol) {
+    private static Flow clipFlow(Flow flow, double startClipRadius, double endClipRadius, double deCasteljauTol) {
 
         // Test whether start or end clip areas are defined.
         // If none is defined, the flow is not converted to straight line segments,
@@ -657,6 +657,7 @@ public final class Flow {
 
         // t parameter for location of end clipping
         double endT = 1;
+        double startT = 0;
 
         if (clipWithStartArea || clipWithEndArea) {
 
@@ -666,8 +667,8 @@ public final class Flow {
 
             // clip with start area
             if (clipWithStartArea) {
-                double startT = flow.clippingT(lineString, true);
-                flow = flow.split(startT)[1];
+                startT = flow.clippingT(lineString, true);
+                //flow = flow.split(startT)[1];
             }
 
             // compute t parameter for clipping with the end area
@@ -685,6 +686,16 @@ public final class Flow {
 
         // cut off the end piece
         flow = flow.split(endT)[0];
+        
+        if (startClipRadius > 0) {
+            // compute t parameter for clipping with the circle around the end point
+            double startNodeT = flow.getIntersectionTWithCircleAroundStartPoint(startClipRadius);
+            // find the larger of the two t parameters
+            startT = Math.max(startT, startNodeT);
+        }
+        
+        // cut off the start piece
+        flow = flow.split(startT)[1];
 
         return flow;
     }

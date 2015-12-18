@@ -184,14 +184,19 @@ public class Model {
     private double arrowSizeRatio = 0.1;
 
     /**
-     * Determines the distance (in pixels) a flow line stops before reaching its
-     * endpoint. If arrows are being drawn, this is the distance from the tip of
-     * the arrow to the outside of the node. If arrows are NOT being drawn, this
-     * is the distance from the end of the flow line to the center of the node.
+     * Determines the gap (in pixels) between a flow's end node and the end of 
+     * the flow line.
      * Currently modified by a GUI modifiable text field.
      */
     private double flowDistanceFromEndPointPx = 0.0d;
 
+    /**
+     * Determines the gap (in pixels) between a flow's start 
+     * node and the start of the flow line.
+     * Currently modified by a GUI modifiable text field.
+     */
+    private double flowDistanceFromStartPointPx = 0.0d;
+    
     /**
      * Maximum allowed flow width in pixels. The flow with the highest value
      * will have this width. All other flows are scaled down relative to this
@@ -1173,12 +1178,23 @@ public class Model {
     }
 
     /**
+     * @return the flowArrowEndPointRadius
+     */
+    public double getFlowDistanceFromStartPointPixel() {
+        return flowDistanceFromStartPointPx;
+    }
+    
+    /**
      * @param flowArrowEndPointRadius the flowArrowEndPointRadius to set
      */
     public void setFlowDistanceFromEndPointPixel(double flowArrowEndPointRadius) {
         this.flowDistanceFromEndPointPx = flowArrowEndPointRadius;
     }
 
+    public void setFlowDistanceFromStartPointPixel(double flowArrowStartPointRadius) {
+        this.flowDistanceFromStartPointPx = flowArrowStartPointRadius;
+    }
+    
     /**
      * @return the addArrows
      */
