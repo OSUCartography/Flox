@@ -159,30 +159,40 @@ public class Model {
 
     /**
      * Used by the Arrow class to determine the location of the arrow edge
-     * control points. FIXME: missing documentation - is this in pixels or
-     * relative to the line width?
+     * control points. The control point is moved from the arrowhead's base
+     * towards the tip by the length of the arrowhead times this number.
      */
     private double arrowEdgeCtrlLength = 0.5;
 
     /**
      * Used by the Arrow class to determine the location of the arrow edge
-     * control points. FIXME: missing documentation - is this in pixels or
-     * relative to the line width?
+     * control points. The control point is moved away from the 
+     * centerline of the arrow by the width of the arrowhead times this number.
      */
     private double arrowEdgeCtrlWidth = 0.5;
 
     /**
      * Used by the Arrow class to determine the horizontal position of the
-     * arrow's corners relative to the base. FIXME: missing documentation - is
-     * this in pixels or relative to the line width?
+     * arrow's corners relative to the base. The corners are moved from the base 
+     * of the arrowhead towards the tip by the length of the arrowhead times
+     * this number.
      */
     private double arrowCornerPosition = 0.0;
 
     /**
      * Used by the Arrow class to determine the size of the smallest arrowhead.
+     * Larger values result in a larger minimum arrowhead size. 
      */
     private double arrowSizeRatio = 0.1;
 
+    /**
+     * Used by the Arrow class to determine the length of the longest arrowhead.
+     * Smaller values result in longer arrowheads; the absolute difference 
+     * between the the shortest arrow and the arrow being drawn is multiplied by 
+     * this and subtracted from the arrow length.
+     */
+    private double arrowLengthRatio = 0.0;
+    
     /**
      * Determines the gap (in pixels) between a flow's end node and the end of 
      * the flow line.
@@ -735,6 +745,10 @@ public class Model {
     public double getMaxFlowValue() {
         return graph.getMaxFlowValue();
     }
+    
+    public double getMinFlowValue() {
+        return graph.getMinFlowValue();
+    }
 
     /**
      * Get the length of longest flow baseline.
@@ -1258,6 +1272,10 @@ public class Model {
         return arrowSizeRatio;
     }
 
+    public double getArrowLengthRatio() {
+        return arrowLengthRatio;
+    }
+    
     /**
      * @param arrowSizeRatio the arrowSizeRatio to set
      */
@@ -1265,6 +1283,10 @@ public class Model {
         this.arrowSizeRatio = arrowSizeRatio;
     }
 
+    public void setArrowLengthRatio(double arrowLengthRatio) {
+        this.arrowLengthRatio = arrowLengthRatio;
+    }
+    
     /**
      * @param maxFlowLengthSpringConstant the maxFlowLengthSpringConstant to set
      */

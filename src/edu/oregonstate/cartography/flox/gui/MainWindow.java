@@ -189,12 +189,13 @@ public class MainWindow extends javax.swing.JFrame {
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPointPixel());
             flowDistanceFromStartPointFormattedTextField.setValue(model.getFlowDistanceFromStartPointPixel());
             addArrowsCheckbox.setSelected(model.isDrawArrows());
-            arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 10));
-            arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 10));
+            arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 40));
+            arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 40));
             arrowEdgeCtrlLengthSlider.setValue((int) (model.getArrowEdgeCtrlLength() * 100));
             arrowEdgeCtrlWidthSlider.setValue((int) (model.getArrowEdgeCtrlWidth() * 100));
             arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
             arrowSizeRatioSlider.setValue((int) (model.getArrowSizeRatio() * 100));
+            arrowLengthRatioSlider.setValue((int) Math.abs((model.getArrowLengthRatio() * 100) - 100));
             maximumFlowWidthSlider.setValue((int) model.getMaxFlowStrokeWidthPixel());
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
 
@@ -330,6 +331,10 @@ public class MainWindow extends javax.swing.JFrame {
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
+        flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel29 = new javax.swing.JLabel();
+        flowDistanceFromStartPointFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel14 = new javax.swing.JLabel();
         layerListScrollPane = new javax.swing.JScrollPane();
         layerList = new edu.oregonstate.cartography.flox.gui.DraggableList();
         symbolPanel = new TransparentMacPanel();
@@ -349,8 +354,6 @@ public class MainWindow extends javax.swing.JFrame {
         lockFeatureScaleToggleButton = new javax.swing.JToggleButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
-        flowDistanceFromEndPointFormattedTextField = new javax.swing.JFormattedTextField();
-        jLabel14 = new javax.swing.JLabel();
         addArrowsCheckbox = new javax.swing.JCheckBox();
         arrowheadLengthSlider = new javax.swing.JSlider();
         jLabel10 = new javax.swing.JLabel();
@@ -364,8 +367,8 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel18 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
         arrowSizeRatioSlider = new javax.swing.JSlider();
-        jLabel29 = new javax.swing.JLabel();
-        flowDistanceFromStartPointFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel30 = new javax.swing.JLabel();
+        arrowLengthRatioSlider = new javax.swing.JSlider();
         clipAreaPanel = new TransparentMacPanel();
         clipAreaControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel20 = new javax.swing.JLabel();
@@ -975,9 +978,59 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel9.setText("Map Layers");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel9, gridBagConstraints);
+
+        flowDistanceFromEndPointFormattedTextField.setMinimumSize(new java.awt.Dimension(40, 30));
+        flowDistanceFromEndPointFormattedTextField.setPreferredSize(new java.awt.Dimension(4, 30));
+        flowDistanceFromEndPointFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                flowDistanceFromEndPointFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
+        mapControlPanel.add(flowDistanceFromEndPointFormattedTextField, gridBagConstraints);
+
+        jLabel29.setText("Flow Distance From Start Point");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(jLabel29, gridBagConstraints);
+
+        flowDistanceFromStartPointFormattedTextField.setToolTipText("");
+        flowDistanceFromStartPointFormattedTextField.setMinimumSize(new java.awt.Dimension(40, 30));
+        flowDistanceFromStartPointFormattedTextField.setName(""); // NOI18N
+        flowDistanceFromStartPointFormattedTextField.setPreferredSize(new java.awt.Dimension(4, 30));
+        flowDistanceFromStartPointFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                flowDistanceFromStartPointFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
+        mapControlPanel.add(flowDistanceFromStartPointFormattedTextField, gridBagConstraints);
+
+        jLabel14.setText("Flow Distance From End Point");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(jLabel14, gridBagConstraints);
 
         layerListScrollPane.setPreferredSize(new java.awt.Dimension(220, 80));
 
@@ -990,7 +1043,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         mapControlPanel.add(layerListScrollPane, gridBagConstraints);
@@ -1042,7 +1095,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         mapControlPanel.add(symbolPanel, gridBagConstraints);
@@ -1056,7 +1109,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
@@ -1071,7 +1124,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         mapControlPanel.add(jButton1, gridBagConstraints);
 
@@ -1087,14 +1140,15 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
         mapControlPanel.add(maximumFlowWidthSlider, gridBagConstraints);
 
         jLabel26.setText("Maximum Flow Width");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(jLabel26, gridBagConstraints);
@@ -1111,17 +1165,17 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
         mapControlPanel.add(maximumNodeSizeSlider, gridBagConstraints);
 
         jLabel27.setText("Maximum Node Radius");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
         mapControlPanel.add(jLabel27, gridBagConstraints);
 
         showNodesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
@@ -1136,7 +1190,8 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
         mapControlPanel.add(showNodesToggleButton, gridBagConstraints);
 
         showFlowsToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
@@ -1151,11 +1206,12 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
         mapControlPanel.add(showFlowsToggleButton, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
@@ -1169,9 +1225,9 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.insets = new java.awt.Insets(12, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         mapControlPanel.add(lockFeatureScaleToggleButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
@@ -1179,28 +1235,6 @@ public class MainWindow extends javax.swing.JFrame {
         controlsTabbedPane.addTab("Map", mapPanel);
 
         arrowHeadsControlPanel.setLayout(new java.awt.GridBagLayout());
-
-        flowDistanceFromEndPointFormattedTextField.setMinimumSize(new java.awt.Dimension(40, 30));
-        flowDistanceFromEndPointFormattedTextField.setPreferredSize(new java.awt.Dimension(4, 30));
-        flowDistanceFromEndPointFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                flowDistanceFromEndPointFormattedTextFieldPropertyChange(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 9, 0);
-        arrowHeadsControlPanel.add(flowDistanceFromEndPointFormattedTextField, gridBagConstraints);
-
-        jLabel14.setText("Flow Distance From End Point");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        arrowHeadsControlPanel.add(jLabel14, gridBagConstraints);
 
         addArrowsCheckbox.setText("Add Arrows");
         addArrowsCheckbox.addActionListener(new java.awt.event.ActionListener() {
@@ -1210,14 +1244,28 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
         arrowHeadsControlPanel.add(addArrowsCheckbox, gridBagConstraints);
 
-        arrowheadLengthSlider.setMajorTickSpacing(50);
-        arrowheadLengthSlider.setMaximum(200);
+        arrowheadLengthSlider.setMajorTickSpacing(200);
+        arrowheadLengthSlider.setMaximum(800);
         arrowheadLengthSlider.setPaintLabels(true);
         arrowheadLengthSlider.setPaintTicks(true);
         arrowheadLengthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        {
+            java.util.Hashtable labels = arrowheadLengthSlider.createStandardLabels(arrowheadLengthSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    int i = Integer.parseInt(label.getText());
+                    int p = (int)(i/4);
+                    label.setText(Integer.toString(p));
+                }
+            }
+            arrowheadLengthSlider.setLabelTable(labels);
+        }
         arrowheadLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowheadLengthSliderStateChanged(evt);
@@ -1225,21 +1273,35 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 2;
         arrowHeadsControlPanel.add(arrowheadLengthSlider, gridBagConstraints);
 
         jLabel10.setText("Arrowhead Length");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel10, gridBagConstraints);
 
-        arrowheadWidthSlider.setMajorTickSpacing(25);
+        arrowheadWidthSlider.setMajorTickSpacing(100);
+        arrowheadWidthSlider.setMaximum(400);
         arrowheadWidthSlider.setPaintLabels(true);
         arrowheadWidthSlider.setPaintTicks(true);
-        arrowheadWidthSlider.setValue(25);
         arrowheadWidthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        {
+            java.util.Hashtable labels = arrowheadWidthSlider.createStandardLabels(arrowheadWidthSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    int i = Integer.parseInt(label.getText());
+                    int p = (int)(i/4);
+                    label.setText(Integer.toString(p));
+                }
+            }
+            arrowheadWidthSlider.setLabelTable(labels);
+        }
         arrowheadWidthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowheadWidthSliderStateChanged(evt);
@@ -1247,13 +1309,13 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 4;
         arrowHeadsControlPanel.add(arrowheadWidthSlider, gridBagConstraints);
 
         jLabel15.setText("Arrowhead Width");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel15, gridBagConstraints);
@@ -1261,14 +1323,14 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel16.setText("Arrow Edge Ctrl Point Length");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel16, gridBagConstraints);
 
         jLabel17.setText("Arrow Edge Ctrl Point Width");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel17, gridBagConstraints);
 
@@ -1283,7 +1345,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 6;
         arrowHeadsControlPanel.add(arrowEdgeCtrlLengthSlider, gridBagConstraints);
 
         arrowEdgeCtrlWidthSlider.setMajorTickSpacing(50);
@@ -1298,7 +1360,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 8;
         arrowHeadsControlPanel.add(arrowEdgeCtrlWidthSlider, gridBagConstraints);
 
         arrowCornerPositionSlider.setMajorTickSpacing(25);
@@ -1315,20 +1377,20 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 10;
         arrowHeadsControlPanel.add(arrowCornerPositionSlider, gridBagConstraints);
 
         jLabel18.setText("Arrow Corner Position");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel18, gridBagConstraints);
 
         jLabel19.setText("Arrow Size Ratio");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel19, gridBagConstraints);
@@ -1345,32 +1407,30 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 12;
         arrowHeadsControlPanel.add(arrowSizeRatioSlider, gridBagConstraints);
 
-        jLabel29.setText("Flow Distance From Start Point");
+        jLabel30.setText("Arrow Length Ratio");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        arrowHeadsControlPanel.add(jLabel29, gridBagConstraints);
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        arrowHeadsControlPanel.add(jLabel30, gridBagConstraints);
 
-        flowDistanceFromStartPointFormattedTextField.setToolTipText("");
-        flowDistanceFromStartPointFormattedTextField.setMinimumSize(new java.awt.Dimension(40, 30));
-        flowDistanceFromStartPointFormattedTextField.setName(""); // NOI18N
-        flowDistanceFromStartPointFormattedTextField.setPreferredSize(new java.awt.Dimension(4, 30));
-        flowDistanceFromStartPointFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                flowDistanceFromStartPointFormattedTextFieldPropertyChange(evt);
+        arrowLengthRatioSlider.setMajorTickSpacing(10);
+        arrowLengthRatioSlider.setPaintLabels(true);
+        arrowLengthRatioSlider.setPaintTicks(true);
+        arrowLengthRatioSlider.setPreferredSize(new java.awt.Dimension(190, 43));
+        arrowLengthRatioSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                arrowLengthRatioSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 9, 0);
-        arrowHeadsControlPanel.add(flowDistanceFromStartPointFormattedTextField, gridBagConstraints);
+        arrowHeadsControlPanel.add(arrowLengthRatioSlider, gridBagConstraints);
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
@@ -1634,12 +1694,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         editMenu.setText("Edit");
         editMenu.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                editMenuMenuSelected(evt);
             }
             public void menuDeselected(javax.swing.event.MenuEvent evt) {
             }
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                editMenuMenuSelected(evt);
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
             }
         });
 
@@ -2351,7 +2411,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowheadLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadLengthSliderStateChanged
 
         if (updatingGUI == false && model != null) {
-            model.setArrowLengthScaleFactor((arrowheadLengthSlider.getValue() + 1) / 10d);
+            model.setArrowLengthScaleFactor((arrowheadLengthSlider.getValue() + 1) / 40d);
             mapComponent.refreshMap();
             if (!arrowheadLengthSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Length");
@@ -2362,7 +2422,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
-            model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 10d);
+            model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 40d);
             mapComponent.refreshMap();
             if (!arrowheadWidthSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Width");
@@ -3111,6 +3171,16 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_flowDistanceFromStartPointFormattedTextFieldPropertyChange
 
+    private void arrowLengthRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowLengthRatioSliderStateChanged
+        if (updatingGUI == false && model != null) {
+            model.setArrowLengthRatio(Math.abs(arrowLengthRatioSlider.getValue()-100) / 100d);
+            mapComponent.refreshMap();
+            if (!arrowLengthRatioSlider.getValueIsAdjusting()) {
+                addUndo("Arrow Size Ratio");
+            }
+        }
+    }//GEN-LAST:event_arrowLengthRatioSliderStateChanged
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3257,6 +3327,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider arrowEdgeCtrlWidthSlider;
     private javax.swing.JPanel arrowHeadsControlPanel;
     private javax.swing.JPanel arrowHeadsPanel;
+    private javax.swing.JSlider arrowLengthRatioSlider;
     private javax.swing.JSlider arrowSizeRatioSlider;
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadLengthSlider;
@@ -3320,6 +3391,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel29;
+    private javax.swing.JLabel jLabel30;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator1;

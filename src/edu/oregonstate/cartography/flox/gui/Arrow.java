@@ -108,17 +108,26 @@ public class Arrow {
         // based on the valueToStrokeRatio
         double maxFlowStrokeWidth = model.getMaxFlowValue() * valueToStrokeRatio;
 
-        // Get the differnce between this flow's stroke size and the biggest
+        double minFlowStrokeWidth = model.getMinFlowValue() * valueToStrokeRatio;
+        
+        // Get the difference between this flow's stroke size and the biggest
         // stroke size.
         double strokeDiff = maxFlowStrokeWidth - flowStrokeWidth;
 
+        // Get the difference between this flow's stroke size and the smallest
+        // stroke size.
+        double smallStrokeDiff = flowStrokeWidth - minFlowStrokeWidth;
+        
         // Get a percentage of that difference based on valRatio
         double plusStroke = strokeDiff * (model.getArrowSizeRatio());
 
+        
+        double minusLength = smallStrokeDiff * (model.getArrowLengthRatio());
+        
         // Determine the distance of the tip of the arrow from the base.
         // Is scaled to the value of the flow, which itself is scaled by the 
         // scale factor of the model.
-        double arrowLengthInPx = (flowStrokeWidth + plusStroke)
+        double arrowLengthInPx = (flowStrokeWidth + plusStroke - minusLength)
                 * model.getArrowLengthScaleFactor();
 
         arrowLengthInWorld = arrowLengthInPx / scale;

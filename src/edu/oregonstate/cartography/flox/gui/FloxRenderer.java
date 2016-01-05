@@ -274,7 +274,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
                 // Compute radius of clipping circle around end point.
                 // Clip the flow with the clipping area and a circle around the end node
-                flow = getClippedFlow(flow, startClipRadius(flow.getStartPt()),endClipRadius(flow.getEndPt()));
+                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
+                flow = getClippedFlow(flow, rs, endClipRadius(flow.getEndPt()));
 
                 // Create an arrowhead
                 Arrow arrow = new Arrow(flow, model, flowStrokeWidth, scale, west, north);
