@@ -185,6 +185,22 @@ public final class Graph extends DirectedMultigraph<Point, Flow> {
         return max;
     }
 
+    public double getMinFlowValue() {
+        int nFlows = edgeSet().size();
+        if (nFlows < 1) {
+            return 0;
+        }
+        Iterator<Flow> iter = flowIterator();
+        double min = iter.next().getValue();
+        while (iter.hasNext()) {
+            double v = iter.next().getValue();
+            if (v < min) {
+                min = v;
+            }
+        }
+        return min;
+    }
+    
     public double getMaxNodeValue() {
         int nNodes = vertexSet().size();
         if (nNodes < 1) {
