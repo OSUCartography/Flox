@@ -369,6 +369,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowSizeRatioSlider = new javax.swing.JSlider();
         jLabel30 = new javax.swing.JLabel();
         arrowLengthRatioSlider = new javax.swing.JSlider();
+        useInFlowCheckbox = new javax.swing.JCheckBox();
         clipAreaPanel = new TransparentMacPanel();
         clipAreaControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel20 = new javax.swing.JLabel();
@@ -1431,6 +1432,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 14;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         arrowHeadsControlPanel.add(arrowLengthRatioSlider, gridBagConstraints);
+
+        useInFlowCheckbox.setText("Point Arrow Towards Endpoint (temp)");
+        useInFlowCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                useInFlowCheckboxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 15;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        arrowHeadsControlPanel.add(useInFlowCheckbox, gridBagConstraints);
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
@@ -3181,6 +3194,14 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_arrowLengthRatioSliderStateChanged
 
+    private void useInFlowCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useInFlowCheckboxActionPerformed
+        if (model != null) {
+            model.setPointArrowTowardsEndpoint(useInFlowCheckbox.isSelected());
+            mapComponent.refreshMap();
+            addUndo("Use In Flow");
+        }
+    }//GEN-LAST:event_useInFlowCheckboxActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3456,6 +3477,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
     private javax.swing.JCheckBoxMenuItem useFrictionCheckBoxMenuItem;
+    private javax.swing.JCheckBox useInFlowCheckbox;
     private javax.swing.JLabel vallueLabel;
     private javax.swing.JFormattedTextField valueFormattedTextField;
     private javax.swing.JToggleButton viewCanvasToggleButton;
