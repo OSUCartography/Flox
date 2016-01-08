@@ -527,7 +527,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
     private Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
-        
         return flow.getClippedFlow(startClipRadius, endClipRadius, deCasteljauTol);
     }
 
