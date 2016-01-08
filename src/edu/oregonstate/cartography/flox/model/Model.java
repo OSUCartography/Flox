@@ -265,6 +265,22 @@ public class Model {
     // TODO temporary hack to enable the "move flows that overlapp nodes" function
     public boolean moveFlowsOverlappingNodes = false;
     
+    // TODO Determines how arrow orientation is calculated. false results in
+    // arrowheads having the same angle as the curve at the point of the 
+    // arrowhead's base; true results in arrows being oriented towards the 
+    // flow's endpoint, which sometimes results in gaps between the end of the 
+    // flow and the arrowhead, resulting in the need for the flow to overlap 
+    // the arrowhead a little at the base, but points more towards the endpoint. 
+    // Should probably choose one over the other sometime. 
+    // A checkbox is currently in the GUI to compare the two methods.
+    public boolean pointArrowTowardsEndpoint = false;
+    public boolean isPointArrowTowardsEndpoint () {
+        return pointArrowTowardsEndpoint;
+    }
+    public void setPointArrowTowardsEndpoint (boolean boo) {
+        pointArrowTowardsEndpoint = boo;
+    }
+    
     /**
      * Constructor of the model.
      */

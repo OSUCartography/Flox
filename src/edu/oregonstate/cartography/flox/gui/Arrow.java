@@ -121,7 +121,12 @@ public class Arrow {
         // Get a percentage of that difference based on valRatio
         double plusStroke = strokeDiff * (model.getArrowSizeRatio());
 
-        
+        // This much length will be subtracted from the lengths of arrowheads, 
+        // proportionally to how relatively large they are compared to the 
+        // smallest arrowhead. 
+        // So the smallest arrowhead will have nothing subtracted, and the 
+        // other arrowheads will have the difference between it and the smallest
+        // arrowhead * model.getArrowLengthRatio (a number from 0 - 1) subtracted.
         double minusLength = smallStrokeDiff * (model.getArrowLengthRatio());
         
         // Determine the distance of the tip of the arrow from the base.
@@ -130,6 +135,8 @@ public class Arrow {
         double arrowLengthInPx = (flowStrokeWidth + plusStroke - minusLength)
                 * model.getArrowLengthScaleFactor();
 
+        // Get the arrow length in world coordinates. This is needed later for 
+        // Flow.getInterSectionTWithCircleAroundEndPoint(arrowLengthInWorld).
         arrowLengthInWorld = arrowLengthInPx / scale;
 
         // Determine the perpendicular distance of the corners of the arrow from 
@@ -154,7 +161,16 @@ public class Arrow {
         // The little bit is to provide sufficient overlap of the flow with the
         // arrowhead to prevent gaps between the flow and arrowhead when the
         // arrowhead is drawn along more curved parts of the flow
-        Flow[] splitFlows = inFlow.split(t + ((1 - t) * 0.1));
+        // TODO: This overlap is significantly less when using the other method
+        // of orienting arrows, but some overlap is still required to avoid
+        // a visible gap between the end of the flow and the arrowhead.
+        Flow[] splitFlows;
+        if (model.isPointArrowTowardsEndpoint()) {
+            splitFlows = inFlow.split(t + ((1 - t) * 0.1));
+        } else {
+            splitFlows = inFlow.split(t + ((1 - t) * 0.025));
+        }
+        
 
         // Set the flow to the section of the flow that travels from the 
         // start point to the base of the Arrow. The remaining section of the
@@ -186,8 +202,15 @@ public class Arrow {
 
         // Get the azimuth of the line connecting the base of the arrow to the
         // endPoint of the flow. This determines the azimuth of the Arrow.
-        double azimuth = GeometryUtils.computeAzimuth(getBasePt(), inFlow.getEndPt());
-
+        // TODO: currently experminenting with a slightly different way of 
+        // determining arrowhead orientation
+        double azimuth;
+        if(model.isPointArrowTowardsEndpoint()) {
+            azimuth = GeometryUtils.computeAzimuth(getBasePt(), inFlow.getEndPt());
+        } else {
+            azimuth = GeometryUtils.computeAzimuth(outFlow.getCtrlPt(), getBasePt());
+        }
+               
         // Rotate all the points that make up the shape of the Arrow, using
         // the Arrow's base point as the pivot.  
         tipPt = getTipPt().rotatePoint(getBasePt(), azimuth);
