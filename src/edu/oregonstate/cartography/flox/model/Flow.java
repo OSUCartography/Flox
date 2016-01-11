@@ -353,6 +353,17 @@ public final class Flow {
     }
 
     /**
+     * Returns the slope at t.
+     * @param t t parameter, must be within 0 and 1.
+     * @return slope in radians
+     */
+    public double getSlope(double t) {
+        double dx = (1 - t) * (cPt.x - startPt.x) + t * (endPt.x - cPt.x);
+        double dy = (1 - t) * (cPt.y - startPt.y) + t * (endPt.y - cPt.y);
+        return Math.atan2(dy, dx);
+    }
+
+    /**
      *
      * @param deCasteljauTol
      * @return
@@ -686,14 +697,14 @@ public final class Flow {
 
         // cut off the end piece
         flow = flow.split(endT)[0];
-        
+
         if (startClipRadius > 0) {
             // compute t parameter for clipping with the circle around the end point
             double startNodeT = flow.getIntersectionTWithCircleAroundStartPoint(startClipRadius);
             // find the larger of the two t parameters
             startT = Math.max(startT, startNodeT);
         }
-        
+
         // cut off the start piece
         flow = flow.split(startT)[1];
 

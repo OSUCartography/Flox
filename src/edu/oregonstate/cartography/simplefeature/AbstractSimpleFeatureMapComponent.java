@@ -8,7 +8,6 @@ import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.Point2D;
@@ -414,9 +413,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
-     * Transforms a horizontal x coordinate (usually in meters) to pixels. Takes
-     * the scale and bounding boundingBox defined by the PageFormat into
-     * account.
+     * Transforms a horizontal x coordinate (usually in meters) to pixels.
      *
      * @param x The horizontal coordinate.
      * @return Returns the coordinate in pixels.
@@ -426,8 +423,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     }
 
     /**
-     * Transforms a vertical y coordinate to the scale and bounding boundingBox
-     * defined by the PageFormat.
+     * Transforms a vertical y coordinate (usually in meters) to pixels.
      *
      * @param y The vertical coordinate.
      * @return Returns the coordinate in the page coordinate system.

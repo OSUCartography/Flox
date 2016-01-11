@@ -9,11 +9,16 @@ import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.Transparency;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -59,6 +64,16 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private boolean flowWidthLocked = false;
 
     /**
+     * the width of the drawable area of the map component
+     */
+    private final int canvasWidth;
+    
+    /**
+     * the height of the drawable area of the map component
+     */
+    private final int canvasHeight;
+
+    /**
      * Creates a new renderer.
      *
      * @param model The model to render.
@@ -70,9 +85,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param scale The scale factor to apply when drawing.
      */
     public FloxRenderer(Model model, Graphics2D g2d,
-            double west, double north, double scale) {
+            double west, double north, double scale,
+            int canvasWidth, int canvasHeight) {
         super(g2d, west, north, scale);
         this.model = model;
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
     }
 
     public void render(boolean renderBackgroundLayers,
@@ -120,7 +138,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         if (drawControlPoints) {
             drawControlPoints();
         }
-
         if (drawLineSegments) {
             drawStraightLinesSegments();
         }
@@ -179,7 +196,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         // setup renderer
         FloxRenderer renderer = new FloxRenderer(model, g2d,
-                bb.getMinX(), bb.getMaxY(), scale);
+                bb.getMinX(), bb.getMaxY(), scale, w, h);
         FloxRenderer.enableHighQualityRenderingHints(g2d, antialias);
         renderer.render(drawBackgroundLayers,
                 false, // drawCanvas
@@ -200,7 +217,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     /**
      * Constructs a GeneralPath object for drawing a Flow.
      *
-     * @param flow The flow to convert in world coordinats.
+     * @param flow The flow to convert in world coordinates.
      * @return A GeneralPath for drawing in pixel coordinates.
      */
     private GeneralPath flowToGeneralPath(Flow flow) {
@@ -218,8 +235,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     /**
-     * Computes clipping radius for an end node. Takes size of node and distance to
-     * end node into account.
+     * Computes clipping radius for an end node. Takes size of node and distance
+     * to end node into account.
      *
      * @param endNode The end node of the flow.
      * @return Clipping radius in world coordinates.
@@ -241,7 +258,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         double startNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode)) / scale;
         return gapDistanceToStartNodes + startNodeRadius;
     }
-    
+
     /**
      * Draws the flows to the Graphics2D context. Retrieves settings from the
      * model to determine flow width, length, as well as determining whether to
@@ -302,18 +319,105 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 g2d.fill(arrowPath);
             }
 
-            // draw the flow
-            g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
-                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            g2d.draw(flowPath);
+            drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
 
-            // draw symbol for locked flows
+            // draw symbol for locked flow
             if (drawLocks && flow.isLocked()) {
                 Point pt = flow.pointOnCurve(0.5);
                 drawCross(pt.x, pt.y);
             }
         }
 
+    }
+
+    /**
+     * Returns the geometry of an in-line arrow for one flow.
+     * @param flow the flow
+     * @param flowStrokeWidth the width of the flow line in pixels
+     * @return the geometry of the arrow in pixel coordinates.
+     */
+    private Shape getInlineFlowArrow(Flow flow, double flowStrokeWidth) {
+        // default placement is at T + 0.5
+        // TODO optimize placement to avoid conflicts with overlapping flows
+        double t = 0.5;
+        
+        // location on flow line
+        Point pt = flow.pointOnCurve(t);
+        double x = xToPx(pt.x);
+        double y = yToPx(pt.y);
+
+        // distance from dip to center of line on flow line
+        double d = flowStrokeWidth / 4;
+        
+        // half line width
+        double w = flowStrokeWidth / 2;
+        // make slightly wider to avoid visual artifacts along border of flow line
+        w *= 1.05;
+        // displacement in flow direction of end of arrow. If 0, a line
+        // perpendicular to the flow line is drawn.
+        double s = w;
+        
+        // construct right-pointing larger-than sign
+        Path2D path = new Path2D.Double();
+        // start at tip
+        path.moveTo(d, 0);
+        path.lineTo(d - s, -w);
+        path.lineTo(-d - s, -w);
+        path.lineTo(-d, 0);
+        path.lineTo(-d - s, w);
+        path.lineTo(d - s, w);
+        path.closePath();
+        
+        // rotate and move
+        double rot = flow.getSlope(t);
+        AffineTransform trans = AffineTransform.getTranslateInstance(x, y);
+        trans.concatenate(AffineTransform.getRotateInstance(-rot));
+        path.transform(trans);
+        
+        return path;
+    }
+
+    /**
+     * Draws a flow line
+     * @param g2d destination to draw to.
+     * @param flow the flow to draw.
+     * @param flowPath the geometry of the flow to draw.
+     * @param flowStrokeWidth the width of the flow in pixels.
+     * @param highlightSelected If true and the flow is selected, it is drawn with
+     * SELECTION_COLOR.
+     */
+    private void drawFlowLine(Graphics2D g2d, Flow flow, GeneralPath flowPath,
+            double flowStrokeWidth, boolean highlightSelected) {
+
+        if (model.isDrawInlineArrows()) {
+            // draw lines with inline arrows
+            
+            // TODO this image should be allocated once and be reused for all flows
+            BufferedImage mask = g2d.getDeviceConfiguration().createCompatibleImage(
+                    canvasWidth, canvasHeight, Transparency.TRANSLUCENT);
+            Graphics2D mask2D = (Graphics2D) mask.getGraphics();
+            enableHighQualityRenderingHints(mask2D, true);
+
+            mask2D.setStroke(new BasicStroke((float) flowStrokeWidth,
+                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            mask2D.setColor(highlightSelected && flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
+            mask2D.draw(flowPath);
+
+            // draw to alpha channel to make inner flow area transparent
+            mask2D.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN));
+            mask2D.setColor(new Color(0, true));
+            mask2D.fill(getInlineFlowArrow(flow, flowStrokeWidth));
+
+            // draw flow image onto map image
+            mask2D.dispose();
+            g2d.drawRenderedImage(mask, null);
+        } else {
+            // draw plain arrows
+            g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
+                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            g2d.setColor(highlightSelected && flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
+            g2d.draw(flowPath);
+        }
     }
 
     /**
@@ -483,8 +587,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0; 
-            double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;            
+            double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
+            double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
             ArrayList<Point> points = flow.toClippedStraightLineSegments(rs, re, deCasteljauTol);
             for (Point point : points) {
                 drawCircle(point.x, point.y, CR, Color.pink, Color.white);

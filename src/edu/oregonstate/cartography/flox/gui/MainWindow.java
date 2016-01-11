@@ -88,17 +88,17 @@ public class MainWindow extends javax.swing.JFrame {
         layerList.addPropertyChangeListener(DraggableList.MODEL_PROPERTY,
                 new PropertyChangeListener() {
 
-                    @Override
-                    public void propertyChange(PropertyChangeEvent evt) {
-                        model.removeAllLayers();
-                        DnDListModel m = (DnDListModel) layerList.getModel();
-                        int n = m.getSize();
-                        for (int i = 0; i < n; i++) {
-                            model.addLayer((Layer) m.get(i));
-                        }
-                        mapComponent.repaint();
-                    }
-                });
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                model.removeAllLayers();
+                DnDListModel m = (DnDListModel) layerList.getModel();
+                int n = m.getSize();
+                for (int i = 0; i < n; i++) {
+                    model.addLayer((Layer) m.get(i));
+                }
+                mapComponent.repaint();
+            }
+        });
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
         mapComponent.setMainWindow(this);
         mapComponent.requestFocusInWindow();
@@ -240,7 +240,6 @@ public class MainWindow extends javax.swing.JFrame {
             endAreasBufferDistanceFormattedTextField.setEnabled(hasFlowsAndClipAreas && clipEnd);
             startAreasBufferDistanceFormattedTextField.setEnabled(hasFlowsAndClipAreas && clipStart);
 
-            
             endAreasBufferDistanceFormattedTextField.setValue(
                     model.getEndClipAreaBufferDistance());
             startAreasBufferDistanceFormattedTextField.setValue(
@@ -370,6 +369,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel30 = new javax.swing.JLabel();
         arrowLengthRatioSlider = new javax.swing.JSlider();
         useInFlowCheckbox = new javax.swing.JCheckBox();
+        drawInlineArrowsCheckBox = new javax.swing.JCheckBox();
         clipAreaPanel = new TransparentMacPanel();
         clipAreaControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel20 = new javax.swing.JLabel();
@@ -1446,6 +1446,19 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 15;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(useInFlowCheckbox, gridBagConstraints);
+
+        drawInlineArrowsCheckBox.setText("Draw Inline Arrows");
+        drawInlineArrowsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                drawInlineArrowsCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 19;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(30, 0, 0, 0);
+        arrowHeadsControlPanel.add(drawInlineArrowsCheckBox, gridBagConstraints);
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
@@ -3193,7 +3206,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_useFrictionCheckBoxMenuItemActionPerformed
 
     private void recomputeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recomputeMenuItemActionPerformed
-       layout(null);
+        layout(null);
     }//GEN-LAST:event_recomputeMenuItemActionPerformed
 
     private void flowDistanceFromStartPointFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_flowDistanceFromStartPointFormattedTextFieldPropertyChange
@@ -3206,7 +3219,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowLengthRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowLengthRatioSliderStateChanged
         if (updatingGUI == false && model != null) {
-            model.setArrowLengthRatio(Math.abs(arrowLengthRatioSlider.getValue()-100) / 100d);
+            model.setArrowLengthRatio(Math.abs(arrowLengthRatioSlider.getValue() - 100) / 100d);
             mapComponent.refreshMap();
             if (!arrowLengthRatioSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Size Ratio");
@@ -3230,6 +3243,12 @@ public class MainWindow extends javax.swing.JFrame {
     private void liveDrawingCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_liveDrawingCheckBoxMenuItemActionPerformed
         model.liveDrawing = liveDrawingCheckBoxMenuItem.isSelected();
     }//GEN-LAST:event_liveDrawingCheckBoxMenuItemActionPerformed
+
+    private void drawInlineArrowsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawInlineArrowsCheckBoxActionPerformed
+        model.setDrawInlineArrows(drawInlineArrowsCheckBox.isSelected());
+        mapComponent.refreshMap();
+        addUndo("Draw Inline Arrows");
+    }//GEN-LAST:event_drawInlineArrowsCheckBoxActionPerformed
 
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
@@ -3256,10 +3275,10 @@ public class MainWindow extends javax.swing.JFrame {
         /**
          * Apply layout iterations to all non-locked flows.
          */
-        private void layout(int start, int end, 
+        private void layout(int start, int end,
                 boolean moveFlowsOverlappingNodes,
                 double scale) {
-            
+
             for (int i = start; i < end; i++) {
                 if (isCancelled()) {
                     break;
@@ -3298,13 +3317,13 @@ public class MainWindow extends javax.swing.JFrame {
             setProgress(0);
 
             double scale = mapComponent.getScale();
-            
+
             // first half of iterations. Flows are not moved away from overlapped nodes.
             layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale);
 
             // second half of iterations: Flows are moved away from overlapped nodes.
             boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
-            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, 
+            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS,
                     moveFlowsOverlappingNodes, scale);
             return null;
         }
@@ -3392,6 +3411,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
+    private javax.swing.JCheckBox drawInlineArrowsCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JMenu editMenu;
     private javax.swing.JMenuItem emptySpaceMenuItem;

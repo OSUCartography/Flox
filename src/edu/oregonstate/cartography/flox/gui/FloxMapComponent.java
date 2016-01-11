@@ -4,6 +4,7 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -91,11 +92,14 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     @Override
     protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
         if (model == null) {
             return;
         }
 
         Graphics2D g2d = getGraphics2DBuffer();
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, bufferImage.getWidth(), bufferImage.getHeight());
 
         // Give the current MapTool a chance to draw some background drawing.
         // Returns true if the the tool also painted the map, i.e. there is no
@@ -106,7 +110,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         // paint the map if this has not been done by the current MapTool
         if (toolPaintedMap == false) {
             FloxRenderer renderer = new FloxRenderer(model, g2d,
-                    west, north, scale);
+                    west, north, scale, bufferImage.getWidth(), bufferImage.getHeight());
             renderer.setStrokeWidth(1f);
             renderer.render(
                     true, // renderBackgroundLayers

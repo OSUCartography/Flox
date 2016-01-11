@@ -113,7 +113,7 @@ public class Model {
 
     /**
      * If this is true, control points of flows are prevented from moving
-     * outside of its flow's rangebox. Modified by a GUI checkbox.
+     * outside of its flow's rangebox.
      */
     private boolean enforceRangebox = true;
 
@@ -134,7 +134,7 @@ public class Model {
      * Determines the size of the canvas. The minimum canvas size is the
      * bounding box of all flows. This value is used to increases the length and
      * width of the minimum canvas by (length * this value) and (width * this
-     * value). Modified currently by a GUI slider.
+     * value).
      */
     private double canvasPadding = 0.5;
 
@@ -145,11 +145,15 @@ public class Model {
     private final Color FLOW_COLOR = Color.BLACK;
 
     /**
-     * If this is true, arrows are drawn onto the end of flows. Modified by a
-     * GUI checkbox.
+     * If true, arrows are drawn onto the end of flows.
      */
     private boolean drawArrows = false;
 
+    /**
+     * If true direction indications are drawn on flow lines.
+     */
+    private boolean drawInlineArrows = false;
+    
     /**
      * Used by the Arrow class to determine the length of arrowheads.
      */
@@ -1493,6 +1497,20 @@ public class Model {
      */
     public void setClipFlowStarts(boolean clipFlowStarts) {
         this.clipFlowStarts = clipFlowStarts;
+    }
+
+    /**
+     * @return the drawInlineArrows
+     */
+    public boolean isDrawInlineArrows() {
+        return drawInlineArrows;
+    }
+
+    /**
+     * @param drawInlineArrows the drawInlineArrows to set
+     */
+    public void setDrawInlineArrows(boolean drawInlineArrows) {
+        this.drawInlineArrows = drawInlineArrows;
     }
 
 }
