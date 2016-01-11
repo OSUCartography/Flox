@@ -18,7 +18,7 @@ public class ForceLayouter {
     public static final int NBR_ITERATIONS = 100;
 
     // model with all map features.
-    private Model model;
+    private final Model model;
 
     /**
      * hash map with a line string for each flow to accelerate computations. The
@@ -26,6 +26,9 @@ public class ForceLayouter {
      * control point of a BŽzier flow changes.
      */
     HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
+
+    // store force for each flow for friction computation
+    ArrayList<Force> forces;
 
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
@@ -35,14 +38,13 @@ public class ForceLayouter {
      */
     public ForceLayouter(Model model) {
         this.model = model;
-    }
 
-    public Model getModel() {
-        return model;
-    }
-
-    public void setModel(Model model) {
-        this.model = model;
+        // store force for each flow. This is used for friction computation.
+        int nFlows = model.getNbrFlows();
+        forces = new ArrayList<>(nFlows);
+        for (int i = 0; i < nFlows; i++) {
+            forces.add(new Force());
+        }
     }
 
     /**
@@ -388,7 +390,7 @@ public class ForceLayouter {
      *
      * @param weight
      */
-    public void layoutAllFlows(double weight, ArrayList<Force> forces) {
+    public void layoutAllFlows(double weight) {
         int nbrFlows = model.getNbrFlows();
         if (nbrFlows < 2) {
             return;
@@ -451,7 +453,7 @@ public class ForceLayouter {
                 ctrlPt.x += weight * f.fx;
                 ctrlPt.y += weight * f.fy;
             }
-            
+
             // Move the control point by the angular distribution force.
             // Angular distribution forces are not applied from the beginning 
             // of the iterative layout computation. Angular distribution forces 
@@ -627,11 +629,13 @@ public class ForceLayouter {
 
         // Get an ArrayList of all flows that intersect nodes.
         ArrayList<Flow> flowsArray;
-
         flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
-        // If flowsArray has anything in it, call moveFlowsCrossingNodes, update
-        // flowsArray using getFlowsThatIntersectNodes, and repeat until 
+
+        // If flowsArray has anything in it, move flows that overlap nodes, update
+        // flowsArray with flows that intersect nodes, and repeat until 
         // flowsArray is empty.
+        // FIXME This is a potentially infinite loop. There might exist configurations
+        // where there are always some flows that overlap some nodes
         while (flowsArray.size() > 0) {
             GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
             flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);

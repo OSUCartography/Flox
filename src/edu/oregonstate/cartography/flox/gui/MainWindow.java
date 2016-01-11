@@ -3227,7 +3227,10 @@ public class MainWindow extends javax.swing.JFrame {
         /**
          * Apply layout iterations to all non-locked flows.
          */
-        private void layout(int start, int end, boolean moveFlowsOverlappingNodes, double scale, ArrayList<Force> forces) {
+        private void layout(int start, int end, 
+                boolean moveFlowsOverlappingNodes,
+                double scale) {
+            
             for (int i = start; i < end; i++) {
                 if (isCancelled()) {
                     break;
@@ -3235,7 +3238,7 @@ public class MainWindow extends javax.swing.JFrame {
 
                 // compute an iteration with decreasing weight
                 double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
-                layouter.layoutAllFlows(weight, forces);
+                layouter.layoutAllFlows(weight);
 
                 if (moveFlowsOverlappingNodes) {
                     // store initial lock flags of all flows
@@ -3263,21 +3266,15 @@ public class MainWindow extends javax.swing.JFrame {
             // initialize progress property.
             setProgress(0);
 
-            //long startTime = System.currentTimeMillis();
             double scale = mapComponent.getScale();
-            // store force for each flow for current configuration in this array
-            int nFlows = model.getNbrFlows();
-            ArrayList<Force> forces = new ArrayList<>(nFlows);
-            for (int i = 0; i < nFlows; i++) {
-                forces.add(new Force());
-            }
+            
             // first half of iterations. Flows are not moved away from overlapped nodes.
-            layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale, forces);
-            //long endTime = System.currentTimeMillis();
-            //System.out.println(model.getDistanceWeightExponent() + " " + (endTime - startTime) / 1000.);
+            layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale);
+
             // second half of iterations: Flows are moved away from overlapped nodes.
             boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
-            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, moveFlowsOverlappingNodes, scale, forces);
+            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS, 
+                    moveFlowsOverlappingNodes, scale);
             return null;
         }
 
