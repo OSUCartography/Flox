@@ -445,6 +445,7 @@ public class MainWindow extends javax.swing.JFrame {
         emptySpaceMenuItem = new javax.swing.JMenuItem();
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
+        liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1996,6 +1997,15 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(recomputeMenuItem);
 
+        liveDrawingCheckBoxMenuItem.setSelected(true);
+        liveDrawingCheckBoxMenuItem.setText("Live Drawing");
+        liveDrawingCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                liveDrawingCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(liveDrawingCheckBoxMenuItem);
+
         menuBar.add(jMenu1);
 
         setJMenuBar(menuBar);
@@ -3217,6 +3227,10 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Use Friction for Angular Distribution");
     }//GEN-LAST:event_useAngularFrictionCheckBoxMenuItemActionPerformed
 
+    private void liveDrawingCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_liveDrawingCheckBoxMenuItemActionPerformed
+        model.liveDrawing = liveDrawingCheckBoxMenuItem.isSelected();
+    }//GEN-LAST:event_liveDrawingCheckBoxMenuItemActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3268,7 +3282,9 @@ public class MainWindow extends javax.swing.JFrame {
 
                 // publish intermediate results in map. This will call process() 
                 // on the Event Dispatch Thread.
-                publish();
+                if (model.liveDrawing) {
+                    publish();
+                }
 
                 // update progress indicator
                 double progress = 100d * i / ForceLayouter.NBR_ITERATIONS;
@@ -3440,6 +3456,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
+    private javax.swing.JCheckBoxMenuItem liveDrawingCheckBoxMenuItem;
     private javax.swing.JToggleButton lockFeatureScaleToggleButton;
     private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JButton lockUnlockButton;

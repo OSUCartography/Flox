@@ -50,6 +50,8 @@ public class Model {
     public boolean useFrictionForForcesHack = true; // FIXME
     public boolean useFrictionForAngularDistortionHack = true; // FIXME
 
+    public boolean liveDrawing = true;
+    
     /**
      * Density of points along flows.
      */
