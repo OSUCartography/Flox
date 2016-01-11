@@ -17,6 +17,10 @@ public class ForceLayouter {
 
     public static final int NBR_ITERATIONS = 100;
 
+    // TODO Dorling used 0.25, but other values might work better?
+    private static final double frictionForForces = 0.25;
+    private static final double frictionForAngularDistribution = 0.25;
+
     // model with all map features.
     private final Model model;
 
@@ -413,9 +417,6 @@ public class ForceLayouter {
 
         Iterator<Flow> iterator = model.flowIterator();
         int j = 0;
-        double friction = 0.25; // FIXME should be a field
-        // TODO Dorling used 0.25, but other values might work better?
-        // add the new vector to the previous vector, and scale the sum.
 
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
@@ -426,8 +427,9 @@ public class ForceLayouter {
             Force fnew = computeForceOnFlow(flow, maxFlowLength);
             Force f = forces.get(j);
             if (model.useFrictionForForcesHack) {
-                f.fx = friction * (f.fx + fnew.fx);
-                f.fy = friction * (f.fy + fnew.fy);
+                // add the new vector to the previous vector, and scale the sum.
+                f.fx = frictionForForces * (f.fx + fnew.fx);
+                f.fy = frictionForForces * (f.fy + fnew.fy);
             } else {
                 f.fx = fnew.fx;
                 f.fy = fnew.fy;
@@ -437,8 +439,9 @@ public class ForceLayouter {
             Force angularDistF = angularDistForces.get(j);
             Force newAngularDistF = computeAngularDistributionForce(flow);
             if (model.useFrictionForAngularDistortionHack) {
-                angularDistF.fx = friction * (angularDistF.fx + newAngularDistF.fx);
-                angularDistF.fy = friction * (angularDistF.fy + newAngularDistF.fy);
+                // add the new vector to the previous vector, and scale the sum.
+                angularDistF.fx = frictionForAngularDistribution * (angularDistF.fx + newAngularDistF.fx);
+                angularDistF.fy = frictionForAngularDistribution * (angularDistF.fy + newAngularDistF.fy);
             } else {
                 angularDistF.fx = newAngularDistF.fx;
                 angularDistF.fy = newAngularDistF.fy;
