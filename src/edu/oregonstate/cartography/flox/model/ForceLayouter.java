@@ -30,6 +30,9 @@ public class ForceLayouter {
     // store force for each flow for friction computation
     ArrayList<Force> forces;
 
+    // store angular distribution force for each flow for friction computation
+    ArrayList<Force> angularDistForces;
+
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
      * flow map features.
@@ -44,6 +47,14 @@ public class ForceLayouter {
         forces = new ArrayList<>(nFlows);
         for (int i = 0; i < nFlows; i++) {
             forces.add(new Force());
+        }
+
+        // store angular distribution force for each flow in this array
+        // Angular distribution forces are computed separately, because they 
+        // require a different weight than the other forces.
+        angularDistForces = new ArrayList<>(nFlows);
+        for (int i = 0; i < nFlows; i++) {
+            angularDistForces.add(new Force());
         }
     }
 
@@ -400,13 +411,12 @@ public class ForceLayouter {
 
         double maxFlowLength = model.getLongestFlowLength();
 
-        // store angular distribution force for each flow in this array
-        // Angular distribution forces are computed separately, because they 
-        // require a different weight than the other forces.
-        ArrayList<Force> angularDistForces = new ArrayList<>(nbrFlows);
-
         Iterator<Flow> iterator = model.flowIterator();
         int j = 0;
+        double friction = 0.25; // FIXME should be a field
+        // TODO Dorling used 0.25, but other values might work better?
+        // add the new vector to the previous vector, and scale the sum.
+
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
             if (flow.isLocked()) {
@@ -414,22 +424,27 @@ public class ForceLayouter {
             }
             // compute force exerted by flows and nodes
             Force fnew = computeForceOnFlow(flow, maxFlowLength);
-            System.out.println(fnew);
-            Force f = forces.get(j++);
-            if (model.useFrictionHack) {
-                double friction = 0.25; // FIXME should be a field
-                // TODO Dorling used 0.25, but other values might work better?
-                // add the new vector to the previous vector, and scale the sum.
+            Force f = forces.get(j);
+            if (model.useFrictionForForcesHack) {
                 f.fx = friction * (f.fx + fnew.fx);
                 f.fy = friction * (f.fy + fnew.fy);
-                // FIXME should use friction also for angular distribution forces
             } else {
                 f.fx = fnew.fx;
                 f.fy = fnew.fy;
             }
             // compute force creating an even angular distribution of flows around 
             // nodes
-            angularDistForces.add(computeAngularDistributionForce(flow));
+            Force angularDistF = angularDistForces.get(j);
+            Force newAngularDistF = computeAngularDistributionForce(flow);
+            if (model.useFrictionForAngularDistortionHack) {
+                angularDistF.fx = friction * (angularDistF.fx + newAngularDistF.fx);
+                angularDistF.fy = friction * (angularDistF.fy + newAngularDistF.fy);
+            } else {
+                angularDistF.fx = newAngularDistF.fx;
+                angularDistF.fy = newAngularDistF.fy;
+            }
+
+            j++;
         }
 
         // apply forces onto control points of each flow
@@ -446,7 +461,7 @@ public class ForceLayouter {
 
             // Move the control point by the total force
             Force f = forces.get(i);
-            if (model.useFrictionHack) {
+            if (model.useFrictionForForcesHack) {
                 ctrlPt.x += f.fx;
                 ctrlPt.y += f.fy;
             } else {

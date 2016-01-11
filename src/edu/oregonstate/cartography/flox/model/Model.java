@@ -47,7 +47,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
-    public boolean useFrictionHack = true;
+    public boolean useFrictionForForcesHack = true; // FIXME
+    public boolean useFrictionForAngularDistortionHack = true; // FIXME
 
     /**
      * Density of points along flows.
