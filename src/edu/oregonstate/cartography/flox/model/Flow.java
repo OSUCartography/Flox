@@ -354,6 +354,7 @@ public final class Flow {
 
     /**
      * Returns the slope at t.
+     *
      * @param t t parameter, must be within 0 and 1.
      * @return slope in radians
      */
@@ -361,6 +362,103 @@ public final class Flow {
         double dx = (1 - t) * (cPt.x - startPt.x) + t * (endPt.x - cPt.x);
         double dy = (1 - t) * (cPt.y - startPt.y) + t * (endPt.y - cPt.y);
         return Math.atan2(dy, dx);
+    }
+
+    /**
+     * Offsets this flow in parallel to the line.
+     *
+     * http://pomax.github.io/bezierinfo/#offsetting
+     *
+     * @param d offset distance
+     */
+    public void offsetFlow(double d) {
+        // normal at start
+        double dxStart = cPt.x - startPt.x;
+        double dyStart = cPt.y - startPt.y;
+        double lStart = Math.sqrt(dxStart * dxStart + dyStart * dyStart);
+        double nxStart = -dyStart / lStart;
+        double nyStart = dxStart / lStart;
+
+        // normal at end
+        double dxEnd = endPt.x - cPt.x;
+        double dyEnd = endPt.y - cPt.y;
+        double lEnd = Math.sqrt(dxEnd * dxEnd + dyEnd * dyEnd);
+        double nxEnd = -dyEnd / lEnd;
+        double nyEnd = dxEnd / lEnd;
+
+        // offset start point
+        startPt.x += nxStart * d;
+        startPt.y += nyStart * d;
+
+        // offset end point
+        endPt.x += nxEnd * d;
+        endPt.y += nyEnd * d;
+
+        // offset control point
+        cPt.x += (nxStart + nxEnd) / 2 * d;
+        cPt.y += (nyStart + nyEnd) / 2 * d;
+    }
+
+    /**
+     * Returns an array of flows that are offset.
+     *
+     * http://pomax.github.io/bezierinfo/#offsetting
+     *
+     * @param d offset distance
+     * @return a new offset flow
+     */
+    public Flow[] splitAndOffsetFlow(double d) {
+        // FIXME adjust segmentation to curvature of flow.
+        // http://pomax.github.io/bezierinfo/#offsetting suggests testing whether 
+        // the control point is close to center of triangle defined by the 
+        // three Bezier points
+        Flow[] flows = split(0.5);
+        Flow[] flows12 = flows[0].split(0.5);
+        Flow[] flows34 = flows[1].split(0.5);
+        flows = new Flow[]{flows12[0], flows12[1], flows34[0], flows34[1]};
+        for (Flow flow : flows) {
+            flow.offsetFlow(d);
+        }
+        return flows;
+    }
+
+    /**
+     * Constructs a GeneralPath object for drawing a Flow and optionally offsets 
+     * the path parallel to its direction.
+     *
+     * @param scale scale factor for converting from world to pixel coordinates
+     * @param west horizontal origin in world coordinates
+     * @param north vertical origin in world coordinates
+     * @param offset parallel offset in world coordinates
+     * @return A GeneralPath for drawing in pixel coordinates.
+     */
+    public GeneralPath toGeneralPath(double scale, double west, double north, double offset) {
+        Flow[] flows = (offset == 0d) ? new Flow[]{this} : splitAndOffsetFlow(offset);
+        GeneralPath path = new GeneralPath();
+        for (int i = 0; i < flows.length; i++) {
+            Flow flow = flows[i];
+            if (i == 0) {
+                Point pt0 = flow.getStartPt();
+                path.moveTo((pt0.x - west) * scale, (north - pt0.y) * scale);
+            }
+            Point pt1 = flow.getCtrlPt();
+            Point pt2 = flow.getEndPt();
+            path.quadTo((pt1.x - west) * scale, (north - pt1.y) * scale,
+                    (pt2.x - west) * scale, (north - pt2.y) * scale);
+        }
+        return path;
+    }
+
+    /**
+     * Constructs a GeneralPath object for drawing a Flow.
+     *
+     * @param scale scale factor for converting from world to pixel coordinates
+     * @param west horizontal origin in world coordinates
+     * @param north vertical origin in world coordinates
+     * @return A GeneralPath for drawing in pixel coordinates.
+     */
+    public GeneralPath toGeneralPath(double scale, double west, double north) {
+        return toGeneralPath(scale, west, north, 0);
     }
 
     /**
