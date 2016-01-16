@@ -275,8 +275,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 flow = getClippedFlow(flow, rs, endClipRadius(flow.getEndPt()));
 
                 // Create an arrowhead
-                Arrow arrow = new Arrow(flow, model, flowStrokeWidth, scale, west, north);
+                flow.configureArrow(model, flowStrokeWidth, scale, west, north);
 
+                Arrow arrow = flow.getEndArrow();
+                
                 // Get the GeneralPath needed to draw the arrowhead
                 arrowPath = arrow.getArrowPath();
 

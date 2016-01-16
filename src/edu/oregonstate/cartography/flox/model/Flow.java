@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKTWriter;
+import edu.oregonstate.cartography.flox.gui.Arrow;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
@@ -71,6 +72,28 @@ public final class Flow {
      */
     private boolean locked = false;
 
+    /**
+     * The arrow at the start of the flow, pointing towards startPt
+     * TODO: not used yet
+     */
+    Arrow startArrow = new Arrow(this);
+    
+    /**
+     * The Arrow at the end of the flow, points towards endPt
+     */
+    Arrow endArrow = new Arrow(this);
+    
+    public void configureArrow(Model model, double flowStrokeWidth,
+            double scale, double west, double north) {
+        
+        endArrow.computeArrowPoints(model, flowStrokeWidth, scale, west, north);
+        
+    };
+    
+    public Arrow getEndArrow() {
+        return endArrow;
+    };
+    
     /**
      * Construct a Flow from 3 points.
      *

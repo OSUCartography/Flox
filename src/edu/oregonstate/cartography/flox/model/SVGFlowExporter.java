@@ -193,9 +193,8 @@ public class SVGFlowExporter extends SVGExporter {
                 double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(f.getStartPt()) : 0;
                 f = getClippedFlow(f, rs, endClipRadius(f.getEndPt()));
                 
-                // make the arrow
-                Arrow arrow = new Arrow(f, model, flowWidth, mapComponent.getScale(),
-                        mapComponent.getWest(), mapComponent.getNorth());
+                // get the arrow
+                Arrow arrow = f.getEndArrow();
 
                 // Get the flow SVG
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
