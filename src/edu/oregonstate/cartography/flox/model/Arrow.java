@@ -1,8 +1,5 @@
-package edu.oregonstate.cartography.flox.gui;
+package edu.oregonstate.cartography.flox.model;
 
-import edu.oregonstate.cartography.flox.model.Flow;
-import edu.oregonstate.cartography.flox.model.Model;
-import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
 
@@ -41,7 +38,7 @@ public class Arrow {
     /**
      * The flow that is passed in at instantiation.
      */
-    private final Flow inFlow;
+    private final Flow flow;
 
     /**
      * The location of the base of the Arrow in world coordinates. 
@@ -69,25 +66,15 @@ public class Arrow {
     private double west;
     private double north;
     private double scale;
-    private double flowStrokeWidth;
-    private Model model;
 
     /**
      * Constructor for the Arrow. Computes the location of the points comprising
      * the arrow head based on the stroke width and azimuth of the flow.
      *
-     * @param inFlow The flow an arrow will be created for
-     * @param model The complete data model. Needed for scaling up the smallest
-     * arrows
-     * @param flowStrokeWidth Determines the size of the arrow
-     * @param scale Needed for scaling to pixel values
-     * @param west Needed for scaling to pixel values
-     * @param north Needed for scaling to pixel values
+     * @param flow The flow an arrow will be created for
      */
-    public Arrow(Flow inFlow) {
-
-        this.inFlow = inFlow;
-
+    public Arrow(Flow flow) {
+        this.flow = flow;
     }
 
     public void computeArrowPoints(Model model, double flowStrokeWidth,
@@ -96,12 +83,10 @@ public class Arrow {
         this.west = west;
         this.north = north;
         this.scale = scale;
-        this.flowStrokeWidth = flowStrokeWidth;
-        this.model = model;
         
         // Gets the ratio of the flows stroke width to it's value. This ratio
         // is the same for all drawn flows.
-        double valueToStrokeRatio = flowStrokeWidth / inFlow.getValue();
+        double valueToStrokeRatio = flowStrokeWidth / flow.getValue();
 
         // Get the max flow value, and get the stroke value of that width 
         // based on the valueToStrokeRatio
@@ -151,10 +136,10 @@ public class Arrow {
 
         // Get the t value of the location on the flow where the base of the 
         // arrowhead will sit
-        double t = inFlow.getIntersectionTWithCircleAroundEndPoint(arrowLengthInWorld);
+        double t = flow.getIntersectionTWithCircleAroundEndPoint(arrowLengthInWorld);
 
         // Set the base of the Arrow to the point on the curve determined above.
-        basePt = inFlow.pointOnCurve(t);
+        basePt = flow.pointOnCurve(t);
 
         // Split the flow at the base point of the Arrow, plus a little bit.
         // The little bit is to provide sufficient overlap of the flow with the
@@ -165,16 +150,16 @@ public class Arrow {
         // a visible gap between the end of the flow and the arrowhead.
         Flow[] splitFlows;
         if (model.isPointArrowTowardsEndpoint()) {
-            splitFlows = inFlow.split(t + ((1 - t) * 0.1));
+            splitFlows = flow.split(t + ((1 - t) * 0.1));
         } else {
-            splitFlows = inFlow.split(t + ((1 - t) * 0.025));
+            splitFlows = flow.split(t + ((1 - t) * 0.025));
         }
         
 
         // Set the flow to the section of the flow that travels from the 
         // start point to the base of the Arrow. The remaining section of the
         // flow will not be drawn.
-        this.setOutFlow(splitFlows[0]);
+        setOutFlow(splitFlows[0]);
 
         // Locate the various points that determine the shape and location of 
         // the Arrow. This pulls various parameters from the model that are 
@@ -211,7 +196,7 @@ public class Arrow {
         // determining arrowhead orientation
         double azimuth;
         if(model.isPointArrowTowardsEndpoint()) {
-            azimuth = GeometryUtils.computeAzimuth(getBasePt(), inFlow.getEndPt());
+            azimuth = GeometryUtils.computeAzimuth(getBasePt(), flow.getEndPt());
         } else {
             azimuth = GeometryUtils.computeAzimuth(outFlow.getCtrlPt(), getBasePt());
         }

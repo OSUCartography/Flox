@@ -660,4 +660,22 @@ public class ForceLayouter {
         }
     }
 
+    public void computeArrowHeads() {
+        // FIXME 
+        // TODO endClipRadius, startClipAreas and methods used by them should be moved to the Model class.
+/*        if (model.isDrawArrows()) {
+            Iterator<Flow> iterator = model.flowIterator();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                // Compute radius of clipping circle around end point.
+                // Clip the flow with the clipping area and a circle around the end node
+                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
+                flow = getClippedFlow(flow, rs, endClipRadius(flow.getEndPt()));
+
+                // Create an arrowhead
+                flow.configureArrow(model, flowStrokeWidth, scale, west, north);
+            }
+        }
+*/
+    }
 }

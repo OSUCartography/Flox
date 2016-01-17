@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.gui;
 
+import edu.oregonstate.cartography.flox.model.Arrow;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.Flow;
@@ -222,7 +223,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @return Clipping radius in world coordinates.
      */
     private double endClipRadius(Point endNode) {
-        // distance between end of flows and their end points
+        // distance between end of flos and end point
         double gapDistanceToEndNodes = model.getFlowDistanceFromEndPointPixel() / scale
                 * getLockedScaleFactor();
         // Compute the radius of the end node (add stroke width / 2 to radius)
@@ -231,10 +232,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     private double startClipRadius(Point startNode) {
-        // distance between end of flows and their end points
+        // distance between start of flow and start point
         double gapDistanceToStartNodes = model.getFlowDistanceFromStartPointPixel() / scale
                 * getLockedScaleFactor();
-        // Compute the radius of the end node (add stroke width / 2 to radius)
+        // Compute the radius of the start node (add stroke width / 2 to radius)
         double startNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode)) / scale;
         return gapDistanceToStartNodes + startNodeRadius;
     }
@@ -269,6 +270,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // Draw arrows if the model says so
             if (model.isDrawArrows()) {
 
+                // FIXME the following three lines of code should not be here
+                // this should be taken care of by ForceLayouter.computeArrowHeads()
+                
                 // Compute radius of clipping circle around end point.
                 // Clip the flow with the clipping area and a circle around the end node
                 double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;

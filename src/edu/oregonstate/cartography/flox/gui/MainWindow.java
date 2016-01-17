@@ -3310,7 +3310,7 @@ public class MainWindow extends javax.swing.JFrame {
                 setProgress((int) Math.round(progress));
             }
         }
-
+        
         @Override
         public Void doInBackground() {
             // initialize progress property.
@@ -3325,6 +3325,8 @@ public class MainWindow extends javax.swing.JFrame {
             boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
             layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS,
                     moveFlowsOverlappingNodes, scale);
+            
+            layouter.computeArrowHeads();
             return null;
         }
 

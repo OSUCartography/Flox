@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.flox.model;
 
-import edu.oregonstate.cartography.flox.gui.Arrow;
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
