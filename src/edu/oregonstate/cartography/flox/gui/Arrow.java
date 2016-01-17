@@ -84,22 +84,21 @@ public class Arrow {
      * @param west Needed for scaling to pixel values
      * @param north Needed for scaling to pixel values
      */
-    public Arrow(Flow inFlow, Model model, double flowStrokeWidth,
-            double scale, double west, double north) {
+    public Arrow(Flow inFlow) {
 
+        this.inFlow = inFlow;
+
+    }
+
+    public void computeArrowPoints(Model model, double flowStrokeWidth,
+            double scale, double west, double north) {
+        
         this.west = west;
         this.north = north;
         this.scale = scale;
         this.flowStrokeWidth = flowStrokeWidth;
-        this.inFlow = inFlow;
         this.model = model;
-
-        computeArrowPoints();
-
-    }
-
-    private void computeArrowPoints() {
-
+        
         // Gets the ratio of the flows stroke width to it's value. This ratio
         // is the same for all drawn flows.
         double valueToStrokeRatio = flowStrokeWidth / inFlow.getValue();
@@ -189,16 +188,22 @@ public class Arrow {
         corner1Pt.y = getBasePt().y + arrowWidthInWorld;
 
         // Locate the first control point
-        corner1cPt.x = getBasePt().x + (getCorner1Pt().x - getBasePt().x) + ((getTipPt().x - getCorner1Pt().x) * model.getArrowEdgeCtrlLength());
-        corner1cPt.y = getBasePt().y + arrowWidthInWorld * model.getArrowEdgeCtrlWidth();
+        corner1cPt.x = getBasePt().x + (getCorner1Pt().x - getBasePt().x) 
+                + ((getTipPt().x - getCorner1Pt().x) 
+                * model.getArrowEdgeCtrlLength());
+        corner1cPt.y = getBasePt().y + arrowWidthInWorld 
+                * model.getArrowEdgeCtrlWidth();
 
         // locate the second corner
         corner2Pt.x = getBasePt().x + (arrowLengthInWorld * arrowCornerPosition);
         corner2Pt.y = getBasePt().y - arrowWidthInWorld;
 
         // locate the second control point
-        corner2cPt.x = getBasePt().x + (getCorner2Pt().x - getBasePt().x) + ((getTipPt().x - getCorner2Pt().x) * model.getArrowEdgeCtrlLength());
-        corner2cPt.y = getBasePt().y - arrowWidthInWorld * model.getArrowEdgeCtrlWidth();
+        corner2cPt.x = getBasePt().x + (getCorner2Pt().x - getBasePt().x) 
+                + ((getTipPt().x - getCorner2Pt().x) 
+                * model.getArrowEdgeCtrlLength());
+        corner2cPt.y = getBasePt().y - arrowWidthInWorld 
+                * model.getArrowEdgeCtrlWidth();
 
         // Get the azimuth of the line connecting the base of the arrow to the
         // endPoint of the flow. This determines the azimuth of the Arrow.
