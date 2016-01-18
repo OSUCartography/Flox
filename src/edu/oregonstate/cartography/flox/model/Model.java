@@ -759,6 +759,17 @@ public class Model {
     public ArrayList<Point> getNodes() {
         return graph.getNodes();
     }
+    
+    /**
+     * Returns a list of flows incident at a node. The flows are ordered 
+     * anti-clockwise. The origin of the polar coordinate system is the 
+     * horizontal x axis.
+     * @param node the point to search incoming flows for.
+     * @return A list with the ordered flows.
+     */
+    public ArrayList<Flow> getAnticlockwiseOrderedIncomingFlows(Point node) {
+        return graph.getAnticlockwiseOrderedIncomingFlows(node);
+    }
 
     /**
      * Returns the maximum flow value.

@@ -2,7 +2,7 @@ package edu.oregonstate.cartography.flox.model;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.Iterator;
 import org.jgrapht.graph.DirectedMultigraph;
 
@@ -24,7 +24,7 @@ public final class Graph extends DirectedMultigraph<Point, Flow> {
      */
     public Graph(Graph original) {
         super(Flow.class);
-        
+
         Iterator<Flow> flowIterator = original.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
@@ -78,11 +78,11 @@ public final class Graph extends DirectedMultigraph<Point, Flow> {
     public int getNbrFlows() {
         return edgeSet().size();
     }
-    
+
     public int getNbrNodes() {
         return vertexSet().size();
     }
-    
+
     /**
      * Returns the bounding box of all flows, excluding the other geometry.
      *
@@ -118,29 +118,47 @@ public final class Graph extends DirectedMultigraph<Point, Flow> {
      */
     public ArrayList<Flow> getOrderedFlows(boolean increasing) {
         ArrayList<Flow> flows = new ArrayList<>(edgeSet());
-        java.util.Collections.sort(flows, new Comparator<Flow>() {
-            @Override
-            public int compare(Flow flow1, Flow flow2) {
-                if (increasing) {
-                    return Double.compare(flow1.getValue(), flow2.getValue());
-                } else {
-                    return Double.compare(flow2.getValue(), flow1.getValue());
-                }
+        java.util.Collections.sort(flows, (Flow flow1, Flow flow2) -> {
+            if (increasing) {
+                return Double.compare(flow1.getValue(), flow2.getValue());
+            } else {
+                return Double.compare(flow2.getValue(), flow1.getValue());
             }
         });
         return flows;
     }
 
+    /**
+     * Returns a list of flows incident at a node. The flows are ordered 
+     * anti-clockwise. The origin of the polar coordinate system is the 
+     * horizontal x axis.
+     * @param node the point to search incoming flows for.
+     * @return A list with the ordered flows.
+     */
+    public ArrayList<Flow> getAnticlockwiseOrderedIncomingFlows(Point node) {
+        Collection<Flow> unsorted = incomingEdgesOf(node);
+        ArrayList<Flow> list = new ArrayList<>(unsorted);
+        java.util.Collections.sort(list, (Flow f1, Flow f2) -> {
+            double a1 = f1.getBaselineAzimuth();
+            double a2 = f2.getBaselineAzimuth();
+            if (a1 < a2) {
+                return -1;
+            }
+            if (a1 > a2) {
+                return 1;
+            }
+            return 0;
+        });
+        return list;
+    }
+
     public ArrayList<Point> getOrderedNodes(boolean increasing) {
         ArrayList<Point> nodes = new ArrayList<>(vertexSet());
-        java.util.Collections.sort(nodes, new Comparator<Point>() {
-            @Override
-            public int compare(Point node1, Point node2) {
-                if (increasing) {
-                    return Double.compare(node1.getValue(), node2.getValue());
-                } else {
-                    return Double.compare(node2.getValue(), node1.getValue());
-                }
+        java.util.Collections.sort(nodes, (Point node1, Point node2) -> {
+            if (increasing) {
+                return Double.compare(node1.getValue(), node2.getValue());
+            } else {
+                return Double.compare(node2.getValue(), node1.getValue());
             }
         });
         return nodes;
@@ -200,7 +218,7 @@ public final class Graph extends DirectedMultigraph<Point, Flow> {
         }
         return min;
     }
-    
+
     public double getMaxNodeValue() {
         int nNodes = vertexSet().size();
         if (nNodes < 1) {
@@ -216,8 +234,8 @@ public final class Graph extends DirectedMultigraph<Point, Flow> {
         }
         return max;
     }
-    
-     /**
+
+    /**
      * Gets the average value of all nodes on the map.
      *
      * @return mean node value
@@ -249,8 +267,8 @@ public final class Graph extends DirectedMultigraph<Point, Flow> {
         }
         return sum / counter;
     }
-    
-     /**
+
+    /**
      * Get the length of longest flow baseline.
      *
      * @return the length of the longest flow baseline
