@@ -57,7 +57,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     protected double north;
 
     /**
-     * scale factor for drawing geometry pixels = world_coordinates * scale;
+     * scale factor for drawing geometry: pixels = world_coordinates * scale;
      */
     protected double scale;
 

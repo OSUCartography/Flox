@@ -40,6 +40,22 @@ public final class Point {
         return new Point(newX + origin.x, newY + origin.y);
     }
 
+     /**
+     * Rotate and translate
+     *
+     * @param dx horizontal translation
+     * @param dy vertical translation
+     * @param angle Rotation angle in radians. Positive numbers will rotate
+     * counter- clockwise, negative numbers will rotate clockwise.
+     */
+    public void transform(double dx, double dy, double angle) {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        double newX = x * cos - y * sin + dx;
+        y = x * sin + y * cos + dy;
+        x = newX;
+    }
+    
     /**
      * @return the selected
      */

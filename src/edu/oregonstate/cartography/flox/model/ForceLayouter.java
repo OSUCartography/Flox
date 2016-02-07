@@ -643,11 +643,11 @@ public class ForceLayouter {
         }
     }
 
-    public void moveFlowsOverlappingNodes(double scale) {
+    public void moveFlowsOverlappingNodes(double mapScale) {
 
         // Get an ArrayList of all flows that intersect nodes.
         ArrayList<Flow> flowsArray;
-        flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+        flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, mapScale);
 
         // If flowsArray has anything in it, move flows that overlap nodes, update
         // flowsArray with flows that intersect nodes, and repeat until 
@@ -655,30 +655,29 @@ public class ForceLayouter {
         // FIXME This is a potentially infinite loop. There might exist configurations
         // where there are always some flows that overlap some nodes
         while (flowsArray.size() > 0) {
-            GeometryUtils.moveFlowsThatCrossNodes(flowsArray, scale);
-            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, scale);
+            GeometryUtils.moveFlowsThatCrossNodes(flowsArray, mapScale);
+            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, mapScale);
         }
     }
 
-    public void computeArrowHeads() {
-        // FIXME 
-        // TODO endClipRadius, startClipAreas and methods used by them should be moved to the Model class.
-        if (model.isDrawArrows()) {
-            Iterator<Flow> iterator = model.flowIterator();
-            while (iterator.hasNext()) {
-                Flow flow = iterator.next();
+    public void computeArrowHeads(double mapScale) {
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
 
-//                // Compute radius of clipping circle around end point.
-//                // Clip the flow with the clipping area and a circle around the end node
-//                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
-//                flow = getClippedFlow(flow, rs, endClipRadius(flow.getEndPt()));
-//
-//                // Create an arrowhead
-//                flow.configureArrow(model, flowStrokeWidth, scale, west, north);
-            }
+            // Compute radius of clipping circle around end point.
+            // Clip the flow with the clipping area and/or a circle around the end node
+            double endClipRadius = model.endClipRadius(flow.getEndPt(), mapScale);
+            
+            // Create an arrowhead
+            // Calculate the stroke width of the flow based on its value.
+            double flowWidthScaleFactor = model.getFlowWidthScaleFactor();
+            double flowStrokeWidth = Math.abs(flow.getValue()) * flowWidthScaleFactor
+                    * model.getLockedScaleFactor(mapScale) / mapScale;
+            flow.configureArrow(model, flowStrokeWidth, endClipRadius);
         }
 
-        // TODO this is where for each node arrowheads can be adjusted
+        // TODO adjust the width of arrowheads
         ArrayList<Point> points = model.getNodes();
         for (Point point : points) {
             ArrayList<Flow> incomingFlows = model.getAnticlockwiseOrderedIncomingFlows(point);

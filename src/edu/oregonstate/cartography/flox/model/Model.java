@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
@@ -51,7 +52,7 @@ public class Model {
     public boolean useFrictionForAngularDistortionHack = true; // FIXME
 
     public boolean liveDrawing = true;
-    
+
     /**
      * Density of points along flows.
      */
@@ -153,7 +154,7 @@ public class Model {
      * If true direction indications are drawn on flow lines.
      */
     private boolean drawInlineArrows = false;
-    
+
     /**
      * Used by the Arrow class to determine the length of arrowheads.
      */
@@ -173,14 +174,14 @@ public class Model {
 
     /**
      * Used by the Arrow class to determine the location of the arrow edge
-     * control points. The control point is moved away from the 
-     * centerline of the arrow by the width of the arrowhead times this number.
+     * control points. The control point is moved away from the centerline of
+     * the arrow by the width of the arrowhead times this number.
      */
     private double arrowEdgeCtrlWidth = 0.5;
 
     /**
      * Used by the Arrow class to determine the horizontal position of the
-     * arrow's corners relative to the base. The corners are moved from the base 
+     * arrow's corners relative to the base. The corners are moved from the base
      * of the arrowhead towards the tip by the length of the arrowhead times
      * this number.
      */
@@ -188,32 +189,30 @@ public class Model {
 
     /**
      * Used by the Arrow class to determine the size of the smallest arrowhead.
-     * Larger values result in a larger minimum arrowhead size. 
+     * Larger values result in a larger minimum arrowhead size.
      */
     private double arrowSizeRatio = 0.1;
 
     /**
      * Used by the Arrow class to determine the length of the longest arrowhead.
-     * Smaller values result in longer arrowheads; the absolute difference 
-     * between the the shortest arrow and the arrow being drawn is multiplied by 
+     * Smaller values result in longer arrowheads; the absolute difference
+     * between the the shortest arrow and the arrow being drawn is multiplied by
      * this and subtracted from the arrow length.
      */
     private double arrowLengthRatio = 0.0;
-    
+
     /**
-     * Determines the gap (in pixels) between a flow's end node and the end of 
-     * the flow line.
-     * Currently modified by a GUI modifiable text field.
+     * Determines the gap (in pixels) between a flow's end node and the end of
+     * the flow line. Currently modified by a GUI modifiable text field.
      */
     private double flowDistanceFromEndPointPx = 0.0d;
 
     /**
-     * Determines the gap (in pixels) between a flow's start 
-     * node and the start of the flow line.
-     * Currently modified by a GUI modifiable text field.
+     * Determines the gap (in pixels) between a flow's start node and the start
+     * of the flow line. Currently modified by a GUI modifiable text field.
      */
     private double flowDistanceFromStartPointPx = 0.0d;
-    
+
     /**
      * Maximum allowed flow width in pixels. The flow with the highest value
      * will have this width. All other flows are scaled down relative to this
@@ -240,7 +239,7 @@ public class Model {
      * Clip the ends of flows. This flags is only used to update the GUI.
      */
     private boolean clipFlowEnds = false;
-    
+
     /**
      * Clip the beginnings of flows. This flags is only used to update the GUI.
      */
@@ -271,7 +270,7 @@ public class Model {
 
     // TODO temporary hack to enable the "move flows that overlapp nodes" function
     public boolean moveFlowsOverlappingNodes = false;
-    
+
     // TODO Determines how arrow orientation is calculated. false results in
     // arrowheads having the same angle as the curve at the point of the 
     // arrowhead's base; true results in arrows being oriented towards the 
@@ -281,13 +280,15 @@ public class Model {
     // Should probably choose one over the other sometime. 
     // A checkbox is currently in the GUI to compare the two methods.
     public boolean pointArrowTowardsEndpoint = false;
-    public boolean isPointArrowTowardsEndpoint () {
+
+    public boolean isPointArrowTowardsEndpoint() {
         return pointArrowTowardsEndpoint;
     }
-    public void setPointArrowTowardsEndpoint (boolean boo) {
+
+    public void setPointArrowTowardsEndpoint(boolean boo) {
         pointArrowTowardsEndpoint = boo;
     }
-    
+
     /**
      * Constructor of the model.
      */
@@ -473,9 +474,9 @@ public class Model {
             graph.removeEdge(flow);
             flow.reverseFlow();
             graph.addFlow(flow);
-        }        
+        }
     }
-    
+
     /**
      * Delete a node.
      *
@@ -759,11 +760,12 @@ public class Model {
     public ArrayList<Point> getNodes() {
         return graph.getNodes();
     }
-    
+
     /**
-     * Returns a list of flows incident at a node. The flows are ordered 
-     * anti-clockwise. The origin of the polar coordinate system is the 
+     * Returns a list of flows incident at a node. The flows are ordered
+     * anti-clockwise. The origin of the polar coordinate system is the
      * horizontal x axis.
+     *
      * @param node the point to search incoming flows for.
      * @return A list with the ordered flows.
      */
@@ -779,7 +781,7 @@ public class Model {
     public double getMaxFlowValue() {
         return graph.getMaxFlowValue();
     }
-    
+
     public double getMinFlowValue() {
         return graph.getMinFlowValue();
     }
@@ -803,10 +805,10 @@ public class Model {
     }
 
     /**
-     * Empirically computes the tolerance value needed for the De Casteljau 
-     * algorithm, which converts a Bezier curve to straight line segments.
-     * This value is determined by minimum/maximum flow lengths. The
-     * flowNodeDensity field controls the maximum number of nodes along a flow.
+     * Empirically computes the tolerance value needed for the De Casteljau
+     * algorithm, which converts a Bezier curve to straight line segments. This
+     * value is determined by minimum/maximum flow lengths. The flowNodeDensity
+     * field controls the maximum number of nodes along a flow.
      *
      * @return
      */
@@ -985,6 +987,7 @@ public class Model {
     /**
      * Apply lock flags to all flows. Flags must be in the order of an iterator
      * returned by flowIterator().
+     *
      * @param locks An array with lock flags.
      */
     public void applyLocks(boolean[] locks) {
@@ -1003,9 +1006,10 @@ public class Model {
     public Collection<Layer> getLayers() {
         return map.getLayers();
     }
-    
+
     /**
      * Returns a layer by its name.
+     *
      * @param name Name must contain at least one non-empty character.
      * @return The found layer or null if non is found.
      */
@@ -1231,7 +1235,7 @@ public class Model {
     public double getFlowDistanceFromStartPointPixel() {
         return flowDistanceFromStartPointPx;
     }
-    
+
     /**
      * @param flowArrowEndPointRadius the flowArrowEndPointRadius to set
      */
@@ -1242,7 +1246,7 @@ public class Model {
     public void setFlowDistanceFromStartPointPixel(double flowArrowStartPointRadius) {
         this.flowDistanceFromStartPointPx = flowArrowStartPointRadius;
     }
-    
+
     /**
      * @return the addArrows
      */
@@ -1309,7 +1313,7 @@ public class Model {
     public double getArrowLengthRatio() {
         return arrowLengthRatio;
     }
-    
+
     /**
      * @param arrowSizeRatio the arrowSizeRatio to set
      */
@@ -1320,7 +1324,7 @@ public class Model {
     public void setArrowLengthRatio(double arrowLengthRatio) {
         this.arrowLengthRatio = arrowLengthRatio;
     }
-    
+
     /**
      * @param maxFlowLengthSpringConstant the maxFlowLengthSpringConstant to set
      */
@@ -1522,6 +1526,63 @@ public class Model {
      */
     public void setDrawInlineArrows(boolean drawInlineArrows) {
         this.drawInlineArrows = drawInlineArrows;
+    }
+
+    public double getLockedScaleFactor(double mapScale) {
+        if (!isScaleLocked()) {
+            return 1;
+        } else {
+            return mapScale / getLockedMapScale();
+        }
+    }
+
+    public Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
+        double deCasteljauTol = getDeCasteljauTolerance();
+        return flow.getClippedFlow(startClipRadius, endClipRadius, deCasteljauTol);
+    }
+
+    /**
+     * Get a node's radius in pixels for drawing.
+     *
+     * @param node
+     * @return
+     */
+    private double getNodeRadius(Point node, double mapScale) {
+        double area = Math.abs(node.getValue()
+                * getNodeSizeScaleFactor());
+        return (Math.sqrt(area / Math.PI)) * getLockedScaleFactor(mapScale);
+    }
+
+    /**
+     * Computes clipping radius for an end node. Takes size of node and distance
+     * to the end node into account.
+     *
+     * @param endNode the end node of the flow.
+     * @return Clipping radius in world coordinates.
+     */
+    public double endClipRadius(Point endNode, double mapScale) {
+        // distance between end of flow and end point
+        double gapDistanceToEndNodes = getFlowDistanceFromEndPointPixel() / mapScale
+                * getLockedScaleFactor(mapScale);
+        // Compute the radius of the end node (add stroke width / 2 to radius)
+        double endNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(endNode, mapScale)) / mapScale;
+        return gapDistanceToEndNodes + endNodeRadius;
+    }
+
+    /**
+     * Computes clipping radius for a start node. Takes size of node and
+     * distance to the start node into account.
+     *
+     * @param startNode the start node of the flow.
+     * @return Clipping radius in world coordinates.
+     */
+    public double startClipRadius(Point startNode, double mapScale) {
+        // distance between start of flow and start point
+        double gapDistanceToStartNodes = getFlowDistanceFromStartPointPixel() / mapScale
+                * getLockedScaleFactor(mapScale);
+        // Compute the radius of the start node (add stroke width / 2 to radius)
+        double startNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode, mapScale)) / mapScale;
+        return gapDistanceToStartNodes + startNodeRadius;
     }
 
 }

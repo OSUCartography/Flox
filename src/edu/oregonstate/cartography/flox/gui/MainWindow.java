@@ -2455,20 +2455,20 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
 
     private void arrowheadLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadLengthSliderStateChanged
-
         if (updatingGUI == false && model != null) {
             model.setArrowLengthScaleFactor((arrowheadLengthSlider.getValue() + 1) / 40d);
+            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowheadLengthSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Length");
             }
-
         }
     }//GEN-LAST:event_arrowheadLengthSliderStateChanged
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 40d);
+            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowheadWidthSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Width");
@@ -2479,6 +2479,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowEdgeCtrlLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlLengthSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowEdgeCtrlLength((arrowEdgeCtrlLengthSlider.getValue()) / 100d);
+            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowEdgeCtrlLengthSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Edge Shape");
@@ -2489,6 +2490,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowEdgeCtrlWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidthSlider.getValue()) / 100d);
+            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowEdgeCtrlWidthSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Edge Shape");
@@ -2499,6 +2501,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowCornerPositionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowCornerPositionSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowCornerPosition((arrowCornerPositionSlider.getValue()) / 100d);
+            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowCornerPositionSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Corner Position");
@@ -2706,6 +2709,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowSizeRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowSizeRatioSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowSizeRatio((arrowSizeRatioSlider.getValue()) / 100d);
+            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowSizeRatioSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Size Ratio");
@@ -3220,6 +3224,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowLengthRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowLengthRatioSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowLengthRatio(Math.abs(arrowLengthRatioSlider.getValue() - 100) / 100d);
+            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowLengthRatioSlider.getValueIsAdjusting()) {
                 addUndo("Arrow Size Ratio");
@@ -3230,6 +3235,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void useInFlowCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useInFlowCheckboxActionPerformed
         if (model != null) {
             model.setPointArrowTowardsEndpoint(useInFlowCheckbox.isSelected());
+            updateArrowHeads();
             mapComponent.refreshMap();
             addUndo("Use In Flow");
         }
@@ -3310,7 +3316,7 @@ public class MainWindow extends javax.swing.JFrame {
                 setProgress((int) Math.round(progress));
             }
         }
-        
+
         @Override
         public Void doInBackground() {
             // initialize progress property.
@@ -3325,8 +3331,8 @@ public class MainWindow extends javax.swing.JFrame {
             boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
             layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS,
                     moveFlowsOverlappingNodes, scale);
-            
-            layouter.computeArrowHeads();
+
+            layouter.computeArrowHeads(scale);
             return null;
         }
 
@@ -3384,6 +3390,15 @@ public class MainWindow extends javax.swing.JFrame {
         layouter.straightenFlows(false);
         layoutWorker = new LayoutWorker(layouter);
         layoutWorker.execute();
+    }
+
+    private void updateArrowHeads() {
+        if (updatingGUI || model.getNbrFlows() == 0) {
+            return;
+        }
+        ForceLayouter layouter = new ForceLayouter(model);
+        double scale = mapComponent.getScale();
+        layouter.computeArrowHeads(scale);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

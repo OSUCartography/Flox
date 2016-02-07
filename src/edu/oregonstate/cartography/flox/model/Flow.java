@@ -193,9 +193,15 @@ public final class Flow {
         this.value = value;
     }
 
-    public void configureArrow(Model model, double flowStrokeWidth,
-            double scale, double west, double north) {
-        endArrow.computeArrowPoints(model, flowStrokeWidth, scale, west, north);
+    /**
+     * Computes geometry of arrow heads
+     * @param model model
+     * @param flowStrokeWidth width of flow in world units.
+     * @param endClipRadius the tip of the arrow is placed at this distance 
+     * from the end of the flow
+     */
+    public void configureArrow(Model model, double flowStrokeWidth, double endClipRadius) {
+        endArrow.computeArrowPoints(model, flowStrokeWidth, endClipRadius);
     };
     
     public Arrow getEndArrow() {
