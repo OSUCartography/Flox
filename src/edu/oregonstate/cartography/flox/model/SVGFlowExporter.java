@@ -193,8 +193,7 @@ public class SVGFlowExporter extends SVGExporter {
                 flow = getClippedFlow(flow, rs, endClipRadius(flow.getEndPt()));
                 
                 // Create an arrowhead
-                flow.configureArrow(model, flowWidth, mapComponent.getScale(), mapComponent.getWest(), 
-                        mapComponent.getNorth());
+                flow.configureArrow(model, flowWidth, model.endClipRadius(flow.getEndPt(), mapComponent.getScale()));
                 
                 // get the arrow
                 Arrow arrow = flow.getEndArrow();
