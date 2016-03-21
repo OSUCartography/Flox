@@ -183,17 +183,21 @@ public class SVGFlowExporter extends SVGExporter {
 
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow f = iterator.next();
-            double flowWidth = getFlowWidth(f);
+            Flow flow = iterator.next();
+            double flowWidth = getFlowWidth(flow);
 
             if (model.isDrawArrows()) {
                 // Compute radius of clipping circle around end point.
                 // Clip the flow with the clipping area and a circle around the end node
-                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(f.getStartPt()) : 0;
-                f = getClippedFlow(f, rs, endClipRadius(f.getEndPt()));
+                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
+                flow = getClippedFlow(flow, rs, endClipRadius(flow.getEndPt()));
+                
+                // Create an arrowhead
+                flow.configureArrow(model, flowWidth, mapComponent.getScale(), mapComponent.getWest(), 
+                        mapComponent.getNorth());
                 
                 // get the arrow
-                Arrow arrow = f.getEndArrow();
+                Arrow arrow = flow.getEndArrow();
 
                 // Get the flow SVG
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
@@ -205,17 +209,18 @@ public class SVGFlowExporter extends SVGExporter {
                 Element arrowPathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 arrowPathElement.setAttribute("d", arrowToPath(arrow));
                 arrowPathElement.setAttribute("fill", "black");
+                arrowPathElement.setAttribute("stroke-width", Double.toString(0));
                 g.appendChild(arrowPathElement);
 
             } else {
                 // Clip the flow with the clipping area
-                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(f.getStartPt()) : 0;
-                double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(f.getEndPt()) : 0;
+                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
+                double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
                 
-                f = getClippedFlow(f, rs, re);
+                flow = getClippedFlow(flow, rs, re);
                 
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                pathElement.setAttribute("d", flowToPath(f));
+                pathElement.setAttribute("d", flowToPath(flow));
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
                 g.appendChild(pathElement);
             }
