@@ -50,6 +50,7 @@ public class Model {
 
     public boolean useFrictionForForcesHack = true; // FIXME
     public boolean useFrictionForAngularDistortionHack = true; // FIXME
+    public boolean limitNodesRepulsionToBandHack = false; // FIXME
 
     public boolean liveDrawing = true;
 

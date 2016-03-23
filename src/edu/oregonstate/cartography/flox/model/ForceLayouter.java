@@ -340,53 +340,50 @@ public class ForceLayouter {
             // base line of the flow defined by vector 'b'.
             // if the length of the projected vector > base line length / 2
             // then the node is not vertically above or below the base line
-            Point baseLineMidPoint = flow.getBaseLineMidPoint();
-            Point endPoint = flow.getEndPt();
-            double ax = node.x - baseLineMidPoint.x;
-            double ay = node.y - baseLineMidPoint.y;
-            double baseLineLength = flow.getBaselineLength(); // twice the tolerance
-            double bx = endPoint.x - baseLineMidPoint.x;
-            double by = endPoint.y - baseLineMidPoint.y;
-            double projectedLength = Math.abs((ax * bx + ay * by) / baseLineLength);
-            // a node not vertically above or below the base line will have a 
-            // weight = 0.
-            // A node on the normal vector on the base line passing through the 
-            // base line mid point has a weight of 1 (i.e. projected Length = 0).
-            // A node with a projected length = baseLineLength / 2 has a weight of 0.
             double wDist;
-            if (projectedLength > baseLineLength / 2) {
-                wDist = 0;
+            // the following is experimental and apparently not of any benefit.
+            // FIXME should be removed
+            if (model.limitNodesRepulsionToBandHack) {
+                Point baseLineMidPoint = flow.getBaseLineMidPoint();
+                Point endPoint = flow.getEndPt();
+                double ax = node.x - baseLineMidPoint.x;
+                double ay = node.y - baseLineMidPoint.y;
+                double baseLineLength = flow.getBaselineLength(); // twice the tolerance
+                double bx = endPoint.x - baseLineMidPoint.x;
+                double by = endPoint.y - baseLineMidPoint.y;
+                double projectedLength = Math.abs((ax * bx + ay * by) / baseLineLength);
+                // a node not vertically above or below the base line will have a 
+                // weight = 0.
+                // A node on the normal vector on the base line passing through the 
+                // base line mid point has a weight of 1 (i.e. projected Length = 0).
+                // A node with a projected length = baseLineLength / 2 has a weight of 0.
+                if (projectedLength > baseLineLength / 2) {
+                    wDist = 0;
+                } else {
+                    wDist = 1 - projectedLength / (baseLineLength / 2);
+                }
             } else {
-                wDist = 1 - projectedLength / (baseLineLength / 2);
+                wDist = 1;
             }
 
             // find nearest point on target flow
             xy[0] = node.x;
             xy[1] = node.y;
             double d = flow.distance(xy);
+            double dx = (xy[0] - node.x);
+            double dy = (xy[1] - node.y);
 
-            // start with unary direction vector
-            double dx = (xy[0] - node.x) / d;
-            double dy = (xy[1] - node.y) / d;
-
+            // compute IDW from distance
             // avoid division by zero
             if (d == 0) {
                 continue;
             }
-
-            // compute idw from distance
-            // Maybe this could use a different method designed for nodes in
+            // TODO this could use a different method designed for nodes in
             // order to get a different distance weight.
-            // FIXME should we use a different IDW exponent than for flows?
-            double idw = 1d / pow(d, distWeightExponent); // inverseDistanceWeight(d);
-
-            // apply IDW weight and distance-to-centra-normal weight
-            dx *= idw * wDist;
-            dy *= idw * wDist;
-
-            // add to nodes force sum
-            fxTotal += dx;
-            fyTotal += dy;
+            double idw = 1d / pow(d, distWeightExponent);
+            idw *= wDist;
+            fxTotal += dx * idw;
+            fyTotal += dy * idw;
             wTotal += idw;
         }
 
@@ -642,11 +639,12 @@ public class ForceLayouter {
             }
         }
     }
-    
+
     /**
      * Identifies flows that overlap nodes they are not connected to using
-     * GeometryUtils.getFlowsOverlappingNOdes(model, scale), and passes
-     * them to GeometryUtils.moveFlowsOverlappingNodes(flows, scale).
+     * GeometryUtils.getFlowsOverlappingNOdes(model, scale), and passes them to
+     * GeometryUtils.moveFlowsOverlappingNodes(flows, scale).
+     *
      * @param scale Current map scale
      */
     public void moveFlowsOverlappingNodes(double scale) {
@@ -674,7 +672,7 @@ public class ForceLayouter {
             // Compute radius of clipping circle around end point.
             // Clip the flow with the clipping area and/or a circle around the end node
             double endClipRadius = model.endClipRadius(flow.getEndPt(), mapScale);
-            
+
             // Create an arrowhead
             // Calculate the stroke width of the flow based on its value.
             double flowWidthScaleFactor = model.getFlowWidthScaleFactor();

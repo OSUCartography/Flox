@@ -327,6 +327,7 @@ public class MainWindow extends javax.swing.JFrame {
         viewFlowRangeboxToggleButton = new javax.swing.JToggleButton();
         angularDistributionSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel28 = new javax.swing.JLabel();
+        limitNodesRepulsionToBandCheckBox = new javax.swing.JCheckBox();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
@@ -808,7 +809,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel7.setText("Anti-Torsion Forces");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel7, gridBagConstraints);
 
@@ -825,7 +826,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 16;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
@@ -834,7 +835,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel8.setText("Stiffness Factor for Peripheral Flows");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 17;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel8, gridBagConstraints);
 
@@ -852,7 +853,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 18;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
@@ -867,7 +868,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridy = 22;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(enforceRangeboxCheckbox, gridBagConstraints);
 
@@ -882,7 +883,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 17;
+        gridBagConstraints.gridy = 20;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(canvasSizeSlider, gridBagConstraints);
@@ -890,7 +891,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel11.setText("Canvas Size");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 19;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel11, gridBagConstraints);
 
@@ -906,7 +907,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridy = 22;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
@@ -915,7 +916,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel13.setText("Flow Rangebox Size");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridy = 21;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel13, gridBagConstraints);
 
@@ -932,7 +933,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 17;
+        gridBagConstraints.gridy = 20;
         forcesPanel.add(viewCanvasToggleButton, gridBagConstraints);
 
         viewFlowRangeboxToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
@@ -945,7 +946,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridy = 23;
         forcesPanel.add(viewFlowRangeboxToggleButton, gridBagConstraints);
 
         angularDistributionSlider.setMajorTickSpacing(10);
@@ -961,7 +962,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 23;
+        gridBagConstraints.gridy = 26;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         forcesPanel.add(angularDistributionSlider, gridBagConstraints);
@@ -969,10 +970,23 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel28.setText("Angular Distribution");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 22;
+        gridBagConstraints.gridy = 25;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel28, gridBagConstraints);
+
+        limitNodesRepulsionToBandCheckBox.setText("Limit Nodes Repulsion to Vertical Band");
+        limitNodesRepulsionToBandCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                limitNodesRepulsionToBandCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        forcesPanel.add(limitNodesRepulsionToBandCheckBox, gridBagConstraints);
 
         controlsTabbedPane.addTab("Layout", forcesPanel);
 
@@ -3256,6 +3270,11 @@ public class MainWindow extends javax.swing.JFrame {
         addUndo("Draw Inline Arrows");
     }//GEN-LAST:event_drawInlineArrowsCheckBoxActionPerformed
 
+    private void limitNodesRepulsionToBandCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_limitNodesRepulsionToBandCheckBoxActionPerformed
+        model.limitNodesRepulsionToBandHack = limitNodesRepulsionToBandCheckBox.isSelected();
+        layout("Limit Nodes Repulsion to Band");
+    }//GEN-LAST:event_limitNodesRepulsionToBandCheckBoxActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3493,6 +3512,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToolBar jToolBar1;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
+    private javax.swing.JCheckBox limitNodesRepulsionToBandCheckBox;
     private javax.swing.JCheckBoxMenuItem liveDrawingCheckBoxMenuItem;
     private javax.swing.JToggleButton lockFeatureScaleToggleButton;
     private javax.swing.JMenuItem lockMenuItem;
