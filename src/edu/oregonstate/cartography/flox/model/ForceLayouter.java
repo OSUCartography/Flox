@@ -642,12 +642,18 @@ public class ForceLayouter {
             }
         }
     }
-
-    public void moveFlowsOverlappingNodes(double mapScale) {
+    
+    /**
+     * Identifies flows that overlap nodes they are not connected to using
+     * GeometryUtils.getFlowsOverlappingNOdes(model, scale), and passes
+     * them to GeometryUtils.moveFlowsOverlappingNodes(flows, scale).
+     * @param scale Current map scale
+     */
+    public void moveFlowsOverlappingNodes(double scale) {
 
         // Get an ArrayList of all flows that intersect nodes.
         ArrayList<Flow> flowsArray;
-        flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, mapScale);
+        flowsArray = GeometryUtils.getFlowsOverlappingNodes(model, scale);
 
         // If flowsArray has anything in it, move flows that overlap nodes, update
         // flowsArray with flows that intersect nodes, and repeat until 
@@ -655,8 +661,8 @@ public class ForceLayouter {
         // FIXME This is a potentially infinite loop. There might exist configurations
         // where there are always some flows that overlap some nodes
         while (flowsArray.size() > 0) {
-            GeometryUtils.moveFlowsThatCrossNodes(flowsArray, mapScale);
-            flowsArray = GeometryUtils.getFlowsThatIntersectNodes(model, mapScale);
+            GeometryUtils.moveFlowsOverlappingNodes(flowsArray, scale);
+            flowsArray = GeometryUtils.getFlowsOverlappingNodes(model, scale);
         }
     }
 

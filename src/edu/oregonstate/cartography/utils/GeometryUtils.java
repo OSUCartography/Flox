@@ -324,7 +324,7 @@ public class GeometryUtils {
      * @param scale The scale of the mapComponent.
      * @return
      */
-    public static ArrayList<Flow> getFlowsThatIntersectNodes(Model model, double scale) {
+    public static ArrayList<Flow> getFlowsOverlappingNodes(Model model, double scale) {
         ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
@@ -620,7 +620,7 @@ public class GeometryUtils {
      *
      * @param flows
      */
-    public static void moveFlowsThatCrossNodes(ArrayList<Flow> flows, double scale) {
+    public static void moveFlowsOverlappingNodes(ArrayList<Flow> flows, double scale) {
 
         for (Flow flow : flows) {
 
@@ -659,7 +659,7 @@ public class GeometryUtils {
             // Get the d value of the flow's control point.
             double pt0D = (cPt.x - sPt.x) * (ePt.y - sPt.y) - (cPt.y - sPt.y) * (ePt.x - sPt.x);
 
-            // Initiallize the perpendicular unitVector of the flow's baseline.
+            // Initialize the perpendicular unitVector of the flow's baseline.
             // The values assigned to these will depend on whether the control
             // point is on the right or left side of the baseline.
             double unitVectorX;
