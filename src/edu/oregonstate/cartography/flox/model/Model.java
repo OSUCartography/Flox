@@ -264,6 +264,12 @@ public class Model {
     private double endClipAreaBufferDistance = 0;
 
     /**
+     * Minimum distance of flows from nodes. 
+     * Used by ForceLayouter.moveFlowsOverlappingNodes()
+     */
+    private double nodeTolerancePx = 10;
+    
+    /**
      * A map with a set of symbolized layers.
      */
     @XmlTransient
@@ -1584,6 +1590,20 @@ public class Model {
         // Compute the radius of the start node (add stroke width / 2 to radius)
         double startNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode, mapScale)) / mapScale;
         return gapDistanceToStartNodes + startNodeRadius;
+    }
+
+    /**
+     * @return the nodeTolerancePx
+     */
+    public double getNodeTolerancePx() {
+        return nodeTolerancePx;
+    }
+
+    /**
+     * @param nodeTolerancePx the nodeTolerancePx to set
+     */
+    public void setNodeTolerancePx(double nodeTolerancePx) {
+        this.nodeTolerancePx = nodeTolerancePx;
     }
 
 }

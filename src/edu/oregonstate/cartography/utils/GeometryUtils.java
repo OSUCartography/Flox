@@ -387,7 +387,7 @@ public class GeometryUtils {
         // Find out what that radius is in world coordinates
         // Add a bit to the pixel radius in order to make the radius a few pixels 
         // wider than the actual node and to account for the node's stroke width. 
-        double worldNodeRadius = (nodeRadiusPx + NODE_TOLERANCE_PX) / mapScale;
+        double worldNodeRadius = (nodeRadiusPx + model.getNodeTolerancePx()) / mapScale;
 
         // Add the worldNodeRadius to half the worldFlowWidth
         double threshDist = (worldStrokeWidth / 2) + worldNodeRadius;

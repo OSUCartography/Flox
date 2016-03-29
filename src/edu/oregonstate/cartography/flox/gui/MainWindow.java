@@ -328,6 +328,8 @@ public class MainWindow extends javax.swing.JFrame {
         angularDistributionSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel28 = new javax.swing.JLabel();
         limitNodesRepulsionToBandCheckBox = new javax.swing.JCheckBox();
+        minPxDistanceOfFlowsFromNodesSlider = new javax.swing.JSlider();
+        minPxDistanceOfFlowsFromNodesSliderLabel = new javax.swing.JLabel();
         mapPanel = new TransparentMacPanel();
         mapControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
@@ -784,6 +786,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         forcesPanel.add(jLabel6, gridBagConstraints);
 
@@ -984,9 +987,39 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         forcesPanel.add(limitNodesRepulsionToBandCheckBox, gridBagConstraints);
+
+        minPxDistanceOfFlowsFromNodesSlider.setMajorTickSpacing(2);
+        minPxDistanceOfFlowsFromNodesSlider.setMaximum(20);
+        minPxDistanceOfFlowsFromNodesSlider.setMinorTickSpacing(1);
+        minPxDistanceOfFlowsFromNodesSlider.setPaintLabels(true);
+        minPxDistanceOfFlowsFromNodesSlider.setPaintTicks(true);
+        minPxDistanceOfFlowsFromNodesSlider.setSnapToTicks(true);
+        minPxDistanceOfFlowsFromNodesSlider.setValue(10);
+        minPxDistanceOfFlowsFromNodesSlider.setPreferredSize(new java.awt.Dimension(190, 40));
+        minPxDistanceOfFlowsFromNodesSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                minPxDistanceOfFlowsFromNodesSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 28;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        forcesPanel.add(minPxDistanceOfFlowsFromNodesSlider, gridBagConstraints);
+
+        minPxDistanceOfFlowsFromNodesSliderLabel.setText("Min. Pixel Distance of Flows from Nodes");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 27;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+        forcesPanel.add(minPxDistanceOfFlowsFromNodesSliderLabel, gridBagConstraints);
 
         controlsTabbedPane.addTab("Layout", forcesPanel);
 
@@ -3275,6 +3308,14 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Limit Nodes Repulsion to Band");
     }//GEN-LAST:event_limitNodesRepulsionToBandCheckBoxActionPerformed
 
+    private void minPxDistanceOfFlowsFromNodesSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_minPxDistanceOfFlowsFromNodesSliderStateChanged
+        model.setNodeTolerancePx(minPxDistanceOfFlowsFromNodesSlider.getValue());
+        mapComponent.refreshMap();
+        if (minPxDistanceOfFlowsFromNodesSlider.getValueIsAdjusting() == false) {
+            layout("Min. Flow Distance from Nodes");
+        }
+    }//GEN-LAST:event_minPxDistanceOfFlowsFromNodesSliderStateChanged
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3528,6 +3569,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JSlider minPxDistanceOfFlowsFromNodesSlider;
+    private javax.swing.JLabel minPxDistanceOfFlowsFromNodesSliderLabel;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
