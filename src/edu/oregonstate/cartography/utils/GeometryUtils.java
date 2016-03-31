@@ -618,12 +618,10 @@ public class GeometryUtils {
                 Point node = nodeIterator.next();
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
                     if(flowIntersectsNode(flow, node, model, mapScale)){
-                        System.out.println("yes");
                         return true;
                     }
                 }
             }
-        System.out.println("no");
         return false;
     }
     

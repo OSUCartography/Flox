@@ -3378,6 +3378,8 @@ public class MainWindow extends javax.swing.JFrame {
         @Override
         public Void doInBackground() {
             // initialize progress property.
+            double startTime = System.currentTimeMillis();
+            
             setProgress(0);
 
             double scale = mapComponent.getScale();
@@ -3391,6 +3393,7 @@ public class MainWindow extends javax.swing.JFrame {
                     moveFlowsOverlappingNodes, scale);
 
             layouter.computeArrowHeads(scale);
+            System.out.println("Milliseconds: " + (System.currentTimeMillis() - startTime));
             return null;
         }
 
