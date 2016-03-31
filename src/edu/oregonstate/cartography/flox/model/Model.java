@@ -48,11 +48,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
-    public boolean useFrictionForForcesHack = true; // FIXME
-    public boolean useFrictionForAngularDistortionHack = true; // FIXME
+    public boolean useFrictionForForcesHack = false; // FIXME
+    public boolean useFrictionForAngularDistortionHack = false; // FIXME
     public boolean limitNodesRepulsionToBandHack = false; // FIXME
 
-    public boolean liveDrawing = true;
+    public boolean liveDrawing = false;
 
     /**
      * Density of points along flows.
@@ -1606,4 +1606,13 @@ public class Model {
         this.nodeTolerancePx = nodeTolerancePx;
     }
 
+    public void setFlowValue (Flow flow, double value) {
+        flow.setValue(value);
+        graph.updateCachedValues();
+    }
+    
+    public void setNodeValue(Point node, double value) {
+        node.setValue(value);
+        graph.updateCachedValues();
+    }
 }

@@ -499,7 +499,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="useFrictionCheckBoxMenuItem">
               <Properties>
-                <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="Use Friction for Forces"/>
               </Properties>
               <Events>
@@ -508,7 +507,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="useAngularFrictionCheckBoxMenuItem">
               <Properties>
-                <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="Use Friction for Angular Distribution"/>
               </Properties>
               <Events>
@@ -517,6 +515,7 @@
             </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="moveFlowsCheckBoxMenuItem">
               <Properties>
+                <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="Move Flows Overlapping Nodes"/>
               </Properties>
               <Events>
@@ -551,7 +550,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="liveDrawingCheckBoxMenuItem">
               <Properties>
-                <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="Live Drawing"/>
               </Properties>
               <Events>

@@ -20,6 +20,12 @@ public final class Point {
         this.y = y;
         this.value = 1;
     }
+    
+    public Point(double x, double y, double value) {
+        this.x = x;
+        this.y = y;
+        this.value = value;
+    }
 
     /**
      * Rotates this point by the provided angle around an origin point and
@@ -40,7 +46,7 @@ public final class Point {
         return new Point(newX + origin.x, newY + origin.y);
     }
 
-     /**
+    /**
      * Rotate and translate
      *
      * @param dx horizontal translation
@@ -55,7 +61,7 @@ public final class Point {
         y = x * sin + y * cos + dy;
         x = newX;
     }
-    
+
     /**
      * @return the selected
      */
@@ -83,6 +89,10 @@ public final class Point {
     }
 
     /**
+     * Change the point value. Must be followed by a call to
+     * Model.updateCachedValues(). It is preferable to use Model.setNodeValue()
+     * instead, which will call Model.updateCachedValues().
+     *
      * @param value the value to set
      */
     public void setValue(double value) {

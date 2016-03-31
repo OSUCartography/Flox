@@ -2011,7 +2011,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(enforceCanvasCheckBoxMenuItem);
 
-        useFrictionCheckBoxMenuItem.setSelected(true);
         useFrictionCheckBoxMenuItem.setText("Use Friction for Forces");
         useFrictionCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2020,7 +2019,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(useFrictionCheckBoxMenuItem);
 
-        useAngularFrictionCheckBoxMenuItem.setSelected(true);
         useAngularFrictionCheckBoxMenuItem.setText("Use Friction for Angular Distribution");
         useAngularFrictionCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2029,6 +2027,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(useAngularFrictionCheckBoxMenuItem);
 
+        moveFlowsCheckBoxMenuItem.setSelected(true);
         moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
         moveFlowsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2057,7 +2056,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(recomputeMenuItem);
 
-        liveDrawingCheckBoxMenuItem.setSelected(true);
         liveDrawingCheckBoxMenuItem.setText("Live Drawing");
         liveDrawingCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3108,7 +3106,7 @@ public class MainWindow extends javax.swing.JFrame {
 
             // Change the value of selected points to the value of the box.
             for (Point selectedPoint : selectedPoints) {
-                selectedPoint.setValue(v);
+                model.setNodeValue(selectedPoint, v);
             }
             mapComponent.refreshMap();
         }

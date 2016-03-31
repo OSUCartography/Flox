@@ -52,8 +52,7 @@ public class FlowImporter {
                 locked = (Double.parseDouble(tokenizer.nextToken()) == 1);
             }
 
-            Flow flow = new Flow(new Point(x1, y1), new Point(x2, y2));
-            flow.setValue(value);
+            Flow flow = new Flow(new Point(x1, y1), new Point(x2, y2), value);
 
             if (cPt != null) {                
                 flow.setControlPoint(cPt);
@@ -108,8 +107,7 @@ public class FlowImporter {
                     val = Double.parseDouble(tokenizer.nextToken());
                 };
                 
-                Point point = new Point(x, y);
-                point.setValue(val);
+                Point point = new Point(x, y, val);
                 points.put(id, point);
             }
         }
@@ -124,8 +122,7 @@ public class FlowImporter {
                 double value = Double.parseDouble(tokenizer.nextToken());
                 Point startPoint = points.get(startPtID);
                 Point endPoint = points.get(endPtID);
-                Flow flow = new Flow(startPoint, endPoint);
-                flow.setValue(value);
+                Flow flow = new Flow(startPoint, endPoint, value);
                 flows.add(flow);
             }
         }

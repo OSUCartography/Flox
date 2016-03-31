@@ -53,8 +53,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             double x = Double.parseDouble(tokenizer.nextToken());
             double y = Double.parseDouble(tokenizer.nextToken());
             double nodeValue = Double.parseDouble(tokenizer.nextToken());
-            Point point = new Point(x, y);
-            point.setValue(nodeValue);
+            Point point = new Point(x, y, nodeValue);
             points.put(id, point);
         }
 
@@ -82,8 +81,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             Point startPoint = points.get(startPtID);
             Point endPoint = points.get(endPtID);
             Point cPoint = new Point(cPtX, cPtY);
-            Flow flow = new Flow(startPoint, endPoint);
-            flow.setValue(flowValue);
+            Flow flow = new Flow(startPoint, endPoint, flowValue);
             flow.setControlPoint(cPoint);
             flow.setLocked(locked);
             String startClipAreaWKT = tokenizer.nextToken();

@@ -83,10 +83,11 @@ public final class Flow {
      * @param ctrlPt Control point
      * @param endPt End point
      */
-    public Flow(Point startPt, Point ctrlPt, Point endPt) {
+    public Flow(Point startPt, Point ctrlPt, Point endPt, double value) {
         this.startPt = startPt;
         this.cPt = ctrlPt;
         this.endPt = endPt;
+        this.value = value;
     }
 
     /**
@@ -94,12 +95,14 @@ public final class Flow {
      *
      * @param startPt Start point
      * @param endPt End point
+     * @param value value of this flow
      */
-    public Flow(Point startPt, Point endPt) {
+    public Flow(Point startPt, Point endPt, double value) {
 
         this.startPt = startPt;
         this.endPt = endPt;
-
+        this.value = value;
+        
         // Angle between the straight line connecting start and end point and 
         // the line connecting the start/end point with the corresponding Bezier 
         // control point.
@@ -185,13 +188,19 @@ public final class Flow {
     public double getValue() {
         return value;
     }
-
+    
     /**
+     * Change the flow value. Must be followed by a call to
+     * Model.updateCachedValues(). It is preferable to use Model.setFlowValue()
+     * instead, which will call Model.updateCachedValues().
+     *
      * @param value the value to set
      */
     public void setValue(double value) {
         this.value = value;
     }
+
+    /**
 
     /**
      * Computes geometry of arrow heads
@@ -680,14 +689,12 @@ public final class Flow {
         Point ctrl2 = new Point(ctrlX2, ctrlY2);
         Point end2 = new Point(endX2, endY2);
 
-        Flow flow1 = new Flow(start1, ctrl1, end1);
-        flow1.setValue(getValue());
+        Flow flow1 = new Flow(start1, ctrl1, end1, getValue());
         flow1.setSelected(isSelected());
         flow1.setLocked(isLocked());
         flow1.setStartClipArea(getStartClipArea());
 
-        Flow flow2 = new Flow(start2, ctrl2, end2);
-        flow2.setValue(getValue());
+        Flow flow2 = new Flow(start2, ctrl2, end2, getValue());
         flow2.setSelected(isSelected());
         flow2.setLocked(isLocked());
         flow2.setEndClipArea(getEndClipArea());

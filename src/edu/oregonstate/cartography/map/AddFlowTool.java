@@ -140,7 +140,7 @@ public class AddFlowTool extends MapTool {
         if (originNode == null) {
             originNode = new Point(point.x, point.y);
             if (model.getNbrNodes() > 0) {
-                originNode.setValue(model.getMeanNodeValue());
+                model.setNodeValue(originNode, model.getMeanNodeValue());
             }
         }
 
@@ -203,20 +203,20 @@ public class AddFlowTool extends MapTool {
         if (destinationNode == null) {
             destinationNode = new Point(point.x, point.y);
             if (model.getNbrNodes() > 0) {
-                destinationNode.setValue(model.getMeanNodeValue());
+                model.setNodeValue(destinationNode, model.getMeanNodeValue());
             }
         }
 
-        // build a flow from the toNode and the fromNode, add it to the model
-        Flow newFlow = new Flow(originNode, destinationNode);
-
         // Set the value of newFlow to the mean of existing flow values.
         // If no other flows exist, set the value of newFlow to 1.
+        final double value;
         if (model.getNbrFlows() < 1) {
-            newFlow.setValue(1);
+            value = 1;
         } else {
-            newFlow.setValue(model.getMeanFlowValue());
+            value = model.getMeanFlowValue();
         }
+         // build a flow from the toNode and the fromNode, add it to the model
+        Flow newFlow = new Flow(originNode, destinationNode, value);
 
         // Straighten the new flow.
         // This is done because when a newFlow is created, the control point
