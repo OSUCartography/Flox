@@ -658,10 +658,21 @@ public class ForceLayouter {
         // flowsArray is empty.
         // FIXME This is a potentially infinite loop. There might exist configurations
         // where there are always some flows that overlap some nodes
+        /*
         while (flowsArray.size() > 0) {
             GeometryUtils.moveFlowsOverlappingNodes(flowsArray, scale);
             flowsArray = GeometryUtils.getFlowsOverlappingNodes(model, scale);
         }
+        */
+        for (Flow flow: flowsArray) {
+            // while the flow intersects a node
+            while (GeometryUtils.flowIntersectsANode(flow, model, scale)) {
+                // Move it a little
+                //System.out.println("intersect!");
+                GeometryUtils.moveFlowOverlappingANode(flow, scale);
+            }
+        }
+        
     }
 
     public void computeArrowHeads(double mapScale) {

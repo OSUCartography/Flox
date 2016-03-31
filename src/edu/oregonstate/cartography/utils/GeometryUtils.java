@@ -611,6 +611,103 @@ public class GeometryUtils {
         return Math.sqrt(dSq);
     }
 
+    public static boolean flowIntersectsANode(Flow flow, Model model, 
+            double mapScale) {
+        Iterator<Point> nodeIterator = model.nodeIterator();
+            while (nodeIterator.hasNext()){
+                Point node = nodeIterator.next();
+                if (node != flow.getStartPt() && node != flow.getEndPt()) {
+                    if(flowIntersectsNode(flow, node, model, mapScale)){
+                        System.out.println("yes");
+                        return true;
+                    }
+                }
+            }
+        System.out.println("no");
+        return false;
+    }
+    
+    public static void moveFlowOverlappingANode(Flow flow, double scale) {
+        // Collect needed points from the flow
+        Point cPt = flow.getCtrlPt();
+        Point sPt = flow.getStartPt();
+        Point ePt = flow.getEndPt();
+
+        // Get the distance of startPt to endPt
+        double dx = ePt.x - sPt.x;
+        double dy = ePt.y - sPt.y;
+        double dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Create a point known to be on the right side of the line.
+        Point rightPt;
+        // FIXME +1 and -1 seem to be in ground coordinates of the flow, not in pixels.
+        if (dy > 0) {
+            rightPt = new Point(sPt.x + 1, sPt.y);
+        } else if (dy < 0) {
+            rightPt = new Point(sPt.x - 1, sPt.y);
+        } else {
+            // dy is 0
+            if (dx > 0) {
+                rightPt = new Point(sPt.x, sPt.y - 1);
+            } else {
+                rightPt = new Point(sPt.x, sPt.y + 1);
+            }
+        }
+
+        // Get the d value of rightPt. The d value will be positive if it's
+        // on one side of the flow's baseline, and negative if it's on the 
+        // other, but we don't know if the right side is positive or
+        // negative. This will allow us to find out.
+        double rightPtD = (rightPt.x - sPt.x) * (ePt.y - sPt.y) - (rightPt.y - sPt.y) * (ePt.x - sPt.x);
+
+        // Get the d value of the flow's control point.
+        double pt0D = (cPt.x - sPt.x) * (ePt.y - sPt.y) - (cPt.y - sPt.y) * (ePt.x - sPt.x);
+
+        // Initialize the perpendicular unitVector of the flow's baseline.
+        // The values assigned to these will depend on whether the control
+        // point is on the right or left side of the baseline.
+        double unitVectorX;
+        double unitVectorY;
+
+        // if pt0D and rightPtD have the same polarity, than the conrol point
+        // is on the right side! Set the unitVector accordingly.
+        // If either d value is 0 (the point lies directly on top of the 
+        // baseline) move the control point to the left arbitrarily.  
+        if ((pt0D > 0 && rightPtD > 0) || (pt0D < 0 && rightPtD < 0)) {
+            unitVectorX = dy / dist;
+            unitVectorY = -dx / dist;
+        } else if (pt0D == 0 || rightPtD == 0) {
+            unitVectorX = -dy / dist;
+            unitVectorY = dx / dist;
+        } else {
+            unitVectorX = -dy / dist;
+            unitVectorY = dx / dist;
+        }
+
+        // If the distance from the control point to the baseline is more 
+        // than twice the length of the baseline
+        // move the control point to the baseline centerpoint,
+        // and reverse the vectorUnits' polarity. This amounts to flipping
+        // the flow to the other side.
+        double distFromBaseline = GeometryUtils.getDistanceToLine(cPt.x, cPt.y, sPt.x, sPt.y, ePt.x, ePt.y);
+
+        if (distFromBaseline > flow.getBaselineLength() * 2) {
+            cPt.x = flow.getBaseLineMidPoint().x;
+            cPt.y = flow.getBaseLineMidPoint().y;
+            unitVectorX *= -1;
+            unitVectorY *= -1;
+        }
+
+        // Add the unitVectors to the control point. Also, multiply the
+        // unitVectors by 2. This will cut the iterations in half without
+        // losing significant fidelity. 
+        cPt.x += (unitVectorX * 2 / scale);
+        cPt.y += (unitVectorY * 2 / scale);
+
+        // Lock the flow. This is to prevent it from moving when forces
+        // are reapplied to the layout.
+        flow.setLocked(true);
+    }
     /**
      * Moves the control point of a flow perpendicularly to the baseline by one
      * pixel.
