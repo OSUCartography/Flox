@@ -89,13 +89,12 @@ public final class Point {
     }
 
     /**
-     * Change the point value. Must be followed by a call to
-     * Model.updateCachedValues(). It is preferable to use Model.setNodeValue()
-     * instead, which will call Model.updateCachedValues().
+     * Change the point value. <STRONG>Must be followed by a call to
+     * Graph.updateCachedValues().</STRONG>
      *
      * @param value the value to set
      */
-    public void setValue(double value) {
+    protected void setValue(double value) {
         this.value = value;
     }
 

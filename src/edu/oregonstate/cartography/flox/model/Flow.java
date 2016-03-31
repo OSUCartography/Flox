@@ -190,13 +190,12 @@ public final class Flow {
     }
     
     /**
-     * Change the flow value. Must be followed by a call to
-     * Model.updateCachedValues(). It is preferable to use Model.setFlowValue()
-     * instead, which will call Model.updateCachedValues().
+     * Change the flow value. <STRONG>Important: Must be followed by a call to
+     * Graph.updateCachedValues().</STRONG>
      *
      * @param value the value to set
      */
-    public void setValue(double value) {
+    protected void setValue(double value) {
         this.value = value;
     }
 

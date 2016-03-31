@@ -264,11 +264,11 @@ public class Model {
     private double endClipAreaBufferDistance = 0;
 
     /**
-     * Minimum distance of flows from nodes. 
-     * Used by ForceLayouter.moveFlowsOverlappingNodes()
+     * Minimum distance of flows from nodes. Used by
+     * ForceLayouter.moveFlowsOverlappingNodes()
      */
     private double nodeTolerancePx = 10;
-    
+
     /**
      * A map with a set of symbolized layers.
      */
@@ -905,6 +905,32 @@ public class Model {
             }
         }
         return selectedFlows;
+    }
+
+    /**
+     * Change the flow value of all selected flows.
+     *
+     * @param value new value for selected flows.
+     */
+    public void setValueOfSelectedFlows(double value) {
+        ArrayList<Flow> selectedFlows = getSelectedFlows();
+        for (Flow selectedFlow : selectedFlows) {
+            selectedFlow.setValue(value);
+        }
+        graph.updateCachedValues();
+    }
+
+    /**
+     * Change the node value of all selected flows.
+     *
+     * @param value new value for selected nodes.
+     */
+    public void setValueOfSelectedNodes(double value) {
+        ArrayList<Point> selectedPoints = getSelectedNodes();
+        for (Point selectedPoint : selectedPoints) {
+            selectedPoint.setValue(value);
+        }
+        graph.updateCachedValues();
     }
 
     /**
@@ -1606,13 +1632,4 @@ public class Model {
         this.nodeTolerancePx = nodeTolerancePx;
     }
 
-    public void setFlowValue (Flow flow, double value) {
-        flow.setValue(value);
-        graph.updateCachedValues();
-    }
-    
-    public void setNodeValue(Point node, double value) {
-        node.setValue(value);
-        graph.updateCachedValues();
-    }
 }

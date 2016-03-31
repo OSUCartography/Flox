@@ -3090,24 +3090,10 @@ public class MainWindow extends javax.swing.JFrame {
                 // the text field does not currently contain a valid value
                 return;
             }
-            // Get the value of the field
+            // Get the value of the field and pass it to the model
             double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
-
-            // Access all flows
-            ArrayList<Flow> selectedFlows = model.getSelectedFlows();
-
-            // Change the value of selected flows to the value of the box
-            for (Flow selectedFlow : selectedFlows) {
-                selectedFlow.setValue(v);
-            }
-
-            // Access all nodes
-            ArrayList<Point> selectedPoints = model.getSelectedNodes();
-
-            // Change the value of selected points to the value of the box.
-            for (Point selectedPoint : selectedPoints) {
-                model.setNodeValue(selectedPoint, v);
-            }
+            model.setValueOfSelectedFlows(v);
+            model.setValueOfSelectedNodes(v);
             mapComponent.refreshMap();
         }
         // Move focus to MainWindow

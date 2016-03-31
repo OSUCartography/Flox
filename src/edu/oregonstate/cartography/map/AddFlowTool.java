@@ -138,10 +138,8 @@ public class AddFlowTool extends MapTool {
         // If an existing node was NOT assigned to originNode, create a new one 
         // and assign it to originNode.
         if (originNode == null) {
-            originNode = new Point(point.x, point.y);
-            if (model.getNbrNodes() > 0) {
-                model.setNodeValue(originNode, model.getMeanNodeValue());
-            }
+            double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : 0;
+            originNode = new Point(point.x, point.y, v);
         }
 
         originNodeCreated = true;
@@ -201,10 +199,8 @@ public class AddFlowTool extends MapTool {
         // If an existing node was NOT assigned to destinationNode, make a new
         // Point and assign it to destinationNode.
         if (destinationNode == null) {
+            double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : 0;
             destinationNode = new Point(point.x, point.y);
-            if (model.getNbrNodes() > 0) {
-                model.setNodeValue(destinationNode, model.getMeanNodeValue());
-            }
         }
 
         // Set the value of newFlow to the mean of existing flow values.
