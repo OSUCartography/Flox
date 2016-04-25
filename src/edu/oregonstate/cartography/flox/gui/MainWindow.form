@@ -497,22 +497,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="enforceCanvasCheckBoxMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="useFrictionCheckBoxMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Use Friction for Forces"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="useFrictionCheckBoxMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="useAngularFrictionCheckBoxMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Use Friction for Angular Distribution"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="useAngularFrictionCheckBoxMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="moveFlowsCheckBoxMenuItem">
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>

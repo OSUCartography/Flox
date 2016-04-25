@@ -48,8 +48,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
-    public boolean useFrictionForForcesHack = false; // FIXME
-    public boolean useFrictionForAngularDistortionHack = false; // FIXME
     public boolean limitNodesRepulsionToBandHack = false; // FIXME
 
     public boolean liveDrawing = false;

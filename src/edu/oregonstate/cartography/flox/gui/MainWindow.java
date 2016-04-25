@@ -441,8 +441,6 @@ public class MainWindow extends javax.swing.JFrame {
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        useFrictionCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        useAngularFrictionCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         emptySpaceMenuItem = new javax.swing.JMenuItem();
@@ -2011,22 +2009,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(enforceCanvasCheckBoxMenuItem);
 
-        useFrictionCheckBoxMenuItem.setText("Use Friction for Forces");
-        useFrictionCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                useFrictionCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        jMenu1.add(useFrictionCheckBoxMenuItem);
-
-        useAngularFrictionCheckBoxMenuItem.setText("Use Friction for Angular Distribution");
-        useAngularFrictionCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                useAngularFrictionCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        jMenu1.add(useAngularFrictionCheckBoxMenuItem);
-
         moveFlowsCheckBoxMenuItem.setSelected(true);
         moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
         moveFlowsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -3235,11 +3217,6 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Move Flows");
     }//GEN-LAST:event_moveFlowsCheckBoxMenuItemActionPerformed
 
-    private void useFrictionCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useFrictionCheckBoxMenuItemActionPerformed
-        model.useFrictionForForcesHack = useFrictionCheckBoxMenuItem.isSelected();
-        layout("Use Friction for Forces");
-    }//GEN-LAST:event_useFrictionCheckBoxMenuItemActionPerformed
-
     private void recomputeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recomputeMenuItemActionPerformed
         layout(null);
     }//GEN-LAST:event_recomputeMenuItemActionPerformed
@@ -3271,11 +3248,6 @@ public class MainWindow extends javax.swing.JFrame {
             addUndo("Use In Flow");
         }
     }//GEN-LAST:event_useInFlowCheckboxActionPerformed
-
-    private void useAngularFrictionCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useAngularFrictionCheckBoxMenuItemActionPerformed
-        model.useFrictionForAngularDistortionHack = useAngularFrictionCheckBoxMenuItem.isSelected();
-        layout("Use Friction for Angular Distribution");
-    }//GEN-LAST:event_useAngularFrictionCheckBoxMenuItemActionPerformed
 
     private void liveDrawingCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_liveDrawingCheckBoxMenuItemActionPerformed
         model.liveDrawing = liveDrawingCheckBoxMenuItem.isSelected();
@@ -3592,8 +3564,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel symbolPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
-    private javax.swing.JCheckBoxMenuItem useAngularFrictionCheckBoxMenuItem;
-    private javax.swing.JCheckBoxMenuItem useFrictionCheckBoxMenuItem;
     private javax.swing.JCheckBox useInFlowCheckbox;
     private javax.swing.JLabel vallueLabel;
     private javax.swing.JFormattedTextField valueFormattedTextField;

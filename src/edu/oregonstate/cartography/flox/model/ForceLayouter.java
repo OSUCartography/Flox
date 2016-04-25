@@ -17,10 +17,6 @@ public class ForceLayouter {
 
     public static final int NBR_ITERATIONS = 100;
 
-    // TODO Dorling used 0.25, but other values might work better?
-    private static final double frictionForForces = 0.25;
-    private static final double frictionForAngularDistribution = 0.25;
-
     // model with all map features.
     private final Model model;
 
@@ -115,8 +111,7 @@ public class ForceLayouter {
                 return new Force();
             }
 
-            for (int ptID = 0; ptID < points.length; ptID++) {
-                Point point = points[ptID];
+            for (Point point : points) {
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
 
@@ -423,26 +418,16 @@ public class ForceLayouter {
             // compute force exerted by flows and nodes
             Force fnew = computeForceOnFlow(flow, maxFlowLength);
             Force f = forces.get(j);
-            if (model.useFrictionForForcesHack) {
-                // add the new vector to the previous vector, and scale the sum.
-                f.fx = frictionForForces * (f.fx + fnew.fx);
-                f.fy = frictionForForces * (f.fy + fnew.fy);
-            } else {
-                f.fx = fnew.fx;
-                f.fy = fnew.fy;
-            }
+
+            f.fx = fnew.fx;
+            f.fy = fnew.fy;
+
             // compute force creating an even angular distribution of flows around 
             // nodes
             Force angularDistF = angularDistForces.get(j);
             Force newAngularDistF = computeAngularDistributionForce(flow);
-            if (model.useFrictionForAngularDistortionHack) {
-                // add the new vector to the previous vector, and scale the sum.
-                angularDistF.fx = frictionForAngularDistribution * (angularDistF.fx + newAngularDistF.fx);
-                angularDistF.fy = frictionForAngularDistribution * (angularDistF.fy + newAngularDistF.fy);
-            } else {
-                angularDistF.fx = newAngularDistF.fx;
-                angularDistF.fy = newAngularDistF.fy;
-            }
+            angularDistF.fx = newAngularDistF.fx;
+            angularDistF.fy = newAngularDistF.fy;
 
             j++;
         }
@@ -461,13 +446,8 @@ public class ForceLayouter {
 
             // Move the control point by the total force
             Force f = forces.get(i);
-            if (model.useFrictionForForcesHack) {
-                ctrlPt.x += f.fx;
-                ctrlPt.y += f.fy;
-            } else {
-                ctrlPt.x += weight * f.fx;
-                ctrlPt.y += weight * f.fy;
-            }
+            ctrlPt.x += weight * f.fx;
+            ctrlPt.y += weight * f.fy;
 
             // Move the control point by the angular distribution force.
             // Angular distribution forces are not applied from the beginning 
@@ -663,8 +643,8 @@ public class ForceLayouter {
             GeometryUtils.moveFlowsOverlappingNodes(flowsArray, scale);
             flowsArray = GeometryUtils.getFlowsOverlappingNodes(model, scale);
         }
-        */
-        for (Flow flow: flowsArray) {
+         */
+        for (Flow flow : flowsArray) {
             // while the flow intersects a node
             while (GeometryUtils.flowIntersectsANode(flow, model, scale)) {
                 // Move it a little
@@ -672,7 +652,7 @@ public class ForceLayouter {
                 GeometryUtils.moveFlowOverlappingANode(flow, scale);
             }
         }
-        
+
     }
 
     public void computeArrowHeads(double mapScale) {
@@ -696,7 +676,7 @@ public class ForceLayouter {
         ArrayList<Point> points = model.getNodes();
         for (Point point : points) {
             ArrayList<Flow> incomingFlows = model.getAnticlockwiseOrderedIncomingFlows(point);
-            System.out.println("Number of incoming flows at node " + point + ": " + incomingFlows.size());
+            // System.out.println("Number of incoming flows at node " + point + ": " + incomingFlows.size());
         }
 
     }
