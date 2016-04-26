@@ -15,6 +15,24 @@ import java.util.Iterator;
  */
 public class ForceLayouter {
 
+    private static final double D = 1;
+
+    private class Verlet {
+        public double vx;
+        public double vy;
+        public double ax;
+        public double ay;
+        public double ax_;
+        public double ay_;
+        
+        public double ang_vx;
+        public double ang_vy;
+        public double ang_ax;
+        public double ang_ay;
+        public double ang_ax_;
+        public double ang_ay_;
+    }
+
     public static final int NBR_ITERATIONS = 100;
 
     // model with all map features.
@@ -28,10 +46,10 @@ public class ForceLayouter {
     HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
 
     // store force for each flow for friction computation
-    ArrayList<Force> forces;
+    ArrayList<Verlet> forces;
 
     // store angular distribution force for each flow for friction computation
-    ArrayList<Force> angularDistForces;
+    //ArrayList<Force> angularDistForces;
 
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
@@ -46,16 +64,16 @@ public class ForceLayouter {
         int nFlows = model.getNbrFlows();
         forces = new ArrayList<>(nFlows);
         for (int i = 0; i < nFlows; i++) {
-            forces.add(new Force());
+            forces.add(new Verlet());
         }
 
         // store angular distribution force for each flow in this array
         // Angular distribution forces are computed separately, because they 
         // require a different weight than the other forces.
-        angularDistForces = new ArrayList<>(nFlows);
-        for (int i = 0; i < nFlows; i++) {
-            angularDistForces.add(new Force());
-        }
+//        angularDistForces = new ArrayList<>(nFlows);
+//        for (int i = 0; i < nFlows; i++) {
+//            angularDistForces.add(new Force());
+//        }
     }
 
     /**
@@ -408,31 +426,60 @@ public class ForceLayouter {
         double maxFlowLength = model.getLongestFlowLength();
 
         Iterator<Flow> iterator = model.flowIterator();
-        int j = 0;
 
+        int j = 0;
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
             if (flow.isLocked()) {
                 continue;
             }
+            
+            Verlet f = forces.get(j++);
+            Point ctrlPt = flow.getCtrlPt();
+            
+            // update position for time t + dt
+            ctrlPt.x += weight * (f.vx * D + 0.5 * f.ax * D * D);
+            ctrlPt.y += weight * (f.vy * D + 0.5 * f.ay * D * D);
+            
+            // Move the control point by the angular distribution force.
+            // Angular distribution forces are not applied from the beginning 
+            // of the iterative layout computation. Angular distribution forces 
+            // kick in slowly to avoid creating crossing flows. 
+            // The weight for regular forces varies from 
+            // 1 to 0 with each iteration. The weight for angular 
+            // distribution forces is w’ = -weight * weight + weight.    
+            double angularDistWeight = weight * (1 - weight);
+            ctrlPt.x += angularDistWeight * (f.ang_vx * D + 0.5 * f.ang_ax * D * D);
+            ctrlPt.y += angularDistWeight * (f.ang_vy * D + 0.5 * f.ang_ay * D * D);
+        }
+
+        // compute acceleration at time t + dt
+        j = 0;
+        iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.isLocked()) {
+                continue;
+            }
+            
+            Verlet f = forces.get(j);
+            
             // compute force exerted by flows and nodes
             Force fnew = computeForceOnFlow(flow, maxFlowLength);
-            Force f = forces.get(j);
-
-            f.fx = fnew.fx;
-            f.fy = fnew.fy;
+            f.ax_ = fnew.fx;
+            f.ay_ = fnew.fy;
 
             // compute force creating an even angular distribution of flows around 
             // nodes
-            Force angularDistF = angularDistForces.get(j);
+            //Force angularDistF = angularDistForces.get(j);
             Force newAngularDistF = computeAngularDistributionForce(flow);
-            angularDistF.fx = newAngularDistF.fx;
-            angularDistF.fy = newAngularDistF.fy;
+            f.ang_ax_ = newAngularDistF.fx;
+            f.ang_ay_ = newAngularDistF.fy;
 
             j++;
         }
 
-        // apply forces onto control points of each flow
+        // compute velocity at time t + dt
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
         iterator = model.flowIterator();
         int i = 0;
@@ -443,24 +490,18 @@ public class ForceLayouter {
             }
 
             Point ctrlPt = flow.getCtrlPt();
-
-            // Move the control point by the total force
-            Force f = forces.get(i);
-            ctrlPt.x += weight * f.fx;
-            ctrlPt.y += weight * f.fy;
-
-            // Move the control point by the angular distribution force.
-            // Angular distribution forces are not applied from the beginning 
-            // of the iterative layout computation. Angular distribution forces 
-            // kick in slowly to avoid creating crossing flows. 
-            // The weight for regular forces varies from 
-            // 1 to 0 with each iteration. The weight for angular 
-            // distribution forces is w’ = -weight * weight + weight.    
-            double angularDistWeight = weight * (1 - weight);
-            Force angularDistForce = angularDistForces.get(i);
-            ctrlPt.x += angularDistWeight * angularDistForce.fx;
-            ctrlPt.y += angularDistWeight * angularDistForce.fy;
-
+            Verlet f = forces.get(i);
+            
+            f.vx += 0.5 * (f.ax + f.ax_) * D;
+            f.vy += 0.5 * (f.ay + f.ay_) * D;
+            f.ax = f.ax_;
+            f.ay = f.ay_;
+            
+            f.ang_vx += 0.5 * (f.ang_ax + f.ang_ax_) * D;
+            f.ang_vy += 0.5 * (f.ang_ay + f.ang_ay_) * D;
+            f.ang_ax = f.ang_ax_;
+            f.ang_ay = f.ang_ay_;
+   
             // Enforce control point range if enforceRangebox is true
             if (model.isEnforceRangebox()) {
                 Point tempPoint = enforcer.enforceFlowControlPointRange(flow);
@@ -501,7 +542,7 @@ public class ForceLayouter {
      * balanced.
      * @return Force to be applied as displacement on control point.
      */
-    public Force computeAngularDistributionForce(Flow flow) {
+    private Force computeAngularDistributionForce(Flow flow) {
 
         Point startPoint = flow.getStartPt();
         Point endPoint = flow.getEndPt();
