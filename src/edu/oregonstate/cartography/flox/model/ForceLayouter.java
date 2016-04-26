@@ -18,13 +18,14 @@ public class ForceLayouter {
     private static final double D = 1;
 
     private class Verlet {
+
         public double vx;
         public double vy;
         public double ax;
         public double ay;
         public double ax_;
         public double ay_;
-        
+
         public double ang_vx;
         public double ang_vy;
         public double ang_ax;
@@ -50,7 +51,6 @@ public class ForceLayouter {
 
     // store angular distribution force for each flow for friction computation
     //ArrayList<Force> angularDistForces;
-
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
      * flow map features.
@@ -433,14 +433,14 @@ public class ForceLayouter {
             if (flow.isLocked()) {
                 continue;
             }
-            
+
             Verlet f = forces.get(j++);
             Point ctrlPt = flow.getCtrlPt();
-            
+
             // update position for time t + dt
             ctrlPt.x += weight * (f.vx * D + 0.5 * f.ax * D * D);
             ctrlPt.y += weight * (f.vy * D + 0.5 * f.ay * D * D);
-            
+
             // Move the control point by the angular distribution force.
             // Angular distribution forces are not applied from the beginning 
             // of the iterative layout computation. Angular distribution forces 
@@ -461,9 +461,9 @@ public class ForceLayouter {
             if (flow.isLocked()) {
                 continue;
             }
-            
+
             Verlet f = forces.get(j);
-            
+
             // compute force exerted by flows and nodes
             Force fnew = computeForceOnFlow(flow, maxFlowLength);
             f.ax_ = fnew.fx;
@@ -491,17 +491,17 @@ public class ForceLayouter {
 
             Point ctrlPt = flow.getCtrlPt();
             Verlet f = forces.get(i);
-            
+
             f.vx += 0.5 * (f.ax + f.ax_) * D;
             f.vy += 0.5 * (f.ay + f.ay_) * D;
             f.ax = f.ax_;
             f.ay = f.ay_;
-            
+
             f.ang_vx += 0.5 * (f.ang_ax + f.ang_ax_) * D;
             f.ang_vy += 0.5 * (f.ang_ay + f.ang_ay_) * D;
             f.ang_ax = f.ang_ax_;
             f.ang_ay = f.ang_ay_;
-   
+
             // Enforce control point range if enforceRangebox is true
             if (model.isEnforceRangebox()) {
                 Point tempPoint = enforcer.enforceFlowControlPointRange(flow);
@@ -687,12 +687,128 @@ public class ForceLayouter {
          */
         for (Flow flow : flowsArray) {
             // while the flow intersects a node
-            while (GeometryUtils.flowIntersectsANode(flow, model, scale)) {
+            if (GeometryUtils.flowIntersectsANode(flow, model, scale)) {
                 // Move it a little
                 //System.out.println("intersect!");
-                GeometryUtils.moveFlowOverlappingANode(flow, scale);
+                //GeometryUtils.moveFlowOverlappingANode(flow, scale);
+                moveFlowOverlappingANode(flow, scale);
             }
         }
+
+    }
+
+    public void moveFlowOverlappingANode(Flow flow, double scale) {
+
+        Point cPt = flow.getCtrlPt();
+        double originalX = cPt.x;
+        double originalY = cPt.y;
+        double angleRad = Math.PI;
+        double dist = flow.getBaselineLength() / 50;
+        for (int i = 0; i < 100; i++) {
+            double spiralR = dist * angleRad / Math.PI / 2;
+            cPt.x = Math.cos(angleRad) * spiralR + originalX;
+            cPt.y = Math.sin(angleRad) * spiralR + originalY;
+            angleRad += dist / spiralR;
+
+            if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
+                flow.setSelected(true);
+                return;
+            }
+        }
+//
+//        // Collect needed points from the flow
+//        Point cPt = flow.getCtrlPt();
+//        double originalX = cPt.x;
+//        double originalY = cPt.y;
+//        Point sPt = flow.getStartPt();
+//        Point ePt = flow.getEndPt();
+//
+//        // Get the distance of startPt to endPt
+//        double dx = ePt.x - sPt.x;
+//        double dy = ePt.y - sPt.y;
+//        double baseLineLength = Math.sqrt(dx * dx + dy * dy);
+//        double rangeBoxHeight = model.getFlowRangeboxHeight() * baseLineLength;
+//        double slope = rangeBoxHeight / baseLineLength;
+//        int cols = 20;
+//        double cellSize = baseLineLength / (cols - 1); // FIXME hard-coded constant value
+//        int rows = (int) Math.floor(cols * model.getFlowRangeboxHeight());
+//        Point midPt = flow.getBaseLineMidPoint();
+//        double azimuth = flow.getBaselineAzimuth();
+//        Point rotatedCtrlPt = cPt.rotatePoint(midPt, -azimuth);
+//        int dRow = (int) Math.round((rotatedCtrlPt.x - midPt.x) / cellSize);
+//        int dCol = (int) Math.round((rotatedCtrlPt.y - midPt.y) / cellSize);
+//        int i = 1;
+//
+//        System.out.println(cols + " x " + rows);
+//        for (int r = 0; r < rows; r++) {
+//            for (int c = 0; c < cols; c++) {
+//                if (c > r / slope) {
+//                    System.out.print("  x");
+//                } else {
+//                    System.out.format(" %2d", i++);
+//                }
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
+//
+//        double x = dCol * cellSize + midPt.x;
+//        double y = dRow * cellSize + midPt.y;
+//
+//        for (int r = -rows; r < rows; r++) {
+//            for (int c = -cols; c < cols; c++) {
+//                int row = r + Math.abs(dRow);
+//                int col = c + Math.abs(dCol);
+//                if (row >= rows || col >= cols) {
+//                    continue;
+//                }
+//                if (col > row / slope) {
+//                    continue;
+//                }
+//
+//                // x/y in first quadrant
+//                // +x/+y 
+//                cPt.x = x + col * cellSize;
+//                cPt.y = y + row + cellSize;
+//                cPt.rotatePoint(midPt, azimuth);
+//                if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
+//                    flow.setSelected(true);
+//                    return;
+//                }
+//                // x/y in second quadrant
+//                // -x/+y
+//                cPt.x = x - col * cellSize;
+//                cPt.y = y + row + cellSize;
+//                cPt.rotatePoint(midPt, azimuth);
+//                if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
+//                    flow.setSelected(true);
+//                    return;
+//                }
+//
+//                // x/y in third quadrant
+//                // -x/-y
+//                cPt.x = x - col * cellSize;
+//                cPt.y = y - row + cellSize;
+//                cPt.rotatePoint(midPt, azimuth);
+//                if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
+//                    flow.setSelected(true);
+//                    return;
+//                }
+//
+//                // x/y in second quadrant
+//                // +x/-y
+//                cPt.x = x + col * cellSize;
+//                cPt.y = y - row + cellSize;
+//                cPt.rotatePoint(midPt, azimuth);
+//                if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
+//                    flow.setSelected(true);
+//                    return;
+//                }
+//            }
+//        }
+
+        cPt.x = originalX;
+        cPt.y = originalY;
 
     }
 

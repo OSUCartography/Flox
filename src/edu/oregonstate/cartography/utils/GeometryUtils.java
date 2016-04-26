@@ -359,9 +359,6 @@ public class GeometryUtils {
     public static boolean flowIntersectsNode(Flow flow, Point node,
             Model model, double mapScale) {
 
-        // TODO this could be a user specifiable parameter.
-        final double NODE_TOLERANCE_PX = 10;
-
         // Get the locked scale factor needed to calculate flow widths
         double lockedScaleFactor;
         if (!model.isScaleLocked()) {

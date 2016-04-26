@@ -77,7 +77,7 @@ public class Model {
     /**
      * Start and end node exert a larger force than points along flow lines.
      */
-    private double nodesWeight = 1;
+    private double nodesWeight = 0.5;
 
     /**
      * Weight for the anti-torsion force.
@@ -1025,7 +1025,7 @@ public class Model {
         Iterator<Flow> flowIterator = flowIterator();
         int i = 0;
         while (flowIterator.hasNext()) {
-            flowIterator.next().setLocked(locks[i++]);
+            flowIterator.next().setLocked(false); // locks[i++]); // FIXME
         }
     }
 
