@@ -15,22 +15,25 @@ import java.util.Iterator;
  */
 public class ForceLayouter {
 
-    private static final double D = 1;
-
+    /**
+     * A utility structure for the integration over time using the velocity
+     * Verlet method.
+     * https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
+     */
     private class Verlet {
 
-        public double vx;
+        public double vx; // velocity of current time step t
         public double vy;
-        public double ax;
+        public double ax; // acceleration for current time step t
         public double ay;
-        public double ax_;
+        public double ax_; // acceleration for time step t + dt
         public double ay_;
 
-        public double ang_vx;
+        public double ang_vx; // angular distribution velocity of current time step t
         public double ang_vy;
-        public double ang_ax;
+        public double ang_ax; // angular distribution acceleration for current time step t
         public double ang_ay;
-        public double ang_ax_;
+        public double ang_ax_; // angular distribution acceleration for time step t + dt
         public double ang_ay_;
     }
 
@@ -40,17 +43,16 @@ public class ForceLayouter {
     private final Model model;
 
     /**
-     * hash map with a line string for each flow to accelerate computations. The
-     * content of the hash map needs to be updated whenever the start, end, or
-     * control point of a Bézier flow changes.
+     * hash map with a line string of straight segments for each curved flow.
+     * Used for accelerating computations. The content of the hash map needs to
+     * be updated whenever the start, end, or control point of a Bézier flow
+     * changes.
      */
     HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
 
-    // store force for each flow for friction computation
-    ArrayList<Verlet> forces;
+    // store per flow values for Verlet velocity integration
+    ArrayList<Verlet> verletVelocities;
 
-    // store angular distribution force for each flow for friction computation
-    //ArrayList<Force> angularDistForces;
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
      * flow map features.
@@ -62,18 +64,10 @@ public class ForceLayouter {
 
         // store force for each flow. This is used for friction computation.
         int nFlows = model.getNbrFlows();
-        forces = new ArrayList<>(nFlows);
+        verletVelocities = new ArrayList<>(nFlows);
         for (int i = 0; i < nFlows; i++) {
-            forces.add(new Verlet());
+            verletVelocities.add(new Verlet());
         }
-
-        // store angular distribution force for each flow in this array
-        // Angular distribution forces are computed separately, because they 
-        // require a different weight than the other forces.
-//        angularDistForces = new ArrayList<>(nFlows);
-//        for (int i = 0; i < nFlows; i++) {
-//            angularDistForces.add(new Force());
-//        }
     }
 
     /**
@@ -289,13 +283,8 @@ public class ForceLayouter {
         // Compute forces applied by all flows on current flow
         Force externalF = new Force();
         double lengthOfForceVectorsSum = 0;
-        int counter = 0;
         for (Point pt : flowPoints) {
             Force f = computeForceOnPoint(pt, flow);
-            if (Double.isNaN(f.fx)) {
-                System.out.println("problem " + counter);
-            }
-            counter++;
             // add to totals
             externalF.add(f);
             lengthOfForceVectorsSum += f.length();
@@ -321,7 +310,6 @@ public class ForceLayouter {
         Force springF = computeSpringForce(basePt, cPt, flowSpringConstant);
 
         // compute total force: external forces + spring force + anti-torsion force
-        // FIXME add nodes force with optional weight (maybe)
         double fx = externalF.fx + springF.fx + antiTorsionF.fx + nodeF.fx;
         double fy = externalF.fy + springF.fy + antiTorsionF.fy + nodeF.fy;
         return new Force(fx, fy);
@@ -403,7 +391,7 @@ public class ForceLayouter {
         double fxFinal = fxTotal / wTotal;
         double fyFinal = fyTotal / wTotal;
 
-        // Multiply by the value of the GUI slider for node weight.
+        // Multiply by the node weight.
         fxFinal *= nodeWeight;
         fyFinal *= nodeWeight;
 
@@ -411,13 +399,15 @@ public class ForceLayouter {
     }
 
     /**
-     * Applies a layout iteration to all unlocked flows.
+     * Applies a layout iteration to all unlocked flows. Uses Verlet velocity
+     * integration.
      *
-     * @param weight
+     * See https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
+     *
+     * @param weight the weight for the displacements resulting from this iteration
      */
     public void layoutAllFlows(double weight) {
-        int nbrFlows = model.getNbrFlows();
-        if (nbrFlows < 2) {
+        if (model.getNbrFlows() < 2) {
             return;
         }
 
@@ -426,7 +416,6 @@ public class ForceLayouter {
         double maxFlowLength = model.getLongestFlowLength();
 
         Iterator<Flow> iterator = model.flowIterator();
-
         int j = 0;
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
@@ -434,12 +423,13 @@ public class ForceLayouter {
                 continue;
             }
 
-            Verlet f = forces.get(j++);
+            Verlet v = verletVelocities.get(j++);
             Point ctrlPt = flow.getCtrlPt();
 
             // update position for time t + dt
-            ctrlPt.x += weight * (f.vx * D + 0.5 * f.ax * D * D);
-            ctrlPt.y += weight * (f.vy * D + 0.5 * f.ay * D * D);
+            // dt is 1
+            ctrlPt.x += weight * (v.vx + 0.5 * v.ax);
+            ctrlPt.y += weight * (v.vy + 0.5 * v.ay);
 
             // Move the control point by the angular distribution force.
             // Angular distribution forces are not applied from the beginning 
@@ -449,8 +439,8 @@ public class ForceLayouter {
             // 1 to 0 with each iteration. The weight for angular 
             // distribution forces is w’ = -weight * weight + weight.    
             double angularDistWeight = weight * (1 - weight);
-            ctrlPt.x += angularDistWeight * (f.ang_vx * D + 0.5 * f.ang_ax * D * D);
-            ctrlPt.y += angularDistWeight * (f.ang_vy * D + 0.5 * f.ang_ay * D * D);
+            ctrlPt.x += angularDistWeight * (v.ang_vx + 0.5 * v.ang_ax);
+            ctrlPt.y += angularDistWeight * (v.ang_vy + 0.5 * v.ang_ay);
         }
 
         // compute acceleration at time t + dt
@@ -462,19 +452,17 @@ public class ForceLayouter {
                 continue;
             }
 
-            Verlet f = forces.get(j);
-
             // compute force exerted by flows and nodes
             Force fnew = computeForceOnFlow(flow, maxFlowLength);
-            f.ax_ = fnew.fx;
-            f.ay_ = fnew.fy;
+            Verlet v = verletVelocities.get(j);
+            v.ax_ = fnew.fx;
+            v.ay_ = fnew.fy;
 
             // compute force creating an even angular distribution of flows around 
             // nodes
-            //Force angularDistF = angularDistForces.get(j);
             Force newAngularDistF = computeAngularDistributionForce(flow);
-            f.ang_ax_ = newAngularDistF.fx;
-            f.ang_ay_ = newAngularDistF.fy;
+            v.ang_ax_ = newAngularDistF.fx;
+            v.ang_ay_ = newAngularDistF.fy;
 
             j++;
         }
@@ -489,18 +477,19 @@ public class ForceLayouter {
                 continue;
             }
 
+            // update velocities and accelerations of Verlet velocity 
+            // integration for next time step
+            Verlet v = verletVelocities.get(i);
+            v.vx += 0.5 * (v.ax + v.ax_);
+            v.vy += 0.5 * (v.ay + v.ay_);
+            v.ax = v.ax_;
+            v.ay = v.ay_;
+            v.ang_vx += 0.5 * (v.ang_ax + v.ang_ax_);
+            v.ang_vy += 0.5 * (v.ang_ay + v.ang_ay_);
+            v.ang_ax = v.ang_ax_;
+            v.ang_ay = v.ang_ay_;
+
             Point ctrlPt = flow.getCtrlPt();
-            Verlet f = forces.get(i);
-
-            f.vx += 0.5 * (f.ax + f.ax_) * D;
-            f.vy += 0.5 * (f.ay + f.ay_) * D;
-            f.ax = f.ax_;
-            f.ay = f.ay_;
-
-            f.ang_vx += 0.5 * (f.ang_ax + f.ang_ax_) * D;
-            f.ang_vy += 0.5 * (f.ang_ay + f.ang_ay_) * D;
-            f.ang_ax = f.ang_ax_;
-            f.ang_ay = f.ang_ay_;
 
             // Enforce control point range if enforceRangebox is true
             if (model.isEnforceRangebox()) {
@@ -660,6 +649,159 @@ public class ForceLayouter {
             }
         }
     }
+    
+    /**
+     * Returns true if the provided flow intersects the provided node.
+     *
+     * @param flow A Flow.
+     * @param node A Node.
+     * @param model The current data model
+     * @param mapScale The current scale of the mapComponent
+     * @return
+     */
+    private static boolean flowIntersectsNode(Flow flow, Point node,
+            Model model, double mapScale) {
+
+        // Get the locked scale factor needed to calculate flow widths
+        double lockedScaleFactor;
+        if (!model.isScaleLocked()) {
+            lockedScaleFactor = 1;
+        } else {
+            // compare the locked scale to the current scale
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = mapScale / lockedMapScale;
+        }
+
+        // Get the current stroke width of the flow in pixels
+        double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
+                * lockedScaleFactor;
+
+        // Find out what that width is in world coordinates
+        double worldStrokeWidth = (flowStrokeWidthPx) / mapScale;
+
+        // Get the current pixel radius of the node
+        double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
+
+        double nodeRadiusPx = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+
+        // Find out what that radius is in world coordinates
+        // Add a bit to the pixel radius in order to make the radius a few pixels 
+        // wider than the actual node and to account for the node's stroke width. 
+        double worldNodeRadius = (nodeRadiusPx + model.getNodeTolerancePx()) / mapScale;
+
+        // Add the worldNodeRadius to half the worldFlowWidth
+        double threshDist = (worldStrokeWidth / 2) + worldNodeRadius;
+
+        // Get the flow's bounding box, and add a padding to it of threshDist.
+        Rectangle2D flowBB = flow.getBoundingBox();
+        flowBB.add((flowBB.getMinX() - threshDist), (flowBB.getMinY() - threshDist));
+        flowBB.add((flowBB.getMaxX() + threshDist), (flowBB.getMaxY() + threshDist));
+
+        // the node must be inside the extended bounding box
+        if (flowBB.contains(node.x, node.y) == false) {
+            return false;
+        }
+
+        // Check the shortest distance between the node and the flow. If it's 
+        // less than the threshold, then the flow intersects the node. 
+        double[] xy = {node.x, node.y};
+        double shortestDistSquare = flow.distanceSq(xy);
+        return shortestDistSquare < threshDist * threshDist;
+
+    }
+
+    private static boolean flowIntersectsANode(Flow flow, Model model, 
+            double mapScale) {
+        Iterator<Point> nodeIterator = model.nodeIterator();
+            while (nodeIterator.hasNext()){
+                Point node = nodeIterator.next();
+                if (node != flow.getStartPt() && node != flow.getEndPt()) {
+                    if(flowIntersectsNode(flow, node, model, mapScale)){
+                        return true;
+                    }
+                }
+            }
+        return false;
+    }
+    
+    /**
+     * Test whether a flow can be moved off a node. A flow cannot be moved off a
+     * node if the node overlaps the center of the flow's start or end point.
+     *
+     * @return
+     */
+    public static boolean isFlowMovable(Flow flow, Point node, Model model,
+            double mapScale) {
+
+        double NODE_TOLERANCE_PX = 10;
+
+        Point sPt = flow.getStartPt();
+        Point ePt = flow.getEndPt();
+
+        // TODO
+        // Dan Comment: All this code involved in getting the pixel and world 
+        // coordinates of flow width and node radius is repeated in several 
+        // places. It might be better if it lived in just one place. 
+        // Get the locked scale factor needed to calculate flow widths
+        double lockedScaleFactor;
+        if (!model.isScaleLocked()) {
+            lockedScaleFactor = 1;
+        } else {
+            double lockedMapScale = model.getLockedMapScale();
+            lockedScaleFactor = mapScale / lockedMapScale;
+        }
+
+        double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
+                * lockedScaleFactor;
+
+        double worldStrokeWidth = (flowStrokeWidthPx) / mapScale;
+
+        double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
+
+        double nodeRadiusPx = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+
+        double worldNodeRadius = (nodeRadiusPx + NODE_TOLERANCE_PX) / mapScale;
+
+        // Comment by Dan: This checks to see if the node overlaps the center
+        // of the flow's start point or end point. If it does, then there is 
+        // no way (yet) to move the flow such that it no
+        // longer intersects the node, and should not be attempted. Before this 
+        // test was implemented, it would keep trying forever to move it off 
+        // the node and crash.
+        return !(sPt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0
+                || ePt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0);
+    }
+    
+    /**
+     * Returns an ArrayList of all flows that intersect nodes in the provided
+     * data model.
+     *
+     * @param model The data model containing flows and nodes.
+     * @param scale The scale of the mapComponent.
+     * @return
+     */
+    private static ArrayList<Flow> getFlowsOverlappingNodes(Model model, double scale) {
+        ArrayList<Flow> flowsArray = new ArrayList();
+        Iterator<Flow> flowIterator = model.flowIterator();
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
+            Iterator<Point> nodeIterator = model.nodeIterator();
+            while (nodeIterator.hasNext()) {
+                Point node = nodeIterator.next();
+                if (node != flow.getStartPt() && node != flow.getEndPt()) {
+                    if (flowIntersectsNode(flow, node, model, scale)) {
+                        // check to see if the flow can be moved off the node
+                        if (isFlowMovable(flow, node, model, scale)) {
+                            flowsArray.add(flow);
+                            break;
+                        }
+
+                    }
+                }
+            }
+        }
+        return flowsArray;
+    }
 
     /**
      * Identifies flows that overlap nodes they are not connected to using
@@ -672,24 +814,11 @@ public class ForceLayouter {
 
         // Get an ArrayList of all flows that intersect nodes.
         ArrayList<Flow> flowsArray;
-        flowsArray = GeometryUtils.getFlowsOverlappingNodes(model, scale);
-
-        // If flowsArray has anything in it, move flows that overlap nodes, update
-        // flowsArray with flows that intersect nodes, and repeat until 
-        // flowsArray is empty.
-        // FIXME This is a potentially infinite loop. There might exist configurations
-        // where there are always some flows that overlap some nodes
-        /*
-        while (flowsArray.size() > 0) {
-            GeometryUtils.moveFlowsOverlappingNodes(flowsArray, scale);
-            flowsArray = GeometryUtils.getFlowsOverlappingNodes(model, scale);
-        }
-         */
+        flowsArray = getFlowsOverlappingNodes(model, scale);
         for (Flow flow : flowsArray) {
             // while the flow intersects a node
-            if (GeometryUtils.flowIntersectsANode(flow, model, scale)) {
+            if (flowIntersectsANode(flow, model, scale)) {
                 // Move it a little
-                //System.out.println("intersect!");
                 //GeometryUtils.moveFlowOverlappingANode(flow, scale);
                 moveFlowOverlappingANode(flow, scale);
             }
@@ -710,7 +839,7 @@ public class ForceLayouter {
             cPt.y = Math.sin(angleRad) * spiralR + originalY;
             angleRad += dist / spiralR;
 
-            if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
+            if (flowIntersectsANode(flow, model, scale) == false) {
                 flow.setSelected(true);
                 return;
             }
