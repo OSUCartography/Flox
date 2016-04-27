@@ -188,24 +188,6 @@ public final class Graph {
     }
 
     /**
-     * Get an ordered list of all flows.
-     *
-     * @param increasing Increasing or decreasing list.
-     * @return A list with all ordered flows.
-     */
-    public ArrayList<Flow> getOrderedFlows(boolean increasing) {
-        ArrayList<Flow> flows = new ArrayList<>(graph.edgeSet());
-        java.util.Collections.sort(flows, (Flow flow1, Flow flow2) -> {
-            if (increasing) {
-                return Double.compare(flow1.getValue(), flow2.getValue());
-            } else {
-                return Double.compare(flow2.getValue(), flow1.getValue());
-            }
-        });
-        return flows;
-    }
-
-    /**
      * Returns a list of flows incident at a node. The flows are ordered
      * anti-clockwise. The origin of the polar coordinate system is the
      * horizontal x axis.

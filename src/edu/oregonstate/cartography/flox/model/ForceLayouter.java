@@ -5,6 +5,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * ForceLayouter contains the algorithms that compute the total force that each
@@ -404,7 +405,8 @@ public class ForceLayouter {
      *
      * See https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
      *
-     * @param weight the weight for the displacements resulting from this iteration
+     * @param weight the weight for the displacements resulting from this
+     * iteration
      */
     public void layoutAllFlows(double weight) {
         if (model.getNbrFlows() < 2) {
@@ -649,18 +651,16 @@ public class ForceLayouter {
             }
         }
     }
-    
+
     /**
      * Returns true if the provided flow intersects the provided node.
      *
      * @param flow A Flow.
      * @param node A Node.
-     * @param model The current data model
      * @param mapScale The current scale of the mapComponent
      * @return
      */
-    private static boolean flowIntersectsNode(Flow flow, Point node,
-            Model model, double mapScale) {
+    private boolean flowIntersectsNode(Flow flow, Point node, double mapScale) {
 
         // Get the locked scale factor needed to calculate flow widths
         double lockedScaleFactor;
@@ -710,29 +710,29 @@ public class ForceLayouter {
 
     }
 
-    private static boolean flowIntersectsANode(Flow flow, Model model, 
+    private boolean flowIntersectsANode(Flow flow,
             double mapScale) {
         Iterator<Point> nodeIterator = model.nodeIterator();
-            while (nodeIterator.hasNext()){
-                Point node = nodeIterator.next();
-                if (node != flow.getStartPt() && node != flow.getEndPt()) {
-                    if(flowIntersectsNode(flow, node, model, mapScale)){
-                        return true;
-                    }
+        while (nodeIterator.hasNext()) {
+            Point node = nodeIterator.next();
+            if (node != flow.getStartPt() && node != flow.getEndPt()) {
+                if (flowIntersectsNode(flow, node, mapScale)) {
+                    return true;
                 }
             }
+        }
         return false;
     }
-    
+
     /**
      * Test whether a flow can be moved off a node. A flow cannot be moved off a
      * node if the node overlaps the center of the flow's start or end point.
      *
      * @return
      */
-    public static boolean isFlowMovable(Flow flow, Point node, Model model,
-            double mapScale) {
+    public boolean isFlowMovable(Flow flow, Point node, double mapScale) {
 
+        // FIXME hard-coded parameter
         double NODE_TOLERANCE_PX = 10;
 
         Point sPt = flow.getStartPt();
@@ -765,22 +765,18 @@ public class ForceLayouter {
         // Comment by Dan: This checks to see if the node overlaps the center
         // of the flow's start point or end point. If it does, then there is 
         // no way (yet) to move the flow such that it no
-        // longer intersects the node, and should not be attempted. Before this 
-        // test was implemented, it would keep trying forever to move it off 
-        // the node and crash.
+        // longer intersects the node, and should not be attempted.
         return !(sPt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0
                 || ePt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0);
     }
-    
+
     /**
-     * Returns an ArrayList of all flows that intersect nodes in the provided
-     * data model.
+     * Returns an List of all flows that intersect nodes.
      *
-     * @param model The data model containing flows and nodes.
-     * @param scale The scale of the mapComponent.
+     * @param scale the scale of the map.
      * @return
      */
-    private static ArrayList<Flow> getFlowsOverlappingNodes(Model model, double scale) {
+    private ArrayList<Flow> getFlowsOverlappingNodes(double scale) {
         ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
@@ -789,9 +785,9 @@ public class ForceLayouter {
             while (nodeIterator.hasNext()) {
                 Point node = nodeIterator.next();
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
-                    if (flowIntersectsNode(flow, node, model, scale)) {
+                    if (flowIntersectsNode(flow, node, scale)) {
                         // check to see if the flow can be moved off the node
-                        if (isFlowMovable(flow, node, model, scale)) {
+                        if (isFlowMovable(flow, node, scale)) {
                             flowsArray.add(flow);
                             break;
                         }
@@ -804,34 +800,29 @@ public class ForceLayouter {
     }
 
     /**
-     * Identifies flows that overlap nodes they are not connected to using
-     * GeometryUtils.getFlowsOverlappingNOdes(model, scale), and passes them to
-     * GeometryUtils.moveFlowsOverlappingNodes(flows, scale).
+     * Identifies flows that overlap nodes they are not connected to, and moves
+     * the control point of overlapping flows away from nodes.
      *
-     * @param scale Current map scale
+     * @param scale current map scale
      */
     public void moveFlowsOverlappingNodes(double scale) {
-
-        // Get an ArrayList of all flows that intersect nodes.
-        ArrayList<Flow> flowsArray;
-        flowsArray = getFlowsOverlappingNodes(model, scale);
+        // get a list of all flows that intersect nodes.
+        List<Flow> flowsArray = getFlowsOverlappingNodes(scale);
+        // sort flows in decreasing order
+        Model.sortFlows(flowsArray, false);
+        // move control points of overlapping flows, starts with largest flow
         for (Flow flow : flowsArray) {
-            // while the flow intersects a node
-            if (flowIntersectsANode(flow, model, scale)) {
-                // Move it a little
-                //GeometryUtils.moveFlowOverlappingANode(flow, scale);
-                moveFlowOverlappingANode(flow, scale);
-            }
+            moveFlowOverlappingANode(flow, scale);
         }
-
     }
 
-    public void moveFlowOverlappingANode(Flow flow, double scale) {
-
+    private void moveFlowOverlappingANode(Flow flow, double scale) {
         Point cPt = flow.getCtrlPt();
         double originalX = cPt.x;
         double originalY = cPt.y;
         double angleRad = Math.PI;
+
+        // TODO control point may be moved outside of range box
         double dist = flow.getBaselineLength() / 50;
         for (int i = 0; i < 100; i++) {
             double spiralR = dist * angleRad / Math.PI / 2;
@@ -839,102 +830,11 @@ public class ForceLayouter {
             cPt.y = Math.sin(angleRad) * spiralR + originalY;
             angleRad += dist / spiralR;
 
-            if (flowIntersectsANode(flow, model, scale) == false) {
+            if (flowIntersectsANode(flow, scale) == false) {
                 flow.setSelected(true);
                 return;
             }
         }
-//
-//        // Collect needed points from the flow
-//        Point cPt = flow.getCtrlPt();
-//        double originalX = cPt.x;
-//        double originalY = cPt.y;
-//        Point sPt = flow.getStartPt();
-//        Point ePt = flow.getEndPt();
-//
-//        // Get the distance of startPt to endPt
-//        double dx = ePt.x - sPt.x;
-//        double dy = ePt.y - sPt.y;
-//        double baseLineLength = Math.sqrt(dx * dx + dy * dy);
-//        double rangeBoxHeight = model.getFlowRangeboxHeight() * baseLineLength;
-//        double slope = rangeBoxHeight / baseLineLength;
-//        int cols = 20;
-//        double cellSize = baseLineLength / (cols - 1); // FIXME hard-coded constant value
-//        int rows = (int) Math.floor(cols * model.getFlowRangeboxHeight());
-//        Point midPt = flow.getBaseLineMidPoint();
-//        double azimuth = flow.getBaselineAzimuth();
-//        Point rotatedCtrlPt = cPt.rotatePoint(midPt, -azimuth);
-//        int dRow = (int) Math.round((rotatedCtrlPt.x - midPt.x) / cellSize);
-//        int dCol = (int) Math.round((rotatedCtrlPt.y - midPt.y) / cellSize);
-//        int i = 1;
-//
-//        System.out.println(cols + " x " + rows);
-//        for (int r = 0; r < rows; r++) {
-//            for (int c = 0; c < cols; c++) {
-//                if (c > r / slope) {
-//                    System.out.print("  x");
-//                } else {
-//                    System.out.format(" %2d", i++);
-//                }
-//            }
-//            System.out.println();
-//        }
-//        System.out.println();
-//
-//        double x = dCol * cellSize + midPt.x;
-//        double y = dRow * cellSize + midPt.y;
-//
-//        for (int r = -rows; r < rows; r++) {
-//            for (int c = -cols; c < cols; c++) {
-//                int row = r + Math.abs(dRow);
-//                int col = c + Math.abs(dCol);
-//                if (row >= rows || col >= cols) {
-//                    continue;
-//                }
-//                if (col > row / slope) {
-//                    continue;
-//                }
-//
-//                // x/y in first quadrant
-//                // +x/+y 
-//                cPt.x = x + col * cellSize;
-//                cPt.y = y + row + cellSize;
-//                cPt.rotatePoint(midPt, azimuth);
-//                if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
-//                    flow.setSelected(true);
-//                    return;
-//                }
-//                // x/y in second quadrant
-//                // -x/+y
-//                cPt.x = x - col * cellSize;
-//                cPt.y = y + row + cellSize;
-//                cPt.rotatePoint(midPt, azimuth);
-//                if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
-//                    flow.setSelected(true);
-//                    return;
-//                }
-//
-//                // x/y in third quadrant
-//                // -x/-y
-//                cPt.x = x - col * cellSize;
-//                cPt.y = y - row + cellSize;
-//                cPt.rotatePoint(midPt, azimuth);
-//                if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
-//                    flow.setSelected(true);
-//                    return;
-//                }
-//
-//                // x/y in second quadrant
-//                // +x/-y
-//                cPt.x = x + col * cellSize;
-//                cPt.y = y - row + cellSize;
-//                cPt.rotatePoint(midPt, azimuth);
-//                if (GeometryUtils.flowIntersectsANode(flow, model, scale) == false) {
-//                    flow.setSelected(true);
-//                    return;
-//                }
-//            }
-//        }
 
         cPt.x = originalX;
         cPt.y = originalY;

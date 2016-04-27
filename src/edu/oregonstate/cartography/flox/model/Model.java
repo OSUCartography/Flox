@@ -21,6 +21,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
@@ -724,14 +725,19 @@ public class Model {
     }
 
     /**
-     * Returns a new ArrayList with references to the flows in increasing or
-     * decreasing order.
+     * Sort a list of flows by flow values.
      *
-     * @param increasing If true, the flows are arranged in increasing order.
-     * @return A new ArrayList with references to the flows in the graph.
+     * @param flows flows to order
+     * @param increasing increasing or decreasing sort
      */
-    public ArrayList<Flow> getOrderedFlows(boolean increasing) {
-        return graph.getOrderedFlows(increasing);
+    public static void sortFlows(List<Flow> flows, boolean increasing) {
+        java.util.Collections.sort(flows, (Flow flow1, Flow flow2) -> {
+            if (increasing) {
+                return Double.compare(flow1.getValue(), flow2.getValue());
+            } else {
+                return Double.compare(flow2.getValue(), flow1.getValue());
+            }
+        });
     }
 
     /**
