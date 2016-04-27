@@ -434,8 +434,8 @@ public class ForceLayouter {
 
             // update position for time t + dt
             // dt is 1
-            ctrlPt.x += weight * (v.vx + 0.5 * v.ax);
-            ctrlPt.y += weight * (v.vy + 0.5 * v.ay);
+            ctrlPt.x += v.vx + 0.5 * v.ax;
+            ctrlPt.y += v.vy + 0.5 * v.ay;
 
             // Move the control point by the angular distribution force.
             // Angular distribution forces are not applied from the beginning 
@@ -444,9 +444,8 @@ public class ForceLayouter {
             // The weight for regular forces varies from 
             // 1 to 0 with each iteration. The weight for angular 
             // distribution forces is w’ = -weight * weight + weight.    
-            double angularDistWeight = weight * (1 - weight);
-            ctrlPt.x += angularDistWeight * (v.ang_vx + 0.5 * v.ang_ax);
-            ctrlPt.y += angularDistWeight * (v.ang_vy + 0.5 * v.ang_ay);
+            ctrlPt.x += v.ang_vx + 0.5 * v.ang_ax;
+            ctrlPt.y += v.ang_vy + 0.5 * v.ang_ay;
         }
 
         // compute acceleration at time t + dt
@@ -459,16 +458,17 @@ public class ForceLayouter {
             }
 
             // compute force exerted by flows and nodes
-            Force fnew = computeForceOnFlow(flow, maxFlowLength);
+            Force f = computeForceOnFlow(flow, maxFlowLength);
             Verlet v = verletVelocities.get(j);
-            v.ax_ = fnew.fx;
-            v.ay_ = fnew.fy;
+            v.ax_ = weight * f.fx;
+            v.ay_ = weight * f.fy;
 
             // compute force creating an even angular distribution of flows around 
             // nodes
             Force newAngularDistF = computeAngularDistributionForce(flow);
-            v.ang_ax_ = newAngularDistF.fx;
-            v.ang_ay_ = newAngularDistF.fy;
+            double angularDistWeight = weight * (1 - weight);
+            v.ang_ax_ = angularDistWeight * newAngularDistF.fx;
+            v.ang_ay_ = angularDistWeight * newAngularDistF.fy;
 
             j++;
         }
