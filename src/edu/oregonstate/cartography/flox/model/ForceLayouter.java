@@ -87,20 +87,16 @@ public class ForceLayouter {
     }
 
     /**
-     * Computes the total acting force on a point as applied by neighboring
-     * points. This is used to calculate the forces applied to the control
-     * point(s) of a BŽzier flow. There are two forces that will be calculated
-     * for each control point: The combined force of all nodes on the target
-     * node, and the force of the spring that pulls the target node towards the
-     * center point between the start/end points of the flow. The force of the
-     * spring is stronger for flows with start/end points that are closer
-     * together.
+     * Computes the force exerted by all other flows on a point.
      *
-     * @param targetPoint The point that will be moved.
-     * @param targetFlow The flow that receives the forces.
-     * @return The force exerted on the targetPoint.
+     * @param targetPoint the point that receives the forces.
+     * @param targetFlow the flow that receives the forces. targetPt is on this
+     * flow.
+     * @return the force exerted on the targetPoint.
      */
     private Force computeForceOnPoint(Point targetPoint, Flow targetFlow) {
+
+        Rectangle2D.Double targetFlowBB = targetFlow.getBoundingBox();
 
         Iterator<Flow> flowIterator = model.flowIterator();
         int distWeightExponent = model.getDistanceWeightExponent();
@@ -116,19 +112,28 @@ public class ForceLayouter {
             if (targetFlow == flow) {
                 continue;
             }
-            Point[] points = straightLinesMap.get(flow);
 
-            // FIXME
-            if (points.length > 200) {
-                System.err.println("flow lines with too many points");
-                return new Force();
+            // ignor flow if it is too far away from the targetFlow
+            double distSq = GeometryUtils.rectDistSq(targetFlowBB, flow.getBoundingBox());
+            // distSq is 0 if rectangles intersect
+            if (distSq > 0d) {
+                double rectW = 1d / geometricSeriesPower(distSq, distWeightExponent);
+                if (rectW < Model.MIN_W) {
+                    continue;
+                }
+//                System.out.println(targetFlow);
+//                System.out.println(flow);
+//                System.out.println(distSq);
+//                System.out.println(rectW);
+//                System.out.println();
             }
-
+            
+            Point[] points = straightLinesMap.get(flow);
             for (Point point : points) {
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
 
-                // square of euclidean distance from node to target
+                // square of euclidean distance from point to targetPoint
                 double lSq = xDist * xDist + yDist * yDist;
                 // avoid division by zero
                 if (lSq == 0) {
@@ -138,11 +143,11 @@ public class ForceLayouter {
                 // inverse distance weighting
                 double w = 1d / geometricSeriesPower(lSq, distWeightExponent);
 
-                // Apply the distance weight to each force
+                // apply the distance weight to each force
                 xDist *= w; // The force along the x-axis after weighting
                 yDist *= w; // The force along the y-axix after weighting
 
-                // Add forces to the totals
+                // add forces to the totals
                 fxTotal += xDist;
                 fyTotal += yDist;
                 wTotal += w;
@@ -152,7 +157,6 @@ public class ForceLayouter {
         // Calculate the final force of all nodes on the target point
         double fxFinal = fxTotal / wTotal;
         double fyFinal = fyTotal / wTotal;
-
         return new Force(fxFinal, fyFinal);
     }
 
@@ -657,7 +661,7 @@ public class ForceLayouter {
      *
      * @param flow A Flow.
      * @param node A Node.
-     * @param mapScale The current scale of the mapComponent
+     * @param mapScale The current scale of the map
      * @return
      */
     private boolean flowIntersectsNode(Flow flow, Point node, double mapScale) {
@@ -681,7 +685,6 @@ public class ForceLayouter {
 
         // Get the current pixel radius of the node
         double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
-
         double nodeRadiusPx = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
 
         // Find out what that radius is in world coordinates
@@ -707,11 +710,16 @@ public class ForceLayouter {
         double[] xy = {node.x, node.y};
         double shortestDistSquare = flow.distanceSq(xy);
         return shortestDistSquare < threshDist * threshDist;
-
     }
 
-    private boolean flowIntersectsANode(Flow flow,
-            double mapScale) {
+    /**
+     * Tests whether a flow overlaps a start or end node of any other flow.
+     *
+     * @param flow the flow to test
+     * @param mapScale the current scale of the map
+     * @return true if the flow overlaps a node
+     */
+    private boolean flowIntersectsANode(Flow flow, double mapScale) {
         Iterator<Point> nodeIterator = model.nodeIterator();
         while (nodeIterator.hasNext()) {
             Point node = nodeIterator.next();
@@ -728,7 +736,10 @@ public class ForceLayouter {
      * Test whether a flow can be moved off a node. A flow cannot be moved off a
      * node if the node overlaps the center of the flow's start or end point.
      *
-     * @return
+     * @param flow flow to test
+     * @param node node to test
+     * @param mapScale current map scale
+     * @return true if flow can be moved off the node
      */
     public boolean isFlowMovable(Flow flow, Point node, double mapScale) {
 
@@ -824,18 +835,18 @@ public class ForceLayouter {
 
         // TODO control point may be moved outside of range box
         double dist = flow.getBaselineLength() / 50;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) { // FIXME hard-coded random parameter
             double spiralR = dist * angleRad / Math.PI / 2;
             cPt.x = Math.cos(angleRad) * spiralR + originalX;
             cPt.y = Math.sin(angleRad) * spiralR + originalY;
             angleRad += dist / spiralR;
-
             if (flowIntersectsANode(flow, scale) == false) {
-                flow.setSelected(true);
                 return;
             }
         }
 
+        // could not find a position that does not overlap a node. Restore 
+        // original coordinates.
         cPt.x = originalX;
         cPt.y = originalY;
 

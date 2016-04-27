@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.utils;
 
-import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Point;
 import java.awt.geom.Rectangle2D;
 
@@ -142,10 +141,6 @@ public class GeometryUtils {
         final double dx = endPt.x - startPt.x;
         final double dy = endPt.y - startPt.y;
         return Math.atan2(dy, dx);
-    }
-
-    public static boolean detectFlowCollisionWithRectangle(Flow flow, Rectangle2D rect, double pixelTolerance) {
-        return false;
     }
 
     /**
@@ -481,6 +476,80 @@ public class GeometryUtils {
 
         // alternative smootherstep
         // return x * x * x * (x * (x * 6 - 15) + 10);
+    }
+
+    /**
+     * Returns the squared distance between two points.
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @return 
+     */
+    public static double distSq(double x1, double y1, double x2, double y2) {
+        double dx = x1 - x2;
+        double dy = y1 - y2;
+        return dx * dx + dy * dy;
+    }
+
+    /**
+     * Returns the shortest distance between two rectangles. Returns 0 if the
+     * rectangles intersect or touch. See
+     * http://stackoverflow.com/questions/4978323/how-to-calculate-distance-between-two-rectangles-context-a-game-in-lua?rq=1
+     *
+     * @param x1
+     * @param y1
+     * @param x1b
+     * @param y1b
+     * @param x2
+     * @param y2
+     * @param x2b
+     * @param y2b
+     * @return
+     */
+    public static double rectDistSq(double x1, double y1, double x1b, double y1b,
+            double x2, double y2, double x2b, double y2b) {
+        boolean left = x2b < x1;
+        boolean right = x1b < x2;
+        boolean bottom = y2b < y1;
+        boolean top = y1b < y2;
+        if (top && left) {
+            return distSq(x1, y1b, x2b, y2);
+        }
+        if (left && bottom) {
+            return distSq(x1, y1, x2b, y2b);
+        }
+        if (bottom && right) {
+            return distSq(x1b, y1, x2, y2b);
+        }
+        if (right && top) {
+            return distSq(x1b, y1b, x2, y2);
+        }
+        if (left) {
+            return (x1 - x2b) * (x1 - x2b);
+        }
+        if (right) {
+            return (x2 - x1b) * (x2 - x1b);
+        }
+        if (bottom) {
+            return (y1 - y2b) * (y1 - y2b);
+        }
+        if (top) {
+            return (y2 - y1b) * (y2 - y1b);
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the shortest distance between two rectangles. Returns 0 if the
+     * rectangles intersect or touch.
+     * @param r1
+     * @param r2
+     * @return 
+     */
+    public static double rectDistSq(Rectangle2D r1, Rectangle2D r2) {
+        return rectDistSq(r1.getMinX(), r1.getMinY(), r1.getMaxX(), r1.getMaxY(),
+                r2.getMinX(), r2.getMinY(), r2.getMaxX(), r2.getMaxY());
     }
 
 }

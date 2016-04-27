@@ -53,6 +53,8 @@ public class Model {
 
     public boolean liveDrawing = false;
 
+    public final static double MIN_W = 1e-6;
+    
     /**
      * Density of points along flows.
      */
