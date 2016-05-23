@@ -112,21 +112,6 @@ public class ForceLayouter {
             if (targetFlow == flow) {
                 continue;
             }
-
-            // ignor flow if it is too far away from the targetFlow
-            double distSq = GeometryUtils.rectDistSq(targetFlowBB, flow.getBoundingBox());
-            // distSq is 0 if rectangles intersect
-            if (distSq > 0d) {
-                double rectW = 1d / geometricSeriesPower(distSq, distWeightExponent);
-                if (rectW < Model.MIN_W) {
-                    continue;
-                }
-//                System.out.println(targetFlow);
-//                System.out.println(flow);
-//                System.out.println(distSq);
-//                System.out.println(rectW);
-//                System.out.println();
-            }
             
             Point[] points = straightLinesMap.get(flow);
             for (Point point : points) {
@@ -142,7 +127,7 @@ public class ForceLayouter {
 
                 // inverse distance weighting
                 double w = 1d / geometricSeriesPower(lSq, distWeightExponent);
-
+                
                 // apply the distance weight to each force
                 xDist *= w; // The force along the x-axis after weighting
                 yDist *= w; // The force along the y-axix after weighting
