@@ -680,7 +680,7 @@ public class ForceLayouter {
 
         // Get the current pixel radius of the node
         double nodeRadiusPx = obstacle.r * lockedScaleFactor;
-        
+
         // Find out what that radius is in world coordinates
         // Add a bit to the pixel radius in order to make the radius a few pixels 
         // wider than the actual node and to account for the node's stroke width. 
@@ -710,6 +710,7 @@ public class ForceLayouter {
      * Tests whether a flow overlaps any obstacle.
      *
      * @param flow the flow to test
+     * @param obstacles circular obstacles
      * @param mapScale the current scale of the map
      * @return true if the flow overlaps a node
      */
@@ -740,7 +741,7 @@ public class ForceLayouter {
         if (model.isDrawArrowheads()) {
             // re-compute arrowheads for the current flow geometries
             computeArrowHeads(mapScale);
-            
+
             Iterator<Flow> flowIterator = model.flowIterator();
             while (flowIterator.hasNext()) {
                 Flow flow = flowIterator.next();
@@ -749,7 +750,7 @@ public class ForceLayouter {
                 obstacles.add(new Obstacle(flow.endPt, basePoint.x, basePoint.y, r));
             }
         }
-       
+
         return obstacles;
     }
 
@@ -821,8 +822,8 @@ public class ForceLayouter {
                         // TODO why is this needed?
                         // FIXME with the change to obstacles, this is using the wrong coordinates for arrowheads
                         //if (isFlowMovable(flow, node, scale)) {
-                            flowsArray.add(flow);
-                            break;
+                        flowsArray.add(flow);
+                        break;
                         //}
 
                     }
@@ -864,6 +865,12 @@ public class ForceLayouter {
                 cPt.x = dx + originalX;
                 cPt.y = dy + originalY;
                 angleRad += dist / spiralR / 20; // FIXME hard-coded parameter
+    
+                boolean insideRangebox = new RangeboxEnforcer(model).isPointInRangebox(flow, cPt.x, cPt.y);
+                if (!insideRangebox) {
+                    continue;
+                }
+                
                 if (flowIntersectsObstacle(flow, obstacles, scale) == false) {
                     // found a new position for the control point that does not 
                     // result in an overlap with any obstacle
