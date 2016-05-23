@@ -31,7 +31,7 @@ public class RangeboxEnforcer {
         Point refPt = flow.getBaseLineMidPoint();
 
         Point[] box = computeRangebox(flow);
-        
+
         if (GeometryUtils.linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -65,7 +65,7 @@ public class RangeboxEnforcer {
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     box[0].x, box[0].y,
-                box[2].x, box[2].y);
+                    box[2].x, box[2].y);
         }
 
         if (GeometryUtils.linesIntersect(
@@ -77,9 +77,9 @@ public class RangeboxEnforcer {
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     box[1].x, box[1].y,
-                box[3].x, box[3].y);
+                    box[3].x, box[3].y);
         }
-        
+
         return cPt;
     }
 
@@ -154,22 +154,30 @@ public class RangeboxEnforcer {
     }
 
     public Point[] computeRangebox(Flow flow) {
-
         double baseDist = flow.getBaselineLength();
-        double baseAzimuth = flow.getBaselineAzimuth();
-        Point bPt = new Point(flow.startPt.x + baseDist, flow.startPt.y);
         double boxHeight = model.getFlowRangeboxHeight();
-
-        Point b1 = (new Point(flow.startPt.x, flow.startPt.y + (baseDist * boxHeight)))
-                .rotatePoint(flow.startPt, baseAzimuth);
-        Point b2 = (new Point(bPt.x, bPt.y + (baseDist * boxHeight)))
-                .rotatePoint(flow.startPt, baseAzimuth);
-        Point b3 = (new Point(flow.startPt.x, flow.startPt.y - (baseDist * boxHeight)))
-                .rotatePoint(flow.startPt, baseAzimuth);
-        Point b4 = (new Point(bPt.x, bPt.y - (baseDist * boxHeight)))
-                .rotatePoint(flow.startPt, baseAzimuth);
         
-        Point[] rangeboxPoints = {b1, b2, b3, b4};
+        double x1 = flow.startPt.x;
+        double y1 = flow.startPt.y;
+        double x2 = flow.endPt.x;
+        double y2 = flow.endPt.y;
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        double l = Math.sqrt(dx * dx + dy * dy);
+        
+        // unary vector along base line
+        double ux = dx / l;
+        double uy = dy / l;
+        // vector from start and end points of base line to corners
+        double vx = -uy * baseDist * boxHeight;
+        double vy = ux * baseDist * boxHeight;
+        
+        Point bottomLeft = new Point(x1 - vx, y1 - vy);
+        Point bottomRight = new Point(x2 - vx, y2 - vy);
+        Point topRight = new Point(x2 + vx, y2 + vy);
+        Point topLeft = new Point(x1 + vx, y1 + vy);
+        
+        Point[] rangeboxPoints = {bottomLeft, bottomRight, topRight, topLeft};
         return rangeboxPoints;
     }
 }
