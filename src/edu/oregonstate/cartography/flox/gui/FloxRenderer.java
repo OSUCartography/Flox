@@ -4,6 +4,7 @@ import edu.oregonstate.cartography.flox.model.Arrow;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.Flow;
+import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
@@ -145,6 +146,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         if (drawStartClipAreas || drawEndClipAreas) {
             drawClipAreas(drawStartClipAreas, drawEndClipAreas);
+        }
+
+        edu.oregonstate.cartography.flox.model.ForceLayouter layouter
+                = new edu.oregonstate.cartography.flox.model.ForceLayouter(model);
+        java.util.List<edu.oregonstate.cartography.flox.model.ForceLayouter.Obstacle> obstacles = layouter.getObstacles(scale);
+        for (ForceLayouter.Obstacle obstacle : obstacles) {
+            g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
+            double r = obstacle.r ;
+            drawCircle(obstacle.x, obstacle.y, r, new Color(200, 0, 0, 60), Color.BLACK);
         }
     }
 
@@ -290,7 +300,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                     * getLockedScaleFactor();
 
             // Draw arrows if the model says so
-            if (model.isDrawArrows()) {
+            if (model.isDrawArrowheads()) {
                 Arrow arrow = flow.getEndArrow();
                 arrowPath = getArrowPath(arrow);
                 // get  clipped flow that is shortened to make space for the arrow head
@@ -305,7 +315,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.setColor(highlightSelected && flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
 
             // draw the arrow head
-            if (model.isDrawArrows()) {
+            if (model.isDrawArrowheads()) {
                 g2d.fill(arrowPath);
             }
 
@@ -493,14 +503,14 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                         xToPx(box[0].x), yToPx(box[0].y),
                         xToPx(box[1].x), yToPx(box[1].y));
                 Line2D line2 = new Line2D.Double(
+                        xToPx(box[1].x), yToPx(box[1].y),
+                        xToPx(box[2].x), yToPx(box[2].y));
+                Line2D line3 = new Line2D.Double(
                         xToPx(box[2].x), yToPx(box[2].y),
                         xToPx(box[3].x), yToPx(box[3].y));
-                Line2D line3 = new Line2D.Double(
-                        xToPx(box[0].x), yToPx(box[0].y),
-                        xToPx(box[2].x), yToPx(box[2].y));
                 Line2D line4 = new Line2D.Double(
-                        xToPx(box[1].x), yToPx(box[1].y),
-                        xToPx(box[3].x), yToPx(box[3].y));
+                        xToPx(box[3].x), yToPx(box[3].y),
+                        xToPx(box[0].x), yToPx(box[0].y));
 
                 g2d.draw(line1);
                 g2d.draw(line2);

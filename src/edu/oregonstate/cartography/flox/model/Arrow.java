@@ -69,10 +69,11 @@ public class Arrow {
 
     /**
      * Computes the arrow head geometry.
+     *
      * @param model model
      * @param flowStrokeWidth width of flow in world units.
-     * @param endClipRadius the tip of the arrow is placed at this distance 
-     * from the end of the flow
+     * @param endClipRadius the tip of the arrow is placed at this distance from
+     * the end of the flow
      */
     public void computeArrowPoints(Model model, double flowStrokeWidth, double endClipRadius) {
         // Gets the ratio of the flows stroke width to it's value. This ratio
@@ -178,6 +179,15 @@ public class Arrow {
         corner2Pt.transform(basePt.x, basePt.y, azimuth);
         corner1cPt.transform(basePt.x, basePt.y, azimuth);
         corner2cPt.transform(basePt.x, basePt.y, azimuth);
+    }
+
+    /**
+     * Returns the arrow length.
+     *
+     * @return the length
+     */
+    public double getLength() {
+        return arrowLength;
     }
 
     /**

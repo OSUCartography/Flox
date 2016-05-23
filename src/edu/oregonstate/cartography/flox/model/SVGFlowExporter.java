@@ -186,7 +186,7 @@ public class SVGFlowExporter extends SVGExporter {
             Flow flow = iterator.next();
             double flowWidth = getFlowWidth(flow);
 
-            if (model.isDrawArrows()) {
+            if (model.isDrawArrowheads()) {
                 // Compute radius of clipping circle around end point.
                 // Clip the flow with the clipping area and a circle around the end node
                 double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;

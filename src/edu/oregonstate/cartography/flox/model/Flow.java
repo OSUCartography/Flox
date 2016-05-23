@@ -79,9 +79,10 @@ public final class Flow {
     /**
      * Construct a Flow from 3 points.
      *
-     * @param startPt Start point
-     * @param ctrlPt Control point
-     * @param endPt End point
+     * @param startPt start point
+     * @param ctrlPt control point
+     * @param endPt end point
+     * @param value flow value
      */
     public Flow(Point startPt, Point ctrlPt, Point endPt, double value) {
         this.startPt = startPt;

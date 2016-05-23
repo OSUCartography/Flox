@@ -148,7 +148,7 @@ public class Model {
     /**
      * If true, arrows are drawn onto the end of flows.
      */
-    private boolean drawArrows = false;
+    private boolean drawArrowheads = false;
 
     /**
      * If true direction indications are drawn on flow lines.
@@ -1285,17 +1285,17 @@ public class Model {
     }
 
     /**
-     * @return the addArrows
+     * @return true if arrowheads are added to flows.
      */
-    public boolean isDrawArrows() {
-        return drawArrows;
+    public boolean isDrawArrowheads() {
+        return drawArrowheads;
     }
 
     /**
-     * @param addArrows the addArrows to set
+     * @param addArrows set whether arrowheads are to be added.
      */
-    public void setAddArrows(boolean addArrows) {
-        this.drawArrows = addArrows;
+    public void setDrawArrowheads(boolean addArrows) {
+        this.drawArrowheads = addArrows;
     }
 
     /**

@@ -38,6 +38,20 @@ public class ForceLayouter {
         public double ang_ay_;
     }
 
+    public class Obstacle {
+
+        public Obstacle(Point node, double x, double y, double r) {
+            this.node = node;
+            this.x = x;
+            this.y = y;
+            this.r = r;
+        }
+        public Point node;
+        public double x;
+        public double y;
+        public double r;
+    }
+
     public static final int NBR_ITERATIONS = 100;
 
     // model with all map features.
@@ -95,9 +109,6 @@ public class ForceLayouter {
      * @return the force exerted on the targetPoint.
      */
     private Force computeForceOnPoint(Point targetPoint, Flow targetFlow) {
-
-        Rectangle2D.Double targetFlowBB = targetFlow.getBoundingBox();
-
         Iterator<Flow> flowIterator = model.flowIterator();
         int distWeightExponent = model.getDistanceWeightExponent();
 
@@ -112,7 +123,7 @@ public class ForceLayouter {
             if (targetFlow == flow) {
                 continue;
             }
-            
+
             Point[] points = straightLinesMap.get(flow);
             for (Point point : points) {
                 double xDist = targetPoint.x - point.x; // x distance from node to target
@@ -127,7 +138,7 @@ public class ForceLayouter {
 
                 // inverse distance weighting
                 double w = 1d / geometricSeriesPower(lSq, distWeightExponent);
-                
+
                 // apply the distance weight to each force
                 xDist *= w; // The force along the x-axis after weighting
                 yDist *= w; // The force along the y-axix after weighting
@@ -169,7 +180,6 @@ public class ForceLayouter {
      * @return
      */
     private double computeSpringConstant(Flow flow, double maxFlowLength) {
-
         double flowBaseLength = flow.getBaselineLength();
         double relativeFlowLength = flowBaseLength / maxFlowLength;
         double flowSpringConstant = (-model.getMinFlowLengthSpringConstant()
@@ -642,14 +652,14 @@ public class ForceLayouter {
     }
 
     /**
-     * Returns true if the provided flow intersects the provided node.
+     * Returns true if a flow intersects an obstacle.
      *
-     * @param flow A Flow.
-     * @param node A Node.
-     * @param mapScale The current scale of the map
+     * @param flow a flow.
+     * @param node a node.
+     * @param mapScale the current scale of the map
      * @return
      */
-    private boolean flowIntersectsNode(Flow flow, Point node, double mapScale) {
+    private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle, double mapScale) {
 
         // Get the locked scale factor needed to calculate flow widths
         double lockedScaleFactor;
@@ -669,9 +679,8 @@ public class ForceLayouter {
         double worldStrokeWidth = (flowStrokeWidthPx) / mapScale;
 
         // Get the current pixel radius of the node
-        double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
-        double nodeRadiusPx = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-
+        double nodeRadiusPx = obstacle.r * lockedScaleFactor;
+        
         // Find out what that radius is in world coordinates
         // Add a bit to the pixel radius in order to make the radius a few pixels 
         // wider than the actual node and to account for the node's stroke width. 
@@ -686,35 +695,62 @@ public class ForceLayouter {
         flowBB.add((flowBB.getMaxX() + threshDist), (flowBB.getMaxY() + threshDist));
 
         // the node must be inside the extended bounding box
-        if (flowBB.contains(node.x, node.y) == false) {
+        if (flowBB.contains(obstacle.x, obstacle.y) == false) {
             return false;
         }
 
         // Check the shortest distance between the node and the flow. If it's 
         // less than the threshold, then the flow intersects the node. 
-        double[] xy = {node.x, node.y};
+        double[] xy = {obstacle.x, obstacle.y};
         double shortestDistSquare = flow.distanceSq(xy);
         return shortestDistSquare < threshDist * threshDist;
     }
 
     /**
-     * Tests whether a flow overlaps a start or end node of any other flow.
+     * Tests whether a flow overlaps any obstacle.
      *
      * @param flow the flow to test
      * @param mapScale the current scale of the map
      * @return true if the flow overlaps a node
      */
-    private boolean flowIntersectsANode(Flow flow, double mapScale) {
-        Iterator<Point> nodeIterator = model.nodeIterator();
-        while (nodeIterator.hasNext()) {
-            Point node = nodeIterator.next();
-            if (node != flow.getStartPt() && node != flow.getEndPt()) {
-                if (flowIntersectsNode(flow, node, mapScale)) {
+    public boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles, double mapScale) {
+        for (Obstacle obstacle : obstacles) {
+            if (obstacle.node != flow.getStartPt() && obstacle.node != flow.getEndPt()) {
+                if (flowIntersectsObstacle(flow, obstacle, mapScale)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public List<Obstacle> getObstacles(double mapScale) {
+        List<Obstacle> obstacles = new ArrayList<>();
+
+        // nodes are obstacles
+        Iterator<Point> nodeIterator = model.nodeIterator();
+        while (nodeIterator.hasNext()) {
+            Point node = nodeIterator.next();
+            double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
+            double r = Math.sqrt(nodeArea / Math.PI);
+            obstacles.add(new Obstacle(node, node.x, node.y, r));
+        }
+
+        // arrowheads are obstacles
+        if (model.isDrawArrowheads()) {
+            // re-compute arrowheads for the current flow geometries
+            computeArrowHeads(mapScale);
+            
+            Iterator<Flow> flowIterator = model.flowIterator();
+            while (flowIterator.hasNext()) {
+                Flow flow = flowIterator.next();
+                Point basePoint = flow.getEndArrow().getBasePt();
+                double r = flow.getEndArrow().getLength() * mapScale;
+                obstacles.add(new Obstacle(flow.endPt, basePoint.x, basePoint.y, r));
+            }
+        }
+       
+        return obstacles;
     }
 
     /**
@@ -726,7 +762,7 @@ public class ForceLayouter {
      * @param mapScale current map scale
      * @return true if flow can be moved off the node
      */
-    public boolean isFlowMovable(Flow flow, Point node, double mapScale) {
+    private boolean isFlowMovable(Flow flow, Point node, double mapScale) {
 
         // FIXME hard-coded parameter
         double NODE_TOLERANCE_PX = 10;
@@ -767,26 +803,27 @@ public class ForceLayouter {
     }
 
     /**
-     * Returns an List of all flows that intersect nodes.
+     * Returns a list of all flows that intersect nodes.
      *
      * @param scale the scale of the map.
      * @return
      */
-    private ArrayList<Flow> getFlowsOverlappingNodes(double scale) {
+    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles, double scale) {
         ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            Iterator<Point> nodeIterator = model.nodeIterator();
-            while (nodeIterator.hasNext()) {
-                Point node = nodeIterator.next();
+            for (Obstacle obstacle : obstacles) {
+                Point node = obstacle.node;
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
-                    if (flowIntersectsNode(flow, node, scale)) {
+                    if (flowIntersectsObstacle(flow, obstacle, scale)) {
                         // check to see if the flow can be moved off the node
-                        if (isFlowMovable(flow, node, scale)) {
+                        // TODO why is this needed?
+                        // FIXME with the change to obstacles, this is using the wrong coordinates for arrowheads
+                        //if (isFlowMovable(flow, node, scale)) {
                             flowsArray.add(flow);
                             break;
-                        }
+                        //}
 
                     }
                 }
@@ -801,40 +838,46 @@ public class ForceLayouter {
      *
      * @param scale current map scale
      */
-    public void moveFlowsOverlappingNodes(double scale) {
-        // get a list of all flows that intersect nodes.
-        List<Flow> flowsArray = getFlowsOverlappingNodes(scale);
+    public void moveFlowsOverlappingObstacles(double scale) {
+        List<Obstacle> obstacles = getObstacles(scale);
+        // get a list of all flows that intersect obstacles
+        List<Flow> flowsOverlappingNodes = getFlowsOverlappingObstacles(obstacles, scale);
+
         // sort flows in decreasing order
-        Model.sortFlows(flowsArray, false);
+        Model.sortFlows(flowsOverlappingNodes, false);
+
         // move control points of overlapping flows, starts with largest flow
-        for (Flow flow : flowsArray) {
-            moveFlowOverlappingANode(flow, scale);
-        }
-    }
+        for (Flow flow : flowsOverlappingNodes) {
+            Point cPt = flow.getCtrlPt();
+            double originalX = cPt.x;
+            double originalY = cPt.y;
+            double angleRad = Math.PI;
 
-    private void moveFlowOverlappingANode(Flow flow, double scale) {
-        Point cPt = flow.getCtrlPt();
-        double originalX = cPt.x;
-        double originalY = cPt.y;
-        double angleRad = Math.PI;
-
-        // TODO control point may be moved outside of range box
-        double dist = flow.getBaselineLength() / 50;
-        for (int i = 0; i < 100; i++) { // FIXME hard-coded random parameter
-            double spiralR = dist * angleRad / Math.PI / 2;
-            cPt.x = Math.cos(angleRad) * spiralR + originalX;
-            cPt.y = Math.sin(angleRad) * spiralR + originalY;
-            angleRad += dist / spiralR;
-            if (flowIntersectsANode(flow, scale) == false) {
-                return;
+            // TODO control point may be moved outside of range box
+            double dist = flow.getBaselineLength() / 200; // FIXME hard-coded parameter
+            for (int i = 0; i < 10000; i++) { // FIXME hard-coded parameter
+                double spiralR = dist * angleRad / Math.PI / 2;
+                double dx = Math.cos(angleRad) * spiralR;
+                double dy = Math.sin(angleRad) * spiralR;
+                //System.out.println(Math.sqrt(dx * dx + dy * dy));
+                //System.out.println(i + " \t" + Math.toDegrees(angleRad) + " \t" + Math.sqrt(dx * dx + dy * dy));
+                cPt.x = dx + originalX;
+                cPt.y = dy + originalY;
+                angleRad += dist / spiralR / 20; // FIXME hard-coded parameter
+                if (flowIntersectsObstacle(flow, obstacles, scale) == false) {
+                    // found a new position for the control point that does not 
+                    // result in an overlap with any obstacle
+                    System.out.println("OK " + i + "\n");
+                    return;
+                }
             }
+
+            // could not find a position that does not overlap an obstacle. Restore 
+            // original coordinates.
+            cPt.x = originalX;
+            cPt.y = originalY;
+            System.out.println("no position found\n");
         }
-
-        // could not find a position that does not overlap a node. Restore 
-        // original coordinates.
-        cPt.x = originalX;
-        cPt.y = originalY;
-
     }
 
     public void computeArrowHeads(double mapScale) {

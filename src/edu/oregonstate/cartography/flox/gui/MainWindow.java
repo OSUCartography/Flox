@@ -8,6 +8,7 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
+import edu.oregonstate.cartography.flox.model.ForceLayouter.Obstacle;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -188,7 +189,7 @@ public class MainWindow extends javax.swing.JFrame {
             // Arrow Settings
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPointPixel());
             flowDistanceFromStartPointFormattedTextField.setValue(model.getFlowDistanceFromStartPointPixel());
-            addArrowsCheckbox.setSelected(model.isDrawArrows());
+            addArrowsCheckbox.setSelected(model.isDrawArrowheads());
             arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 40));
             arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 40));
             arrowEdgeCtrlLengthSlider.setValue((int) (model.getArrowEdgeCtrlLength() * 100));
@@ -447,6 +448,7 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
         liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        intersectionInfoMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -2046,6 +2048,15 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(liveDrawingCheckBoxMenuItem);
 
+        intersectionInfoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        intersectionInfoMenuItem.setText("Print Intersection Info to Console");
+        intersectionInfoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                intersectionInfoMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(intersectionInfoMenuItem);
+
         menuBar.add(jMenu1);
 
         setJMenuBar(menuBar);
@@ -2475,7 +2486,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void addArrowsCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addArrowsCheckboxActionPerformed
         if (model != null) {
-            model.setAddArrows(addArrowsCheckbox.isSelected());
+            model.setDrawArrowheads(addArrowsCheckbox.isSelected());
             mapComponent.refreshMap();
             addUndo("Add Arrows");
         }
@@ -3272,6 +3283,17 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_minPxDistanceOfFlowsFromNodesSliderStateChanged
 
+    private void intersectionInfoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_intersectionInfoMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        ForceLayouter layouter = new ForceLayouter(model);
+        double mapScale = mapComponent.getScale();
+        List<Obstacle> obstacles = layouter.getObstacles(mapScale);
+        for (Flow flow : flows) {
+            boolean intersects = layouter.flowIntersectsObstacle(flow, obstacles, mapScale);
+            System.out.format("Intersection: %b%n", intersects);
+        }
+    }//GEN-LAST:event_intersectionInfoMenuItemActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3315,7 +3337,7 @@ public class MainWindow extends javax.swing.JFrame {
                     boolean[] initialLocks = model.getLocks();
 
                     // move flows: this will lock flows that have been moved
-                    layouter.moveFlowsOverlappingNodes(scale);
+                    layouter.moveFlowsOverlappingObstacles(scale);
 
                     // reset lock flags to initial values
                     model.applyLocks(initialLocks);
@@ -3476,6 +3498,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton importPanelOKButton;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
+    private javax.swing.JMenuItem intersectionInfoMenuItem;
     private javax.swing.JButton jButton1;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel1;
