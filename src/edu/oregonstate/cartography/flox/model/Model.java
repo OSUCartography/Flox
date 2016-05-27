@@ -52,7 +52,7 @@ public class Model {
     public boolean limitNodesRepulsionToBandHack = false; // FIXME
 
     public boolean liveDrawing = false;
-    
+
     /**
      * Density of points along flows.
      */
@@ -203,13 +203,13 @@ public class Model {
 
     /**
      * Determines the gap (in pixels) between a flow's end node and the end of
-     * the flow line. Currently modified by a GUI modifiable text field.
+     * the flow line.
      */
     private double flowDistanceFromEndPointPx = 0.0d;
 
     /**
      * Determines the gap (in pixels) between a flow's start node and the start
-     * of the flow line. Currently modified by a GUI modifiable text field.
+     * of the flow line.
      */
     private double flowDistanceFromStartPointPx = 0.0d;
 
@@ -226,14 +226,12 @@ public class Model {
     private double maxNodeSizePx = 10;
 
     /**
-     * Flag to indicate when the flow width is locked to the current map scale.
+     * scale factor for converting between ground coordinates and the map
+     * coordinates in pixels. Note: this scale factor is independent of the scale factor
+     * of the map component that displays the map. Conversion: mapPixelX = groundX *
+     * referenceMapScale;
      */
-    private boolean scaleLocked = false;
-
-    /**
-     * The map scale at the time it was locked.
-     */
-    private double lockedMapScale = 1;
+    private double referenceMapScale = 1;
 
     /**
      * Clip the ends of flows. This flags is only used to update the GUI.
@@ -1435,34 +1433,6 @@ public class Model {
     }
 
     /**
-     * @return the flowWidthLocked
-     */
-    public boolean isScaleLocked() {
-        return scaleLocked;
-    }
-
-    /**
-     * @param scaleLocked the flowWidthLocked to set
-     */
-    public void setScaleLocked(boolean scaleLocked) {
-        this.scaleLocked = scaleLocked;
-    }
-
-    /**
-     * @return the lockedMapScale
-     */
-    public double getLockedMapScale() {
-        return lockedMapScale;
-    }
-
-    /**
-     * @param lockedMapScale the lockedMapScale to set
-     */
-    public void setLockedMapScale(double lockedMapScale) {
-        this.lockedMapScale = lockedMapScale;
-    }
-
-    /**
      * @return the maxFlowStrokeWidthPx
      */
     public double getMaxFlowStrokeWidthPixel() {
@@ -1565,29 +1535,20 @@ public class Model {
         this.drawInlineArrows = drawInlineArrows;
     }
 
-    public double getLockedScaleFactor(double mapScale) {
-        if (!isScaleLocked()) {
-            return 1;
-        } else {
-            return mapScale / getLockedMapScale();
-        }
-    }
-
     public Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
         double deCasteljauTol = getDeCasteljauTolerance();
         return flow.getClippedFlow(startClipRadius, endClipRadius, deCasteljauTol);
     }
 
     /**
-     * Get a node's radius in pixels for drawing.
+     * Get a node's radius in pixels at the reference scale.
      *
      * @param node
      * @return
      */
-    private double getNodeRadius(Point node, double mapScale) {
-        double area = Math.abs(node.getValue()
-                * getNodeSizeScaleFactor());
-        return (Math.sqrt(area / Math.PI)) * getLockedScaleFactor(mapScale);
+    public double getNodeRadiusRefPx(Point node) {
+        double area = Math.abs(node.getValue()* getNodeSizeScaleFactor());
+        return Math.sqrt(area / Math.PI);
     }
 
     /**
@@ -1597,13 +1558,12 @@ public class Model {
      * @param endNode the end node of the flow.
      * @return Clipping radius in world coordinates.
      */
-    public double endClipRadius(Point endNode, double mapScale) {
+    public double endClipRadius(Point endNode) {
         // distance between end of flow and end point
-        double gapDistanceToEndNodes = getFlowDistanceFromEndPointPixel() / mapScale
-                * getLockedScaleFactor(mapScale);
+        double gapDistanceToEndNodesPx = getFlowDistanceFromEndPointPixel();
         // Compute the radius of the end node (add stroke width / 2 to radius)
-        double endNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(endNode, mapScale)) / mapScale;
-        return gapDistanceToEndNodes + endNodeRadius;
+        double endNodeRadiusPx = NODE_STROKE_WIDTH / 2 + getNodeRadiusRefPx(endNode);
+        return (gapDistanceToEndNodesPx + endNodeRadiusPx) / getReferenceMapScale();
     }
 
     /**
@@ -1613,13 +1573,12 @@ public class Model {
      * @param startNode the start node of the flow.
      * @return Clipping radius in world coordinates.
      */
-    public double startClipRadius(Point startNode, double mapScale) {
+    public double startClipRadius(Point startNode) {
         // distance between start of flow and start point
-        double gapDistanceToStartNodes = getFlowDistanceFromStartPointPixel() / mapScale
-                * getLockedScaleFactor(mapScale);
+        double gapDistanceToStartNodesPx = getFlowDistanceFromStartPointPixel();
         // Compute the radius of the start node (add stroke width / 2 to radius)
-        double startNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode, mapScale)) / mapScale;
-        return gapDistanceToStartNodes + startNodeRadius;
+        double startNodeRadiusPx = NODE_STROKE_WIDTH / 2 + getNodeRadiusRefPx(startNode);
+        return (gapDistanceToStartNodesPx + startNodeRadiusPx) / getReferenceMapScale();
     }
 
     /**
@@ -1634,6 +1593,20 @@ public class Model {
      */
     public void setNodeTolerancePx(double nodeTolerancePx) {
         this.nodeTolerancePx = nodeTolerancePx;
+    }
+    
+        /**
+     * @return the referenceMapScale
+     */
+    public double getReferenceMapScale() {
+        return referenceMapScale;
+    }
+
+    /**
+     * @param referenceMapScale the referenceMapScale to set
+     */
+    public void setReferenceMapScale(double referenceMapScale) {
+        this.referenceMapScale = referenceMapScale;
     }
 
 }

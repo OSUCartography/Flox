@@ -96,13 +96,10 @@ public class SVGFlowExporter extends SVGExporter {
     }
 
     private double getLockedScaleFactor() {
-        if (!model.isScaleLocked()) {
-            return 1;
-        } else {
-            // compare the locked scale to the current scale
-            double lockedMapScale = model.getLockedMapScale();
-            return mapComponent.getScale() / lockedMapScale;
-        }
+        // compare the locked scale to the current scale
+        // FIXME
+        double lockedMapScale = model.getReferenceMapScale();
+        return mapComponent.getScale() / lockedMapScale;
     }
 
     private double getFlowWidth(Flow flow) {
@@ -134,7 +131,7 @@ public class SVGFlowExporter extends SVGExporter {
         double endNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(endNode)) / s;
         return gapDistanceToEndNodes + endNodeRadius;
     }
-    
+
     private double startClipRadius(Point startNode) {
         double s = 1000 * MM2PX / scale;
         // distance between end of flows and their end points
@@ -144,9 +141,7 @@ public class SVGFlowExporter extends SVGExporter {
         double endNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode)) / s;
         return gapDistanceToEndNodes + endNodeRadius;
     }
-   
-    
-    
+
     private Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
         return flow.getClippedFlow(startClipRadius, endClipRadius, deCasteljauTol);
@@ -191,10 +186,10 @@ public class SVGFlowExporter extends SVGExporter {
                 // Clip the flow with the clipping area and a circle around the end node
                 double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
                 flow = getClippedFlow(flow, rs, endClipRadius(flow.getEndPt()));
-                
+
                 // Create an arrowhead
-                flow.configureArrow(model, flowWidth, model.endClipRadius(flow.getEndPt(), mapComponent.getScale()));
-                
+                flow.configureArrow(model, flowWidth, model.endClipRadius(flow.getEndPt()));
+
                 // get the arrow
                 Arrow arrow = flow.getEndArrow();
 
@@ -215,9 +210,9 @@ public class SVGFlowExporter extends SVGExporter {
                 // Clip the flow with the clipping area
                 double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
                 double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
-                
+
                 flow = getClippedFlow(flow, rs, re);
-                
+
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 pathElement.setAttribute("d", flowToPath(flow));
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));

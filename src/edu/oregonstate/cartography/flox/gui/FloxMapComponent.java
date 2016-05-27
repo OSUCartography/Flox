@@ -14,8 +14,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @beaninfo
- *      attribute: isContainer false
+ * @beaninfo attribute: isContainer false
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
@@ -60,26 +59,26 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing clip areas around starts of flows
      */
     private boolean drawStartClipAreas = false;
-    
+
     /**
      * flag for drawing obstacles (areas around nodes and arrowheads)
      */
     private boolean drawObstacles = false;
-    
+
     /**
      * Flag to indicate when the flow width is locked to the current map scale.
      */
     private boolean flowWidthLocked = false;
 
     private MainWindow mainWindow;
-    
+
     public FloxMapComponent() {
     }
 
     public void setMainWindow(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
     }
-    
+
     /**
      * Returns the bounding box of the geometry that is drawn by the map.
      *
@@ -173,13 +172,13 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
 
     /**
      * Returns an ArrayList of nodes that were clicked.
-     * 
+     *
      * @param nodes An ArrayList of nodes from which clicked nodes will be
      * returned
      * @param click a Point2D.Double at the location of the click
-     * @param pixelTolerance If the click is within this pixel tolerance
-     * of the node, it will be returned. This is mostly to account for the the
-     * stroke width of the node drawing.
+     * @param pixelTolerance If the click is within this pixel tolerance of the
+     * node, it will be returned. This is to account for the the stroke width of
+     * the node drawing.
      * @return An ArrayList of nodes that were clicked.
      */
     public ArrayList<Point> getClickedNodes(ArrayList<Point> nodes,
@@ -187,29 +186,21 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         // Create an empty ArrayList to store clicked nodes
         ArrayList<Point> clickedNodes = new ArrayList<>();
 
-        double lockedScaleFactor;
-        if (!model.isScaleLocked()) {
-            lockedScaleFactor = 1;
-        } else {
-            double lockedMapScale = model.getLockedMapScale();
-            lockedScaleFactor = scale / lockedMapScale;
-        }
-
         if (isDrawNodes()) {
             for (int i = nodes.size() - 1; i >= 0; i--) {
                 Point node = nodes.get(i);
 
-                double nodeArea = Math.abs(node.getValue()
-                        * model.getNodeSizeScaleFactor());
-                double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-                nodeRadius = (nodeRadius + pixelTolerance) / scale;
+                double rRefPx = model.getNodeRadiusRefPx(node);
+                double rPx = rRefPx / model.getReferenceMapScale();
+                rPx += pixelTolerance;
+                double rWorld = rPx * scale;
                 
                 // Calculate the distance of the click from the node center.
                 double dx = node.x - click.x;
                 double dy = node.y - click.y;
                 double distSquared = (dx * dx + dy * dy);
-                
-                if (distSquared <= nodeRadius * nodeRadius) {
+
+                if (distSquared <= rWorld * rWorld) {
                     // this node was clicked.
                     // add it to clickedNodes
                     clickedNodes.add(node);

@@ -151,7 +151,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         if (drawObstacles) {
             ForceLayouter layouter = new ForceLayouter(model);
-            java.util.List<ForceLayouter.Obstacle> obstacles = layouter.getObstacles(scale);
+            java.util.List<ForceLayouter.Obstacle> obstacles = layouter.getObstacles();
             for (ForceLayouter.Obstacle obstacle : obstacles) {
                 g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
                 double r = obstacle.r;
@@ -222,7 +222,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 false, // highlightSelected
                 false, // drawStartClipAreas
                 false, // drawEndClipAreas
-                false  // drawObstacles
+                false // drawObstacles
         );
 
         return bufferImage;
@@ -237,10 +237,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     private double endClipRadius(Point endNode) {
         // distance between end of flow and end point
-        double gapDistanceToEndNodes = model.getFlowDistanceFromEndPointPixel() / scale
-                * getLockedScaleFactor();
+        double gapDistanceToEndNodes = model.getFlowDistanceFromEndPointPixel() / model.getReferenceMapScale();
         // Compute the radius of the end node (add stroke width / 2 to radius)
-        double endNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(endNode)) / scale;
+        double endNodeRadius = (NODE_STROKE_WIDTH / 2 + model.getNodeRadiusRefPx(endNode)) / model.getReferenceMapScale();
         return gapDistanceToEndNodes + endNodeRadius;
     }
 
@@ -253,10 +252,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     private double startClipRadius(Point startNode) {
         // distance between start of flow and start point
-        double gapDistanceToStartNodes = model.getFlowDistanceFromStartPointPixel() / scale
-                * getLockedScaleFactor();
+        double gapDistanceToStartNodes = model.getFlowDistanceFromStartPointPixel() / model.getReferenceMapScale();
         // Compute the radius of the start node (add stroke width / 2 to radius)
-        double startNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode)) / scale;
+        double startNodeRadius = (NODE_STROKE_WIDTH / 2 + model.getNodeRadiusRefPx(startNode)) / model.getReferenceMapScale();
         return gapDistanceToStartNodes + startNodeRadius;
     }
 
@@ -287,8 +285,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     private void drawFlows(boolean highlightSelected, boolean drawLocks) {
 
-        double flowWidthScaleFactor = model.getFlowWidthScaleFactor();
-
+        double flowWidthScaleFactor = model.getFlowWidthScaleFactor() * 
+                scale / model.getReferenceMapScale();
+        
         // Iterate through the flows
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
@@ -299,8 +298,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             GeneralPath arrowPath = null;
 
             // Calculate the stroke width of the flow based on its value.
-            double flowStrokeWidth = Math.abs(flow.getValue()) * flowWidthScaleFactor
-                    * getLockedScaleFactor();
+            double flowStrokeWidth = Math.abs(flow.getValue()) * flowWidthScaleFactor;
 
             // Draw arrows if the model says so
             if (model.isDrawArrowheads()) {
@@ -310,12 +308,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 flowPath = arrow.getOutFlow().toGeneralPath(scale, west, north);
             } else {
                 // Clip the flow with the clipping area
-                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
-                double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
+                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? 
+                        startClipRadius(flow.getStartPt()) : 0;
+                double re = model.getFlowDistanceFromEndPointPixel() > 0 ? 
+                        endClipRadius(flow.getEndPt()) : 0;
                 flowPath = getClippedFlow(flow, rs, re).toGeneralPath(scale, west, north);
             }
 
-            g2d.setColor(highlightSelected && flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
+            g2d.setColor(highlightSelected && flow.isSelected() ?
+                    SELECTION_COLOR : model.getFlowColor());
 
             // draw the arrow head
             if (model.isDrawArrowheads()) {
@@ -436,10 +437,14 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * color. Otherwise they are filled with white.
      */
     private void drawNodes(boolean highlightSelected, boolean fillNodes) {
-        g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
+        double s = scale /  model.getReferenceMapScale();
+        
+        // same stroke width for all nodes
+        g2d.setStroke(new BasicStroke((float)(NODE_STROKE_WIDTH * s)));
+        
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
-            double r = getNodeRadius(node);
+            double r = model.getNodeRadiusRefPx(node) * s;
             Color strokeColor = highlightSelected && node.isSelected()
                     ? SELECTION_COLOR : model.getFlowColor();
             Color fillColor = fillNodes ? model.getFlowColor() : NODE_FILL_COLOR;
@@ -628,31 +633,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
 
-    private double getLockedScaleFactor() {
-        if (!model.isScaleLocked()) {
-            return 1;
-        } else {
-            // compare the locked scale to the current scale
-            double lockedMapScale = model.getLockedMapScale();
-            return scale / lockedMapScale;
-        }
-    }
-
     private Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
         return flow.getClippedFlow(startClipRadius, endClipRadius, deCasteljauTol);
-    }
-
-    /**
-     * Get a node's radius in pixels for drawing.
-     *
-     * @param node
-     * @return
-     */
-    private double getNodeRadius(Point node) {
-        double area = Math.abs(node.getValue()
-                * model.getNodeSizeScaleFactor());
-        return (Math.sqrt(area / Math.PI)) * getLockedScaleFactor();
     }
 
 }

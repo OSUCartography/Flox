@@ -656,35 +656,23 @@ public class ForceLayouter {
      *
      * @param flow a flow.
      * @param node a node.
-     * @param mapScale the current scale of the map
      * @return
      */
-    private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle, double mapScale) {
-
-        // Get the locked scale factor needed to calculate flow widths
-        double lockedScaleFactor;
-        if (!model.isScaleLocked()) {
-            lockedScaleFactor = 1;
-        } else {
-            // compare the locked scale to the current scale
-            double lockedMapScale = model.getLockedMapScale();
-            lockedScaleFactor = mapScale / lockedMapScale;
-        }
-
-        // Get the current stroke width of the flow in pixels
+    private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle) {
+       // Get the current stroke width of the flow in pixels
         double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
-                * lockedScaleFactor;
+                * model.getReferenceMapScale();
 
         // Find out what that width is in world coordinates
-        double worldStrokeWidth = (flowStrokeWidthPx) / mapScale;
+        double worldStrokeWidth = flowStrokeWidthPx / model.getReferenceMapScale();
 
         // Get the current pixel radius of the node
-        double nodeRadiusPx = obstacle.r * lockedScaleFactor;
+        double nodeRadiusPx = obstacle.r * model.getReferenceMapScale();
 
         // Find out what that radius is in world coordinates
         // Add a bit to the pixel radius in order to make the radius a few pixels 
         // wider than the actual node and to account for the node's stroke width. 
-        double worldNodeRadius = (nodeRadiusPx + model.getNodeTolerancePx()) / mapScale;
+        double worldNodeRadius = (nodeRadiusPx + model.getNodeTolerancePx()) / model.getReferenceMapScale();
 
         // Add the worldNodeRadius to half the worldFlowWidth
         double threshDist = (worldStrokeWidth / 2) + worldNodeRadius;
@@ -711,13 +699,12 @@ public class ForceLayouter {
      *
      * @param flow the flow to test
      * @param obstacles circular obstacles
-     * @param mapScale the current scale of the map
      * @return true if the flow overlaps a node
      */
-    public boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles, double mapScale) {
+    public boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles) {
         for (Obstacle obstacle : obstacles) {
             if (obstacle.node != flow.getStartPt() && obstacle.node != flow.getEndPt()) {
-                if (flowIntersectsObstacle(flow, obstacle, mapScale)) {
+                if (flowIntersectsObstacle(flow, obstacle)) {
                     return true;
                 }
             }
@@ -725,7 +712,7 @@ public class ForceLayouter {
         return false;
     }
 
-    public List<Obstacle> getObstacles(double mapScale) {
+    public List<Obstacle> getObstacles() {
         List<Obstacle> obstacles = new ArrayList<>();
 
         // nodes are obstacles
@@ -740,13 +727,13 @@ public class ForceLayouter {
         // arrowheads are obstacles
         if (model.isDrawArrowheads()) {
             // re-compute arrowheads for the current flow geometries
-            computeArrowHeads(mapScale);
+            computeArrowHeads();
 
             Iterator<Flow> flowIterator = model.flowIterator();
             while (flowIterator.hasNext()) {
                 Flow flow = flowIterator.next();
                 Point basePoint = flow.getEndArrow().getBasePt();
-                double r = flow.getEndArrow().getLength() * mapScale;
+                double r = flow.getEndArrow().getLength() * model.getReferenceMapScale();
                 obstacles.add(new Obstacle(flow.endPt, basePoint.x, basePoint.y, r));
             }
         }
@@ -760,7 +747,7 @@ public class ForceLayouter {
      * @param scale the scale of the map.
      * @return
      */
-    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles, double scale) {
+    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
         ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
@@ -768,7 +755,7 @@ public class ForceLayouter {
             for (Obstacle obstacle : obstacles) {
                 Point node = obstacle.node;
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
-                    if (flowIntersectsObstacle(flow, obstacle, scale)) {
+                    if (flowIntersectsObstacle(flow, obstacle)) {
                         flowsArray.add(flow);
                         break;
                     }
@@ -781,13 +768,11 @@ public class ForceLayouter {
     /**
      * Identifies flows that overlap nodes they are not connected to, and moves
      * the control point of overlapping flows away from nodes.
-     *
-     * @param scale current map scale
      */
-    public void moveFlowsOverlappingObstacles(double scale) {
-        List<Obstacle> obstacles = getObstacles(scale);
+    public void moveFlowsOverlappingObstacles() {
+        List<Obstacle> obstacles = getObstacles();
         // get a list of all flows that intersect obstacles
-        List<Flow> flowsOverlappingNodes = getFlowsOverlappingObstacles(obstacles, scale);
+        List<Flow> flowsOverlappingNodes = getFlowsOverlappingObstacles(obstacles);
 
         // sort flows in decreasing order
         Model.sortFlows(flowsOverlappingNodes, false);
@@ -816,7 +801,7 @@ public class ForceLayouter {
                     continue;
                 }
                 
-                if (flowIntersectsObstacle(flow, obstacles, scale) == false) {
+                if (flowIntersectsObstacle(flow, obstacles) == false) {
                     // found a new position for the control point that does not 
                     // result in an overlap with any obstacle
                     System.out.println("OK " + i + "\n");
@@ -832,29 +817,27 @@ public class ForceLayouter {
         }
     }
 
-    public void computeArrowHeads(double mapScale) {
+    public void computeArrowHeads() {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
 
             // Compute radius of clipping circle around end point.
             // Clip the flow with the clipping area and/or a circle around the end node
-            double endClipRadius = model.endClipRadius(flow.getEndPt(), mapScale);
+            double endClipRadius = model.endClipRadius(flow.getEndPt());
 
             // Create an arrowhead
             // Calculate the stroke width of the flow based on its value.
-            double flowWidthScaleFactor = model.getFlowWidthScaleFactor();
-            double flowStrokeWidth = Math.abs(flow.getValue()) * flowWidthScaleFactor
-                    * model.getLockedScaleFactor(mapScale) / mapScale;
+            double s = model.getFlowWidthScaleFactor() / model.getReferenceMapScale();
+            double flowStrokeWidth = Math.abs(flow.getValue()) * s;
             flow.configureArrow(model, flowStrokeWidth, endClipRadius);
         }
 
-        // TODO adjust the width of arrowheads
-        ArrayList<Point> points = model.getNodes();
-        for (Point point : points) {
-            ArrayList<Flow> incomingFlows = model.getAnticlockwiseOrderedIncomingFlows(point);
-            // System.out.println("Number of incoming flows at node " + point + ": " + incomingFlows.size());
-        }
-
+//        // TODO adjust the width of arrowheads
+//        ArrayList<Point> points = model.getNodes();
+//        for (Point point : points) {
+//            ArrayList<Flow> incomingFlows = model.getAnticlockwiseOrderedIncomingFlows(point);
+//            System.out.println("Number of incoming flows at node " + point + ": " + incomingFlows.size());
+//        }
     }
 }

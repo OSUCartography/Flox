@@ -97,18 +97,9 @@ public class AddFlowTool extends MapTool {
      */
     private void addOriginNode(Point2D.Double point) {
 
-        double scale = mapComponent.getScale();
-
-        // Get the locked scale factor needed to calculate feature sizes
-        double lockedScaleFactor;
-        if (!model.isScaleLocked()) {
-            lockedScaleFactor = 1;
-        } else {
-            // compare the locked scale to the current scale
-            double lockedMapScale = model.getLockedMapScale();
-            lockedScaleFactor = scale / lockedMapScale;
-        }
-
+        double mapScale = mapComponent.getScale();
+        double refScale = model.getReferenceMapScale();
+        
         Iterator<Point> iterator = model.nodeIterator();
         while (iterator.hasNext()) {
             Point node = iterator.next();
@@ -119,8 +110,8 @@ public class AddFlowTool extends MapTool {
             //FloxMapComponent?
             double nodeArea = Math.abs(node.getValue())
                     * model.getNodeSizeScaleFactor();
-            double nodePxRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-            double nodeRadius = (nodePxRadius + PIXEL_TOLERANCE) / scale;
+            double nodePxRadius = (Math.sqrt(nodeArea / Math.PI)) * refScale;
+            double nodeRadius = (nodePxRadius + PIXEL_TOLERANCE) / mapScale;
 
             // calculate the distance of the click from the node center
             double dx = node.x - point.x;
@@ -158,18 +149,9 @@ public class AddFlowTool extends MapTool {
      */
     private void addDestinationNode(Point2D.Double point) {
 
-        double scale = mapComponent.getScale();
-
-        // Get the locked scale factor needed to calculate feature sizes
-        double lockedScaleFactor;
-        if (!model.isScaleLocked()) {
-            lockedScaleFactor = 1;
-        } else {
-            // compare the locked scale to the current scale
-            double lockedMapScale = model.getLockedMapScale();
-            lockedScaleFactor = scale / lockedMapScale;
-        }
-
+        double mapScale = mapComponent.getScale();
+        double refScale = model.getReferenceMapScale();
+        
         ArrayList<Point> nodes = model.getNodes();
         for (int i = nodes.size() - 1; i >= 0; i--) {
             Point node = nodes.get(i);
@@ -180,8 +162,8 @@ public class AddFlowTool extends MapTool {
             //FloxMapComponent.
             double nodeArea = Math.abs(node.getValue())
                     * model.getNodeSizeScaleFactor();
-            double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-            nodeRadius = (nodeRadius + PIXEL_TOLERANCE) / scale;
+            double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * refScale;
+            nodeRadius = (nodeRadius + PIXEL_TOLERANCE) / mapScale;
 
             // calculate the distance of the click from the node center
             double dx = node.x - point.x;
@@ -246,20 +228,11 @@ public class AddFlowTool extends MapTool {
     public void draw(Graphics2D g2d) {
 
         if (originNodeCreated) {
-
             FloxRenderer.enableHighQualityRenderingHints(g2d, true);
-
-            double lockedScaleFactor;
-            if (!model.isScaleLocked()) {
-                lockedScaleFactor = 1;
-            } else {
-                // compare the locked scale to the current scale
-                double lockedMapScale = model.getLockedMapScale();
-                lockedScaleFactor = mapComponent.getScale() / lockedMapScale;
-            }
-
+            double refScale = model.getReferenceMapScale();
+            
             double nodeArea = Math.abs(originNode.getValue()) * model.getNodeSizeScaleFactor();
-            double r = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
+            double r = (Math.sqrt(nodeArea / Math.PI)) * refScale;
             double x = mapComponent.xToPx(originNode.x);
             double y = mapComponent.yToPx(originNode.y);
             Ellipse2D circle = new Ellipse2D.Double(x - r, y - r, r * 2, r * 2);

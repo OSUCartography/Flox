@@ -42,20 +42,20 @@ public class Arrow {
     /**
      * The location of the tip of the Arrow.
      */
-    private Point tipPt = new Point(0, 0);
+    private final Point tipPt = new Point(0, 0);
 
     /**
      * The locations of the 2 corners of the Arrow.
      */
-    private Point corner1Pt = new Point(0, 0);
-    private Point corner2Pt = new Point(0, 0);
+    private final Point corner1Pt = new Point(0, 0);
+    private final Point corner2Pt = new Point(0, 0);
 
     /**
      * The locations of the 2 control points that determine the curved shape of
      * the sides of the Arrow.
      */
-    private Point corner1cPt = new Point(0, 0);
-    private Point corner2cPt = new Point(0, 0);
+    private final Point corner1cPt = new Point(0, 0);
+    private final Point corner2cPt = new Point(0, 0);
 
     /**
      * Constructor for the Arrow. Computes the location of the points comprising

@@ -232,9 +232,7 @@ public class SimpleFeatureRenderer {
     }
 
     /**
-     * Transforms a horizontal x coordinate (usually in meters) to pixels. Takes
-     * the scale and bounding boundingBox defined by the PageFormat into
-     * account.
+     * Transforms a horizontal x coordinate (usually in meters) to pixels.
      *
      * @param x The horizontal coordinate.
      * @return Returns the coordinate in pixels.
@@ -244,8 +242,7 @@ public class SimpleFeatureRenderer {
     }
 
     /**
-     * Transforms a vertical y coordinate to the scale and bounding boundingBox
-     * defined by the PageFormat.
+     * Transforms a vertical y coordinate to pixels.
      *
      * @param y The vertical coordinate.
      * @return Returns the coordinate in the page coordinate system.

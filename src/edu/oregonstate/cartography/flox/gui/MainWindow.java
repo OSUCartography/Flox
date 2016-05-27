@@ -2131,10 +2131,11 @@ public class MainWindow extends javax.swing.JFrame {
         if (flows != null) {
             setTitle(FileUtils.getFileNameWithoutExtension(filePath));
             model.setFlows(flows);
+            mapComponent.showAll();
+            model.setReferenceMapScale(mapComponent.getScale());
             flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPointPixel());
             flowDistanceFromStartPointFormattedTextField.setValue(model.getFlowDistanceFromStartPointPixel());
             layout("Load Flows");
-            mapComponent.showAll();
         }
     }
 
@@ -2154,7 +2155,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.showAll();
 
             // the user might have loaded clipping areas before. Apply these
-            // clipping area to the new flows.
+            // clipping areas to the new flows.
             applyClippingSettings();
         } catch (Throwable ex) {
             showErrorDialog("The file could not be read.", ex);
@@ -3260,10 +3261,9 @@ public class MainWindow extends javax.swing.JFrame {
     private void intersectionInfoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_intersectionInfoMenuItemActionPerformed
         ArrayList<Flow> flows = model.getSelectedFlows();
         ForceLayouter layouter = new ForceLayouter(model);
-        double mapScale = mapComponent.getScale();
-        List<Obstacle> obstacles = layouter.getObstacles(mapScale);
+        List<Obstacle> obstacles = layouter.getObstacles();
         for (Flow flow : flows) {
-            boolean intersects = layouter.flowIntersectsObstacle(flow, obstacles, mapScale);
+            boolean intersects = layouter.flowIntersectsObstacle(flow, obstacles);
             System.out.format("Intersection: %b%n", intersects);
         }
     }//GEN-LAST:event_intersectionInfoMenuItemActionPerformed
@@ -3299,8 +3299,7 @@ public class MainWindow extends javax.swing.JFrame {
          * Apply layout iterations to all non-locked flows.
          */
         private void layout(int start, int end,
-                boolean moveFlowsOverlappingNodes,
-                double scale) {
+                boolean moveFlowsOverlappingNodes) {
             
             for (int i = start; i < end; i++) {
                 if (isCancelled()) {
@@ -3316,7 +3315,7 @@ public class MainWindow extends javax.swing.JFrame {
                     boolean[] initialLocks = model.getLocks();
 
                     // move flows: this will lock flows that have been moved
-                    layouter.moveFlowsOverlappingObstacles(scale);
+                    layouter.moveFlowsOverlappingObstacles();
 
                     // reset lock flags to initial values
                     model.applyLocks(initialLocks);
@@ -3340,18 +3339,16 @@ public class MainWindow extends javax.swing.JFrame {
             double startTime = System.currentTimeMillis();
             
             setProgress(0);
-            
-            double scale = mapComponent.getScale();
 
             // first half of iterations. Flows are not moved away from overlapped nodes.
-            layout(0, ForceLayouter.NBR_ITERATIONS / 2, false, scale);
+            layout(0, ForceLayouter.NBR_ITERATIONS / 2, false);
 
             // second half of iterations: Flows are moved away from overlapped nodes.
             boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
             layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS,
-                    moveFlowsOverlappingNodes, scale);
+                    moveFlowsOverlappingNodes);
             
-            layouter.computeArrowHeads(scale);
+            layouter.computeArrowHeads();
             System.out.println("Milliseconds: " + (System.currentTimeMillis() - startTime));
             return null;
         }
@@ -3417,8 +3414,7 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
         ForceLayouter layouter = new ForceLayouter(model);
-        double scale = mapComponent.getScale();
-        layouter.computeArrowHeads(scale);
+        layouter.computeArrowHeads();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

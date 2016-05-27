@@ -306,16 +306,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
 
-        // Get the locked scale factor needed to calculate feature sizes
-        double lockedScaleFactor;
-        if (!model.isScaleLocked()) {
-            lockedScaleFactor = 1;
-        } else {
-            // compare the locked scale to the current scale
-            double lockedMapScale = model.getLockedMapScale();
-            lockedScaleFactor = scale / lockedMapScale;
-        }
-
         // Select Control Point
         if (((FloxMapComponent) mapComponent).isDrawFlows()) {
             if (model.isFlowSelected()) {
@@ -413,7 +403,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
                 // Get the flow's width.
                 double width = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
-                        * lockedScaleFactor;
+                        * model.getReferenceMapScale();
 
                 // Add half the width to tol, scaled to the map scale
                 double totalTol = tol + ((width / 2) / scale);
