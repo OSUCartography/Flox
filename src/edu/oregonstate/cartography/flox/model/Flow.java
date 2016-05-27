@@ -75,7 +75,7 @@ public final class Flow {
      * The Arrow at the end of the flow, points towards endPt
      */
     private final Arrow endArrow = new Arrow(this);
-    
+
     /**
      * Construct a Flow from 3 points.
      *
@@ -103,7 +103,7 @@ public final class Flow {
         this.startPt = startPt;
         this.endPt = endPt;
         this.value = value;
-        
+
         // Angle between the straight line connecting start and end point and 
         // the line connecting the start/end point with the corresponding Bezier 
         // control point.
@@ -189,7 +189,7 @@ public final class Flow {
     public double getValue() {
         return value;
     }
-    
+
     /**
      * Change the flow value. <STRONG>Important: Must be followed by a call to
      * Graph.updateCachedValues().</STRONG>
@@ -201,21 +201,26 @@ public final class Flow {
     }
 
     /**
-
-    /**
+     *
+     * /**
      * Computes geometry of arrow heads
+     *
      * @param model model
      * @param flowStrokeWidth width of flow in world units.
-     * @param endClipRadius the tip of the arrow is placed at this distance 
-     * from the end of the flow
+     * @param endClipRadius the tip of the arrow is placed at this distance from
+     * the end of the flow
      */
     public void configureArrow(Model model, double flowStrokeWidth, double endClipRadius) {
         endArrow.computeArrowPoints(model, flowStrokeWidth, endClipRadius);
-    };
+    }
+
+    ;
     
     public Arrow getEndArrow() {
         return endArrow;
-    };
+    }
+
+    ;
     
     /**
      * @return the startClipArea
@@ -452,7 +457,7 @@ public final class Flow {
     }
 
     /**
-     * Constructs a GeneralPath object for drawing a Flow and optionally offsets 
+     * Constructs a GeneralPath object for drawing a Flow and optionally offsets
      * the path parallel to its direction.
      *
      * @param scale scale factor for converting from world to pixel coordinates
@@ -542,7 +547,7 @@ public final class Flow {
     public ArrayList<Point> toClippedStraightLineSegments(double startClipRadius, double endClipRadius, double deCasteljauTol) {
 
         // FIXME 0 parameter
-        Flow clippedFlow = Flow.clipFlow(this, startClipRadius, endClipRadius, deCasteljauTol);
+        Flow clippedFlow = Flow.clipFlowByRadii(this, startClipRadius, endClipRadius, deCasteljauTol);
         return clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
     }
 
@@ -762,28 +767,17 @@ public final class Flow {
 
     /**
      * Returns a flow with the start and/or end masking areas removed. If no
-     * masking areas are defined, returns a reference to this flow.
-     *
-     * @param endClipRadius Clip the end of the flow with a circle of this
-     * radius.
-     * @param deCasteljauTol Tolerance for conversion to straight line segments.
-     * @return A new flow (if something was clipped), or the passed flow.
-     */
-    public Flow getClippedFlow(double startClipRadius, double endClipRadius, double deCasteljauTol) {
-        return Flow.clipFlow(this, startClipRadius, endClipRadius, deCasteljauTol);
-    }
-
-    /**
-     * Returns a flow with the start and/or end masking areas removed. If no
      * masking areas are defined, returns the passed flow.
      *
      * @param flow The flow to clip
-     * @param endClipRadius Clip the end of the flow with a circle of this
+     * @param startClipRadius clip the end of the flow with a circle with this
+     * radius.
+     * @param endClipRadius clip the end of the flow with a circle with this
      * radius.
      * @param deCasteljauTol Tolerance for conversion to straight line segments.
      * @return A new flow (if something was clipped), or the passed flow.
      */
-    private static Flow clipFlow(Flow flow, double startClipRadius, double endClipRadius, double deCasteljauTol) {
+    public static Flow clipFlowByRadii(Flow flow, double startClipRadius, double endClipRadius, double deCasteljauTol) {
 
         // Test whether start or end clip areas are defined.
         // If none is defined, the flow is not converted to straight line segments,

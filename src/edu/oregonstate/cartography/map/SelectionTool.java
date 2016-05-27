@@ -252,9 +252,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     if (shiftDown == false) {
                         pt.setSelected(false);
                     }
-
                 }
-
             }
         }
 

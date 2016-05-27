@@ -32,13 +32,16 @@ public class Arrow {
      */
     private final Flow flow;
 
-    private double baseT = 1;
-
     /**
      * The location of the base of the Arrow in world coordinates.
      */
     private Point basePt;
 
+    /**
+     * t parameter of basePt
+     */
+    private double baseT = 1;
+    
     /**
      * The location of the tip of the Arrow.
      */
@@ -139,8 +142,7 @@ public class Arrow {
         }
 
         // Locate the various points that determine the shape and location of 
-        // the Arrow. This pulls various parameters from the model that are 
-        // themselves modified by the GUI to change the shape of the Arrows. 
+        // the Arrow.
         // Locate the tip
         tipPt.x = arrowLength;
         tipPt.y = 0;

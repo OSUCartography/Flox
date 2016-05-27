@@ -144,7 +144,7 @@ public class SVGFlowExporter extends SVGExporter {
 
     private Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
         double deCasteljauTol = model.getDeCasteljauTolerance();
-        return flow.getClippedFlow(startClipRadius, endClipRadius, deCasteljauTol);
+        return Flow.clipFlowByRadii(flow, startClipRadius, endClipRadius, deCasteljauTol);
     }
 
     /**

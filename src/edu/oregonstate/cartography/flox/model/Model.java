@@ -1535,9 +1535,9 @@ public class Model {
         this.drawInlineArrows = drawInlineArrows;
     }
 
-    public Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
+    public Flow clipFlowByRadii(Flow flow, double startClipRadius, double endClipRadius) {
         double deCasteljauTol = getDeCasteljauTolerance();
-        return flow.getClippedFlow(startClipRadius, endClipRadius, deCasteljauTol);
+        return Flow.clipFlowByRadii(flow, startClipRadius, endClipRadius, deCasteljauTol);
     }
 
     /**
