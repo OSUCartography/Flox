@@ -299,9 +299,15 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         return (flowGotSelected || nodeGotSelected);
     }
 
+    /**
+     * Select a map feature after the user clicked on the map.
+     * @param point click location in world coordinates.
+     * @param shiftDown true if shift key was pressed when the click happened
+     * @param pixelTolerance selection tolerance in pixels
+     * @return 
+     */
     private boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
 
-        double scale = mapComponent.getScale();
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
@@ -394,33 +400,32 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
             // The distance tolerance the click needs to be within the flow in order
             // to be selected, scaled to the current map scale.
-            double tol = pixelTolerance / scale;
+            double toleranceWorld = pixelTolerance / mapComponent.getScale();
 
             double[] xy = new double[2];
 
             while (flows.hasNext()) {
                 Flow flow = flows.next();
 
-                // Get the flow's width.
-                double width = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
-                        * model.getReferenceMapScale();
-
+                // flow width.
+                double flowWidthWorld = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
+                        / model.getReferenceMapScale();
+                
                 // Add half the width to tol, scaled to the map scale
-                double totalTol = tol + ((width / 2) / scale);
+                double maxDistWorld = toleranceWorld + flowWidthWorld / 2;
 
                 // Add a little padding to the bounding box in the amount of tol
                 Rectangle2D flowBB = flow.getBoundingBox();
-
-                flowBB.add(flowBB.getMinX() - totalTol, flowBB.getMinY() - totalTol);
-                flowBB.add(flowBB.getMaxX() + totalTol, flowBB.getMaxY() + totalTol);
+                flowBB.add(flowBB.getMinX() - maxDistWorld, flowBB.getMinY() - maxDistWorld);
+                flowBB.add(flowBB.getMaxX() + maxDistWorld, flowBB.getMaxY() + maxDistWorld);
 
                 if (flowBB.contains(point)) {
                     // Get the distance of the click to the flow.
                     xy[0] = point.x;
                     xy[1] = point.y;
-                    double distance = flow.distance(xy);
+                    double distanceSqWorld = flow.distanceSq(xy);
                     // If that distance is less than the tolerance, select it.
-                    if (distance <= totalTol && !nodeGotSelected) {
+                    if (distanceSqWorld <= maxDistWorld * maxDistWorld && !nodeGotSelected) {
                         if (shiftDown) {
                             flow.setSelected(!flow.isSelected());
                         } else {

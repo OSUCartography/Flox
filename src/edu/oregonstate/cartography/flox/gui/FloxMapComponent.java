@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.gui;
 
+import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.map.MapTool;
@@ -175,10 +176,10 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      *
      * @param nodes An ArrayList of nodes from which clicked nodes will be
      * returned
-     * @param click a Point2D.Double at the location of the click
+     * @param click a Point2D.Double at the location of the click in world coordinates.
      * @param pixelTolerance If the click is within this pixel tolerance of the
      * node, it will be returned. This is to account for the the stroke width of
-     * the node drawing.
+     * the node drawing. In pixels.
      * @return An ArrayList of nodes that were clicked.
      */
     public ArrayList<Point> getClickedNodes(ArrayList<Point> nodes,
@@ -190,10 +191,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             for (int i = nodes.size() - 1; i >= 0; i--) {
                 Point node = nodes.get(i);
 
-                double rRefPx = model.getNodeRadiusRefPx(node);
-                double rPx = rRefPx / model.getReferenceMapScale();
-                rPx += pixelTolerance;
-                double rWorld = rPx * scale;
+                double rRefPx = model.getNodeRadiusRefPx(node) + NODE_STROKE_WIDTH / 2;
+                double rWorld = rRefPx / model.getReferenceMapScale();
+                rWorld += pixelTolerance / scale;
                 
                 // Calculate the distance of the click from the node center.
                 double dx = node.x - click.x;
