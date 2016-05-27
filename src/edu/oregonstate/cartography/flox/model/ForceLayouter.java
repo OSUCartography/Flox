@@ -319,7 +319,7 @@ public class ForceLayouter {
 
         double nodeWeight = model.getNodesWeight();
         int distWeightExponent = model.getDistanceWeightExponent();
-
+        double tol = 1 / model.getReferenceMapScale(); // 1 pixel in world coordinates
         double[] xy = new double[2];
         double wTotal = 0;
         double fxTotal = 0;
@@ -370,7 +370,7 @@ public class ForceLayouter {
             // find nearest point on target flow
             xy[0] = node.x;
             xy[1] = node.y;
-            double d = flow.distance(xy);
+            double d = flow.distance(xy, tol);
             double dx = (xy[0] - node.x);
             double dy = (xy[1] - node.y);
 
@@ -659,6 +659,7 @@ public class ForceLayouter {
      * @return
      */
     private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle) {
+        double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
        // Get the current stroke width of the flow in pixels
         double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
                 * model.getReferenceMapScale();
@@ -690,7 +691,7 @@ public class ForceLayouter {
         // Check the shortest distance between the node and the flow. If it's 
         // less than the threshold, then the flow intersects the node. 
         double[] xy = {obstacle.x, obstacle.y};
-        double shortestDistSquare = flow.distanceSq(xy);
+        double shortestDistSquare = flow.distanceSq(xy, tol);
         return shortestDistSquare < threshDist * threshDist;
     }
 
@@ -804,7 +805,7 @@ public class ForceLayouter {
                 if (flowIntersectsObstacle(flow, obstacles) == false) {
                     // found a new position for the control point that does not 
                     // result in an overlap with any obstacle
-                    System.out.println("OK " + i + "\n");
+//                    System.out.println("OK " + i + "\n");
                     return;
                 }
             }

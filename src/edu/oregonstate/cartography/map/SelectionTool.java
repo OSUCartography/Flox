@@ -305,7 +305,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      * @return 
      */
     private boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
-
+       
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
@@ -401,11 +401,12 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             double toleranceWorld = pixelTolerance / mapComponent.getScale();
 
             double[] xy = new double[2];
-
+            double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
+            
             while (flows.hasNext()) {
                 Flow flow = flows.next();
 
-                // flow width.
+                // flow width
                 double flowWidthWorld = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
                         / model.getReferenceMapScale();
                 
@@ -421,7 +422,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     // Get the distance of the click to the flow.
                     xy[0] = point.x;
                     xy[1] = point.y;
-                    double distanceSqWorld = flow.distanceSq(xy);
+                    double distanceSqWorld = flow.distanceSq(xy, tol);
                     // If that distance is less than the tolerance, select it.
                     if (distanceSqWorld <= maxDistWorld * maxDistWorld && !nodeGotSelected) {
                         if (shiftDown) {

@@ -309,16 +309,17 @@ public class GeometryUtils {
     /**
      * Test whether three points align.
      *
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @param x3
-     * @param y3
+     * @param x1 point 1 x
+     * @param y1 point 1 y
+     * @param x2 point 2 x
+     * @param y2 point 2 y
+     * @param x3 point 3 x
+     * @param y3 point 3 y
+     * @param tol tolerance
      * @return
      */
-    public static boolean collinear(double x1, double y1, double x2, double y2, double x3, double y3) {
-        return Math.abs((y1 - y2) * (x1 - x3) - (y1 - y3) * (x1 - x2)) <= 1e-9;
+    public static boolean collinear(double x1, double y1, double x2, double y2, double x3, double y3, double tol) {
+        return Math.abs((y1 - y2) * (x1 - x3) - (y1 - y3) * (x1 - x2)) < tol;
     }
 
     private static double cuberoot(double x) {
@@ -355,7 +356,7 @@ public class GeometryUtils {
         }
         double u = Math.sqrt(-p / 3);
         double v = Math.acos(-Math.sqrt(-27.0 / p3) * q / 2.0) / 3.0;
-        double m = Math.cos(v), n = Math.sin(v) * 1.732050808;
+        double m = Math.cos(v), n = Math.sin(v) * Math.sqrt(3.0);
         r[0] = offset + u * (m + m);
         r[1] = offset - u * (n + m);
         r[2] = offset + u * (n - m);
@@ -383,9 +384,10 @@ public class GeometryUtils {
     public static double getDistanceToQuadraticBezierCurveSq(double p0x, double p0y,
             double p1x, double p1y,
             double p2x, double p2y,
+            double tol,
             double[] xy) {
 
-        if (collinear(p0x, p0y, p1x, p1y, p2x, p2y)) {
+        if (collinear(p0x, p0y, p1x, p1y, p2x, p2y, tol)) {
             return getDistanceToLineSegmentSquare(xy[0], xy[1], p0x, p0y, p2x, p2y);
         }
 
@@ -427,7 +429,7 @@ public class GeometryUtils {
                 double dy = posy - xy[1];
                 double distSq = dx * dx + dy * dy;
                 if (distSq < minDistSq) {
-                    minDistSq = dx * dx + dy * dy;
+                    minDistSq = distSq;
                     xy[0] = posx;
                     xy[1] = posy;
                 }
@@ -454,8 +456,9 @@ public class GeometryUtils {
     public static double getDistanceToQuadraticBezierCurve(double p0x, double p0y,
             double p1x, double p1y,
             double p2x, double p2y,
+            double tol,
             double[] xy) {
-        double dSq = getDistanceToQuadraticBezierCurveSq(p0x, p0y, p1x, p1y, p2x, p2y, xy);
+        double dSq = getDistanceToQuadraticBezierCurveSq(p0x, p0y, p1x, p1y, p2x, p2y, tol, xy);
         return Math.sqrt(dSq);
     }
 

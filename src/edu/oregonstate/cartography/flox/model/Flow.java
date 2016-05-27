@@ -875,9 +875,9 @@ public final class Flow {
      * output.
      * @return The distance.
      */
-    public double distance(double[] xy) {
+    public double distance(double[] xy, double tol) {
         return GeometryUtils.getDistanceToQuadraticBezierCurve(startPt.x, startPt.y,
-                cPt.x, cPt.y, endPt.x, endPt.y, xy);
+                cPt.x, cPt.y, endPt.x, endPt.y, tol, xy);
     }
 
     /**
@@ -888,9 +888,9 @@ public final class Flow {
      * output.
      * @return The distance.
      */
-    public double distanceSq(double[] xy) {
+    public double distanceSq(double[] xy, double tol) {
         return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
-                cPt.x, cPt.y, endPt.x, endPt.y, xy);
+                cPt.x, cPt.y, endPt.x, endPt.y, tol, xy);
     }
 
     public double getDistanceBetweenStartPointAndControlPoint() {
