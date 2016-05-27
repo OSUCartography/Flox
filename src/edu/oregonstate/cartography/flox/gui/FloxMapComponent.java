@@ -60,7 +60,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing clip areas around starts of flows
      */
     private boolean drawStartClipAreas = false;
-
+    
+    /**
+     * flag for drawing obstacles (areas around nodes and arrowheads)
+     */
+    private boolean drawObstacles = false;
+    
     /**
      * Flag to indicate when the flow width is locked to the current map scale.
      */
@@ -123,7 +128,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                     true, // draw symbol for locked flows
                     true, // highlight selected flows and nodes
                     isDrawStartClipAreas(),
-                    isDrawEndClipAreas());
+                    isDrawEndClipAreas(),
+                    isDrawObstacles());
         }
 
         // copy double buffer image to JComponent
@@ -298,6 +304,20 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     public boolean isDrawNodes() {
         return drawNodes;
+    }
+
+    /**
+     * @return the drawObstacles
+     */
+    public boolean isDrawObstacles() {
+        return drawObstacles;
+    }
+
+    /**
+     * @param drawObstacles the drawObstacles to set
+     */
+    public void setDrawObstacles(boolean drawObstacles) {
+        this.drawObstacles = drawObstacles;
     }
 
 }

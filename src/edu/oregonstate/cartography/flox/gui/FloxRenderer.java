@@ -105,7 +105,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             boolean drawLocks,
             boolean highlightSelected,
             boolean drawStartClipAreas,
-            boolean drawEndClipAreas) {
+            boolean drawEndClipAreas,
+            boolean drawObstacles) {
 
         if (renderBackgroundLayers) {
             int nbrLayers = model.getNbrLayers();
@@ -148,13 +149,14 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             drawClipAreas(drawStartClipAreas, drawEndClipAreas);
         }
 
-        edu.oregonstate.cartography.flox.model.ForceLayouter layouter
-                = new edu.oregonstate.cartography.flox.model.ForceLayouter(model);
-        java.util.List<edu.oregonstate.cartography.flox.model.ForceLayouter.Obstacle> obstacles = layouter.getObstacles(scale);
-        for (ForceLayouter.Obstacle obstacle : obstacles) {
-            g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
-            double r = obstacle.r ;
-            drawCircle(obstacle.x, obstacle.y, r, new Color(200, 0, 0, 60), Color.BLACK);
+        if (drawObstacles) {
+            ForceLayouter layouter = new ForceLayouter(model);
+            java.util.List<ForceLayouter.Obstacle> obstacles = layouter.getObstacles(scale);
+            for (ForceLayouter.Obstacle obstacle : obstacles) {
+                g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
+                double r = obstacle.r;
+                drawCircle(obstacle.x, obstacle.y, r, new Color(200, 0, 0, 60), Color.BLACK);
+            }
         }
     }
 
@@ -219,7 +221,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 false, // drawLocks
                 false, // highlightSelected
                 false, // drawStartClipAreas
-                false // drawEndClipAreas
+                false, // drawEndClipAreas
+                false  // drawObstacles
         );
 
         return bufferImage;

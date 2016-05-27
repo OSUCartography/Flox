@@ -62,16 +62,16 @@ public class MainWindow extends javax.swing.JFrame {
      * Undo/redo manager.
      */
     private final Undo undo;
-
+    
     private boolean updatingGUI = false;
-
+    
     private LayoutWorker layoutWorker = null;
 
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
-
+        
         initComponents();
         progressBar.setVisible(false);
 
@@ -88,7 +88,7 @@ public class MainWindow extends javax.swing.JFrame {
         // reorder layers
         layerList.addPropertyChangeListener(DraggableList.MODEL_PROPERTY,
                 new PropertyChangeListener() {
-
+            
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 model.removeAllLayers();
@@ -103,7 +103,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
         mapComponent.setMainWindow(this);
         mapComponent.requestFocusInWindow();
-
+        
         try {
             this.undo = new Undo(new Model().marshal());
             undo.registerUndoMenuItems(undoMenuItem, redoMenuItem);
@@ -123,11 +123,11 @@ public class MainWindow extends javax.swing.JFrame {
         String title = "Flox Error";
         ErrorDialog.showErrorDialog(msg, title, ex, this);
     }
-
+    
     protected void registerUndoMenuItems(JMenuItem undoMenuItem, JMenuItem redoMenuItem) {
         undo.registerUndoMenuItems(undoMenuItem, redoMenuItem);
     }
-
+    
     private void undoRedo(boolean undoFlag) {
         Object undoData = undoFlag ? undo.getUndo() : undo.getRedo();
         if (undoData != null) {
@@ -143,7 +143,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }
-
+    
     protected void addUndo(String message) {
         try {
             if (updatingGUI == false) {
@@ -183,7 +183,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (model == null) {
             return;
         }
-
+        
         updatingGUI = true;
         try {
             // Arrow Settings
@@ -204,7 +204,7 @@ public class MainWindow extends javax.swing.JFrame {
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
             zeroLengthStiffnessSlider.setValue((int) (model.getMinFlowLengthSpringConstant() * 100d));
-
+            
             int[] v = {0, 1, 2, 4, 6, 8, 16, 32};
             int w = model.getDistanceWeightExponent();
             for (int i = 0; i < v.length; i++) {
@@ -212,7 +212,7 @@ public class MainWindow extends javax.swing.JFrame {
                     exponentSlider.setValue(i);
                 }
             }
-
+            
             nodeWeightSlider.setValue((int) (model.getNodesWeight() * 10d));
             antiTorsionSlider.setValue((int) (model.getAntiTorsionWeight() * 100d));
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
@@ -231,32 +231,29 @@ public class MainWindow extends javax.swing.JFrame {
             boolean hasFlowsAndClipAreas = model.hasClipAreas() && model.getNbrFlows() > 0;
             boolean clipStart = model.isClipFlowStarts();
             boolean clipEnd = model.isClipFlowEnds();
-
+            
             clipWithStartAreasCheckBox.setSelected(clipStart);
             clipWithEndAreasCheckBox.setSelected(clipEnd);
-
+            
             clipWithEndAreasCheckBox.setEnabled(hasFlowsAndClipAreas);
             clipWithStartAreasCheckBox.setEnabled(hasFlowsAndClipAreas);
-
+            
             endAreasBufferDistanceFormattedTextField.setEnabled(hasFlowsAndClipAreas && clipEnd);
             startAreasBufferDistanceFormattedTextField.setEnabled(hasFlowsAndClipAreas && clipStart);
-
+            
             endAreasBufferDistanceFormattedTextField.setValue(
                     model.getEndClipAreaBufferDistance());
             startAreasBufferDistanceFormattedTextField.setValue(
                     model.getStartClipAreaBufferDistance());
-
+            
             drawEndClipAreasCheckBox.setEnabled(hasFlowsAndClipAreas && clipEnd);
             drawStartClipAreasCheckBox.setEnabled(hasFlowsAndClipAreas && clipStart);
-
-            // reference scale
-            lockFeatureScaleToggleButton.setSelected(model.isScaleLocked());
-
+            
         } finally {
             updatingGUI = false;
         }
     }
-
+    
     private void updateLayerList() {
         assert SwingUtilities.isEventDispatchThread();
         int selectedID = layerList.getSelectedIndex();
@@ -354,7 +351,6 @@ public class MainWindow extends javax.swing.JFrame {
         showNodesToggleButton = new javax.swing.JToggleButton();
         showFlowsToggleButton = new javax.swing.JToggleButton();
         jSeparator9 = new javax.swing.JSeparator();
-        lockFeatureScaleToggleButton = new javax.swing.JToggleButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         addArrowsCheckbox = new javax.swing.JCheckBox();
@@ -441,6 +437,8 @@ public class MainWindow extends javax.swing.JFrame {
         mediumFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
+        showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
@@ -1267,19 +1265,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         mapControlPanel.add(jSeparator9, gridBagConstraints);
 
-        lockFeatureScaleToggleButton.setText("Lock Feature Scale");
-        lockFeatureScaleToggleButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lockFeatureScaleToggleButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-        mapControlPanel.add(lockFeatureScaleToggleButton, gridBagConstraints);
-
         mapPanel.add(mapControlPanel);
 
         controlsTabbedPane.addTab("Map", mapPanel);
@@ -2002,6 +1987,15 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(showFlowSegmentsMenuItem);
 
+        showObstaclesCheckBoxMenuItem.setText("Show Obstacles");
+        showObstaclesCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showObstaclesCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(showObstaclesCheckBoxMenuItem);
+        jMenu1.add(jSeparator12);
+
         enforceCanvasCheckBoxMenuItem.setSelected(true);
         enforceCanvasCheckBoxMenuItem.setText("Enforce Canvas");
         enforceCanvasCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2065,7 +2059,7 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exportSVGMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportSVGMenuItemActionPerformed
-
+        
         OutputStream outputStream = null;
         try {
             // ask for export file
@@ -2092,7 +2086,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_exportSVGMenuItemActionPerformed
-
+    
     private void addLayer(GeometryCollection geometry, String name) {
         Layer layer = model.addLayer(geometry);
         layer.setName(name);
@@ -2157,7 +2151,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             setFlows(flows, inFilePath);
-            sizeFeaturesToScale();
+            mapComponent.showAll();
 
             // the user might have loaded clipping areas before. Apply these
             // clipping area to the new flows.
@@ -2177,7 +2171,7 @@ public class MainWindow extends javax.swing.JFrame {
         int index = layerList.getSelectedIndex();
         return index == -1 ? null : model.getLayer(index);
     }
-
+    
     private VectorSymbol getSelectedVectorSymbol() {
         Layer selectedLayer = getSelectedMapLayer();
         VectorSymbol vectorSymbol = null;
@@ -2186,16 +2180,16 @@ public class MainWindow extends javax.swing.JFrame {
         }
         return vectorSymbol;
     }
-
+    
     private void writeSymbolGUI() {
         VectorSymbol vectorSymbol = getSelectedVectorSymbol();
-
+        
         boolean enable = vectorSymbol != null;
         fillCheckBox.setEnabled(enable);
         strokeCheckBox.setEnabled(enable);
         fillColorButton.setEnabled(enable);
         strokeColorButton.setEnabled(enable);
-
+        
         if (vectorSymbol != null) {
             fillCheckBox.setSelected(vectorSymbol.isFilled());
             strokeCheckBox.setSelected(vectorSymbol.isStroked());
@@ -2203,7 +2197,7 @@ public class MainWindow extends javax.swing.JFrame {
             strokeColorButton.setColor(vectorSymbol.getStrokeColor());
         }
     }
-
+    
     private void readSymbolGUI() {
         VectorSymbol vectorSymbol = getSelectedVectorSymbol();
         if (vectorSymbol == null) {
@@ -2258,7 +2252,7 @@ public class MainWindow extends javax.swing.JFrame {
         readSymbolGUI();
         mapComponent.repaint();
     }//GEN-LAST:event_strokeColorButtonActionPerformed
-
+    
     private void removeSelectedLayer() {
         int selectedLayerID = layerList.getSelectedIndex();
         if (selectedLayerID < 0) {
@@ -2301,12 +2295,12 @@ public class MainWindow extends javax.swing.JFrame {
                 bb.getWidth(), bb.getHeight());
         mapComponent.zoomOnRectangle(bbRect);
     }//GEN-LAST:event_zoomOnSelectedLayerMenuItemActionPerformed
-
+    
     private void showReport() {
         int nbrIntersections = LayoutGrader.countFlowIntersections(model);
         int nbrFlows = model.getNbrFlows();
         int nbrNodes = model.getNbrNodes();
-
+        
         StringBuilder sb = new StringBuilder();
         sb.append("Flows: ");
         sb.append(nbrFlows);
@@ -2428,13 +2422,13 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_exportImageMenuItemActionPerformed
 
     private void canvasSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_canvasSizeSliderStateChanged
-
+        
         model.setCanvasPadding(canvasSizeSlider.getValue() / 100d);
-
+        
         if (mapComponent.isDrawCanvas()) {
             mapComponent.refreshMap();
         }
-
+        
         if (canvasSizeSlider.getValueIsAdjusting() == false) {
             layout("Canvas Size");
         }
@@ -2562,11 +2556,11 @@ public class MainWindow extends javax.swing.JFrame {
                 showErrorDialog("The selected file is not a shapefile.", null);
                 return;
             }
-
+            
             model.setClipAreas(collection);
             writeModelToGUI();
             clipWithEndAreasCheckBox.doClick();
-
+            
             String fileName = FileUtils.getFileNameWithoutExtension(inFilePath);
             Layer layer = model.getLayer(fileName);
             if (layer == null) {
@@ -2610,7 +2604,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_endAreasBufferDistanceFormattedTextFieldPropertyChange
-
+    
     protected JOptionPane getOptionPane(JComponent parent) {
         JOptionPane pane;
         if (!(parent instanceof JOptionPane)) {
@@ -2644,7 +2638,8 @@ public class MainWindow extends javax.swing.JFrame {
             String flowsFilePath = flowsFilePathLabel.getText();
             ArrayList<Flow> flows = FlowImporter.readFlows(pointsFilePath, flowsFilePath);
             setFlows(flows, flowsFilePath);
-            sizeFeaturesToScale();
+            mapComponent.showAll();
+
             // the user might have loaded clipping areas before. Apply these
             // clipping area to the new flows.
             applyClippingSettings();
@@ -2652,28 +2647,19 @@ public class MainWindow extends javax.swing.JFrame {
             showErrorDialog("The flows could not be imported.", ex);
         }
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
-
+    
     private void applyClippingSettings() {
         if (clipWithStartAreasCheckBox.isSelected()) {
             model.updateStartClipAreas();
         }
         model.setClipFlowStarts(clipWithStartAreasCheckBox.isSelected());
-
+        
         if (clipWithEndAreasCheckBox.isSelected()) {
             model.updateEndClipAreas();
         }
         model.setClipFlowEnds(clipWithEndAreasCheckBox.isSelected());
-
+        
         writeModelToGUI();
-    }
-
-    private void sizeFeaturesToScale() {
-        if (lockFeatureScaleToggleButton.isSelected()) {
-            model.setLockedMapScale(mapComponent.getScale());
-            mapComponent.refreshMap();
-        } else {
-            lockFeatureScaleToggleButton.doClick();
-        }
     }
 
     private void selectPointsFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectPointsFileButtonActionPerformed
@@ -2918,17 +2904,17 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
-
+        
         setLockUnlockButtonIcon();
-
+        
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectNoneMenuItemActionPerformed
 
     private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(true);
-
+        
         setLockUnlockButtonIcon();
-
+        
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectAllMenuItemActionPerformed
 
@@ -2943,7 +2929,7 @@ public class MainWindow extends javax.swing.JFrame {
         ArrayList<Flow> selectedFlows = model.getSelectedFlows();
         if (selectedFlows.size() > 0) {
             lockUnlockButton.setEnabled(true);
-
+            
             int locked = 0;
             int unlocked = 0;
             for (Flow flow : selectedFlows) {
@@ -2992,7 +2978,7 @@ public class MainWindow extends javax.swing.JFrame {
                 unlocked++;
             }
         }
-
+        
         if (unlocked == 0) {
             model.setLockOfSelectedFlows(false);
             lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
@@ -3018,7 +3004,7 @@ public class MainWindow extends javax.swing.JFrame {
      * @param evt
      */
     private void xFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xFormattedTextFieldActionPerformed
-
+        
         if (model != null) {
             try {
                 xFormattedTextField.commitEdit();
@@ -3103,7 +3089,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.setDrawNodes(showNodesToggleButton.isSelected());
         mapComponent.refreshMap();
     }//GEN-LAST:event_showNodesToggleButtonActionPerformed
-
+    
     private double inverseDistanceWeight(double d) {
         // FIXME hard coded exponent value
         double p = 2;
@@ -3199,22 +3185,10 @@ public class MainWindow extends javax.swing.JFrame {
         // move control point
         ctrlPt.x += v.fx;
         ctrlPt.y += v.fy;
-
+        
         mapComponent.eraseBufferImage();
         mapComponent.repaint();
     }//GEN-LAST:event_emptySpaceMenuItemActionPerformed
-
-    private void lockFeatureScaleToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockFeatureScaleToggleButtonActionPerformed
-        if (lockFeatureScaleToggleButton.isSelected()) {
-            lockFeatureScaleToggleButton.setText("Unlock Feature Scale");
-            model.setScaleLocked(true);
-            model.setLockedMapScale(mapComponent.getScale());
-        } else {
-            lockFeatureScaleToggleButton.setText("Lock Feature Scale");
-            model.setScaleLocked(false);
-            mapComponent.refreshMap();
-        }
-    }//GEN-LAST:event_lockFeatureScaleToggleButtonActionPerformed
 
     private void angularDistributionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_angularDistributionSliderStateChanged
         model.setAngularDistributionWeight(angularDistributionSlider.getValue() / 100d);
@@ -3294,19 +3268,24 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_intersectionInfoMenuItemActionPerformed
 
+    private void showObstaclesCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showObstaclesCheckBoxMenuItemActionPerformed
+        mapComponent.setDrawObstacles(showObstaclesCheckBoxMenuItem.isSelected());
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_showObstaclesCheckBoxMenuItemActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
      * is simultaneously changing it.
      */
     private class LayoutWorker extends SwingWorker<Void, Void> {
-
+        
         private final ForceLayouter layouter;
-
+        
         public LayoutWorker(ForceLayouter layouter) {
             this.layouter = layouter;
             this.addPropertyChangeListener(new PropertyChangeListener() {
-
+                
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if ("progress".equals(evt.getPropertyName())) {
@@ -3322,7 +3301,7 @@ public class MainWindow extends javax.swing.JFrame {
         private void layout(int start, int end,
                 boolean moveFlowsOverlappingNodes,
                 double scale) {
-
+            
             for (int i = start; i < end; i++) {
                 if (isCancelled()) {
                     break;
@@ -3331,7 +3310,7 @@ public class MainWindow extends javax.swing.JFrame {
                 // compute an iteration with decreasing weight
                 double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
                 layouter.layoutAllFlows(weight);
-
+                
                 if (moveFlowsOverlappingNodes) {
                     // store initial lock flags of all flows
                     boolean[] initialLocks = model.getLocks();
@@ -3354,14 +3333,14 @@ public class MainWindow extends javax.swing.JFrame {
                 setProgress((int) Math.round(progress));
             }
         }
-
+        
         @Override
         public Void doInBackground() {
             // initialize progress property.
             double startTime = System.currentTimeMillis();
             
             setProgress(0);
-
+            
             double scale = mapComponent.getScale();
 
             // first half of iterations. Flows are not moved away from overlapped nodes.
@@ -3371,7 +3350,7 @@ public class MainWindow extends javax.swing.JFrame {
             boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
             layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS,
                     moveFlowsOverlappingNodes, scale);
-
+            
             layouter.computeArrowHeads(scale);
             System.out.println("Milliseconds: " + (System.currentTimeMillis() - startTime));
             return null;
@@ -3407,7 +3386,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.repaint();
         }
     }
-
+    
     private void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -3420,7 +3399,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (model.getNbrFlows() == 0) {
             return;
         }
-
+        
         progressBar.setVisible(true);
         if (layoutWorker != null && !layoutWorker.isDone()) {
             layoutWorker.cancel(false);
@@ -3432,7 +3411,7 @@ public class MainWindow extends javax.swing.JFrame {
         layoutWorker = new LayoutWorker(layouter);
         layoutWorker.execute();
     }
-
+    
     private void updateArrowHeads() {
         if (updatingGUI || model.getNbrFlows() == 0) {
             return;
@@ -3525,6 +3504,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
+    private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator7;
@@ -3537,7 +3517,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JScrollPane layerListScrollPane;
     private javax.swing.JCheckBox limitNodesRepulsionToBandCheckBox;
     private javax.swing.JCheckBoxMenuItem liveDrawingCheckBoxMenuItem;
-    private javax.swing.JToggleButton lockFeatureScaleToggleButton;
     private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;
@@ -3580,6 +3559,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem showFlowSegmentsMenuItem;
     private javax.swing.JToggleButton showFlowsToggleButton;
     private javax.swing.JToggleButton showNodesToggleButton;
+    private javax.swing.JCheckBoxMenuItem showObstaclesCheckBoxMenuItem;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;

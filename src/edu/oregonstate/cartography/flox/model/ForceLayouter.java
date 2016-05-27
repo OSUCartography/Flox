@@ -755,55 +755,6 @@ public class ForceLayouter {
     }
 
     /**
-     * Test whether a flow can be moved off a node. A flow cannot be moved off a
-     * node if the node overlaps the center of the flow's start or end point.
-     *
-     * @param flow flow to test
-     * @param node node to test
-     * @param mapScale current map scale
-     * @return true if flow can be moved off the node
-     */
-    private boolean isFlowMovable(Flow flow, Point node, double mapScale) {
-
-        // FIXME hard-coded parameter
-        double NODE_TOLERANCE_PX = 10;
-
-        Point sPt = flow.getStartPt();
-        Point ePt = flow.getEndPt();
-
-        // TODO
-        // Dan Comment: All this code involved in getting the pixel and world 
-        // coordinates of flow width and node radius is repeated in several 
-        // places. It might be better if it lived in just one place. 
-        // Get the locked scale factor needed to calculate flow widths
-        double lockedScaleFactor;
-        if (!model.isScaleLocked()) {
-            lockedScaleFactor = 1;
-        } else {
-            double lockedMapScale = model.getLockedMapScale();
-            lockedScaleFactor = mapScale / lockedMapScale;
-        }
-
-        double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
-                * lockedScaleFactor;
-
-        double worldStrokeWidth = (flowStrokeWidthPx) / mapScale;
-
-        double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
-
-        double nodeRadiusPx = (Math.sqrt(nodeArea / Math.PI)) * lockedScaleFactor;
-
-        double worldNodeRadius = (nodeRadiusPx + NODE_TOLERANCE_PX) / mapScale;
-
-        // Comment by Dan: This checks to see if the node overlaps the center
-        // of the flow's start point or end point. If it does, then there is 
-        // no way (yet) to move the flow such that it no
-        // longer intersects the node, and should not be attempted.
-        return !(sPt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0
-                || ePt.distance(node) - (worldNodeRadius + worldStrokeWidth / 2) < 0);
-    }
-
-    /**
      * Returns a list of all flows that intersect nodes.
      *
      * @param scale the scale of the map.
@@ -818,14 +769,8 @@ public class ForceLayouter {
                 Point node = obstacle.node;
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
                     if (flowIntersectsObstacle(flow, obstacle, scale)) {
-                        // check to see if the flow can be moved off the node
-                        // TODO why is this needed?
-                        // FIXME with the change to obstacles, this is using the wrong coordinates for arrowheads
-                        //if (isFlowMovable(flow, node, scale)) {
                         flowsArray.add(flow);
                         break;
-                        //}
-
                     }
                 }
             }
