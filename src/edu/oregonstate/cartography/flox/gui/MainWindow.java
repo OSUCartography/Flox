@@ -1269,7 +1269,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         mapControlPanel.add(jSeparator9, gridBagConstraints);
 
-        jLabel32.setText("Pixel");
+        jLabel32.setText("Pixels");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 5;
@@ -1278,7 +1278,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         mapControlPanel.add(jLabel32, gridBagConstraints);
 
-        jLabel31.setText("Pixel");
+        jLabel31.setText("Pixels");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 7;
@@ -2497,7 +2497,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ("value".equals(evt.getPropertyName()) && model != null) {
             double s = ((Number) flowDistanceFromEndPointFormattedTextField.getValue()).doubleValue();
             model.setFlowDistanceFromEndPointPixel(s);
-            mapComponent.refreshMap();
+            layout("Distance to End Point");
         }
     }//GEN-LAST:event_flowDistanceFromEndPointFormattedTextFieldPropertyChange
 
@@ -2505,7 +2505,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (model != null) {
             model.setDrawArrowheads(addArrowsCheckbox.isSelected());
             mapComponent.refreshMap();
-            addUndo("Add Arrows");
+            layout("Add Arrows");
         }
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
 
@@ -2515,7 +2515,7 @@ public class MainWindow extends javax.swing.JFrame {
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowheadLengthSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Length");
+                layout("Arrow Length");
             }
         }
     }//GEN-LAST:event_arrowheadLengthSliderStateChanged
@@ -2526,7 +2526,7 @@ public class MainWindow extends javax.swing.JFrame {
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowheadWidthSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Width");
+                layout("Arrow Width");
             }
         }
     }//GEN-LAST:event_arrowheadWidthSliderStateChanged
@@ -2537,7 +2537,7 @@ public class MainWindow extends javax.swing.JFrame {
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowEdgeCtrlLengthSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Edge Shape");
+                layout("Arrow Edge Shape");
             }
         }
     }//GEN-LAST:event_arrowEdgeCtrlLengthSliderStateChanged
@@ -2548,7 +2548,7 @@ public class MainWindow extends javax.swing.JFrame {
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowEdgeCtrlWidthSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Edge Shape");
+                layout("Arrow Edge Shape");
             }
         }
     }//GEN-LAST:event_arrowEdgeCtrlWidthSliderStateChanged
@@ -2559,7 +2559,7 @@ public class MainWindow extends javax.swing.JFrame {
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowCornerPositionSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Corner Position");
+                layout("Arrow Corner Position");
             }
         }
     }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
@@ -2759,7 +2759,7 @@ public class MainWindow extends javax.swing.JFrame {
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowSizeRatioSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Size Ratio");
+                layout("Arrow Size Ratio");
             }
         }
     }//GEN-LAST:event_arrowSizeRatioSliderStateChanged
@@ -2826,7 +2826,7 @@ public class MainWindow extends javax.swing.JFrame {
             model.setMaxFlowStrokeWidthPixel(maximumFlowWidthSlider.getValue());
             mapComponent.refreshMap();
             if (!maximumFlowWidthSlider.getValueIsAdjusting()) {
-                addUndo("Flow Width");
+                layout("Flow Width");
             }
         }
     }//GEN-LAST:event_maximumFlowWidthSliderStateChanged
@@ -2836,7 +2836,7 @@ public class MainWindow extends javax.swing.JFrame {
             model.setMaxNodeSizePx(maximumNodeSizeSlider.getValue());
             mapComponent.refreshMap();
             if (!maximumNodeSizeSlider.getValueIsAdjusting()) {
-                addUndo("Node Size");
+                layout("Node Size");
             }
         }
     }//GEN-LAST:event_maximumNodeSizeSliderStateChanged
@@ -2906,7 +2906,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void reverseFlowDirectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseFlowDirectionMenuItemActionPerformed
         model.reverseSelectedFlows();
-        addUndo("Reverse Flow Direction");
+        layout("Reverse Flow Direction");
         mapComponent.refreshMap();
     }//GEN-LAST:event_reverseFlowDirectionMenuItemActionPerformed
 
@@ -2977,9 +2977,8 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
-        addUndo("Delete");
         model.deleteSelectedFlowsAndNodes();
-        mapComponent.refreshMap();
+        layout("Delete");
     }//GEN-LAST:event_deleteMenuItemActionPerformed
 
     private void redoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redoMenuItemActionPerformed
@@ -3046,7 +3045,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         // Move focus to MainWindow
         this.requestFocus();
-        addUndo("Edit X Coordinate");
+        layout("Edit X Coordinate");
     }//GEN-LAST:event_xFormattedTextFieldActionPerformed
 
     /**
@@ -3074,7 +3073,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         // Move focus to MainWindow
         this.requestFocus();
-        addUndo("Edit Y Coordinate");
+        layout("Edit Y Coordinate");
     }//GEN-LAST:event_yFormattedTextFieldActionPerformed
 
     /**
@@ -3100,7 +3099,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
         // Move focus to MainWindow
         this.requestFocus();
-        addUndo("Edit Value");
+        layout("Edit Value");
     }//GEN-LAST:event_valueFormattedTextFieldActionPerformed
 
     private void showFlowsToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showFlowsToggleButtonActionPerformed
@@ -3233,7 +3232,7 @@ public class MainWindow extends javax.swing.JFrame {
         if ("value".equals(evt.getPropertyName()) && model != null) {
             double s = ((Number) flowDistanceFromStartPointFormattedTextField.getValue()).doubleValue();
             model.setFlowDistanceFromStartPointPixel(s);
-            mapComponent.refreshMap();
+            layout("Distance to Start Point");
         }
     }//GEN-LAST:event_flowDistanceFromStartPointFormattedTextFieldPropertyChange
 
@@ -3243,7 +3242,7 @@ public class MainWindow extends javax.swing.JFrame {
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowLengthRatioSlider.getValueIsAdjusting()) {
-                addUndo("Arrow Size Ratio");
+                layout("Arrow Size Ratio");
             }
         }
     }//GEN-LAST:event_arrowLengthRatioSliderStateChanged
