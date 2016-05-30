@@ -675,31 +675,31 @@ public class ForceLayouter {
         double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
 
         // flow width in world coordinates
-        double worldStrokeWidth = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
+        double strokeWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
 
         // Find out what that radius is in world coordinates
         // Add a bit to the pixel radius in order to make the radius a few pixels 
         // wider than the actual node and to account for the node's stroke width. 
-        double worldNodeRadius = (obstacle.r + model.getNodeTolerancePx()) / model.getReferenceMapScale();
+        double obstacleRadiusWorld = (obstacle.r + model.getMinObstacleDistPx()) / model.getReferenceMapScale();
 
-        // Add the worldNodeRadius to half the worldFlowWidth
-        double threshDist = (worldStrokeWidth / 2) + worldNodeRadius;
+        // the minimum distance between the obstacle center and the flow axis
+        double minDist = (strokeWidthWorld / 2) + obstacleRadiusWorld;
 
-        // Get the flow's bounding box, and add a padding to it of threshDist.
+        // Get the flow's bounding box, and add a padding to it of minDist.
         Rectangle2D flowBB = flow.getBoundingBox();
-        flowBB.add((flowBB.getMinX() - threshDist), (flowBB.getMinY() - threshDist));
-        flowBB.add((flowBB.getMaxX() + threshDist), (flowBB.getMaxY() + threshDist));
+        flowBB.add((flowBB.getMinX() - minDist), (flowBB.getMinY() - minDist));
+        flowBB.add((flowBB.getMaxX() + minDist), (flowBB.getMaxY() + minDist));
 
-        // the node must be inside the extended bounding box
+        // the obstacle must be inside the extended bounding box
         if (flowBB.contains(obstacle.x, obstacle.y) == false) {
             return false;
         }
 
-        // Check the shortest distance between the node and the flow. If it's 
-        // less than the threshold, then the flow intersects the node. 
+        // Check the shortest distance between the obstacle and the flow. If it's 
+        // less than the minimum distance, then the flow intersects the obstacle. 
         double[] xy = {obstacle.x, obstacle.y};
         double shortestDistSquare = flow.distanceSq(xy, tol);
-        return shortestDistSquare < threshDist * threshDist;
+        return shortestDistSquare < minDist * minDist;
     }
 
     /**
@@ -727,10 +727,10 @@ public class ForceLayouter {
         Iterator<Point> nodeIterator = model.nodeIterator();
         while (nodeIterator.hasNext()) {
             Point node = nodeIterator.next();
-            double r = model.getNodeRadiusPx(node);
-            obstacles.add(new Obstacle(node, node.x, node.y, r));
+            double rPx = model.getNodeRadiusPx(node);
+            obstacles.add(new Obstacle(node, node.x, node.y, rPx));
         }
-/*
+
         // arrowheads are obstacles
         if (model.isDrawArrowheads()) {
             // re-compute arrowheads for the current flow geometries
@@ -740,11 +740,11 @@ public class ForceLayouter {
             while (flowIterator.hasNext()) {
                 Flow flow = flowIterator.next();
                 Point basePoint = flow.getEndArrow().getBasePt();
-                double r = flow.getEndArrow().getLength() * model.getReferenceMapScale();
-                obstacles.add(new Obstacle(flow.endPt, basePoint.x, basePoint.y, r));
+                double rPx = flow.getEndArrow().getLength() * model.getReferenceMapScale();
+                obstacles.add(new Obstacle(flow.endPt, basePoint.x, basePoint.y, rPx));
             }
         }
-*/
+
         return obstacles;
     }
 
@@ -753,7 +753,7 @@ public class ForceLayouter {
      *
      * @return
      */
-    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
+    public ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
         ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
@@ -779,13 +779,13 @@ public class ForceLayouter {
     public void moveFlowsOverlappingObstacles() {
         List<Obstacle> obstacles = getObstacles();
         // get a list of all flows that intersect obstacles
-        List<Flow> flowsOverlappingNodes = getFlowsOverlappingObstacles(obstacles);
+        List<Flow> flowsOverlappingObstacles = getFlowsOverlappingObstacles(obstacles);
 
         // sort flows in decreasing order
-        Model.sortFlows(flowsOverlappingNodes, false);
+        Model.sortFlows(flowsOverlappingObstacles, false);
 
         // move control points of overlapping flows, starts with largest flow
-        for (Flow flow : flowsOverlappingNodes) {
+        for (Flow flow : flowsOverlappingObstacles) {
             Point cPt = flow.getCtrlPt();
             double originalX = cPt.x;
             double originalY = cPt.y;

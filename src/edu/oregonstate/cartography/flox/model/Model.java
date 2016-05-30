@@ -262,10 +262,9 @@ public class Model {
     private double endClipAreaBufferDistance = 0;
 
     /**
-     * Minimum distance of flows from nodes. Used by
-     * ForceLayouter.moveFlowsOverlappingNodes()
+     * Minimum distance of flows from obstacles in pixels.
      */
-    private double nodeTolerancePx = 10;
+    private double minObstacleDistPx = 10;
 
     /**
      * A map with a set of symbolized layers.
@@ -1580,15 +1579,15 @@ public class Model {
     /**
      * @return the nodeTolerancePx
      */
-    public double getNodeTolerancePx() {
-        return nodeTolerancePx;
+    public double getMinObstacleDistPx() {
+        return minObstacleDistPx;
     }
 
     /**
-     * @param nodeTolerancePx the nodeTolerancePx to set
+     * @param minObstacleDistPx the nodeTolerancePx to set
      */
-    public void setNodeTolerancePx(double nodeTolerancePx) {
-        this.nodeTolerancePx = nodeTolerancePx;
+    public void setMinObstacleDistPx(double minObstacleDistPx) {
+        this.minObstacleDistPx = minObstacleDistPx;
     }
 
     /**

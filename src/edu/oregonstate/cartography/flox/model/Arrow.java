@@ -35,7 +35,7 @@ public class Arrow {
     /**
      * The location of the base of the Arrow in world coordinates.
      */
-    private Point basePt;
+    private Point basePt = new Point(0, 0);
 
     /**
      * Radius around end node used to clip the end of the flow line. The base

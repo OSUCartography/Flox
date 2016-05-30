@@ -440,6 +440,7 @@ public class MainWindow extends javax.swing.JFrame {
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -448,7 +449,6 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
         liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        intersectionInfoMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -2016,6 +2016,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jMenu1.add(showObstaclesCheckBoxMenuItem);
+
+        selectOverlappingFlowsInfoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        selectOverlappingFlowsInfoMenuItem.setText("Select Flows Overlapping Obstacles");
+        selectOverlappingFlowsInfoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectOverlappingFlowsInfoMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(selectOverlappingFlowsInfoMenuItem);
         jMenu1.add(jSeparator12);
 
         enforceCanvasCheckBoxMenuItem.setSelected(true);
@@ -2063,15 +2072,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jMenu1.add(liveDrawingCheckBoxMenuItem);
-
-        intersectionInfoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        intersectionInfoMenuItem.setText("Print Intersection Info to Console");
-        intersectionInfoMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                intersectionInfoMenuItemActionPerformed(evt);
-            }
-        });
-        jMenu1.add(intersectionInfoMenuItem);
 
         menuBar.add(jMenu1);
 
@@ -2331,6 +2331,13 @@ public class MainWindow extends javax.swing.JFrame {
         sb.append(nbrNodes);
         sb.append("\nIntersections: ");
         sb.append(nbrIntersections);
+        
+        sb.append("\nFlows overlapping obstacles:");
+        ForceLayouter layouter = new ForceLayouter(model);
+        List<Obstacle> obstacles = layouter.getObstacles();
+        List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles(obstacles);
+        sb.append(flowsOverlappingObstacles.size());
+        
         JOptionPane.showMessageDialog(mapComponent, sb.toString(), "Flox", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -2504,7 +2511,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void addArrowsCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addArrowsCheckboxActionPerformed
         if (model != null) {
             model.setDrawArrowheads(addArrowsCheckbox.isSelected());
-            mapComponent.refreshMap();
             layout("Add Arrows");
         }
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed
@@ -2927,9 +2933,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
-        
-        setLockUnlockButtonIcon();
-        
+        setLockUnlockButtonIcon();        
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectNoneMenuItemActionPerformed
 
@@ -3272,22 +3276,24 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_limitNodesRepulsionToBandCheckBoxActionPerformed
 
     private void minPxDistanceOfFlowsFromNodesSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_minPxDistanceOfFlowsFromNodesSliderStateChanged
-        model.setNodeTolerancePx(minPxDistanceOfFlowsFromNodesSlider.getValue());
+        model.setMinObstacleDistPx(minPxDistanceOfFlowsFromNodesSlider.getValue());
         mapComponent.refreshMap();
         if (minPxDistanceOfFlowsFromNodesSlider.getValueIsAdjusting() == false) {
-            layout("Min. Flow Distance from Nodes");
+            layout("Minimum Flow Distance from Obstacles");
         }
     }//GEN-LAST:event_minPxDistanceOfFlowsFromNodesSliderStateChanged
 
-    private void intersectionInfoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_intersectionInfoMenuItemActionPerformed
-        ArrayList<Flow> flows = model.getSelectedFlows();
+    private void selectOverlappingFlowsInfoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectOverlappingFlowsInfoMenuItemActionPerformed
+        model.setSelectionOfAllFlowsAndNodes(false);
         ForceLayouter layouter = new ForceLayouter(model);
         List<Obstacle> obstacles = layouter.getObstacles();
-        for (Flow flow : flows) {
-            boolean intersects = layouter.flowIntersectsObstacle(flow, obstacles);
-            System.out.format("Intersection: %b%n", intersects);
+        // get a list of all flows that intersect obstacles
+        List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles(obstacles);
+        for (Flow flow : flowsOverlappingObstacles) {
+            flow.setSelected(true);
         }
-    }//GEN-LAST:event_intersectionInfoMenuItemActionPerformed
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_selectOverlappingFlowsInfoMenuItemActionPerformed
 
     private void showObstaclesCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showObstaclesCheckBoxMenuItemActionPerformed
         mapComponent.setDrawObstacles(showObstaclesCheckBoxMenuItem.isSelected());
@@ -3492,7 +3498,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton importPanelOKButton;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
-    private javax.swing.JMenuItem intersectionInfoMenuItem;
     private javax.swing.JButton jButton1;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel1;
@@ -3569,6 +3574,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton selectEndClipAreaButton;
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JMenuItem selectNoneMenuItem;
+    private javax.swing.JMenuItem selectOverlappingFlowsInfoMenuItem;
     private javax.swing.JButton selectPointsFileButton;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
