@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A renderer for the Flox data model
@@ -61,11 +62,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private final Model model;
 
     /**
-     * Flag to indicate when the flow width is locked to the current map scale.
-     */
-    private boolean flowWidthLocked = false;
-
-    /**
      * the width of the drawable area of the map component
      */
     private final int canvasWidth;
@@ -85,6 +81,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param north The top image border corresponds to this world coordinate
      * position.
      * @param scale The scale factor to apply when drawing.
+     * @param canvasWidth width of the drawable area of the map component
+     * @param canvasHeight height of the drawable area of the map component
      */
     public FloxRenderer(Model model, Graphics2D g2d,
             double west, double north, double scale,
@@ -150,13 +148,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
 
         if (drawObstacles) {
-            ForceLayouter layouter = new ForceLayouter(model);
-            java.util.List<ForceLayouter.Obstacle> obstacles = layouter.getObstacles();
-            for (ForceLayouter.Obstacle obstacle : obstacles) {
-                g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
-                double r = obstacle.r;
-                drawCircle(obstacle.x, obstacle.y, r, new Color(200, 0, 0, 60), Color.BLACK);
-            }
+            drawObstacles();
         }
     }
 
@@ -226,36 +218,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         );
 
         return bufferImage;
-    }
-
-    /**
-     * Computes clipping radius for an end node. Takes size of node and distance
-     * to the end node into account.
-     *
-     * @param endNode the end node of the flow.
-     * @return Clipping radius in world coordinates.
-     */
-    private double endClipRadius(Point endNode) {
-        // distance between end of flow and end point
-        double gapDistanceToEndNodes = model.getFlowDistanceFromEndPointPixel() / model.getReferenceMapScale();
-        // Compute the radius of the end node (add stroke width / 2 to radius)
-        double endNodeRadius = (NODE_STROKE_WIDTH / 2 + model.getNodeRadiusRefPx(endNode)) / model.getReferenceMapScale();
-        return gapDistanceToEndNodes + endNodeRadius;
-    }
-
-    /**
-     * Computes clipping radius for a start node. Takes size of node and
-     * distance to the start node into account.
-     *
-     * @param startNode the start node of the flow.
-     * @return Clipping radius in world coordinates.
-     */
-    private double startClipRadius(Point startNode) {
-        // distance between start of flow and start point
-        double gapDistanceToStartNodes = model.getFlowDistanceFromStartPointPixel() / model.getReferenceMapScale();
-        // Compute the radius of the start node (add stroke width / 2 to radius)
-        double startNodeRadius = (NODE_STROKE_WIDTH / 2 + model.getNodeRadiusRefPx(startNode)) / model.getReferenceMapScale();
-        return gapDistanceToStartNodes + startNodeRadius;
     }
 
     /**
@@ -613,5 +575,15 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
         }
     }
-
+    
+    private void drawObstacles() {
+        g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
+        ForceLayouter layouter = new ForceLayouter(model);
+        List<ForceLayouter.Obstacle> obstacles = layouter.getObstacles();
+        double s = scale / model.getReferenceMapScale();
+        Color fillColor = new Color(200, 0, 0, 80);
+        for (ForceLayouter.Obstacle obstacle : obstacles) {
+            drawCircle(obstacle.x, obstacle.y, obstacle.r * s, fillColor, null);
+        }
+    }
 }
