@@ -247,8 +247,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     private void drawFlows(boolean highlightSelected, boolean drawLocks) {
 
-        double flowWidthScaleFactor = model.getFlowWidthScaleFactor()
-                * scale / model.getReferenceMapScale();
+        double s = scale / model.getReferenceMapScale();
 
         // Iterate through the flows
         Iterator<Flow> iterator = model.flowIterator();
@@ -267,7 +266,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // draw flow line
             Flow clippedFlow = model.clipFlow(flow, true);
             GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
-            double flowStrokeWidth = Math.abs(flow.getValue()) * flowWidthScaleFactor;
+            double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
             drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
 
             // draw symbol for locked flow
@@ -388,7 +387,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
-            double r = model.getNodeRadiusRefPx(node) * s;
+            double r = model.getNodeRadiusPx(node) * s;
             Color strokeColor = highlightSelected && node.isSelected()
                     ? SELECTION_COLOR : model.getFlowColor();
             Color fillColor = fillNodes ? model.getFlowColor() : NODE_FILL_COLOR;

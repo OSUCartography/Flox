@@ -783,7 +783,7 @@ public final class Flow {
         double gap = model.getFlowDistanceFromStartPointPixel();
         if (gap > 0) {
             // Compute the radius of the start node (add half stroke width)
-            double startNodeRadiusPx = NODE_STROKE_WIDTH / 2 + model.getNodeRadiusRefPx(getStartPt());
+            double startNodeRadiusPx = NODE_STROKE_WIDTH / 2 + model.getNodeRadiusPx(getStartPt());
             startNodeClipRadius = (gap + startNodeRadiusPx) / model.getReferenceMapScale();
         }
 
@@ -809,7 +809,7 @@ public final class Flow {
             // flow line and the end node symbol.
             double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
             // Compute the radius of the end node (add stroke width / 2 to radius)
-            double endNodeRadiusPx = NODE_STROKE_WIDTH / 2 + model.getNodeRadiusRefPx(endPt);
+            double endNodeRadiusPx = NODE_STROKE_WIDTH / 2 + model.getNodeRadiusPx(endPt);
             endNodeClipRadius =  (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
         }
 

@@ -1,7 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
-import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -95,53 +94,6 @@ public class SVGFlowExporter extends SVGExporter {
         return str.toString();
     }
 
-    private double getLockedScaleFactor() {
-        // compare the locked scale to the current scale
-        // FIXME
-        double lockedMapScale = model.getReferenceMapScale();
-        return mapComponent.getScale() / lockedMapScale;
-    }
-
-    private double getFlowWidth(Flow flow) {
-        return Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
-                * getLockedScaleFactor();
-
-    }
-
-    private double getNodeRadius(Point node) {
-        double area = Math.abs(node.getValue()
-                * model.getNodeSizeScaleFactor());
-
-        return (Math.sqrt(area / Math.PI)) * getLockedScaleFactor();
-    }
-
-    /**
-     * Computes clipping radius for end node. Takes size of node and distance to
-     * end node into account.
-     *
-     * @param endNode The end node of the flow.
-     * @return Clipping radius in world coordinates.
-     */
-    private double endClipRadius(Point endNode) {
-        double s = 1000 * MM2PX / scale;
-        // distance between end of flows and their end points
-        double gapDistanceToEndNodes = model.getFlowDistanceFromEndPointPixel() / s
-                * getLockedScaleFactor();
-        // Compute the radius of the end node (add stroke width / 2 to radius)
-        double endNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(endNode)) / s;
-        return gapDistanceToEndNodes + endNodeRadius;
-    }
-
-    private double startClipRadius(Point startNode) {
-        double s = 1000 * MM2PX / scale;
-        // distance between end of flows and their end points
-        double gapDistanceToEndNodes = model.getFlowDistanceFromStartPointPixel() / s
-                * getLockedScaleFactor();
-        // Compute the radius of the end node (add stroke width / 2 to radius)
-        double endNodeRadius = (NODE_STROKE_WIDTH / 2 + getNodeRadius(startNode)) / s;
-        return gapDistanceToEndNodes + endNodeRadius;
-    }
-
     /**
      * Add the flows to a SVG document
      *
@@ -174,7 +126,7 @@ public class SVGFlowExporter extends SVGExporter {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = model.clipFlow(iterator.next(), true);
-            double flowWidth = getFlowWidth(flow);
+            double flowWidth = model.getFlowWidthPx(flow);
 
             if (model.isDrawArrowheads()) {
                 // Create an arrowhead
@@ -209,7 +161,7 @@ public class SVGFlowExporter extends SVGExporter {
             Element circleElement = (Element) document.createElementNS(SVGNAMESPACE, "circle");
             circleElement.setAttribute("cx", df.format(xToPagePx(node.x)));
             circleElement.setAttribute("cy", df.format(yToPagePx(node.y)));
-            circleElement.setAttribute("r", Double.toString(getNodeRadius(node)));
+            circleElement.setAttribute("r", Double.toString(model.getNodeRadiusPx(node)));
             circleElement.setAttribute("stroke-width", Double.toString(NODE_STROKE_WIDTH));
             circleElement.setAttribute("fill", "white");
             g.appendChild(circleElement);

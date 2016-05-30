@@ -46,9 +46,22 @@ public class ForceLayouter {
             this.y = y;
             this.r = r;
         }
+        /**
+         * The node associated with this obstacle. The node can be the obstacle
+         * itself, or it can be the target of an arrowhead obstacle.
+         */
         public Point node;
+        /**
+         * x coordinate of center of obstacle circle in world coordinates.
+         */
         public double x;
+        /**
+         * y coordinate of center of obstacle circle in world coordinates.
+         */
         public double y;
+        /**
+         * radius of obstacle circle in pixels.
+         */
         public double r;
     }
 
@@ -95,7 +108,7 @@ public class ForceLayouter {
         while (iter.hasNext()) {
             Flow flow = iter.next();
             Flow clippedFlow = model.clipFlow(flow, false);
-            ArrayList<Point> points =  clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);           
+            ArrayList<Point> points = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
             straightLinesMap.put(flow, points.toArray(new Point[points.size()]));
         }
     }
@@ -660,20 +673,14 @@ public class ForceLayouter {
      */
     private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle) {
         double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
-       // Get the current stroke width of the flow in pixels
-        double flowStrokeWidthPx = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
-                * model.getReferenceMapScale();
 
-        // Find out what that width is in world coordinates
-        double worldStrokeWidth = flowStrokeWidthPx / model.getReferenceMapScale();
-
-        // Get the current pixel radius of the node
-        double nodeRadiusPx = obstacle.r * model.getReferenceMapScale();
+        // flow width in world coordinates
+        double worldStrokeWidth = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
 
         // Find out what that radius is in world coordinates
         // Add a bit to the pixel radius in order to make the radius a few pixels 
         // wider than the actual node and to account for the node's stroke width. 
-        double worldNodeRadius = (nodeRadiusPx + model.getNodeTolerancePx()) / model.getReferenceMapScale();
+        double worldNodeRadius = (obstacle.r + model.getNodeTolerancePx()) / model.getReferenceMapScale();
 
         // Add the worldNodeRadius to half the worldFlowWidth
         double threshDist = (worldStrokeWidth / 2) + worldNodeRadius;
@@ -720,11 +727,10 @@ public class ForceLayouter {
         Iterator<Point> nodeIterator = model.nodeIterator();
         while (nodeIterator.hasNext()) {
             Point node = nodeIterator.next();
-            double nodeArea = Math.abs(node.getValue() * model.getNodeSizeScaleFactor());
-            double r = Math.sqrt(nodeArea / Math.PI);
+            double r = model.getNodeRadiusPx(node);
             obstacles.add(new Obstacle(node, node.x, node.y, r));
         }
-
+/*
         // arrowheads are obstacles
         if (model.isDrawArrowheads()) {
             // re-compute arrowheads for the current flow geometries
@@ -738,14 +744,13 @@ public class ForceLayouter {
                 obstacles.add(new Obstacle(flow.endPt, basePoint.x, basePoint.y, r));
             }
         }
-
+*/
         return obstacles;
     }
 
     /**
-     * Returns a list of all flows that intersect nodes.
+     * Returns a list of all flows that intersect obstacle circles.
      *
-     * @param scale the scale of the map.
      * @return
      */
     private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
@@ -754,6 +759,7 @@ public class ForceLayouter {
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
             for (Obstacle obstacle : obstacles) {
+                // ignore obstacles that are start or end nodes of the flow
                 Point node = obstacle.node;
                 if (node != flow.getStartPt() && node != flow.getEndPt()) {
                     if (flowIntersectsObstacle(flow, obstacle)) {
@@ -796,12 +802,12 @@ public class ForceLayouter {
                 cPt.x = dx + originalX;
                 cPt.y = dy + originalY;
                 angleRad += dist / spiralR / 20; // FIXME hard-coded parameter
-    
+
                 boolean insideRangebox = new RangeboxEnforcer(model).isPointInRangebox(flow, cPt.x, cPt.y);
                 if (!insideRangebox) {
                     continue;
                 }
-                
+
                 if (flowIntersectsObstacle(flow, obstacles) == false) {
                     // found a new position for the control point that does not 
                     // result in an overlap with any obstacle

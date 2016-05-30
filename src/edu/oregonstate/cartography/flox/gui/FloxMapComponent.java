@@ -191,7 +191,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             for (int i = nodes.size() - 1; i >= 0; i--) {
                 Point node = nodes.get(i);
 
-                double rRefPx = model.getNodeRadiusRefPx(node) + NODE_STROKE_WIDTH / 2;
+                double rRefPx = model.getNodeRadiusPx(node) + NODE_STROKE_WIDTH / 2;
                 double rWorld = rRefPx / model.getReferenceMapScale();
                 rWorld += pixelTolerance / scale;
                 

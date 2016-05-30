@@ -403,8 +403,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 Flow flow = flows.next();
 
                 // flow width
-                double flowWidthWorld = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
-                        / model.getReferenceMapScale();
+                double flowWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
 
                 // Add half the width to tol, scaled to the map scale
                 double maxDistWorld = toleranceWorld + flowWidthWorld / 2;

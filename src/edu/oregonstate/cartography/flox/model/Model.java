@@ -1460,15 +1460,15 @@ public class Model {
     public void setMaxNodeSizePx(double maxNodeSizePx) {
         this.maxNodeSizePx = maxNodeSizePx;
     }
-
+    
     /**
-     * Gets the ratio between the maximum permitted flow stroke width and the
-     * maximum current flow value.
-     *
-     * @return maxFlowStrokeWidthPx/maxFlowValue
+     * Returns the stroke width in pixels of a flow based on its value.
+     * @param flow the flow
+     * @return width in pixels
      */
-    public double getFlowWidthScaleFactor() {
-        return getMaxFlowStrokeWidthPixel() / getMaxFlowValue();
+    public double getFlowWidthPx(Flow flow) {
+        double flowWidthScaleFactor = getMaxFlowStrokeWidthPixel() / getMaxFlowValue();
+        return Math.abs(flow.getValue()) * flowWidthScaleFactor;
     }
 
     /**
@@ -1572,11 +1572,11 @@ public class Model {
      * @param node
      * @return radius in pixels
      */
-    public double getNodeRadiusRefPx(Point node) {
+    public double getNodeRadiusPx(Point node) {
         double area = Math.abs(node.getValue() * getNodeSizeScaleFactor());
         return Math.sqrt(area / Math.PI);
     }
-
+    
     /**
      * @return the nodeTolerancePx
      */
@@ -1614,9 +1614,8 @@ public class Model {
             // Clip the flow with the clipping area and/or a circle around the end node
             double arrowTipClipRadius = flow.endClipRadius(this, false, null);
             
-            // Calculate the stroke width of the flow based on its value.
-            double s = getFlowWidthScaleFactor() / getReferenceMapScale();
-            double flowStrokeWidth = Math.abs(flow.getValue()) * s;
+            // stroke width in world coordinates of the flow based on its value.
+            double flowStrokeWidth = getFlowWidthPx(flow) / getReferenceMapScale();
 
             // Create an arrowhead
             flow.computeArrowhead(this, flowStrokeWidth, arrowTipClipRadius);
