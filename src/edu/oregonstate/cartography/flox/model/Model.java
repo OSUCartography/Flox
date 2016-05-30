@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -227,9 +228,9 @@ public class Model {
 
     /**
      * scale factor for converting between ground coordinates and the map
-     * coordinates in pixels. Note: this scale factor is independent of the scale factor
-     * of the map component that displays the map. Conversion: mapPixelX = groundX *
-     * referenceMapScale;
+     * coordinates in pixels. Note: this scale factor is independent of the
+     * scale factor of the map component that displays the map. Conversion:
+     * mapPixelX = groundX * referenceMapScale;
      */
     private double referenceMapScale = 1;
 
@@ -594,7 +595,7 @@ public class Model {
     /**
      * Finds the clip areas for the the end of flows. First buffers the clip
      * area geometry, then finds containing geometry for the end point of each
-     * flow, then assigns an end clip area to the flows.
+     * flow, then assigns an end clip area to each flow.
      */
     public void updateEndClipAreas() {
         if (clipAreas == null) {
@@ -1535,50 +1536,45 @@ public class Model {
         this.drawInlineArrows = drawInlineArrows;
     }
 
-    public Flow clipFlowByRadii(Flow flow, double startClipRadius, double endClipRadius) {
-        double deCasteljauTol = getDeCasteljauTolerance();
-        return Flow.clipFlowByRadii(flow, startClipRadius, endClipRadius, deCasteljauTol);
+    /**
+     * Returns a flow with clipped start and end segments. Clipping takes node
+     * dimensions, required distances to start and end points, and masking areas
+     * into account. If nothing is clipped, the passed flow is returned
+     * unaltered.
+     *
+     * @param flow flow to clip
+     * @param clipArrowhead if true, the flow line is clipped to make space for
+     * an arrowhead
+     * @return a flow with clipped start and end segments. If nothing is
+     * clipped, the passed flow is returned unaltered.
+     */
+    public Flow clipFlow(Flow flow, boolean clipArrowhead) {
+        double[] clipRadii = flow.clipRadii(this, clipArrowhead);
+
+        // cut off the end piece
+        double endT = flow.getIntersectionTWithCircleAroundEndPoint(clipRadii[1]);
+        if (endT < 1) {
+            flow = flow.split(endT)[0];
+        }
+
+        // cut off the start piece
+        double startT = flow.getIntersectionTWithCircleAroundStartPoint(clipRadii[0]);
+        if (startT > 0) {
+            flow = flow.split(startT)[1];
+        }
+
+        return flow;
     }
 
     /**
      * Get a node's radius in pixels at the reference scale.
      *
      * @param node
-     * @return
+     * @return radius in pixels
      */
     public double getNodeRadiusRefPx(Point node) {
-        double area = Math.abs(node.getValue()* getNodeSizeScaleFactor());
+        double area = Math.abs(node.getValue() * getNodeSizeScaleFactor());
         return Math.sqrt(area / Math.PI);
-    }
-
-    /**
-     * Computes clipping radius for an end node. Takes size of node and distance
-     * to the end node into account.
-     *
-     * @param endNode the end node of the flow.
-     * @return Clipping radius in world coordinates.
-     */
-    public double endClipRadius(Point endNode) {
-        // distance between end of flow and end point
-        double gapDistanceToEndNodesPx = getFlowDistanceFromEndPointPixel();
-        // Compute the radius of the end node (add stroke width / 2 to radius)
-        double endNodeRadiusPx = NODE_STROKE_WIDTH / 2 + getNodeRadiusRefPx(endNode);
-        return (gapDistanceToEndNodesPx + endNodeRadiusPx) / getReferenceMapScale();
-    }
-
-    /**
-     * Computes clipping radius for a start node. Takes size of node and
-     * distance to the start node into account.
-     *
-     * @param startNode the start node of the flow.
-     * @return Clipping radius in world coordinates.
-     */
-    public double startClipRadius(Point startNode) {
-        // distance between start of flow and start point
-        double gapDistanceToStartNodesPx = getFlowDistanceFromStartPointPixel();
-        // Compute the radius of the start node (add stroke width / 2 to radius)
-        double startNodeRadiusPx = NODE_STROKE_WIDTH / 2 + getNodeRadiusRefPx(startNode);
-        return (gapDistanceToStartNodesPx + startNodeRadiusPx) / getReferenceMapScale();
     }
 
     /**
@@ -1594,8 +1590,8 @@ public class Model {
     public void setNodeTolerancePx(double nodeTolerancePx) {
         this.nodeTolerancePx = nodeTolerancePx;
     }
-    
-        /**
+
+    /**
      * @return the referenceMapScale
      */
     public double getReferenceMapScale() {
@@ -1609,4 +1605,28 @@ public class Model {
         this.referenceMapScale = referenceMapScale;
     }
 
+    public void computeArrowheads() {
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+
+            // Compute radius of clipping circle around end point.
+            // Clip the flow with the clipping area and/or a circle around the end node
+            double arrowTipClipRadius = flow.endClipRadius(this, false, null);
+            
+            // Calculate the stroke width of the flow based on its value.
+            double s = getFlowWidthScaleFactor() / getReferenceMapScale();
+            double flowStrokeWidth = Math.abs(flow.getValue()) * s;
+
+            // Create an arrowhead
+            flow.computeArrowhead(this, flowStrokeWidth, arrowTipClipRadius);
+        }
+
+//        // TODO adjust the width of arrowheads
+//        ArrayList<Point> points = model.getNodes();
+//        for (Point point : points) {
+//            ArrayList<Flow> incomingFlows = model.getAnticlockwiseOrderedIncomingFlows(point);
+//            System.out.println("Number of incoming flows at node " + point + ": " + incomingFlows.size());
+//        }
+    }
 }

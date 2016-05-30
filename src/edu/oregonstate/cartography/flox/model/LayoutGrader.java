@@ -33,12 +33,9 @@ public class LayoutGrader {
         
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = iterator.next();
+            Flow flow = model.clipFlow(iterator.next(), false);
             LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
-            
-            // FIXME value for first parameter is 0.
-            ArrayList<Point> flowPoints = flow.toClippedStraightLineSegments(0, 0, deCasteljauTol);
-            
+            ArrayList<Point> flowPoints = flow.toUnclippedStraightLineSegments(deCasteljauTol);
             for (Point point : flowPoints) {
                 lineBuilder.add(new Coordinate(point.x, point.y));
             }

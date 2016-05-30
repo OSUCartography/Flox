@@ -94,8 +94,8 @@ public class ForceLayouter {
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            // FIXME value for first parameter is 0.
-            ArrayList<Point> points = flow.toClippedStraightLineSegments(0, 0, deCasteljauTol);
+            Flow clippedFlow = model.clipFlow(flow, false);
+            ArrayList<Point> points =  clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);           
             straightLinesMap.put(flow, points.toArray(new Point[points.size()]));
         }
     }
@@ -728,7 +728,7 @@ public class ForceLayouter {
         // arrowheads are obstacles
         if (model.isDrawArrowheads()) {
             // re-compute arrowheads for the current flow geometries
-            computeArrowHeads();
+            model.computeArrowheads();
 
             Iterator<Flow> flowIterator = model.flowIterator();
             while (flowIterator.hasNext()) {
@@ -818,27 +818,4 @@ public class ForceLayouter {
         }
     }
 
-    public void computeArrowHeads() {
-        Iterator<Flow> iterator = model.flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-
-            // Compute radius of clipping circle around end point.
-            // Clip the flow with the clipping area and/or a circle around the end node
-            double endClipRadius = model.endClipRadius(flow.getEndPt());
-
-            // Create an arrowhead
-            // Calculate the stroke width of the flow based on its value.
-            double s = model.getFlowWidthScaleFactor() / model.getReferenceMapScale();
-            double flowStrokeWidth = Math.abs(flow.getValue()) * s;
-            flow.configureArrow(model, flowStrokeWidth, endClipRadius);
-        }
-
-//        // TODO adjust the width of arrowheads
-//        ArrayList<Point> points = model.getNodes();
-//        for (Point point : points) {
-//            ArrayList<Flow> incomingFlows = model.getAnticlockwiseOrderedIncomingFlows(point);
-//            System.out.println("Number of incoming flows at node " + point + ": " + incomingFlows.size());
-//        }
-    }
 }

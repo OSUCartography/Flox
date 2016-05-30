@@ -5,6 +5,7 @@
  */
 package edu.oregonstate.cartography.map;
 
+import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -248,10 +249,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(rect.getMinY()) + 10))) {
                     pt.setSelected(true);
                     nodeGotSelected = true;
-                } else {
-                    if (shiftDown == false) {
-                        pt.setSelected(false);
-                    }
+                } else if (shiftDown == false) {
+                    pt.setSelected(false);
                 }
             }
         }
@@ -267,10 +266,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         rect.getMaxY() + (1 / mapComponent.getScale()));
             }
             while (flows.hasNext()) {
-                Flow flow = flows.next();
+                Flow flow = model.clipFlow(flows.next(), false);
                 if (flow.getBoundingBox().intersects(rect)) {
-                    // FIXME value for first parameter is 0
-                    ArrayList<Point> pts = flow.toClippedStraightLineSegments(0, 0, deCasteljauTol);
+                    ArrayList<Point> pts = flow.toUnclippedStraightLineSegments(deCasteljauTol);
                     for (int i = 0; i < pts.size() - 1; i++) {
                         // Get the points
                         Point pt1 = pts.get(i);
@@ -284,11 +282,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         // Else statement for deselecting flows? Doesn't seem to be
                         // needed because flows are deselected by the initial click.
                     }
-                } else {
-                    // flow bb does not intersect rect
-                    if (shiftDown == false) {
-                        flow.setSelected(false);
-                    }
+                } else // flow bb does not intersect rect
+                if (shiftDown == false) {
+                    flow.setSelected(false);
                 }
             }
         }
@@ -299,13 +295,14 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
     /**
      * Select a map feature after the user clicked on the map.
+     *
      * @param point click location in world coordinates.
      * @param shiftDown true if shift key was pressed when the click happened
      * @param pixelTolerance selection tolerance in pixels
-     * @return 
+     * @return
      */
     private boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
-       
+
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
@@ -381,13 +378,12 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 clickedNodes.get(0).setSelected(true);
                 nodeGotSelected = true;
             }
-        } else { // No nodes were clicked.
-            if (!shiftDown) {
-                // Shift is not held down.
-                // Deselect all nodes.
-                for (Point node : nodes) {
-                    node.setSelected(false);
-                }
+        } else // No nodes were clicked.
+        if (!shiftDown) {
+            // Shift is not held down.
+            // Deselect all nodes.
+            for (Point node : nodes) {
+                node.setSelected(false);
             }
         }
 
@@ -402,14 +398,14 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
             double[] xy = new double[2];
             double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
-            
+
             while (flows.hasNext()) {
                 Flow flow = flows.next();
 
                 // flow width
                 double flowWidthWorld = Math.abs(flow.getValue()) * model.getFlowWidthScaleFactor()
                         / model.getReferenceMapScale();
-                
+
                 // Add half the width to tol, scaled to the map scale
                 double maxDistWorld = toleranceWorld + flowWidthWorld / 2;
 
@@ -431,16 +427,12 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             flow.setSelected(true);
                         }
                         flowGotSelected = true;
-                    } else {
-                        if (shiftDown == false) {
-                            flow.setSelected(false);
-                        }
-                    }
-
-                } else {
-                    if (shiftDown == false) {
+                    } else if (shiftDown == false) {
                         flow.setSelected(false);
                     }
+
+                } else if (shiftDown == false) {
+                    flow.setSelected(false);
                 }
             }
         }

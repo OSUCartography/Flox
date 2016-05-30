@@ -142,11 +142,6 @@ public class SVGFlowExporter extends SVGExporter {
         return gapDistanceToEndNodes + endNodeRadius;
     }
 
-    private Flow getClippedFlow(Flow flow, double startClipRadius, double endClipRadius) {
-        double deCasteljauTol = model.getDeCasteljauTolerance();
-        return Flow.clipFlowByRadii(flow, startClipRadius, endClipRadius, deCasteljauTol);
-    }
-
     /**
      * Add the flows to a SVG document
      *
@@ -178,24 +173,19 @@ public class SVGFlowExporter extends SVGExporter {
 
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = iterator.next();
+            Flow flow = model.clipFlow(iterator.next(), true);
             double flowWidth = getFlowWidth(flow);
 
             if (model.isDrawArrowheads()) {
-                // Compute radius of clipping circle around end point.
-                // Clip the flow with the clipping area and a circle around the end node
-                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
-                flow = getClippedFlow(flow, rs, endClipRadius(flow.getEndPt()));
-
                 // Create an arrowhead
-                flow.configureArrow(model, flowWidth, model.endClipRadius(flow.getEndPt()));
+                // flow.configureArrow(model, flowWidth, model.endClipRadius(flow.getEndPt())); FIXME
 
                 // get the arrow
                 Arrow arrow = flow.getEndArrow();
 
                 // Get the flow SVG
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                pathElement.setAttribute("d", flowToPath(arrow.getOutFlow()));
+                // pathElement.setAttribute("d", flowToPath(arrow.getOutFlow())); FIXME get clipped flow path
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
                 g.appendChild(pathElement);
 
@@ -207,12 +197,6 @@ public class SVGFlowExporter extends SVGExporter {
                 g.appendChild(arrowPathElement);
 
             } else {
-                // Clip the flow with the clipping area
-                double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
-                double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
-
-                flow = getClippedFlow(flow, rs, re);
-
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 pathElement.setAttribute("d", flowToPath(flow));
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));

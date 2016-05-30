@@ -3369,7 +3369,6 @@ public class MainWindow extends javax.swing.JFrame {
             layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS,
                     moveFlowsOverlappingNodes);
             
-            layouter.computeArrowHeads();
             System.out.println("Milliseconds: " + (System.currentTimeMillis() - startTime));
             return null;
         }
@@ -3434,8 +3433,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (updatingGUI || model.getNbrFlows() == 0) {
             return;
         }
-        ForceLayouter layouter = new ForceLayouter(model);
-        layouter.computeArrowHeads();
+        model.computeArrowheads();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

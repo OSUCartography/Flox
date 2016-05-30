@@ -38,10 +38,12 @@ public class Arrow {
     private Point basePt;
 
     /**
-     * t parameter of basePt
+     * Radius around end node used to clip the end of the flow line. The base
+     * point of the arrowhead is placed at the intersection of this circle and
+     * the flow line.
      */
-    private double baseT = 1;
-    
+    private double clipRadius = 0;
+
     /**
      * The location of the tip of the Arrow.
      */
@@ -78,7 +80,7 @@ public class Arrow {
      * @param endClipRadius the tip of the arrow is placed at this distance from
      * the end of the flow
      */
-    public void computeArrowPoints(Model model, double flowStrokeWidth, double endClipRadius) {
+    public void computeArrowhead(Model model, double flowStrokeWidth, double endClipRadius) {
         // Gets the ratio of the flows stroke width to it's value. This ratio
         // is the same for all drawn flows.
         double valueToStrokeRatio = flowStrokeWidth / flow.getValue();
@@ -123,26 +125,19 @@ public class Arrow {
 
         // Get the t value of the location on the flow where the base of the 
         // arrowhead will sit
-        double t = flow.getIntersectionTWithCircleAroundEndPoint(arrowLength + endClipRadius);
+        clipRadius = arrowLength + endClipRadius;
+        double t = flow.getIntersectionTWithCircleAroundEndPoint(clipRadius);
 
         // Set the base of the Arrow to the point on the curve determined above.
         basePt = flow.pointOnCurve(t);
 
-        // Split the flow at the base point of the Arrow, plus a little bit.
-        // The little bit is to provide sufficient overlap of the flow with the
-        // arrowhead to prevent gaps between the flow and arrowhead when the
-        // arrowhead is drawn along more curved parts of the flow
-        // TODO: This overlap is significantly less when using the other method
-        // of orienting arrows, but some overlap is still required to avoid
-        // a visible gap between the end of the flow and the arrowhead.
-        if (model.isPointArrowTowardsEndpoint()) {
-            baseT = t + ((1 - t) * 0.1);
-        } else {
-            baseT = t + ((1 - t) * 0.025);
-        }
+        // reduce clipping radius by 1 pixel to prevent a gap between the flow 
+        // line and the arrowhead
+        double tol = 1d / model.getReferenceMapScale();
+        clipRadius -= tol;
 
         // Locate the various points that determine the shape and location of 
-        // the Arrow.
+        // the arrowhead.
         // Locate the tip
         tipPt.x = arrowLength;
         tipPt.y = 0;
@@ -171,7 +166,7 @@ public class Arrow {
         if (model.isPointArrowTowardsEndpoint()) {
             azimuth = GeometryUtils.computeAzimuth(getBasePt(), flow.getEndPt());
         } else {
-            azimuth = GeometryUtils.computeAzimuth(getOutFlow().getCtrlPt(), getBasePt());
+            azimuth = GeometryUtils.computeAzimuth(flow.split(t)[0].getCtrlPt(), getBasePt());
         }
 
         // Rotate all the points that make up the shape of the Arrow, using
@@ -190,16 +185,6 @@ public class Arrow {
      */
     public double getLength() {
         return arrowLength;
-    }
-
-    /**
-     * Returns the outFlow, which is a clipped version of the inFlow. This is
-     * the flow that will have an arrowhead attached to it.
-     *
-     * @return
-     */
-    public Flow getOutFlow() {
-        return flow.split(baseT)[0];
     }
 
     /**
@@ -242,5 +227,15 @@ public class Arrow {
      */
     public Point getCorner2cPt() {
         return corner2cPt;
+    }
+
+    /**
+     * The base point of this arrowhead is placed at the intersection of a
+     * circle with clip radius around the end node and the flow line.
+     *
+     * @return the clipRadius radius of the clip circle.
+     */
+    public double getClipRadius() {
+        return clipRadius;
     }
 }

@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKTWriter;
+import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
@@ -210,18 +211,14 @@ public final class Flow {
      * @param endClipRadius the tip of the arrow is placed at this distance from
      * the end of the flow
      */
-    public void configureArrow(Model model, double flowStrokeWidth, double endClipRadius) {
-        endArrow.computeArrowPoints(model, flowStrokeWidth, endClipRadius);
+    public void computeArrowhead(Model model, double flowStrokeWidth, double endClipRadius) {
+        endArrow.computeArrowhead(model, flowStrokeWidth, endClipRadius);
     }
 
-    ;
-    
     public Arrow getEndArrow() {
         return endArrow;
     }
 
-    ;
-    
     /**
      * @return the startClipArea
      */
@@ -520,7 +517,7 @@ public final class Flow {
         return irregularPoints;
     }
 
-    private static LineString pointsToLineString(ArrayList<Point> points) {
+    public static LineString pointsToLineString(ArrayList<Point> points) {
         // construct LineString from the current Bezier flow geometry
         GeometryFactory geometryFactory = new GeometryFactory();
         int numPoints = points.size();
@@ -529,26 +526,7 @@ public final class Flow {
             Point point = points.get(i);
             xy[i] = new Coordinate(point.x, point.y);
         }
-
         return geometryFactory.createLineString(xy);
-    }
-
-    /**
-     * Converts this Bezier curve to straight line segments. Applies clipping
-     * with start and end nodes and arrowheads.
-     *
-     * @param endClipRadius Clip the end of the flow with a circle of this
-     * radius.
-     * @param deCasteljauTol The maximum distance between the curve and the
-     * straight line segments.
-     * @return An list of irregularPoints, including copies of the start point
-     * and the end point.
-     */
-    public ArrayList<Point> toClippedStraightLineSegments(double startClipRadius, double endClipRadius, double deCasteljauTol) {
-
-        // FIXME 0 parameter
-        Flow clippedFlow = Flow.clipFlowByRadii(this, startClipRadius, endClipRadius, deCasteljauTol);
-        return clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
     }
 
     /**
@@ -577,8 +555,7 @@ public final class Flow {
 
     /**
      * Converts this Bezier curve to straight line segments. Does not apply
-     * clipping with start and end nodes. Does not apply clipping for
-     * arrowheads.
+     * clipping with start and end nodes, mask areas, or arrowheads.
      *
      * @param deCasteljauTol The maximum distance between the curve and the
      * straight line segments.
@@ -715,6 +692,9 @@ public final class Flow {
      * @return Parameter t [0..1] where the circle intersects the flow.
      */
     public double getIntersectionTWithCircleAroundEndPoint(double r) {
+        // FIXME need to handle the case when the entire curve is within the circle with radius r
+        // comparing r to the distance between start and end node is not sufficient to handle this case.
+
         if (r <= 0) {
             return 1;   // tx = 1: end of curve
         }
@@ -744,6 +724,8 @@ public final class Flow {
      * @return Parameter t [0..1] where the circle intersects the flow.
      */
     public double getIntersectionTWithCircleAroundStartPoint(double r) {
+        // FIXME need to handle the case when the entire curve is within the circle with radius r
+        // comparing r to the distance between start and end node is not sufficient to handle this case.
         if (r <= 0) {
             return 0;   // tx = 0: start of curve
         }
@@ -765,73 +747,87 @@ public final class Flow {
         return t;
     }
 
-    /**
-     * Returns a flow with the start and/or end masking areas removed. If no
-     * masking areas are defined, returns the passed flow.
-     *
-     * @param flow The flow to clip
-     * @param startClipRadius clip the end of the flow with a circle with this
-     * radius.
-     * @param endClipRadius clip the end of the flow with a circle with this
-     * radius.
-     * @param deCasteljauTol Tolerance for conversion to straight line segments.
-     * @return A new flow (if something was clipped), or the passed flow.
-     */
-    public static Flow clipFlowByRadii(Flow flow, double startClipRadius, double endClipRadius, double deCasteljauTol) {
-
-        // Test whether start or end clip areas are defined.
-        // If none is defined, the flow is not converted to straight line segments,
-        // which is potentially expensive.
-        boolean clipWithStartArea = flow.getStartClipArea() != null;
-        boolean clipWithEndArea = flow.getEndClipArea() != null;
-
-        // t parameter for location of end clipping
-        double endT = 1;
-        double startT = 0;
-
-        if (clipWithStartArea || clipWithEndArea) {
-
-            // construct LineString from the current Bezier flow geometry
-            ArrayList<Point> points = flow.toUnclippedStraightLineSegments(deCasteljauTol);
-            LineString lineString = pointsToLineString(points);
-
-            // clip with start area
-            if (clipWithStartArea) {
-                startT = flow.clippingT(lineString, true);
-                //flow = flow.split(startT)[1];
-            }
-
-            // compute t parameter for clipping with the end area
-            if (clipWithEndArea) {
-                endT = flow.clippingT(lineString, false);
-            }
+    private LineString toLineStringIfClipAreaIsAttached(Model model) {
+        // construct LineString from the current Bezier flow geometry if there is
+        // a mask area attached to the start node or the end node
+        if (getEndClipArea() != null || getStartClipArea() != null) {
+            double deCasteljauTol = model.getDeCasteljauTolerance();
+            ArrayList<Point> points = toUnclippedStraightLineSegments(deCasteljauTol);
+         return Flow.pointsToLineString(points);
         }
-
-        if (endClipRadius > 0) {
-            // compute t parameter for clipping with the circle around the end point
-            double endNodeT = flow.getIntersectionTWithCircleAroundEndPoint(endClipRadius);
-            // find the smaller of the two t parameters
-            endT = Math.min(endT, endNodeT);
-        }
-
-        // cut off the end piece
-        flow = flow.split(endT)[0];
-
-        if (startClipRadius > 0) {
-            // compute t parameter for clipping with the circle around the end point
-            double startNodeT = flow.getIntersectionTWithCircleAroundStartPoint(startClipRadius);
-            // find the larger of the two t parameters
-            startT = Math.max(startT, startNodeT);
-        }
-
-        // cut off the start piece
-        flow = flow.split(startT)[1];
-
-        return flow;
+        return null;
     }
 
     /**
-     * Computes the parameter t for the location where the flow needs to be
+     * Returns radii of circles around start and end nodes that can be used to
+     * clip the flows. The radii take the node size, gap around nodes, and mask
+     * areas and optionally the arrowhead into account. The radii
+     * only take the nodes into account, if there is gap between the line and
+     * the nodes.
+     *
+     * @param model model with clipping distances
+     * @param clipArrowhead if true, the flow line is clipped to make space for
+     * an arrowhead
+     * @return clip radii around start and end nodes, first start, then end
+     * point
+     */
+    public double[] clipRadii(Model model, boolean clipArrowhead) {
+        
+        LineString lineString = toLineStringIfClipAreaIsAttached(model);
+
+        // clipping radius for start node
+        double startNodeClipRadius = 0;
+        // clip the start if there must be a gap between the start of 
+        // the flow line and the start node symbol.
+        // distance between start of flow and start node
+        double gap = model.getFlowDistanceFromStartPointPixel();
+        if (gap > 0) {
+            // Compute the radius of the start node (add half stroke width)
+            double startNodeRadiusPx = NODE_STROKE_WIDTH / 2 + model.getNodeRadiusRefPx(getStartPt());
+            startNodeClipRadius = (gap + startNodeRadiusPx) / model.getReferenceMapScale();
+        }
+
+        // clipping radius for start mask area
+        double startMaskClipRadius = 0;
+        if (getStartClipArea() != null) {
+            startMaskClipRadius = maskClippingRadius(lineString, true);
+        }
+
+        // start and end clipping radius
+        double startR = Math.max(startNodeClipRadius, startMaskClipRadius);
+        double endR = endClipRadius(model, clipArrowhead, lineString);
+        return new double[]{startR, endR};
+    }
+    
+    public double endClipRadius(Model model, boolean clipArrowhead, LineString lineString) {
+        // clipping radius for end node
+        double endNodeClipRadius = 0;
+        if (clipArrowhead && model.isDrawArrowheads()) {
+            endNodeClipRadius = getEndArrow().getClipRadius();
+        } else if (model.getFlowDistanceFromEndPointPixel() > 0 || model.isDrawArrowheads()) {
+            // clip the end if there must be a gap between the end of the 
+            // flow line and the end node symbol.
+            double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
+            // Compute the radius of the end node (add stroke width / 2 to radius)
+            double endNodeRadiusPx = NODE_STROKE_WIDTH / 2 + model.getNodeRadiusRefPx(endPt);
+            endNodeClipRadius =  (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
+        }
+
+        // clipping radius for end mask area
+        double endMaskClipRadius = 0;
+        if (getEndClipArea() != null) {
+            if (lineString == null) {
+                lineString = toLineStringIfClipAreaIsAttached(model);
+            }
+            endMaskClipRadius = maskClippingRadius(lineString, false);
+        }
+
+        // end clipping radius
+        return Math.max(endNodeClipRadius, endMaskClipRadius);
+    }
+
+    /**
+     * Computes the clipping radius for the location where the flow needs to be
      * split for masking with the start or the end clip area.
      *
      * @param lineString This flow's geometry converted to straight line
@@ -840,7 +836,7 @@ public final class Flow {
      * clip with the end clip area.
      * @return The parameter t in [0, 1]
      */
-    private double clippingT(LineString lineString, boolean clipWithStartArea) {
+    private double maskClippingRadius(LineString lineString, boolean clipWithStartArea) {
         Geometry clipArea = clipWithStartArea ? getStartClipArea() : getEndClipArea();
         Geometry clippedFlowLineGeometry = lineString.difference(clipArea);
         double d = 0;
@@ -862,9 +858,7 @@ public final class Flow {
                 }
             }
         }
-        return clipWithStartArea
-                ? getIntersectionTWithCircleAroundStartPoint(d)
-                : getIntersectionTWithCircleAroundEndPoint(d);
+        return d;
     }
 
     /**

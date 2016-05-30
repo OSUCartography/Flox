@@ -293,37 +293,18 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
 
-            // will create Swing paths for the flow line and the arrowhead
-            GeneralPath flowPath;
-            GeneralPath arrowPath = null;
-
-            // Clip the flow with the clipping area or nodes and distance to end points
-            Flow clippedFlow;
-            double clipRadiusEnd = 0;
-            if (model.isDrawArrowheads()) {
-                Arrow arrow = flow.getEndArrow();
-                arrowPath = getArrowPath(arrow);
-                clippedFlow = arrow.getOutFlow();
-            } else {
-                clippedFlow = flow;
-                clipRadiusEnd = model.getFlowDistanceFromEndPointPixel() > 0
-                    ? endClipRadius(flow.getEndPt()) : 0;
-            }
-            double clipRadiusStart = model.getFlowDistanceFromStartPointPixel() > 0
-                    ? startClipRadius(flow.getStartPt()) : 0;                  
-            clippedFlow = model.clipFlowByRadii(clippedFlow, clipRadiusStart, clipRadiusEnd);
-            flowPath = clippedFlow.toGeneralPath(scale, west, north);
-
-            // color
             g2d.setColor(highlightSelected && flow.isSelected()
                     ? SELECTION_COLOR : model.getFlowColor());
 
             // draw the arrow head
             if (model.isDrawArrowheads()) {
-                g2d.fill(arrowPath);
+                Arrow arrow = flow.getEndArrow();
+                g2d.fill(getArrowPath(arrow));
             }
 
             // draw flow line
+            Flow clippedFlow = model.clipFlow(flow, true);
+            GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
             double flowStrokeWidth = Math.abs(flow.getValue()) * flowWidthScaleFactor;
             drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
 
@@ -333,7 +314,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 drawCross(pt.x, pt.y);
             }
         }
-
     }
 
     /**
@@ -603,9 +583,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            double rs = model.getFlowDistanceFromStartPointPixel() > 0 ? startClipRadius(flow.getStartPt()) : 0;
-            double re = model.getFlowDistanceFromEndPointPixel() > 0 ? endClipRadius(flow.getEndPt()) : 0;
-            ArrayList<Point> points = flow.toClippedStraightLineSegments(rs, re, deCasteljauTol);
+            Flow clippedFlow = model.clipFlow(flow, false);
+            ArrayList<Point> points = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
             for (Point point : points) {
                 drawCircle(point.x, point.y, CR, Color.pink, Color.white);
             }
