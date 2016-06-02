@@ -187,8 +187,6 @@ public class MainWindow extends javax.swing.JFrame {
         updatingGUI = true;
         try {
             // Arrow Settings
-            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPointPixel());
-            flowDistanceFromStartPointFormattedTextField.setValue(model.getFlowDistanceFromStartPointPixel());
             addArrowsCheckbox.setSelected(model.isDrawArrowheads());
             arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 40));
             arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 40));
@@ -197,8 +195,14 @@ public class MainWindow extends javax.swing.JFrame {
             arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
             arrowSizeRatioSlider.setValue((int) (model.getArrowSizeRatio() * 100));
             arrowLengthRatioSlider.setValue((int) Math.abs((model.getArrowLengthRatio() * 100) - 100));
+           
+            // flows
+            flowDistanceFromEndPointFormattedTextField.setValue(model.getFlowDistanceFromEndPointPixel());
+            flowDistanceFromStartPointFormattedTextField.setValue(model.getFlowDistanceFromStartPointPixel());
             maximumFlowWidthSlider.setValue((int) model.getMaxFlowStrokeWidthPixel());
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
+            minColorButton.setColor(model.getMinFlowColor());
+            maxColorButton.setColor(model.getMaxFlowColor());
 
             // Force Settings
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
@@ -353,6 +357,8 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator9 = new javax.swing.JSeparator();
         jLabel32 = new javax.swing.JLabel();
         jLabel31 = new javax.swing.JLabel();
+        minColorButton = new ika.gui.ColorButton();
+        maxColorButton = new ika.gui.ColorButton();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         addArrowsCheckbox = new javax.swing.JCheckBox();
@@ -1286,6 +1292,32 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         mapControlPanel.add(jLabel31, gridBagConstraints);
+
+        minColorButton.setText("Minimum Value");
+        minColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                minColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(minColorButton, gridBagConstraints);
+
+        maxColorButton.setText("Maximum Value");
+        maxColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                maxColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(maxColorButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -3300,6 +3332,18 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_showObstaclesCheckBoxMenuItemActionPerformed
 
+    private void minColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minColorButtonActionPerformed
+        model.setMinFlowColor(minColorButton.getColor());
+        mapComponent.refreshMap();
+        addUndo("Mininum Color");
+    }//GEN-LAST:event_minColorButtonActionPerformed
+
+    private void maxColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxColorButtonActionPerformed
+        model.setMaxFlowColor(maxColorButton.getColor());
+        mapComponent.refreshMap();
+        addUndo("Maxinum Color");
+    }//GEN-LAST:event_maxColorButtonActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3548,10 +3592,12 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu mapMenu;
     private javax.swing.JPanel mapPanel;
     private javax.swing.ButtonGroup mapToolsButtonGroup;
+    private ika.gui.ColorButton maxColorButton;
     private javax.swing.JSlider maximumFlowWidthSlider;
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
+    private ika.gui.ColorButton minColorButton;
     private javax.swing.JSlider minPxDistanceOfFlowsFromNodesSlider;
     private javax.swing.JLabel minPxDistanceOfFlowsFromNodesSliderLabel;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;

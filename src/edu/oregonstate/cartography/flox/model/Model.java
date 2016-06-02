@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
+import edu.oregonstate.cartography.utils.ColorUtils;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
@@ -141,10 +142,16 @@ public class Model {
     private double canvasPadding = 0.5;
 
     /**
-     * Color for drawing flows that are not selected
+     * Color for drawing the thinnest flow
      */
     @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
-    private final Color FLOW_COLOR = Color.BLACK;
+    private Color minFlowColor = Color.BLACK;
+    
+    /**
+     * Color for drawing the thickest flow
+     */
+    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
+    private Color maxFlowColor = new Color (70, 70, 70);
 
     /**
      * If true, arrows are drawn onto the end of flows.
@@ -720,6 +727,10 @@ public class Model {
      */
     public Iterator<Flow> flowIterator() {
         return graph.flowIterator();
+    }
+
+    public Iterator<Flow> sortedFlowIterator(boolean increasing) {
+        return graph.getOrderedFlows( increasing).iterator();
     }
 
     /**
@@ -1471,12 +1482,23 @@ public class Model {
     }
 
     /**
+     * Returns a the flow value between 0 and 1 relative to the minimum and maximum values of all flows.
+     * @param flow the flow for which a relative value is needed.
+     * @return 
+     */
+    public double getRelativeFlowValue(Flow flow) {
+        return (flow.getValue() - getMinFlowValue())
+                / (getMaxFlowValue() - getMinFlowValue());
+    }
+    /**
      * Returns the color for drawing flows.
      *
+     * @param flow the flow for which a color is needed
      * @return the color of flows
      */
-    public Color getFlowColor() {
-        return FLOW_COLOR;
+    public Color getFlowColor(Flow flow) {
+        double w = getRelativeFlowValue(flow);
+        return ColorUtils.blend(minFlowColor, maxFlowColor, w);
     }
 
     /**
@@ -1626,5 +1648,33 @@ public class Model {
 //            ArrayList<Flow> incomingFlows = model.getAnticlockwiseOrderedIncomingFlows(point);
 //            System.out.println("Number of incoming flows at node " + point + ": " + incomingFlows.size());
 //        }
+    }
+
+    /**
+     * @return the minFlowColor
+     */
+    public Color getMinFlowColor() {
+        return minFlowColor;
+    }
+
+    /**
+     * @param minFlowColor the minFlowColor to set
+     */
+    public void setMinFlowColor(Color minFlowColor) {
+        this.minFlowColor = minFlowColor;
+    }
+
+    /**
+     * @return the maxFlowColor
+     */
+    public Color getMaxFlowColor() {
+        return maxFlowColor;
+    }
+
+    /**
+     * @param maxFlowColor the maxFlowColor to set
+     */
+    public void setMaxFlowColor(Color maxFlowColor) {
+        this.maxFlowColor = maxFlowColor;
     }
 }

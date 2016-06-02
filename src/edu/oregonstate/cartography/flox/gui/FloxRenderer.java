@@ -40,6 +40,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Color for drawing selected flows.
      */
     public static final Color SELECTION_COLOR = Color.decode("#59A4FF");
+    
+    /**
+     * Color for drawing stroke line of nodes.
+     */
+    public static final Color NODE_STROKE_COLOR = Color.BLACK;
 
     /**
      * Color for drawing interior of nodes.
@@ -129,7 +134,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
 
         if (drawNodes) {
-            drawNodes(highlightSelected, false);
+            drawNodes(highlightSelected);
         }
 
         if (drawFlowRangebox) {
@@ -248,14 +253,17 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private void drawFlows(boolean highlightSelected, boolean drawLocks) {
 
         double s = scale / model.getReferenceMapScale();
-
+        boolean colorVaries = !model.getMinFlowColor().equals(model.getMaxFlowColor());
+        
+        
         // Iterate through the flows
-        Iterator<Flow> iterator = model.flowIterator();
+        Iterator<Flow> iterator = colorVaries 
+                ? model.sortedFlowIterator(false) : model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
 
             g2d.setColor(highlightSelected && flow.isSelected()
-                    ? SELECTION_COLOR : model.getFlowColor());
+                    ? SELECTION_COLOR : model.getFlowColor(flow));
 
             // draw the arrow head
             if (model.isDrawArrowheads()) {
@@ -351,7 +359,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             mask2D.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            mask2D.setColor(highlightSelected && flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
+            mask2D.setColor(highlightSelected && flow.isSelected() 
+                    ? SELECTION_COLOR : model.getFlowColor(flow));
             mask2D.draw(flowPath);
 
             // draw to alpha channel to make inner flow area transparent
@@ -366,7 +375,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // draw plain arrows
             g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            g2d.setColor(highlightSelected && flow.isSelected() ? SELECTION_COLOR : model.getFlowColor());
             g2d.draw(flowPath);
         }
 
@@ -378,10 +386,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     /**
      * Draw all nodes to a Graphics2D context.
      *
-     * @param fillNodes If true, the node circles are filled with the stroke
-     * color. Otherwise they are filled with white.
      */
-    private void drawNodes(boolean highlightSelected, boolean fillNodes) {
+    private void drawNodes(boolean highlightSelected) {
         double s = scale / model.getReferenceMapScale();
 
         // same stroke width for all nodes
@@ -391,9 +397,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         for (Point node : nodes) {
             double r = model.getNodeRadiusPx(node) * s;
             Color strokeColor = highlightSelected && node.isSelected()
-                    ? SELECTION_COLOR : model.getFlowColor();
-            Color fillColor = fillNodes ? model.getFlowColor() : NODE_FILL_COLOR;
-            drawCircle(node.x, node.y, r, fillColor, strokeColor);
+                    ? SELECTION_COLOR : NODE_STROKE_COLOR;
+            drawCircle(node.x, node.y, r, NODE_FILL_COLOR, strokeColor);
         }
     }
 

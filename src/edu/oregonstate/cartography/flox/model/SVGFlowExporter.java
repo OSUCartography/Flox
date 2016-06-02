@@ -120,7 +120,7 @@ public class SVGFlowExporter extends SVGExporter {
 
         // export flows and nodes
         Element g = (Element) document.createElementNS(SVGNAMESPACE, "g");
-        setVectorStyle(g, model.getFlowColor(), 1, null);
+        
         svgRootElement.appendChild(g);
 
         Iterator<Flow> iterator = model.flowIterator();
@@ -139,6 +139,7 @@ public class SVGFlowExporter extends SVGExporter {
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 // pathElement.setAttribute("d", flowToPath(arrow.getOutFlow())); FIXME get clipped flow path
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
+                setVectorStyle(pathElement, model.getFlowColor(flow), 1, null);
                 g.appendChild(pathElement);
 
                 // get the arrow
@@ -146,12 +147,14 @@ public class SVGFlowExporter extends SVGExporter {
                 arrowPathElement.setAttribute("d", arrowToPath(arrow));
                 arrowPathElement.setAttribute("fill", "black");
                 arrowPathElement.setAttribute("stroke-width", Double.toString(0));
+                setVectorStyle(arrowPathElement, model.getFlowColor(flow), 1, null);
                 g.appendChild(arrowPathElement);
 
             } else {
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 pathElement.setAttribute("d", flowToPath(flow));
                 pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
+                setVectorStyle(pathElement, model.getFlowColor(flow), 1, null);
                 g.appendChild(pathElement);
             }
         }
