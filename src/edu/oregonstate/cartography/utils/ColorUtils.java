@@ -66,18 +66,19 @@ public class ColorUtils {
     }
 
     /**
-     * Blend two colors
+     * Blend two colors. Red, green, blue and alpha values are blended.
      *
      * @param c1 color 1
      * @param c2 color 2
-     * @param ratio blending ratio
-     * @return
+     * @param ratio blending ratio between 0 and 1. 0 results in a color
+     * identical to c1. 1 results in a color identical to c2.
+     * @return a new color object with blended r, g, b, and alpha values.
      */
     public static final Color blend(Color c1, Color c2, double ratio) {
         if (ratio > 1d) {
-            ratio = 1d;
+            return new Color(c2.getRGB(), true);
         } else if (ratio < 0d) {
-            ratio = 0d;
+            return new Color(c1.getRGB(), true);
         }
 
         int i1 = c1.getRGB();
@@ -97,8 +98,8 @@ public class ColorUtils {
         int r = (int) (r1 + (r2 - r1) * ratio);
         int g = (int) (g1 + (g2 - g1) * ratio);
         int b = (int) (b1 + (b2 - b1) * ratio);
-        
+
         return new Color(a << 24 | r << 16 | g << 8 | b);
     }
-    
+
 }

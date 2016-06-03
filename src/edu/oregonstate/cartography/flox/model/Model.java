@@ -5,8 +5,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import edu.oregonstate.cartography.utils.ColorUtils;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -271,7 +269,7 @@ public class Model {
     /**
      * Minimum distance of flows from obstacles in pixels.
      */
-    private double minObstacleDistPx = 10;
+    private int minObstacleDistPx = 2;
 
     /**
      * A map with a set of symbolized layers.
@@ -1601,14 +1599,14 @@ public class Model {
     /**
      * @return the nodeTolerancePx
      */
-    public double getMinObstacleDistPx() {
+    public int getMinObstacleDistPx() {
         return minObstacleDistPx;
     }
 
     /**
      * @param minObstacleDistPx the nodeTolerancePx to set
      */
-    public void setMinObstacleDistPx(double minObstacleDistPx) {
+    public void setMinObstacleDistPx(int minObstacleDistPx) {
         this.minObstacleDistPx = minObstacleDistPx;
     }
 

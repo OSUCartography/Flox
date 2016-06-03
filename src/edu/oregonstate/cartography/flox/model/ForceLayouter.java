@@ -773,6 +773,56 @@ public class ForceLayouter {
     }
 
     /**
+     * Moves the control point away from its current location such that the flow
+     * does not overlap any obstacle. If no position can be found, the control
+     * point is not changed. Tests control point locations placed along an
+     * Archimedean spiral.
+     *
+     * @param flow flow to change
+     * @param obstacles obstacles to avoid
+     */
+    public void moveFlowFromObstacles(Flow flow, List<Obstacle> obstacles) {
+        // control points are placed along the spiral with this spacing
+        final double DIST_PX = 1; // distance in pixels
+        double dist = DIST_PX / model.getReferenceMapScale(); // convert to world coordinates
+
+        Point cPt = flow.getCtrlPt();
+        double originalX = cPt.x;
+        double originalY = cPt.y;
+        double angleRad = Math.PI;
+        RangeboxEnforcer rangeBox = new RangeboxEnforcer(model);
+        double spiralR, maxSpiralR = flow.getBaselineLength();
+        do {
+            // radius of spiral for current angle.
+            // The distance between two windings is dist.
+            spiralR = dist * angleRad / Math.PI / 2;
+            double dx = Math.cos(angleRad) * spiralR;
+            double dy = Math.sin(angleRad) * spiralR;
+            cPt.x = dx + originalX;
+            cPt.y = dy + originalY;
+
+            // increment rotation angle, such that the next point on the spiral 
+            // has an approximate distance of dist
+            angleRad += dist / spiralR;
+
+            if (!rangeBox.isPointInRangebox(flow, cPt.x, cPt.y)) {
+                continue;
+            }
+
+            if (flowIntersectsObstacle(flow, obstacles) == false) {
+                // found a new position for the control point that does not 
+                // result in an overlap with any obstacle
+                return;
+            }
+        } while (spiralR < maxSpiralR);
+
+        // could not find a control point position that does not overlap an 
+        // obstacle. Restore the original coordinates.
+        cPt.x = originalX;
+        cPt.y = originalY;
+    }
+
+    /**
      * Identifies flows that overlap nodes they are not connected to, and moves
      * the control point of overlapping flows away from nodes.
      */
@@ -786,41 +836,7 @@ public class ForceLayouter {
 
         // move control points of overlapping flows, starts with largest flow
         for (Flow flow : flowsOverlappingObstacles) {
-            Point cPt = flow.getCtrlPt();
-            double originalX = cPt.x;
-            double originalY = cPt.y;
-            double angleRad = Math.PI;
-
-            // TODO control point may be moved outside of range box
-            double dist = flow.getBaselineLength() / 200; // FIXME hard-coded parameter
-            for (int i = 0; i < 10000; i++) { // FIXME hard-coded parameter
-                double spiralR = dist * angleRad / Math.PI / 2;
-                double dx = Math.cos(angleRad) * spiralR;
-                double dy = Math.sin(angleRad) * spiralR;
-                //System.out.println(Math.sqrt(dx * dx + dy * dy));
-                //System.out.println(i + " \t" + Math.toDegrees(angleRad) + " \t" + Math.sqrt(dx * dx + dy * dy));
-                cPt.x = dx + originalX;
-                cPt.y = dy + originalY;
-                angleRad += dist / spiralR / 20; // FIXME hard-coded parameter
-
-                boolean insideRangebox = new RangeboxEnforcer(model).isPointInRangebox(flow, cPt.x, cPt.y);
-                if (!insideRangebox) {
-                    continue;
-                }
-
-                if (flowIntersectsObstacle(flow, obstacles) == false) {
-                    // found a new position for the control point that does not 
-                    // result in an overlap with any obstacle
-//                    System.out.println("OK " + i + "\n");
-                    return;
-                }
-            }
-
-            // could not find a position that does not overlap an obstacle. Restore 
-            // original coordinates.
-            cPt.x = originalX;
-            cPt.y = originalY;
-            System.out.println("no position found\n");
+            moveFlowFromObstacles(flow, obstacles);
         }
     }
 
