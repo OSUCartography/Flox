@@ -67,6 +67,14 @@ public class ForceLayouter {
 
     public static final int NBR_ITERATIONS = 100;
 
+    /**
+     * when searching a control point position that does not result in overlaps
+     * with obstacles, candidate control point positions are placed along a
+     * spiral. SPIRAL_SPACING_PX is the spacing between candidate control
+     * points. Units are pixels. Increase to accelerate computations.
+     */
+    public static final double SPIRAL_SPACING_PX = 1.5;
+
     // model with all map features.
     private final Model model;
 
@@ -751,7 +759,8 @@ public class ForceLayouter {
     /**
      * Returns a list of all flows that intersect obstacle circles.
      *
-     * @return
+     * @param obstacles a list of obstacles
+     * @return a list of flows overlapping any of the passed obstacles
      */
     public ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
         ArrayList<Flow> flowsArray = new ArrayList();
@@ -776,45 +785,55 @@ public class ForceLayouter {
      * Moves the control point away from its current location such that the flow
      * does not overlap any obstacle. If no position can be found, the control
      * point is not changed. Tests control point locations placed along an
-     * Archimedean spiral.
+     * Archimedean spiral centered on the current control point location.
      *
      * @param flow flow to change
      * @param obstacles obstacles to avoid
      */
     public void moveFlowFromObstacles(Flow flow, List<Obstacle> obstacles) {
-        // control points are placed along the spiral with this spacing
-        final double DIST_PX = 1; // distance in pixels
-        double dist = DIST_PX / model.getReferenceMapScale(); // convert to world coordinates
+        // convert spacing of sample points to world coordinates
+        double dist = SPIRAL_SPACING_PX / model.getReferenceMapScale();
 
         Point cPt = flow.getCtrlPt();
         double originalX = cPt.x;
         double originalY = cPt.y;
         double angleRad = Math.PI;
-        RangeboxEnforcer rangeBox = new RangeboxEnforcer(model);
-        double spiralR, maxSpiralR = flow.getBaselineLength();
+        RangeboxEnforcer rangeBoxEnforcer = new RangeboxEnforcer(model);
+
+        // compute the maximum possible radius for the spiral
+        // the maximum radius is the distance between the control point (which
+        // is the center of the spiral) and the corner point of the range box
+        // that is the farthest away from the control point.
+        Point[] rangeBox = rangeBoxEnforcer.computeRangebox(flow);
+        double maxSpiralRSq = rangeBoxEnforcer.longestDistanceSqToCorner(rangeBox, cPt.x, cPt.y);
+
+        // place the control point along the spiral until a position is found 
+        // that does not result in any overlap
+        double spiralR;
         do {
-            // radius of spiral for current angle.
+            // radius of spiral for the current angle.
             // The distance between two windings is dist.
             spiralR = dist * angleRad / Math.PI / 2;
+
+            // new control point location
             double dx = Math.cos(angleRad) * spiralR;
             double dy = Math.sin(angleRad) * spiralR;
             cPt.x = dx + originalX;
             cPt.y = dy + originalY;
 
             // increment rotation angle, such that the next point on the spiral 
-            // has an approximate distance of dist
+            // has an approximate distance of dist to the current point
             angleRad += dist / spiralR;
 
-            if (!rangeBox.isPointInRangebox(flow, cPt.x, cPt.y)) {
-                continue;
-            }
-
-            if (flowIntersectsObstacle(flow, obstacles) == false) {
+            if (rangeBoxEnforcer.isPointInRangebox(flow, cPt.x, cPt.y)
+                    && flowIntersectsObstacle(flow, obstacles) == false) {
                 // found a new position for the control point that does not 
                 // result in an overlap with any obstacle
                 return;
             }
-        } while (spiralR < maxSpiralR);
+
+        } // move along the spiral until the entire range box is covered
+        while (spiralR * spiralR < maxSpiralRSq);
 
         // could not find a control point position that does not overlap an 
         // obstacle. Restore the original coordinates.

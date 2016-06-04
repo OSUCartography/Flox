@@ -18,7 +18,7 @@ public class RangeboxEnforcer {
     /**
      * If the control point of a flow falls outside of the flow's range box,
      * this returns the intersection between a line connecting the control point
-     * to the midpoint of the baseline, and the location along the rangebox's
+     * to the midpoint of the baseline, and the location along the range box's
      * border where the line crosses. Checks each side of the range rectangle
      * one at a time.
      *
@@ -153,6 +153,13 @@ public class RangeboxEnforcer {
         return cPt;
     }
 
+    /**
+     * Computes the corner points of a range box.
+     *
+     * @param flow the flow for which to compute a range box
+     * @return array with four Point objects. Counter-clockwise order: Bottom
+     * left, bottom right, top right, top left.
+     */
     public Point[] computeRangebox(Flow flow) {
         double baseDist = flow.getBaselineLength();
         double boxHeight = model.getFlowRangeboxHeight();
@@ -181,6 +188,14 @@ public class RangeboxEnforcer {
         return rangeboxPoints;
     }
 
+    /**
+     * Tests whether a point is inside the range box of a flow.
+     *
+     * @param flow test with the range box of this flow
+     * @param x horizontal coordinate of the point to test
+     * @param y vertical coordinate of the point to test
+     * @return true if the point is inside the range box, false otherwise.
+     */
     public boolean isPointInRangebox(Flow flow, double x, double y) {
         double baseDist = flow.getBaselineLength();
         double boxHeight = model.getFlowRangeboxHeight();
@@ -199,7 +214,7 @@ public class RangeboxEnforcer {
         // vector from start and end points of base line to corners
         double vx = -uy * baseDist * boxHeight;
         double vy = ux * baseDist * boxHeight;
-        
+
         // http://stackoverflow.com/questions/2752725/finding-whether-a-point-lies-inside-a-rectangle-or-not
         double Ax = x1 - vx;
         double Ay = y1 - vy;
@@ -225,5 +240,28 @@ public class RangeboxEnforcer {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Returns the distance to the one corner point of a range box that is the
+     * farthest away from the passed point.
+     *
+     * @param rangeBoxCorners corners of the range box
+     * @param x x coordinate of the point
+     * @param y y coordinate of the point
+     * @return squared value of the distance
+     */
+    public double longestDistanceSqToCorner(Point[] rangeBoxCorners, double x, double y) {
+        double maxDistSq = 0;
+        for (int i = 0; i < rangeBoxCorners.length; i++) {
+            Point corner = rangeBoxCorners[i];
+            double dx = x - corner.x;
+            double dy = y - corner.y;
+            double distSq = dx * dx + dy * dy;
+            if (distSq > maxDistSq) {
+                maxDistSq = distSq;
+            }
+        }
+        return maxDistSq;
     }
 }
