@@ -238,4 +238,16 @@ public class Arrow {
     public double getClipRadius() {
         return clipRadius;
     }
+
+    /**
+     * Returns the centroid of the the arrow head, computed from the top and the
+     * two corner points.
+     *
+     * @return the centroid
+     */
+    public Point getCentroid() {
+        double x = (tipPt.x + corner1Pt.x + corner2Pt.x) / 3;
+        double y = (tipPt.y + corner1Pt.y + corner2Pt.y) / 3;
+        return new Point(x, y);
+    }
 }

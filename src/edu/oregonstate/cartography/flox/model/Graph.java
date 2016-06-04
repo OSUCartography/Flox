@@ -23,7 +23,6 @@ public final class Graph {
     private double meanNodeValue;
 
     private final DirectedMultigraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
-    
 
     public Graph() {
     }
@@ -54,7 +53,7 @@ public final class Graph {
         maxFlowLength = 0;
         minFlowValue = maxFlowValue = flowIterator.next().getValue();
         while (flowIterator.hasNext()) {
-            Flow flow = flowIterator.next(); 
+            Flow flow = flowIterator.next();
             double v = flow.getValue();
             if (v < minFlowValue) {
                 minFlowValue = v;
@@ -96,7 +95,7 @@ public final class Graph {
         }
         meanNodeValue = nodeSum / nodeCounter;
     }
-    
+
     /**
      * Add a flow.
      *
@@ -123,7 +122,7 @@ public final class Graph {
         graph.addVertex(newNode);
         updateCachedValues();
     }
-    
+
     void removeEdge(Flow flow) {
         graph.removeEdge(flow);
         updateCachedValues();
@@ -188,15 +187,16 @@ public final class Graph {
     }
 
     /**
-     * Returns a list of flows incident at a node. The flows are ordered
-     * anti-clockwise. The origin of the polar coordinate system is the
-     * horizontal x axis.
+     * Returns a list of flows connected to a node. The flows are ordered
+     * anti-clockwise by the orientation of the line connecting start and end
+     * points. The origin of the polar coordinate system is the horizontal x
+     * axis.
      *
-     * @param node the point to search incoming flows for.
-     * @return A list with the ordered flows.
+     * @param node the node to search connected flows for.
+     * @return a list with the ordered flows.
      */
-    public ArrayList<Flow> getAnticlockwiseOrderedIncomingFlows(Point node) {
-        Collection<Flow> unsorted = graph.incomingEdgesOf(node);
+    public ArrayList<Flow> getAnticlockwiseOrderedFlowsAtNode(Point node) {
+        Collection<Flow> unsorted = graph.edgesOf(node);
         ArrayList<Flow> list = new ArrayList<>(unsorted);
         java.util.Collections.sort(list, (Flow f1, Flow f2) -> {
             double a1 = f1.getBaselineAzimuth();
@@ -223,7 +223,7 @@ public final class Graph {
         });
         return nodes;
     }
-    
+
     public ArrayList<Flow> getOrderedFlows(boolean increasing) {
         ArrayList<Flow> flows = new ArrayList<>(graph.edgeSet());
         java.util.Collections.sort(flows, (Flow f1, Flow f2) -> {
@@ -287,7 +287,7 @@ public final class Graph {
      * @return mean node value
      */
     public double getMeanNodeValue() {
-       return meanNodeValue;
+        return meanNodeValue;
     }
 
     /**

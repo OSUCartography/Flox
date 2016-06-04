@@ -3453,6 +3453,8 @@ public class MainWindow extends javax.swing.JFrame {
                 double progress = 100d * i / ForceLayouter.NBR_ITERATIONS;
                 setProgress((int) Math.round(progress));
             }
+            
+            model.computeArrowheads();
         }
 
         @Override

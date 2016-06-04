@@ -747,9 +747,10 @@ public class ForceLayouter {
             Iterator<Flow> flowIterator = model.flowIterator();
             while (flowIterator.hasNext()) {
                 Flow flow = flowIterator.next();
-                Point basePoint = flow.getEndArrow().getBasePt();
-                double rPx = flow.getEndArrow().getLength() * model.getReferenceMapScale();
-                obstacles.add(new Obstacle(flow.endPt, basePoint.x, basePoint.y, rPx));
+                Arrow arrow = flow.getEndArrow();
+                Point centroid = arrow.getCentroid();
+                double rPx = centroid.distance(arrow.getTipPt()) * model.getReferenceMapScale();
+                obstacles.add(new Obstacle(flow.endPt, centroid.x, centroid.y, rPx));
             }
         }
 
@@ -842,8 +843,9 @@ public class ForceLayouter {
     }
 
     /**
-     * Identifies flows that overlap nodes they are not connected to, and moves
-     * the control point of overlapping flows away from nodes.
+     * Identifies flows that overlap obstacles they are not connected to, and
+     * moves the control point of overlapping flows such that there is no
+     * overlap if possible.
      */
     public void moveFlowsOverlappingObstacles() {
         List<Obstacle> obstacles = getObstacles();

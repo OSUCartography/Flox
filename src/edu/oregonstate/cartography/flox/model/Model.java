@@ -780,15 +780,16 @@ public class Model {
     }
 
     /**
-     * Returns a list of flows incident at a node. The flows are ordered
-     * anti-clockwise. The origin of the polar coordinate system is the
-     * horizontal x axis.
+     * Returns a list of flows connected to a node. The flows are ordered
+     * anti-clockwise by the orientation of the line connecting start and end
+     * points. The origin of the polar coordinate system is the horizontal x
+     * axis.
      *
-     * @param node the point to search incoming flows for.
-     * @return A list with the ordered flows.
+     * @param node the node to search connected flows for.
+     * @return a list with the ordered flows.
      */
-    public ArrayList<Flow> getAnticlockwiseOrderedIncomingFlows(Point node) {
-        return graph.getAnticlockwiseOrderedIncomingFlows(node);
+    public List<Flow> getAnticlockwiseOrderedFlowsAtNode(Point node) {
+        return graph.getAnticlockwiseOrderedFlowsAtNode(node);
     }
 
     /**
