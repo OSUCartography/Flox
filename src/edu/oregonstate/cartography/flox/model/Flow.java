@@ -575,7 +575,7 @@ public final class Flow {
         // for de Casteljau's algorithm (it is devided by 100).
         double targetDist = totalLength / Math.round(totalLength / deCasteljauTol);
 
-        // create new point set with regularly distributed irregularPoints
+        // create new point set with regularly distributed points
         double startX = irregularPoints.get(0).x;
         double startY = irregularPoints.get(0).y;
 
@@ -584,7 +584,7 @@ public final class Flow {
 
         double length = 0;
         int nPoints = irregularPoints.size();
-        for (int i = 0; i < nPoints; i++) {
+        for (int i = 1; i < nPoints; i++) {
             Point inputPt = irregularPoints.get(i);
             double endX = inputPt.x;
             double endY = inputPt.y;
@@ -593,16 +593,14 @@ public final class Flow {
             double dx = endX - startX;
             double dy = endY - startY;
             final double l = Math.sqrt(dx * dx + dy * dy);
-            dx /= l;
-            dy /= l;
 
             double rest = length;
             length += l;
             while (length >= targetDist) {
                 // compute new point
                 length -= targetDist;
-                startX += dx * (targetDist - rest);
-                startY += dy * (targetDist - rest);
+                startX += dx / l * (targetDist - rest);
+                startY += dy / l * (targetDist - rest);
                 rest = 0;
                 regularPoints.add(new Point(startX, startY));
             }
@@ -610,8 +608,10 @@ public final class Flow {
             startY = endY;
         }
 
-        // add end point
-        regularPoints.add(irregularPoints.get(irregularPoints.size() - 1));
+        // replace last point with end point
+        regularPoints.set(regularPoints.size() - 1,
+                irregularPoints.get(irregularPoints.size() - 1));
+        
         return regularPoints;
     }
 
@@ -949,5 +949,15 @@ public final class Flow {
      */
     public String getEndClipAreaWKT() {
         return endClipAreaWKT;
+    }
+
+    /**
+     * Returns true if this and the passed flow share a common start or end node.
+     * @param flow flow to test
+     * @return True if start or end nodes are shared, false otherwise.
+     */
+    boolean isSharingStartOrEndNode(Flow flow) {
+        return startPt == flow.startPt || startPt == flow.endPt
+                || endPt == flow.startPt || endPt == flow.endPt;
     }
 }
