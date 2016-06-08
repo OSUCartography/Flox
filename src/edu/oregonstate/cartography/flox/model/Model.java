@@ -63,6 +63,16 @@ public class Model {
         HIGH
     }
 
+    public static class IntersectingFlowPair {
+
+        public IntersectingFlowPair(Flow flow1, Flow flow2) {
+            this.flow1 = flow1;
+            this.flow2 = flow2;
+        }
+        public Flow flow1;
+        public Flow flow2;
+    }
+
     /**
      * Determines the maximum number of intermediate nodes per flow. This is
      * modified by a comboBox in the GUI (low, medium, high).
@@ -144,12 +154,12 @@ public class Model {
      */
     @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
     private Color minFlowColor = Color.BLACK;
-    
+
     /**
      * Color for drawing the thickest flow
      */
     @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
-    private Color maxFlowColor = new Color (70, 70, 70);
+    private Color maxFlowColor = new Color(70, 70, 70);
 
     /**
      * If true, arrows are drawn onto the end of flows.
@@ -728,8 +738,12 @@ public class Model {
     }
 
     public Iterator<Flow> sortedFlowIterator(boolean increasing) {
-        return graph.getOrderedFlows( increasing).iterator();
+        return graph.getOrderedFlows(increasing).iterator();
     }
+    
+    public ArrayList<Flow> getFlows() {
+        return graph.getFlows();
+    }    
 
     /**
      * Sort a list of flows by flow values.
@@ -834,12 +848,17 @@ public class Model {
     public double getDeCasteljauTolerance() {
 
         double maxFlowNodes;
-        if (flowNodeDensity == FlowNodeDensity.LOW) {
-            maxFlowNodes = 10;
-        } else if (flowNodeDensity == FlowNodeDensity.MEDIUM) {
-            maxFlowNodes = 25;
-        } else { // flowNodeDensity == FlowNodeDensity.HIGH
-            maxFlowNodes = 40;
+        switch (flowNodeDensity) {
+            case LOW:
+                maxFlowNodes = 10;
+                break;
+            case MEDIUM:
+                maxFlowNodes = 25;
+                break;
+            default:
+                // FlowNodeDensity.HIGH
+                maxFlowNodes = 40;
+                break;
         }
 
         double longestFlowLength = getLongestFlowLength();
@@ -1469,9 +1488,10 @@ public class Model {
     public void setMaxNodeSizePx(double maxNodeSizePx) {
         this.maxNodeSizePx = maxNodeSizePx;
     }
-    
+
     /**
      * Returns the stroke width in pixels of a flow based on its value.
+     *
      * @param flow the flow
      * @return width in pixels
      */
@@ -1481,14 +1501,17 @@ public class Model {
     }
 
     /**
-     * Returns a the flow value between 0 and 1 relative to the minimum and maximum values of all flows.
+     * Returns a the flow value between 0 and 1 relative to the minimum and
+     * maximum values of all flows.
+     *
      * @param flow the flow for which a relative value is needed.
-     * @return 
+     * @return
      */
     public double getRelativeFlowValue(Flow flow) {
         return (flow.getValue() - getMinFlowValue())
                 / (getMaxFlowValue() - getMinFlowValue());
     }
+
     /**
      * Returns the color for drawing flows.
      *
@@ -1596,7 +1619,7 @@ public class Model {
         double area = Math.abs(node.getValue() * getNodeSizeScaleFactor());
         return Math.sqrt(area / Math.PI);
     }
-    
+
     /**
      * @return the nodeTolerancePx
      */
@@ -1633,7 +1656,7 @@ public class Model {
             // Compute radius of clipping circle around end point.
             // Clip the flow with the clipping area and/or a circle around the end node
             double arrowTipClipRadius = flow.endClipRadius(this, false, null);
-            
+
             // stroke width in world coordinates of the flow based on its value.
             double flowStrokeWidth = getFlowWidthPx(flow) / getReferenceMapScale();
 

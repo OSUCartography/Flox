@@ -1,6 +1,7 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.BooleanGrid;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
@@ -443,12 +444,13 @@ public class MainWindow extends javax.swing.JFrame {
         floxReportMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
-        jMenu1 = new javax.swing.JMenu();
+        debugMenu = new javax.swing.JMenu();
         flowSegmentationMenu = new javax.swing.JMenu();
         lowFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         mediumFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
+        jSeparator15 = new javax.swing.JPopupMenu.Separator();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
         moveSelectedFromObstaclesMenuItem = new javax.swing.JMenuItem();
@@ -460,6 +462,8 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
         liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator16 = new javax.swing.JPopupMenu.Separator();
+        selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -2025,7 +2029,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(infoMenu);
 
-        jMenu1.setText("Debug");
+        debugMenu.setText("Debug");
 
         flowSegmentationMenu.setText("Flow Segmentation");
 
@@ -2057,7 +2061,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         flowSegmentationMenu.add(highFlowSegmentationMenuItem);
 
-        jMenu1.add(flowSegmentationMenu);
+        debugMenu.add(flowSegmentationMenu);
 
         showFlowSegmentsMenuItem.setText("Show Flow Segments");
         showFlowSegmentsMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2065,7 +2069,8 @@ public class MainWindow extends javax.swing.JFrame {
                 showFlowSegmentsMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(showFlowSegmentsMenuItem);
+        debugMenu.add(showFlowSegmentsMenuItem);
+        debugMenu.add(jSeparator15);
 
         showObstaclesCheckBoxMenuItem.setText("Show Obstacles");
         showObstaclesCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2073,7 +2078,7 @@ public class MainWindow extends javax.swing.JFrame {
                 showObstaclesCheckBoxMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(showObstaclesCheckBoxMenuItem);
+        debugMenu.add(showObstaclesCheckBoxMenuItem);
 
         selectOverlappingFlowsInfoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         selectOverlappingFlowsInfoMenuItem.setText("Select Flows Overlapping Obstacles");
@@ -2082,7 +2087,7 @@ public class MainWindow extends javax.swing.JFrame {
                 selectOverlappingFlowsInfoMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(selectOverlappingFlowsInfoMenuItem);
+        debugMenu.add(selectOverlappingFlowsInfoMenuItem);
 
         moveSelectedFromObstaclesMenuItem.setText("Move Selected Flow Away from Obstacles");
         moveSelectedFromObstaclesMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2090,8 +2095,8 @@ public class MainWindow extends javax.swing.JFrame {
                 moveSelectedFromObstaclesMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(moveSelectedFromObstaclesMenuItem);
-        jMenu1.add(jSeparator12);
+        debugMenu.add(moveSelectedFromObstaclesMenuItem);
+        debugMenu.add(jSeparator12);
 
         enforceCanvasCheckBoxMenuItem.setSelected(true);
         enforceCanvasCheckBoxMenuItem.setText("Enforce Canvas");
@@ -2100,7 +2105,7 @@ public class MainWindow extends javax.swing.JFrame {
                 enforceCanvasCheckBoxMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(enforceCanvasCheckBoxMenuItem);
+        debugMenu.add(enforceCanvasCheckBoxMenuItem);
 
         moveFlowsCheckBoxMenuItem.setSelected(true);
         moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
@@ -2109,8 +2114,8 @@ public class MainWindow extends javax.swing.JFrame {
                 moveFlowsCheckBoxMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(moveFlowsCheckBoxMenuItem);
-        jMenu1.add(jSeparator13);
+        debugMenu.add(moveFlowsCheckBoxMenuItem);
+        debugMenu.add(jSeparator13);
 
         emptySpaceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         emptySpaceMenuItem.setText("Attract First Selected Flow by Empty Space");
@@ -2119,8 +2124,8 @@ public class MainWindow extends javax.swing.JFrame {
                 emptySpaceMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(emptySpaceMenuItem);
-        jMenu1.add(jSeparator7);
+        debugMenu.add(emptySpaceMenuItem);
+        debugMenu.add(jSeparator7);
 
         recomputeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         recomputeMenuItem.setText("Recompute");
@@ -2129,7 +2134,7 @@ public class MainWindow extends javax.swing.JFrame {
                 recomputeMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(recomputeMenuItem);
+        debugMenu.add(recomputeMenuItem);
 
         liveDrawingCheckBoxMenuItem.setText("Live Drawing");
         liveDrawingCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2137,9 +2142,18 @@ public class MainWindow extends javax.swing.JFrame {
                 liveDrawingCheckBoxMenuItemActionPerformed(evt);
             }
         });
-        jMenu1.add(liveDrawingCheckBoxMenuItem);
+        debugMenu.add(liveDrawingCheckBoxMenuItem);
+        debugMenu.add(jSeparator16);
 
-        menuBar.add(jMenu1);
+        selectIntersectingSiblingFlowsMenuItem.setText("Select Intersecting Flows Connected to Same Nodes");
+        selectIntersectingSiblingFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectIntersectingSiblingFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(selectIntersectingSiblingFlowsMenuItem);
+
+        menuBar.add(debugMenu);
 
         setJMenuBar(menuBar);
 
@@ -3395,6 +3409,16 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_moveSelectedFromObstaclesMenuItemActionPerformed
 
+    private void selectIntersectingSiblingFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectIntersectingSiblingFlowsMenuItemActionPerformed
+        model.setSelectionOfAllFlowsAndNodes(false);
+        List<Model.IntersectingFlowPair> pairs = new ForceLayouter(model).getIntersectingSiblings();
+        for (Model.IntersectingFlowPair pair : pairs) {
+            pair.flow1.setSelected(true);
+            pair.flow2.setSelected(true);
+        }
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_selectIntersectingSiblingFlowsMenuItemActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3563,6 +3587,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox clipWithStartAreasCheckBox;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
+    private javax.swing.JMenu debugMenu;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
@@ -3621,7 +3646,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator10;
@@ -3629,6 +3653,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
+    private javax.swing.JPopupMenu.Separator jSeparator15;
+    private javax.swing.JPopupMenu.Separator jSeparator16;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
@@ -3676,6 +3702,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem selectAllMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
     private javax.swing.JButton selectFlowsFileButton;
+    private javax.swing.JMenuItem selectIntersectingSiblingFlowsMenuItem;
     private javax.swing.JMenuItem selectNoneMenuItem;
     private javax.swing.JMenuItem selectOverlappingFlowsInfoMenuItem;
     private javax.swing.JButton selectPointsFileButton;

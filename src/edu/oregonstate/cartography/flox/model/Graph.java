@@ -187,6 +187,16 @@ public final class Graph {
     }
 
     /**
+     * Returns a list with all flows. It is recommended to use flowIterator()
+     * instead.
+     *
+     * @return list with flows
+     */
+    public ArrayList<Flow> getFlows() {
+        return new ArrayList<>(graph.edgeSet());
+    }
+
+    /**
      * Returns a list of flows connected to a node. The flows are ordered
      * anti-clockwise by the orientation of the line connecting start and end
      * points. The origin of the polar coordinate system is the horizontal x

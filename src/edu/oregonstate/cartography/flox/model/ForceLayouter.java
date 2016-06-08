@@ -1,5 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -15,28 +19,6 @@ import java.util.List;
  * @author danielstephen
  */
 public class ForceLayouter {
-
-    /**
-     * A utility structure for the integration over time using the velocity
-     * Verlet method.
-     * https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
-     */
-    private class Verlet {
-
-        public double vx; // velocity of current time step t
-        public double vy;
-        public double ax; // acceleration for current time step t
-        public double ay;
-        public double ax_; // acceleration for time step t + dt
-        public double ay_;
-
-        public double ang_vx; // angular distribution velocity of current time step t
-        public double ang_vy;
-        public double ang_ax; // angular distribution acceleration for current time step t
-        public double ang_ay;
-        public double ang_ax_; // angular distribution acceleration for time step t + dt
-        public double ang_ay_;
-    }
 
     public class Obstacle {
 
@@ -86,8 +68,11 @@ public class ForceLayouter {
      */
     HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
 
-    // store per flow values for Verlet velocity integration
-    ArrayList<Verlet> verletVelocities;
+    // store per flow force
+    ArrayList<Force> forces;
+
+    // store angular distribution force for each flow for friction computation
+    ArrayList<Force> angularDistForces;
 
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
@@ -100,9 +85,17 @@ public class ForceLayouter {
 
         // store force for each flow. This is used for friction computation.
         int nFlows = model.getNbrFlows();
-        verletVelocities = new ArrayList<>(nFlows);
+        forces = new ArrayList<>(nFlows);
         for (int i = 0; i < nFlows; i++) {
-            verletVelocities.add(new Verlet());
+            forces.add(new Force());
+        }
+
+        // store angular distribution force for each flow in this array
+        // Angular distribution forces are computed separately, because they 
+        // require a different weight than the other forces.
+        angularDistForces = new ArrayList<>(nFlows);
+        for (int i = 0; i < nFlows; i++) {
+            angularDistForces.add(new Force());
         }
     }
 
@@ -445,47 +438,19 @@ public class ForceLayouter {
                 continue;
             }
 
-            Verlet v = verletVelocities.get(j++);
-            Point ctrlPt = flow.getCtrlPt();
-
-            // update position for time t + dt
-            // dt is 1
-            ctrlPt.x += v.vx + 0.5 * v.ax;
-            ctrlPt.y += v.vy + 0.5 * v.ay;
-
-            // Move the control point by the angular distribution force.
-            // Angular distribution forces are not applied from the beginning 
-            // of the iterative layout computation. Angular distribution forces 
-            // kick in slowly to avoid creating crossing flows. 
-            // The weight for regular forces varies from 
-            // 1 to 0 with each iteration. The weight for angular 
-            // distribution forces is wÕ = -weight * weight + weight.    
-            ctrlPt.x += v.ang_vx + 0.5 * v.ang_ax;
-            ctrlPt.y += v.ang_vy + 0.5 * v.ang_ay;
-        }
-
-        // compute acceleration at time t + dt
-        j = 0;
-        iterator = model.flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            if (flow.isLocked()) {
-                continue;
-            }
-
             // compute force exerted by flows and nodes
-            Force f = computeForceOnFlow(flow, maxFlowLength);
-            Verlet v = verletVelocities.get(j);
-            v.ax_ = weight * f.fx;
-            v.ay_ = weight * f.fy;
+            Force fnew = computeForceOnFlow(flow, maxFlowLength);
+            Force f = forces.get(j);
+
+            f.fx = fnew.fx;
+            f.fy = fnew.fy;
 
             // compute force creating an even angular distribution of flows around 
             // nodes
+            Force angularDistF = angularDistForces.get(j);
             Force newAngularDistF = computeAngularDistributionForce(flow);
-            double angularDistWeight = weight * (1 - weight);
-            v.ang_ax_ = angularDistWeight * newAngularDistF.fx;
-            v.ang_ay_ = angularDistWeight * newAngularDistF.fy;
-
+            angularDistF.fx = newAngularDistF.fx;
+            angularDistF.fy = newAngularDistF.fy;
             j++;
         }
 
@@ -498,20 +463,24 @@ public class ForceLayouter {
             if (flow.isLocked()) {
                 continue;
             }
-
-            // update velocities and accelerations of Verlet velocity 
-            // integration for next time step
-            Verlet v = verletVelocities.get(i);
-            v.vx += 0.5 * (v.ax + v.ax_);
-            v.vy += 0.5 * (v.ay + v.ay_);
-            v.ax = v.ax_;
-            v.ay = v.ay_;
-            v.ang_vx += 0.5 * (v.ang_ax + v.ang_ax_);
-            v.ang_vy += 0.5 * (v.ang_ay + v.ang_ay_);
-            v.ang_ax = v.ang_ax_;
-            v.ang_ay = v.ang_ay_;
-
             Point ctrlPt = flow.getCtrlPt();
+            
+            // Move the control point by the total force
+            Force f = forces.get(i);
+            ctrlPt.x += weight * f.fx;
+            ctrlPt.y += weight * f.fy;
+
+            // Move the control point by the angular distribution force.
+            // Angular distribution forces are not applied from the beginning 
+            // of the iterative layout computation. Angular distribution forces 
+            // kick in slowly to avoid creating crossing flows. 
+            // The weight for regular forces varies from 
+            // 1 to 0 with each iteration. The weight for angular 
+            // distribution forces is wÍ = -weight * weight + weight.    
+            double angularDistWeight = weight * (1 - weight);
+            Force angularDistForce = angularDistForces.get(i);
+            ctrlPt.x += angularDistWeight * angularDistForce.fx;
+            ctrlPt.y += angularDistWeight * angularDistForce.fy;
 
             // Enforce control point range if enforceRangebox is true
             if (model.isEnforceRangebox()) {
@@ -529,6 +498,55 @@ public class ForceLayouter {
             }
             i++;
         }
+    }
+
+    /**
+     * Returns a list with pairs of flows that intersect and are connected to a
+     * shared node. FIXME should either cache JTS Geometry objects or write
+     * intersection test for lines in straightLinesMap.
+     *
+     * @return pairs of flows that have a common start or end node.
+     */
+    public ArrayList<Model.IntersectingFlowPair> getIntersectingSiblings() {
+        initStraightLinesHashMap();
+        GeometryFactory geometryFactory = new GeometryFactory();
+        ArrayList<Flow> flows = model.getFlows();
+
+        ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
+        for (int i = 0; i < flows.size(); i++) {
+            Flow flow1 = flows.get(i);
+            Point[] points1 = straightLinesMap.get(flow1);
+            if (points1.length < 4) {
+                continue;
+            }
+            LinearGeometryBuilder lineBuilder1 = new LinearGeometryBuilder(geometryFactory);
+            for (int ptID = 1; ptID < points1.length - 1; ptID++) {
+                Point point = points1[ptID];
+                lineBuilder1.add(new Coordinate(point.x, point.y));
+            }
+            Geometry geometry1 = lineBuilder1.getGeometry();
+
+            for (int j = i + 1; j < flows.size(); j++) {
+                Flow flow2 = flows.get(j);
+                if (flow1.isSharingStartOrEndNode(flow2)) {
+                    Point[] points2 = straightLinesMap.get(flow2);
+                    if (points2.length < 4) {
+                        continue;
+                    }
+                    LinearGeometryBuilder lineBuilder2 = new LinearGeometryBuilder(geometryFactory);
+                    for (int ptID = 1; ptID < points2.length - 1; ptID++) {
+                        Point point = points2[ptID];
+                        lineBuilder2.add(new Coordinate(point.x, point.y));
+                    }
+                    Geometry geometry2 = lineBuilder2.getGeometry();
+
+                    if (geometry1.crosses(geometry2)) {
+                        pairs.add(new Model.IntersectingFlowPair(flow1, flow2));
+                    }
+                }
+            }
+        }
+        return pairs;
     }
 
     /**
