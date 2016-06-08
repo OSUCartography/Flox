@@ -31,7 +31,10 @@ public class RangeboxEnforcer {
         Point refPt = flow.getBaseLineMidPoint();
 
         Point[] box = computeRangebox(flow);
-
+        // box corners have counter-clockwise order: 
+        // bottom left, bottom right, top right, top left.
+     
+        // bottom border
         if (GeometryUtils.linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -44,6 +47,7 @@ public class RangeboxEnforcer {
                     box[1].x, box[1].y);
         }
 
+        // top border
         if (GeometryUtils.linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
@@ -56,27 +60,29 @@ public class RangeboxEnforcer {
                     box[3].x, box[3].y);
         }
 
-        if (GeometryUtils.linesIntersect(
-                refPt.x, refPt.y,
-                cPt.x, cPt.y,
-                box[0].x, box[0].y,
-                box[2].x, box[2].y)) {
-            return GeometryUtils.getLineLineIntersection(
-                    refPt.x, refPt.y,
-                    cPt.x, cPt.y,
-                    box[0].x, box[0].y,
-                    box[2].x, box[2].y);
-        }
-
+        // right border
         if (GeometryUtils.linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
                 box[1].x, box[1].y,
-                box[3].x, box[3].y)) {
+                box[2].x, box[2].y)) {
             return GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     box[1].x, box[1].y,
+                    box[2].x, box[2].y);
+        }
+
+        // left border
+        if (GeometryUtils.linesIntersect(
+                refPt.x, refPt.y,
+                cPt.x, cPt.y,
+                box[0].x, box[0].y,
+                box[3].x, box[3].y)) {
+            return GeometryUtils.getLineLineIntersection(
+                    refPt.x, refPt.y,
+                    cPt.x, cPt.y,
+                    box[0].x, box[0].y,
                     box[3].x, box[3].y);
         }
 
