@@ -1673,7 +1673,7 @@
                         </Constraint>
                       </Constraints>
                     </Component>
-                    <Component class="ika.gui.ColorButton" name="minColorButton">
+                    <Component class="edu.oregonstate.cartography.flox.gui.ColorButton" name="minColorButton">
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="minColorButtonActionPerformed"/>
                       </Events>
@@ -1683,7 +1683,7 @@
                         </Constraint>
                       </Constraints>
                     </Component>
-                    <Component class="ika.gui.ColorButton" name="maxColorButton">
+                    <Component class="edu.oregonstate.cartography.flox.gui.ColorButton" name="maxColorButton">
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="maxColorButtonActionPerformed"/>
                       </Events>

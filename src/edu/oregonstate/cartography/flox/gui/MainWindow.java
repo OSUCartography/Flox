@@ -359,8 +359,8 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator9 = new javax.swing.JSeparator();
         jLabel32 = new javax.swing.JLabel();
         jLabel31 = new javax.swing.JLabel();
-        minColorButton = new ika.gui.ColorButton();
-        maxColorButton = new ika.gui.ColorButton();
+        minColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        maxColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         jLabel33 = new javax.swing.JLabel();
         jLabel34 = new javax.swing.JLabel();
         jLabel35 = new javax.swing.JLabel();
@@ -3674,12 +3674,12 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu mapMenu;
     private javax.swing.JPanel mapPanel;
     private javax.swing.ButtonGroup mapToolsButtonGroup;
-    private ika.gui.ColorButton maxColorButton;
+    private edu.oregonstate.cartography.flox.gui.ColorButton maxColorButton;
     private javax.swing.JSlider maximumFlowWidthSlider;
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
-    private ika.gui.ColorButton minColorButton;
+    private edu.oregonstate.cartography.flox.gui.ColorButton minColorButton;
     private javax.swing.JSlider minPxDistanceOfFlowsFromNodesSlider;
     private javax.swing.JLabel minPxDistanceOfFlowsFromNodesSliderLabel;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
