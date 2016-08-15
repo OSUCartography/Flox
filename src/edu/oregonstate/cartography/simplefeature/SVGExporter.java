@@ -100,6 +100,11 @@ public class SVGExporter {
         setSVGCanvasSize(600, 450);
     }
 
+    /**
+     * 
+     * @param width canvas width in pixels
+     * @param height canvas height in pixels
+     */
     public final void setSVGCanvasSize(double width, double height) {
         canvasWidth = width;
         canvasHeight = height;
@@ -294,17 +299,17 @@ public class SVGExporter {
         StringBuilder str = new StringBuilder();
         Point startPoint = lineString.getStartPoint();
         str.append("M");
-        str.append(df.format(xToPagePx(startPoint.getX())));
+        str.append(df.format(xToSVGCanvas(startPoint.getX())));
         str.append(" ");
-        str.append(df.format(yToPagePx(startPoint.getY())));
+        str.append(df.format(yToSVGCanvas(startPoint.getY())));
 
         int numPoints = lineString.getNumPoints();
         for (int i = 1; i < numPoints; i++) {
             Point point = lineString.getPointN(i);
             str.append(" L");
-            str.append(df.format(xToPagePx(point.getX())));
+            str.append(df.format(xToSVGCanvas(point.getX())));
             str.append(" ");
-            str.append(df.format(yToPagePx(point.getY())));
+            str.append(df.format(yToSVGCanvas(point.getY())));
         }
 
         return str.toString();
@@ -390,7 +395,7 @@ public class SVGExporter {
      * @param x The horizontal coordinate.
      * @return Returns the coordinate in pixels.
      */
-    protected double xToPagePx(double x) {
+    protected double xToSVGCanvas(double x) {
         double west = bb.getMinX();
         return (x - west) / scale * 1000 * MM2PX;
     }
@@ -402,7 +407,7 @@ public class SVGExporter {
      * @param y The vertical coordinate.
      * @return Returns the coordinate in the page coordinate system.
      */
-    protected double yToPagePx(double y) {
+    protected double yToSVGCanvas(double y) {
         double north = bb.getMaxY();
         return (north - y) / scale * 1000 * MM2PX;
     }

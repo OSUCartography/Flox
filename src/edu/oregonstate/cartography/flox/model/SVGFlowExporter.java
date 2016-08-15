@@ -1,6 +1,7 @@
 package edu.oregonstate.cartography.flox.model;
 
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
+import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -10,7 +11,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Extension of SVGExporter to export Flows.
+ * Extension of SVGExporter to export flows.
  *
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
@@ -20,10 +21,8 @@ public class SVGFlowExporter extends SVGExporter {
     private final Model model;
     private final FloxMapComponent mapComponent;
 
-    private final double NODE_STROKE_WIDTH = 2;
-
     public SVGFlowExporter(Model model, FloxMapComponent mapComponent) {
-        super(model.getLayerGeometry(), "OSU Cartography Group", "Flox");
+        super(model.getLayerGeometry(), "", "Flox");
         this.model = model;
         Rectangle2D b = mapComponent.getVisibleArea();
         bb.init(b.getMinX(), b.getMaxX(), b.getMinY(), b.getMaxY());
@@ -34,18 +33,18 @@ public class SVGFlowExporter extends SVGExporter {
 
         StringBuilder str = new StringBuilder();
         str.append("M");
-        str.append(df.format(xToPagePx(flow.getStartPt().x)));
+        str.append(df.format(xToSVGCanvas(flow.getStartPt().x)));
         str.append(" ");
-        str.append(df.format(yToPagePx(flow.getStartPt().y)));
+        str.append(df.format(yToSVGCanvas(flow.getStartPt().y)));
 
         str.append(" Q");
-        str.append(df.format(xToPagePx(flow.getCtrlPt().x)));
+        str.append(df.format(xToSVGCanvas(flow.getCtrlPt().x)));
         str.append(" ");
-        str.append(df.format(yToPagePx(flow.getCtrlPt().y)));
+        str.append(df.format(yToSVGCanvas(flow.getCtrlPt().y)));
         str.append(", ");
-        str.append(df.format(xToPagePx(flow.getEndPt().x)));
+        str.append(df.format(xToSVGCanvas(flow.getEndPt().x)));
         str.append(", ");
-        str.append(df.format(yToPagePx(flow.getEndPt().y)));
+        str.append(df.format(yToSVGCanvas(flow.getEndPt().y)));
         return str.toString();
     }
 
@@ -54,48 +53,48 @@ public class SVGFlowExporter extends SVGExporter {
         StringBuilder str = new StringBuilder();
 
         // Start at the base point
-        str.append("M");
-        str.append(df.format(xToPagePx(arrow.getBasePt().x)));
+        str.append("M ");
+        str.append(df.format(xToSVGCanvas(arrow.getBasePt().x)));
         str.append(" ");
-        str.append(df.format(yToPagePx(arrow.getBasePt().y)));
+        str.append(df.format(yToSVGCanvas(arrow.getBasePt().y)));
 
         // Line to the first corner
-        str.append(" L");
-        str.append(df.format(xToPagePx(arrow.getCorner1Pt().x)));
+        str.append(", L ");
+        str.append(df.format(xToSVGCanvas(arrow.getCorner1Pt().x)));
         str.append(" ");
-        str.append(df.format(yToPagePx(arrow.getCorner1Pt().y)));
+        str.append(df.format(yToSVGCanvas(arrow.getCorner1Pt().y)));
 
         // Quad to the tip
-        str.append(" Q");
-        str.append(df.format(xToPagePx(arrow.getCorner1cPt().x)));
+        str.append(", Q ");
+        str.append(df.format(xToSVGCanvas(arrow.getCorner1cPt().x)));
         str.append(" ");
-        str.append(df.format(yToPagePx(arrow.getCorner1cPt().y)));
+        str.append(df.format(yToSVGCanvas(arrow.getCorner1cPt().y)));
         str.append(", ");
-        str.append(df.format(xToPagePx(arrow.getTipPt().x)));
-        str.append(", ");
-        str.append(df.format(yToPagePx(arrow.getTipPt().y)));
+        str.append(df.format(xToSVGCanvas(arrow.getTipPt().x)));
+        str.append(" ");
+        str.append(df.format(yToSVGCanvas(arrow.getTipPt().y)));
 
         // Quad to the other corner
-        str.append(" Q");
-        str.append(df.format(xToPagePx(arrow.getCorner2cPt().x)));
+        str.append("  Q ");
+        str.append(df.format(xToSVGCanvas(arrow.getCorner2cPt().x)));
         str.append(" ");
-        str.append(df.format(yToPagePx(arrow.getCorner2cPt().y)));
+        str.append(df.format(yToSVGCanvas(arrow.getCorner2cPt().y)));
         str.append(", ");
-        str.append(df.format(xToPagePx(arrow.getCorner2Pt().x)));
-        str.append(", ");
-        str.append(df.format(yToPagePx(arrow.getCorner2Pt().y)));
+        str.append(df.format(xToSVGCanvas(arrow.getCorner2Pt().x)));
+        str.append(" ");
+        str.append(df.format(yToSVGCanvas(arrow.getCorner2Pt().y)));
 
         // Line back to the base
-        str.append(" L");
-        str.append(df.format(xToPagePx(arrow.getBasePt().x)));
+        str.append(", L ");
+        str.append(df.format(xToSVGCanvas(arrow.getBasePt().x)));
         str.append(" ");
-        str.append(df.format(yToPagePx(arrow.getBasePt().y)));
+        str.append(df.format(yToSVGCanvas(arrow.getBasePt().y)));
 
         return str.toString();
     }
 
     /**
-     * Add the flows to a SVG document
+     * Add flows, nodes and map layers to the SVG document
      *
      * @param svgRootElement The SVG root element.
      * @param document The SVG document.
@@ -103,7 +102,7 @@ public class SVGFlowExporter extends SVGExporter {
     @Override
     protected void append(Element svgRootElement, Document document) {
 
-        // export map layers
+        // map layers
         int nbrLayers = model.getNbrLayers();
         for (int i = nbrLayers - 1; i >= 0; i--) {
             Layer layer = model.getLayer(i);
@@ -118,56 +117,50 @@ public class SVGFlowExporter extends SVGExporter {
             setVectorStyle(g, strokeColor, 1, fillColor);
         }
 
-        // export flows and nodes
-        Element g = (Element) document.createElementNS(SVGNAMESPACE, "g");
-        
-        svgRootElement.appendChild(g);
-
+        // flows
+        Element flowsGroup = (Element) document.createElementNS(SVGNAMESPACE, "g");
+        flowsGroup.setAttribute("id", "Flows");
+        svgRootElement.appendChild(flowsGroup);
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = model.clipFlow(iterator.next(), true);
-            double flowWidth = model.getFlowWidthPx(flow);
+            Flow flow = iterator.next();
 
+            // arrowhead
             if (model.isDrawArrowheads()) {
-                // Create an arrowhead
-                // flow.configureArrow(model, flowWidth, model.endClipRadius(flow.getEndPt())); FIXME
-
-                // get the arrow
+                Element arrowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 Arrow arrow = flow.getEndArrow();
-
-                // Get the flow SVG
-                Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                // pathElement.setAttribute("d", flowToPath(arrow.getOutFlow())); FIXME get clipped flow path
-                pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
-                setVectorStyle(pathElement, model.getFlowColor(flow), 1, null);
-                g.appendChild(pathElement);
-
-                // get the arrow
-                Element arrowPathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                arrowPathElement.setAttribute("d", arrowToPath(arrow));
-                arrowPathElement.setAttribute("fill", "black");
-                arrowPathElement.setAttribute("stroke-width", Double.toString(0));
-                setVectorStyle(arrowPathElement, model.getFlowColor(flow), 1, null);
-                g.appendChild(arrowPathElement);
-
-            } else {
-                Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                pathElement.setAttribute("d", flowToPath(flow));
-                pathElement.setAttribute("stroke-width", Double.toString(flowWidth));
-                setVectorStyle(pathElement, model.getFlowColor(flow), 1, null);
-                g.appendChild(pathElement);
+                arrowElement.setAttribute("d", arrowToPath(arrow));
+                setVectorStyle(arrowElement, null, 0, model.getFlowColor(flow));
+                flowsGroup.appendChild(arrowElement);
             }
+            
+            // flow line
+            flow = model.clipFlow(flow, true);
+            Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
+            flowElement.setAttribute("id", Double.toString(flow.getValue()));
+            flowElement.setAttribute("d", flowToPath(flow));
+            double flowWidth = dimPxToSVGCanvas(model.getFlowWidthPx(flow));
+            setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null);
+            flowsGroup.appendChild(flowElement);            
         }
 
+        // nodes
+        Element nodesGroup = (Element) document.createElementNS(SVGNAMESPACE, "g");
+        svgRootElement.appendChild(nodesGroup);
+        nodesGroup.setAttribute("id", "Nodes");
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
             Element circleElement = (Element) document.createElementNS(SVGNAMESPACE, "circle");
-            circleElement.setAttribute("cx", df.format(xToPagePx(node.x)));
-            circleElement.setAttribute("cy", df.format(yToPagePx(node.y)));
-            circleElement.setAttribute("r", Double.toString(model.getNodeRadiusPx(node)));
-            circleElement.setAttribute("stroke-width", Double.toString(NODE_STROKE_WIDTH));
-            circleElement.setAttribute("fill", "white");
-            g.appendChild(circleElement);
+            circleElement.setAttribute("cx", df.format(xToSVGCanvas(node.x)));
+            circleElement.setAttribute("cy", df.format(yToSVGCanvas(node.y)));
+            circleElement.setAttribute("r", Double.toString(dimPxToSVGCanvas(model.getNodeRadiusPx(node))));
+            double strokeWidth = dimPxToSVGCanvas(FloxRenderer.NODE_STROKE_WIDTH);
+            setVectorStyle(circleElement, FloxRenderer.NODE_STROKE_COLOR, strokeWidth, FloxRenderer.NODE_FILL_COLOR);
+            nodesGroup.appendChild(circleElement);
         }
+    }
+
+    private double dimPxToSVGCanvas(double d) {
+        return d * mapComponent.getScale() / model.getReferenceMapScale();
     }
 }

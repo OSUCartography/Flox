@@ -372,7 +372,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             mask2D.dispose();
             g2d.drawRenderedImage(mask, null);
         } else {
-            // draw plain arrows
+            // will draw plain arrows elsewhere
             g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.draw(flowPath);
