@@ -121,7 +121,9 @@ public class SVGFlowExporter extends SVGExporter {
         Element flowsGroup = (Element) document.createElementNS(SVGNAMESPACE, "g");
         flowsGroup.setAttribute("id", "Flows");
         svgRootElement.appendChild(flowsGroup);
-        Iterator<Flow> iterator = model.flowIterator();
+        boolean colorVaries = !model.getMinFlowColor().equals(model.getMaxFlowColor());
+        Iterator<Flow> iterator = colorVaries 
+                ? model.sortedFlowIterator(false) : model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
 
