@@ -3457,14 +3457,7 @@ public class MainWindow extends javax.swing.JFrame {
                 layouter.layoutAllFlows(weight);
 
                 if (moveFlowsOverlappingNodes) {
-                    // store initial lock flags of all flows
-                    boolean[] initialLocks = model.getLocks();
-
-                    // move flows: this will lock flows that have been moved
                     layouter.moveFlowsOverlappingObstacles();
-
-                    // reset lock flags to initial values
-                    model.applyLocks(initialLocks);
                 }
 
                 // publish intermediate results in map. This will call process() 
