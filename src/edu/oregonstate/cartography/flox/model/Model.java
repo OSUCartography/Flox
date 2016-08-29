@@ -133,7 +133,7 @@ public class Model {
      * bounding box = this value * the length of the flow's baseline. Currently
      * modified by a GUI slider.
      */
-    private double flowRangeboxHeight = 0.2;
+    private double flowRangeboxHeight = 0.4;
 
     /**
      * If this is true, control points are prevented from moving outside of the
@@ -279,7 +279,7 @@ public class Model {
     /**
      * Minimum distance of flows from obstacles in pixels.
      */
-    private int minObstacleDistPx = 2;
+    private int minObstacleDistPx = 5;
 
     /**
      * A map with a set of symbolized layers.

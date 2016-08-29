@@ -49,14 +49,6 @@ public class ForceLayouter {
 
     public static final int NBR_ITERATIONS = 100;
 
-    /**
-     * when searching a control point position that does not result in overlaps
-     * with obstacles, candidate control point positions are placed along a
-     * spiral. SPIRAL_SPACING_PX is the spacing between candidate control
-     * points. Units are pixels. Increase to accelerate computations.
-     */
-    public static final double SPIRAL_SPACING_PX = 1.5;
-
     // model with all map features.
     private final Model model;
 
@@ -464,7 +456,7 @@ public class ForceLayouter {
                 continue;
             }
             Point ctrlPt = flow.getCtrlPt();
-            
+
             // Move the control point by the total force
             Force f = forces.get(i);
             ctrlPt.x += weight * f.fx;
@@ -808,10 +800,13 @@ public class ForceLayouter {
      *
      * @param flow flow to change
      * @param obstacles obstacles to avoid
+     * @return true if a new position was found, false otherwise.
      */
-    public void moveFlowFromObstacles(Flow flow, List<Obstacle> obstacles) {
-        // convert spacing of sample points to world coordinates
-        double dist = SPIRAL_SPACING_PX / model.getReferenceMapScale();
+    public boolean moveFlowFromObstacles(Flow flow, List<Obstacle> obstacles) {
+        // compute spacing of sample points in world coordinates
+        // The spacing between candidate control points is equal to the minimum
+        // distance to obstacles. Increase to accelerate computations.    
+        double dist = model.getMinObstacleDistPx() / model.getReferenceMapScale();
 
         Point cPt = flow.getCtrlPt();
         double originalX = cPt.x;
@@ -848,7 +843,7 @@ public class ForceLayouter {
                     && flowIntersectsObstacle(flow, obstacles) == false) {
                 // found a new position for the control point that does not 
                 // result in an overlap with any obstacle
-                return;
+                return true;
             }
 
         } // move along the spiral until the entire range box is covered
@@ -858,12 +853,13 @@ public class ForceLayouter {
         // obstacle. Restore the original coordinates.
         cPt.x = originalX;
         cPt.y = originalY;
+        return false;
     }
 
     /**
      * Identifies flows that overlap obstacles they are not connected to, and
-     * moves the control point of overlapping flows such that there is no
-     * overlap if possible.
+     * moves the control point of the largest overlapping flow such that there
+     * is no overlap if possible.
      */
     public void moveFlowsOverlappingObstacles() {
         List<Obstacle> obstacles = getObstacles();
@@ -875,7 +871,12 @@ public class ForceLayouter {
 
         // move control points of overlapping flows, starts with largest flow
         for (Flow flow : flowsOverlappingObstacles) {
-            moveFlowFromObstacles(flow, obstacles);
+            if (moveFlowFromObstacles(flow, obstacles)) {
+                // moved one flow. Lock it.
+                // The next smaller flow will be moved the next time this method is called.
+                flow.setLocked(true);
+                break;
+            }
         }
     }
 
