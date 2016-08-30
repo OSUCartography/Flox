@@ -54,6 +54,20 @@ public class Model {
     public boolean liveDrawing = false;
 
     /**
+     * @return the nodeStrokeWidthPx
+     */
+    public float getNodeStrokeWidthPx() {
+        return nodeStrokeWidthPx;
+    }
+
+    /**
+     * @param nodeStrokeWidthPx the nodeStrokeWidthPx to set
+     */
+    public void setNodeStrokeWidthPx(float nodeStrokeWidthPx) {
+        this.nodeStrokeWidthPx = nodeStrokeWidthPx;
+    }
+
+    /**
      * Density of points along flows.
      */
     public enum FlowNodeDensity {
@@ -240,6 +254,11 @@ public class Model {
      * Maximum allowed node radius in pixels.
      */
     private double maxNodeSizePx = 10;
+    
+    /**
+     * Stroke width for drawing node circles. In pixels.
+     */
+    private float nodeStrokeWidthPx = 2;
 
     /**
      * scale factor for converting between ground coordinates and the map

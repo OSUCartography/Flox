@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.flox.gui;
 
-import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.map.MapTool;
@@ -191,7 +190,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             for (int i = nodes.size() - 1; i >= 0; i--) {
                 Point node = nodes.get(i);
 
-                double rRefPx = model.getNodeRadiusPx(node) + NODE_STROKE_WIDTH / 2;
+                double rRefPx = model.getNodeRadiusPx(node) + model.getNodeStrokeWidthPx() / 2;
                 double rWorld = rRefPx / model.getReferenceMapScale();
                 rWorld += pixelTolerance / scale;
                 

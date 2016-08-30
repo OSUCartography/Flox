@@ -6,7 +6,6 @@ import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKTWriter;
-import static edu.oregonstate.cartography.flox.gui.FloxRenderer.NODE_STROKE_WIDTH;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
@@ -783,7 +782,7 @@ public final class Flow {
         double gap = model.getFlowDistanceFromStartPointPixel();
         if (gap > 0) {
             // Compute the radius of the start node (add half stroke width)
-            double startNodeRadiusPx = NODE_STROKE_WIDTH / 2 + model.getNodeRadiusPx(getStartPt());
+            double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
             startNodeClipRadius = (gap + startNodeRadiusPx) / model.getReferenceMapScale();
         }
 
@@ -809,7 +808,7 @@ public final class Flow {
             // flow line and the end node symbol.
             double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
             // Compute the radius of the end node (add stroke width / 2 to radius)
-            double endNodeRadiusPx = NODE_STROKE_WIDTH / 2 + model.getNodeRadiusPx(endPt);
+            double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(endPt);
             endNodeClipRadius =  (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
         }
 

@@ -52,11 +52,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     public static final Color NODE_FILL_COLOR = Color.WHITE;
 
     /**
-     * Width of stroke line for nodes
-     */
-    public static final float NODE_STROKE_WIDTH = 2;
-
-    /**
      * Radius of circles for control points (in pixels)
      */
     private static final double CR = 3;
@@ -391,7 +386,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         double s = scale / model.getReferenceMapScale();
 
         // same stroke width for all nodes
-        g2d.setStroke(new BasicStroke((float) (NODE_STROKE_WIDTH * s)));
+        g2d.setStroke(new BasicStroke((float) (model.getNodeStrokeWidthPx() * s)));
 
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
@@ -583,7 +578,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
     
     private void drawObstacles() {
-        g2d.setStroke(new BasicStroke(NODE_STROKE_WIDTH));
+        g2d.setStroke(new BasicStroke(model.getNodeStrokeWidthPx()));
         ForceLayouter layouter = new ForceLayouter(model);
         List<ForceLayouter.Obstacle> obstacles = layouter.getObstacles();
         double s = scale / model.getReferenceMapScale();

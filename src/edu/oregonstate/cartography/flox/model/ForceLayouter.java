@@ -746,7 +746,7 @@ public class ForceLayouter {
         Iterator<Point> nodeIterator = model.nodeIterator();
         while (nodeIterator.hasNext()) {
             Point node = nodeIterator.next();
-            double rPx = model.getNodeRadiusPx(node);
+            double rPx = model.getNodeRadiusPx(node) + 0.5 * model.getNodeStrokeWidthPx();
             obstacles.add(new Obstacle(node, node.x, node.y, rPx));
         }
 

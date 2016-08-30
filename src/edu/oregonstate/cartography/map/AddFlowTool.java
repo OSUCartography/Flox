@@ -239,7 +239,7 @@ public class AddFlowTool extends MapTool {
             g2d.setColor(FloxRenderer.NODE_FILL_COLOR);
             g2d.fill(circle);
             g2d.setColor(FloxRenderer.SELECTION_COLOR);
-            g2d.setStroke(new BasicStroke(FloxRenderer.NODE_STROKE_WIDTH));
+            g2d.setStroke(new BasicStroke(model.getNodeStrokeWidthPx()));
             g2d.draw(circle);
         }
     }
