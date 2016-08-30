@@ -3,6 +3,7 @@ package edu.oregonstate.cartography.flox.model;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
@@ -793,16 +794,77 @@ public class ForceLayouter {
     }
 
     /**
-     * Moves the control point away from its current location such that the flow
-     * does not overlap any obstacle. If no position can be found, the control
-     * point is not changed. Tests control point locations placed along an
-     * Archimedean spiral centered on the current control point location.
+     * Create map layer with spiral points used for moving flows away from
+     * obstacles. Only for selected flows. This is only meant or debugging
+     * purposes. Look at moveFlowFromObstacles() for documentation. Selected
+     * flows are not changed.
+     */
+    public void createSpiralPointsLayer() {
+        List<Flow> flows = model.getSelectedFlows();
+        List<Obstacle> obstacles = getObstacles();
+
+        ArrayList<Geometry> geometries = new ArrayList<>();
+        GeometryFactory geometryFactory = new GeometryFactory();
+        PrecisionModel precisionModel = geometryFactory.getPrecisionModel();
+        double dist = model.getMinObstacleDistPx() / model.getReferenceMapScale();
+
+        for (Flow flow : flows) {
+            if (flowIntersectsObstacle(flow, obstacles) == false) {
+                continue;
+            }
+            Point cPt = flow.getCtrlPt();
+            double originalX = cPt.x;
+            double originalY = cPt.y;
+            double angleRad = Math.PI;
+            RangeboxEnforcer rangeBoxEnforcer = new RangeboxEnforcer(model);
+
+            Point[] rangeBox = rangeBoxEnforcer.computeRangebox(flow);
+            double maxSpiralRSq = rangeBoxEnforcer.longestDistanceSqToCorner(rangeBox, cPt.x, cPt.y);
+
+            double spiralR;
+            do {
+                spiralR = dist * angleRad / Math.PI / 2;
+                double dx = Math.cos(angleRad) * spiralR;
+                double dy = Math.sin(angleRad) * spiralR;
+                cPt.x = dx + originalX;
+                cPt.y = dy + originalY;
+
+                Coordinate coord = new Coordinate(cPt.x, cPt.y);
+                precisionModel.makePrecise(coord);
+                com.vividsolutions.jts.geom.Point point = geometryFactory.createPoint(coord);
+                geometries.add(point);
+                angleRad += dist / spiralR;
+
+                if (rangeBoxEnforcer.isPointInRangebox(flow, cPt.x, cPt.y)
+                        && flowIntersectsObstacle(flow, obstacles) == false) {
+                    Geometry[] array = new Geometry[geometries.size()];
+                    Geometry geometry = geometryFactory.createGeometryCollection((Geometry[]) geometries.toArray(array));
+                    Layer layer = new Layer(geometry);
+                    layer.setName("Spiral points");
+                    model.addLayer(layer);
+                    break;
+                }
+
+            } // move along the spiral until the entire range box is covered
+            while (spiralR * spiralR < maxSpiralRSq);
+
+            // restore original position
+            cPt.x = originalX;
+            cPt.y = originalY;
+        }
+    }
+
+    /**
+     * Moves the control point location such that the flow does not overlap any
+     * obstacle. If no position can be found, the control point is not changed.
+     * Tests control point locations placed along an Archimedean spiral centered
+     * on the current control point location.
      *
      * @param flow flow to change
      * @param obstacles obstacles to avoid
      * @return true if a new position was found, false otherwise.
      */
-    public boolean moveFlowFromObstacles(Flow flow, List<Obstacle> obstacles) {
+    private boolean moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
         // compute spacing of sample points in world coordinates
         // The spacing between candidate control points is equal to the minimum
         // distance to obstacles. Increase to accelerate computations.    
@@ -842,7 +904,7 @@ public class ForceLayouter {
             if (rangeBoxEnforcer.isPointInRangebox(flow, cPt.x, cPt.y)
                     && flowIntersectsObstacle(flow, obstacles) == false) {
                 // found a new position for the control point that does not 
-                // result in an overlap with any obstacle
+                // result in an overlap with any obstacle                
                 return true;
             }
 
@@ -857,27 +919,47 @@ public class ForceLayouter {
     }
 
     /**
-     * Identifies flows that overlap obstacles they are not connected to, and
-     * moves the control point of the largest overlapping flow such that there
-     * is no overlap if possible.
+     * Moves the control point of up to the nbrFlowsToMove largest flows that
+     * overlap unconnected obstacles. When a flow is moved, it will no longer
+     * overlap an obstacles and it will be locked.
+     *
+     * @param nbrFlowsToMove the number of flows to be moved away from
+     * obstacles. If it is impossible to find non-overlapping geometries for
+     * this many flows, fewer flows will be moved.
+     * @param onlySelectedFlows if true only selected flows will be moved away
+     * from obstacles
+     * @return the number of remaining flows that overlap obstacles
      */
-    public void moveFlowsOverlappingObstacles() {
+    public int moveFlowsAwayFromObstacles(int nbrFlowsToMove, boolean onlySelectedFlows) {
         List<Obstacle> obstacles = getObstacles();
+
         // get a list of all flows that intersect obstacles
         List<Flow> flowsOverlappingObstacles = getFlowsOverlappingObstacles(obstacles);
+        if (nbrFlowsToMove <= 0) {
+            flowsOverlappingObstacles.size();
+        }
 
         // sort flows in decreasing order
         Model.sortFlows(flowsOverlappingObstacles, false);
 
         // move control points of overlapping flows, starts with largest flow
+        int nbrMovedFlows = 0;
         for (Flow flow : flowsOverlappingObstacles) {
-            if (moveFlowFromObstacles(flow, obstacles)) {
+            if (onlySelectedFlows && flow.isSelected() == false) {
+                continue;
+            }
+            if (moveFlowAwayFromObstacles(flow, obstacles)) {
                 // moved one flow. Lock it.
-                // The next smaller flow will be moved the next time this method is called.
+                System.out.println("******* Moved one flow away from obstacles.");
                 flow.setLocked(true);
-                break;
+                if (++nbrMovedFlows == nbrFlowsToMove) {
+                    break;
+                }
             }
         }
+
+        // return initial number of flows overlapping obstacles
+        return flowsOverlappingObstacles.size() - nbrMovedFlows;
     }
 
 }

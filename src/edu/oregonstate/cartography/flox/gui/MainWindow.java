@@ -1,7 +1,6 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.BooleanGrid;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
@@ -454,6 +453,7 @@ public class MainWindow extends javax.swing.JFrame {
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
         moveSelectedFromObstaclesMenuItem = new javax.swing.JMenuItem();
+        spiralPointsMenuItem = new javax.swing.JMenuItem();
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -914,7 +914,7 @@ public class MainWindow extends javax.swing.JFrame {
         forcesPanel.add(jLabel11, gridBagConstraints);
 
         flowRangeboxSizeSlider.setMajorTickSpacing(10);
-        flowRangeboxSizeSlider.setMaximum(50);
+        flowRangeboxSizeSlider.setMaximum(80);
         flowRangeboxSizeSlider.setPaintLabels(true);
         flowRangeboxSizeSlider.setPaintTicks(true);
         flowRangeboxSizeSlider.setPreferredSize(new java.awt.Dimension(190, 38));
@@ -2089,6 +2089,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(selectOverlappingFlowsInfoMenuItem);
 
+        moveSelectedFromObstaclesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         moveSelectedFromObstaclesMenuItem.setText("Move Selected Flow Away from Obstacles");
         moveSelectedFromObstaclesMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2096,6 +2097,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(moveSelectedFromObstaclesMenuItem);
+
+        spiralPointsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        spiralPointsMenuItem.setText("Create Map Layer with Spiral Points");
+        spiralPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                spiralPointsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(spiralPointsMenuItem);
         debugMenu.add(jSeparator12);
 
         enforceCanvasCheckBoxMenuItem.setSelected(true);
@@ -2412,7 +2422,7 @@ public class MainWindow extends javax.swing.JFrame {
         sb.append("\nIntersections: ");
         sb.append(nbrIntersections);
 
-        sb.append("\nFlows overlapping obstacles:");
+        sb.append("\nFlows overlapping obstacles: ");
         ForceLayouter layouter = new ForceLayouter(model);
         List<Obstacle> obstacles = layouter.getObstacles();
         List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles(obstacles);
@@ -3394,18 +3404,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void moveSelectedFromObstaclesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveSelectedFromObstaclesMenuItemActionPerformed
         ForceLayouter layouter = new ForceLayouter(model);
-        List<Obstacle> obstacles = layouter.getObstacles();
-        List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles(obstacles);
-
-        // sort flows in decreasing order
-        Model.sortFlows(flowsOverlappingObstacles, false);
-
-        // move control points of overlapping flows, starts with largest flow
-        for (Flow flow : flowsOverlappingObstacles) {
-            if (flow.isSelected()) {
-                layouter.moveFlowFromObstacles(flow, obstacles);
-            }
-        }
+        layouter.moveFlowsAwayFromObstacles(model.getNbrFlows(), true);
         mapComponent.refreshMap();
     }//GEN-LAST:event_moveSelectedFromObstaclesMenuItemActionPerformed
 
@@ -3418,6 +3417,14 @@ public class MainWindow extends javax.swing.JFrame {
         }
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectIntersectingSiblingFlowsMenuItemActionPerformed
+
+    private void spiralPointsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spiralPointsMenuItemActionPerformed
+        new ForceLayouter(model).createSpiralPointsLayer();
+        writeSymbolGUI();
+        updateLayerList();
+        layerList.setSelectedIndex(0);
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_spiralPointsMenuItemActionPerformed
 
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
@@ -3444,27 +3451,68 @@ public class MainWindow extends javax.swing.JFrame {
         /**
          * Apply layout iterations to all non-locked flows.
          */
-        private void layout(int start, int end,
-                boolean moveFlowsOverlappingNodes) {
+        private void layout(boolean moveFlowsOverlappingNodes) {
 
-            for (int i = start; i < end; i++) {
+            // After 10% of all iterations the first flow is moved away from
+            // obstacles like arrowheads and unconnected nodes. This gives flows
+            // a chance to stabilize before the first one is moved.
+            int iterBeforeMovingFlows = ForceLayouter.NBR_ITERATIONS / 10;
+            
+            // this many flows are moved away from obstacles per moving attempt
+            int nbrFlowsToMove = 1;
+
+            // store initial lock flags of all flows
+            boolean[] initialLocks = model.getLocks();
+
+            for (int i = 0; i < ForceLayouter.NBR_ITERATIONS; i++) {
+                System.out.println(i);
+
                 if (isCancelled()) {
                     break;
                 }
 
-                // compute an iteration with decreasing weight
+                // compute one iteration of forces with a linearly decreasing weight
                 double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
                 layouter.layoutAllFlows(weight);
 
-                if (moveFlowsOverlappingNodes) {
-                    // store initial lock flags of all flows
-                    boolean[] initialLocks = model.getLocks();
+                // move flows away from obstacles
+                if (moveFlowsOverlappingNodes && iterBeforeMovingFlows == 0) {
+                    int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
+                    System.out.println("nbr of flows to move: " + nbrFlowsToMove);
 
-                    // move flows: this will lock flows that have been moved
-                    layouter.moveFlowsOverlappingObstacles();
+                    // moving flows will lock flows that have been moved
+                    int nbrOverlaps = layouter.moveFlowsAwayFromObstacles(nbrFlowsToMove, false);
 
-                    // reset lock flags to initial values
-                    model.applyLocks(initialLocks);
+                    // compute the number of iterations until the next flow will 
+                    // be moved away from obstacles
+                    if (nbrOverlaps > 0) {
+                        // division by empirical factor = 2 to increase the 
+                        // number of iterations at the end of calculations
+                        iterBeforeMovingFlows = (ForceLayouter.NBR_ITERATIONS - i) / (nbrOverlaps + 1) / 2;
+                    } else {
+                        // There are no flows left hat overlap obstacles. Future
+                        // iterations may again create overlaps. So check after
+                        // 50% of the remaining iterations for new overlaps.
+                        iterBeforeMovingFlows = remainingIterations / 2;
+                    }
+                                        
+                    // the number of flows to move the next time. Default is 1, but
+                    // this might have to be larger for when there are more 
+                    // overlapping flows than remaining iterations.                    
+                    if (nbrOverlaps > remainingIterations && remainingIterations > 0) {
+                        // FIXME this might not be accurate for the next time flows 
+                        // are moved away from obstacles because force iterations might have created additional overlaps
+                        nbrFlowsToMove = (int)Math.ceil(nbrOverlaps / remainingIterations);
+                    } else {
+                        nbrFlowsToMove = 1;
+                    }                    
+                    
+                    System.out.println("#remaining overlaps: " + nbrOverlaps);
+                    if (iterBeforeMovingFlows >= 0) {
+                        System.out.println("#iterations to next move: " + iterBeforeMovingFlows);
+                    }
+                } else {
+                    --iterBeforeMovingFlows;
                 }
 
                 // publish intermediate results in map. This will call process() 
@@ -3478,6 +3526,9 @@ public class MainWindow extends javax.swing.JFrame {
                 setProgress((int) Math.round(progress));
             }
 
+            // reset lock flags to initial values
+            model.applyLocks(initialLocks);
+
             model.computeArrowheads();
         }
 
@@ -3488,13 +3539,8 @@ public class MainWindow extends javax.swing.JFrame {
 
             setProgress(0);
 
-            // first half of iterations. Flows are not moved away from overlapped nodes.
-            layout(0, ForceLayouter.NBR_ITERATIONS / 2, false);
-
-            // second half of iterations: Flows are moved away from overlapped nodes.
             boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
-            layout(ForceLayouter.NBR_ITERATIONS / 2, ForceLayouter.NBR_ITERATIONS,
-                    moveFlowsOverlappingNodes);
+            layout(moveFlowsOverlappingNodes);
 
             System.out.println("Milliseconds: " + (System.currentTimeMillis() - startTime));
             return null;
@@ -3713,6 +3759,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton showFlowsToggleButton;
     private javax.swing.JToggleButton showNodesToggleButton;
     private javax.swing.JCheckBoxMenuItem showObstaclesCheckBoxMenuItem;
+    private javax.swing.JMenuItem spiralPointsMenuItem;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
