@@ -950,7 +950,6 @@ public class ForceLayouter {
             }
             if (moveFlowAwayFromObstacles(flow, obstacles)) {
                 // moved one flow. Lock it.
-                System.out.println("******* Moved one flow away from obstacles.");
                 flow.setLocked(true);
                 if (++nbrMovedFlows == nbrFlowsToMove) {
                     break;

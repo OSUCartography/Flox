@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -11,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
-import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
@@ -39,7 +39,7 @@ public class AddFlowTool extends MapTool {
      * Point is assigned to originNode. If an empty space is clicked, a new
      * Point is created and assigned to originNode.
      */
-    Point originNode;
+    Point originNode = null;
 
     /**
      * The destination node of the new flow being added. A destinationNode is
@@ -47,7 +47,7 @@ public class AddFlowTool extends MapTool {
      * clicked, that Point is assigned to destinationNode. If an empty space is
      * clicked, a new Point is created and assigned to destinationNode.
      */
-    Point destinationNode;
+    Point destinationNode = null;
 
     /**
      * The distance from an existing node that a click must be within for that
@@ -55,6 +55,16 @@ public class AddFlowTool extends MapTool {
      * distance should change with the size of the node.
      */
     private final double PIXEL_TOLERANCE = 3;
+    
+    /**
+     * The default value for a new node.
+     */
+    private static final int DEFAULT_NODE_VALUE = 1;
+    
+    /**
+     * The default value for a flow.
+     */
+    private static final int DEFAULT_FLOW_VALUE = 1;
 
     /**
      * Constructor for AddFlowTool.
@@ -129,7 +139,7 @@ public class AddFlowTool extends MapTool {
         // If an existing node was NOT assigned to originNode, create a new one 
         // and assign it to originNode.
         if (originNode == null) {
-            double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : 0;
+            double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : DEFAULT_NODE_VALUE;
             originNode = new Point(point.x, point.y, v);
         }
 
@@ -138,7 +148,7 @@ public class AddFlowTool extends MapTool {
         // repaint the map
         mapComponent.refreshMap();
     }
-
+    
     /**
      * Adds a destinationNode to the map layout. Called on the second click
      * while the addFlowTool is active. If an existing node was clicked, that
@@ -181,7 +191,6 @@ public class AddFlowTool extends MapTool {
         // If an existing node was NOT assigned to destinationNode, make a new
         // Point and assign it to destinationNode.
         if (destinationNode == null) {
-            double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : 0;
             destinationNode = new Point(point.x, point.y);
         }
 
@@ -189,7 +198,7 @@ public class AddFlowTool extends MapTool {
         // If no other flows exist, set the value of newFlow to 1.
         final double value;
         if (model.getNbrFlows() < 1) {
-            value = 1;
+            value = DEFAULT_FLOW_VALUE;
         } else {
             value = model.getMeanFlowValue();
         }
@@ -214,9 +223,11 @@ public class AddFlowTool extends MapTool {
 
         // repaint the map
         mapComponent.refreshMap();
-        // FIXME         model.addUndo("Add Flow");
+        
+        // update the force-based layout and add undo option
+        ((FloxMapComponent)mapComponent).layout("Add Flow");
     }
-
+    
     /**
      * Draw the origin node after the first click and highlight it. If an
      * existing node was clicked, this draws a highlighted node of the same

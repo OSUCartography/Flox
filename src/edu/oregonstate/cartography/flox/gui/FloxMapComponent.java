@@ -78,7 +78,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public void setMainWindow(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
     }
-
+    
+    public void layout(String undoMessage) {
+        mainWindow.layout(undoMessage);
+    }
+    
     /**
      * Returns the bounding box of the geometry that is drawn by the map.
      *

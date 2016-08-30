@@ -99,20 +99,16 @@ public final class Flow {
      * @param value value of this flow
      */
     public Flow(Point startPt, Point endPt, double value) {
-
+        assert(startPt != null);
+        assert(endPt != null);
+        assert(Double.isFinite(value));
+        
         this.startPt = startPt;
         this.endPt = endPt;
         this.value = value;
-
-        // Angle between the straight line connecting start and end point and 
-        // the line connecting the start/end point with the corresponding Bezier 
-        // control point.
-        double alpha = 0.5;
-
-        // Distance between startPt and endPt
-        double dist = getBaselineLength();
-        double tangentLength = dist * 0.5;
-        computeCtrlPt(alpha, tangentLength);
+        
+        // control point is half way between start and end nodes
+        cPt = new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2);
     }
 
     /**
@@ -197,6 +193,7 @@ public final class Flow {
      * @param value the value to set
      */
     protected void setValue(double value) {
+        assert(Double.isFinite(value));
         this.value = value;
     }
 
@@ -294,23 +291,6 @@ public final class Flow {
     }
 
     /**
-     * Compute first control point from orientation of base line
-     *
-     * @param alpha angle between the base line and the line connecting the
-     * start point with the first control point.
-     * @param dist Distance between start point and first control point.
-     */
-    private void computeCtrlPt(double alpha, double dist) {
-        final double lineOrientation = getBaselineAzimuth();
-        final double azimuth = lineOrientation + alpha;
-        final double dx1 = Math.sin(azimuth) * dist;
-        final double dy1 = Math.cos(azimuth) * dist;
-        double cPt1X = startPt.x + dx1;
-        double cPt1Y = startPt.y + dy1;
-        cPt = new Point(cPt1X, cPt1Y);
-    }
-
-    /**
      * Returns a bounding box containing the curve. The control point can be
      * outside of the bounding box returned by this method. Does not take any
      * line width into account. Based on
@@ -389,6 +369,7 @@ public final class Flow {
      * @return slope in radians
      */
     public double getSlope(double t) {
+        assert (t >= 0 && t <= 1);
         double dx = (1 - t) * (cPt.x - startPt.x) + t * (endPt.x - cPt.x);
         double dy = (1 - t) * (cPt.y - startPt.y) + t * (endPt.y - cPt.y);
         return Math.atan2(dy, dx);
@@ -402,6 +383,8 @@ public final class Flow {
      * @param d offset distance
      */
     public void offsetFlow(double d) {
+        assert(Double.isFinite(d));
+        
         // normal at start
         double dxStart = cPt.x - startPt.x;
         double dyStart = cPt.y - startPt.y;

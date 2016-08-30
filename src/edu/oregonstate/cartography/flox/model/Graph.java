@@ -51,7 +51,8 @@ public final class Graph {
         int flowCounter = 0;
         minFlowLength = Double.MAX_VALUE;
         maxFlowLength = 0;
-        minFlowValue = maxFlowValue = flowIterator.next().getValue();
+        minFlowValue = Double.MAX_VALUE;
+        maxFlowValue = -Double.MAX_VALUE;
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
             double v = flow.getValue();

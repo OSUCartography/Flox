@@ -468,6 +468,7 @@ public class MainWindow extends javax.swing.JFrame {
         liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator16 = new javax.swing.JPopupMenu.Separator();
         selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
+        resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -2187,6 +2188,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(selectIntersectingSiblingFlowsMenuItem);
 
+        resolveIntersectingSiblingsMenuItem.setText("Resolve Intersecting Flows Connected to Same Nodes");
+        resolveIntersectingSiblingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resolveIntersectingSiblingsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(resolveIntersectingSiblingsMenuItem);
+
         menuBar.add(debugMenu);
 
         setJMenuBar(menuBar);
@@ -3458,6 +3467,16 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Node Stroke Width");
     }//GEN-LAST:event_nodeStrokeSpinnerStateChanged
 
+    private void resolveIntersectingSiblingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveIntersectingSiblingsMenuItemActionPerformed
+        List<Model.IntersectingFlowPair> pairs = new ForceLayouter(model).getIntersectingSiblings();
+        for (Model.IntersectingFlowPair pair : pairs) {
+            Flow flow1 = pair.flow1;
+            Flow flow2 = pair.flow2;
+            
+        }
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_resolveIntersectingSiblingsMenuItemActionPerformed
+
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
@@ -3497,8 +3516,6 @@ public class MainWindow extends javax.swing.JFrame {
             boolean[] initialLocks = model.getLocks();
 
             for (int i = 0; i < ForceLayouter.NBR_ITERATIONS; i++) {
-                System.out.println(i);
-
                 if (isCancelled()) {
                     break;
                 }
@@ -3510,8 +3527,7 @@ public class MainWindow extends javax.swing.JFrame {
                 // move flows away from obstacles
                 if (moveFlowsOverlappingNodes && iterBeforeMovingFlows == 0) {
                     int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
-                    System.out.println("nbr of flows to move: " + nbrFlowsToMove);
-
+                    
                     // moving flows will lock flows that have been moved
                     int nbrOverlaps = layouter.moveFlowsAwayFromObstacles(nbrFlowsToMove, false);
 
@@ -3537,11 +3553,6 @@ public class MainWindow extends javax.swing.JFrame {
                         nbrFlowsToMove = (int)Math.ceil(nbrOverlaps / remainingIterations);
                     } else {
                         nbrFlowsToMove = 1;
-                    }                    
-                    
-                    System.out.println("#remaining overlaps: " + nbrOverlaps);
-                    if (iterBeforeMovingFlows >= 0) {
-                        System.out.println("#iterations to next move: " + iterBeforeMovingFlows);
                     }
                 } else {
                     --iterBeforeMovingFlows;
@@ -3609,7 +3620,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
-    private void layout(String undoString) {
+    public void layout(String undoString) {
         if (updatingGUI) {
             return;
         }
@@ -3775,6 +3786,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem redoMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
+    private javax.swing.JMenuItem resolveIntersectingSiblingsMenuItem;
     private javax.swing.JMenuItem reverseFlowDirectionMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveSettingsMenuItem;
