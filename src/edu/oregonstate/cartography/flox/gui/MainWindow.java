@@ -24,6 +24,7 @@ import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
+import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -3472,7 +3473,18 @@ public class MainWindow extends javax.swing.JFrame {
         for (Model.IntersectingFlowPair pair : pairs) {
             Flow flow1 = pair.flow1;
             Flow flow2 = pair.flow2;
-            
+            double x = pair.sharedNode.x;
+            double y = pair.sharedNode.y;
+            Point node1 = flow1.getOppositePoint(pair.sharedNode);
+            Point node2 = flow2.getOppositePoint(pair.sharedNode);
+            Point cPt1 = flow1.getCtrlPt();
+            Point cPt2 = flow2.getCtrlPt();
+            Point cPt1New = GeometryUtils.getLineLineIntersection(x, y, cPt2.x, cPt2.y, cPt1.x, cPt1.y, node1.x, node1.y);
+            Point cPt2New = GeometryUtils.getLineLineIntersection(x, y, cPt1.x, cPt1.y, cPt2.x, cPt2.y, node2.x, node2.y);
+            if (cPt1New != null && cPt2New != null) {
+                flow1.setControlPoint(cPt1New);
+                flow2.setControlPoint(cPt2New);
+            }
         }
         mapComponent.refreshMap();
     }//GEN-LAST:event_resolveIntersectingSiblingsMenuItemActionPerformed

@@ -99,14 +99,14 @@ public final class Flow {
      * @param value value of this flow
      */
     public Flow(Point startPt, Point endPt, double value) {
-        assert(startPt != null);
-        assert(endPt != null);
-        assert(Double.isFinite(value));
-        
+        assert (startPt != null);
+        assert (endPt != null);
+        assert (Double.isFinite(value));
+
         this.startPt = startPt;
         this.endPt = endPt;
         this.value = value;
-        
+
         // control point is half way between start and end nodes
         cPt = new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2);
     }
@@ -145,6 +145,22 @@ public final class Flow {
      */
     public void setEndPt(Point endPt) {
         this.endPt = endPt;
+    }
+
+    /**
+     * If the start point is passed, returns the end point, and vice versa.
+     *
+     * @param point start or end point of this flow
+     * @return opposite point or null if neither the start nor the end point was
+     * passed.
+     */
+    public Point getOppositePoint(Point point) {
+        if (point == startPt) {
+            return endPt;
+        } else if (point == endPt) {
+            return startPt;
+        }
+        return null;
     }
 
     /**
@@ -193,7 +209,7 @@ public final class Flow {
      * @param value the value to set
      */
     protected void setValue(double value) {
-        assert(Double.isFinite(value));
+        assert (Double.isFinite(value));
         this.value = value;
     }
 
@@ -383,8 +399,8 @@ public final class Flow {
      * @param d offset distance
      */
     public void offsetFlow(double d) {
-        assert(Double.isFinite(d));
-        
+        assert (Double.isFinite(d));
+
         // normal at start
         double dxStart = cPt.x - startPt.x;
         double dyStart = cPt.y - startPt.y;
@@ -593,7 +609,7 @@ public final class Flow {
         // replace last point with end point
         regularPoints.set(regularPoints.size() - 1,
                 irregularPoints.get(irregularPoints.size() - 1));
-        
+
         return regularPoints;
     }
 
@@ -735,7 +751,7 @@ public final class Flow {
         if (getEndClipArea() != null || getStartClipArea() != null) {
             double deCasteljauTol = model.getDeCasteljauTolerance();
             ArrayList<Point> points = toUnclippedStraightLineSegments(deCasteljauTol);
-         return Flow.pointsToLineString(points);
+            return Flow.pointsToLineString(points);
         }
         return null;
     }
@@ -743,9 +759,8 @@ public final class Flow {
     /**
      * Returns radii of circles around start and end nodes that can be used to
      * clip the flows. The radii take the node size, gap around nodes, and mask
-     * areas and optionally the arrowhead into account. The radii
-     * only take the nodes into account, if there is gap between the line and
-     * the nodes.
+     * areas and optionally the arrowhead into account. The radii only take the
+     * nodes into account, if there is gap between the line and the nodes.
      *
      * @param model model with clipping distances
      * @param clipArrowhead if true, the flow line is clipped to make space for
@@ -754,7 +769,7 @@ public final class Flow {
      * point
      */
     public double[] clipRadii(Model model, boolean clipArrowhead) {
-        
+
         LineString lineString = toLineStringIfClipAreaIsAttached(model);
 
         // clipping radius for start node
@@ -780,7 +795,7 @@ public final class Flow {
         double endR = endClipRadius(model, clipArrowhead, lineString);
         return new double[]{startR, endR};
     }
-    
+
     public double endClipRadius(Model model, boolean clipArrowhead, LineString lineString) {
         // clipping radius for end node
         double endNodeClipRadius = 0;
@@ -792,7 +807,7 @@ public final class Flow {
             double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
             // Compute the radius of the end node (add stroke width / 2 to radius)
             double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(endPt);
-            endNodeClipRadius =  (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
+            endNodeClipRadius = (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
         }
 
         // clipping radius for end mask area
@@ -934,12 +949,20 @@ public final class Flow {
     }
 
     /**
-     * Returns true if this and the passed flow share a common start or end node.
-     * @param flow flow to test
-     * @return True if start or end nodes are shared, false otherwise.
+     * If this and the passed flow share a common start or end node, the shared
+     * node is returned. Ohterwise null is returned.
+     *
+     * @param flow flow to test.
+     * @return the shared node or null.
      */
-    boolean isSharingStartOrEndNode(Flow flow) {
-        return startPt == flow.startPt || startPt == flow.endPt
-                || endPt == flow.startPt || endPt == flow.endPt;
+    public Point getShareddNode(Flow flow) {
+        if (startPt == flow.startPt || startPt == flow.endPt) {
+            return startPt;
+        }
+        if (endPt == flow.startPt || endPt == flow.endPt) {
+            return endPt;
+        }
+        return null;
     }
+
 }

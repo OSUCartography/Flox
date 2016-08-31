@@ -79,12 +79,15 @@ public class Model {
 
     public static class IntersectingFlowPair {
 
-        public IntersectingFlowPair(Flow flow1, Flow flow2) {
+        public IntersectingFlowPair(Flow flow1, Flow flow2, Point sharedNode) {
             this.flow1 = flow1;
             this.flow2 = flow2;
+            this.sharedNode = sharedNode;
         }
+
         public Flow flow1;
         public Flow flow2;
+        public Point sharedNode;
     }
 
     /**
@@ -254,7 +257,7 @@ public class Model {
      * Maximum allowed node radius in pixels.
      */
     private double maxNodeSizePx = 10;
-    
+
     /**
      * Stroke width for drawing node circles. In pixels.
      */
@@ -759,10 +762,10 @@ public class Model {
     public Iterator<Flow> sortedFlowIterator(boolean increasing) {
         return graph.getOrderedFlows(increasing).iterator();
     }
-    
+
     public ArrayList<Flow> getFlows() {
         return graph.getFlows();
-    }    
+    }
 
     /**
      * Sort a list of flows by flow values.

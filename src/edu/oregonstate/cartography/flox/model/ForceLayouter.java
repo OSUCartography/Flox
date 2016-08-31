@@ -521,9 +521,10 @@ public class ForceLayouter {
 
             for (int j = i + 1; j < flows.size(); j++) {
                 Flow flow2 = flows.get(j);
-                if (flow1.isSharingStartOrEndNode(flow2)) {
+                Point sharedNode = flow1.getShareddNode(flow2);
+                if (sharedNode != null) {
                     Point[] points2 = straightLinesMap.get(flow2);
-                    if (points2.length < 4) {
+                    if (points2.length < 4) { // FIXME
                         continue;
                     }
                     LinearGeometryBuilder lineBuilder2 = new LinearGeometryBuilder(geometryFactory);
@@ -534,7 +535,7 @@ public class ForceLayouter {
                     Geometry geometry2 = lineBuilder2.getGeometry();
 
                     if (geometry1.crosses(geometry2)) {
-                        pairs.add(new Model.IntersectingFlowPair(flow1, flow2));
+                        pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));
                     }
                 }
             }
