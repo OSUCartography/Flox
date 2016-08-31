@@ -475,22 +475,19 @@ public class ForceLayouter {
             ctrlPt.x += angularDistWeight * angularDistForce.fx;
             ctrlPt.y += angularDistWeight * angularDistForce.fy;
 
-            // Enforce control point range if enforceRangebox is true
+            // move control point if it is outside of the range box or the canvas
             if (model.isEnforceRangebox()) {
-                Point tempPoint = enforcer.enforceFlowControlPointRange(flow);
-                ctrlPt.x = tempPoint.x;
-                ctrlPt.y = tempPoint.y;
+               enforcer.enforceFlowControlPointRange(flow);
             }
-
-            // Enforce the canvas range
             if (model.isEnforceCanvasRange()) {
-                Rectangle2D canvasRect = model.getNodesBoundingBox();
-                Point tempPoint = enforcer.enforceCanvasBoundingBox(flow, canvasRect);
-                ctrlPt.x = tempPoint.x;
-                ctrlPt.y = tempPoint.y;
+                enforcer.enforceCanvasBoundingBox(flow, model.getNodesBoundingBox());
             }
             i++;
         }
+    }
+    
+    public void movePointToRangebox(Point p) {
+        
     }
 
     /**
@@ -509,7 +506,7 @@ public class ForceLayouter {
         for (int i = 0; i < flows.size(); i++) {
             Flow flow1 = flows.get(i);
             Point[] points1 = straightLinesMap.get(flow1);
-            if (points1.length < 4) {
+            if (points1.length < 4) { // FIXME
                 continue;
             }
             LinearGeometryBuilder lineBuilder1 = new LinearGeometryBuilder(geometryFactory);

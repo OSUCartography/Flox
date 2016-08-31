@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import edu.oregonstate.cartography.utils.ColorUtils;
+import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
@@ -79,15 +80,41 @@ public class Model {
 
     public static class IntersectingFlowPair {
 
+        public Flow flow1;
+        public Flow flow2;
+        public Point sharedNode;
+
         public IntersectingFlowPair(Flow flow1, Flow flow2, Point sharedNode) {
             this.flow1 = flow1;
             this.flow2 = flow2;
             this.sharedNode = sharedNode;
         }
 
-        public Flow flow1;
-        public Flow flow2;
-        public Point sharedNode;
+        /**
+         * Reposition control points such that the two flows no longer
+         * intersect. Move control point along line connecting the opposite node
+         * and the current position of the control point. The new position is
+         * the intersection of that line with the line connecting the shared
+         * node and the control point of the other flow. This is done for both
+         * control points.
+         */
+        public void resolveIntersection() {
+            // node shared by both flows
+            double x = sharedNode.x;
+            double y = sharedNode.y;
+            // opposite nodes
+            Point node1 = flow1.getOppositePoint(sharedNode);
+            Point node2 = flow2.getOppositePoint(sharedNode);
+
+            Point cPt1 = flow1.getCtrlPt();
+            Point cPt2 = flow2.getCtrlPt();
+            Point cPt1New = GeometryUtils.getLineLineIntersection(x, y, cPt2.x, cPt2.y, cPt1.x, cPt1.y, node1.x, node1.y);
+            Point cPt2New = GeometryUtils.getLineLineIntersection(x, y, cPt1.x, cPt1.y, cPt2.x, cPt2.y, node2.x, node2.y);
+            if (cPt1New != null && cPt2New != null) {
+                flow1.setControlPoint(cPt1New);
+                flow2.setControlPoint(cPt2New);
+            }
+        }
     }
 
     /**
@@ -165,6 +192,12 @@ public class Model {
      * value).
      */
     private double canvasPadding = 0.5;
+
+    /**
+     * Flag to indicate whether the control points of intersecting flows
+     * connected to the same node are moved.
+     */
+    private boolean resolveIntersectionsForSiblings = true;
 
     /**
      * Color for drawing the thinnest flow
@@ -1720,5 +1753,19 @@ public class Model {
      */
     public void setMaxFlowColor(Color maxFlowColor) {
         this.maxFlowColor = maxFlowColor;
+    }
+
+    /**
+     * @return the resolveIntersectionsForSiblings
+     */
+    public boolean isResolveIntersectionsForSiblings() {
+        return resolveIntersectionsForSiblings;
+    }
+
+    /**
+     * @param resolveIntersectionsForSiblings the resolveIntersectionsForSiblings to set
+     */
+    public void setResolveIntersectionsForSiblings(boolean resolveIntersectionsForSiblings) {
+        this.resolveIntersectionsForSiblings = resolveIntersectionsForSiblings;
     }
 }

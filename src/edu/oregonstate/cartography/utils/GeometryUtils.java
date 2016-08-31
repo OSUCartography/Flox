@@ -126,6 +126,52 @@ public class GeometryUtils {
         return new Point(x, y);
     }
 
+    /**
+     * Copied from here: http://www.java-gaming.org/index.php?topic=22590.0
+     *
+     * Finds the intersection between two infinite lines. The found intersection
+     * is stored in destination Point. The destination Point is not changed if
+     * the lines are parallel. The parameters define two infinite lines. Points
+     * 1 & 2 are along one line Points 3 & 4 are along a second line
+     *
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param x3
+     * @param y3
+     * @param x4
+     * @param y4
+     * @param destination
+     * @return true if an intersection was found, that is, the lines are not
+     * parallel.
+     */
+    public static boolean getLineLineIntersection(double x1, double y1,
+            double x2, double y2,
+            double x3, double y3,
+            double x4, double y4,
+            Point destination) {
+        double det1And2 = det(x1, y1, x2, y2);
+        double det3And4 = det(x3, y3, x4, y4);
+        double x1LessX2 = x1 - x2;
+        double y1LessY2 = y1 - y2;
+        double x3LessX4 = x3 - x4;
+        double y3LessY4 = y3 - y4;
+        double det1Less2And3Less4 = det(x1LessX2, y1LessY2, x3LessX4, y3LessY4);
+        if (det1Less2And3Less4 == 0) {
+            // the denominator is zero the lines are parallel and there is 
+            // either no solution or multiple solutions if the lines overlap.
+            return false;
+        }
+        destination.x = (det(det1And2, x1LessX2,
+                det3And4, x3LessX4)
+                / det1Less2And3Less4);
+        destination.y = (det(det1And2, y1LessY2,
+                det3And4, y3LessY4)
+                / det1Less2And3Less4);
+        return true;
+    }
+
     protected static double det(double a, double b, double c, double d) {
         return a * d - b * c;
     }
@@ -483,11 +529,12 @@ public class GeometryUtils {
 
     /**
      * Returns the squared distance between two points.
+     *
      * @param x1
      * @param y1
      * @param x2
      * @param y2
-     * @return 
+     * @return
      */
     public static double distSq(double x1, double y1, double x2, double y2) {
         double dx = x1 - x2;
@@ -546,9 +593,10 @@ public class GeometryUtils {
     /**
      * Returns the shortest distance between two rectangles. Returns 0 if the
      * rectangles intersect or touch.
+     *
      * @param r1
      * @param r2
-     * @return 
+     * @return
      */
     public static double rectDistSq(Rectangle2D r1, Rectangle2D r2) {
         return rectDistSq(r1.getMinX(), r1.getMinY(), r1.getMaxX(), r1.getMaxY(),

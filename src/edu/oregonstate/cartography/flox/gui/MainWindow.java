@@ -14,6 +14,7 @@ import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
 import edu.oregonstate.cartography.flox.model.Point;
+import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.AddFlowTool;
@@ -455,21 +456,22 @@ public class MainWindow extends javax.swing.JFrame {
         highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
         showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
         jSeparator15 = new javax.swing.JPopupMenu.Separator();
+        moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
         moveSelectedFromObstaclesMenuItem = new javax.swing.JMenuItem();
         spiralPointsMenuItem = new javax.swing.JMenuItem();
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         emptySpaceMenuItem = new javax.swing.JMenuItem();
+        jSeparator16 = new javax.swing.JPopupMenu.Separator();
+        resolveIntersectionsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
+        resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
         liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        jSeparator16 = new javax.swing.JPopupMenu.Separator();
-        selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
-        resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -2098,6 +2100,15 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu.add(showFlowSegmentsMenuItem);
         debugMenu.add(jSeparator15);
 
+        moveFlowsCheckBoxMenuItem.setSelected(true);
+        moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
+        moveFlowsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                moveFlowsCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(moveFlowsCheckBoxMenuItem);
+
         showObstaclesCheckBoxMenuItem.setText("Show Obstacles");
         showObstaclesCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2142,15 +2153,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(enforceCanvasCheckBoxMenuItem);
-
-        moveFlowsCheckBoxMenuItem.setSelected(true);
-        moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
-        moveFlowsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                moveFlowsCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(moveFlowsCheckBoxMenuItem);
         debugMenu.add(jSeparator13);
 
         emptySpaceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2161,6 +2163,32 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(emptySpaceMenuItem);
+        debugMenu.add(jSeparator16);
+
+        resolveIntersectionsCheckBoxMenuItem.setSelected(true);
+        resolveIntersectionsCheckBoxMenuItem.setText("Resolve Intersections");
+        resolveIntersectionsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resolveIntersectionsCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(resolveIntersectionsCheckBoxMenuItem);
+
+        selectIntersectingSiblingFlowsMenuItem.setText("Select Intersecting Flows Connected to Same Nodes");
+        selectIntersectingSiblingFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectIntersectingSiblingFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(selectIntersectingSiblingFlowsMenuItem);
+
+        resolveIntersectingSiblingsMenuItem.setText("Resolve Intersecting Flows Connected to Same Nodes");
+        resolveIntersectingSiblingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resolveIntersectingSiblingsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(resolveIntersectingSiblingsMenuItem);
         debugMenu.add(jSeparator7);
 
         recomputeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2179,23 +2207,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(liveDrawingCheckBoxMenuItem);
-        debugMenu.add(jSeparator16);
-
-        selectIntersectingSiblingFlowsMenuItem.setText("Select Intersecting Flows Connected to Same Nodes");
-        selectIntersectingSiblingFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectIntersectingSiblingFlowsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(selectIntersectingSiblingFlowsMenuItem);
-
-        resolveIntersectingSiblingsMenuItem.setText("Resolve Intersecting Flows Connected to Same Nodes");
-        resolveIntersectingSiblingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resolveIntersectingSiblingsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(resolveIntersectingSiblingsMenuItem);
 
         menuBar.add(debugMenu);
 
@@ -3247,6 +3258,9 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void emptySpaceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emptySpaceMenuItemActionPerformed
+        
+        JOptionPane.showMessageDialog(this, "Experimental and not currently working.");
+        
         // FIXME this is not the right class for this
 
         // experiment for moving flow towards empty space. Attracting forces are 
@@ -3462,7 +3476,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void nodeStrokeSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeStrokeSpinnerStateChanged
         SpinnerModel dateModel = nodeStrokeSpinner.getModel();
-        float strokeWidth = ((SpinnerNumberModel)dateModel).getNumber().floatValue();
+        float strokeWidth = ((SpinnerNumberModel) dateModel).getNumber().floatValue();
         model.setNodeStrokeWidthPx(strokeWidth);
         mapComponent.refreshMap();
         layout("Node Stroke Width");
@@ -3471,23 +3485,16 @@ public class MainWindow extends javax.swing.JFrame {
     private void resolveIntersectingSiblingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveIntersectingSiblingsMenuItemActionPerformed
         List<Model.IntersectingFlowPair> pairs = new ForceLayouter(model).getIntersectingSiblings();
         for (Model.IntersectingFlowPair pair : pairs) {
-            Flow flow1 = pair.flow1;
-            Flow flow2 = pair.flow2;
-            double x = pair.sharedNode.x;
-            double y = pair.sharedNode.y;
-            Point node1 = flow1.getOppositePoint(pair.sharedNode);
-            Point node2 = flow2.getOppositePoint(pair.sharedNode);
-            Point cPt1 = flow1.getCtrlPt();
-            Point cPt2 = flow2.getCtrlPt();
-            Point cPt1New = GeometryUtils.getLineLineIntersection(x, y, cPt2.x, cPt2.y, cPt1.x, cPt1.y, node1.x, node1.y);
-            Point cPt2New = GeometryUtils.getLineLineIntersection(x, y, cPt1.x, cPt1.y, cPt2.x, cPt2.y, node2.x, node2.y);
-            if (cPt1New != null && cPt2New != null) {
-                flow1.setControlPoint(cPt1New);
-                flow2.setControlPoint(cPt2New);
-            }
+            pair.resolveIntersection();
         }
         mapComponent.refreshMap();
+        addUndo("Resolve Intersections");
     }//GEN-LAST:event_resolveIntersectingSiblingsMenuItemActionPerformed
+
+    private void resolveIntersectionsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveIntersectionsCheckBoxMenuItemActionPerformed
+        model.setResolveIntersectionsForSiblings(resolveIntersectionsCheckBoxMenuItem.isSelected());
+        layout("");
+    }//GEN-LAST:event_resolveIntersectionsCheckBoxMenuItemActionPerformed
 
     /**
      * FIXME This will result in concurrent unsynchronized modifications of the
@@ -3520,12 +3527,15 @@ public class MainWindow extends javax.swing.JFrame {
             // obstacles like arrowheads and unconnected nodes. This gives flows
             // a chance to stabilize before the first one is moved.
             int iterBeforeMovingFlows = ForceLayouter.NBR_ITERATIONS / 10;
-            
+
             // this many flows are moved away from obstacles per moving attempt
             int nbrFlowsToMove = 1;
 
             // store initial lock flags of all flows
             boolean[] initialLocks = model.getLocks();
+
+            Rectangle2D canvas = model.getNodesBoundingBox();
+            RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
 
             for (int i = 0; i < ForceLayouter.NBR_ITERATIONS; i++) {
                 if (isCancelled()) {
@@ -3536,10 +3546,27 @@ public class MainWindow extends javax.swing.JFrame {
                 double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
                 layouter.layoutAllFlows(weight);
 
+                if (model.isResolveIntersectionsForSiblings()) {
+                    List<Model.IntersectingFlowPair> pairs = layouter.getIntersectingSiblings();
+                    for (Model.IntersectingFlowPair pair : pairs) {
+                        pair.resolveIntersection();
+
+                        // move control points if they are outside of the range box or the canvas
+                        if (model.isEnforceRangebox()) {
+                            enforcer.enforceFlowControlPointRange(pair.flow1);
+                            enforcer.enforceFlowControlPointRange(pair.flow2);
+                        }
+                        if (model.isEnforceCanvasRange()) {
+                            enforcer.enforceCanvasBoundingBox(pair.flow1, canvas);
+                            enforcer.enforceCanvasBoundingBox(pair.flow2, canvas);
+                        }
+                    }
+                }
+                
                 // move flows away from obstacles
                 if (moveFlowsOverlappingNodes && iterBeforeMovingFlows == 0) {
                     int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
-                    
+
                     // moving flows will lock flows that have been moved
                     int nbrOverlaps = layouter.moveFlowsAwayFromObstacles(nbrFlowsToMove, false);
 
@@ -3555,14 +3582,14 @@ public class MainWindow extends javax.swing.JFrame {
                         // 50% of the remaining iterations for new overlaps.
                         iterBeforeMovingFlows = remainingIterations / 2;
                     }
-                                        
+
                     // the number of flows to move the next time. Default is 1, but
                     // this might have to be larger for when there are more 
                     // overlapping flows than remaining iterations.                    
                     if (nbrOverlaps > remainingIterations && remainingIterations > 0) {
                         // FIXME this might not be accurate for the next time flows 
                         // are moved away from obstacles because force iterations might have created additional overlaps
-                        nbrFlowsToMove = (int)Math.ceil(nbrOverlaps / remainingIterations);
+                        nbrFlowsToMove = (int) Math.ceil(nbrOverlaps / remainingIterations);
                     } else {
                         nbrFlowsToMove = 1;
                     }
@@ -3799,6 +3826,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JMenuItem resolveIntersectingSiblingsMenuItem;
+    private javax.swing.JCheckBoxMenuItem resolveIntersectionsCheckBoxMenuItem;
     private javax.swing.JMenuItem reverseFlowDirectionMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveSettingsMenuItem;

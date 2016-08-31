@@ -22,10 +22,9 @@ public class RangeboxEnforcer {
      * border where the line crosses. Checks each side of the range rectangle
      * one at a time.
      *
-     * @param flow A Flow
-     * @return
+     * @param flow a Flow
      */
-    public Point enforceFlowControlPointRange(Flow flow) {
+    public void enforceFlowControlPointRange(Flow flow) {
 
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();
@@ -33,18 +32,18 @@ public class RangeboxEnforcer {
         Point[] box = computeRangebox(flow);
         // box corners have counter-clockwise order: 
         // bottom left, bottom right, top right, top left.
-     
+
         // bottom border
         if (GeometryUtils.linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
                 box[0].x, box[0].y,
                 box[1].x, box[1].y)) {
-            return GeometryUtils.getLineLineIntersection(
+            GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     box[0].x, box[0].y,
-                    box[1].x, box[1].y);
+                    box[1].x, box[1].y, cPt);
         }
 
         // top border
@@ -53,11 +52,11 @@ public class RangeboxEnforcer {
                 cPt.x, cPt.y,
                 box[2].x, box[2].y,
                 box[3].x, box[3].y)) {
-            return GeometryUtils.getLineLineIntersection(
+            GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     box[2].x, box[2].y,
-                    box[3].x, box[3].y);
+                    box[3].x, box[3].y, cPt);
         }
 
         // right border
@@ -66,11 +65,11 @@ public class RangeboxEnforcer {
                 cPt.x, cPt.y,
                 box[1].x, box[1].y,
                 box[2].x, box[2].y)) {
-            return GeometryUtils.getLineLineIntersection(
+            GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     box[1].x, box[1].y,
-                    box[2].x, box[2].y);
+                    box[2].x, box[2].y, cPt);
         }
 
         // left border
@@ -79,17 +78,16 @@ public class RangeboxEnforcer {
                 cPt.x, cPt.y,
                 box[0].x, box[0].y,
                 box[3].x, box[3].y)) {
-            return GeometryUtils.getLineLineIntersection(
+            GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     box[0].x, box[0].y,
-                    box[3].x, box[3].y);
+                    box[3].x, box[3].y, cPt);
         }
 
-        return cPt;
     }
 
-    public Point enforceCanvasBoundingBox(Flow flow, Rectangle2D canvas) {
+    public void enforceCanvasBoundingBox(Flow flow, Rectangle2D canvas) {
 
         double cWidth = canvas.getWidth();
         double cHeight = canvas.getHeight();
@@ -113,50 +111,42 @@ public class RangeboxEnforcer {
                 cPt.x, cPt.y,
                 b1.x, b1.y,
                 b2.x, b2.y)) {
-            return GeometryUtils.getLineLineIntersection(
+            GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     b1.x, b1.y,
-                    b2.x, b2.y);
-        }
-
-        if (GeometryUtils.linesIntersect(
+                    b2.x, b2.y, cPt);
+        } else if (GeometryUtils.linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
                 b3.x, b3.y,
                 b4.x, b4.y)) {
-            return GeometryUtils.getLineLineIntersection(
+            GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     b3.x, b3.y,
-                    b4.x, b4.y);
-        }
-
-        if (GeometryUtils.linesIntersect(
+                    b4.x, b4.y, cPt);
+        } else if (GeometryUtils.linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
                 b1.x, b1.y,
                 b3.x, b3.y)) {
-            return GeometryUtils.getLineLineIntersection(
+            GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     b1.x, b1.y,
-                    b3.x, b3.y);
-        }
-
-        if (GeometryUtils.linesIntersect(
+                    b3.x, b3.y, cPt);
+        } else if (GeometryUtils.linesIntersect(
                 refPt.x, refPt.y,
                 cPt.x, cPt.y,
                 b2.x, b2.y,
                 b4.x, b4.y)) {
-            return GeometryUtils.getLineLineIntersection(
+            GeometryUtils.getLineLineIntersection(
                     refPt.x, refPt.y,
                     cPt.x, cPt.y,
                     b2.x, b2.y,
-                    b4.x, b4.y);
+                    b4.x, b4.y, cPt);
         }
-
-        return cPt;
     }
 
     /**
