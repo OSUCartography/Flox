@@ -152,10 +152,14 @@ public class SimpleFeatureRenderer {
         x = xToPx(x);
         y = yToPx(y);
         Ellipse2D circle = new Ellipse2D.Double(x - r, y - r, r * 2, r * 2);
-        g2d.setColor(fill);
-        g2d.fill(circle);
-        g2d.setColor(stroke);
-        g2d.draw(circle);
+        if (fill != null) {
+            g2d.setColor(fill);
+            g2d.fill(circle);
+        }
+        if (stroke != null) {
+            g2d.setColor(stroke);
+            g2d.draw(circle);
+        }        
     }
 
     /**

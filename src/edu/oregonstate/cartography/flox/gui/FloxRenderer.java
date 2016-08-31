@@ -40,7 +40,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Color for drawing selected flows.
      */
     public static final Color SELECTION_COLOR = Color.decode("#59A4FF");
-    
+
     /**
      * Color for drawing stroke line of nodes.
      */
@@ -249,10 +249,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         double s = scale / model.getReferenceMapScale();
         boolean colorVaries = !model.getMinFlowColor().equals(model.getMaxFlowColor());
-        
-        
+
         // Iterate through the flows
-        Iterator<Flow> iterator = colorVaries 
+        Iterator<Flow> iterator = colorVaries
                 ? model.sortedFlowIterator(false) : model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
@@ -354,7 +353,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             mask2D.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            mask2D.setColor(highlightSelected && flow.isSelected() 
+            mask2D.setColor(highlightSelected && flow.isSelected()
                     ? SELECTION_COLOR : model.getFlowColor(flow));
             mask2D.draw(flowPath);
 
@@ -385,15 +384,28 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private void drawNodes(boolean highlightSelected) {
         double s = scale / model.getReferenceMapScale();
 
+        double strokeWidthPx = model.getNodeStrokeWidthPx();
+
         // same stroke width for all nodes
-        g2d.setStroke(new BasicStroke((float) (model.getNodeStrokeWidthPx() * s)));
+        g2d.setStroke(new BasicStroke((float) (strokeWidthPx * s)));
 
         ArrayList<Point> nodes = model.getOrderedNodes(false);
         for (Point node : nodes) {
-            double r = model.getNodeRadiusPx(node) * s;
-            Color strokeColor = highlightSelected && node.isSelected()
-                    ? SELECTION_COLOR : NODE_STROKE_COLOR;
-            drawCircle(node.x, node.y, r, NODE_FILL_COLOR, strokeColor);
+            double nodeRadiusPx = model.getNodeRadiusPx(node);
+            double r = nodeRadiusPx * s;
+            Color strokeColor;
+            if (strokeWidthPx == 0) {
+                strokeColor = null;
+            } else if (highlightSelected && node.isSelected()) {
+                strokeColor = SELECTION_COLOR;
+            } else {
+                strokeColor = NODE_STROKE_COLOR;
+            }
+            // if the stroke width is larger than the radius of the circle, the
+            // drawing engine does not fill the circle entirely. This fix fills
+            // the circle with the stroke color.
+            Color fillColor = strokeWidthPx > nodeRadiusPx ? strokeColor : NODE_FILL_COLOR;
+            drawCircle(node.x, node.y, r, fillColor, strokeColor);
         }
     }
 
@@ -576,7 +588,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
         }
     }
-    
+
     private void drawObstacles() {
         g2d.setStroke(new BasicStroke(model.getNodeStrokeWidthPx()));
         ForceLayouter layouter = new ForceLayouter(model);
