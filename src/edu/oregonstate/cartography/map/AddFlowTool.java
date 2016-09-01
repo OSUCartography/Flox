@@ -55,12 +55,12 @@ public class AddFlowTool extends MapTool {
      * distance should change with the size of the node.
      */
     private final double PIXEL_TOLERANCE = 3;
-    
+
     /**
      * The default value for a new node.
      */
     private static final int DEFAULT_NODE_VALUE = 1;
-    
+
     /**
      * The default value for a flow.
      */
@@ -109,7 +109,7 @@ public class AddFlowTool extends MapTool {
 
         double mapScale = mapComponent.getScale();
         double refScale = model.getReferenceMapScale();
-        
+
         Iterator<Point> iterator = model.nodeIterator();
         while (iterator.hasNext()) {
             Point node = iterator.next();
@@ -144,11 +144,11 @@ public class AddFlowTool extends MapTool {
         }
 
         originNodeCreated = true;
-        
+
         // repaint the map
         mapComponent.refreshMap();
     }
-    
+
     /**
      * Adds a destinationNode to the map layout. Called on the second click
      * while the addFlowTool is active. If an existing node was clicked, that
@@ -161,7 +161,7 @@ public class AddFlowTool extends MapTool {
 
         double mapScale = mapComponent.getScale();
         double refScale = model.getReferenceMapScale();
-        
+
         ArrayList<Point> nodes = model.getNodes();
         for (int i = nodes.size() - 1; i >= 0; i--) {
             Point node = nodes.get(i);
@@ -202,18 +202,13 @@ public class AddFlowTool extends MapTool {
         } else {
             value = model.getMeanFlowValue();
         }
-         // build a flow from the toNode and the fromNode, add it to the model
+        // build a flow from the toNode and the fromNode, add it to the model
         Flow newFlow = new Flow(originNode, destinationNode, value);
 
-        // Straighten the new flow.
-        // This is done because when a newFlow is created, the control point
-        // is assigned a strange, arbitrary location.
-        newFlow.straighten();
-
-        // FIXME test whether start and end point are identical to avoid 
-        // exception due to the attempt of creating a loop
         // Add the new flow to the data model.
-        model.addFlow(newFlow);
+        if (destinationNode != originNode) {
+            model.addFlow(newFlow);
+        }
 
         // Reinitialize flags, set origin and destination nodes to null. This
         // insures that new nodes will be assigned/created with successive
@@ -223,11 +218,11 @@ public class AddFlowTool extends MapTool {
 
         // repaint the map
         mapComponent.refreshMap();
-        
+
         // update the force-based layout and add undo option
-        ((FloxMapComponent)mapComponent).layout("Add Flow");
+        ((FloxMapComponent) mapComponent).layout("Add Flow");
     }
-    
+
     /**
      * Draw the origin node after the first click and highlight it. If an
      * existing node was clicked, this draws a highlighted node of the same
@@ -241,7 +236,7 @@ public class AddFlowTool extends MapTool {
         if (originNodeCreated) {
             FloxRenderer.enableHighQualityRenderingHints(g2d, true);
             double refScale = model.getReferenceMapScale();
-            
+
             double nodeArea = Math.abs(originNode.getValue()) * model.getNodeSizeScaleFactor();
             double r = (Math.sqrt(nodeArea / Math.PI)) * refScale;
             double x = mapComponent.xToPx(originNode.x);

@@ -81,8 +81,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             Point startPoint = points.get(startPtID);
             Point endPoint = points.get(endPtID);
             Point cPoint = new Point(cPtX, cPtY);
-            Flow flow = new Flow(startPoint, endPoint, flowValue);
-            flow.setControlPoint(cPoint);
+            Flow flow = new Flow(startPoint, cPoint, endPoint, flowValue);
             flow.setLocked(locked);
             String startClipAreaWKT = tokenizer.nextToken();
             if (startClipAreaWKT.startsWith("POLYGON")) {

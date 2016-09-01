@@ -198,6 +198,15 @@ public final class Graph {
     }
 
     /**
+     * Returns the flow from the end to the start point of the passed flow, if it exists.
+     * @param flow search for flow in opposite direction to this flow
+     * @return flow with opposite direction or null
+     */
+    public Flow getOpposingFlow(Flow flow) {
+        return graph.getEdge(flow.getEndPt(), flow.getStartPt());
+    }
+    
+    /**
      * Returns a list of flows connected to a node. The flows are ordered
      * anti-clockwise by the orientation of the line connecting start and end
      * points. The origin of the polar coordinate system is the horizontal x

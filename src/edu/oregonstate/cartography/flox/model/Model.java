@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -73,10 +74,29 @@ public class Model {
      */
     public enum FlowNodeDensity {
 
-        LOW,
-        MEDIUM,
-        HIGH
+        // de Casteljau tolerance in pixels relative to current map reference scale.
+        LOW(2.5d),
+        MEDIUM(1d),
+        HIGH(0.5);
+
+        private final double deCasteljauTolerance;
+
+        /**
+         * Multiply deCasteljauTolerance by DE_CASTELJAU_TO_LINE_SEGMENT_LENGTH
+         * to compute target line segment length when converting from Bezier
+         * curves to straight line segments.
+         */
+        public static final double DE_CASTELJAU_TO_LINE_SEGMENT_LENGTH = 20;
+
+        FlowNodeDensity(double deCasteljauTolerance) {
+            this.deCasteljauTolerance = deCasteljauTolerance;
+        }
     }
+
+    /**
+     * Determines the maximum number of intermediate nodes per flow.
+     */
+    private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
 
     public static class IntersectingFlowPair {
 
@@ -116,12 +136,6 @@ public class Model {
             }
         }
     }
-
-    /**
-     * Determines the maximum number of intermediate nodes per flow. This is
-     * modified by a comboBox in the GUI (low, medium, high).
-     */
-    private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
 
     /**
      * Graph of edges (Flow class) and nodes (Point class).
@@ -203,13 +217,13 @@ public class Model {
      * Color for drawing the thinnest flow
      */
     @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
-    private Color minFlowColor = Color.BLACK;
+    private Color minFlowColor = new Color(80, 80, 80);
 
     /**
      * Color for drawing the thickest flow
      */
     @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
-    private Color maxFlowColor = new Color(70, 70, 70);
+    private Color maxFlowColor = Color.BLACK;
 
     /**
      * If true, arrows are drawn onto the end of flows.
@@ -542,6 +556,64 @@ public class Model {
         graph.removeEdge(flow);
     }
 
+    public void changeToBidirectionalFlows() {
+        ArrayList<BidirectionalFlow> flowsToAdd = new ArrayList<>();
+        HashSet<Flow> flowsToRemove = new HashSet<>();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            Flow flow2 = graph.getOpposingFlow(flow);
+            if (flow2 != null) {
+                if (flowsToRemove.contains(flow) == false) {
+                    flowsToAdd.add(new BidirectionalFlow(flow, flow2));
+                    flowsToRemove.add(flow);
+                    flowsToRemove.add(flow2);
+                }
+            }
+        }
+        System.out.println();
+        System.out.println("changeToBidirectionalFlows");
+        System.out.println("# initial flows: " + graph.getNbrFlows());
+        System.out.println("# opposing flows to remove: " + flowsToRemove.size());
+        System.out.println("# bidirectional flows to add: " + flowsToAdd.size());
+
+        for (Flow flow : flowsToRemove) {
+            graph.removeEdge(flow);
+        }
+        for (BidirectionalFlow bidirectionalFlow : flowsToAdd) {
+            graph.addFlow(bidirectionalFlow);
+        }
+        System.out.println("# final flows: " + graph.getNbrFlows());
+    }
+
+    public void changeToUnidirectionalFlows() {
+        ArrayList<Flow> flowsToAdd = new ArrayList<>();
+        ArrayList<BidirectionalFlow> flowsToRemove = new ArrayList<>();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow instanceof BidirectionalFlow) {
+                BidirectionalFlow biFlow = (BidirectionalFlow) flow;
+                flowsToRemove.add(biFlow);
+                flowsToAdd.add(biFlow.createFlow1());
+                flowsToAdd.add(biFlow.createFlow2());
+            }
+        }
+        System.out.println();
+        System.out.println("changeToUnidirectionalFlows");
+        System.out.println("# initial flows: " + graph.getNbrFlows());
+        System.out.println("# bidirectional flows to remove: " + flowsToRemove.size());
+        System.out.println("# opposing flows to add: " + flowsToAdd.size());
+
+        for (BidirectionalFlow flow : flowsToRemove) {
+            graph.removeEdge(flow);
+        }
+        for (Flow bidirectionalFlow : flowsToAdd) {
+            graph.addFlow(bidirectionalFlow);
+        }
+        System.out.println("# final flows: " + graph.getNbrFlows());
+    }
+
     public void reverseSelectedFlows() {
         ArrayList<Flow> flows = getSelectedFlows();
         for (Flow flow : flows) {
@@ -792,6 +864,12 @@ public class Model {
         return graph.flowIterator();
     }
 
+    /**
+     * Returns an iterator for all flows sorted by their value.
+     *
+     * @param increasing sort by increasing (true) or decreasing (false) values
+     * @return iterator for sorted flows
+     */
     public Iterator<Flow> sortedFlowIterator(boolean increasing) {
         return graph.getOrderedFlows(increasing).iterator();
     }
@@ -893,38 +971,14 @@ public class Model {
     }
 
     /**
-     * Empirically computes the tolerance value needed for the De Casteljau
-     * algorithm, which converts a Bezier curve to straight line segments. This
-     * value is determined by minimum/maximum flow lengths. The flowNodeDensity
-     * field controls the maximum number of nodes along a flow.
+     * Returns an empirical tolerance value for the De Casteljau algorithm,
+     * which converts a Bezier curve to straight line segments. The returned
+     * value is relative to the current reference map scale.
      *
-     * @return
+     * @return de Casteljau tolerance in world units.
      */
     public double getDeCasteljauTolerance() {
-
-        double maxFlowNodes;
-        switch (flowNodeDensity) {
-            case LOW:
-                maxFlowNodes = 10;
-                break;
-            case MEDIUM:
-                maxFlowNodes = 25;
-                break;
-            default:
-                // FlowNodeDensity.HIGH
-                maxFlowNodes = 40;
-                break;
-        }
-
-        double longestFlowLength = getLongestFlowLength();
-        double tol = getShortestFlowLength() / maxFlowNodes;
-        if (longestFlowLength / tol <= maxFlowNodes) {
-            return tol;
-        } else {
-            tol = longestFlowLength / maxFlowNodes;
-            return tol;
-        }
-
+        return flowNodeDensity.deCasteljauTolerance / getReferenceMapScale();
     }
 
     /**
@@ -1692,7 +1746,7 @@ public class Model {
     /**
      * @return the referenceMapScale
      */
-    public double getReferenceMapScale() {
+    public final double getReferenceMapScale() {
         return referenceMapScale;
     }
 
@@ -1763,7 +1817,8 @@ public class Model {
     }
 
     /**
-     * @param resolveIntersectionsForSiblings the resolveIntersectionsForSiblings to set
+     * @param resolveIntersectionsForSiblings the
+     * resolveIntersectionsForSiblings to set
      */
     public void setResolveIntersectionsForSiblings(boolean resolveIntersectionsForSiblings) {
         this.resolveIntersectionsForSiblings = resolveIntersectionsForSiblings;

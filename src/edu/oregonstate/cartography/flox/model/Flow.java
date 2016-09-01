@@ -19,7 +19,7 @@ import java.util.Iterator;
  * @author Bernhard Jenny
  * @author Daniel Stephen
  */
-public final class Flow {
+public class Flow {
 
     /**
      * start point of flow.
@@ -241,7 +241,7 @@ public final class Flow {
     /**
      * @param startClipArea the startClipArea to set
      */
-    public void setStartClipArea(Geometry startClipArea) {
+    public final void setStartClipArea(Geometry startClipArea) {
         this.startClipArea = startClipArea;
         if (startClipArea != null) {
             startClipAreaWKT = new WKTWriter().write(startClipArea);
@@ -260,7 +260,7 @@ public final class Flow {
     /**
      * @param endClipArea the endClipArea to set
      */
-    public void setEndClipArea(Geometry endClipArea) {
+    public final void setEndClipArea(Geometry endClipArea) {
         this.endClipArea = endClipArea;
         if (endClipArea != null) {
             this.endClipAreaWKT = new WKTWriter().write(endClipArea);
@@ -293,7 +293,7 @@ public final class Flow {
     /**
      * @param locked the locked to set
      */
-    public void setLocked(boolean locked) {
+    public final void setLocked(boolean locked) {
         this.locked = locked;
     }
 
@@ -491,8 +491,12 @@ public final class Flow {
     }
 
     /**
+     * Converts the Bezier curve to segments of straight line. The segments are
+     * of irregular length. Uses standard Java2D functionality.
      *
-     * @param deCasteljauTol
+     * @param deCasteljauTol the de Casteljau tolerance, which is the maximum
+     * distance between the Bezier curve and the approximation by straight line
+     * segments.
      * @return
      */
     public ArrayList<Point> toStraightLineSegmentsWithIrregularLength(
@@ -503,8 +507,7 @@ public final class Flow {
         GeneralPath path = new GeneralPath();
         path.moveTo(startPt.x, startPt.y);
         path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
-        // FIXME division by 100?
-        PathIterator iter = path.getPathIterator(null, deCasteljauTol / 100);
+        PathIterator iter = path.getPathIterator(null, deCasteljauTol);
         double[] coords = new double[6];
         while (!iter.isDone()) {
             iter.currentSegment(coords);
@@ -552,13 +555,14 @@ public final class Flow {
     }
 
     /**
-     * Converts this Bezier curve to straight line segments. Does not apply
-     * clipping with start and end nodes, mask areas, or arrowheads.
+     * Converts this Bezier curve to straight line segments with regular length.
+     * Does not apply clipping with start and end nodes, mask areas, or
+     * arrowheads.
      *
-     * @param deCasteljauTol The maximum distance between the curve and the
+     * @param deCasteljauTol the maximum distance between the curve and the
      * straight line segments.
-     * @return An list of irregularPoints, including copies of the start point
-     * and the end point.
+     * @return a list of points, including copies of the start point and the end
+     * point.
      */
     public ArrayList<Point> toUnclippedStraightLineSegments(double deCasteljauTol) {
         assert (deCasteljauTol > 0);
@@ -569,9 +573,8 @@ public final class Flow {
 
         // compute distance between points in regular line string
         double totalLength = lineStringLength(irregularPoints);
-        // FIXME abusing the deCasteljauTol, which is not really the tolerance
-        // for de Casteljau's algorithm (it is devided by 100).
-        double targetDist = totalLength / Math.round(totalLength / deCasteljauTol);
+        // the length of an ideal, unbroken line segment
+        double targetDist = totalLength / Math.round(totalLength / (deCasteljauTol * Model.FlowNodeDensity.DE_CASTELJAU_TO_LINE_SEGMENT_LENGTH));
 
         // create new point set with regularly distributed points
         double startX = irregularPoints.get(0).x;
@@ -955,7 +958,7 @@ public final class Flow {
      * @param flow flow to test.
      * @return the shared node or null.
      */
-    public Point getShareddNode(Flow flow) {
+    public Point getSharedNode(Flow flow) {
         if (startPt == flow.startPt || startPt == flow.endPt) {
             return startPt;
         }

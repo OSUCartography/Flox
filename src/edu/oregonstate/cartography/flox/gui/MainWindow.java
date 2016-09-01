@@ -25,7 +25,6 @@ import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
-import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -2220,7 +2219,7 @@ public class MainWindow extends javax.swing.JFrame {
         OutputStream outputStream = null;
         try {
             // ask for export file
-            String name = getTitle() + ".svg";
+            String name = getFileName() + ".svg";
             String outFilePath = FileUtils.askFile(this, "SVG File", name, false, "svg");
             if (outFilePath == null) {
                 // user canceled
@@ -2563,7 +2562,7 @@ public class MainWindow extends javax.swing.JFrame {
             Rectangle2D bb = mapComponent.getVisibleArea();
 
             // ask user for file
-            String name = getTitle() + ".png";
+            String name = getFileName() + ".png";
             String filePath = FileUtils.askFile(this, "PNG Image File", name, false, "png");
             if (filePath == null) {
                 // user canceled
@@ -2930,7 +2929,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void saveSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveSettingsMenuItemActionPerformed
         try {
             // ask user for file
-            String name = getTitle() + ".xml";
+            String name = getFileName() + ".xml";
             String filePath = FileUtils.askFile(this, "Save Settings to XML File", name, false, "xml");
             if (filePath == null) {
                 // user canceled
@@ -2946,7 +2945,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void exportFlowsCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFlowsCSVMenuItemActionPerformed
         try {
             // ask for export file
-            String name = getTitle() + ".csv";
+            String name = getFileName() + ".csv";
             String outFilePath = FileUtils.askFile(this, "CSV Text File", name, false, "csv");
             if (outFilePath == null) {
                 // user canceled
@@ -2986,6 +2985,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (lowFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.LOW);
             mapComponent.refreshMap();
+            layout("Low Flow Segmentation");
         }
 
     }//GEN-LAST:event_lowFlowSegmentationMenuItemActionPerformed
@@ -2994,6 +2994,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (mediumFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
             mapComponent.refreshMap();
+            layout("Medium Flow Segmentation");
         }
     }//GEN-LAST:event_mediumFlowSegmentationMenuItemActionPerformed
 
@@ -3001,6 +3002,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (highFlowSegmentationMenuItem.isSelected()) {
             model.setFlowNodeDensity(FlowNodeDensity.HIGH);
             mapComponent.refreshMap();
+            layout("High Flow Segmentation");
         }
     }//GEN-LAST:event_highFlowSegmentationMenuItemActionPerformed
 
@@ -3258,11 +3260,10 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void emptySpaceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emptySpaceMenuItemActionPerformed
-        
-        JOptionPane.showMessageDialog(this, "Experimental and not currently working.");
-        
-        // FIXME this is not the right class for this
 
+        JOptionPane.showMessageDialog(this, "Experimental and not currently working.");
+
+        // FIXME this is not the right class for this
         // experiment for moving flow towards empty space. Attracting forces are 
         // computed between white space and the control point of the flow.
         // It might be better to compute forces between empty space and flow line
@@ -3497,6 +3498,15 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_resolveIntersectionsCheckBoxMenuItemActionPerformed
 
     /**
+     * Returns a string that can be used for a file name when exporting to a file.
+     * @return file name without file extension.
+     */
+    private String getFileName() {
+        String title = getTitle();
+        return (title == null || title.isEmpty()) ? "Flows" : title;
+    }
+
+    /**
      * FIXME This will result in concurrent unsynchronized modifications of the
      * model. The Event Dispatch Thread is drawing the model, while the worker
      * is simultaneously changing it.
@@ -3531,6 +3541,7 @@ public class MainWindow extends javax.swing.JFrame {
             // this many flows are moved away from obstacles per moving attempt
             int nbrFlowsToMove = 1;
 
+            //model.changeToBidirectionalFlows();
             // store initial lock flags of all flows
             boolean[] initialLocks = model.getLocks();
 
@@ -3562,7 +3573,7 @@ public class MainWindow extends javax.swing.JFrame {
                         }
                     }
                 }
-                
+
                 // move flows away from obstacles
                 if (moveFlowsOverlappingNodes && iterBeforeMovingFlows == 0) {
                     int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
@@ -3611,6 +3622,7 @@ public class MainWindow extends javax.swing.JFrame {
             // reset lock flags to initial values
             model.applyLocks(initialLocks);
 
+            //model.changeToUnidirectionalFlows();
             model.computeArrowheads();
         }
 

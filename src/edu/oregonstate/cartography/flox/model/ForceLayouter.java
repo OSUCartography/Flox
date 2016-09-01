@@ -501,6 +501,7 @@ public class ForceLayouter {
         initStraightLinesHashMap();
         GeometryFactory geometryFactory = new GeometryFactory();
         ArrayList<Flow> flows = model.getFlows();
+        Model.sortFlows(flows, false);
 
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
         for (int i = 0; i < flows.size(); i++) {
@@ -518,7 +519,7 @@ public class ForceLayouter {
 
             for (int j = i + 1; j < flows.size(); j++) {
                 Flow flow2 = flows.get(j);
-                Point sharedNode = flow1.getShareddNode(flow2);
+                Point sharedNode = flow1.getSharedNode(flow2);
                 if (sharedNode != null) {
                     Point[] points2 = straightLinesMap.get(flow2);
                     if (points2.length < 4) { // FIXME
