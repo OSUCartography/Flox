@@ -161,7 +161,7 @@ public class Model {
     /**
      * Stiffness factor for peripheral flows.
      */
-    private double peripheralStiffnessFactor = 0.5;
+    private double peripheralStiffnessFactor = 2.5;
 
     /**
      * spring stiffness of longest flow.
@@ -181,7 +181,7 @@ public class Model {
     private int distanceWeightExponent = 4;
 
     /**
-     * If this is true, control points of flows are prevented from moving
+     * If this is true, control points of flows are prevented from movingm
      * outside of its flow's rangebox.
      */
     private boolean enforceRangebox = true;
@@ -191,7 +191,7 @@ public class Model {
      * bounding box = this value * the length of the flow's baseline. Currently
      * modified by a GUI slider.
      */
-    private double flowRangeboxHeight = 0.4;
+    private double flowRangeboxHeight = 0.5;
 
     /**
      * If this is true, control points are prevented from moving outside of the

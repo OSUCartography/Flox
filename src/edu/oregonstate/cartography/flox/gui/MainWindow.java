@@ -1,7 +1,10 @@
 package edu.oregonstate.cartography.flox.gui;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 import edu.oregonstate.cartography.flox.model.BooleanGrid;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
 import edu.oregonstate.cartography.flox.model.Flow;
@@ -204,6 +207,7 @@ public class MainWindow extends javax.swing.JFrame {
             flowDistanceFromStartPointFormattedTextField.setValue(model.getFlowDistanceFromStartPointPixel());
             maximumFlowWidthSlider.setValue((int) model.getMaxFlowStrokeWidthPixel());
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
+            nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
             minColorButton.setColor(model.getMinFlowColor());
             maxColorButton.setColor(model.getMaxFlowColor());
 
@@ -225,12 +229,18 @@ public class MainWindow extends javax.swing.JFrame {
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
-            if (model.getFlowNodeDensity() == FlowNodeDensity.LOW) {
-                lowFlowSegmentationMenuItem.setSelected(true);
-            } else if (model.getFlowNodeDensity() == FlowNodeDensity.MEDIUM) {
-                mediumFlowSegmentationMenuItem.setSelected(true);
-            } else {
-                highFlowSegmentationMenuItem.setSelected(true);
+            if (null != model.getFlowNodeDensity()) {
+                switch (model.getFlowNodeDensity()) {
+                    case LOW:
+                        lowFlowSegmentationMenuItem.setSelected(true);
+                        break;
+                    case MEDIUM:
+                        mediumFlowSegmentationMenuItem.setSelected(true);
+                        break;
+                    default:
+                        highFlowSegmentationMenuItem.setSelected(true);
+                        break;
+                }
             }
             angularDistributionSlider.setValue((int) (model.getAngularDistributionWeight() * 100));
 
@@ -2244,8 +2254,17 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_exportSVGMenuItemActionPerformed
 
     private void addLayer(GeometryCollection geometry, String name) {
+        assert (geometry != null);
+        
         Layer layer = model.addLayer(geometry);
         layer.setName(name);
+        // depth first search to first non-collection geometry
+        Geometry g = geometry;
+        while (g.getNumGeometries() > 1) {
+            g = g.getGeometryN(0);
+        }
+        boolean fill = g instanceof Polygon;
+        layer.getVectorSymbol().setFilled(fill);
         updateLayerList();
         layerList.setSelectedIndex(0);
         mapComponent.showAll();
@@ -3498,7 +3517,9 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_resolveIntersectionsCheckBoxMenuItemActionPerformed
 
     /**
-     * Returns a string that can be used for a file name when exporting to a file.
+     * Returns a string that can be used for a file name when exporting to a
+     * file.
+     *
      * @return file name without file extension.
      */
     private String getFileName() {

@@ -37,6 +37,16 @@ public class SVGExporter {
     private static final String XMLEVENTSNAMESPACE = "http://www.w3.org/2001/xml-events";
 
     /**
+     * id of point symbol used by SVG use elements for Points
+     */
+    private static final String POINT_SYMBOL_ID = "PointSymbol";
+    
+    /**
+     * Radius of point symbol for SVG use element for Points
+     */
+    private static final double POINT_SYMBOL_RADIUS = 5;
+
+    /**
      * Factor to convert from millimeter to pixels. Assumes 72 pixels per inch.
      */
     protected static final double MM2PX = 72. / 2.54 / 10.;
@@ -101,7 +111,7 @@ public class SVGExporter {
     }
 
     /**
-     * 
+     *
      * @param width canvas width in pixels
      * @param height canvas height in pixels
      */
@@ -248,12 +258,13 @@ public class SVGExporter {
      *
      * @param collection The GeometryCollection to convert.
      * @param parent The parent element that will contain the passed
-     * GeometryCollection.
+     * GeometryCollection. This is not always the SVG root element.
+     * @param svgRootElement SVG root element containing all other elements
      * @param document The DOM.
      * @return The element containing all geometry features.
      */
     protected Element appendGeometryCollection(GeometryCollection collection,
-            Element parent, Document document) {
+            Element parent, Element svgRootElement, Document document) {
 
         Element g = document.createElementNS(SVGNAMESPACE, "g");
         if (g == null) {
@@ -271,13 +282,13 @@ public class SVGExporter {
             } else if (geometry instanceof Polygon) {
                 svgPath = convertToSVGPath((Polygon) geometry);
             } else if (geometry instanceof MultiPolygon) {
-                svgPath = convertToSVGPath((MultiPolygon) geometry);
+                svgPath = convertToSVGSymbol((MultiPolygon) geometry);
             } else if (geometry instanceof Point) {
-                System.err.println("SVG export of points not supported yet");
+                addPoint(document, svgRootElement, g, (Point)geometry);
             } else if (geometry instanceof GeometryCollection) {
-                appendGeometryCollection((GeometryCollection) geometry, g, document);
+                appendGeometryCollection((GeometryCollection) geometry, svgRootElement, g, document);
             } else {
-                System.err.println("SVG export found unsupported geometry type");
+                System.err.println("SVG exporter found unsupported geometry type");
             }
             if (svgPath != null) {
                 Element pathElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
@@ -333,13 +344,65 @@ public class SVGExporter {
     }
 
     /**
+     * Add a symbol element to the SVG root element if no such symbol exists
+     * yet.
+     *
+     * @param document document
+     * @param svgRootElement SVG root element
+     */
+    private void addSVGPointSymbol(Document document, Element svgRootElement, Element parent) {
+        Element pointSymbol = document.getElementById(POINT_SYMBOL_ID);
+        if (pointSymbol == null) {
+            pointSymbol = (Element) document.createElementNS(SVGNAMESPACE, "symbol");
+            pointSymbol.setAttribute("id", POINT_SYMBOL_ID);
+            pointSymbol.setIdAttribute("id", true);
+            double r = POINT_SYMBOL_RADIUS;
+            String viewBoxStr = String.format("%f %f %f %f", -r, -r, 2 * r, 2 * r);
+            pointSymbol.setAttribute("viewBox", viewBoxStr);
+            Element circle = (Element) document.createElementNS(SVGNAMESPACE, "circle");
+            circle.setAttribute("r", Double.toString(POINT_SYMBOL_RADIUS));
+            pointSymbol.appendChild(circle);
+            svgRootElement.insertBefore(pointSymbol, parent);
+        }
+    }
+
+    /**
+     * Creates a SVG use element for a Point and adds it to the parent element.
+     * @param document SVG document
+     * @param parent parent element to receive the use element
+     * @param point point to convert to use element
+     */
+    private void addPoint(Document document, Element svgRootElement, Element parent, Point point) {
+        
+        // add SVG symbol if this is the first point
+        addSVGPointSymbol(document, svgRootElement, parent);
+        
+        // create a SVG use element in the format used by Illustrator CS6
+        // <use xlink:href="#PointSymbol"  width="10" height="10" x="-5" y="-5" transform="matrix(1 0 0 -1 100 50)" overflow="visible"/>
+        Element useElement = (Element) document.createElementNS(SVGNAMESPACE, "use");
+        useElement.setAttribute("xlink:href", "#" + POINT_SYMBOL_ID);
+        useElement.setAttribute("width", Double.toString(POINT_SYMBOL_RADIUS * 2));
+        useElement.setAttribute("height", Double.toString(POINT_SYMBOL_RADIUS * 2));
+        useElement.setAttribute("x", Double.toString(POINT_SYMBOL_RADIUS));
+        useElement.setAttribute("y", Double.toString(POINT_SYMBOL_RADIUS));
+        useElement.setAttribute("overflow", "visible");
+
+        String xStr = df.format(xToSVGCanvas(point.getX()));
+        String yStr = df.format(yToSVGCanvas(point.getY()));
+        String trasnformStr = String.format("matrix(1 0 0 -1 %s %s)", xStr, yStr);
+        useElement.setAttribute("transform", trasnformStr);
+        
+        parent.appendChild(useElement);
+    }
+
+    /**
      * Converts a MultiPolygon to a SVG string for the d attribute of a path
      * element.
      *
      * @param multiPolygon The geometry to convert.
      * @return A string for the d attribute of a SVG path element.
      */
-    private String convertToSVGPath(MultiPolygon multiPolygon) {
+    private String convertToSVGSymbol(MultiPolygon multiPolygon) {
         int numPolygons = multiPolygon.getNumGeometries();
         String svgPath = "";
         for (int i = 0; i < numPolygons; i++) {
@@ -377,7 +440,7 @@ public class SVGExporter {
             strokeWidth = Double.max(0, strokeWidth);
             element.setAttribute("stroke-width", Double.toString(strokeWidth));
         }
-        
+
         // fill color
         String fillColorStr;
         if (fillColor == null) {

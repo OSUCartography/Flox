@@ -22,12 +22,12 @@ public class VectorSymbol {
     /**
      * color of filling
      */
-    private Color fillColor = Color.decode("#BAD8F5");
+    private Color fillColor = Color.decode("#F3F3F3");
     
     /**
      * If true, geometry is filled.
      */
-    private boolean filled = false;
+    private boolean filled = true;
 
     /**
      * @return the strokeColor

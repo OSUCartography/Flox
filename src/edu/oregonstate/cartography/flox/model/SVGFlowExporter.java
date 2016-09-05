@@ -106,8 +106,8 @@ public class SVGFlowExporter extends SVGExporter {
         int nbrLayers = model.getNbrLayers();
         for (int i = nbrLayers - 1; i >= 0; i--) {
             Layer layer = model.getLayer(i);
-            Element g = appendGeometryCollection(layer.getGeometryCollection(),
-                    svgRootElement, document);
+            Element g = appendGeometryCollection(layer.getGeometryCollection(), 
+                    svgRootElement, svgRootElement, document);
             g.setAttribute("id", layer.getName());
             VectorSymbol symbol = layer.getVectorSymbol();
             Color fillColor = symbol.isFilled()
