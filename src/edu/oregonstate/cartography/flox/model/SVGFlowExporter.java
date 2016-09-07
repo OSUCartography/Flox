@@ -59,17 +59,17 @@ public class SVGFlowExporter extends SVGExporter {
         str.append(df.format(yToSVGCanvas(arrow.getBasePt().y)));
 
         // Line to the first corner
-        str.append(", L ");
+        str.append(" L ");
         str.append(df.format(xToSVGCanvas(arrow.getCorner1Pt().x)));
         str.append(" ");
         str.append(df.format(yToSVGCanvas(arrow.getCorner1Pt().y)));
 
         // Quad to the tip
-        str.append(", Q ");
+        str.append(" Q ");
         str.append(df.format(xToSVGCanvas(arrow.getCorner1cPt().x)));
         str.append(" ");
         str.append(df.format(yToSVGCanvas(arrow.getCorner1cPt().y)));
-        str.append(", ");
+        str.append(" ");
         str.append(df.format(xToSVGCanvas(arrow.getTipPt().x)));
         str.append(" ");
         str.append(df.format(yToSVGCanvas(arrow.getTipPt().y)));
@@ -79,13 +79,13 @@ public class SVGFlowExporter extends SVGExporter {
         str.append(df.format(xToSVGCanvas(arrow.getCorner2cPt().x)));
         str.append(" ");
         str.append(df.format(yToSVGCanvas(arrow.getCorner2cPt().y)));
-        str.append(", ");
+        str.append(" ");
         str.append(df.format(xToSVGCanvas(arrow.getCorner2Pt().x)));
         str.append(" ");
         str.append(df.format(yToSVGCanvas(arrow.getCorner2Pt().y)));
 
         // Line back to the base
-        str.append(", L ");
+        str.append(" L ");
         str.append(df.format(xToSVGCanvas(arrow.getBasePt().x)));
         str.append(" ");
         str.append(df.format(yToSVGCanvas(arrow.getBasePt().y)));
