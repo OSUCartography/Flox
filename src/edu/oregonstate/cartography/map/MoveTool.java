@@ -121,14 +121,14 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
         updateLocation(point);
         updateCoordinateFields();
-         model.computeArrowheads();
+        model.computeArrowheads();
     }
 
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
         // this calls mouseClicked
         super.endDrag(point, evt);
-        
+
         // deselect all Bezier control points
         if (model.isControlPtSelected()) {
             Iterator<Flow> iterator = model.flowIterator();
@@ -142,8 +142,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
         }
 
-         model.computeArrowheads();
-         
+        model.computeArrowheads();
+
         // update the force-based layout and add undo option        
         if (dragging == true) {
             ((FloxMapComponent) mapComponent).layout("Move");
@@ -174,13 +174,26 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
         } else {
             // Move selected nodes
-            // FIXME only if a node was clicked, and it is selected
-            Iterator nodes = model.nodeIterator();
+            Iterator<Point> nodes = model.nodeIterator();
             while (nodes.hasNext()) {
-                Point node = (Point) nodes.next();
+                Point node = nodes.next();
                 if (node.isSelected()) {
                     node.x += (point.x - previousDrag_x);
                     node.y += (point.y - previousDrag_y);
+                }
+            }
+
+            // move control points
+            Iterator<Flow> flows = model.flowIterator();
+            while (flows.hasNext()) {
+                Flow flow = flows.next();
+                if (flow.getStartPt().isSelected()) {
+                    flow.getCtrlPt().x += (point.x - previousDrag_x) / 2;
+                    flow.getCtrlPt().y += (point.y - previousDrag_y) / 2;
+                }
+                if (flow.getEndPt().isSelected()) {
+                    flow.getCtrlPt().x += (point.x - previousDrag_x) / 2;
+                    flow.getCtrlPt().y += (point.y - previousDrag_y) / 2;
                 }
             }
         }
@@ -188,7 +201,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         // Redraw the map
         mapComponent.refreshMap();
 
-        // Update the previousDrax coordinates.
+        // Update the previousDrag coordinates.
         previousDrag_x = point.x;
         previousDrag_y = point.y;
     }
