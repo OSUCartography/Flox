@@ -106,9 +106,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         }
 
         Graphics2D g2d = getGraphics2DBuffer();
-        g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, bufferImage.getWidth(), bufferImage.getHeight());
-
+        
         // Give the current MapTool a chance to draw some background drawing.
         // Returns true if the the tool also painted the map, i.e. there is no
         // need to paint the map.

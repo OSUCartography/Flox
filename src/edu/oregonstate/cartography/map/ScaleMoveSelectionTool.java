@@ -7,7 +7,6 @@
 
 package edu.oregonstate.cartography.map;
 
-import edu.oregonstate.cartography.flox.gui.Undo;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
