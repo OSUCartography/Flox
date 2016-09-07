@@ -214,8 +214,6 @@ public class Flow {
     }
 
     /**
-     *
-     * /**
      * Computes geometry of arrow heads
      *
      * @param model model

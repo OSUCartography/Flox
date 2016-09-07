@@ -119,23 +119,18 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      */
     @Override
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
-
         updateLocation(point);
         updateCoordinateFields();
+         model.computeArrowheads();
     }
 
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
-        super.endDrag(point, evt);
         // this calls mouseClicked
+        super.endDrag(point, evt);
         
-        if (dragging == true) {
-            // FIXME    model.addUndo("Move");
-        }
-        dragging = false;
-
+        // deselect all Bezier control points
         if (model.isControlPtSelected()) {
-            // deselect all control points
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
@@ -143,10 +138,17 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 if (cPt.isSelected()) {
                     cPt.setSelected(false);
                 }
-
                 mapComponent.refreshMap();
             }
         }
+
+         model.computeArrowheads();
+         
+        // update the force-based layout and add undo option        
+        if (dragging == true) {
+            ((FloxMapComponent) mapComponent).layout("Move");
+        }
+        dragging = false;
     }
 
     /**

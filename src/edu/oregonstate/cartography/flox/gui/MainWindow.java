@@ -2255,7 +2255,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void addLayer(GeometryCollection geometry, String name) {
         assert (geometry != null);
-        
+
         Layer layer = model.addLayer(geometry);
         layer.setName(name);
         // depth first search to first non-collection geometry
@@ -3412,7 +3412,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void useInFlowCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useInFlowCheckboxActionPerformed
         if (model != null) {
             model.setPointArrowTowardsEndpoint(useInFlowCheckbox.isSelected());
-            updateArrowHeads();
             mapComponent.refreshMap();
             addUndo("Use In Flow");
         }
@@ -3628,7 +3627,9 @@ public class MainWindow extends javax.swing.JFrame {
                 } else {
                     --iterBeforeMovingFlows;
                 }
-
+                
+                model.computeArrowheads();
+                
                 // publish intermediate results in map. This will call process() 
                 // on the Event Dispatch Thread.
                 if (model.liveDrawing) {
@@ -3644,7 +3645,7 @@ public class MainWindow extends javax.swing.JFrame {
             model.applyLocks(initialLocks);
 
             //model.changeToUnidirectionalFlows();
-            model.computeArrowheads();
+            
         }
 
         @Override
@@ -3717,6 +3718,12 @@ public class MainWindow extends javax.swing.JFrame {
         layoutWorker.execute();
     }
 
+    /**
+     * Update the arrowheads after a parameter for the arrowhead geometry
+     * changed. This allows for quick previews while arrow-related sliders are
+     * changed. This must be followed by a re-computation of the layout to take
+     * the new geometry of arrowheads into account.
+     */
     private void updateArrowHeads() {
         if (updatingGUI || model.getNbrFlows() == 0) {
             return;
