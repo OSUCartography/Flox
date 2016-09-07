@@ -67,11 +67,13 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
             // Get an arraylist selectedNodes that were clicked
             // FIXME, a magic number of 2 is passed in for the pixel tolorance
-            ArrayList<Point> clickedNodes = ((FloxMapComponent) mapComponent).getClickedNodes(selectedNodes, point, 2);
+            int tolPx = SelectionTool.CLICK_PIXEL_TOLERANCE;
+            FloxMapComponent map = (FloxMapComponent) mapComponent;
+            Point clickedNode = map.getClickedNode(selectedNodes, point, tolPx);
 
             // If any nodes were clicked, select the first one
-            if (clickedNodes.size() > 0) {
-                clickedNodes.get(0).setSelected(true);
+            if (clickedNode != null) {
+                clickedNode.setSelected(true);
             }
         }
     }
@@ -89,9 +91,11 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             // There is at least one selected node
             // Was one of them clicked?
             ArrayList<Point> selectedNodes = model.getSelectedNodes();
-            if (((FloxMapComponent) mapComponent).getClickedNodes(selectedNodes, point, 2).size() > 0) {
-                // FIXME, having to convert mapComponent to FloxMapComponent
-                // all the time is annoying.
+            int tolPx = SelectionTool.CLICK_PIXEL_TOLERANCE;
+            FloxMapComponent map = (FloxMapComponent) mapComponent;
+            Point clickedNode = map.getClickedNode(selectedNodes, point, tolPx);
+            
+            if (clickedNode != null) {
                 // At least one selected node was clicked
                 // Allow dragging
                 dragging = true;

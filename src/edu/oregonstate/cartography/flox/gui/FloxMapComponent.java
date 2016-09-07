@@ -173,7 +173,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     }
 
     /**
-     * Returns an ArrayList of nodes that were clicked.
+     * Returns the node at a position in pixel coordinates.
      *
      * @param nodes An ArrayList of nodes from which clicked nodes will be
      * returned
@@ -181,9 +181,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * @param pixelTolerance If the click is within this pixel tolerance of the
      * node, it will be returned. This is to account for the the stroke width of
      * the node drawing. In pixels.
-     * @return An ArrayList of nodes that were clicked.
+     * @return the clicked node or null
      */
-    public ArrayList<Point> getClickedNodes(ArrayList<Point> nodes,
+    public Point getClickedNode(ArrayList<Point> nodes,
             Point2D.Double click, double pixelTolerance) {
         // Create an empty ArrayList to store clicked nodes
         ArrayList<Point> clickedNodes = new ArrayList<>();
@@ -209,7 +209,14 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
             }
         }
 
-        return clickedNodes;
+        // sort by increasing node value
+        java.util.Collections.sort(nodes, (Point node1, Point node2) -> {
+            return Double.compare(node1.getValue(), node2.getValue());
+            
+        });
+        
+        // return the smallest node, which is visually on top of all others on the map
+        return clickedNodes.isEmpty() ? null : clickedNodes.get(0);
     }
 
     public boolean isDrawCanvas() {

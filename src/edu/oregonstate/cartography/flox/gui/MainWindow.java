@@ -3099,15 +3099,13 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
-        setLockUnlockButtonIcon();
+        updateLockUnlockButtonIcon();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectNoneMenuItemActionPerformed
 
     private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(true);
-
-        setLockUnlockButtonIcon();
-
+        updateLockUnlockButtonIcon();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectAllMenuItemActionPerformed
 
@@ -3118,7 +3116,7 @@ public class MainWindow extends javax.swing.JFrame {
      * there some kind of action listener this code could go into that the
      * SelectionTool could trigger?
      */
-    private void setLockUnlockButtonIcon() {
+    private void updateLockUnlockButtonIcon() {
         ArrayList<Flow> selectedFlows = model.getSelectedFlows();
         if (selectedFlows.size() > 0) {
             lockUnlockButton.setEnabled(true);

@@ -282,8 +282,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         // needed because flows are deselected by the initial click.
                     }
                 } else // flow bb does not intersect rect
-                if (shiftDown == false) {
-                    flow.setSelected(false);
+                {
+                    if (shiftDown == false) {
+                        flow.setSelected(false);
+                    }
                 }
             }
         }
@@ -347,20 +349,21 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         // SELECT NODES
         // Get clicked nodes
         ArrayList<Point> nodes = model.getNodes();
-        ArrayList<Point> clickedNodes = ((FloxMapComponent) mapComponent)
-                .getClickedNodes(nodes, point, pixelTolerance);
+        int tolPx = SelectionTool.CLICK_PIXEL_TOLERANCE;
+        FloxMapComponent map = (FloxMapComponent) mapComponent;
+        Point clickedNode = map.getClickedNode(nodes, point, tolPx);
 
         // If a node was clicked, select it. If it was already selected,
         // deselect it if shift is held down. Deselect all other nodes unless
         // shift is held down.
-        if (clickedNodes.size() > 0) { // At least one node was clicked.
-            if (clickedNodes.get(0).isSelected()) {// The first node is currently selected.
+        if (clickedNode != null) { // At least one node was clicked.
+            if (clickedNode.isSelected()) {// The first node is currently selected.
                 // Set nodeGotSelected to true so that flows aren't selected later.
                 nodeGotSelected = true;
                 if (shiftDown) {
                     // Shift is held down.
                     // Deselect it
-                    clickedNodes.get(0).setSelected(false);
+                    clickedNode.setSelected(false);
                 }
                 // set nodeGotSelected to true so that flows aren't 
                 // selected later. FIXME, this is weird.
@@ -374,15 +377,17 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     }
                 }
                 // select the first node in clickedNodes
-                clickedNodes.get(0).setSelected(true);
+                clickedNode.setSelected(true);
                 nodeGotSelected = true;
             }
         } else // No nodes were clicked.
-        if (!shiftDown) {
-            // Shift is not held down.
-            // Deselect all nodes.
-            for (Point node : nodes) {
-                node.setSelected(false);
+        {
+            if (!shiftDown) {
+                // Shift is not held down.
+                // Deselect all nodes.
+                for (Point node : nodes) {
+                    node.setSelected(false);
+                }
             }
         }
 

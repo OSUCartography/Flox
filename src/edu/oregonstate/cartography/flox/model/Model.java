@@ -633,7 +633,8 @@ public class Model {
     }
 
     /**
-     * Removes all selected nodes and flows from the graph.
+     * Removes all selected nodes and flows from the graph. Selects nodes that
+     * were connected to a selected flow.
      *
      * @return The number of flows and nodes that were deleted.
      */
@@ -658,6 +659,8 @@ public class Model {
         }
 
         flowsToRemove.stream().forEach((flow) -> {
+            flow.getStartPt().setSelected(true);
+            flow.getEndPt().setSelected(true);
             deleteFlow(flow);
         });
 
@@ -901,8 +904,8 @@ public class Model {
      * @param increasing If true, the nodes are arranged in increasing order.
      * @return A new ArrayList with references to the nodes in the graph.
      */
-    public ArrayList<Point> getOrderedNodes(boolean increasing) {
-        return graph.getOrderedNodes(increasing);
+    public ArrayList<Point> getSortedNodes(boolean increasing) {
+        return graph.getSortedNodes(increasing);
     }
 
     /**
@@ -1125,7 +1128,7 @@ public class Model {
             node.setSelected(select);
         }
     }
-
+    
     /**
      * Set the lock for all selected flows.
      *

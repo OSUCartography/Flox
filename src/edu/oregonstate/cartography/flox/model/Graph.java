@@ -27,19 +27,6 @@ public final class Graph {
     public Graph() {
     }
 
-    /**
-     * Copy constructor.
-     *
-     * @param original
-     */
-    public Graph(Graph original) {
-        Iterator<Flow> flowIterator = original.flowIterator();
-        while (flowIterator.hasNext()) {
-            Flow flow = flowIterator.next();
-            addFlow(flow);
-        }
-    }
-
     public void updateCachedValues() {
         int nFlows = graph.edgeSet().size();
         if (nFlows < 1) {
@@ -82,7 +69,8 @@ public final class Graph {
         Iterator<Point> nodeIterator = nodeIterator();
         double nodeSum = 0;
         int nodeCounter = 0;
-        minNodeValue = maxNodeValue = nodeIterator.next().getValue();
+        minNodeValue = Double.MAX_VALUE;
+        maxNodeValue = -Double.MAX_VALUE;
         while (nodeIterator.hasNext()) {
             double v = nodeIterator.next().getValue();
             if (v < minNodeValue) {
@@ -232,7 +220,7 @@ public final class Graph {
         return list;
     }
 
-    public ArrayList<Point> getOrderedNodes(boolean increasing) {
+    public ArrayList<Point> getSortedNodes(boolean increasing) {
         ArrayList<Point> nodes = new ArrayList<>(graph.vertexSet());
         java.util.Collections.sort(nodes, (Point node1, Point node2) -> {
             if (increasing) {

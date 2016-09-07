@@ -389,7 +389,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         // same stroke width for all nodes
         g2d.setStroke(new BasicStroke((float) (strokeWidthPx * s)));
 
-        ArrayList<Point> nodes = model.getOrderedNodes(false);
+        ArrayList<Point> nodes = model.getSortedNodes(false);
         for (Point node : nodes) {
             double nodeRadiusPx = model.getNodeRadiusPx(node);
             double r = nodeRadiusPx * s;

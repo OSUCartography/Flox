@@ -150,7 +150,7 @@ public class SVGFlowExporter extends SVGExporter {
         Element nodesGroup = (Element) document.createElementNS(SVGNAMESPACE, "g");
         svgRootElement.appendChild(nodesGroup);
         nodesGroup.setAttribute("id", "Nodes");
-        ArrayList<Point> nodes = model.getOrderedNodes(false);
+        ArrayList<Point> nodes = model.getSortedNodes(false);
         for (Point node : nodes) {
             Element circleElement = (Element) document.createElementNS(SVGNAMESPACE, "circle");
             circleElement.setAttribute("cx", df.format(xToSVGCanvas(node.x)));

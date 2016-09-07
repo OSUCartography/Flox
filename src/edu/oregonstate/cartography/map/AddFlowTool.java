@@ -9,10 +9,9 @@ import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapCompone
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-import java.util.Iterator;
 import java.awt.event.KeyEvent;
+import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 
 /**
@@ -20,18 +19,12 @@ import java.util.ArrayList;
  *
  * @author Dan Stephen
  */
-public class AddFlowTool extends MapTool {
+public class AddFlowTool extends DoubleBufferedTool {
 
     /**
      * The data model containing all flows.
      */
     private final Model model;
-
-    /**
-     * Flag indicating that an origin node has been created. The next click
-     * should create/assign a destinationNode if this is true.
-     */
-    private boolean originNodeCreated = false;
 
     /**
      * The origin node of the new flow being added. An originNode is assigned on
@@ -67,6 +60,16 @@ public class AddFlowTool extends MapTool {
     private static final int DEFAULT_FLOW_VALUE = 1;
 
     /**
+     * current mouse position in world coordinates
+     */
+    private Point2D mouse = null;
+
+    /**
+     * the value of the flow that will be created
+     */
+    private double flowValue;
+
+    /**
      * Constructor for AddFlowTool.
      *
      * @param mapComponent The current mapComponent.
@@ -85,168 +88,106 @@ public class AddFlowTool extends MapTool {
      */
     @Override
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
-        // deselect all nodes and flows
-        model.setSelectionOfAllFlowsAndNodes(false);
+
         // If an origin node was assigned, add a destination node. Otherwise, 
         // add an origin node. Aka, if this is the first click, add an origin
         // node. If this is the second click, add a destination node.
-        if (originNodeCreated) {
-            addDestinationNode(point);
-        } else {
-            addOriginNode(point);
-        }
-    }
+        if (originNode != null) {
+            ArrayList<Point> nodes = model.getNodes();
+            destinationNode = ((FloxMapComponent) mapComponent).getClickedNode(nodes, point, PIXEL_TOLERANCE);
 
-    /**
-     * Adds an originNode to the map layout. Called on the first click while the
-     * addFlowTool is active. If an existing node was clicked, that Point is
-     * assigned to originNode. If a blank space was clicked, a new Point is
-     * created and assigned to originNode.
-     *
-     * @param point The location of the new node.
-     */
-    private void addOriginNode(Point2D.Double point) {
-
-        double mapScale = mapComponent.getScale();
-        double refScale = model.getReferenceMapScale();
-
-        Iterator<Point> iterator = model.nodeIterator();
-        while (iterator.hasNext()) {
-            Point node = iterator.next();
-
-            //get the radius of the node
-            //FIXME this exact code for finding the radius is used in the 
-            //selection tool and some other places. Maybe make a method in 
-            //FloxMapComponent?
-            double nodeArea = Math.abs(node.getValue())
-                    * model.getNodeSizeScaleFactor();
-            double nodePxRadius = (Math.sqrt(nodeArea / Math.PI)) * refScale;
-            double nodeRadius = (nodePxRadius + PIXEL_TOLERANCE) / mapScale;
-
-            // calculate the distance of the click from the node center
-            double dx = node.x - point.x;
-            double dy = node.y - point.y;
-            double distSquared = (dx * dx + dy * dy);
-
-            if (distSquared <= nodeRadius * nodeRadius) {
-                originNode = node;
-
-                // Stop checking nodes
-                break;
+            // If an existing node was NOT assigned to destinationNode, make a new
+            // Point and assign it to destinationNode.
+            if (destinationNode == null) {
+                destinationNode = new Point(point.x, point.y, originNode.getValue());
             }
+
+            // Add the new flow to the data model.
+            if (destinationNode != originNode) {
+                model.addFlow(new Flow(originNode, destinationNode, flowValue));
+            }
+
+            // Reinitialize flags, set origin and destination nodes to null. This
+            // insures that new nodes will be assigned/created with successive
+            originNode = null;
+            destinationNode = null;
+
+            releaseBackground();
+            
+            // update the force-based layout and add undo option
+            ((FloxMapComponent) mapComponent).layout("Add Flow");
+
+        } else {
+            
+            
+            ArrayList<Point> nodes = model.getNodes();
+            originNode = ((FloxMapComponent) mapComponent).getClickedNode(nodes, point, PIXEL_TOLERANCE);
+
+            // If an existing node was NOT assigned to originNode, create a new one 
+            if (originNode == null) {
+                double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : DEFAULT_NODE_VALUE;
+                originNode = new Point(point.x, point.y, v);
+            }
+            // select origin node if it exists in the map
+            model.setSelectionOfAllFlowsAndNodes(false);
+            originNode.setSelected(true);
+            
+            if (model.getNbrFlows() < 1) {
+                flowValue = DEFAULT_FLOW_VALUE;
+            } else {
+                flowValue = model.getMeanFlowValue();
+            }            
         }
-
-        // If an existing node was NOT assigned to originNode, create a new one 
-        // and assign it to originNode.
-        if (originNode == null) {
-            double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : DEFAULT_NODE_VALUE;
-            originNode = new Point(point.x, point.y, v);
-        }
-
-        originNodeCreated = true;
-
-        // repaint the map
         mapComponent.refreshMap();
     }
 
-    /**
-     * Adds a destinationNode to the map layout. Called on the second click
-     * while the addFlowTool is active. If an existing node was clicked, that
-     * Point is assigned to destinationNode. If a blank space was clicked, a new
-     * Point is created and assigned to destinationNode.
-     *
-     * @param point The location of the new node.
-     */
-    private void addDestinationNode(Point2D.Double point) {
-
-        double mapScale = mapComponent.getScale();
-        double refScale = model.getReferenceMapScale();
-
-        ArrayList<Point> nodes = model.getNodes();
-        for (int i = nodes.size() - 1; i >= 0; i--) {
-            Point node = nodes.get(i);
-
-            //get the radius of the node
-            //FIXME this exact code for finding the radius is used in the 
-            //selection tool and maybe other places. Perhaps make a method in 
-            //FloxMapComponent.
-            double nodeArea = Math.abs(node.getValue())
-                    * model.getNodeSizeScaleFactor();
-            double nodeRadius = (Math.sqrt(nodeArea / Math.PI)) * refScale;
-            nodeRadius = (nodeRadius + PIXEL_TOLERANCE) / mapScale;
-
-            // calculate the distance of the click from the node center
-            double dx = node.x - point.x;
-            double dy = node.y - point.y;
-            double distSquared = (dx * dx + dy * dy);
-
-            if (distSquared <= nodeRadius * nodeRadius) {
-                destinationNode = node;
-
-                // Stop checking nodes
-                break;
-            }
-        }
-
-        // If an existing node was NOT assigned to destinationNode, make a new
-        // Point and assign it to destinationNode.
-        if (destinationNode == null) {
-            destinationNode = new Point(point.x, point.y);
-        }
-
-        // Set the value of newFlow to the mean of existing flow values.
-        // If no other flows exist, set the value of newFlow to 1.
-        final double value;
-        if (model.getNbrFlows() < 1) {
-            value = DEFAULT_FLOW_VALUE;
+    private void conditionalCaptureBackground(Point2D.Double point) {
+        // if this is the first time, capture the screen.
+        if (originNode != null && !isCapturingBackground()) {
+            mouse = (Point2D.Double) point.clone();
+            captureBackground();
+            mapComponent.repaint();
         } else {
-            value = model.getMeanFlowValue();
+            releaseBackground();
         }
-        // build a flow from the toNode and the fromNode, add it to the model
-        Flow newFlow = new Flow(originNode, destinationNode, value);
+    }
+    @Override
+    public void mouseMoved(Point2D.Double point, MouseEvent evt) {
+        conditionalCaptureBackground(point);
+    }
 
-        // Add the new flow to the data model.
-        if (destinationNode != originNode) {
-            model.addFlow(newFlow);
-        }
+    @Override
+    public void mouseEntered(Point2D.Double point, MouseEvent evt) {
+        conditionalCaptureBackground(point);
+        mapComponent.repaint();
+    }
 
-        // Reinitialize flags, set origin and destination nodes to null. This
-        // insures that new nodes will be assigned/created with successive
-        originNodeCreated = false;
-        originNode = null;
-        destinationNode = null;
-
-        // repaint the map
-        mapComponent.refreshMap();
-
-        // update the force-based layout and add undo option
-        ((FloxMapComponent) mapComponent).layout("Add Flow");
+    @Override
+    public void mouseExited(Point2D.Double point, MouseEvent evt) {
+        mouse = null;
+        releaseBackground();
+        mapComponent.repaint();
     }
 
     /**
-     * Draw the origin node after the first click and highlight it. If an
-     * existing node was clicked, this draws a highlighted node of the same
-     * radius on top of it.
+     * Draw a line from the originNode to the current mouse position.
      *
      * @param g2d
      */
     @Override
     public void draw(Graphics2D g2d) {
 
-        if (originNodeCreated) {
+        if (isCapturingBackground() && originNode != null && mouse != null) {
             FloxRenderer.enableHighQualityRenderingHints(g2d, true);
-            double refScale = model.getReferenceMapScale();
-
-            double nodeArea = Math.abs(originNode.getValue()) * model.getNodeSizeScaleFactor();
-            double r = (Math.sqrt(nodeArea / Math.PI)) * refScale;
-            double x = mapComponent.xToPx(originNode.x);
-            double y = mapComponent.yToPx(originNode.y);
-            Ellipse2D circle = new Ellipse2D.Double(x - r, y - r, r * 2, r * 2);
-            g2d.setColor(FloxRenderer.NODE_FILL_COLOR);
-            g2d.fill(circle);
-            g2d.setColor(FloxRenderer.SELECTION_COLOR);
-            g2d.setStroke(new BasicStroke(model.getNodeStrokeWidthPx()));
-            g2d.draw(circle);
+            Point endNode = new Point(mouse.getX(), mouse.getY(), originNode.getValue());
+            Flow flow = new Flow(originNode, endNode, flowValue);
+            FloxMapComponent map = (FloxMapComponent) mapComponent;
+            GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
+            double s = map.getScale() / model.getReferenceMapScale();
+            double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
+            g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
+                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            g2d.draw(flowPath);
         }
     }
 
@@ -259,7 +200,7 @@ public class AddFlowTool extends MapTool {
      */
     @Override
     public boolean keyEvent(KeyEvent keyEvent) {
-        if (originNodeCreated) {
+        if (originNode != null) {
 
             // treat backspace and delete key release events
             boolean keyReleased = keyEvent.getID() == KeyEvent.KEY_RELEASED;
@@ -268,7 +209,6 @@ public class AddFlowTool extends MapTool {
             if (keyReleased && (isDeleteKey || isBackspaceKey)) {
                 // delete new origin node
                 originNode = null;
-                originNodeCreated = false;
                 // repaint the map
                 mapComponent.refreshMap();
                 return true;
