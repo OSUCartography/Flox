@@ -361,7 +361,7 @@ public class MainWindow extends javax.swing.JFrame {
         fillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         addLayerButton = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        removeLayerButton = new javax.swing.JButton();
         maximumFlowWidthSlider = new javax.swing.JSlider();
         jLabel26 = new javax.swing.JLabel();
         maximumNodeSizeSlider = new javax.swing.JSlider();
@@ -1200,18 +1200,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
         mapControlPanel.add(addLayerButton, gridBagConstraints);
 
-        jButton1.setText("-");
-        jButton1.setPreferredSize(new java.awt.Dimension(22, 22));
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        removeLayerButton.setText("-");
+        removeLayerButton.setPreferredSize(new java.awt.Dimension(22, 22));
+        removeLayerButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                removeLayerButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 19;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        mapControlPanel.add(jButton1, gridBagConstraints);
+        mapControlPanel.add(removeLayerButton, gridBagConstraints);
 
         maximumFlowWidthSlider.setMajorTickSpacing(20);
         maximumFlowWidthSlider.setMinorTickSpacing(10);
@@ -2936,9 +2936,9 @@ public class MainWindow extends javax.swing.JFrame {
         openShapefile();
     }//GEN-LAST:event_addLayerButtonActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void removeLayerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeLayerButtonActionPerformed
         removeSelectedLayer();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_removeLayerButtonActionPerformed
 
     private void openSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openSettingsMenuItemActionPerformed
         String filePath = FileUtils.askFile(null, "Load XML Settings", null, true, "xml");
@@ -3147,8 +3147,10 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
-        model.deleteSelectedFlowsAndNodes();
-        layout("Delete");
+        if (model.deleteSelectedFlowsAndNodes() > 0) {
+            layout("Delete");
+            mapComponent.refreshMap();
+        }
     }//GEN-LAST:event_deleteMenuItemActionPerformed
 
     private void redoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redoMenuItemActionPerformed
@@ -3805,7 +3807,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton importPanelOKButton;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
-    private javax.swing.JButton jButton1;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -3882,6 +3883,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem recomputeMenuItem;
     private javax.swing.JMenuItem redoMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
+    private javax.swing.JButton removeLayerButton;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JMenuItem resolveIntersectingSiblingsMenuItem;
     private javax.swing.JCheckBoxMenuItem resolveIntersectionsCheckBoxMenuItem;
