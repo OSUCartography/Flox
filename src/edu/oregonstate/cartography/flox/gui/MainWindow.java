@@ -3062,6 +3062,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
         ForceLayouter layouter = new ForceLayouter(model);
         layouter.straightenFlows(true);
+        model.computeArrowheads();
         addUndo("Straighten Flows");
         mapComponent.refreshMap();
     }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
