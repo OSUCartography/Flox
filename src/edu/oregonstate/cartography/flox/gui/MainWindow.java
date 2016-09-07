@@ -481,6 +481,7 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
         liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -2047,7 +2048,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         infoMenu.setText("Info");
 
-        floxReportMenuItem.setText("Report…");
+        floxReportMenuItem.setText("Layout Report…");
         floxReportMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 floxReportMenuItemActionPerformed(evt);
@@ -2216,6 +2217,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(liveDrawingCheckBoxMenuItem);
+
+        printFlowsToConsoleMenuItem.setText("Print Flows to Console");
+        printFlowsToConsoleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                printFlowsToConsoleMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(printFlowsToConsoleMenuItem);
 
         menuBar.add(debugMenu);
 
@@ -3516,6 +3525,13 @@ public class MainWindow extends javax.swing.JFrame {
         layout("");
     }//GEN-LAST:event_resolveIntersectionsCheckBoxMenuItemActionPerformed
 
+    private void printFlowsToConsoleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printFlowsToConsoleMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getFlows();
+        for (Flow flow : flows) {
+            System.out.println(flow.toString());
+        }
+    }//GEN-LAST:event_printFlowsToConsoleMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -3860,6 +3876,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem openShapefileMenuItem;
     private javax.swing.JSlider peripheralStiffnessSlider;
     private javax.swing.JLabel pointsFilePathLabel;
+    private javax.swing.JMenuItem printFlowsToConsoleMenuItem;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JPanel progressBarPanel;
     private javax.swing.JMenuItem recomputeMenuItem;

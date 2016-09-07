@@ -111,6 +111,18 @@ public class Flow {
         cPt = new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Flow ");
+        sb.append("start=").append(startPt);
+        sb.append(", end=").append(endPt);
+        sb.append(", ctrl=").append(cPt);
+        sb.append(", value=").append(value);
+        sb.append(", selected=").append(selected);
+        sb.append(", locked=").append(locked);
+        return sb.toString();
+    }
+
     /**
      * Returns the start point of the flow.
      *
