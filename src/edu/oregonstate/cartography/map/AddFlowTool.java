@@ -159,7 +159,6 @@ public class AddFlowTool extends DoubleBufferedTool {
     @Override
     public void mouseEntered(Point2D.Double point, MouseEvent evt) {
         conditionalCaptureBackground(point);
-        mapComponent.repaint();
     }
 
     @Override

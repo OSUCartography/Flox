@@ -186,16 +186,18 @@ public final class Graph {
     }
 
     /**
-     * Returns the flow from the end to the start point of the passed flow, if it exists.
+     * Returns the flow from the end to the start point of the passed flow, if
+     * it exists.
+     *
      * @param flow search for flow in opposite direction to this flow
      * @return flow with opposite direction or null
      */
     public Flow getOpposingFlow(Flow flow) {
         return graph.getEdge(flow.getEndPt(), flow.getStartPt());
     }
-    
+
     /**
-     * Returns a list of flows connected to a node. The flows are ordered
+     * Returns a list of flows connected to a node. The flows are sorted
      * anti-clockwise by the orientation of the line connecting start and end
      * points. The origin of the polar coordinate system is the horizontal x
      * axis.
@@ -219,6 +221,34 @@ public final class Graph {
         });
         return list;
     }
+
+    /**
+     * Returns a set of flows connected to a node. 
+     *
+     * @param node search for flows connected to this node
+     * @return a collection of Flows connected to the passed node
+     */
+    public Collection<Flow> getFlowsForNode(Point node) {
+        return graph.edgesOf(node);
+    }
+    
+    /**
+     * Returns a flow connecting two nodes. 
+     *
+     * @param node1 search for flows connected to this node
+     * @param node2 search for flows connected to this node
+     * @return a flow connected to the passed two nodes or null
+     */
+    public Flow getFlowBetweenNodes(Point node1, Point node2) {
+        Collection<Flow> flows = graph.edgesOf(node1);
+        for (Flow flow : flows) {
+            if (flow.endPt == node2 || flow.startPt == node2) {
+                return flow;
+            }
+        }
+        return null;
+    }
+
 
     public ArrayList<Point> getSortedNodes(boolean increasing) {
         ArrayList<Point> nodes = new ArrayList<>(graph.vertexSet());

@@ -263,6 +263,14 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectNoneMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="selectUnconnectedNodesMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Select Unconnected Nodes"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectUnconnectedNodesMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator10">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="lockMenuItem">
@@ -306,6 +314,14 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="straightenFlowsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mergeNodesMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Merge Nodes"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mergeNodesMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -672,7 +688,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/edu/oregonstate/cartography/icons/Arrow16x16.gif"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="Select, move and scale objects."/>
+                <Property name="toolTipText" type="java.lang.String" value="Select and Move Nodes and Flows"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[24, 24]"/>
@@ -691,7 +707,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/edu/oregonstate/cartography/icons/SetPoint16x16.gif"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="Add Flow"/>
+                <Property name="toolTipText" type="java.lang.String" value="Add Nodes and Flows"/>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[24, 24]"/>
                 </Property>
@@ -767,7 +783,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/edu/oregonstate/cartography/icons/Hand16x16.gif"/>
                 </Property>
-                <Property name="toolTipText" type="java.lang.String" value="Pan"/>
+                <Property name="toolTipText" type="java.lang.String" value="Pan Map"/>
                 <Property name="focusable" type="boolean" value="false"/>
                 <Property name="horizontalTextPosition" type="int" value="0"/>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -805,6 +821,11 @@
                   <Image iconType="3" name="/edu/oregonstate/cartography/icons/ShowAll20x14.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="Show All"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder bottom="0" left="25" right="25" top="0"/>
+                  </Border>
+                </Property>
                 <Property name="borderPainted" type="boolean" value="false"/>
                 <Property name="contentAreaFilled" type="boolean" value="false"/>
                 <Property name="focusable" type="boolean" value="false"/>
@@ -816,6 +837,9 @@
               </Events>
             </Component>
             <Component class="edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel" name="coordinateInfoPanel">
+              <Properties>
+                <Property name="toolTipText" type="java.lang.String" value="Cursor Coordinates and Measured Distance and Angle"/>
+              </Properties>
             </Component>
             <Component class="javax.swing.JLabel" name="vallueLabel">
               <Properties>
@@ -837,6 +861,7 @@
                 <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
                   <Format format="#,##0.######" subtype="-1" type="0"/>
                 </Property>
+                <Property name="toolTipText" type="java.lang.String" value="Flow or Node Value"/>
                 <Property name="enabled" type="boolean" value="false"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.editors2.FontEditor">
                   <FontInfo relative="true">
@@ -858,6 +883,7 @@
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="xFormattedTextField">
               <Properties>
+                <Property name="toolTipText" type="java.lang.String" value="Node X Position"/>
                 <Property name="enabled" type="boolean" value="false"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Lucida Grande" size="11" style="0"/>
@@ -877,6 +903,7 @@
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="yFormattedTextField">
               <Properties>
+                <Property name="toolTipText" type="java.lang.String" value="Node Y Position"/>
                 <Property name="enabled" type="boolean" value="false"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Lucida Grande" size="11" style="0"/>

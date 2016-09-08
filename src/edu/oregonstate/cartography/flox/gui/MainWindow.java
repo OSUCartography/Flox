@@ -436,12 +436,14 @@ public class MainWindow extends javax.swing.JFrame {
         deleteMenuItem = new javax.swing.JMenuItem();
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNoneMenuItem = new javax.swing.JMenuItem();
+        selectUnconnectedNodesMenuItem = new javax.swing.JMenuItem();
         jSeparator10 = new javax.swing.JPopupMenu.Separator();
         lockMenuItem = new javax.swing.JMenuItem();
         unlockMenuItem = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JPopupMenu.Separator();
         reverseFlowDirectionMenuItem = new javax.swing.JMenuItem();
         straightenFlowsMenuItem = new javax.swing.JMenuItem();
+        mergeNodesMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
@@ -563,7 +565,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapToolsButtonGroup.add(arrowToggleButton);
         arrowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Arrow16x16.gif"))); // NOI18N
-        arrowToggleButton.setToolTipText("Select, move and scale objects.");
+        arrowToggleButton.setToolTipText("Select and Move Nodes and Flows");
         arrowToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         arrowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         arrowToggleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -576,7 +578,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapToolsButtonGroup.add(addFlowToggleButton);
         addFlowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/SetPoint16x16.gif"))); // NOI18N
-        addFlowToggleButton.setToolTipText("Add Flow");
+        addFlowToggleButton.setToolTipText("Add Nodes and Flows");
         addFlowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         addFlowToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -628,7 +630,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapToolsButtonGroup.add(handToggleButton);
         handToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Hand16x16.gif"))); // NOI18N
-        handToggleButton.setToolTipText("Pan");
+        handToggleButton.setToolTipText("Pan Map");
         handToggleButton.setFocusable(false);
         handToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         handToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
@@ -656,6 +658,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         showAllButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ShowAll20x14.png"))); // NOI18N
         showAllButton.setToolTipText("Show All");
+        showAllButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 25, 0, 25));
         showAllButton.setBorderPainted(false);
         showAllButton.setContentAreaFilled(false);
         showAllButton.setFocusable(false);
@@ -667,6 +670,8 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jPanel2.add(showAllButton);
+
+        coordinateInfoPanel.setToolTipText("Cursor Coordinates and Measured Distance and Angle");
         jPanel2.add(coordinateInfoPanel);
 
         vallueLabel.setFont(vallueLabel.getFont().deriveFont(vallueLabel.getFont().getSize()-2f));
@@ -675,6 +680,7 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel2.add(vallueLabel);
 
         valueFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
+        valueFormattedTextField.setToolTipText("Flow or Node Value");
         valueFormattedTextField.setEnabled(false);
         valueFormattedTextField.setFont(valueFormattedTextField.getFont().deriveFont(valueFormattedTextField.getFont().getSize()-2f));
         valueFormattedTextField.setPreferredSize(new java.awt.Dimension(80, 28));
@@ -688,6 +694,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel12.setText("X:");
         jPanel2.add(jLabel12);
 
+        xFormattedTextField.setToolTipText("Node X Position");
         xFormattedTextField.setEnabled(false);
         xFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
         xFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
@@ -701,6 +708,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel25.setText("Y:");
         jPanel2.add(jLabel25);
 
+        yFormattedTextField.setToolTipText("Node Y Position");
         yFormattedTextField.setEnabled(false);
         yFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
         yFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
@@ -1929,6 +1937,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(selectNoneMenuItem);
+
+        selectUnconnectedNodesMenuItem.setText("Select Unconnected Nodes");
+        selectUnconnectedNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectUnconnectedNodesMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectUnconnectedNodesMenuItem);
         editMenu.add(jSeparator10);
 
         lockMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -1966,6 +1982,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(straightenFlowsMenuItem);
+
+        mergeNodesMenuItem.setText("Merge Nodes");
+        mergeNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mergeNodesMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(mergeNodesMenuItem);
 
         menuBar.add(editMenu);
 
@@ -2485,14 +2509,13 @@ public class MainWindow extends javax.swing.JFrame {
         int nbrIntersections = LayoutGrader.countFlowIntersections(model);
         int nbrFlows = model.getNbrFlows();
         int nbrNodes = model.getNbrNodes();
+        int nbrUnconnectedNodes = model.countUnconnectedNodes();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Flows: ");
-        sb.append(nbrFlows);
-        sb.append("\nNodes: ");
-        sb.append(nbrNodes);
-        sb.append("\nIntersections: ");
-        sb.append(nbrIntersections);
+        sb.append("Flows: ").append(nbrFlows);
+        sb.append("\nNodes: ").append(nbrNodes);
+        sb.append("\nIntersections: ").append(nbrIntersections);
+        sb.append("\nUnconnected nodes: ").append(nbrUnconnectedNodes);
 
         sb.append("\nFlows overlapping obstacles: ");
         ForceLayouter layouter = new ForceLayouter(model);
@@ -2500,7 +2523,7 @@ public class MainWindow extends javax.swing.JFrame {
         List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles(obstacles);
         sb.append(flowsOverlappingObstacles.size());
 
-        JOptionPane.showMessageDialog(mapComponent, sb.toString(), "Flox", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(mapComponent, sb.toString(), "Layout Report", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void exponentSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_exponentSliderStateChanged
@@ -3059,13 +3082,16 @@ public class MainWindow extends javax.swing.JFrame {
         boolean hasSelectedNode = model.isNodeSelected();
         boolean isLockedFlowSelected = model.isLockedFlowSelected();
         boolean isUnlockedFlowSelected = model.isUnlockedFlowSelected();
+        boolean hasNodes = model.getNbrNodes() > 1;
         deleteMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
-        selectAllMenuItem.setEnabled(model.getNbrFlows() > 1 || model.getNbrNodes() > 1);
+        selectAllMenuItem.setEnabled(hasNodes);
         selectNoneMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
+        selectUnconnectedNodesMenuItem.setEnabled(hasNodes);
         lockMenuItem.setEnabled(isUnlockedFlowSelected);
         unlockMenuItem.setEnabled(isLockedFlowSelected);
         reverseFlowDirectionMenuItem.setEnabled(hasSelectedFlow);
         straightenFlowsMenuItem.setEnabled(hasSelectedFlow);
+        mergeNodesMenuItem.setEnabled(hasSelectedNode);
     }//GEN-LAST:event_editMenuMenuSelected
 
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
@@ -3532,6 +3558,22 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_printFlowsToConsoleMenuItemActionPerformed
 
+    private void mergeNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mergeNodesMenuItemActionPerformed
+        model.mergeSelectedNodes();
+        layout("Merge Nodes");
+    }//GEN-LAST:event_mergeNodesMenuItemActionPerformed
+
+    private void selectUnconnectedNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectUnconnectedNodesMenuItemActionPerformed
+        model.setSelectionOfAllFlowsAndNodes(false);
+        int nbrUnconnectedNodes = model.selectUnconnectedNodes();
+        if (nbrUnconnectedNodes == 0) {
+            String msg = "There are no unconnected nodes.";
+            JOptionPane.showMessageDialog(this, msg, "Flox", JOptionPane.INFORMATION_MESSAGE);
+        }
+        updateLockUnlockButtonIcon();
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_selectUnconnectedNodesMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -3863,6 +3905,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem mergeNodesMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton minColorButton;
     private javax.swing.JSlider minPxDistanceOfFlowsFromNodesSlider;
     private javax.swing.JLabel minPxDistanceOfFlowsFromNodesSliderLabel;
@@ -3895,6 +3938,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem selectNoneMenuItem;
     private javax.swing.JMenuItem selectOverlappingFlowsInfoMenuItem;
     private javax.swing.JButton selectPointsFileButton;
+    private javax.swing.JMenuItem selectUnconnectedNodesMenuItem;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;

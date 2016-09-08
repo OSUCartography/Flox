@@ -548,6 +548,102 @@ public class Model {
     }
 
     /**
+     * Selects all nodes that are not connected to any other node. Does not
+     * change the selection state of other nodes or flows.
+     * @return number of unconnected nodes
+     */
+    public int selectUnconnectedNodes() {
+        int n = 0;
+        ArrayList<Point> nodes = getNodes();
+        for (Point node : nodes) {
+            if (graph.getFlowsForNode(node).isEmpty()) {
+                node.setSelected(true);
+                ++n;
+            }
+        }
+        return n;
+    }
+
+    /**
+     * Returns the number of nodes that are not connected to any other node.
+     *
+     * @return number of unconnected nodes
+     */
+    public int countUnconnectedNodes() {
+        int nbr = 0;
+        ArrayList<Point> nodes = getNodes();
+        for (Point node : nodes) {
+            if (graph.getFlowsForNode(node).isEmpty()) {
+                ++nbr;
+            }
+        }
+        return nbr;
+    }
+
+    public void mergeSelectedNodes() {
+        ArrayList<Point> nodes = getSelectedNodes();
+        if (nodes.size() < 2) {
+            return;
+        }
+
+        // location and value of the new node
+        double x = nodes.get(0).x;
+        double y = nodes.get(0).y;
+        double v = nodes.get(0).getValue();
+        for (int i = 1; i < nodes.size(); i++) {
+            x += nodes.get(i).x;
+            y += nodes.get(i).y;
+            v += nodes.get(i).getValue();
+        }
+        x /= nodes.size();
+        y /= nodes.size();
+        Point mergedNode = new Point(x, y, v);
+
+        // find all flows connected to the nodes that will be merged
+        ArrayList<Flow> flowsToMerg = new ArrayList<>();
+        for (Point node : nodes) {
+            Collection<Flow> flows = graph.getFlowsForNode(node);
+            flowsToMerg.addAll(flows);
+        }
+
+        // remove flows that will be merged from the graph
+        for (Flow flow : flowsToMerg) {
+            graph.removeEdge(flow);
+        }
+
+        // add merged flows
+        for (Flow flow : flowsToMerg) {
+            // ignore collapsing flows
+            if (flow.getStartPt().isSelected() && flow.getEndPt().isSelected()) {
+                continue;
+            }
+            // test whether a flow has been added between the merged node and the opposite node of this flow 
+            Flow existingFlow = graph.getFlowBetweenNodes(flow.getStartPt(), mergedNode);
+            if (existingFlow == null) {
+                existingFlow = graph.getFlowBetweenNodes(flow.getEndPt(), mergedNode);
+            }
+
+            if (existingFlow == null) {
+                // add a new flow to the graph
+                // replace start or end node of existing flows
+                if (flow.getStartPt().isSelected()) {
+                    flow.setStartPt(mergedNode);
+                    //graph.removeVertex(flow.getStartPt());
+                } else {
+                    flow.setEndPt(mergedNode);
+                    //graph.removeVertex(flow.getEndPt());
+                }
+                graph.addFlow(flow);
+            } else {
+                // increase the flow value of the existing flow
+                existingFlow.setValue(existingFlow.getValue() + flow.getValue());
+                graph.updateCachedValues();
+            }
+        }
+
+    }
+
+    /**
      * Delete a flow.
      *
      * @param flow The flow to delete
@@ -1128,7 +1224,7 @@ public class Model {
             node.setSelected(select);
         }
     }
-    
+
     /**
      * Set the lock for all selected flows.
      *
