@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * A flow based on a quadratic BŽzier curve.
+ * A flow based on a quadratic BÃ©zier curve.
  *
  * @author Bernhard Jenny
  * @author Daniel Stephen
@@ -627,7 +627,7 @@ public class Flow {
     }
 
     /**
-     * Returns the location on the BŽzier curve at parameter value t.
+     * Returns the location on the BÃ©zier curve at parameter value t.
      *
      * @param t Parameter [0..1]
      * @return Location on curve.
@@ -697,7 +697,7 @@ public class Flow {
 
     /**
      * Returns the curve parameter where a circle with radius r around the end
-     * point intersects the BŽzier curve.
+     * point intersects the BÃ©zier curve.
      *
      * @param r Radius of circle
      * @return Parameter t [0..1] where the circle intersects the flow.
@@ -729,7 +729,7 @@ public class Flow {
 
     /**
      * Returns the curve parameter where a circle with radius r around the start
-     * point intersects the BŽzier curve.
+     * point intersects the BÃ©zier curve.
      *
      * @param r Radius of circle
      * @return Parameter t [0..1] where the circle intersects the flow.
@@ -873,7 +873,7 @@ public class Flow {
 
     /**
      * Computes the shortest distance between a point and any point on this
-     * quadratic BŽzier curve. Attention: xy parameter is changed.
+     * quadratic BÃ©zier curve. Attention: xy parameter is changed.
      *
      * @param xy Point x and y on input; the closest point on the curve on
      * output.
@@ -886,7 +886,7 @@ public class Flow {
 
     /**
      * Computes the square of the shortest distance between a point and any
-     * point on this quadratic BŽzier curve. Attention: xy parameter is changed.
+     * point on this quadratic BÃ©zier curve. Attention: xy parameter is changed.
      *
      * @param xy Point x and y on input; the closest point on the curve on
      * output.

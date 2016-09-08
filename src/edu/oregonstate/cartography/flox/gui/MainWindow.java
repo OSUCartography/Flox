@@ -3,7 +3,6 @@ package edu.oregonstate.cartography.flox.gui;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import edu.oregonstate.cartography.flox.model.BooleanGrid;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
@@ -500,7 +499,7 @@ public class MainWindow extends javax.swing.JFrame {
         importPanel.add(jLabel23, gridBagConstraints);
 
         pointsFilePathLabel.setFont(pointsFilePathLabel.getFont().deriveFont(pointsFilePathLabel.getFont().getSize()-3f));
-        pointsFilePathLabel.setText("Ð");
+        pointsFilePathLabel.setText("ï¿½");
         pointsFilePathLabel.setPreferredSize(new java.awt.Dimension(500, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -511,7 +510,7 @@ public class MainWindow extends javax.swing.JFrame {
         importPanel.add(pointsFilePathLabel, gridBagConstraints);
 
         flowsFilePathLabel.setFont(flowsFilePathLabel.getFont().deriveFont(flowsFilePathLabel.getFont().getSize()-3f));
-        flowsFilePathLabel.setText("Ð");
+        flowsFilePathLabel.setText("ï¿½");
         flowsFilePathLabel.setPreferredSize(new java.awt.Dimension(500, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -520,7 +519,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         importPanel.add(flowsFilePathLabel, gridBagConstraints);
 
-        selectPointsFileButton.setText("SelectÉ");
+        selectPointsFileButton.setText("Selectï¿½");
         selectPointsFileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectPointsFileButtonActionPerformed(evt);
@@ -530,7 +529,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         importPanel.add(selectPointsFileButton, gridBagConstraints);
 
-        selectFlowsFileButton.setText("SelectÉ");
+        selectFlowsFileButton.setText("Selectï¿½");
         selectFlowsFileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectFlowsFileButtonActionPerformed(evt);
@@ -1635,7 +1634,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         clipAreaControlPanel.add(jLabel20, gridBagConstraints);
 
-        selectEndClipAreaButton.setText("Select ShapefileÉ");
+        selectEndClipAreaButton.setText("Select Shapefileï¿½");
         selectEndClipAreaButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectEndClipAreaButtonActionPerformed(evt);
@@ -1820,7 +1819,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.setText("File");
 
         importFlowsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        importFlowsMenuItem.setText("Open FlowsÉ");
+        importFlowsMenuItem.setText("Open Flowsï¿½");
         importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 importFlowsMenuItemActionPerformed(evt);
@@ -1828,7 +1827,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(importFlowsMenuItem);
 
-        openPointsAndFlowsMenuItem.setText("Open Nodes and FlowsÉ");
+        openPointsAndFlowsMenuItem.setText("Open Nodes and Flowsï¿½");
         openPointsAndFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openPointsAndFlowsMenuItemActionPerformed(evt);
@@ -1837,7 +1836,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(openPointsAndFlowsMenuItem);
         fileMenu.add(jSeparator14);
 
-        openSettingsMenuItem.setText("Open ProjectÉ");
+        openSettingsMenuItem.setText("Open Projectï¿½");
         openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openSettingsMenuItemActionPerformed(evt);
@@ -1846,7 +1845,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(openSettingsMenuItem);
 
         saveSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        saveSettingsMenuItem.setText("Save ProjectÉ");
+        saveSettingsMenuItem.setText("Save Projectï¿½");
         saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveSettingsMenuItemActionPerformed(evt);
@@ -1855,7 +1854,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(saveSettingsMenuItem);
         fileMenu.add(jSeparator3);
 
-        exportSVGMenuItem.setText("Export SVGÉ");
+        exportSVGMenuItem.setText("Export SVGï¿½");
         exportSVGMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exportSVGMenuItemActionPerformed(evt);
@@ -1863,7 +1862,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(exportSVGMenuItem);
 
-        exportImageMenuItem.setText("Export ImageÉ");
+        exportImageMenuItem.setText("Export Imageï¿½");
         exportImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exportImageMenuItemActionPerformed(evt);
@@ -1995,7 +1994,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapMenu.setText("Layers");
 
-        openShapefileMenuItem.setText("Add Layer from ShapefileÉ");
+        openShapefileMenuItem.setText("Add Layer from Shapefileï¿½");
         openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openShapefileMenuItemActionPerformed(evt);
@@ -2072,7 +2071,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         infoMenu.setText("Info");
 
-        floxReportMenuItem.setText("Layout ReportÉ");
+        floxReportMenuItem.setText("Layout Reportï¿½");
         floxReportMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 floxReportMenuItemActionPerformed(evt);
@@ -2081,7 +2080,7 @@ public class MainWindow extends javax.swing.JFrame {
         infoMenu.add(floxReportMenuItem);
         infoMenu.add(jSeparator2);
 
-        infoMenuItem.setText("InfoÉ");
+        infoMenuItem.setText("Infoï¿½");
         infoMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 infoMenuItemActionPerformed(evt);
@@ -2832,8 +2831,8 @@ public class MainWindow extends javax.swing.JFrame {
     private void openPointsAndFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openPointsAndFlowsMenuItemActionPerformed
         String title = "Open Nodes and Flows";
         importPanelOKButton.setEnabled(false);
-        pointsFilePathLabel.setText("Ð");
-        flowsFilePathLabel.setText("Ð");
+        pointsFilePathLabel.setText("ï¿½");
+        flowsFilePathLabel.setText("ï¿½");
         // http://stackoverflow.com/questions/14334931/disable-ok-button-on-joptionpane-dialog-until-user-gives-an-input/14335083#14335083
         int res = JOptionPane.showOptionDialog(
                 this,

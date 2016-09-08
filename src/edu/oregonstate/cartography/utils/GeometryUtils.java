@@ -376,7 +376,7 @@ public class GeometryUtils {
     }
 
     /**
-     * Find roots in cubic equation of the form x^3 + aáx^2 + báx + c = 0 From
+     * Find roots in cubic equation of the form x^3 + aÂ·x^2 + bÂ·x + c = 0 From
      * http://www.pouet.net/topic.php?which=9119&page=1
      *
      * @param a
@@ -411,7 +411,7 @@ public class GeometryUtils {
 
     /**
      * Computes the square of the shortest distance between a point and any
-     * point on a quadratic BŽzier curve. Attention: xy parameter is changed.
+     * point on a quadratic BÃ©zier curve. Attention: xy parameter is changed.
      * Based on
      * http://blog.gludion.com/2009/08/distance-to-quadratic-bezier-curve.html
      * and http://www.pouet.net/topic.php?which=9119&page=2
@@ -467,7 +467,7 @@ public class GeometryUtils {
                 double w0 = _1_t * _1_t;
                 double w1 = 2.0 * t * _1_t;
                 double w2 = t * t;
-                // point on BŽzier curve
+                // point on BÃ©zier curve
                 double posx = w0 * p0x + w1 * p1x + w2 * p2x;
                 double posy = w0 * p0y + w1 * p1y + w2 * p2y;
 
@@ -487,7 +487,7 @@ public class GeometryUtils {
 
     /**
      * Computes the shortest distance between a point and any point on a
-     * quadratic BŽzier curve. Attention: xy parameter is changed.
+     * quadratic BÃ©zier curve. Attention: xy parameter is changed.
      *
      * @param p0x Start point x
      * @param p0y Start point y

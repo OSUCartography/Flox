@@ -56,7 +56,7 @@ public class ForceLayouter {
     /**
      * hash map with a line string of straight segments for each curved flow.
      * Used for accelerating computations. The content of the hash map needs to
-     * be updated whenever the start, end, or control point of a Bézier flow
+     * be updated whenever the start, end, or control point of a B√©zier flow
      * changes.
      */
     HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
@@ -196,7 +196,7 @@ public class ForceLayouter {
     }
 
     /**
-     * Computes the anti-torsion force for a quadratic Bézier flow.
+     * Computes the anti-torsion force for a quadratic B√©zier flow.
      *
      * @param flow
      * @return A force pulling the control point towards a perpendicular line on
@@ -272,10 +272,10 @@ public class ForceLayouter {
     }
 
     /**
-     * Compute forces onto a quadratic Bézier flow. The Bézier curve is split
+     * Compute forces onto a quadratic B√©zier flow. The B√©zier curve is split
      * into small segments. The force exerted onto each node in the segmented
      * flow is computed and then these forces are summed. The summed force is
-     * then applied onto the control point of the Bézier curve.
+     * then applied onto the control point of the B√©zier curve.
      *
      * @param flow
      * @param maxFlowLength
@@ -469,7 +469,7 @@ public class ForceLayouter {
             // kick in slowly to avoid creating crossing flows. 
             // The weight for regular forces varies from 
             // 1 to 0 with each iteration. The weight for angular 
-            // distribution forces is wÕ = -weight * weight + weight.    
+            // distribution forces is w√ï = -weight * weight + weight.    
             double angularDistWeight = weight * (1 - weight);
             Force angularDistForce = angularDistForces.get(i);
             ctrlPt.x += angularDistWeight * angularDistForce.fx;
