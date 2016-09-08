@@ -35,7 +35,8 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         Graph graph = new Graph();
 
         // The first line of the xml file is the number of nodes in the graph
-        int numberOfNodes = Integer.parseInt(reader.readLine());
+        StringTokenizer tokenizer = new StringTokenizer(reader.readLine(), SEPARATOR);
+        int numberOfNodes = Integer.parseInt(tokenizer.nextToken());
 
         // If there are no nodes, return an empty graph
         if (numberOfNodes == 0) {
@@ -48,7 +49,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         // Read in node data, add nodes to the points HashMap
         for (int i = 0; i < numberOfNodes; i++) {
             l = reader.readLine();
-            StringTokenizer tokenizer = new StringTokenizer(l, SEPARATOR);
+            tokenizer = new StringTokenizer(l, SEPARATOR);
             String id = tokenizer.nextToken();
             double x = Double.parseDouble(tokenizer.nextToken());
             double y = Double.parseDouble(tokenizer.nextToken());
@@ -65,7 +66,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         // Read in flow data, add them to the flowIterator ArrayList
         while ((l = reader.readLine()) != null) {
 
-            StringTokenizer tokenizer = new StringTokenizer(l, SEPARATOR);
+            tokenizer = new StringTokenizer(l, SEPARATOR);
             boolean locked = false;
 
             String startPtID = tokenizer.nextToken();
@@ -161,12 +162,14 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             flowStr.append(flow.getStartClipAreaWKT());
             flowStr.append(SEPARATOR);
             flowStr.append(flow.getEndClipAreaWKT());
+            flowStr.append(SEPARATOR);
             flowStr.append("\n");
         }
 
         // Make a string of the nodes in nodeMap
         // Key first, then coordinates
         nodeStr.append(points.size());
+        nodeStr.append(SEPARATOR);
         nodeStr.append("\n");
         for (Map.Entry<Point, String> entry : points.entrySet()) {
             String id = entry.getValue();
@@ -181,8 +184,8 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             nodeStr.append(y);
             nodeStr.append(SEPARATOR);
             nodeStr.append(val);
+            nodeStr.append(SEPARATOR);
             nodeStr.append("\n");
-
         }
 
         // Append the flowStr to the end of nodeStr and return the whole thing

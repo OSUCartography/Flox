@@ -51,24 +51,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
-    public boolean limitNodesRepulsionToBandHack = false; // FIXME
+    // FIXME
+    public boolean limitNodesRepulsionToBandHack = false;
 
+    // FIXME
     public boolean liveDrawing = false;
-
-    /**
-     * @return the nodeStrokeWidthPx
-     */
-    public float getNodeStrokeWidthPx() {
-        return nodeStrokeWidthPx;
-    }
-
-    /**
-     * @param nodeStrokeWidthPx the nodeStrokeWidthPx to set
-     */
-    public void setNodeStrokeWidthPx(float nodeStrokeWidthPx) {
-        this.nodeStrokeWidthPx = nodeStrokeWidthPx;
-    }
-
+    
     /**
      * Density of points along flows.
      */
@@ -98,6 +86,9 @@ public class Model {
      */
     private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
 
+    /**
+     * Helper class for pairs of intersecting flows.
+     */
     public static class IntersectingFlowPair {
 
         public Flow flow1;
@@ -1696,6 +1687,21 @@ public class Model {
     public void setMaxNodeSizePx(double maxNodeSizePx) {
         this.maxNodeSizePx = maxNodeSizePx;
     }
+    
+    /**
+     * @return the nodeStrokeWidthPx
+     */
+    public float getNodeStrokeWidthPx() {
+        return nodeStrokeWidthPx;
+    }
+
+    /**
+     * @param nodeStrokeWidthPx the nodeStrokeWidthPx to set
+     */
+    public void setNodeStrokeWidthPx(float nodeStrokeWidthPx) {
+        this.nodeStrokeWidthPx = nodeStrokeWidthPx;
+    }
+
 
     /**
      * Returns the stroke width in pixels of a flow based on its value.
