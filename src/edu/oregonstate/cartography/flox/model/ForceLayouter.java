@@ -866,9 +866,12 @@ public class ForceLayouter {
     private boolean moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
         // compute spacing of sample points in world coordinates
         // The spacing between candidate control points is equal to the minimum
-        // distance to obstacles. Increase to accelerate computations.    
-        double dist = model.getMinObstacleDistPx() / model.getReferenceMapScale();
-
+        // distance to obstacles. Increase to accelerate computations.
+        // minObstacleDistPx can be zero. We require a distance of at least 1 
+        // pixel to move along the spiral.
+        double minObstacleDistPx= Math.max(model.getMinObstacleDistPx(), 1);
+        double dist = minObstacleDistPx / model.getReferenceMapScale();
+        
         Point cPt = flow.getCtrlPt();
         double originalX = cPt.x;
         double originalY = cPt.y;
@@ -906,7 +909,6 @@ public class ForceLayouter {
                 // result in an overlap with any obstacle                
                 return true;
             }
-
         } // move along the spiral until the entire range box is covered
         while (spiralR * spiralR < maxSpiralRSq);
 
