@@ -1061,6 +1061,25 @@ public class Model {
     }
 
     /**
+     * Converts all flows that are not locked to straight lines.
+     *
+     * @param onlySelected If true, only flows that are selected are converted
+     * to straight lines.
+     */
+    public void straightenFlows(boolean onlySelected) {
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (onlySelected && flow.isSelected() == false) {
+                continue;
+            }
+            if (!flow.isLocked()) {
+                flow.straighten();
+            }
+        }
+    }
+    
+    /**
      * Returns an empirical tolerance value for the De Casteljau algorithm,
      * which converts a Bezier curve to straight line segments. The returned
      * value is relative to the current reference map scale.

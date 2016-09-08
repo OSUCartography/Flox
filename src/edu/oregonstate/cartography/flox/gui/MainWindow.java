@@ -2649,7 +2649,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_canvasSizeSliderStateChanged
 
     private void flowRangeboxSizeSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_flowRangeboxSizeSliderStateChanged
-        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d + 0.01);
+        model.setFlowRangeboxHeight(flowRangeboxSizeSlider.getValue() / 100d);
         mapComponent.refreshMap();
         if (flowRangeboxSizeSlider.getValueIsAdjusting() == false) {
             layout("Flow Rangebox Size");
@@ -3094,8 +3094,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_editMenuMenuSelected
 
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
-        ForceLayouter layouter = new ForceLayouter(model);
-        layouter.straightenFlows(true);
+        model.straightenFlows(true);
         model.computeArrowheads();
         addUndo("Straighten Flows");
         mapComponent.refreshMap();
@@ -3685,9 +3684,9 @@ public class MainWindow extends javax.swing.JFrame {
                 } else {
                     --iterBeforeMovingFlows;
                 }
-                
+
                 model.computeArrowheads();
-                
+
                 // publish intermediate results in map. This will call process() 
                 // on the Event Dispatch Thread.
                 if (model.liveDrawing) {
@@ -3703,7 +3702,6 @@ public class MainWindow extends javax.swing.JFrame {
             model.applyLocks(initialLocks);
 
             //model.changeToUnidirectionalFlows();
-            
         }
 
         @Override
@@ -3764,16 +3762,18 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
 
-        progressBar.setVisible(true);
+        // this will wait until previous layout has canceled
         if (layoutWorker != null && !layoutWorker.isDone()) {
             layoutWorker.cancel(false);
         }
 
-        // Create a layouter and pass it the model.
-        ForceLayouter layouter = new ForceLayouter(model);
-        layouter.straightenFlows(false);
-        layoutWorker = new LayoutWorker(layouter);
-        layoutWorker.execute();
+        model.straightenFlows(false);
+        if (model.getFlowRangeboxHeight() > 0) {
+            progressBar.setVisible(true);
+            ForceLayouter layouter = new ForceLayouter(model);
+            layoutWorker = new LayoutWorker(layouter);
+            layoutWorker.execute();
+        }
     }
 
     /**

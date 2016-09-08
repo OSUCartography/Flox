@@ -664,25 +664,6 @@ public class ForceLayouter {
     }
 
     /**
-     * Converts all flows that are not locked to straight lines.
-     *
-     * @param onlySelected If true, only flows that are selected are converted
-     * to straight lines.
-     */
-    public void straightenFlows(boolean onlySelected) {
-        Iterator<Flow> iterator = model.flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            if (onlySelected && flow.isSelected() == false) {
-                continue;
-            }
-            if (!flow.isLocked()) {
-                flow.straighten();
-            }
-        }
-    }
-
-    /**
      * Returns true if a flow intersects an obstacle.
      *
      * @param flow a flow.
