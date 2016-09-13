@@ -303,11 +303,11 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
         addFlowToggleButton = new javax.swing.JToggleButton();
-        lockUnlockButton = new javax.swing.JButton();
         zoomInToggleButton = new javax.swing.JToggleButton();
         zoomOutToggleButton = new javax.swing.JToggleButton();
         handToggleButton = new javax.swing.JToggleButton();
         distanceToggleButton = new javax.swing.JToggleButton();
+        lockUnlockButton = new javax.swing.JButton();
         showAllButton = new javax.swing.JButton();
         coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
         vallueLabel = new javax.swing.JLabel();
@@ -562,7 +562,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapToolsButtonGroup.add(arrowToggleButton);
         arrowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Arrow16x16.gif"))); // NOI18N
-        arrowToggleButton.setToolTipText("Select and Move Nodes and Flows");
+        arrowToggleButton.setToolTipText("Select and Move Nodes and Flows (V)");
         arrowToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         arrowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         arrowToggleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -575,7 +575,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapToolsButtonGroup.add(addFlowToggleButton);
         addFlowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/SetPoint16x16.gif"))); // NOI18N
-        addFlowToggleButton.setToolTipText("Add Nodes and Flows");
+        addFlowToggleButton.setToolTipText("Add Nodes and Flows (A)");
         addFlowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
         addFlowToggleButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -583,19 +583,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jPanel2.add(addFlowToggleButton);
-
-        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif"))); // NOI18N
-        lockUnlockButton.setToolTipText("Lock/Unlock Flows");
-        lockUnlockButton.setBorderPainted(false);
-        lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
-        lockUnlockButton.setEnabled(false);
-        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 24));
-        lockUnlockButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lockUnlockButtonActionPerformed(evt);
-            }
-        });
-        jPanel2.add(lockUnlockButton);
 
         mapToolsButtonGroup.add(zoomInToggleButton);
         zoomInToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ZoomIn16x16.gif"))); // NOI18N
@@ -653,9 +640,23 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jPanel2.add(distanceToggleButton);
 
+        lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif"))); // NOI18N
+        lockUnlockButton.setToolTipText("Lock/Unlock Flows");
+        lockUnlockButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        lockUnlockButton.setBorderPainted(false);
+        lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
+        lockUnlockButton.setEnabled(false);
+        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 24));
+        lockUnlockButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lockUnlockButtonActionPerformed(evt);
+            }
+        });
+        jPanel2.add(lockUnlockButton);
+
         showAllButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ShowAll20x14.png"))); // NOI18N
         showAllButton.setToolTipText("Show All");
-        showAllButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 25, 0, 25));
+        showAllButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 25));
         showAllButton.setBorderPainted(false);
         showAllButton.setContentAreaFilled(false);
         showAllButton.setFocusable(false);
@@ -2643,6 +2644,14 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
+    public void setScaleMoveSelectionTool() {
+        arrowToggleButton.doClick();
+    }
+
+    public void setAddFlowTool() {
+        addFlowToggleButton.doClick();
+    }
+
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
         mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent,
                 valueFormattedTextField, xFormattedTextField, yFormattedTextField,
@@ -3565,7 +3574,6 @@ public class MainWindow extends javax.swing.JFrame {
         String title = getTitle();
         return (title == null || title.isEmpty()) ? "Flows" : title;
     }
-
 
     public void layout(String undoString) {
         if (updatingGUI) {

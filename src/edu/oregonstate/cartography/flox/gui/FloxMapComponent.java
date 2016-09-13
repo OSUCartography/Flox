@@ -4,7 +4,6 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.map.MapTool;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -81,6 +80,14 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     
     public void layout(String undoMessage) {
         mainWindow.layout(undoMessage);
+    }
+    
+    public void setScaleMoveSelectionTool() {
+        mainWindow.setScaleMoveSelectionTool();
+    }
+    
+    public void setAddFlowTool() {
+        mainWindow.setAddFlowTool();
     }
     
     /**

@@ -5,6 +5,8 @@
  */
 package edu.oregonstate.cartography.map;
 
+import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
+import edu.oregonstate.cartography.flox.gui.MainWindow;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import edu.oregonstate.cartography.utils.FocusUtils;
 import java.awt.geom.*;
@@ -294,11 +296,13 @@ public class MapEventHandler implements java.awt.event.MouseListener,
             return new ZoomOutTool(mapComponent);
         }
 
-        // zoom in with meta key
-        if (metaKeyDown && !zoomInCurrent) {
+        // zoom in with meta and space key (meta alone creates troubles with key
+        // combinations that are commonly used to switch between applications, 
+        // such as command-tab on OS X)
+        if (metaKeyDown && spaceKeyDown && !zoomInCurrent) {
             return new ZoomInTool(mapComponent);
         }
-        
+
         return null;
     }
 
@@ -348,16 +352,15 @@ public class MapEventHandler implements java.awt.event.MouseListener,
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent keyEvent) {
-        /*
-         System.out.println("Modifiers: " + keyEvent.getModifiers());
-         System.out.println("Code: " + KeyEvent.getKeyText(keyEvent.getKeyCode()));
-         System.out.println("Key ID: " + keyEvent.getID());
-         System.out.println("Meta: " + metaKeyDown);
-         System.out.println("Alt: " + altKeyDown);
-         System.out.println("Space: " + spaceKeyDown);
-         System.out.println("Is Action Key: " + keyEvent.isActionKey());
-         System.out.println();
-         */
+
+//         System.out.println("Modifiers: " + keyEvent.getModifiers());
+//         System.out.println("Code: " + keyEvent.getKeyCode() + " " + KeyEvent.getKeyText(keyEvent.getKeyCode()));
+//         System.out.println("Key ID: " + keyEvent.getID());
+//         System.out.println("Meta: " + metaKeyDown);
+//         System.out.println("Alt: " + altKeyDown);
+//         System.out.println("Space: " + spaceKeyDown);
+//         System.out.println("Is Action Key: " + keyEvent.isActionKey());
+//         System.out.println();
 
         // remember the current key state.
         updateKeyStates(keyEvent);
@@ -398,6 +401,16 @@ public class MapEventHandler implements java.awt.event.MouseListener,
         }
 
         // the rest of this method changes the current map tool.
+        if (keyReleased && keyEvent.getKeyCode() == KeyEvent.VK_V) {
+            // V switches to move/selection tool
+            FloxMapComponent floxMap = (FloxMapComponent) mapComponent;
+            floxMap.setScaleMoveSelectionTool();
+        } else if (keyReleased && keyEvent.getKeyCode() == KeyEvent.VK_A) {
+            // A switches to add flow tool
+            FloxMapComponent floxMap = (FloxMapComponent) mapComponent;
+            floxMap.setAddFlowTool();
+        }
+
         // Only do this if the mouse is over the map component.
         if (!mouseOverComponent) {
             return false;
