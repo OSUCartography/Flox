@@ -107,7 +107,31 @@ public class ForceLayouter {
         }
     }
 
-    public int layoutIteration(int i, int iterBeforeMovingFlows, Rectangle2D canvas) {
+    /**
+     * Assign the graph after layout is computed to the passed model. This is
+     * meant to be called when all iterations are completed and a new layout has
+     * been generated.
+     *
+     * @param destinationModel the graph of this model will be replaced with a
+     * reference to the model of this ForceLayouter.
+     */
+    public void assignGraphToModel(Model destinationModel) {
+        destinationModel.assignGraph(model);
+    }
+
+    /**
+     * Compute one iteration, including forces computation, moving overlapping
+     * sibling flows, moving nodes from obstacles, and constraining control
+     * points to range boxes.
+     *
+     * @param i current iteration, between 0 and ForceLayouter.NBR_ITERATIONS
+     * @param iterBeforeMovingFlowsOffObstacles number of remaining iterations
+     * until flows are moved away from obstacles
+     * @param canvas control points are to be constrained to this rectangle
+     * @return number of remaining iterations until flows are moved away from
+     * obstacles
+     */
+    public int layoutIteration(int i, int iterBeforeMovingFlowsOffObstacles, Rectangle2D canvas) {
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
 
         // compute one iteration of forces with a linearly decreasing weight
@@ -132,7 +156,7 @@ public class ForceLayouter {
         }
 
         // move flows away from obstacles. Moved flows will be locked.
-        if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlows == 0) {
+        if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlowsOffObstacles == 0) {
             int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
 
             List<Obstacle> obstacles = getObstacles();
@@ -156,24 +180,25 @@ public class ForceLayouter {
             if (nbrRemainingOverlaps > 0) {
                 // division by empirical factor = 2 to increase the 
                 // number of iterations at the end of calculations
-                iterBeforeMovingFlows = (ForceLayouter.NBR_ITERATIONS - i) / (nbrRemainingOverlaps + 1) / 2;
+                iterBeforeMovingFlowsOffObstacles = (ForceLayouter.NBR_ITERATIONS - i) / (nbrRemainingOverlaps + 1) / 2;
             } else {
                 // There are no flows left hat overlap obstacles. Future
                 // iterations may again create overlaps. So check after
                 // 50% of the remaining iterations for new overlaps.
-                iterBeforeMovingFlows = remainingIterations / 2;
+                iterBeforeMovingFlowsOffObstacles = remainingIterations / 2;
             }
         } else {
-            --iterBeforeMovingFlows;
+            --iterBeforeMovingFlowsOffObstacles;
         }
 
         model.computeArrowheads();
 
-        return iterBeforeMovingFlows;
+        return iterBeforeMovingFlowsOffObstacles;
     }
 
     /**
      * Compute on iteration of forces exerted on control points of all flows.
+     *
      * @param weight the weight for the displacements resulting from this
      * iteration
      */
@@ -248,7 +273,7 @@ public class ForceLayouter {
             i++;
         }
     }
-    
+
     /**
      * Computes the force exerted by all other flows on a point.
      *

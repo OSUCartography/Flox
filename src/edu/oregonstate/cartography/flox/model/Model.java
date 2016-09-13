@@ -39,8 +39,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 /**
  * Model for Flox.
  *
- * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
- * University
+ * @author Bernhard Jenny
  */
 //Defines root element of JAXB XML file
 @XmlRootElement
@@ -56,7 +55,7 @@ public class Model {
 
     // FIXME
     public boolean liveDrawing = false;
-    
+
     /**
      * Density of points along flows.
      */
@@ -340,7 +339,7 @@ public class Model {
      * whether to move flows that overlap obstacles (i.e. nodes and arrowheads)
      */
     private boolean moveFlowsOverlappingObstacles = true;
-    
+
     /**
      * Minimum distance of flows from obstacles in pixels.
      */
@@ -356,6 +355,19 @@ public class Model {
      * Constructor of the model.
      */
     public Model() {
+    }
+
+    /**
+     * Copy model.
+     *
+     * @return an exact copy of this model.
+     */
+    public Model copy() {
+        try {
+            return Model.unmarshal(marshal());
+        } catch (JAXBException exc) {
+            throw new IllegalStateException(exc);
+        }
     }
 
     private static JAXBContext getJAXBContext() throws JAXBException {
@@ -443,6 +455,16 @@ public class Model {
     }
 
     /**
+     * Replace the graph of this model with a reference to the graph of the
+     * passed model. Only a shallow copy is made.
+     *
+     * @param model copy graph reference from this model
+     */
+    public void assignGraph(Model model) {
+        this.graph = model.graph;
+    }
+
+    /**
      * Calculates the ratio between the maximum allowed node size and the
      * highest node value. Needed for drawing nodes to the correct radius
      * relative to the maximum radius permitted by the GUI settings. If there
@@ -525,6 +547,7 @@ public class Model {
     /**
      * Selects all nodes that are not connected to any other node. Does not
      * change the selection state of other nodes or flows.
+     *
      * @return number of unconnected nodes
      */
     public int selectUnconnectedNodes() {
@@ -1062,7 +1085,7 @@ public class Model {
             }
         }
     }
-    
+
     /**
      * Returns an empirical tolerance value for the De Casteljau algorithm,
      * which converts a Bezier curve to straight line segments. The returned
@@ -1690,7 +1713,7 @@ public class Model {
     public void setMaxNodeSizePx(double maxNodeSizePx) {
         this.maxNodeSizePx = maxNodeSizePx;
     }
-    
+
     /**
      * @return the nodeStrokeWidthPx
      */
@@ -1704,7 +1727,6 @@ public class Model {
     public void setNodeStrokeWidthPx(float nodeStrokeWidthPx) {
         this.nodeStrokeWidthPx = nodeStrokeWidthPx;
     }
-
 
     /**
      * Returns the stroke width in pixels of a flow based on its value.
@@ -1940,7 +1962,8 @@ public class Model {
     }
 
     /**
-     * @param moveFlowsOverlappingObstacles the moveFlowsOverlappingObstacles to set
+     * @param moveFlowsOverlappingObstacles the moveFlowsOverlappingObstacles to
+     * set
      */
     public void setMoveFlowsOverlappingObstacles(boolean moveFlowsOverlappingObstacles) {
         this.moveFlowsOverlappingObstacles = moveFlowsOverlappingObstacles;

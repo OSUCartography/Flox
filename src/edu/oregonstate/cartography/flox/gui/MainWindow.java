@@ -3562,11 +3562,6 @@ public class MainWindow extends javax.swing.JFrame {
         return (title == null || title.isEmpty()) ? "Flows" : title;
     }
 
-    /**
-     * FIXME This will result in concurrent unsynchronized modifications of the
-     * model. The Event Dispatch Thread is drawing the model, while the worker
-     * is simultaneously changing it.
-     */
     private class LayoutWorker extends SwingWorker<Void, Void> {
 
         private final ForceLayouter layouter;
@@ -3585,7 +3580,8 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
         /**
-         * Apply layout iterations to all non-locked flows.
+         * Apply layout iterations to all non-locked flows. This is run in the
+         * worker thread.
          */
         private void layout() {
 
@@ -3597,9 +3593,9 @@ public class MainWindow extends javax.swing.JFrame {
             //model.changeToBidirectionalFlows();
             // store initial lock flags of all flows
             boolean[] initialLocks = model.getLocks();
-            
+
             Rectangle2D canvas = model.getNodesBoundingBox();
-            
+
             for (int i = 0; i < ForceLayouter.NBR_ITERATIONS; i++) {
                 if (isCancelled()) {
                     break;
@@ -3626,7 +3622,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         @Override
         public Void doInBackground() {
-            // initialize progress property.
             double startTime = System.currentTimeMillis();
             setProgress(0);
             layout();
@@ -3642,6 +3637,7 @@ public class MainWindow extends javax.swing.JFrame {
             try {
                 if (!isCancelled()) {
                     get();
+                    layouter.assignGraphToModel(model);
                     mapComponent.eraseBufferImage();
                     mapComponent.repaint();
                     progressBar.setVisible(false);
@@ -3686,7 +3682,7 @@ public class MainWindow extends javax.swing.JFrame {
         model.straightenFlows(false);
         if (model.getFlowRangeboxHeight() > 0) {
             progressBar.setVisible(true);
-            ForceLayouter layouter = new ForceLayouter(model);
+            ForceLayouter layouter = new ForceLayouter(model.copy());
             layoutWorker = new LayoutWorker(layouter);
             layoutWorker.execute();
         }
