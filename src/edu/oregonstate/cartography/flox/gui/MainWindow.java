@@ -2682,6 +2682,8 @@ public class MainWindow extends javax.swing.JFrame {
     private void addArrowsCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addArrowsCheckboxActionPerformed
         if (model != null) {
             model.setDrawArrowheads(addArrowsCheckbox.isSelected());
+            updateArrowHeads();
+            mapComponent.refreshMap();
             layout("Add Arrows");
         }
     }//GEN-LAST:event_addArrowsCheckboxActionPerformed

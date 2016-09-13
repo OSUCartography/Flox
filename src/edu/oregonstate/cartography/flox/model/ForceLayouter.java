@@ -14,7 +14,8 @@ import java.util.List;
 
 /**
  * ForceLayouter contains the algorithms that compute the total force that each
- * map feature emits and receives.
+ * map feature emits and receives. A ForceLayouter changes the location of
+ * control points and the geometry of arrowheads.
  *
  * @author Bernhard Jenny
  * @author danielstephen
@@ -118,19 +119,20 @@ public class ForceLayouter {
     }
 
     /**
-     * Assign the graph after layout is computed to the passed model. This is
-     * meant to be called when all iterations are completed and a new layout has
-     * been generated.
+     * Apply the control points to the model and recompute arrowheads. This
+     * method should be called when all iterations are completed and a new
+     * layout has been generated.
      *
      * @param destinationModel the graph of this model will be replaced with a
      * reference to the model of this ForceLayouter.
      */
-    public void assignGraphToModel(Model destinationModel) {
+    public void applyChangesToModel(Model destinationModel) {
         ArrayList<Flow> flows = model.getFlows();
         for (Flow flow : flows) {
             Point ctrlPt = flow.getCtrlPt();
             destinationModel.replaceControlPoint(flow.id, ctrlPt.x, ctrlPt.y);
         }
+        destinationModel.computeArrowheads();
     }
 
     /**

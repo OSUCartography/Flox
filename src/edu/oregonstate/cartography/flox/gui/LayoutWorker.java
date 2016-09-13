@@ -89,7 +89,7 @@ class LayoutWorker extends SwingWorker<Void, Void> {
         try {
             if (!isCancelled()) {
                 get();
-                layouter.assignGraphToModel(mapComponent.getModel());
+                layouter.applyChangesToModel(mapComponent.getModel());
                 mapComponent.eraseBufferImage();
                 mapComponent.repaint();
                 progressBar.setVisible(false);

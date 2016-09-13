@@ -71,7 +71,7 @@ public class Arrow {
     public Arrow(Flow flow) {
         this.flow = flow;
     }
-
+    
     /**
      * Computes the arrow head geometry.
      *
