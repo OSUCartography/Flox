@@ -3485,7 +3485,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void moveSelectedFromObstaclesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveSelectedFromObstaclesMenuItemActionPerformed
         ForceLayouter layouter = new ForceLayouter(model);
-        layouter.moveFlowsAwayFromObstacles(model.getNbrFlows(), true);
+        layouter.moveFlowsAwayFromObstacles(true);
         mapComponent.refreshMap();
     }//GEN-LAST:event_moveSelectedFromObstaclesMenuItemActionPerformed
 
@@ -3595,9 +3595,6 @@ public class MainWindow extends javax.swing.JFrame {
             // a chance to stabilize before the first one is moved.
             int iterBeforeMovingFlows = ForceLayouter.NBR_ITERATIONS / 10;
 
-            // this many flows are moved away from obstacles per moving attempt
-            int nbrFlowsToMove = 1;
-
             //model.changeToBidirectionalFlows();
             // store initial lock flags of all flows
             boolean[] initialLocks = model.getLocks();
@@ -3631,35 +3628,37 @@ public class MainWindow extends javax.swing.JFrame {
                     }
                 }
 
-                // move flows away from obstacles
+                // move flows away from obstacles. Moved flows will be locked.
                 if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlows == 0) {
                     int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
 
-                    // moving flows will lock flows that have been moved
-                    int nbrOverlaps = layouter.moveFlowsAwayFromObstacles(nbrFlowsToMove, false);
+                    List<Obstacle> obstacles = layouter.getObstacles();
+
+                    // get a list of all flows that intersect obstacles
+                    ArrayList<Flow> sortedOverlappingFlows = layouter.getSortedFlowsOverlappingObstacles(obstacles);
+                    int nbrOverlaps = sortedOverlappingFlows.size();
+                    
+                    // Compute the number of flows to move. Default is 1, but
+                    // this might have to be larger for when there are more 
+                    // overlapping flows than remaining iterations.
+                    int nbrFlowsToMove = 1;            
+                    if (nbrOverlaps > remainingIterations && remainingIterations > 0) {
+                        nbrFlowsToMove = (int) Math.ceil(nbrOverlaps / remainingIterations);
+                    }
+                    
+                    int nbrRemainingOverlaps = layouter.moveFlowsAwayFromObstacles(obstacles, sortedOverlappingFlows, nbrFlowsToMove);
 
                     // compute the number of iterations until the next flow will 
                     // be moved away from obstacles
-                    if (nbrOverlaps > 0) {
+                    if (nbrRemainingOverlaps > 0) {
                         // division by empirical factor = 2 to increase the 
                         // number of iterations at the end of calculations
-                        iterBeforeMovingFlows = (ForceLayouter.NBR_ITERATIONS - i) / (nbrOverlaps + 1) / 2;
+                        iterBeforeMovingFlows = (ForceLayouter.NBR_ITERATIONS - i) / (nbrRemainingOverlaps + 1) / 2;
                     } else {
                         // There are no flows left hat overlap obstacles. Future
                         // iterations may again create overlaps. So check after
                         // 50% of the remaining iterations for new overlaps.
                         iterBeforeMovingFlows = remainingIterations / 2;
-                    }
-
-                    // the number of flows to move the next time. Default is 1, but
-                    // this might have to be larger for when there are more 
-                    // overlapping flows than remaining iterations.                    
-                    if (nbrOverlaps > remainingIterations && remainingIterations > 0) {
-                        // FIXME this might not be accurate for the next time flows 
-                        // are moved away from obstacles because force iterations might have created additional overlaps
-                        nbrFlowsToMove = (int) Math.ceil(nbrOverlaps / remainingIterations);
-                    } else {
-                        nbrFlowsToMove = 1;
                     }
                 } else {
                     --iterBeforeMovingFlows;

@@ -477,7 +477,7 @@ public class ForceLayouter {
 
             // move control point if it is outside of the range box or the canvas
             if (model.isEnforceRangebox()) {
-               enforcer.enforceFlowControlPointRange(flow);
+                enforcer.enforceFlowControlPointRange(flow);
             }
             if (model.isEnforceCanvasRange()) {
                 enforcer.enforceCanvasBoundingBox(flow, model.getNodesBoundingBox());
@@ -485,9 +485,9 @@ public class ForceLayouter {
             i++;
         }
     }
-    
+
     public void movePointToRangebox(Point p) {
-        
+
     }
 
     /**
@@ -850,9 +850,9 @@ public class ForceLayouter {
         // distance to obstacles. Increase to accelerate computations.
         // minObstacleDistPx can be zero. We require a distance of at least 1 
         // pixel to move along the spiral.
-        double minObstacleDistPx= Math.max(model.getMinObstacleDistPx(), 1);
+        double minObstacleDistPx = Math.max(model.getMinObstacleDistPx(), 1);
         double dist = minObstacleDistPx / model.getReferenceMapScale();
-        
+
         Point cPt = flow.getCtrlPt();
         double originalX = cPt.x;
         double originalY = cPt.y;
@@ -901,35 +901,30 @@ public class ForceLayouter {
     }
 
     /**
-     * Moves the control point of up to the nbrFlowsToMove largest flows that
-     * overlap unconnected obstacles. When a flow is moved, it will no longer
-     * overlap an obstacles and it will be locked.
+     * Returns all flows that overlap the passed obstacles. Returned flows are
+     * sorted by decreasing value.
      *
-     * @param nbrFlowsToMove the number of flows to be moved away from
-     * obstacles. If it is impossible to find non-overlapping geometries for
-     * this many flows, fewer flows will be moved.
-     * @param onlySelectedFlows if true only selected flows will be moved away
-     * from obstacles
-     * @return the number of remaining flows that overlap obstacles
+     * @param obstacles obstacles to test for
+     * @return flows that overlap at least one of the obstacles, sorted by
+     * decreasing value.
      */
-    public int moveFlowsAwayFromObstacles(int nbrFlowsToMove, boolean onlySelectedFlows) {
-        List<Obstacle> obstacles = getObstacles();
-
-        // get a list of all flows that intersect obstacles
-        List<Flow> flowsOverlappingObstacles = getFlowsOverlappingObstacles(obstacles);
-        if (nbrFlowsToMove <= 0) {
-            flowsOverlappingObstacles.size();
-        }
-
-        // sort flows in decreasing order
+    public ArrayList<Flow> getSortedFlowsOverlappingObstacles(List<Obstacle> obstacles) {
+        ArrayList<Flow> flowsOverlappingObstacles = getFlowsOverlappingObstacles(obstacles);
         Model.sortFlows(flowsOverlappingObstacles, false);
+        return flowsOverlappingObstacles;
+    }
 
-        // move control points of overlapping flows, starts with largest flow
+    /**
+     * Move control points of flows overlapping obstacles
+     *
+     * @param obstacles obstacles to avoid
+     * @param flows flows overlapping an obstacle that are to be moved
+     * @param nbrFlowsToMove stop when this many flows have been moved
+     * @return number of remaining flows that overlap an obstacle
+     */
+    public int moveFlowsAwayFromObstacles(List<Obstacle> obstacles, ArrayList<Flow> flows, int nbrFlowsToMove) {
         int nbrMovedFlows = 0;
-        for (Flow flow : flowsOverlappingObstacles) {
-            if (onlySelectedFlows && flow.isSelected() == false) {
-                continue;
-            }
+        for (Flow flow : flows) {
             if (moveFlowAwayFromObstacles(flow, obstacles)) {
                 // moved one flow. Lock it.
                 flow.setLocked(true);
@@ -940,7 +935,37 @@ public class ForceLayouter {
         }
 
         // return initial number of flows overlapping obstacles
-        return flowsOverlappingObstacles.size() - nbrMovedFlows;
+        return flows.size() - nbrMovedFlows;
     }
 
+    /**
+     * Moves the control point of all flows that overlap unconnected obstacles.
+     * When a flow is moved, it will no longer overlap an obstacles and it will
+     * be locked.     *
+     *
+     * @param onlySelectedFlows if true only selected flows will be moved away
+     * from obstacles
+     * @return the number of remaining flows that overlap obstacles
+     */
+    public int moveFlowsAwayFromObstacles(boolean onlySelectedFlows) {
+        List<Obstacle> obstacles = getObstacles();
+
+        // get a list of all flows that intersect obstacles
+        ArrayList<Flow> sortedOverlappingFlows = getSortedFlowsOverlappingObstacles(obstacles);
+
+        // move control points of overlapping flows, starts with largest flow
+        int nbrMovedFlows = 0;
+        for (Flow flow : sortedOverlappingFlows) {
+            if (onlySelectedFlows && flow.isSelected() == false) {
+                continue;
+            }
+            if (moveFlowAwayFromObstacles(flow, obstacles)) {
+                // moved one flow. Lock it.
+                flow.setLocked(true);
+            }
+        }
+
+        // return initial number of flows overlapping obstacles
+        return sortedOverlappingFlows.size() - nbrMovedFlows;
+    }
 }
