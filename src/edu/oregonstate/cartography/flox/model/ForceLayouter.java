@@ -107,6 +107,148 @@ public class ForceLayouter {
         }
     }
 
+    public int layoutIteration(int i, int iterBeforeMovingFlows, Rectangle2D canvas) {
+        RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
+
+        // compute one iteration of forces with a linearly decreasing weight
+        double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
+        computeForces(weight);
+
+        if (model.isResolveIntersectionsForSiblings()) {
+            List<Model.IntersectingFlowPair> pairs = getIntersectingSiblings();
+            for (Model.IntersectingFlowPair pair : pairs) {
+                pair.resolveIntersection();
+
+                // move control points if they are outside of the range box or the canvas
+                if (model.isEnforceRangebox()) {
+                    enforcer.enforceFlowControlPointRange(pair.flow1);
+                    enforcer.enforceFlowControlPointRange(pair.flow2);
+                }
+                if (model.isEnforceCanvasRange()) {
+                    enforcer.enforceCanvasBoundingBox(pair.flow1, canvas);
+                    enforcer.enforceCanvasBoundingBox(pair.flow2, canvas);
+                }
+            }
+        }
+
+        // move flows away from obstacles. Moved flows will be locked.
+        if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlows == 0) {
+            int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
+
+            List<Obstacle> obstacles = getObstacles();
+
+            // get a list of all flows that intersect obstacles
+            ArrayList<Flow> sortedOverlappingFlows = getSortedFlowsOverlappingObstacles(obstacles);
+            int nbrOverlaps = sortedOverlappingFlows.size();
+
+            // Compute the number of flows to move. Default is 1, but
+            // this might have to be larger for when there are more 
+            // overlapping flows than remaining iterations.
+            int nbrFlowsToMove = 1;
+            if (nbrOverlaps > remainingIterations && remainingIterations > 0) {
+                nbrFlowsToMove = (int) Math.ceil(nbrOverlaps / remainingIterations);
+            }
+
+            int nbrRemainingOverlaps = moveFlowsAwayFromObstacles(obstacles, sortedOverlappingFlows, nbrFlowsToMove);
+
+            // compute the number of iterations until the next flow will 
+            // be moved away from obstacles
+            if (nbrRemainingOverlaps > 0) {
+                // division by empirical factor = 2 to increase the 
+                // number of iterations at the end of calculations
+                iterBeforeMovingFlows = (ForceLayouter.NBR_ITERATIONS - i) / (nbrRemainingOverlaps + 1) / 2;
+            } else {
+                // There are no flows left hat overlap obstacles. Future
+                // iterations may again create overlaps. So check after
+                // 50% of the remaining iterations for new overlaps.
+                iterBeforeMovingFlows = remainingIterations / 2;
+            }
+        } else {
+            --iterBeforeMovingFlows;
+        }
+
+        model.computeArrowheads();
+
+        return iterBeforeMovingFlows;
+    }
+
+    /**
+     * Compute on iteration of forces exerted on control points of all flows.
+     * @param weight the weight for the displacements resulting from this
+     * iteration
+     */
+    public void computeForces(double weight) {
+        if (model.getNbrFlows() < 2) {
+            return;
+        }
+
+        initStraightLinesHashMap();
+
+        double maxFlowLength = model.getLongestFlowLength();
+
+        Iterator<Flow> iterator = model.flowIterator();
+        int j = 0;
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.isLocked()) {
+                continue;
+            }
+
+            // compute force exerted by flows and nodes
+            Force fnew = computeForceOnFlow(flow, maxFlowLength);
+            Force f = forces.get(j);
+
+            f.fx = fnew.fx;
+            f.fy = fnew.fy;
+
+            // compute force creating an even angular distribution of flows around 
+            // nodes
+            Force angularDistF = angularDistForces.get(j);
+            Force newAngularDistF = computeAngularDistributionForce(flow);
+            angularDistF.fx = newAngularDistF.fx;
+            angularDistF.fy = newAngularDistF.fy;
+            j++;
+        }
+
+        // compute velocity at time t + dt
+        RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
+        iterator = model.flowIterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.isLocked()) {
+                continue;
+            }
+            Point ctrlPt = flow.getCtrlPt();
+
+            // Move the control point by the total force
+            Force f = forces.get(i);
+            ctrlPt.x += weight * f.fx;
+            ctrlPt.y += weight * f.fy;
+
+            // Move the control point by the angular distribution force.
+            // Angular distribution forces are not applied from the beginning 
+            // of the iterative layout computation. Angular distribution forces 
+            // kick in slowly to avoid creating crossing flows. 
+            // The weight for regular forces varies from 
+            // 1 to 0 with each iteration. The weight for angular 
+            // distribution forces is wÕ = -weight * weight + weight.    
+            double angularDistWeight = weight * (1 - weight);
+            Force angularDistForce = angularDistForces.get(i);
+            ctrlPt.x += angularDistWeight * angularDistForce.fx;
+            ctrlPt.y += angularDistWeight * angularDistForce.fy;
+
+            // move control point if it is outside of the range box or the canvas
+            if (model.isEnforceRangebox()) {
+                enforcer.enforceFlowControlPointRange(flow);
+            }
+            if (model.isEnforceCanvasRange()) {
+                enforcer.enforceCanvasBoundingBox(flow, model.getNodesBoundingBox());
+            }
+            i++;
+        }
+    }
+    
     /**
      * Computes the force exerted by all other flows on a point.
      *
@@ -403,91 +545,6 @@ public class ForceLayouter {
         fyFinal *= nodeWeight;
 
         return new Force(fxFinal, fyFinal);
-    }
-
-    /**
-     * Applies a layout iteration to all unlocked flows. Uses Verlet velocity
-     * integration.
-     *
-     * See https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
-     *
-     * @param weight the weight for the displacements resulting from this
-     * iteration
-     */
-    public void layoutAllFlows(double weight) {
-        if (model.getNbrFlows() < 2) {
-            return;
-        }
-
-        initStraightLinesHashMap();
-
-        double maxFlowLength = model.getLongestFlowLength();
-
-        Iterator<Flow> iterator = model.flowIterator();
-        int j = 0;
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            if (flow.isLocked()) {
-                continue;
-            }
-
-            // compute force exerted by flows and nodes
-            Force fnew = computeForceOnFlow(flow, maxFlowLength);
-            Force f = forces.get(j);
-
-            f.fx = fnew.fx;
-            f.fy = fnew.fy;
-
-            // compute force creating an even angular distribution of flows around 
-            // nodes
-            Force angularDistF = angularDistForces.get(j);
-            Force newAngularDistF = computeAngularDistributionForce(flow);
-            angularDistF.fx = newAngularDistF.fx;
-            angularDistF.fy = newAngularDistF.fy;
-            j++;
-        }
-
-        // compute velocity at time t + dt
-        RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
-        iterator = model.flowIterator();
-        int i = 0;
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            if (flow.isLocked()) {
-                continue;
-            }
-            Point ctrlPt = flow.getCtrlPt();
-
-            // Move the control point by the total force
-            Force f = forces.get(i);
-            ctrlPt.x += weight * f.fx;
-            ctrlPt.y += weight * f.fy;
-
-            // Move the control point by the angular distribution force.
-            // Angular distribution forces are not applied from the beginning 
-            // of the iterative layout computation. Angular distribution forces 
-            // kick in slowly to avoid creating crossing flows. 
-            // The weight for regular forces varies from 
-            // 1 to 0 with each iteration. The weight for angular 
-            // distribution forces is wÕ = -weight * weight + weight.    
-            double angularDistWeight = weight * (1 - weight);
-            Force angularDistForce = angularDistForces.get(i);
-            ctrlPt.x += angularDistWeight * angularDistForce.fx;
-            ctrlPt.y += angularDistWeight * angularDistForce.fy;
-
-            // move control point if it is outside of the range box or the canvas
-            if (model.isEnforceRangebox()) {
-                enforcer.enforceFlowControlPointRange(flow);
-            }
-            if (model.isEnforceCanvasRange()) {
-                enforcer.enforceCanvasBoundingBox(flow, model.getNodesBoundingBox());
-            }
-            i++;
-        }
-    }
-
-    public void movePointToRangebox(Point p) {
-
     }
 
     /**
@@ -941,7 +998,7 @@ public class ForceLayouter {
     /**
      * Moves the control point of all flows that overlap unconnected obstacles.
      * When a flow is moved, it will no longer overlap an obstacles and it will
-     * be locked.     *
+     * be locked. *
      *
      * @param onlySelectedFlows if true only selected flows will be moved away
      * from obstacles

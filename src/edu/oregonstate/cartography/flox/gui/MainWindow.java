@@ -16,7 +16,6 @@ import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
 import edu.oregonstate.cartography.flox.model.Point;
-import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.AddFlowTool;
@@ -3598,73 +3597,15 @@ public class MainWindow extends javax.swing.JFrame {
             //model.changeToBidirectionalFlows();
             // store initial lock flags of all flows
             boolean[] initialLocks = model.getLocks();
-
+            
             Rectangle2D canvas = model.getNodesBoundingBox();
-            RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
-
+            
             for (int i = 0; i < ForceLayouter.NBR_ITERATIONS; i++) {
                 if (isCancelled()) {
                     break;
                 }
 
-                // compute one iteration of forces with a linearly decreasing weight
-                double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
-                layouter.layoutAllFlows(weight);
-
-                if (model.isResolveIntersectionsForSiblings()) {
-                    List<Model.IntersectingFlowPair> pairs = layouter.getIntersectingSiblings();
-                    for (Model.IntersectingFlowPair pair : pairs) {
-                        pair.resolveIntersection();
-
-                        // move control points if they are outside of the range box or the canvas
-                        if (model.isEnforceRangebox()) {
-                            enforcer.enforceFlowControlPointRange(pair.flow1);
-                            enforcer.enforceFlowControlPointRange(pair.flow2);
-                        }
-                        if (model.isEnforceCanvasRange()) {
-                            enforcer.enforceCanvasBoundingBox(pair.flow1, canvas);
-                            enforcer.enforceCanvasBoundingBox(pair.flow2, canvas);
-                        }
-                    }
-                }
-
-                // move flows away from obstacles. Moved flows will be locked.
-                if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlows == 0) {
-                    int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
-
-                    List<Obstacle> obstacles = layouter.getObstacles();
-
-                    // get a list of all flows that intersect obstacles
-                    ArrayList<Flow> sortedOverlappingFlows = layouter.getSortedFlowsOverlappingObstacles(obstacles);
-                    int nbrOverlaps = sortedOverlappingFlows.size();
-                    
-                    // Compute the number of flows to move. Default is 1, but
-                    // this might have to be larger for when there are more 
-                    // overlapping flows than remaining iterations.
-                    int nbrFlowsToMove = 1;            
-                    if (nbrOverlaps > remainingIterations && remainingIterations > 0) {
-                        nbrFlowsToMove = (int) Math.ceil(nbrOverlaps / remainingIterations);
-                    }
-                    
-                    int nbrRemainingOverlaps = layouter.moveFlowsAwayFromObstacles(obstacles, sortedOverlappingFlows, nbrFlowsToMove);
-
-                    // compute the number of iterations until the next flow will 
-                    // be moved away from obstacles
-                    if (nbrRemainingOverlaps > 0) {
-                        // division by empirical factor = 2 to increase the 
-                        // number of iterations at the end of calculations
-                        iterBeforeMovingFlows = (ForceLayouter.NBR_ITERATIONS - i) / (nbrRemainingOverlaps + 1) / 2;
-                    } else {
-                        // There are no flows left hat overlap obstacles. Future
-                        // iterations may again create overlaps. So check after
-                        // 50% of the remaining iterations for new overlaps.
-                        iterBeforeMovingFlows = remainingIterations / 2;
-                    }
-                } else {
-                    --iterBeforeMovingFlows;
-                }
-
-                model.computeArrowheads();
+                iterBeforeMovingFlows = layouter.layoutIteration(i, iterBeforeMovingFlows, canvas);
 
                 // publish intermediate results in map. This will call process() 
                 // on the Event Dispatch Thread.
