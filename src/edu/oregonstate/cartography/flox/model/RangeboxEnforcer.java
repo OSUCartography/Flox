@@ -17,14 +17,17 @@ public class RangeboxEnforcer {
 
     /**
      * If the control point of a flow falls outside of the flow's range box,
-     * this returns the intersection between a line connecting the control point
-     * to the midpoint of the baseline, and the location along the range box's
-     * border where the line crosses. Checks each side of the range rectangle
-     * one at a time.
+     * moves the control point to the intersection between a line connecting the
+     * control point to the midpoint of the baseline, and the location along the
+     * range box's border where the line crosses. A locked flow is not changed.
      *
-     * @param flow a Flow
+     * @param flow flow to change
      */
     public void enforceFlowControlPointRange(Flow flow) {
+
+        if (flow.isLocked()) {
+            return;
+        }
 
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();
@@ -87,7 +90,18 @@ public class RangeboxEnforcer {
 
     }
 
+    /**
+     * Forces a flow control point to stay within the past rectangle. A locked
+     * flow is not changed.
+     *
+     * @param flow flow to change
+     * @param canvas canvas rectangle
+     */
     public void enforceCanvasBoundingBox(Flow flow, Rectangle2D canvas) {
+
+        if (flow.isLocked()) {
+            return;
+        }
 
         double cWidth = canvas.getWidth();
         double cHeight = canvas.getHeight();

@@ -91,9 +91,11 @@ public class ForceLayouter {
             angularDistForces.add(new Force());
         }
     }
-    
+
     /**
-     * Returns the model. The model must not be changed while a layout is computed.
+     * Returns the model. The model must not be changed while a layout is
+     * computed.
+     *
      * @return model
      */
     public Model getModel() {
@@ -173,9 +175,9 @@ public class ForceLayouter {
             ArrayList<Flow> sortedOverlappingFlows = getSortedFlowsOverlappingObstacles(obstacles);
             int nbrOverlaps = sortedOverlappingFlows.size();
 
-            // Compute the number of flows to move. Default is 1, but
-            // this might have to be larger for when there are more 
-            // overlapping flows than remaining iterations.
+            // Compute the number of flows to move. Default is 1, but this might 
+            // have to be larger for when there are more overlapping flows than 
+            // remaining iterations.
             int nbrFlowsToMove = 1;
             if (nbrOverlaps > remainingIterations && remainingIterations > 0) {
                 nbrFlowsToMove = (int) Math.ceil(nbrOverlaps / remainingIterations);
@@ -582,8 +584,9 @@ public class ForceLayouter {
 
     /**
      * Returns a list with pairs of flows that intersect and are connected to a
-     * shared node. FIXME should either cache JTS Geometry objects or write
-     * intersection test for lines in straightLinesMap.
+     * shared node. The list does not include pairs where both flows are locked.
+     * FIXME should either cache JTS Geometry objects or write intersection test
+     * for lines in straightLinesMap.
      *
      * @return pairs of flows that have a common start or end node.
      */
@@ -609,6 +612,11 @@ public class ForceLayouter {
 
             for (int j = i + 1; j < flows.size(); j++) {
                 Flow flow2 = flows.get(j);
+                // pairs where both flows are locked, as nothing can be changed for locked flows.
+                if (flow1.isLocked() && flow2.isLocked()) {
+                    continue;
+                }
+
                 Point sharedNode = flow1.getSharedNode(flow2);
                 if (sharedNode != null) {
                     Point[] points2 = straightLinesMap.get(flow2);
@@ -930,11 +938,14 @@ public class ForceLayouter {
      * Tests control point locations placed along an Archimedean spiral centered
      * on the current control point location.
      *
-     * @param flow flow to change
+     * @param flow flow to change. Nothing is changed if the flow is locked.
      * @param obstacles obstacles to avoid
      * @return true if a new position was found, false otherwise.
      */
     private boolean moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
+        if (flow.isLocked()) {
+            return false;
+        }
         // compute spacing of sample points in world coordinates
         // The spacing between candidate control points is equal to the minimum
         // distance to obstacles. Increase to accelerate computations.

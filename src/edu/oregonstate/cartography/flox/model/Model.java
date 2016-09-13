@@ -131,8 +131,12 @@ public class Model {
             Point cPt1New = GeometryUtils.getLineLineIntersection(x, y, cPt2.x, cPt2.y, cPt1.x, cPt1.y, node1.x, node1.y);
             Point cPt2New = GeometryUtils.getLineLineIntersection(x, y, cPt1.x, cPt1.y, cPt2.x, cPt2.y, node2.x, node2.y);
             if (cPt1New != null && cPt2New != null) {
-                flow1.setControlPoint(cPt1New);
-                flow2.setControlPoint(cPt2New);
+                if (flow1.isLocked() == false) {
+                    flow1.setControlPoint(cPt1New);
+                }
+                if (flow2.isLocked() == false) {
+                    flow2.setControlPoint(cPt2New);
+                }
             }
         }
     }
