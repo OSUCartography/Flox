@@ -2317,12 +2317,12 @@ public class MainWindow extends javax.swing.JFrame {
     /**
      * Passes flows to the model and initializes the GUI for the flows.
      *
-     * @param flows
-     * @param filePath
+     * @param flows new flows
+     * @param name name of the flow data set, used for window title
      */
-    private void setFlows(ArrayList<Flow> flows, String filePath) {
+    private void setFlows(ArrayList<Flow> flows, String name) {
         if (flows != null) {
-            setTitle(FileUtils.getFileNameWithoutExtension(filePath));
+            setTitle(name);
             model.setFlows(flows);
             mapComponent.showAll();
             model.setReferenceMapScale(mapComponent.getScale());
@@ -2344,7 +2344,8 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
-            setFlows(flows, inFilePath);
+            String name = FileUtils.getFileNameWithoutExtension(inFilePath);
+            setFlows(flows, name);
             mapComponent.showAll();
 
             // the user might have loaded clipping areas before. Apply these
@@ -2836,7 +2837,8 @@ public class MainWindow extends javax.swing.JFrame {
             String pointsFilePath = pointsFilePathLabel.getText();
             String flowsFilePath = flowsFilePathLabel.getText();
             ArrayList<Flow> flows = FlowImporter.readFlows(pointsFilePath, flowsFilePath);
-            setFlows(flows, flowsFilePath);
+            String name = FileUtils.getFileNameWithoutExtension(flowsFilePath);
+            setFlows(flows, name);
             mapComponent.showAll();
 
             // the user might have loaded clipping areas before. Apply these
@@ -3679,10 +3681,11 @@ public class MainWindow extends javax.swing.JFrame {
             layoutWorker.cancel(false);
         }
 
-        model.straightenFlows(false);
         if (model.getFlowRangeboxHeight() > 0) {
             progressBar.setVisible(true);
-            ForceLayouter layouter = new ForceLayouter(model.copy());
+            Model modelCopy = model.copy();
+            modelCopy.straightenFlows(false);
+            ForceLayouter layouter = new ForceLayouter(modelCopy);
             layoutWorker = new LayoutWorker(layouter);
             layoutWorker.execute();
         }
