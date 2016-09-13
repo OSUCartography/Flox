@@ -469,13 +469,23 @@ public class Model {
     }
 
     /**
-     * Replace the graph of this model with a reference to the graph of the
-     * passed model. Only a shallow copy is made.
+     * Change control point location of a flow.
      *
-     * @param model copy graph reference from this model
+     * @param id identifier of the flow in the graph
+     * @param x horizontal coordinate of control point
+     * @param y vertical coordinate of control point
      */
-    public void assignGraph(Model model) {
-        this.graph = model.graph;
+    public void replaceControlPoint(long id, double x, double y) {
+        // FIXME inefficient iteration, should use hash map
+        Iterator<Flow> iter = graph.flowIterator();
+        while (iter.hasNext()) {
+            Flow flow = iter.next();
+            if (flow.id == id) {
+                flow.getCtrlPt().x = x;
+                flow.getCtrlPt().y = y;
+                break;
+            }
+        }
     }
 
     /**

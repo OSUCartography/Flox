@@ -91,6 +91,8 @@ public final class Graph {
      * @param flow The flow to add.
      */
     public void addFlow(Flow flow) {
+        assert (hasFlowWithID(flow.id) == false);
+        
         Point startPoint = findNodeInGraph(flow.getStartPt());
         Point endPoint = findNodeInGraph(flow.getEndPt());
         flow.setStartPt(startPoint);
@@ -138,6 +140,16 @@ public final class Graph {
             }
         }
         return target;
+    }
+    
+    private boolean hasFlowWithID(long id) {
+        Iterator<Flow> iter = graph.edgeSet().iterator();
+        while (iter.hasNext()) {
+            if (iter.next().id == id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int getNbrFlows() {

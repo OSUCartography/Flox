@@ -21,6 +21,20 @@ import java.util.Iterator;
  */
 public class Flow {
 
+    private static long idCounter = 0;
+
+    protected static synchronized long createID() {
+        return idCounter++;
+    }
+
+    /**
+     * An identifier that is used to find Flows in a Graph. The id is not
+     * required to be unique. For example, when a flow is split in two flows
+     * both new flows have the same id as the original flow. However, a Graph
+     * cannot contain multiple flows with identical IDs.
+     */
+    public final long id;
+
     /**
      * start point of flow.
      */
@@ -83,12 +97,18 @@ public class Flow {
      * @param ctrlPt control point
      * @param endPt end point
      * @param value flow value
+     * @param id id for this flow
      */
-    public Flow(Point startPt, Point ctrlPt, Point endPt, double value) {
+    public Flow(Point startPt, Point ctrlPt, Point endPt, double value, long id) {
+        assert (startPt != null);
+        assert (endPt != null);
+        assert (Double.isFinite(value));
+
         this.startPt = startPt;
         this.cPt = ctrlPt;
         this.endPt = endPt;
         this.value = value;
+        this.id = id;
     }
 
     /**
@@ -99,22 +119,14 @@ public class Flow {
      * @param value value of this flow
      */
     public Flow(Point startPt, Point endPt, double value) {
-        assert (startPt != null);
-        assert (endPt != null);
-        assert (Double.isFinite(value));
-
-        this.startPt = startPt;
-        this.endPt = endPt;
-        this.value = value;
-
-        // control point is half way between start and end nodes
-        cPt = new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2);
+        this(startPt, new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2), endPt, value, createID());
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Flow ");
-        sb.append("start=").append(startPt);
+        sb.append("id=").append(id);
+        sb.append(" start=").append(startPt);
         sb.append(", end=").append(endPt);
         sb.append(", ctrl=").append(cPt);
         sb.append(", value=").append(value);
@@ -682,12 +694,12 @@ public class Flow {
         Point ctrl2 = new Point(ctrlX2, ctrlY2);
         Point end2 = new Point(endX2, endY2);
 
-        Flow flow1 = new Flow(start1, ctrl1, end1, getValue());
+        Flow flow1 = new Flow(start1, ctrl1, end1, getValue(), id);
         flow1.setSelected(isSelected());
         flow1.setLocked(isLocked());
         flow1.setStartClipArea(getStartClipArea());
 
-        Flow flow2 = new Flow(start2, ctrl2, end2, getValue());
+        Flow flow2 = new Flow(start2, ctrl2, end2, getValue(), id);
         flow2.setSelected(isSelected());
         flow2.setLocked(isLocked());
         flow2.setEndClipArea(getEndClipArea());

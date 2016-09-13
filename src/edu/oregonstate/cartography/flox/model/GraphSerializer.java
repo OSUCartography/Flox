@@ -55,8 +55,6 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             double y = Double.parseDouble(tokenizer.nextToken());
             double nodeValue = Double.parseDouble(tokenizer.nextToken());
             Point point = new Point(x, y, nodeValue);
-            boolean selected = Boolean.parseBoolean(tokenizer.nextToken());
-            point.setSelected(selected);
             points.put(id, point);
         }
 
@@ -70,8 +68,8 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
             tokenizer = new StringTokenizer(l, SEPARATOR);
             boolean locked = false;
-            boolean selected = false;
 
+            long id = Long.parseLong(tokenizer.nextToken());
             String startPtID = tokenizer.nextToken();
             String endPtID = tokenizer.nextToken();
             double cPtX = Double.parseDouble(tokenizer.nextToken());
@@ -81,17 +79,12 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             if (Double.parseDouble(tokenizer.nextToken()) == 1) {
                 locked = true;
             }
-            
-            if (Double.parseDouble(tokenizer.nextToken()) == 1) {
-                selected = true;
-            }
-
+           
             Point startPoint = points.get(startPtID);
             Point endPoint = points.get(endPtID);
             Point cPoint = new Point(cPtX, cPtY);
-            Flow flow = new Flow(startPoint, cPoint, endPoint, flowValue);
+            Flow flow = new Flow(startPoint, cPoint, endPoint, flowValue, id);
             flow.setLocked(locked);
-            flow.setSelected(selected);
             String startClipAreaWKT = tokenizer.nextToken();
             if (startClipAreaWKT.startsWith("POLYGON")) {
                 Geometry startClipArea = new WKTReader().read(startClipAreaWKT);
@@ -142,15 +135,12 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
         // Make a string of all the flows
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-
+            flowStr.append(flow.id);
+            flowStr.append(SEPARATOR);
             flowStr.append(points.get(flow.getStartPt()));
             flowStr.append(SEPARATOR);
-
-            // Append the key and a comma to flowStr
             flowStr.append(points.get(flow.getEndPt()));
             flowStr.append(SEPARATOR);
-
-            // Append the control point coordinates
             flowStr.append(flow.getCtrlPt().x);
             flowStr.append(SEPARATOR);
             flowStr.append(flow.getCtrlPt().y);
@@ -161,14 +151,6 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
 
             // Append the locked status
             if (flow.isLocked()) {
-                flowStr.append(1);
-            } else {
-                flowStr.append(0);
-            }
-            flowStr.append(SEPARATOR);
-            
-            // Append the selection status
-            if (flow.isSelected()) {
                 flowStr.append(1);
             } else {
                 flowStr.append(0);
@@ -192,8 +174,7 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             double x = entry.getKey().x;
             double y = entry.getKey().y;
             double val = entry.getKey().getValue();
-            boolean selected = entry.getKey().isSelected();
-            
+
             nodeStr.append(id);
             nodeStr.append(SEPARATOR);
             nodeStr.append(x);
@@ -201,8 +182,6 @@ public class GraphSerializer extends XmlAdapter<String, Graph> {
             nodeStr.append(y);
             nodeStr.append(SEPARATOR);
             nodeStr.append(val);
-            nodeStr.append(SEPARATOR);
-            nodeStr.append(selected);
             nodeStr.append(SEPARATOR);
             nodeStr.append("\n");
         }

@@ -12,7 +12,7 @@ public class BidirectionalFlow extends Flow {
     private final boolean lock2;
     
     public BidirectionalFlow(Flow flow1, Flow flow2) {
-        super(flow1.getStartPt(), flow1.getCtrlPt(), flow1.getEndPt(), flow1.getValue());
+        super(flow1.getStartPt(), flow1.getCtrlPt(), flow1.getEndPt(), flow1.getValue(), createID());
         
         assert(flow1.getStartPt() == flow2.getEndPt());
         assert(flow2.getStartPt() == flow1.getEndPt());
@@ -33,7 +33,7 @@ public class BidirectionalFlow extends Flow {
     }
     
     public Flow createFlow1() {
-        Flow flow = new Flow(startPt, getCtrlPt(), endPt, getValue());
+        Flow flow = new Flow(startPt, getCtrlPt(), endPt, getValue(), id);
         flow.setLocked(lock1);
         flow.setStartClipArea(getStartClipArea());
         flow.setEndClipArea(getEndClipArea());
@@ -41,7 +41,7 @@ public class BidirectionalFlow extends Flow {
     }
     
     public Flow createFlow2() {
-        Flow flow = new Flow(endPt, getCtrlPt(), startPt, value2);
+        Flow flow = new Flow(endPt, getCtrlPt(), startPt, value2, id);
         flow.setLocked(lock2);
         flow.setStartClipArea(getEndClipArea());
         flow.setEndClipArea(getStartClipArea());

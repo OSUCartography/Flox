@@ -126,7 +126,11 @@ public class ForceLayouter {
      * reference to the model of this ForceLayouter.
      */
     public void assignGraphToModel(Model destinationModel) {
-        destinationModel.assignGraph(model);
+        ArrayList<Flow> flows = model.getFlows();
+        for (Flow flow : flows) {
+            Point ctrlPt = flow.getCtrlPt();
+            destinationModel.replaceControlPoint(flow.id, ctrlPt.x, ctrlPt.y);
+        }
     }
 
     /**
