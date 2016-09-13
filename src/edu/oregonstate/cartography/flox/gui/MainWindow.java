@@ -3564,104 +3564,6 @@ public class MainWindow extends javax.swing.JFrame {
         return (title == null || title.isEmpty()) ? "Flows" : title;
     }
 
-    private class LayoutWorker extends SwingWorker<Void, Void> {
-
-        private final ForceLayouter layouter;
-
-        public LayoutWorker(ForceLayouter layouter) {
-            this.layouter = layouter;
-            this.addPropertyChangeListener(new PropertyChangeListener() {
-
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if ("progress".equals(evt.getPropertyName())) {
-                        progressBar.setValue((Integer) evt.getNewValue());
-                    }
-                }
-            });
-        }
-
-        /**
-         * Apply layout iterations to all non-locked flows. This is run in the
-         * worker thread.
-         */
-        private void layout() {
-
-            // After 10% of all iterations the first flow is moved away from
-            // obstacles like arrowheads and unconnected nodes. This gives flows
-            // a chance to stabilize before the first one is moved.
-            int iterBeforeMovingFlows = ForceLayouter.NBR_ITERATIONS / 10;
-
-            //model.changeToBidirectionalFlows();
-            // store initial lock flags of all flows
-            boolean[] initialLocks = model.getLocks();
-
-            Rectangle2D canvas = model.getNodesBoundingBox();
-
-            for (int i = 0; i < ForceLayouter.NBR_ITERATIONS; i++) {
-                if (isCancelled()) {
-                    break;
-                }
-
-                iterBeforeMovingFlows = layouter.layoutIteration(i, iterBeforeMovingFlows, canvas);
-
-                // publish intermediate results in map. This will call process() 
-                // on the Event Dispatch Thread.
-                if (model.liveDrawing) {
-                    publish();
-                }
-
-                // update progress indicator
-                double progress = 100d * i / ForceLayouter.NBR_ITERATIONS;
-                setProgress((int) Math.round(progress));
-            }
-
-            // reset lock flags to initial values
-            model.applyLocks(initialLocks);
-
-            //model.changeToUnidirectionalFlows();
-        }
-
-        @Override
-        public Void doInBackground() {
-            double startTime = System.currentTimeMillis();
-            setProgress(0);
-            layout();
-            System.out.println("Milliseconds: " + (System.currentTimeMillis() - startTime));
-            return null;
-        }
-
-        /**
-         * Finished computations. This is invoked on the Event Dispatch Thread.
-         */
-        @Override
-        public void done() {
-            try {
-                if (!isCancelled()) {
-                    get();
-                    layouter.assignGraphToModel(model);
-                    mapComponent.eraseBufferImage();
-                    mapComponent.repaint();
-                    progressBar.setVisible(false);
-                }
-            } catch (Throwable t) {
-                showErrorDialog("An error occured while computing a new layout.", t);
-            }
-        }
-
-        /**
-         * Process intermediate results. This is invoked on the Event Dispatch
-         * Thread.
-         *
-         * @param models
-         */
-        @Override
-        protected void process(List<Void> ignore) {
-            // draw the new graph on the map
-            mapComponent.eraseBufferImage();
-            mapComponent.repaint();
-        }
-    }
 
     public void layout(String undoString) {
         if (updatingGUI) {
@@ -3686,7 +3588,7 @@ public class MainWindow extends javax.swing.JFrame {
             Model modelCopy = model.copy();
             modelCopy.straightenFlows(false);
             ForceLayouter layouter = new ForceLayouter(modelCopy);
-            layoutWorker = new LayoutWorker(layouter);
+            layoutWorker = new LayoutWorker(layouter, progressBar, mapComponent);
             layoutWorker.execute();
         }
     }

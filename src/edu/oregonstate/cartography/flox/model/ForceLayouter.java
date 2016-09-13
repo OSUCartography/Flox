@@ -59,13 +59,13 @@ public class ForceLayouter {
      * be updated whenever the start, end, or control point of a Bézier flow
      * changes.
      */
-    HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
+    private final HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
 
     // store per flow force
-    ArrayList<Force> forces;
+    private final ArrayList<Force> forces;
 
     // store angular distribution force for each flow for friction computation
-    ArrayList<Force> angularDistForces;
+    private final ArrayList<Force> angularDistForces;
 
     /**
      * Constructor for the ForceLayouter. Requires a Model object containing
@@ -90,6 +90,14 @@ public class ForceLayouter {
         for (int i = 0; i < nFlows; i++) {
             angularDistForces.add(new Force());
         }
+    }
+    
+    /**
+     * Returns the model. The model must not be changed while a layout is computed.
+     * @return model
+     */
+    public Model getModel() {
+        return model;
     }
 
     /**
