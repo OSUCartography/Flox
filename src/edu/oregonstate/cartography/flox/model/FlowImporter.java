@@ -19,11 +19,12 @@ public class FlowImporter {
     }
 
     /**
-     * Import flows from a reader. One flow per line. 
-     * Format: startX, startY, endX, endY 
-     * Values are separated by space, coma or tab.
+     * Import flows from a reader. One flow per line. Values are separated by
+     * space, coma or tab. Format: startX, startY, endX, endY, [flow value],
+     * [start node value], [end node value] [controlX], [controlY], [lock flag].
+     * Optional values are indicated with [].
      *
-     * @param reader
+     * @param reader read from this reader
      * @return The imported flows.
      * @throws IOException
      */
@@ -38,9 +39,24 @@ public class FlowImporter {
             double y1 = Double.parseDouble(tokenizer.nextToken());
             double x2 = Double.parseDouble(tokenizer.nextToken());
             double y2 = Double.parseDouble(tokenizer.nextToken());
-            double value = Double.parseDouble(tokenizer.nextToken());
-            
-            // Are there control point coordinates?
+
+            // flow value
+            double value = Model.DEFAULT_FLOW_VALUE;
+            if (tokenizer.hasMoreTokens()) {
+                value = Double.parseDouble(tokenizer.nextToken());
+            }
+
+            // node values
+            double startNodeValue = Model.DEFAULT_NODE_VALUE;
+            double endNodeValue = Model.DEFAULT_NODE_VALUE;
+            if (tokenizer.hasMoreTokens()) {
+                startNodeValue = Double.parseDouble(tokenizer.nextToken());
+            }
+            if (tokenizer.hasMoreTokens()) {
+                endNodeValue = Double.parseDouble(tokenizer.nextToken());
+            }
+
+            // control point coordinates
             Point cPt = null;
             if (tokenizer.hasMoreTokens()) {
                 double cx = Double.parseDouble(tokenizer.nextToken());
@@ -52,9 +68,11 @@ public class FlowImporter {
                 locked = (Double.parseDouble(tokenizer.nextToken()) == 1);
             }
 
-            Flow flow = new Flow(new Point(x1, y1), new Point(x2, y2), value);
+            Point startNode = new Point(x1, y1, startNodeValue);
+            Point endNode = new Point(x2, y2, endNodeValue);
+            Flow flow = new Flow(startNode, endNode, value);
 
-            if (cPt != null) {                
+            if (cPt != null) {
                 flow.setControlPoint(cPt);
             }
             flow.setLocked(locked);
@@ -64,11 +82,10 @@ public class FlowImporter {
 
         return flows;
     }
-       
+
     /**
-     * Import file with flows. One flow per line.
-     * Format: startX, startY, endX, endY 
-     * Values are separated by space, coma or tab.
+     * Import file with flows. One flow per line. Format: startX, startY, endX,
+     * endY Values are separated by space, coma or tab.
      *
      * @param filePath
      * @return The imported flows.
@@ -102,11 +119,11 @@ public class FlowImporter {
                 double x = Double.parseDouble(tokenizer.nextToken());
                 double y = Double.parseDouble(tokenizer.nextToken());
                 double val = 1;
-                
+
                 if (tokenizer.hasMoreTokens()) {
                     val = Double.parseDouble(tokenizer.nextToken());
                 };
-                
+
                 Point point = new Point(x, y, val);
                 points.put(id, point);
             }

@@ -50,16 +50,6 @@ public class AddFlowTool extends DoubleBufferedTool {
     private final double PIXEL_TOLERANCE = 3;
 
     /**
-     * The default value for a new node.
-     */
-    private static final int DEFAULT_NODE_VALUE = 1;
-
-    /**
-     * The default value for a flow.
-     */
-    private static final int DEFAULT_FLOW_VALUE = 1;
-
-    /**
      * current mouse position in world coordinates
      */
     private Point2D mouse = null;
@@ -125,7 +115,7 @@ public class AddFlowTool extends DoubleBufferedTool {
 
             // If an existing node was NOT assigned to originNode, create a new one 
             if (originNode == null) {
-                double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : DEFAULT_NODE_VALUE;
+                double v = (model.getNbrNodes() > 0) ? model.getMeanNodeValue() : Model.DEFAULT_NODE_VALUE;
                 originNode = new Point(point.x, point.y, v);
             }
             // select origin node if it exists in the map
@@ -133,7 +123,7 @@ public class AddFlowTool extends DoubleBufferedTool {
             originNode.setSelected(true);
             
             if (model.getNbrFlows() < 1) {
-                flowValue = DEFAULT_FLOW_VALUE;
+                flowValue = Model.DEFAULT_FLOW_VALUE;
             } else {
                 flowValue = model.getMeanFlowValue();
             }            

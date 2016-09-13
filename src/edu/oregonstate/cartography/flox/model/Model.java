@@ -50,6 +50,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 public class Model {
 
+    /**
+     * The default value for a new node.
+     */
+    public static final double DEFAULT_NODE_VALUE = 1;
+
+    /**
+     * The default value for a flow.
+     */
+    public static final double DEFAULT_FLOW_VALUE = 1;
+    
     // FIXME
     public boolean limitNodesRepulsionToBandHack = false;
 
