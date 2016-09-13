@@ -45,7 +45,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     private boolean drawCanvas = false;
 
     /**
-     * flag for drawing flow rangebox
+     * flag for drawing flow range box
      */
     private boolean drawFlowRangebox = false;
 
@@ -63,11 +63,6 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing obstacles (areas around nodes and arrowheads)
      */
     private boolean drawObstacles = false;
-
-    /**
-     * Flag to indicate when the flow width is locked to the current map scale.
-     */
-    private boolean flowWidthLocked = false;
 
     private MainWindow mainWindow;
 

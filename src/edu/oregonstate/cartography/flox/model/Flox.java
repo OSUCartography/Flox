@@ -3,7 +3,11 @@ package edu.oregonstate.cartography.flox.model;
 import edu.oregonstate.cartography.flox.gui.MainWindow;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 /**
  * Main class for Flox.
@@ -12,9 +16,10 @@ import javax.swing.UIManager;
  * University
  */
 public class Flox {
-    
+
     /**
      * Main entry point for Flox.
+     *
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -35,19 +40,30 @@ public class Flox {
             public void run() {
                 MainWindow window = new MainWindow();
                 window.setModel(model);
-                
+
                 // find available screen real estate (without taskbar, etc.)
                 Rectangle screen = GraphicsEnvironment.
                         getLocalGraphicsEnvironment().getMaximumWindowBounds();
-                window.setSize((int)screen.getWidth(), (int) screen.getHeight());
+                window.setSize((int) screen.getWidth(), (int) screen.getHeight());
                 window.setLocation((int) screen.getMinX(), (int) screen.getMinY());
                 window.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
                 window.setVisible(true);
-                
+
                 window.openFlowsCSVFile();
+
+                window.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        String msg = "This will exit Flox and all unsaved edits will be lost.";
+                        String title = "Flox";
+                        int res = JOptionPane.showConfirmDialog(window, msg, title, 
+                                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                        if (res == JOptionPane.YES_OPTION) {
+                            window.dispose();
+                        }
+                    }
+                });
             }
         });
-
     }
-
 }

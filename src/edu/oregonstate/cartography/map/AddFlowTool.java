@@ -195,10 +195,12 @@ public class AddFlowTool extends DoubleBufferedTool {
             boolean keyReleased = keyEvent.getID() == KeyEvent.KEY_RELEASED;
             boolean isDeleteKey = keyEvent.getKeyCode() == KeyEvent.VK_DELETE;
             boolean isBackspaceKey = keyEvent.getKeyCode() == KeyEvent.VK_BACK_SPACE;
-            if (keyReleased && (isDeleteKey || isBackspaceKey)) {
+            boolean isEscapeKey = keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE;
+            if (keyReleased && (isDeleteKey || isBackspaceKey || isEscapeKey)) {
                 // delete new origin node
                 originNode = null;
                 // repaint the map
+                releaseBackground();
                 mapComponent.refreshMap();
                 return true;
             }
@@ -207,4 +209,5 @@ public class AddFlowTool extends DoubleBufferedTool {
         // default: delegate key event to other components
         return false;
     }
+    
 }

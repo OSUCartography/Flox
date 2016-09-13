@@ -47,7 +47,6 @@ import javax.swing.ListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.xml.bind.JAXBException;
 
 /**
@@ -437,9 +436,9 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator10 = new javax.swing.JPopupMenu.Separator();
         lockMenuItem = new javax.swing.JMenuItem();
         unlockMenuItem = new javax.swing.JMenuItem();
+        straightenFlowsMenuItem = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JPopupMenu.Separator();
         reverseFlowDirectionMenuItem = new javax.swing.JMenuItem();
-        straightenFlowsMenuItem = new javax.swing.JMenuItem();
         mergeNodesMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
@@ -556,7 +555,7 @@ public class MainWindow extends javax.swing.JFrame {
         jCheckBoxMenuItem1.setSelected(true);
         jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
         jToolBar1.setRollover(true);
 
@@ -1950,6 +1949,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(unlockMenuItem);
+
+        straightenFlowsMenuItem.setText("Straigthen and Lock Flows");
+        straightenFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                straightenFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(straightenFlowsMenuItem);
         editMenu.add(jSeparator11);
 
         reverseFlowDirectionMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -1960,14 +1967,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(reverseFlowDirectionMenuItem);
-
-        straightenFlowsMenuItem.setText("Straigthen Flows");
-        straightenFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                straightenFlowsMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(straightenFlowsMenuItem);
 
         mergeNodesMenuItem.setText("Merge Nodes");
         mergeNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -3094,6 +3093,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
         model.straightenFlows(true);
+        model.setLockOfSelectedFlows(true);
         model.computeArrowheads();
         addUndo("Straighten Flows");
         mapComponent.refreshMap();
@@ -3588,7 +3588,6 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
 
-        // this will wait until previous layout has canceled
         if (layoutWorker != null && !layoutWorker.isDone()) {
             layoutWorker.cancel(false);
         }
@@ -3600,6 +3599,8 @@ public class MainWindow extends javax.swing.JFrame {
             ForceLayouter layouter = new ForceLayouter(modelCopy);
             layoutWorker = new LayoutWorker(layouter, progressBar, mapComponent);
             layoutWorker.execute();
+        } else {
+            model.straightenFlows(false);
         }
     }
 
