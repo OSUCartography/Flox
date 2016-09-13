@@ -225,9 +225,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     @Override
     public void mouseDown(Point2D.Double point, MouseEvent evt) {
-
         selectByPoint(point, evt.isShiftDown(), SelectionTool.CLICK_PIXEL_TOLERANCE);
-
         updateValueField();
         updateCoordinateFields();
         updateLockUnlockButton();
@@ -265,9 +263,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         rect.getMaxY() + (1 / mapComponent.getScale()));
             }
             while (flows.hasNext()) {
-                Flow flow = model.clipFlow(flows.next(), false);
-                if (flow.getBoundingBox().intersects(rect)) {
-                    ArrayList<Point> pts = flow.toUnclippedStraightLineSegments(deCasteljauTol);
+                Flow flow = flows.next();
+                Flow clippedFlow = model.clipFlow(flow, false);
+                if (clippedFlow.getBoundingBox().intersects(rect)) {
+                    ArrayList<Point> pts = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
                     for (int i = 0; i < pts.size() - 1; i++) {
                         // Get the points
                         Point pt1 = pts.get(i);
