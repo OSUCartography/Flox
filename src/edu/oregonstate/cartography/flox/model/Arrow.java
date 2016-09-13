@@ -134,7 +134,7 @@ public class Arrow {
         // reduce clipping radius by 1 pixel to prevent a gap between the flow 
         // line and the arrowhead
         double tol = 1d / model.getReferenceMapScale();
-        clipRadius -= tol;
+        //clipRadius -= tol;
 
         // Locate the various points that determine the shape and location of 
         // the arrowhead.
@@ -160,15 +160,11 @@ public class Arrow {
 
         // Get the azimuth of the line connecting the base of the arrow to the
         // endPoint of the flow. This determines the azimuth of the Arrow.
-        // TODO: currently experminenting with a slightly different way of 
-        // determining arrowhead orientation
-        double azimuth;
-        if (model.isPointArrowTowardsEndpoint()) {
-            azimuth = GeometryUtils.computeAzimuth(getBasePt(), flow.getEndPt());
-        } else {
-            azimuth = GeometryUtils.computeAzimuth(flow.split(t)[0].getCtrlPt(), getBasePt());
-        }
-
+        double azimuth = GeometryUtils.computeAzimuth(basePt, flow.getEndPt());
+        // FIXME for thick flows this results in a small gap between the end line and the arrow base. clipRadius should be reduced to compensate for this gap.
+        // The size of the gap can be computed from the two azimuth angle and the widht of the flow line.
+        // double baseAzimuth = GeometryUtils.computeAzimuth(flow.split(t)[0].getCtrlPt(), getBasePt());
+        
         // Rotate all the points that make up the shape of the Arrow, using
         // the Arrow's base point as the pivot.
         tipPt.transform(basePt.x, basePt.y, azimuth);

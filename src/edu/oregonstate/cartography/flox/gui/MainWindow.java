@@ -394,7 +394,6 @@ public class MainWindow extends javax.swing.JFrame {
         arrowSizeRatioSlider = new javax.swing.JSlider();
         jLabel30 = new javax.swing.JLabel();
         arrowLengthRatioSlider = new javax.swing.JSlider();
-        useInFlowCheckbox = new javax.swing.JCheckBox();
         drawInlineArrowsCheckBox = new javax.swing.JCheckBox();
         clipAreaPanel = new TransparentMacPanel();
         clipAreaControlPanel = new TransparentMacPanel();
@@ -499,7 +498,7 @@ public class MainWindow extends javax.swing.JFrame {
         importPanel.add(jLabel23, gridBagConstraints);
 
         pointsFilePathLabel.setFont(pointsFilePathLabel.getFont().deriveFont(pointsFilePathLabel.getFont().getSize()-3f));
-        pointsFilePathLabel.setText("�");
+        pointsFilePathLabel.setText("–");
         pointsFilePathLabel.setPreferredSize(new java.awt.Dimension(500, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -510,7 +509,7 @@ public class MainWindow extends javax.swing.JFrame {
         importPanel.add(pointsFilePathLabel, gridBagConstraints);
 
         flowsFilePathLabel.setFont(flowsFilePathLabel.getFont().deriveFont(flowsFilePathLabel.getFont().getSize()-3f));
-        flowsFilePathLabel.setText("�");
+        flowsFilePathLabel.setText("–");
         flowsFilePathLabel.setPreferredSize(new java.awt.Dimension(500, 13));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -519,7 +518,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         importPanel.add(flowsFilePathLabel, gridBagConstraints);
 
-        selectPointsFileButton.setText("Select�");
+        selectPointsFileButton.setText("Select…");
         selectPointsFileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectPointsFileButtonActionPerformed(evt);
@@ -529,7 +528,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         importPanel.add(selectPointsFileButton, gridBagConstraints);
 
-        selectFlowsFileButton.setText("Select�");
+        selectFlowsFileButton.setText("Select…");
         selectFlowsFileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectFlowsFileButtonActionPerformed(evt);
@@ -956,7 +955,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         forcesPanel.add(flowRangeboxSizeSlider, gridBagConstraints);
 
-        jLabel13.setText("Flow Rangebox Size");
+        jLabel13.setText("Maximum Curvature");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 21;
@@ -1052,7 +1051,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         forcesPanel.add(minPxDistanceOfFlowsFromNodesSlider, gridBagConstraints);
 
-        minPxDistanceOfFlowsFromNodesSliderLabel.setText("Min. Pixel Distance of Flows from Nodes");
+        minPxDistanceOfFlowsFromNodesSliderLabel.setText("Minimum Distance to Nodes (Pixels)");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 27;
@@ -1596,18 +1595,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         arrowHeadsControlPanel.add(arrowLengthRatioSlider, gridBagConstraints);
 
-        useInFlowCheckbox.setText("Point Arrow Towards Endpoint (temp)");
-        useInFlowCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                useInFlowCheckboxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 15;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        arrowHeadsControlPanel.add(useInFlowCheckbox, gridBagConstraints);
-
         drawInlineArrowsCheckBox.setText("Draw Inline Arrows");
         drawInlineArrowsCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1634,7 +1621,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         clipAreaControlPanel.add(jLabel20, gridBagConstraints);
 
-        selectEndClipAreaButton.setText("Select Shapefile�");
+        selectEndClipAreaButton.setText("Select Shapefile…");
         selectEndClipAreaButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectEndClipAreaButtonActionPerformed(evt);
@@ -1819,7 +1806,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.setText("File");
 
         importFlowsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        importFlowsMenuItem.setText("Open Flows�");
+        importFlowsMenuItem.setText("Open Flows…");
         importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 importFlowsMenuItemActionPerformed(evt);
@@ -1827,7 +1814,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(importFlowsMenuItem);
 
-        openPointsAndFlowsMenuItem.setText("Open Nodes and Flows�");
+        openPointsAndFlowsMenuItem.setText("Open Nodes and Flows…");
         openPointsAndFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openPointsAndFlowsMenuItemActionPerformed(evt);
@@ -1836,7 +1823,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(openPointsAndFlowsMenuItem);
         fileMenu.add(jSeparator14);
 
-        openSettingsMenuItem.setText("Open Project�");
+        openSettingsMenuItem.setText("Open Project…");
         openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openSettingsMenuItemActionPerformed(evt);
@@ -1845,7 +1832,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(openSettingsMenuItem);
 
         saveSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        saveSettingsMenuItem.setText("Save Project�");
+        saveSettingsMenuItem.setText("Save Project…");
         saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveSettingsMenuItemActionPerformed(evt);
@@ -1854,7 +1841,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(saveSettingsMenuItem);
         fileMenu.add(jSeparator3);
 
-        exportSVGMenuItem.setText("Export SVG�");
+        exportSVGMenuItem.setText("Export SVG…");
         exportSVGMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exportSVGMenuItemActionPerformed(evt);
@@ -1862,7 +1849,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(exportSVGMenuItem);
 
-        exportImageMenuItem.setText("Export Image�");
+        exportImageMenuItem.setText("Export Image…");
         exportImageMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exportImageMenuItemActionPerformed(evt);
@@ -1994,7 +1981,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapMenu.setText("Layers");
 
-        openShapefileMenuItem.setText("Add Layer from Shapefile�");
+        openShapefileMenuItem.setText("Add Layer from Shapefile…");
         openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openShapefileMenuItemActionPerformed(evt);
@@ -2071,7 +2058,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         infoMenu.setText("Info");
 
-        floxReportMenuItem.setText("Layout Report�");
+        floxReportMenuItem.setText("Layout Report…");
         floxReportMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 floxReportMenuItemActionPerformed(evt);
@@ -2080,7 +2067,7 @@ public class MainWindow extends javax.swing.JFrame {
         infoMenu.add(floxReportMenuItem);
         infoMenu.add(jSeparator2);
 
-        infoMenuItem.setText("Info�");
+        infoMenuItem.setText("Info…");
         infoMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 infoMenuItemActionPerformed(evt);
@@ -3417,6 +3404,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_angularDistributionSliderStateChanged
 
     private void moveFlowsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveFlowsCheckBoxMenuItemActionPerformed
+        model.setMoveFlowsOverlappingObstacles(moveFlowsCheckBoxMenuItem.isSelected());
         layout("Move Flows");
     }//GEN-LAST:event_moveFlowsCheckBoxMenuItemActionPerformed
 
@@ -3442,14 +3430,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_arrowLengthRatioSliderStateChanged
-
-    private void useInFlowCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useInFlowCheckboxActionPerformed
-        if (model != null) {
-            model.setPointArrowTowardsEndpoint(useInFlowCheckbox.isSelected());
-            mapComponent.refreshMap();
-            addUndo("Use In Flow");
-        }
-    }//GEN-LAST:event_useInFlowCheckboxActionPerformed
 
     private void liveDrawingCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_liveDrawingCheckBoxMenuItemActionPerformed
         model.liveDrawing = liveDrawingCheckBoxMenuItem.isSelected();
@@ -3608,7 +3588,7 @@ public class MainWindow extends javax.swing.JFrame {
         /**
          * Apply layout iterations to all non-locked flows.
          */
-        private void layout(boolean moveFlowsOverlappingNodes) {
+        private void layout() {
 
             // After 10% of all iterations the first flow is moved away from
             // obstacles like arrowheads and unconnected nodes. This gives flows
@@ -3652,7 +3632,7 @@ public class MainWindow extends javax.swing.JFrame {
                 }
 
                 // move flows away from obstacles
-                if (moveFlowsOverlappingNodes && iterBeforeMovingFlows == 0) {
+                if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlows == 0) {
                     int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
 
                     // moving flows will lock flows that have been moved
@@ -3708,12 +3688,8 @@ public class MainWindow extends javax.swing.JFrame {
         public Void doInBackground() {
             // initialize progress property.
             double startTime = System.currentTimeMillis();
-
             setProgress(0);
-
-            boolean moveFlowsOverlappingNodes = moveFlowsCheckBoxMenuItem.isSelected();
-            layout(moveFlowsOverlappingNodes);
-
+            layout();
             System.out.println("Milliseconds: " + (System.currentTimeMillis() - startTime));
             return null;
         }
@@ -3953,7 +3929,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel symbolPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
-    private javax.swing.JCheckBox useInFlowCheckbox;
     private javax.swing.JLabel vallueLabel;
     private javax.swing.JFormattedTextField valueFormattedTextField;
     private javax.swing.JToggleButton viewCanvasToggleButton;
