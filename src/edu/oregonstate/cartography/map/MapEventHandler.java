@@ -5,8 +5,6 @@
  */
 package edu.oregonstate.cartography.map;
 
-import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
-import edu.oregonstate.cartography.flox.gui.MainWindow;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import edu.oregonstate.cartography.utils.FocusUtils;
 import java.awt.geom.*;
@@ -399,18 +397,7 @@ public class MapEventHandler implements java.awt.event.MouseListener,
         if (mapTool != null && mapTool.keyEvent(keyEvent) == true) {
             return true;
         }
-
-        // the rest of this method changes the current map tool.
-        if (keyReleased && keyEvent.getKeyCode() == KeyEvent.VK_V) {
-            // V switches to move/selection tool
-            FloxMapComponent floxMap = (FloxMapComponent) mapComponent;
-            floxMap.setScaleMoveSelectionTool();
-        } else if (keyReleased && keyEvent.getKeyCode() == KeyEvent.VK_A) {
-            // A switches to add flow tool
-            FloxMapComponent floxMap = (FloxMapComponent) mapComponent;
-            floxMap.setAddFlowTool();
-        }
-
+        
         // Only do this if the mouse is over the map component.
         if (!mouseOverComponent) {
             return false;
