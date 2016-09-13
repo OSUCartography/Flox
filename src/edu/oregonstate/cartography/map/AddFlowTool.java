@@ -7,6 +7,7 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -35,14 +36,6 @@ public class AddFlowTool extends DoubleBufferedTool {
     Point originNode = null;
 
     /**
-     * The destination node of the new flow being added. A destinationNode is
-     * assigned on the second click of the AddFlowTool. If an existing node is
-     * clicked, that Point is assigned to destinationNode. If an empty space is
-     * clicked, a new Point is created and assigned to destinationNode.
-     */
-    Point destinationNode = null;
-
-    /**
      * The distance from an existing node that a click must be within for that
      * node to be assigned to originNode or destinationNode. FIXME The clicking
      * distance should change with the size of the node.
@@ -69,6 +62,16 @@ public class AddFlowTool extends DoubleBufferedTool {
         super(mapComponent);
         this.model = model;
     }
+    
+    private Flow flow(double endX, double endY) {
+        Point endNode = new Point(endX, endY, originNode.getValue());
+        Flow flow = new Flow(originNode, endNode, flowValue);
+        model.updateStartClipArea(flow);
+        model.updateEndClipArea(flow);
+
+        model.computeArrowheadAndClipping(flow);
+        return flow;
+    }
 
     /**
      * Called after a mouse click.
@@ -84,32 +87,29 @@ public class AddFlowTool extends DoubleBufferedTool {
         // node. If this is the second click, add a destination node.
         if (originNode != null) {
             ArrayList<Point> nodes = model.getNodes();
-            destinationNode = ((FloxMapComponent) mapComponent).getClickedNode(nodes, point, PIXEL_TOLERANCE);
+            
+            Point endNode = ((FloxMapComponent) mapComponent).getClickedNode(nodes, point, PIXEL_TOLERANCE);
 
             // If an existing node was NOT assigned to destinationNode, make a new
             // Point and assign it to destinationNode.
-            if (destinationNode == null) {
-                destinationNode = new Point(point.x, point.y, originNode.getValue());
+            if (endNode == null) {
+                endNode = new Point(point.x, point.y, originNode.getValue());
             }
 
             // Add the new flow to the data model.
-            if (destinationNode != originNode) {
-                model.addFlow(new Flow(originNode, destinationNode, flowValue));
+            if (endNode != originNode) {
+                model.addFlow(flow(endNode.x, endNode.y));
             }
 
-            // Reinitialize flags, set origin and destination nodes to null. This
-            // insures that new nodes will be assigned/created with successive
             originNode = null;
-            destinationNode = null;
 
             releaseBackground();
-            
+
             // update the force-based layout and add undo option
             ((FloxMapComponent) mapComponent).layout("Add Flow");
 
         } else {
-            
-            
+
             ArrayList<Point> nodes = model.getNodes();
             originNode = ((FloxMapComponent) mapComponent).getClickedNode(nodes, point, PIXEL_TOLERANCE);
 
@@ -121,12 +121,12 @@ public class AddFlowTool extends DoubleBufferedTool {
             // select origin node if it exists in the map
             model.setSelectionOfAllFlowsAndNodes(false);
             originNode.setSelected(true);
-            
+
             if (model.getNbrFlows() < 1) {
                 flowValue = Model.DEFAULT_FLOW_VALUE;
             } else {
                 flowValue = model.getMeanFlowValue();
-            }            
+            }
         }
         mapComponent.refreshMap();
     }
@@ -141,6 +141,7 @@ public class AddFlowTool extends DoubleBufferedTool {
             releaseBackground();
         }
     }
+
     @Override
     public void mouseMoved(Point2D.Double point, MouseEvent evt) {
         conditionalCaptureBackground(point);
@@ -167,15 +168,24 @@ public class AddFlowTool extends DoubleBufferedTool {
     public void draw(Graphics2D g2d) {
 
         if (isCapturingBackground() && originNode != null && mouse != null) {
-            FloxRenderer.enableHighQualityRenderingHints(g2d, true);
-            Point endNode = new Point(mouse.getX(), mouse.getY(), originNode.getValue());
-            Flow flow = new Flow(originNode, endNode, flowValue);
             FloxMapComponent map = (FloxMapComponent) mapComponent;
-            GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
             double s = map.getScale() / model.getReferenceMapScale();
+            FloxRenderer.enableHighQualityRenderingHints(g2d, true);
+            Flow flow = flow(mouse.getX(), mouse.getY());
             double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
             g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            
+            boolean clipWithAreas = model.isClipFlowEnds() || model.isClipFlowStarts();
+            if (clipWithAreas) {
+                GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
+                g2d.setColor(Color.GRAY);
+                g2d.draw(flowPath);
+            }
+            
+            flow = model.clipFlow(flow, true);
+            GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
+            g2d.setColor(Color.BLACK);
             g2d.draw(flowPath);
         }
     }
@@ -209,5 +219,5 @@ public class AddFlowTool extends DoubleBufferedTool {
         // default: delegate key event to other components
         return false;
     }
-    
+
 }

@@ -125,7 +125,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
         updateLocation(point);
         updateCoordinateFields();
-        model.computeArrowheads();
+        model.computeArrowheadsAndClipping();
     }
 
     @Override
@@ -146,7 +146,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
         }
 
-        model.computeArrowheads();
+        model.computeArrowheadsAndClipping();
 
         // update the force-based layout and add undo option        
         if (dragging == true) {

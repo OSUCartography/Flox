@@ -2798,6 +2798,9 @@ public class MainWindow extends javax.swing.JFrame {
             } else {
                 model.removeEndClipAreasFromFlows();
             }
+            // update arrowhead geometries using the clipped but not properly arranged flows to show a preview
+            updateArrowHeads();
+            
             layout("Clip with End Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -2935,6 +2938,9 @@ public class MainWindow extends javax.swing.JFrame {
             } else {
                 model.removeStartClipAreasFromFlows();
             }
+            // update arrowhead geometries using the clipped but not properly arranged flows to show a preview
+            updateArrowHeads();     
+            
             layout("Clip with Start Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -3094,7 +3100,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
         model.straightenFlows(true);
         model.setLockOfSelectedFlows(true);
-        model.computeArrowheads();
+        model.computeArrowheadsAndClipping();
         addUndo("Straighten Flows");
         mapComponent.refreshMap();
     }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
@@ -3614,7 +3620,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (updatingGUI || model.getNbrFlows() == 0) {
             return;
         }
-        model.computeArrowheads();
+        model.computeArrowheadsAndClipping();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

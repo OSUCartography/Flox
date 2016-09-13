@@ -59,7 +59,7 @@ public class Model {
      * The default value for a flow.
      */
     public static final double DEFAULT_FLOW_VALUE = 1;
-    
+
     // FIXME
     public boolean limitNodesRepulsionToBandHack = false;
 
@@ -833,46 +833,68 @@ public class Model {
     }
 
     /**
-     * Finds the clip areas for the start of flows. First buffers the clip area
-     * geometry, then finds containing geometry for the start point of each
-     * flow, then assigns a start clip area to the flows.
+     * Finds the clip areas for the start of one flow. First buffers the clip
+     * area geometry, then finds containing geometry for the start point of the
+     * flow, then assigns the start clip area to the flow.
+     *
+     * @param flow flow to find start clip area for
+     */
+    public void updateStartClipArea(Flow flow) {
+        if (clipAreas == null) {
+            return;
+        }
+
+        GeometryFactory f = new GeometryFactory();
+        Geometry startClipArea = findContainingGeometry(clipAreas, flow.getStartPt(), f);
+        if (startClipArea != null) {
+            startClipArea = startClipArea.buffer(-startClipAreaBufferDistance);
+        }
+        flow.setStartClipArea(startClipArea);
+    }
+
+    /**
+     * Finds the clip areas for the start of flows.
      */
     public void updateStartClipAreas() {
         if (clipAreas == null) {
             return;
         }
-
         Iterator<Flow> flowIterator = flowIterator();
-        GeometryFactory f = new GeometryFactory();
         while (flowIterator.hasNext()) {
-            Flow flow = flowIterator.next();
-            Geometry startClipArea = findContainingGeometry(clipAreas, flow.getStartPt(), f);
-            if (startClipArea != null) {
-                startClipArea = startClipArea.buffer(-startClipAreaBufferDistance);
-            }
-            flow.setStartClipArea(startClipArea);
+            updateStartClipArea(flowIterator.next());
         }
     }
 
     /**
-     * Finds the clip areas for the the end of flows. First buffers the clip
-     * area geometry, then finds containing geometry for the end point of each
-     * flow, then assigns an end clip area to each flow.
+     * Finds the clip areas for the the end of one flow. First buffers the clip
+     * area geometry, then finds the containing geometry for the end point of
+     * the flow, then assigns the end clip area to the flow.
+     * @param flow flow to find end clip area for
+     */
+    public void updateEndClipArea(Flow flow) {
+        if (clipAreas == null) {
+            return;
+        }
+
+        GeometryFactory f = new GeometryFactory();
+        Geometry endClipArea = findContainingGeometry(clipAreas, flow.getEndPt(), f);
+        if (endClipArea != null) {
+            endClipArea = endClipArea.buffer(-endClipAreaBufferDistance);
+        }
+        flow.setEndClipArea(endClipArea);
+    }
+
+    /**
+     * Finds the clip areas for the the end of flows.
      */
     public void updateEndClipAreas() {
         if (clipAreas == null) {
             return;
         }
-
         Iterator<Flow> flowIterator = flowIterator();
         GeometryFactory f = new GeometryFactory();
         while (flowIterator.hasNext()) {
-            Flow flow = flowIterator.next();
-            Geometry endClipArea = findContainingGeometry(clipAreas, flow.getEndPt(), f);
-            if (endClipArea != null) {
-                endClipArea = endClipArea.buffer(-endClipAreaBufferDistance);
-            }
-            flow.setEndClipArea(endClipArea);
+            updateEndClipArea(flowIterator.next());
         }
     }
 
@@ -1911,20 +1933,31 @@ public class Model {
         this.referenceMapScale = referenceMapScale;
     }
 
-    public void computeArrowheads() {
+    /**
+     * Clip and compute arrowhead geometry for one flow.
+     *
+     * @param flow Flow to clip and compute arrowhead for
+     */
+    public void computeArrowheadAndClipping(Flow flow) {
+        // Compute radius of clipping circle around end point.
+        // Clip the flow with the clipping area and/or a circle around the end node
+        double arrowTipClipRadius = flow.endClipRadius(this, false, null);
+
+        // stroke width in world coordinates of the flow based on its value.
+        double flowStrokeWidth = getFlowWidthPx(flow) / getReferenceMapScale();
+
+        // Create an arrowhead
+        flow.computeArrowhead(this, flowStrokeWidth, arrowTipClipRadius);
+    }
+
+    /**
+     * Clip and compute arrowhead geometry for all flows.
+     */
+    public void computeArrowheadsAndClipping() {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-
-            // Compute radius of clipping circle around end point.
-            // Clip the flow with the clipping area and/or a circle around the end node
-            double arrowTipClipRadius = flow.endClipRadius(this, false, null);
-
-            // stroke width in world coordinates of the flow based on its value.
-            double flowStrokeWidth = getFlowWidthPx(flow) / getReferenceMapScale();
-
-            // Create an arrowhead
-            flow.computeArrowhead(this, flowStrokeWidth, arrowTipClipRadius);
+            computeArrowheadAndClipping(flow);
         }
 
 //        // TODO adjust the width of arrowheads

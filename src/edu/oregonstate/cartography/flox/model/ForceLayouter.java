@@ -132,7 +132,7 @@ public class ForceLayouter {
             Point ctrlPt = flow.getCtrlPt();
             destinationModel.replaceControlPoint(flow.id, ctrlPt.x, ctrlPt.y);
         }
-        destinationModel.computeArrowheads();
+        destinationModel.computeArrowheadsAndClipping();
     }
 
     /**
@@ -207,7 +207,7 @@ public class ForceLayouter {
             --iterBeforeMovingFlowsOffObstacles;
         }
 
-        model.computeArrowheads();
+        model.computeArrowheadsAndClipping();
 
         return iterBeforeMovingFlowsOffObstacles;
     }
@@ -837,7 +837,7 @@ public class ForceLayouter {
         // arrowheads are obstacles
         if (model.isDrawArrowheads()) {
             // re-compute arrowheads for the current flow geometries
-            model.computeArrowheads();
+            model.computeArrowheadsAndClipping();
 
             Iterator<Flow> flowIterator = model.flowIterator();
             while (flowIterator.hasNext()) {
