@@ -1293,7 +1293,7 @@ public class Model {
         Iterator<Flow> flowIterator = flowIterator();
         int i = 0;
         while (flowIterator.hasNext()) {
-            flowIterator.next().setLocked(false); // locks[i++]); // FIXME
+            flowIterator.next().setLocked(locks[i++]);
         }
     }
 
