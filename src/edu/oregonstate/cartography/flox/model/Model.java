@@ -305,9 +305,9 @@ public class Model {
     private double maxFlowStrokeWidthPx = 20;
 
     /**
-     * Maximum allowed node radius in pixels.
+     * Radius of largest node in pixels.
      */
-    private double maxNodeSizePx = 10;
+    private double maxNodeSizePx = 20;
 
     /**
      * Stroke width for drawing node circles. In pixels.

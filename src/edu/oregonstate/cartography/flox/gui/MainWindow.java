@@ -3188,7 +3188,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (unlocked == 0) {
             model.setLockOfSelectedFlows(false);
             lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
-            addUndo("Unlock");
+            layout("Unlock");
         } else {
             model.setLockOfSelectedFlows(true);
             lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
