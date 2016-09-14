@@ -42,16 +42,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     public static final Color SELECTION_COLOR = Color.decode("#59A4FF");
 
     /**
-     * Color for drawing stroke line of nodes.
-     */
-    public static final Color NODE_STROKE_COLOR = Color.BLACK;
-
-    /**
-     * Color for drawing interior of nodes.
-     */
-    public static final Color NODE_FILL_COLOR = Color.WHITE;
-
-    /**
      * Radius of circles for control points (in pixels)
      */
     private static final double CR = 3;
@@ -399,12 +389,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             } else if (highlightSelected && node.isSelected()) {
                 strokeColor = SELECTION_COLOR;
             } else {
-                strokeColor = NODE_STROKE_COLOR;
+                strokeColor = model.getNodeStrokeColor();
             }
             // if the stroke width is larger than the radius of the circle, the
             // drawing engine does not fill the circle entirely. This fix fills
             // the circle with the stroke color.
-            Color fillColor = strokeWidthPx > nodeRadiusPx ? strokeColor : NODE_FILL_COLOR;
+            Color fillColor = strokeWidthPx > nodeRadiusPx ? strokeColor : model.getNodeFillColor();
             drawCircle(node.x, node.y, r, fillColor, strokeColor);
         }
     }

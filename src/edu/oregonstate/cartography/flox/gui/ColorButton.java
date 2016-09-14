@@ -80,6 +80,8 @@ public class ColorButton extends JToggleButton implements ActionListener {
                 RenderingHints.VALUE_RENDER_SPEED);
         
         g2d.fillRect(0, 0, iconWidth, iconHeight);
+        g2d.setColor(Color.GRAY);
+        g2d.drawRect(0, 0, iconWidth - 1, iconHeight - 1);
         ImageIcon imageIcon = new ImageIcon(image);
         this.setIcon(imageIcon);
         g2d.dispose();

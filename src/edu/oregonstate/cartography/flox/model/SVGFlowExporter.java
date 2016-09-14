@@ -157,7 +157,8 @@ public class SVGFlowExporter extends SVGExporter {
             circleElement.setAttribute("cy", df.format(yToSVGCanvas(node.y)));
             circleElement.setAttribute("r", Double.toString(dimPxToSVGCanvas(model.getNodeRadiusPx(node))));
             double strokeWidth = dimPxToSVGCanvas(model.getNodeStrokeWidthPx());
-            setVectorStyle(circleElement, FloxRenderer.NODE_STROKE_COLOR, strokeWidth, FloxRenderer.NODE_FILL_COLOR);
+            setVectorStyle(circleElement, model.getNodeStrokeColor(), 
+                    strokeWidth, model.getNodeFillColor());
             nodesGroup.appendChild(circleElement);
         }
     }

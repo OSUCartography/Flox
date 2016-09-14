@@ -315,6 +315,18 @@ public class Model {
      * Stroke width for drawing node circles. In pixels.
      */
     private float nodeStrokeWidthPx = 2;
+    
+    /**
+     * Color for drawing node outlines
+     */
+    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
+    private Color nodeStrokeColor = Color.BLACK;
+    
+    /**
+     * Color for filling nodes.
+     */
+    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
+    private Color nodeFillColor = Color.WHITE;
 
     /**
      * scale factor for converting between ground coordinates and the map
@@ -2056,4 +2068,34 @@ public class Model {
     public void setNbrIterations(int nbrIterations) {
         this.nbrIterations = nbrIterations;
     }
+
+    /**
+     * @return the nodeStrokeColor
+     */
+    public Color getNodeStrokeColor() {
+        return nodeStrokeColor;
+    }
+
+    /**
+     * @param nodeStrokeColor the nodeStrokeColor to set
+     */
+    public void setNodeStrokeColor(Color nodeStrokeColor) {
+        this.nodeStrokeColor = nodeStrokeColor;
+    }
+
+    /**
+     * @return the nodeFillColor
+     */
+    public Color getNodeFillColor() {
+        return nodeFillColor;
+    }
+
+    /**
+     * Set fill color.
+     * @param nodeFillColor The new fill color.
+     */
+    public void setNodeFillColor(Color nodeFillColor) {
+        this.nodeFillColor = nodeFillColor;
+    }
+    
 }

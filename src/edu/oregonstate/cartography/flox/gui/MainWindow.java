@@ -222,10 +222,14 @@ public class MainWindow extends javax.swing.JFrame {
             endDistanceSpinner.setValue(model.getFlowDistanceFromEndPointPixel());
             maximumFlowWidthSlider.setValue((int) model.getMaxFlowStrokeWidthPixel());
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
-            nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
             minColorButton.setColor(model.getMinFlowColor());
             maxColorButton.setColor(model.getMaxFlowColor());
-
+            
+            // nodes
+            nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
+            nodeStrokeColorButton.setColor(model.getNodeStrokeColor());
+            nodeFillColorButton.setColor(model.getNodeFillColor());
+            
             // Force Settings
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
@@ -394,8 +398,8 @@ public class MainWindow extends javax.swing.JFrame {
         symbolPanel = new TransparentMacPanel();
         fillCheckBox = new javax.swing.JCheckBox();
         strokeCheckBox = new javax.swing.JCheckBox();
-        fillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
-        strokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        layerFillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        layerStrokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         addLayerButton = new javax.swing.JButton();
         removeLayerButton = new javax.swing.JButton();
         maximumFlowWidthSlider = new javax.swing.JSlider();
@@ -418,6 +422,9 @@ public class MainWindow extends javax.swing.JFrame {
         minColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         jLabel35 = new javax.swing.JLabel();
         maxColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        nodeStrokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        nodeFillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        jLabel31 = new javax.swing.JLabel();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         addArrowsCheckbox = new javax.swing.JCheckBox();
@@ -469,9 +476,10 @@ public class MainWindow extends javax.swing.JFrame {
         deleteMenuItem = new javax.swing.JMenuItem();
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNodesMenuItem = new javax.swing.JMenuItem();
-        selectFlowsMenuItem = new javax.swing.JMenuItem();
-        selectNoneMenuItem = new javax.swing.JMenuItem();
         selectUnconnectedNodesMenuItem = new javax.swing.JMenuItem();
+        selectFlowsMenuItem = new javax.swing.JMenuItem();
+        selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
+        selectNoneMenuItem = new javax.swing.JMenuItem();
         jSeparator10 = new javax.swing.JPopupMenu.Separator();
         lockMenuItem = new javax.swing.JMenuItem();
         unlockMenuItem = new javax.swing.JMenuItem();
@@ -501,7 +509,6 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu = new javax.swing.JMenu();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
         moveSelectedFromObstaclesMenuItem = new javax.swing.JMenuItem();
         spiralPointsMenuItem = new javax.swing.JMenuItem();
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
@@ -1197,6 +1204,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 26;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
         mapControlPanel.add(jLabel9, gridBagConstraints);
@@ -1206,6 +1214,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         mapControlPanel.add(jLabel29, gridBagConstraints);
 
         jLabel14.setText("End Gap");
@@ -1213,6 +1222,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 8;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         mapControlPanel.add(jLabel14, gridBagConstraints);
 
         layerListScrollPane.setPreferredSize(new java.awt.Dimension(220, 80));
@@ -1227,7 +1237,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 27;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         mapControlPanel.add(layerListScrollPane, gridBagConstraints);
 
@@ -1257,24 +1267,24 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         symbolPanel.add(strokeCheckBox, gridBagConstraints);
 
-        fillColorButton.setEnabled(false);
-        fillColorButton.addActionListener(new java.awt.event.ActionListener() {
+        layerFillColorButton.setEnabled(false);
+        layerFillColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fillColorButtonActionPerformed(evt);
+                layerFillColorButtonActionPerformed(evt);
             }
         });
-        symbolPanel.add(fillColorButton, new java.awt.GridBagConstraints());
+        symbolPanel.add(layerFillColorButton, new java.awt.GridBagConstraints());
 
-        strokeColorButton.setEnabled(false);
-        strokeColorButton.addActionListener(new java.awt.event.ActionListener() {
+        layerStrokeColorButton.setEnabled(false);
+        layerStrokeColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                strokeColorButtonActionPerformed(evt);
+                layerStrokeColorButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        symbolPanel.add(strokeColorButton, gridBagConstraints);
+        symbolPanel.add(layerStrokeColorButton, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1291,7 +1301,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 29;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.weightx = 0.1;
@@ -1306,7 +1316,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 29;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         mapControlPanel.add(removeLayerButton, gridBagConstraints);
@@ -1324,9 +1334,9 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.gridheight = 4;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 20, 0);
         mapControlPanel.add(maximumFlowWidthSlider, gridBagConstraints);
 
         jLabel26.setText("Maximum Width");
@@ -1335,6 +1345,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         mapControlPanel.add(jLabel26, gridBagConstraints);
 
         maximumNodeSizeSlider.setMajorTickSpacing(20);
@@ -1350,8 +1361,8 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 19;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 3, 0);
         mapControlPanel.add(maximumNodeSizeSlider, gridBagConstraints);
 
         jLabel27.setText("Maximum Radius");
@@ -1360,6 +1371,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 18;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         mapControlPanel.add(jLabel27, gridBagConstraints);
 
         showNodesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
@@ -1373,7 +1385,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 19;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
         mapControlPanel.add(showNodesToggleButton, gridBagConstraints);
@@ -1389,7 +1401,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.gridheight = 4;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
@@ -1397,7 +1409,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 15;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         mapControlPanel.add(jSeparator9, gridBagConstraints);
@@ -1407,7 +1419,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 12;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(16, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(16, 20, 0, 0);
         mapControlPanel.add(jLabel33, gridBagConstraints);
 
         nodeStrokeSpinner.setModel(new javax.swing.SpinnerNumberModel(1.0f, 0.0f, null, 1.0f));
@@ -1418,16 +1430,18 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 21;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         mapControlPanel.add(nodeStrokeSpinner, gridBagConstraints);
 
-        jLabel36.setText("Node Stroke");
+        jLabel36.setText("Stroke");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 21;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         mapControlPanel.add(jLabel36, gridBagConstraints);
 
         jLabel39.setText("Flows");
@@ -1436,7 +1450,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        gridBagConstraints.insets = new java.awt.Insets(6, 0, 20, 0);
         mapControlPanel.add(jLabel39, gridBagConstraints);
 
         jLabel40.setText("Nodes");
@@ -1450,7 +1464,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 24;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         mapControlPanel.add(jSeparator18, gridBagConstraints);
@@ -1464,6 +1478,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         mapControlPanel.add(endDistanceSpinner, gridBagConstraints);
@@ -1477,6 +1492,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         mapControlPanel.add(startDistanceSpinner, gridBagConstraints);
@@ -1509,6 +1525,37 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 13;
         gridBagConstraints.gridwidth = 3;
         mapControlPanel.add(jPanel3, gridBagConstraints);
+
+        nodeStrokeColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nodeStrokeColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 21;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        mapControlPanel.add(nodeStrokeColorButton, gridBagConstraints);
+
+        nodeFillColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nodeFillColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 22;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        mapControlPanel.add(nodeFillColorButton, gridBagConstraints);
+
+        jLabel31.setText("Fill");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 22;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        mapControlPanel.add(jLabel31, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -1623,7 +1670,6 @@ public class MainWindow extends javax.swing.JFrame {
         arrowCornerPositionSlider.setMinorTickSpacing(5);
         arrowCornerPositionSlider.setPaintLabels(true);
         arrowCornerPositionSlider.setPaintTicks(true);
-        arrowCornerPositionSlider.setValue(0);
         arrowCornerPositionSlider.setPreferredSize(new java.awt.Dimension(240, 43));
         arrowCornerPositionSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -1980,6 +2026,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(selectNodesMenuItem);
 
+        selectUnconnectedNodesMenuItem.setText("Select Unconnected Nodes");
+        selectUnconnectedNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectUnconnectedNodesMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectUnconnectedNodesMenuItem);
+
         selectFlowsMenuItem.setText("Select All Flows");
         selectFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1987,6 +2041,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(selectFlowsMenuItem);
+
+        selectOverlappingFlowsInfoMenuItem.setText("Select Flows Overlapping Obstacles");
+        selectOverlappingFlowsInfoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectOverlappingFlowsInfoMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectOverlappingFlowsInfoMenuItem);
 
         selectNoneMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         selectNoneMenuItem.setText("Deselect All");
@@ -1996,14 +2058,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(selectNoneMenuItem);
-
-        selectUnconnectedNodesMenuItem.setText("Select Unconnected Nodes");
-        selectUnconnectedNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectUnconnectedNodesMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(selectUnconnectedNodesMenuItem);
         editMenu.add(jSeparator10);
 
         lockMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2195,15 +2249,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showObstaclesCheckBoxMenuItem);
-
-        selectOverlappingFlowsInfoMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        selectOverlappingFlowsInfoMenuItem.setText("Select Flows Overlapping Obstacles");
-        selectOverlappingFlowsInfoMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectOverlappingFlowsInfoMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(selectOverlappingFlowsInfoMenuItem);
 
         moveSelectedFromObstaclesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         moveSelectedFromObstaclesMenuItem.setText("Move Selected Flow Away from Obstacles");
@@ -2468,14 +2513,14 @@ public class MainWindow extends javax.swing.JFrame {
         boolean enable = vectorSymbol != null;
         fillCheckBox.setEnabled(enable);
         strokeCheckBox.setEnabled(enable);
-        fillColorButton.setEnabled(enable);
-        strokeColorButton.setEnabled(enable);
+        layerFillColorButton.setEnabled(enable);
+        layerStrokeColorButton.setEnabled(enable);
 
         if (vectorSymbol != null) {
             fillCheckBox.setSelected(vectorSymbol.isFilled());
             strokeCheckBox.setSelected(vectorSymbol.isStroked());
-            fillColorButton.setColor(vectorSymbol.getFillColor());
-            strokeColorButton.setColor(vectorSymbol.getStrokeColor());
+            layerFillColorButton.setColor(vectorSymbol.getFillColor());
+            layerStrokeColorButton.setColor(vectorSymbol.getStrokeColor());
         }
     }
 
@@ -2486,8 +2531,8 @@ public class MainWindow extends javax.swing.JFrame {
         }
         vectorSymbol.setFilled(fillCheckBox.isSelected());
         vectorSymbol.setStroked(strokeCheckBox.isSelected());
-        vectorSymbol.setFillColor(fillColorButton.getColor());
-        vectorSymbol.setStrokeColor(strokeColorButton.getColor());
+        vectorSymbol.setFillColor(layerFillColorButton.getColor());
+        vectorSymbol.setStrokeColor(layerStrokeColorButton.getColor());
     }
 
     private void openShapefileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openShapefileMenuItemActionPerformed
@@ -2518,21 +2563,21 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_strokeCheckBoxActionPerformed
 
-    private void fillColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillColorButtonActionPerformed
+    private void layerFillColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_layerFillColorButtonActionPerformed
         if (!fillCheckBox.isSelected()) {
             fillCheckBox.setSelected(true);
         }
         readSymbolGUI();
         mapComponent.repaint();
-    }//GEN-LAST:event_fillColorButtonActionPerformed
+    }//GEN-LAST:event_layerFillColorButtonActionPerformed
 
-    private void strokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeColorButtonActionPerformed
+    private void layerStrokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_layerStrokeColorButtonActionPerformed
         if (!strokeCheckBox.isSelected()) {
             strokeCheckBox.setSelected(true);
         }
         readSymbolGUI();
         mapComponent.repaint();
-    }//GEN-LAST:event_strokeColorButtonActionPerformed
+    }//GEN-LAST:event_layerStrokeColorButtonActionPerformed
 
     private void removeSelectedLayer() {
         int selectedLayerID = layerList.getSelectedIndex();
@@ -3504,13 +3549,20 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void selectOverlappingFlowsInfoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectOverlappingFlowsInfoMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
+        
+        // get a list of all flows that intersect obstacles
         ForceLayouter layouter = new ForceLayouter(model);
         List<Obstacle> obstacles = layouter.getObstacles();
-        // get a list of all flows that intersect obstacles
         List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles(obstacles);
-        for (Flow flow : flowsOverlappingObstacles) {
-            flow.setSelected(true);
+        if (flowsOverlappingObstacles.isEmpty()) {
+            String msg = "There are no flows overlapping nodes or arrowheads.";
+            JOptionPane.showMessageDialog(this, msg, "Flox", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            for (Flow flow : flowsOverlappingObstacles) {
+                flow.setSelected(true);
+            }
         }
+        updateLockUnlockButtonIcon();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectOverlappingFlowsInfoMenuItemActionPerformed
 
@@ -3684,6 +3736,18 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Start Gap");
     }//GEN-LAST:event_startDistanceSpinnerStateChanged
 
+    private void nodeStrokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nodeStrokeColorButtonActionPerformed
+        model.setNodeStrokeColor(nodeStrokeColorButton.getColor());
+        mapComponent.refreshMap();
+        addUndo("Stroke Color");
+    }//GEN-LAST:event_nodeStrokeColorButtonActionPerformed
+
+    private void nodeFillColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nodeFillColorButtonActionPerformed
+        model.setNodeFillColor(nodeFillColorButton.getColor());
+        mapComponent.refreshMap();
+        addUndo("Fill Color");
+    }//GEN-LAST:event_nodeFillColorButtonActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -3780,7 +3844,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
-    private edu.oregonstate.cartography.flox.gui.ColorButton fillColorButton;
     private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JLabel flowsFilePathLabel;
     private javax.swing.JMenuItem floxReportMenuItem;
@@ -3814,6 +3877,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
@@ -3840,8 +3904,10 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea jTextArea2;
     private javax.swing.JToolBar jToolBar1;
+    private edu.oregonstate.cartography.flox.gui.ColorButton layerFillColorButton;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
+    private edu.oregonstate.cartography.flox.gui.ColorButton layerStrokeColorButton;
     private javax.swing.JCheckBox limitNodesRepulsionToBandCheckBox;
     private javax.swing.JCheckBoxMenuItem liveDrawingCheckBoxMenuItem;
     private javax.swing.JMenuItem lockMenuItem;
@@ -3862,6 +3928,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel minPxDistanceOfFlowsFromNodesSliderLabel;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
     private javax.swing.JMenuItem moveSelectedFromObstaclesMenuItem;
+    private edu.oregonstate.cartography.flox.gui.ColorButton nodeFillColorButton;
+    private edu.oregonstate.cartography.flox.gui.ColorButton nodeStrokeColorButton;
     private javax.swing.JSpinner nodeStrokeSpinner;
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
@@ -3906,7 +3974,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSpinner startDistanceSpinner;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
-    private edu.oregonstate.cartography.flox.gui.ColorButton strokeColorButton;
     private javax.swing.JPanel symbolPanel;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
