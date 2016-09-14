@@ -209,8 +209,8 @@ public class MainWindow extends javax.swing.JFrame {
         try {
             // Arrow Settings
             addArrowsCheckbox.setSelected(model.isDrawArrowheads());
-            arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 40));
-            arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 40));
+            arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 100));
+            arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 100));
             arrowEdgeCtrlLengthSlider.setValue((int) (model.getArrowEdgeCtrlLength() * 100));
             arrowEdgeCtrlWidthSlider.setValue((int) (model.getArrowEdgeCtrlWidth() * 100));
             arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
@@ -284,9 +284,21 @@ public class MainWindow extends javax.swing.JFrame {
             drawStartClipAreasCheckBox.setEnabled(hasFlowsAndClipAreas && clipStart);
 
             minPxDistanceOfFlowsFromNodesSlider.setValue(model.getMinObstacleDistPx());
+            updateArrowGUIEnabledState();
         } finally {
             updatingGUI = false;
         }
+    }
+    
+    private void updateArrowGUIEnabledState() {
+        boolean enable = addArrowsCheckbox.isSelected();
+        arrowheadLengthSlider.setEnabled(enable);
+        arrowheadWidthSlider.setEnabled(enable);
+        arrowEdgeCtrlLengthSlider.setEnabled(enable);
+        arrowEdgeCtrlWidthSlider.setEnabled(enable);
+        arrowCornerPositionSlider.setEnabled(enable);
+        arrowLengthRatioSlider.setEnabled(enable);
+        arrowSizeRatioSlider.setEnabled(enable);
     }
 
     private void updateLayerList() {
@@ -421,7 +433,6 @@ public class MainWindow extends javax.swing.JFrame {
         arrowSizeRatioSlider = new javax.swing.JSlider();
         jLabel30 = new javax.swing.JLabel();
         arrowLengthRatioSlider = new javax.swing.JSlider();
-        drawInlineArrowsCheckBox = new javax.swing.JCheckBox();
         clipAreaPanel = new TransparentMacPanel();
         clipAreaControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel20 = new javax.swing.JLabel();
@@ -504,6 +515,8 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator14 = new javax.swing.JPopupMenu.Separator();
         openSettingsMenuItem = new javax.swing.JMenuItem();
         saveSettingsMenuItem = new javax.swing.JMenuItem();
+        jSeparator17 = new javax.swing.JPopupMenu.Separator();
+        inlineArrowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1522,25 +1535,11 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
         arrowHeadsControlPanel.add(addArrowsCheckbox, gridBagConstraints);
 
-        arrowheadLengthSlider.setMajorTickSpacing(200);
-        arrowheadLengthSlider.setMaximum(800);
+        arrowheadLengthSlider.setMajorTickSpacing(100);
+        arrowheadLengthSlider.setMaximum(500);
         arrowheadLengthSlider.setPaintLabels(true);
         arrowheadLengthSlider.setPaintTicks(true);
         arrowheadLengthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
-        {
-            java.util.Hashtable labels = arrowheadLengthSlider.createStandardLabels(arrowheadLengthSlider.getMajorTickSpacing());
-            java.util.Enumeration e = labels.elements();
-            while(e.hasMoreElements()) {
-                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
-                if (comp instanceof javax.swing.JLabel) {
-                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
-                    int i = Integer.parseInt(label.getText());
-                    int p = (int)(i/4);
-                    label.setText(Integer.toString(p));
-                }
-            }
-            arrowheadLengthSlider.setLabelTable(labels);
-        }
         arrowheadLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowheadLengthSliderStateChanged(evt);
@@ -1551,32 +1550,18 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 2;
         arrowHeadsControlPanel.add(arrowheadLengthSlider, gridBagConstraints);
 
-        jLabel10.setText("Arrowhead Length");
+        jLabel10.setText("Length");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         arrowHeadsControlPanel.add(jLabel10, gridBagConstraints);
 
-        arrowheadWidthSlider.setMajorTickSpacing(100);
-        arrowheadWidthSlider.setMaximum(400);
+        arrowheadWidthSlider.setMajorTickSpacing(50);
+        arrowheadWidthSlider.setMaximum(250);
         arrowheadWidthSlider.setPaintLabels(true);
         arrowheadWidthSlider.setPaintTicks(true);
         arrowheadWidthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
-        {
-            java.util.Hashtable labels = arrowheadWidthSlider.createStandardLabels(arrowheadWidthSlider.getMajorTickSpacing());
-            java.util.Enumeration e = labels.elements();
-            while(e.hasMoreElements()) {
-                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
-                if (comp instanceof javax.swing.JLabel) {
-                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
-                    int i = Integer.parseInt(label.getText());
-                    int p = (int)(i/4);
-                    label.setText(Integer.toString(p));
-                }
-            }
-            arrowheadWidthSlider.setLabelTable(labels);
-        }
         arrowheadWidthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowheadWidthSliderStateChanged(evt);
@@ -1587,26 +1572,28 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 4;
         arrowHeadsControlPanel.add(arrowheadWidthSlider, gridBagConstraints);
 
-        jLabel15.setText("Arrowhead Width");
+        jLabel15.setText("Width");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel15, gridBagConstraints);
 
-        jLabel16.setText("Arrow Edge Ctrl Point Length");
+        jLabel16.setText("Pointedness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel16, gridBagConstraints);
 
-        jLabel17.setText("Arrow Edge Ctrl Point Width");
+        jLabel17.setText("Bulkiness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel17, gridBagConstraints);
 
         arrowEdgeCtrlLengthSlider.setMajorTickSpacing(25);
@@ -1638,9 +1625,10 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 8;
         arrowHeadsControlPanel.add(arrowEdgeCtrlWidthSlider, gridBagConstraints);
 
-        arrowCornerPositionSlider.setMajorTickSpacing(25);
-        arrowCornerPositionSlider.setMaximum(50);
+        arrowCornerPositionSlider.setMajorTickSpacing(10);
+        arrowCornerPositionSlider.setMaximum(0);
         arrowCornerPositionSlider.setMinimum(-50);
+        arrowCornerPositionSlider.setMinorTickSpacing(5);
         arrowCornerPositionSlider.setPaintLabels(true);
         arrowCornerPositionSlider.setPaintTicks(true);
         arrowCornerPositionSlider.setValue(0);
@@ -1655,19 +1643,20 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 10;
         arrowHeadsControlPanel.add(arrowCornerPositionSlider, gridBagConstraints);
 
-        jLabel18.setText("Arrow Corner Position");
+        jLabel18.setText("Wing Angle");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 9;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel18, gridBagConstraints);
 
-        jLabel19.setText("Arrow Size Ratio");
+        jLabel19.setText("Width Ratio");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 11;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel19, gridBagConstraints);
 
         arrowSizeRatioSlider.setMajorTickSpacing(10);
@@ -1685,11 +1674,12 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 12;
         arrowHeadsControlPanel.add(arrowSizeRatioSlider, gridBagConstraints);
 
-        jLabel30.setText("Arrow Length Ratio");
+        jLabel30.setText("Length Ratio");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 13;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel30, gridBagConstraints);
 
         arrowLengthRatioSlider.setMajorTickSpacing(10);
@@ -1706,19 +1696,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 14;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         arrowHeadsControlPanel.add(arrowLengthRatioSlider, gridBagConstraints);
-
-        drawInlineArrowsCheckBox.setText("Draw Inline Arrows");
-        drawInlineArrowsCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawInlineArrowsCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 19;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(30, 0, 0, 0);
-        arrowHeadsControlPanel.add(drawInlineArrowsCheckBox, gridBagConstraints);
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
@@ -2327,6 +2304,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(saveSettingsMenuItem);
+        debugMenu.add(jSeparator17);
+
+        inlineArrowsCheckBoxMenuItem.setText("Draw Inline Arrows");
+        inlineArrowsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                inlineArrowsCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(inlineArrowsCheckBoxMenuItem);
 
         menuBar.add(debugMenu);
         debugMenu.setVisible(false);
@@ -2783,6 +2769,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void addArrowsCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addArrowsCheckboxActionPerformed
         if (model != null) {
+            updateArrowGUIEnabledState();
             model.setDrawArrowheads(addArrowsCheckbox.isSelected());
             updateArrowHeads();
             mapComponent.refreshMap();
@@ -2792,7 +2779,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadLengthSliderStateChanged
         if (updatingGUI == false && model != null) {
-            model.setArrowLengthScaleFactor((arrowheadLengthSlider.getValue() + 1) / 40d);
+            model.setArrowLengthScaleFactor(arrowheadLengthSlider.getValue() / 100d);
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowheadLengthSlider.getValueIsAdjusting()) {
@@ -2803,7 +2790,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
-            model.setArrowWidthScaleFactor((arrowheadWidthSlider.getValue() + 1) / 40d);
+            model.setArrowWidthScaleFactor(arrowheadWidthSlider.getValue() / 100d);
             updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowheadWidthSlider.getValueIsAdjusting()) {
@@ -3512,12 +3499,6 @@ public class MainWindow extends javax.swing.JFrame {
         model.liveDrawing = liveDrawingCheckBoxMenuItem.isSelected();
     }//GEN-LAST:event_liveDrawingCheckBoxMenuItemActionPerformed
 
-    private void drawInlineArrowsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawInlineArrowsCheckBoxActionPerformed
-        model.setDrawInlineArrows(drawInlineArrowsCheckBox.isSelected());
-        mapComponent.refreshMap();
-        addUndo("Draw Inline Arrows");
-    }//GEN-LAST:event_drawInlineArrowsCheckBoxActionPerformed
-
     private void limitNodesRepulsionToBandCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_limitNodesRepulsionToBandCheckBoxActionPerformed
         model.limitNodesRepulsionToBandHack = limitNodesRepulsionToBandCheckBox.isSelected();
         layout("Limit Nodes Repulsion to Band");
@@ -3674,7 +3655,16 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void showDebugCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showDebugCheckBoxMenuItemActionPerformed
         debugMenu.setVisible(showDebugCheckBoxMenuItem.isSelected());
+        String msg = "The Debug menu contains experimental and unstable features that are not meant for productive work.";
+        String title = "Flox Debug Menu";
+        JOptionPane.showMessageDialog(this, msg, title, JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_showDebugCheckBoxMenuItemActionPerformed
+
+    private void inlineArrowsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inlineArrowsCheckBoxMenuItemActionPerformed
+        model.setDrawInlineArrows(inlineArrowsCheckBoxMenuItem.isSelected());
+        mapComponent.refreshMap();
+        addUndo("Draw Inline Arrows");
+    }//GEN-LAST:event_inlineArrowsCheckBoxMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -3759,7 +3749,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
-    private javax.swing.JCheckBox drawInlineArrowsCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JMenu editMenu;
     private javax.swing.JMenuItem emptySpaceMenuItem;
@@ -3786,6 +3775,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton importPanelOKButton;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
+    private javax.swing.JCheckBoxMenuItem inlineArrowsCheckBoxMenuItem;
     private javax.swing.JSpinner iterationsSpinner;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel1;
@@ -3824,6 +3814,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator15;
     private javax.swing.JPopupMenu.Separator jSeparator16;
+    private javax.swing.JPopupMenu.Separator jSeparator17;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
