@@ -587,7 +587,7 @@ public class Model {
         }
         return n;
     }
-
+    
     /**
      * Returns the number of nodes that are not connected to any other node.
      *
@@ -1278,15 +1278,30 @@ public class Model {
      * deselected otherwise.
      */
     public void setSelectionOfAllFlowsAndNodes(boolean select) {
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            iterator.next().setSelected(select);
+        setSelectionOfAllFlows(select);
+        setSelectionOfAllNodes(select);
+    }
+    
+    /**
+     * Set selection state of all nodes
+     * 
+     * @param selected new selection state
+     */
+    public void setSelectionOfAllNodes(boolean selected) {
+        Iterator<Point> iter = nodeIterator();
+        while (iter.hasNext()) {
+            iter.next().setSelected(selected);
         }
+    }
 
-        Iterator nodes = nodeIterator();
-        while (nodes.hasNext()) {
-            Point node = (Point) nodes.next();
-            node.setSelected(select);
+    /**
+     * Set selection state of all flows.
+     * @param selected new selection state
+     */
+    public void setSelectionOfAllFlows(boolean selected) {
+        Iterator<Flow> iter = flowIterator();
+        while (iter.hasNext()) {
+            iter.next().setSelected(selected);
         }
     }
 

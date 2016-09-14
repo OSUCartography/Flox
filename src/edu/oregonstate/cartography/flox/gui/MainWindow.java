@@ -466,6 +466,8 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator8 = new javax.swing.JPopupMenu.Separator();
         deleteMenuItem = new javax.swing.JMenuItem();
         selectAllMenuItem = new javax.swing.JMenuItem();
+        selectNodesMenuItem = new javax.swing.JMenuItem();
+        selectFlowsMenuItem = new javax.swing.JMenuItem();
         selectNoneMenuItem = new javax.swing.JMenuItem();
         selectUnconnectedNodesMenuItem = new javax.swing.JMenuItem();
         jSeparator10 = new javax.swing.JPopupMenu.Separator();
@@ -1979,6 +1981,22 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(selectAllMenuItem);
+
+        selectNodesMenuItem.setText("Select All Nodes");
+        selectNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectNodesMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectNodesMenuItem);
+
+        selectFlowsMenuItem.setText("Select All Flows");
+        selectFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectFlowsMenuItem);
 
         selectNoneMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         selectNoneMenuItem.setText("Deselect All");
@@ -3666,6 +3684,20 @@ public class MainWindow extends javax.swing.JFrame {
         addUndo("Draw Inline Arrows");
     }//GEN-LAST:event_inlineArrowsCheckBoxMenuItemActionPerformed
 
+    private void selectNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNodesMenuItemActionPerformed
+        model.setSelectionOfAllFlows(false);
+        model.setSelectionOfAllNodes(true);
+        updateLockUnlockButtonIcon();
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_selectNodesMenuItemActionPerformed
+
+    private void selectFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFlowsMenuItemActionPerformed
+        model.setSelectionOfAllFlows(true);
+        model.setSelectionOfAllNodes(false);
+        updateLockUnlockButtonIcon();
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_selectFlowsMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -3866,7 +3898,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem selectAllMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
     private javax.swing.JButton selectFlowsFileButton;
+    private javax.swing.JMenuItem selectFlowsMenuItem;
     private javax.swing.JMenuItem selectIntersectingSiblingFlowsMenuItem;
+    private javax.swing.JMenuItem selectNodesMenuItem;
     private javax.swing.JMenuItem selectNoneMenuItem;
     private javax.swing.JMenuItem selectOverlappingFlowsInfoMenuItem;
     private javax.swing.JButton selectPointsFileButton;
