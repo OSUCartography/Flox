@@ -7,7 +7,6 @@ package edu.oregonstate.cartography.utils;
  */
 
 
-import edu.oregonstate.cartography.utils.IconUtils;
 import java.util.Properties;
 
 /**

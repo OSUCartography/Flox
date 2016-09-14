@@ -49,8 +49,6 @@ public class ForceLayouter {
         public double r;
     }
 
-    public static final int NBR_ITERATIONS = 100;
-
     // model with all map features.
     private final Model model;
 
@@ -151,7 +149,7 @@ public class ForceLayouter {
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
 
         // compute one iteration of forces with a linearly decreasing weight
-        double weight = 1d - (double) i / ForceLayouter.NBR_ITERATIONS;
+        double weight = 1d - (double) i / model.getNbrIterations();
         computeForces(weight);
 
         if (model.isResolveIntersectionsForSiblings()) {
@@ -173,7 +171,7 @@ public class ForceLayouter {
 
         // move flows away from obstacles. Moved flows will be locked.
         if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlowsOffObstacles == 0) {
-            int remainingIterations = ForceLayouter.NBR_ITERATIONS - i - 1;
+            int remainingIterations = model.getNbrIterations() - i - 1;
 
             List<Obstacle> obstacles = getObstacles();
 
@@ -196,7 +194,7 @@ public class ForceLayouter {
             if (nbrRemainingOverlaps > 0) {
                 // division by empirical factor = 2 to increase the 
                 // number of iterations at the end of calculations
-                iterBeforeMovingFlowsOffObstacles = (ForceLayouter.NBR_ITERATIONS - i) / (nbrRemainingOverlaps + 1) / 2;
+                iterBeforeMovingFlowsOffObstacles = (model.getNbrIterations() - i) / (nbrRemainingOverlaps + 1) / 2;
             } else {
                 // There are no flows left hat overlap obstacles. Future
                 // iterations may again create overlaps. So check after

@@ -141,6 +141,8 @@ public class Model {
         }
     }
 
+    private int nbrIterations = 50;
+    
     /**
      * Graph of edges (Flow class) and nodes (Point class).
      */
@@ -2024,5 +2026,19 @@ public class Model {
      */
     public void setMoveFlowsOverlappingObstacles(boolean moveFlowsOverlappingObstacles) {
         this.moveFlowsOverlappingObstacles = moveFlowsOverlappingObstacles;
+    }
+
+    /**
+     * @return the nbrIterations
+     */
+    public int getNbrIterations() {
+        return nbrIterations;
+    }
+
+    /**
+     * @param nbrIterations the nbrIterations to set
+     */
+    public void setNbrIterations(int nbrIterations) {
+        this.nbrIterations = nbrIterations;
     }
 }

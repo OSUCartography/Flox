@@ -26,6 +26,10 @@ import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.event.ItemEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
@@ -76,7 +80,6 @@ public class MainWindow extends javax.swing.JFrame {
     public MainWindow() {
 
         initComponents();
-        progressBar.setVisible(false);
 
         // change the name of a layer
         new ListAction(layerList, new EditListAction() {
@@ -113,6 +116,21 @@ public class MainWindow extends javax.swing.JFrame {
         } catch (JAXBException ex) {
             throw new IllegalStateException(ex);
         }
+
+        openComputationPalette();
+    }
+
+    private void openComputationPalette() {
+        computationPalette.pack();
+        Dimension dlgDim = computationPalette.getPreferredSize();
+        
+        Rectangle screen = GraphicsEnvironment.
+                        getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        int x = (int) (screen.getMaxX() - dlgDim.getWidth() - 10);
+        int y = (int) (screen.getMaxY() - dlgDim.getHeight() - 10);
+        computationPalette.setAlwaysOnTop(true);
+        computationPalette.setLocation(x, y);
+        computationPalette.setVisible(true);
     }
 
     /**
@@ -229,16 +247,18 @@ public class MainWindow extends javax.swing.JFrame {
             if (null != model.getFlowNodeDensity()) {
                 switch (model.getFlowNodeDensity()) {
                     case LOW:
-                        lowFlowSegmentationMenuItem.setSelected(true);
+                        accuracyComboBox.setSelectedIndex(0);
                         break;
-                    case MEDIUM:
-                        mediumFlowSegmentationMenuItem.setSelected(true);
+                    case HIGH:
+                        accuracyComboBox.setSelectedIndex(1);
                         break;
                     default:
-                        highFlowSegmentationMenuItem.setSelected(true);
+                        accuracyComboBox.setSelectedIndex(2);
                         break;
                 }
             }
+            iterationsSpinner.setValue(model.getNbrIterations());
+
             angularDistributionSlider.setValue((int) (model.getAngularDistributionWeight() * 100));
 
             // clipping
@@ -298,6 +318,15 @@ public class MainWindow extends javax.swing.JFrame {
         importPanelCancelButton = new javax.swing.JButton();
         buttonGroup1 = new javax.swing.ButtonGroup();
         jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
+        computationPalette = new javax.swing.JDialog();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel37 = new javax.swing.JLabel();
+        accuracyComboBox = new javax.swing.JComboBox<>();
+        showLineSegmentsToggleButton = new javax.swing.JToggleButton();
+        iterationsSpinner = new javax.swing.JSpinner();
+        jLabel38 = new javax.swing.JLabel();
+        progressBarPanel = new javax.swing.JPanel();
+        progressBar = new javax.swing.JProgressBar();
         jToolBar1 = new javax.swing.JToolBar();
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
@@ -411,15 +440,10 @@ public class MainWindow extends javax.swing.JFrame {
         jTextArea2 = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        progressBarPanel = new javax.swing.JPanel();
-        progressBar = new javax.swing.JProgressBar();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         importFlowsMenuItem = new javax.swing.JMenuItem();
         openPointsAndFlowsMenuItem = new javax.swing.JMenuItem();
-        jSeparator14 = new javax.swing.JPopupMenu.Separator();
-        openSettingsMenuItem = new javax.swing.JMenuItem();
-        saveSettingsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
@@ -452,17 +476,14 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator viewSeparator = new javax.swing.JPopupMenu.Separator();
         viewZoomInMenuItem = new javax.swing.JMenuItem();
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
+        showComputationSettingsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator15 = new javax.swing.JPopupMenu.Separator();
+        showDebugCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         infoMenu = new javax.swing.JMenu();
         floxReportMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator2 = new javax.swing.JPopupMenu.Separator();
         infoMenuItem = new javax.swing.JMenuItem();
         debugMenu = new javax.swing.JMenu();
-        flowSegmentationMenu = new javax.swing.JMenu();
-        lowFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
-        mediumFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
-        highFlowSegmentationMenuItem = new javax.swing.JRadioButtonMenuItem();
-        showFlowSegmentsMenuItem = new javax.swing.JMenuItem();
-        jSeparator15 = new javax.swing.JPopupMenu.Separator();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
@@ -480,6 +501,9 @@ public class MainWindow extends javax.swing.JFrame {
         recomputeMenuItem = new javax.swing.JMenuItem();
         liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
+        jSeparator14 = new javax.swing.JPopupMenu.Separator();
+        openSettingsMenuItem = new javax.swing.JMenuItem();
+        saveSettingsMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -554,6 +578,93 @@ public class MainWindow extends javax.swing.JFrame {
 
         jCheckBoxMenuItem1.setSelected(true);
         jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
+
+        computationPalette.setTitle("Computation");
+        computationPalette.setFocusableWindowState(false);
+        computationPalette.setResizable(false);
+        computationPalette.setType(java.awt.Window.Type.UTILITY);
+        computationPalette.getContentPane().setLayout(new java.awt.GridBagLayout());
+
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        jLabel37.setText("Accuracy");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+        jPanel1.add(jLabel37, gridBagConstraints);
+
+        accuracyComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Low (Fast)", "Medium", "High (Slow)" }));
+        accuracyComboBox.setSelectedIndex(1);
+        accuracyComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                accuracyComboBoxItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        jPanel1.add(accuracyComboBox, gridBagConstraints);
+
+        showLineSegmentsToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        showLineSegmentsToggleButton.setBorderPainted(false);
+        showLineSegmentsToggleButton.setPreferredSize(new java.awt.Dimension(20, 20));
+        showLineSegmentsToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
+        showLineSegmentsToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showLineSegmentsToggleButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
+        jPanel1.add(showLineSegmentsToggleButton, gridBagConstraints);
+
+        iterationsSpinner.setModel(new javax.swing.SpinnerNumberModel(100, 10, 500, 10));
+        iterationsSpinner.setPreferredSize(new java.awt.Dimension(70, 28));
+        iterationsSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                iterationsSpinnerStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        jPanel1.add(iterationsSpinner, gridBagConstraints);
+
+        jLabel38.setText("Iterations");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+        jPanel1.add(jLabel38, gridBagConstraints);
+
+        computationPalette.getContentPane().add(jPanel1, new java.awt.GridBagConstraints());
+
+        progressBarPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 5, 10));
+        progressBarPanel.setLayout(new java.awt.GridBagLayout());
+
+        progressBar.setEnabled(false);
+        progressBar.setPreferredSize(new java.awt.Dimension(220, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 4, 0);
+        progressBarPanel.add(progressBar, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        computationPalette.getContentPane().add(progressBarPanel, gridBagConstraints);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -722,6 +833,8 @@ public class MainWindow extends javax.swing.JFrame {
         getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
 
         rightPanel.setLayout(new java.awt.BorderLayout());
+
+        controlsTabbedPane.setPreferredSize(new java.awt.Dimension(330, 675));
 
         forcesPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 10, 10, 10));
         forcesPanel.setLayout(new java.awt.GridBagLayout());
@@ -1794,12 +1907,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         rightPanel.add(controlsTabbedPane, java.awt.BorderLayout.NORTH);
 
-        progressBarPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 5, 10));
-        progressBarPanel.setLayout(new javax.swing.BoxLayout(progressBarPanel, javax.swing.BoxLayout.LINE_AXIS));
-        progressBarPanel.add(progressBar);
-
-        rightPanel.add(progressBarPanel, java.awt.BorderLayout.SOUTH);
-
         getContentPane().add(rightPanel, java.awt.BorderLayout.EAST);
 
         fileMenu.setText("File");
@@ -1820,24 +1927,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(openPointsAndFlowsMenuItem);
-        fileMenu.add(jSeparator14);
-
-        openSettingsMenuItem.setText("Open Project…");
-        openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openSettingsMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(openSettingsMenuItem);
-
-        saveSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        saveSettingsMenuItem.setText("Save Project…");
-        saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveSettingsMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(saveSettingsMenuItem);
         fileMenu.add(jSeparator3);
 
         exportSVGMenuItem.setText("Export SVG…");
@@ -2008,6 +2097,15 @@ public class MainWindow extends javax.swing.JFrame {
         menuBar.add(mapMenu);
 
         viewMenu.setText("View");
+        viewMenu.addMenuListener(new javax.swing.event.MenuListener() {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                viewMenuMenuSelected(evt);
+            }
+            public void menuDeselected(javax.swing.event.MenuEvent evt) {
+            }
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            }
+        });
 
         showAllMenuItem.setText("Show All");
         showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2053,6 +2151,24 @@ public class MainWindow extends javax.swing.JFrame {
         });
         viewMenu.add(viewZoomOutMenuItem);
 
+        showComputationSettingsCheckBoxMenuItem.setSelected(true);
+        showComputationSettingsCheckBoxMenuItem.setText("Show Computation Settings");
+        showComputationSettingsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showComputationSettingsCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(showComputationSettingsCheckBoxMenuItem);
+        viewMenu.add(jSeparator15);
+
+        showDebugCheckBoxMenuItem.setText("Show Debug Menu");
+        showDebugCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showDebugCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(showDebugCheckBoxMenuItem);
+
         menuBar.add(viewMenu);
 
         infoMenu.setText("Info");
@@ -2077,47 +2193,6 @@ public class MainWindow extends javax.swing.JFrame {
         menuBar.add(infoMenu);
 
         debugMenu.setText("Debug");
-
-        flowSegmentationMenu.setText("Flow Segmentation");
-
-        buttonGroup1.add(lowFlowSegmentationMenuItem);
-        lowFlowSegmentationMenuItem.setSelected(true);
-        lowFlowSegmentationMenuItem.setText("Low");
-        lowFlowSegmentationMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lowFlowSegmentationMenuItemActionPerformed(evt);
-            }
-        });
-        flowSegmentationMenu.add(lowFlowSegmentationMenuItem);
-
-        buttonGroup1.add(mediumFlowSegmentationMenuItem);
-        mediumFlowSegmentationMenuItem.setText("Medium");
-        mediumFlowSegmentationMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mediumFlowSegmentationMenuItemActionPerformed(evt);
-            }
-        });
-        flowSegmentationMenu.add(mediumFlowSegmentationMenuItem);
-
-        buttonGroup1.add(highFlowSegmentationMenuItem);
-        highFlowSegmentationMenuItem.setText("High");
-        highFlowSegmentationMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                highFlowSegmentationMenuItemActionPerformed(evt);
-            }
-        });
-        flowSegmentationMenu.add(highFlowSegmentationMenuItem);
-
-        debugMenu.add(flowSegmentationMenu);
-
-        showFlowSegmentsMenuItem.setText("Show Flow Segments");
-        showFlowSegmentsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showFlowSegmentsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(showFlowSegmentsMenuItem);
-        debugMenu.add(jSeparator15);
 
         moveFlowsCheckBoxMenuItem.setSelected(true);
         moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
@@ -2234,8 +2309,27 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(printFlowsToConsoleMenuItem);
+        debugMenu.add(jSeparator14);
+
+        openSettingsMenuItem.setText("Open XML…");
+        openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(openSettingsMenuItem);
+
+        saveSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        saveSettingsMenuItem.setText("Save XML…");
+        saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(saveSettingsMenuItem);
 
         menuBar.add(debugMenu);
+        debugMenu.setVisible(false);
 
         setJMenuBar(menuBar);
 
@@ -2800,7 +2894,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             // update arrowhead geometries using the clipped but not properly arranged flows to show a preview
             updateArrowHeads();
-            
+
             layout("Clip with End Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -2939,8 +3033,8 @@ public class MainWindow extends javax.swing.JFrame {
                 model.removeStartClipAreasFromFlows();
             }
             // update arrowhead geometries using the clipped but not properly arranged flows to show a preview
-            updateArrowHeads();     
-            
+            updateArrowHeads();
+
             layout("Clip with Start Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -3034,41 +3128,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_maximumNodeSizeSliderStateChanged
-
-    private void lowFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lowFlowSegmentationMenuItemActionPerformed
-        if (lowFlowSegmentationMenuItem.isSelected()) {
-            model.setFlowNodeDensity(FlowNodeDensity.LOW);
-            mapComponent.refreshMap();
-            layout("Low Flow Segmentation");
-        }
-
-    }//GEN-LAST:event_lowFlowSegmentationMenuItemActionPerformed
-
-    private void mediumFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mediumFlowSegmentationMenuItemActionPerformed
-        if (mediumFlowSegmentationMenuItem.isSelected()) {
-            model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
-            mapComponent.refreshMap();
-            layout("Medium Flow Segmentation");
-        }
-    }//GEN-LAST:event_mediumFlowSegmentationMenuItemActionPerformed
-
-    private void highFlowSegmentationMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_highFlowSegmentationMenuItemActionPerformed
-        if (highFlowSegmentationMenuItem.isSelected()) {
-            model.setFlowNodeDensity(FlowNodeDensity.HIGH);
-            mapComponent.refreshMap();
-            layout("High Flow Segmentation");
-        }
-    }//GEN-LAST:event_highFlowSegmentationMenuItemActionPerformed
-
-    private void showFlowSegmentsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showFlowSegmentsMenuItemActionPerformed
-        mapComponent.setDrawLineSegments(!mapComponent.isDrawLineSegments());
-        if (mapComponent.isDrawLineSegments()) {
-            showFlowSegmentsMenuItem.setText("Hide Flow Points");
-        } else {
-            showFlowSegmentsMenuItem.setText("Show Flow Points");
-        }
-        mapComponent.refreshMap();
-    }//GEN-LAST:event_showFlowSegmentsMenuItemActionPerformed
 
     private void viewCanvasToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewCanvasToggleButtonActionPerformed
         mapComponent.setDrawCanvas(viewCanvasToggleButton.isSelected());
@@ -3526,8 +3585,8 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_spiralPointsMenuItemActionPerformed
 
     private void nodeStrokeSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeStrokeSpinnerStateChanged
-        SpinnerModel dateModel = nodeStrokeSpinner.getModel();
-        float strokeWidth = ((SpinnerNumberModel) dateModel).getNumber().floatValue();
+        SpinnerModel spinnerModel = nodeStrokeSpinner.getModel();
+        float strokeWidth = ((SpinnerNumberModel) spinnerModel).getNumber().floatValue();
         model.setNodeStrokeWidthPx(strokeWidth);
         mapComponent.refreshMap();
         layout("Node Stroke Width");
@@ -3570,6 +3629,53 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectUnconnectedNodesMenuItemActionPerformed
 
+    private void showLineSegmentsToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showLineSegmentsToggleButtonActionPerformed
+        mapComponent.setDrawLineSegments(showLineSegmentsToggleButton.isSelected());
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_showLineSegmentsToggleButtonActionPerformed
+
+    private void accuracyComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_accuracyComboBoxItemStateChanged
+
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            switch (accuracyComboBox.getSelectedIndex()) {
+                case 0:
+                    model.setFlowNodeDensity(FlowNodeDensity.LOW);
+                    layout("Low Accuracy");
+                    break;
+                case 2:
+                    model.setFlowNodeDensity(FlowNodeDensity.HIGH);
+                    layout("Medium Accuracy");
+                    break;
+                default:
+                    model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
+                    layout("High Accuracy");
+                    break;
+            }
+            if (showLineSegmentsToggleButton.isSelected()) {
+                mapComponent.refreshMap();
+            }
+        }
+    }//GEN-LAST:event_accuracyComboBoxItemStateChanged
+
+    private void iterationsSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_iterationsSpinnerStateChanged
+        SpinnerModel spinnerModel = iterationsSpinner.getModel();
+        int iterations = ((SpinnerNumberModel) spinnerModel).getNumber().intValue();
+        model.setNbrIterations(iterations);
+        layout("Number of Iterations");
+    }//GEN-LAST:event_iterationsSpinnerStateChanged
+
+    private void showComputationSettingsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showComputationSettingsCheckBoxMenuItemActionPerformed
+        computationPalette.setVisible(showComputationSettingsCheckBoxMenuItem.isSelected());
+    }//GEN-LAST:event_showComputationSettingsCheckBoxMenuItemActionPerformed
+
+    private void viewMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_viewMenuMenuSelected
+        showComputationSettingsCheckBoxMenuItem.setSelected(computationPalette.isVisible());
+    }//GEN-LAST:event_viewMenuMenuSelected
+
+    private void showDebugCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showDebugCheckBoxMenuItemActionPerformed
+        debugMenu.setVisible(showDebugCheckBoxMenuItem.isSelected());
+    }//GEN-LAST:event_showDebugCheckBoxMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -3599,7 +3705,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
         if (model.getFlowRangeboxHeight() > 0) {
-            progressBar.setVisible(true);
+            progressBar.setEnabled(true);
             Model modelCopy = model.copy();
             modelCopy.straightenFlows(false);
             ForceLayouter layouter = new ForceLayouter(modelCopy);
@@ -3624,6 +3730,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> accuracyComboBox;
     private javax.swing.JCheckBox addArrowsCheckbox;
     private javax.swing.JToggleButton addFlowToggleButton;
     private javax.swing.JButton addLayerButton;
@@ -3645,6 +3752,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel clipAreaPanel;
     private javax.swing.JCheckBox clipWithEndAreasCheckBox;
     private javax.swing.JCheckBox clipWithStartAreasCheckBox;
+    private javax.swing.JDialog computationPalette;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
     private javax.swing.JMenu debugMenu;
@@ -3668,18 +3776,17 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField flowDistanceFromEndPointFormattedTextField;
     private javax.swing.JFormattedTextField flowDistanceFromStartPointFormattedTextField;
     private javax.swing.JSlider flowRangeboxSizeSlider;
-    private javax.swing.JMenu flowSegmentationMenu;
     private javax.swing.JLabel flowsFilePathLabel;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JPanel forcesPanel;
     private javax.swing.JToggleButton handToggleButton;
-    private javax.swing.JRadioButtonMenuItem highFlowSegmentationMenuItem;
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JPanel importPanel;
     private javax.swing.JButton importPanelCancelButton;
     private javax.swing.JButton importPanelOKButton;
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
+    private javax.swing.JSpinner iterationsSpinner;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -3705,6 +3812,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel37;
+    private javax.swing.JLabel jLabel38;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator10;
@@ -3727,7 +3837,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;
-    private javax.swing.JRadioButtonMenuItem lowFlowSegmentationMenuItem;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
     private javax.swing.JPanel mapControlPanel;
     private javax.swing.JMenu mapMenu;
@@ -3736,7 +3845,6 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.ColorButton maxColorButton;
     private javax.swing.JSlider maximumFlowWidthSlider;
     private javax.swing.JSlider maximumNodeSizeSlider;
-    private javax.swing.JRadioButtonMenuItem mediumFlowSegmentationMenuItem;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem mergeNodesMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton minColorButton;
@@ -3775,8 +3883,10 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JMenuItem showAllMenuItem1;
-    private javax.swing.JMenuItem showFlowSegmentsMenuItem;
+    private javax.swing.JCheckBoxMenuItem showComputationSettingsCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem showDebugCheckBoxMenuItem;
     private javax.swing.JToggleButton showFlowsToggleButton;
+    private javax.swing.JToggleButton showLineSegmentsToggleButton;
     private javax.swing.JToggleButton showNodesToggleButton;
     private javax.swing.JCheckBoxMenuItem showObstaclesCheckBoxMenuItem;
     private javax.swing.JMenuItem spiralPointsMenuItem;

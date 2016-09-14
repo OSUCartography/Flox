@@ -46,15 +46,17 @@ class LayoutWorker extends SwingWorker<Void, Void> {
      * worker thread.
      */
     private void layout() {
+        final int nbrIterations = layouter.getModel().getNbrIterations();
+        
         // After 10% of all iterations the first flow is moved away from
         // obstacles like arrowheads and unconnected nodes. This gives flows
         // a chance to stabilize before the first one is moved.
-        int iterBeforeMovingFlows = ForceLayouter.NBR_ITERATIONS / 10;
+        int iterBeforeMovingFlows = nbrIterations / 10;
 
         // store initial lock flags of all flows
         boolean[] initialLocks = layouter.getModel().getLocks();
         Rectangle2D canvas = layouter.getModel().getNodesBoundingBox();
-        for (int i = 0; i < ForceLayouter.NBR_ITERATIONS; i++) {
+        for (int i = 0; i < nbrIterations; i++) {
             if (isCancelled()) {
                 break;
             }
@@ -65,7 +67,7 @@ class LayoutWorker extends SwingWorker<Void, Void> {
                 publish();
             }
             // update progress indicator
-            double progress = 100d * i / ForceLayouter.NBR_ITERATIONS;
+            double progress = 100d * i / nbrIterations;
             setProgress((int) Math.round(progress));
         }
         // reset lock flags to initial values
@@ -92,7 +94,8 @@ class LayoutWorker extends SwingWorker<Void, Void> {
                 layouter.applyChangesToModel(mapComponent.getModel());
                 mapComponent.eraseBufferImage();
                 mapComponent.repaint();
-                progressBar.setVisible(false);
+                progressBar.setValue(0);
+                progressBar.setEnabled(false);
             }
         } catch (Throwable t) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, t);
