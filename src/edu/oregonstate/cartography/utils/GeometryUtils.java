@@ -177,13 +177,13 @@ public class GeometryUtils {
     }
 
     /**
-     * Get the azimuth (in radians) of a line connecting two points
+     * Get the orientation angle (in radians) of a line connecting two points.
      *
      * @param startPt The start point of the line
      * @param endPt The end point of the line
-     * @return
+     * @return angle relative to horizontal x axis in counter-clockwise direction
      */
-    public static double computeAzimuth(Point startPt, Point endPt) {
+    public static double orientation(Point startPt, Point endPt) {
         final double dx = endPt.x - startPt.x;
         final double dy = endPt.y - startPt.y;
         return Math.atan2(dy, dx);

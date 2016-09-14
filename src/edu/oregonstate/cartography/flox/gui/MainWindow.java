@@ -2831,8 +2831,8 @@ public class MainWindow extends javax.swing.JFrame {
     private void openPointsAndFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openPointsAndFlowsMenuItemActionPerformed
         String title = "Open Nodes and Flows";
         importPanelOKButton.setEnabled(false);
-        pointsFilePathLabel.setText("�");
-        flowsFilePathLabel.setText("�");
+        pointsFilePathLabel.setText("-");
+        flowsFilePathLabel.setText("-");
         // http://stackoverflow.com/questions/14334931/disable-ok-button-on-joptionpane-dialog-until-user-gives-an-input/14335083#14335083
         int res = JOptionPane.showOptionDialog(
                 this,

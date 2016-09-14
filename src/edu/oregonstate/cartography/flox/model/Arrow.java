@@ -131,11 +131,6 @@ public class Arrow {
         // Set the base of the Arrow to the point on the curve determined above.
         basePt = flow.pointOnCurve(t);
 
-        // reduce clipping radius by 1 pixel to prevent a gap between the flow 
-        // line and the arrowhead
-        double tol = 1d / model.getReferenceMapScale();
-        //clipRadius -= tol;
-
         // Locate the various points that determine the shape and location of 
         // the arrowhead.
         // Locate the tip
@@ -158,20 +153,33 @@ public class Arrow {
         corner2cPt.x = corner2Pt.x + ((tipPt.x - corner2Pt.x) * model.getArrowEdgeCtrlLength());
         corner2cPt.y = -arrowWidth * model.getArrowEdgeCtrlWidth();
 
-        // Get the azimuth of the line connecting the base of the arrow to the
-        // endPoint of the flow. This determines the azimuth of the Arrow.
-        double azimuth = GeometryUtils.computeAzimuth(basePt, flow.getEndPt());
-        // FIXME for thick flows this results in a small gap between the end line and the arrow base. clipRadius should be reduced to compensate for this gap.
-        // The size of the gap can be computed from the two azimuth angle and the widht of the flow line.
-        // double baseAzimuth = GeometryUtils.computeAzimuth(flow.split(t)[0].getCtrlPt(), getBasePt());
+        // Get the orientation of the line connecting the base of the arrow to the
+        // endPoint of the flow.
+        double arrowheadOrientation = GeometryUtils.orientation(basePt, flow.getEndPt());
         
-        // Rotate all the points that make up the shape of the Arrow, using
+        // Rotate and translate all the points that make up the shape of the Arrow, using
         // the Arrow's base point as the pivot.
-        tipPt.transform(basePt.x, basePt.y, azimuth);
-        corner1Pt.transform(basePt.x, basePt.y, azimuth);
-        corner2Pt.transform(basePt.x, basePt.y, azimuth);
-        corner1cPt.transform(basePt.x, basePt.y, azimuth);
-        corner2cPt.transform(basePt.x, basePt.y, azimuth);
+        tipPt.transform(basePt.x, basePt.y, arrowheadOrientation);
+        corner1Pt.transform(basePt.x, basePt.y, arrowheadOrientation);
+        corner2Pt.transform(basePt.x, basePt.y, arrowheadOrientation);
+        corner1cPt.transform(basePt.x, basePt.y, arrowheadOrientation);
+        corner2cPt.transform(basePt.x, basePt.y, arrowheadOrientation);
+        
+        // For thick flows there is a small gap between the end of the clipped
+        // line and the arrow base. This is due to the fact that the line cap 
+        // and the base line of the arrow are aligned diffrently. The clipRadius
+        // is reduced to compensate for this gap. The size of the gap is 
+        // computed from the orientation of the line and the orientation of the arrow.
+        double lineOrientation = GeometryUtils.orientation(flow.split(t)[0].getCtrlPt(), getBasePt());
+        double dAlpha = GeometryUtils.angleDif(lineOrientation, arrowheadOrientation);
+        double dRadius = Math.abs(Math.tan(dAlpha) * flowStrokeWidth / 2);
+        
+        // Additionally reduce the clipping radius by 0.5 pixel to prevent a
+        // rendering artiface that shows a small white line between end of the flow 
+        // line and the arrowhead. This seems to be an antialiaising bug in Java2D.
+        double tol = 0.5 / model.getReferenceMapScale();
+        
+        clipRadius -= Math.max(tol, dRadius);
     }
 
     /**
