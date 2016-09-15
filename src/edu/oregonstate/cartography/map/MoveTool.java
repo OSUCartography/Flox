@@ -94,7 +94,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             int tolPx = SelectionTool.CLICK_PIXEL_TOLERANCE;
             FloxMapComponent map = (FloxMapComponent) mapComponent;
             Point clickedNode = map.getClickedNode(selectedNodes, point, tolPx);
-            
+
             if (clickedNode != null) {
                 // At least one selected node was clicked
                 // Allow dragging
@@ -142,12 +142,12 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 if (cPt.isSelected()) {
                     cPt.setSelected(false);
                 }
-                mapComponent.refreshMap();
             }
         }
 
-        model.computeArrowheadsAndClipping();
-
+        updateClippingAreas();
+        mapComponent.refreshMap();
+        
         // update the force-based layout and add undo option        
         if (dragging == true) {
             ((FloxMapComponent) mapComponent).layout("Move");
@@ -200,6 +200,9 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                     flow.getCtrlPt().y += (point.y - previousDrag_y) / 2;
                 }
             }
+
+            //calling updateClippingAreas() is possible, but a bit slow, so 
+            // better update clip areas when the drag operation ends
         }
 
         // Redraw the map
@@ -208,6 +211,27 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         // Update the previousDrag coordinates.
         previousDrag_x = point.x;
         previousDrag_y = point.y;
+    }
+
+    private void updateClippingAreas() {
+        if (model.hasClipAreas() == false) {
+            return;
+        }
+        
+        Iterator<Flow> iter = model.flowIterator();
+        while (iter.hasNext()) {
+            Flow flow = iter.next();
+            // only update areas for selected nodes, because only those are moved
+            if (flow.getStartPt().isSelected() && model.isClipFlowStarts()) {
+                model.updateStartClipArea(flow);
+            }
+            if (flow.getEndPt().isSelected() && model.isClipFlowEnds()) {
+                model.updateEndClipArea(flow);
+            }
+
+            model.computeArrowheadAndClipping(flow);
+        }
+
     }
 
     // Constructor

@@ -63,7 +63,7 @@ public class AddFlowTool extends DoubleBufferedTool {
         this.model = model;
     }
 
-    private Flow flow(double endX, double endY) {
+    private Flow makeFlow(double endX, double endY) {
         Point endNode = new Point(endX, endY, originNode.getValue());
         Flow flow = new Flow(originNode, endNode, flowValue);
         if (model.isClipFlowStarts()) {
@@ -101,7 +101,7 @@ public class AddFlowTool extends DoubleBufferedTool {
 
             // Add the new flow to the data model.
             if (endNode != originNode) {
-                model.addFlow(flow(endNode.x, endNode.y));
+                model.addFlow(makeFlow(endNode.x, endNode.y));
             }
 
             originNode = null;
@@ -174,7 +174,7 @@ public class AddFlowTool extends DoubleBufferedTool {
             FloxMapComponent map = (FloxMapComponent) mapComponent;
             double s = map.getScale() / model.getReferenceMapScale();
             FloxRenderer.enableHighQualityRenderingHints(g2d, true);
-            Flow flow = flow(mouse.getX(), mouse.getY());
+            Flow flow = makeFlow(mouse.getX(), mouse.getY());
             double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
             g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
