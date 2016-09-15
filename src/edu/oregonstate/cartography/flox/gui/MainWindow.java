@@ -246,18 +246,16 @@ public class MainWindow extends javax.swing.JFrame {
             peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 20));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
-            if (null != model.getFlowNodeDensity()) {
-                switch (model.getFlowNodeDensity()) {
+            switch (model.getFlowNodeDensity()) {
                     case LOW:
                         accuracyComboBox.setSelectedIndex(0);
                         break;
                     case HIGH:
-                        accuracyComboBox.setSelectedIndex(1);
-                        break;
-                    default:
                         accuracyComboBox.setSelectedIndex(2);
                         break;
-                }
+                    default:
+                        accuracyComboBox.setSelectedIndex(1);
+                        break;
             }
             iterationsSpinner.setValue(model.getNbrIterations());
 
@@ -3834,11 +3832,11 @@ public class MainWindow extends javax.swing.JFrame {
                     break;
                 case 2:
                     model.setFlowNodeDensity(FlowNodeDensity.HIGH);
-                    layout("Medium Accuracy");
+                    layout("High Accuracy");
                     break;
                 default:
                     model.setFlowNodeDensity(FlowNodeDensity.MEDIUM);
-                    layout("High Accuracy");
+                    layout("Medium Accuracy");
                     break;
             }
             if (showLineSegmentsToggleButton.isSelected()) {
