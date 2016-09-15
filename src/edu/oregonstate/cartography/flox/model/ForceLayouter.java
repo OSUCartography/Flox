@@ -22,7 +22,6 @@ import java.util.List;
  */
 public class ForceLayouter {
 
-
     // model with all map features.
     private final Model model;
 
@@ -816,10 +815,11 @@ public class ForceLayouter {
             while (flowIterator.hasNext()) {
                 Flow flow = flowIterator.next();
                 Arrow arrow = flow.getEndArrow();
-                Point centroid = arrow.getCentroid();
-                double rPx = centroid.distance(arrow.getTipPt()) * model.getReferenceMapScale();
-                double rWorld = rPx / model.getReferenceMapScale();
-                obstacles.add(new Obstacle(flow.endPt, centroid.x, centroid.y, rWorld));
+                if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
+                    Obstacle obstacle = new Obstacle(flow.endPt, arrow.getTipPt(),
+                            arrow.getCorner1Pt(), arrow.getCorner2Pt());
+                    obstacles.add(obstacle);
+                }
             }
         }
 
