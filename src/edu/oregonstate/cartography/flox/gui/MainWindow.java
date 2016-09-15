@@ -472,7 +472,7 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu = new javax.swing.JMenu();
         undoMenuItem = new javax.swing.JMenuItem();
         redoMenuItem = new javax.swing.JMenuItem();
-        jSeparator8 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JPopupMenu.Separator jSeparator8 = new javax.swing.JPopupMenu.Separator();
         deleteMenuItem = new javax.swing.JMenuItem();
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNodesMenuItem = new javax.swing.JMenuItem();
@@ -480,11 +480,13 @@ public class MainWindow extends javax.swing.JFrame {
         selectFlowsMenuItem = new javax.swing.JMenuItem();
         selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
         selectNoneMenuItem = new javax.swing.JMenuItem();
-        jSeparator10 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JPopupMenu.Separator jSeparator19 = new javax.swing.JPopupMenu.Separator();
+        referenceMapScaleMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator10 = new javax.swing.JPopupMenu.Separator();
         lockMenuItem = new javax.swing.JMenuItem();
         unlockMenuItem = new javax.swing.JMenuItem();
         straightenFlowsMenuItem = new javax.swing.JMenuItem();
-        jSeparator11 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JPopupMenu.Separator jSeparator11 = new javax.swing.JPopupMenu.Separator();
         reverseFlowDirectionMenuItem = new javax.swing.JMenuItem();
         mergeNodesMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
@@ -494,13 +496,15 @@ public class MainWindow extends javax.swing.JFrame {
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
-        showAllMenuItem1 = new javax.swing.JMenuItem();
+        zoomOnReferenceMapScaleMenuItem = new javax.swing.JMenuItem();
+        zoomOnFlowslMenuItem = new javax.swing.JMenuItem();
         zoomOnSelectedLayerMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator viewSeparator = new javax.swing.JPopupMenu.Separator();
         viewZoomInMenuItem = new javax.swing.JMenuItem();
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator20 = new javax.swing.JPopupMenu.Separator();
         showComputationSettingsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        jSeparator15 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JPopupMenu.Separator jSeparator15 = new javax.swing.JPopupMenu.Separator();
         showDebugCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         infoMenu = new javax.swing.JMenu();
         floxReportMenuItem = new javax.swing.JMenuItem();
@@ -2058,6 +2062,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(selectNoneMenuItem);
+        editMenu.add(jSeparator19);
+
+        referenceMapScaleMenuItem.setText("Set Reference Map Scale…");
+        referenceMapScaleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                referenceMapScaleMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(referenceMapScaleMenuItem);
         editMenu.add(jSeparator10);
 
         lockMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2154,14 +2167,23 @@ public class MainWindow extends javax.swing.JFrame {
         });
         viewMenu.add(showAllMenuItem);
 
-        showAllMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        showAllMenuItem1.setText("Zoom on Flows");
-        showAllMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        zoomOnReferenceMapScaleMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        zoomOnReferenceMapScaleMenuItem.setText("Zoom to Reference Map Scale");
+        zoomOnReferenceMapScaleMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showAllMenuItem1ActionPerformed(evt);
+                zoomOnReferenceMapScaleMenuItemActionPerformed(evt);
             }
         });
-        viewMenu.add(showAllMenuItem1);
+        viewMenu.add(zoomOnReferenceMapScaleMenuItem);
+
+        zoomOnFlowslMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        zoomOnFlowslMenuItem.setText("Zoom on Flows");
+        zoomOnFlowslMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                zoomOnFlowslMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(zoomOnFlowslMenuItem);
 
         zoomOnSelectedLayerMenuItem.setText("Zoom on Selected Layer");
         zoomOnSelectedLayerMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2189,9 +2211,10 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         viewMenu.add(viewZoomOutMenuItem);
+        viewMenu.add(jSeparator20);
 
         showComputationSettingsCheckBoxMenuItem.setSelected(true);
-        showComputationSettingsCheckBoxMenuItem.setText("Show Computation Settings");
+        showComputationSettingsCheckBoxMenuItem.setText("Show Computation Palette");
         showComputationSettingsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 showComputationSettingsCheckBoxMenuItemActionPerformed(evt);
@@ -2699,9 +2722,9 @@ public class MainWindow extends javax.swing.JFrame {
 
     }//GEN-LAST:event_enforceRangeboxCheckboxActionPerformed
 
-    private void showAllMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllMenuItem1ActionPerformed
+    private void zoomOnFlowslMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOnFlowslMenuItemActionPerformed
         mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
-    }//GEN-LAST:event_showAllMenuItem1ActionPerformed
+    }//GEN-LAST:event_zoomOnFlowslMenuItemActionPerformed
 
     private void infoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoMenuItemActionPerformed
         ProgramInfoPanel.showApplicationInfo(this);
@@ -3748,6 +3771,22 @@ public class MainWindow extends javax.swing.JFrame {
         addUndo("Fill Color");
     }//GEN-LAST:event_nodeFillColorButtonActionPerformed
 
+    private void referenceMapScaleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_referenceMapScaleMenuItemActionPerformed
+        String msg = "<html>The reference scale is used to convert between "
+                + "pixels coordinates of flows and nodes.<br>Do you want to use "
+                + "the current map scale as reference scale?</html>";
+        String title = "Flox";
+        int res = JOptionPane.showConfirmDialog(this, msg, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (res == JOptionPane.OK_OPTION) {
+            model.setReferenceMapScale(mapComponent.getScale());
+            layout("Reference Map Scale");
+        }
+    }//GEN-LAST:event_referenceMapScaleMenuItemActionPerformed
+
+    private void zoomOnReferenceMapScaleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOnReferenceMapScaleMenuItemActionPerformed
+        mapComponent.setScale(model.getReferenceMapScale());
+    }//GEN-LAST:event_zoomOnReferenceMapScaleMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -3889,17 +3928,13 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPopupMenu.Separator jSeparator1;
-    private javax.swing.JPopupMenu.Separator jSeparator10;
-    private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
-    private javax.swing.JPopupMenu.Separator jSeparator15;
     private javax.swing.JPopupMenu.Separator jSeparator16;
     private javax.swing.JPopupMenu.Separator jSeparator17;
     private javax.swing.JSeparator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator7;
-    private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea jTextArea2;
@@ -3942,6 +3977,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel progressBarPanel;
     private javax.swing.JMenuItem recomputeMenuItem;
     private javax.swing.JMenuItem redoMenuItem;
+    private javax.swing.JMenuItem referenceMapScaleMenuItem;
     private javax.swing.JMenuItem removeAllLayersMenuItem;
     private javax.swing.JButton removeLayerButton;
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
@@ -3962,7 +3998,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem selectUnconnectedNodesMenuItem;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
-    private javax.swing.JMenuItem showAllMenuItem1;
     private javax.swing.JCheckBoxMenuItem showComputationSettingsCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showDebugCheckBoxMenuItem;
     private javax.swing.JToggleButton showFlowsToggleButton;
@@ -3988,6 +4023,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField yFormattedTextField;
     private javax.swing.JSlider zeroLengthStiffnessSlider;
     private javax.swing.JToggleButton zoomInToggleButton;
+    private javax.swing.JMenuItem zoomOnFlowslMenuItem;
+    private javax.swing.JMenuItem zoomOnReferenceMapScaleMenuItem;
     private javax.swing.JMenuItem zoomOnSelectedLayerMenuItem;
     private javax.swing.JToggleButton zoomOutToggleButton;
     // End of variables declaration//GEN-END:variables

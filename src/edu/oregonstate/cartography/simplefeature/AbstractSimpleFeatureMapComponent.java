@@ -209,23 +209,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * @param zoomFactor The new zoom factor.
      */
     public void zoom(double zoomFactor) {
-        double newScale = scale * zoomFactor;
-        if (newScale < MIN_SCALE) {
-            newScale = MIN_SCALE;
-        }
-
-        Rectangle2D visibleRect = getVisibleArea();
-        double cx = visibleRect.getCenterX();
-        double cy = visibleRect.getCenterY();
-        double dx = cx - west;
-        double dy = cy - north;
-
-        dx *= scale / newScale;
-        dy *= scale / newScale;
-        west = cx - dx;
-        north = cy - dy;
-        scale = newScale;
-        refreshMap();
+        setScale(scale * zoomFactor);        
     }
 
     /**
@@ -295,6 +279,32 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
     public double getScale() {
         return scale;
     }
+    
+    /**
+     * Set the map scale.
+     *
+     * @param newScale new map scale
+     */
+    public void setScale(double newScale) {
+        
+        if (newScale < MIN_SCALE) {
+            newScale = MIN_SCALE;
+        }
+
+        Rectangle2D visibleRect = getVisibleArea();
+        double cx = visibleRect.getCenterX();
+        double cy = visibleRect.getCenterY();
+        double dx = cx - west;
+        double dy = cy - north;
+
+        dx *= scale / newScale;
+        dy *= scale / newScale;
+        west = cx - dx;
+        north = cy - dy;
+        scale = newScale;
+        refreshMap();
+    }
+
 
     /**
      * Returns the western most point in geometry
