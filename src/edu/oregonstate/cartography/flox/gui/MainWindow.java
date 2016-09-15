@@ -2228,6 +2228,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(reverseFlowDirectionMenuItem);
 
+        mergeNodesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         mergeNodesMenuItem.setText("Merge Nodes");
         mergeNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2392,7 +2393,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(showObstaclesCheckBoxMenuItem);
 
-        moveSelectedFromObstaclesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         moveSelectedFromObstaclesMenuItem.setText("Move Selected Flow Away from Obstacles");
         moveSelectedFromObstaclesMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2401,7 +2401,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(moveSelectedFromObstaclesMenuItem);
 
-        spiralPointsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         spiralPointsMenuItem.setText("Create Map Layer with Spiral Points");
         spiralPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2421,7 +2420,6 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu.add(enforceCanvasCheckBoxMenuItem);
         debugMenu.add(jSeparator13);
 
-        emptySpaceMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         emptySpaceMenuItem.setText("Attract First Selected Flow by Empty Space");
         emptySpaceMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2491,7 +2489,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(openSettingsMenuItem);
 
-        saveSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         saveSettingsMenuItem.setText("Save XML…");
         saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3786,6 +3783,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void mergeNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mergeNodesMenuItemActionPerformed
         model.mergeSelectedNodes();
+        mapComponent.refreshMap();
         layout("Merge Nodes");
     }//GEN-LAST:event_mergeNodesMenuItemActionPerformed
 

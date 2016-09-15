@@ -594,6 +594,9 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mergeNodesMenuItem">
               <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Merge Nodes"/>
               </Properties>
               <Events>
@@ -796,9 +799,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="moveSelectedFromObstaclesMenuItem">
               <Properties>
-                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
-                </Property>
                 <Property name="text" type="java.lang.String" value="Move Selected Flow Away from Obstacles"/>
               </Properties>
               <Events>
@@ -807,9 +807,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="spiralPointsMenuItem">
               <Properties>
-                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
-                </Property>
                 <Property name="text" type="java.lang.String" value="Create Map Layer with Spiral Points"/>
               </Properties>
               <Events>
@@ -831,9 +828,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="emptySpaceMenuItem">
               <Properties>
-                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
-                </Property>
                 <Property name="text" type="java.lang.String" value="Attract First Selected Flow by Empty Space"/>
               </Properties>
               <Events>
@@ -908,9 +902,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="saveSettingsMenuItem">
               <Properties>
-                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
-                </Property>
                 <Property name="text" type="java.lang.String" value="Save XML&#x2026;"/>
               </Properties>
               <Events>
