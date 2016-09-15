@@ -61,9 +61,6 @@ public class Model {
     public static final double DEFAULT_FLOW_VALUE = 1;
 
     // FIXME
-    public boolean limitNodesRepulsionToBandHack = false;
-
-    // FIXME
     public boolean liveDrawing = false;
 
     /**
@@ -162,7 +159,7 @@ public class Model {
     /**
      * Weight of angular distribution force. Currently modified by a GUI slider.
      */
-    private double angularDistributionWeight = 0.5;
+    private double angularDistributionWeight = 2;
 
     /**
      * Stiffness factor for peripheral flows.
@@ -309,12 +306,12 @@ public class Model {
     /**
      * Radius of largest node in pixels.
      */
-    private double maxNodeSizePx = 20;
+    private double maxNodeSizePx = 30;
 
     /**
      * Stroke width for drawing node circles. In pixels.
      */
-    private float nodeStrokeWidthPx = 2;
+    private float nodeStrokeWidthPx = 3;
 
     /**
      * Color for drawing node outlines

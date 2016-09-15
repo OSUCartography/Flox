@@ -113,6 +113,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             boolean drawEndClipAreas,
             boolean drawObstacles) {
 
+        if (drawCanvas) {
+            drawCanvas();
+        }
+
         if (renderBackgroundLayers) {
             int nbrLayers = model.getNbrLayers();
             for (int i = nbrLayers - 1; i >= 0; i--) {
@@ -127,10 +131,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
         }
 
-        if (drawCanvas) {
-            drawCanvas();
-        }
-
         if (drawFlows) {
             drawFlows(highlightSelected);
         }
@@ -142,7 +142,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         if (drawFlowRangebox) {
             drawFlowRangebox();
         }
-        
+
         if (drawLineSegments) {
             drawStraightLinesSegments();
         }
@@ -150,7 +150,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         if (drawStartClipAreas || drawEndClipAreas) {
             drawClipAreas(drawStartClipAreas, drawEndClipAreas);
         }
-        
+
         if (drawLocks) {
             drawLockIcons();
         }
@@ -158,10 +158,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         if (drawControlPoints) {
             drawControlPoints();
         }
-        
+
         if (drawObstacles) {
             drawObstacles();
-        }        
+        }
     }
 
     /**
