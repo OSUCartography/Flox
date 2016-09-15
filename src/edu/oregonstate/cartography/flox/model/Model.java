@@ -336,12 +336,12 @@ public class Model {
     /**
      * Clip the ends of flows. This flags is only used to update the GUI.
      */
-    private boolean clipFlowEnds = false;
+    private boolean clipFlowEnds = true;
 
     /**
      * Clip the beginnings of flows. This flags is only used to update the GUI.
      */
-    private boolean clipFlowStarts = false;
+    private boolean clipFlowStarts = true;
 
     /**
      * A geometry (collection) used for clipping start or end of flows.
@@ -351,14 +351,14 @@ public class Model {
     private Geometry clipAreas;
 
     /**
-     * Buffer width for start clip areas.
+     * Buffer width for start clip areas in pixels.
      */
-    private double startClipAreaBufferDistance = 0;
+    private double startClipAreaBufferDistancePx = 30;
 
     /**
-     * Buffer width for end clip areas.
+     * Buffer width for end clip areas in pixels.
      */
-    private double endClipAreaBufferDistance = 0;
+    private double endClipAreaBufferDistancePx = 30;
 
     /**
      * whether to move flows that overlap obstacles (i.e. nodes and arrowheads)
@@ -542,7 +542,7 @@ public class Model {
     public double getMinNodeValue() {
         return graph.getMinNodeValue();
     }
-    
+
     /**
      * Gets the average value of all nodes on the map.
      *
@@ -867,7 +867,8 @@ public class Model {
         GeometryFactory f = new GeometryFactory();
         Geometry startClipArea = findContainingGeometry(clipAreas, flow.getStartPt(), f);
         if (startClipArea != null) {
-            startClipArea = startClipArea.buffer(-startClipAreaBufferDistance);
+            double d = startClipAreaBufferDistancePx / getReferenceMapScale();
+            startClipArea = startClipArea.buffer(-d);
         }
         flow.setStartClipArea(startClipArea);
     }
@@ -900,7 +901,8 @@ public class Model {
         GeometryFactory f = new GeometryFactory();
         Geometry endClipArea = findContainingGeometry(clipAreas, flow.getEndPt(), f);
         if (endClipArea != null) {
-            endClipArea = endClipArea.buffer(-endClipAreaBufferDistance);
+            double d = endClipAreaBufferDistancePx / getReferenceMapScale();
+            endClipArea = endClipArea.buffer(-d);
         }
         flow.setEndClipArea(endClipArea);
     }
@@ -926,6 +928,14 @@ public class Model {
      */
     public void setClipAreas(Geometry clipAreas) {
         this.clipAreas = clipAreas;
+
+        if (isClipFlowEnds()) {
+            updateEndClipAreas();
+        }
+        if (isClipFlowStarts()) {
+            updateStartClipAreas();
+        }
+        computeArrowheadsAndClipping();
     }
 
     /**
@@ -960,30 +970,30 @@ public class Model {
     /**
      * @return the startClipAreaBufferDistance
      */
-    public double getStartClipAreaBufferDistance() {
-        return startClipAreaBufferDistance;
+    public double getStartClipAreaBufferDistancePx() {
+        return startClipAreaBufferDistancePx;
     }
 
     /**
      * @param startClipAreaBufferDistance the startClipAreaBufferDistance to set
      */
-    public void setStartClipAreaBufferDistance(double startClipAreaBufferDistance) {
-        this.startClipAreaBufferDistance = startClipAreaBufferDistance;
+    public void setStartClipAreaBufferDistancePx(double startClipAreaBufferDistance) {
+        this.startClipAreaBufferDistancePx = startClipAreaBufferDistance;
         updateStartClipAreas();
     }
 
     /**
      * @return the endClipAreaBufferDistance
      */
-    public double getEndClipAreaBufferDistance() {
-        return endClipAreaBufferDistance;
+    public double getEndClipAreaBufferDistancePx() {
+        return endClipAreaBufferDistancePx;
     }
 
     /**
      * @param endClipAreaBufferDistance the endClipAreaBufferDistance to set
      */
-    public void setEndClipAreaBufferDistance(double endClipAreaBufferDistance) {
-        this.endClipAreaBufferDistance = endClipAreaBufferDistance;
+    public void setEndClipAreaBufferDistancePx(double endClipAreaBufferDistance) {
+        this.endClipAreaBufferDistancePx = endClipAreaBufferDistance;
         updateEndClipAreas();
     }
 
