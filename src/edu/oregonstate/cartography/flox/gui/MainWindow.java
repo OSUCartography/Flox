@@ -3559,12 +3559,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_showNodesToggleButtonActionPerformed
 
-    private double inverseDistanceWeight(double d) {
-        // FIXME hard coded exponent value
-        double p = 2;
-        return 1. / Math.pow(d, p);
-    }
-
     private void emptySpaceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emptySpaceMenuItemActionPerformed
 
         // FIXME this is not the right class for this

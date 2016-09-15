@@ -313,7 +313,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @return the geometry of the arrow in pixel coordinates.
      */
     private Shape getInlineFlowArrow(Flow flow, double flowStrokeWidth) {
-        // default placement is at T + 0.5
+        // default placement is at t = 0.5
         // TODO optimize placement to avoid conflicts with overlapping flows
         double t = 0.5;
 

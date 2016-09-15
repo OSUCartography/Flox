@@ -350,9 +350,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                     // Deselect it
                     clickedNode.setSelected(false);
                 }
-                // set nodeGotSelected to true so that flows aren't 
-                // selected later. FIXME, this is weird.
-                nodeGotSelected = true;
             } else { // The first node in clickedNodes is not currently selected.
                 if (!shiftDown) {
                     // shift is not held down.

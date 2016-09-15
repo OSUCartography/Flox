@@ -1,9 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
 /**
- *
- * @author Bernhard Jenny, School of Mathematical and Geospatial Sciences, RMIT
- * University, Melbourne
+ * Experimental. Not currently used.
+ * 
+ * @author Bernhard Jenny, School of Science, RMIT University, Melbourne
  */
 public class BidirectionalFlow extends Flow {
     

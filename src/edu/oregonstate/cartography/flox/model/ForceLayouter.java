@@ -529,8 +529,11 @@ public class ForceLayouter {
     /**
      * Returns a list with pairs of flows that intersect and are connected to a
      * shared node. The list does not include pairs where both flows are locked.
+     *
      * FIXME should either cache JTS Geometry objects or write intersection test
-     * for lines in straightLinesMap.
+     * for lines in straightLinesMap. JTS.crosses() returns true for lines
+     * sharing a start or end node. Therefore either move start and end points
+     * slightly, or code own crosses() method.
      *
      * @return pairs of flows that have a common start or end node.
      */
@@ -544,7 +547,11 @@ public class ForceLayouter {
         for (int i = 0; i < flows.size(); i++) {
             Flow flow1 = flows.get(i);
             Point[] points1 = straightLinesMap.get(flow1);
-            if (points1.length < 4) { // FIXME
+            // FIXME the first and last points are ignored, because sibling 
+            // lines are connected at either the first or last point and 
+            // crosses() will return true.. Without start and end points, at 
+            // least 2 intermediate points are needed to define a line.
+            if (points1.length < 4) {
                 continue;
             }
             LinearGeometryBuilder lineBuilder1 = new LinearGeometryBuilder(geometryFactory);
@@ -556,7 +563,7 @@ public class ForceLayouter {
 
             for (int j = i + 1; j < flows.size(); j++) {
                 Flow flow2 = flows.get(j);
-                // pairs where both flows are locked, as nothing can be changed for locked flows.
+                // pairs where both flows are locked are ignored, as nothing can be changed for locked flows.
                 if (flow1.isLocked() && flow2.isLocked()) {
                     continue;
                 }
@@ -564,7 +571,7 @@ public class ForceLayouter {
                 Point sharedNode = flow1.getSharedNode(flow2);
                 if (sharedNode != null) {
                     Point[] points2 = straightLinesMap.get(flow2);
-                    if (points2.length < 4) { // FIXME
+                    if (points2.length < 4) { // FIXME see above
                         continue;
                     }
                     LinearGeometryBuilder lineBuilder2 = new LinearGeometryBuilder(geometryFactory);

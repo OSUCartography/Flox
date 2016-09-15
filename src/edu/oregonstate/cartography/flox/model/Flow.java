@@ -634,7 +634,7 @@ public class Flow {
         if (regularPoints.size() == 1) {
             regularPoints.add(new Point(endPt.x, endPt.y));
         }
-        
+
         // replace last point with end point
         regularPoints.set(regularPoints.size() - 1,
                 irregularPoints.get(irregularPoints.size() - 1));
@@ -718,21 +718,31 @@ public class Flow {
      * @param r Radius of circle
      * @return Parameter t [0..1] where the circle intersects the flow.
      */
-    public double getIntersectionTWithCircleAroundEndPoint(double r) {
-        // FIXME need to handle the case when the entire curve is within the circle with radius r
-        // comparing r to the distance between start and end node is not sufficient to handle this case.
-
+    public final double getIntersectionTWithCircleAroundEndPoint(double r) {
         if (r <= 0) {
-            return 1;   // tx = 1: end of curve
+            return 1;   // t = 1: end of curve
         }
+
+        final double rSqr = r * r;
+
+        // Test whether the entire curve is within the circle with radius r.
+        // Compare r to the distance between start and end node.
+        double baseLineDx = startPt.x - endPt.x;
+        double baseLineDy = startPt.y - endPt.y;
+        double baseLineLengthSqr = baseLineDx * baseLineDx + baseLineDy * baseLineDy;
+        if (baseLineLengthSqr <= rSqr) {
+            return 1; // t = 1: end of curve
+        }
+
+        // FIXME should use distance tolerance instead of hard-coded number of iterations
         double t = 0.5;
         double t_step = 0.25;
         for (int i = 0; i < 20; i++) {
             Point pt = pointOnCurve(t);
             final double dx = endPt.x - pt.x;
             final double dy = endPt.y - pt.y;
-            final double d = Math.sqrt(dx * dx + dy * dy);
-            if (d < r) {
+            final double dSqr = dx * dx + dy * dy;
+            if (dSqr < rSqr) {
                 t -= t_step;
             } else {
                 t += t_step;

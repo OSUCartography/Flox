@@ -693,6 +693,9 @@ public class Model {
         graph.removeEdge(flow);
     }
 
+    /**
+     * Experimental. Not currently used.
+     */
     public void changeToBidirectionalFlows() {
         ArrayList<BidirectionalFlow> flowsToAdd = new ArrayList<>();
         HashSet<Flow> flowsToRemove = new HashSet<>();
@@ -723,6 +726,9 @@ public class Model {
         System.out.println("# final flows: " + graph.getNbrFlows());
     }
 
+    /**
+     * Experimental. Not currently used.
+     */
     public void changeToUnidirectionalFlows() {
         ArrayList<Flow> flowsToAdd = new ArrayList<>();
         ArrayList<BidirectionalFlow> flowsToRemove = new ArrayList<>();
@@ -2007,13 +2013,6 @@ public class Model {
             Flow flow = iterator.next();
             computeArrowheadAndClipping(flow);
         }
-
-//        // TODO adjust the width of arrowheads
-//        ArrayList<Point> points = model.getNodes();
-//        for (Point point : points) {
-//            ArrayList<Flow> incomingFlows = model.getAnticlockwiseOrderedIncomingFlows(point);
-//            System.out.println("Number of incoming flows at node " + point + ": " + incomingFlows.size());
-//        }
     }
 
     /**
