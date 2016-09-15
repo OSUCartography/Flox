@@ -1,13 +1,13 @@
-package edu.oregonstate.cartography.flox.model;
+package edu.oregonstate.cartography.app;
 
 import edu.oregonstate.cartography.flox.gui.MainWindow;
+import edu.oregonstate.cartography.flox.model.Model;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 /**
  * Main class for Flox.
@@ -48,7 +48,7 @@ public class Flox {
                 window.setLocation((int) screen.getMinX(), (int) screen.getMinY());
                 window.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
                 window.setVisible(true);
-
+                window.openComputationPalette();
                 window.openFlowsCSVFile();
 
                 window.addWindowListener(new WindowAdapter() {
