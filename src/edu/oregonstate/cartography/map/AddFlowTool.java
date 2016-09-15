@@ -62,12 +62,16 @@ public class AddFlowTool extends DoubleBufferedTool {
         super(mapComponent);
         this.model = model;
     }
-    
+
     private Flow flow(double endX, double endY) {
         Point endNode = new Point(endX, endY, originNode.getValue());
         Flow flow = new Flow(originNode, endNode, flowValue);
-        model.updateStartClipArea(flow);
-        model.updateEndClipArea(flow);
+        if (model.isClipFlowStarts()) {
+            model.updateStartClipArea(flow);
+        }
+        if (model.isClipFlowEnds()) {
+            model.updateEndClipArea(flow);
+        }
 
         model.computeArrowheadAndClipping(flow);
         return flow;
@@ -87,11 +91,10 @@ public class AddFlowTool extends DoubleBufferedTool {
         // node. If this is the second click, add a destination node.
         if (originNode != null) {
             ArrayList<Point> nodes = model.getNodes();
-            
+
             Point endNode = ((FloxMapComponent) mapComponent).getClickedNode(nodes, point, PIXEL_TOLERANCE);
 
-            // If an existing node was NOT assigned to destinationNode, make a new
-            // Point and assign it to destinationNode.
+            // create new end node if user did not click on existing node
             if (endNode == null) {
                 endNode = new Point(point.x, point.y, originNode.getValue());
             }
@@ -175,14 +178,16 @@ public class AddFlowTool extends DoubleBufferedTool {
             double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
             g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            
+
+            // draw the clipped flow section in gray
             boolean clipWithAreas = model.isClipFlowEnds() || model.isClipFlowStarts();
             if (clipWithAreas) {
                 GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
                 g2d.setColor(Color.GRAY);
                 g2d.draw(flowPath);
             }
-            
+
+            // draw clipped flow in black
             flow = model.clipFlow(flow, true);
             GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
             g2d.setColor(Color.BLACK);
