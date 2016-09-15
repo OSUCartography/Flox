@@ -142,7 +142,7 @@ public class Model {
     }
 
     private int nbrIterations = 50;
-    
+
     /**
      * Graph of edges (Flow class) and nodes (Point class).
      */
@@ -315,13 +315,13 @@ public class Model {
      * Stroke width for drawing node circles. In pixels.
      */
     private float nodeStrokeWidthPx = 2;
-    
+
     /**
      * Color for drawing node outlines
      */
     @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
     private Color nodeStrokeColor = Color.BLACK;
-    
+
     /**
      * Color for filling nodes.
      */
@@ -599,7 +599,7 @@ public class Model {
         }
         return n;
     }
-    
+
     /**
      * Returns the number of nodes that are not connected to any other node.
      *
@@ -883,6 +883,7 @@ public class Model {
      * Finds the clip areas for the the end of one flow. First buffers the clip
      * area geometry, then finds the containing geometry for the end point of
      * the flow, then assigns the end clip area to the flow.
+     *
      * @param flow flow to find end clip area for
      */
     public void updateEndClipArea(Flow flow) {
@@ -1293,10 +1294,10 @@ public class Model {
         setSelectionOfAllFlows(select);
         setSelectionOfAllNodes(select);
     }
-    
+
     /**
      * Set selection state of all nodes
-     * 
+     *
      * @param selected new selection state
      */
     public void setSelectionOfAllNodes(boolean selected) {
@@ -1308,6 +1309,7 @@ public class Model {
 
     /**
      * Set selection state of all flows.
+     *
      * @param selected new selection state
      */
     public void setSelectionOfAllFlows(boolean selected) {
@@ -1949,6 +1951,9 @@ public class Model {
     }
 
     /**
+     * Conversion factor between pixels and world coordinates. world = px /
+     * getReferenceMapScale()
+     *
      * @return the referenceMapScale
      */
     public final double getReferenceMapScale() {
@@ -2092,10 +2097,11 @@ public class Model {
 
     /**
      * Set fill color.
+     *
      * @param nodeFillColor The new fill color.
      */
     public void setNodeFillColor(Color nodeFillColor) {
         this.nodeFillColor = nodeFillColor;
     }
-    
+
 }

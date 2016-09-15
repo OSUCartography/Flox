@@ -10,7 +10,7 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
-import edu.oregonstate.cartography.flox.model.ForceLayouter.Obstacle;
+import edu.oregonstate.cartography.flox.model.Obstacle;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;

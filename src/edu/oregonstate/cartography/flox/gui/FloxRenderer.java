@@ -7,6 +7,7 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
+import edu.oregonstate.cartography.flox.model.Obstacle;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
@@ -596,11 +597,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private void drawObstacles() {
         g2d.setStroke(new BasicStroke(model.getNodeStrokeWidthPx()));
         ForceLayouter layouter = new ForceLayouter(model);
-        List<ForceLayouter.Obstacle> obstacles = layouter.getObstacles();
-        double s = scale / model.getReferenceMapScale();
+        List<Obstacle> obstacles = layouter.getObstacles();
         Color fillColor = new Color(200, 0, 0, 80);
-        for (ForceLayouter.Obstacle obstacle : obstacles) {
-            drawCircle(obstacle.x, obstacle.y, obstacle.r * s, fillColor, null);
+        for (Obstacle obstacle : obstacles) {
+            drawCircle(obstacle.x, obstacle.y, obstacle.r * scale, fillColor, null);
         }
     }
 }
