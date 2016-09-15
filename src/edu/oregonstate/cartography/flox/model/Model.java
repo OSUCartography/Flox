@@ -60,9 +60,6 @@ public class Model {
      */
     public static final double DEFAULT_FLOW_VALUE = 1;
 
-    // FIXME
-    public boolean liveDrawing = false;
-
     /**
      * Density of points along flows.
      */
@@ -596,8 +593,9 @@ public class Model {
      */
     public int selectUnconnectedNodes() {
         int n = 0;
-        ArrayList<Point> nodes = getNodes();
-        for (Point node : nodes) {
+        Iterator<Point> iter = nodeIterator();
+        while (iter.hasNext()) {
+            Point node = iter.next();
             if (graph.getFlowsForNode(node).isEmpty()) {
                 node.setSelected(true);
                 ++n;
@@ -613,8 +611,9 @@ public class Model {
      */
     public int countUnconnectedNodes() {
         int nbr = 0;
-        ArrayList<Point> nodes = getNodes();
-        for (Point node : nodes) {
+        Iterator<Point> iter = nodeIterator();
+        while (iter.hasNext()) {
+            Point node = iter.next();
             if (graph.getFlowsForNode(node).isEmpty()) {
                 ++nbr;
             }
@@ -1089,10 +1088,9 @@ public class Model {
     }
 
     /**
-     * Returns all nodes in the graph. FIXME getNodes should not be needed, as
-     * an extra ArrayList is created with this call. An iterator should be used
-     * instead. However, some applications (e.g. selection tool) require a
-     * reverse iteration.
+     * Returns all nodes in the graph. This method should be avoided because it
+     * creates an extra ArrayList . An iterator should be used instead. However,
+     * some applications (e.g. selection tool) require a reverse iteration.
      *
      * @return All nodes.
      */

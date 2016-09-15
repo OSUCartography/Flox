@@ -73,16 +73,12 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         this.mainWindow = mainWindow;
     }
     
+    public MainWindow getMainWindow() {
+        return mainWindow;
+    }
+    
     public void layout(String undoMessage) {
         mainWindow.layout(undoMessage);
-    }
-    
-    public void setScaleMoveSelectionTool() {
-        mainWindow.setScaleMoveSelectionTool();
-    }
-    
-    public void setAddFlowTool() {
-        mainWindow.setAddFlowTool();
     }
     
     /**

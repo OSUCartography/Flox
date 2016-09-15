@@ -61,11 +61,7 @@ class LayoutWorker extends SwingWorker<Void, Void> {
                 break;
             }
             iterBeforeMovingFlows = layouter.layoutIteration(i, iterBeforeMovingFlows, canvas);
-            // publish intermediate results in map. This will call process()
-            // on the Event Dispatch Thread.
-            if (layouter.getModel().liveDrawing) {
-                publish();
-            }
+
             // update progress indicator
             double progress = 100d * i / nbrIterations;
             setProgress((int) Math.round(progress));

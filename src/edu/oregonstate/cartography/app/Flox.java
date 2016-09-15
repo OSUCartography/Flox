@@ -49,7 +49,7 @@ public class Flox {
                 window.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
                 window.setVisible(true);
                 window.openComputationPalette();
-                window.openFlowsCSVFile();
+                //window.openFlowsCSVFile();
 
                 window.addWindowListener(new WindowAdapter() {
                     @Override

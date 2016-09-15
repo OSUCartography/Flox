@@ -129,39 +129,6 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     }
 
     /**
-     * Sets the icon of the lockUnlockButton to the appropriate icon for the
-     * locked status of selected flows.
-     */
-    private void updateLockUnlockButton() {
-        ArrayList<Flow> selectedFlows = model.getSelectedFlows();
-        if (selectedFlows.size() > 0) {
-            lockUnlockButton.setEnabled(true);
-
-            int locked = 0;
-            int unlocked = 0;
-            for (Flow flow : selectedFlows) {
-                if (flow.isLocked()) {
-                    locked++;
-                } else {
-                    unlocked++;
-                }
-            }
-            if (locked + unlocked == 0) {
-                lockUnlockButton.setEnabled(false);
-            } else if (locked > 0 && unlocked == 0) {
-                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
-            } else if (unlocked > 0 && locked == 0) {
-                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
-            } else {
-                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockedUnlocked16x16.gif")));
-            }
-        } else {
-            lockUnlockButton.setEnabled(false);
-        }
-
-    }
-
-    /**
      * A drag ends, while this MapTool was the active one.
      *
      * @param point The location of the mouse in world coordinates.
@@ -174,11 +141,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         super.endDrag(point, evt);
 
         if (rect != null) {
-            /*boolean selectionChanged = */
             selectByRectangle(rect, evt.isShiftDown());
             updateValueField();
             updateCoordinateFields();
-            updateLockUnlockButton();
+            ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
         }
 
         if (model.isControlPtSelected()) {
@@ -215,6 +181,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 if (dist < tolWorldCoord) {
                     flow.setLocked(false);
                     mapComponent.refreshMap();
+                    ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
                     // compute new flow layout
                     ((FloxMapComponent) mapComponent).layout("Unlock");
                     return;
@@ -247,7 +214,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         selectByPoint(point, evt.isShiftDown(), SelectionTool.CLICK_PIXEL_TOLERANCE);
         updateValueField();
         updateCoordinateFields();
-        updateLockUnlockButton();
+        ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
     }
 
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {

@@ -37,8 +37,7 @@ public class AddFlowTool extends DoubleBufferedTool {
 
     /**
      * The distance from an existing node that a click must be within for that
-     * node to be assigned to originNode or destinationNode. FIXME The clicking
-     * distance should change with the size of the node.
+     * node to be assigned to originNode or destinationNode.
      */
     private final double PIXEL_TOLERANCE = 3;
 

@@ -27,8 +27,6 @@ import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
 import java.awt.Dimension;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -117,11 +115,12 @@ public class MainWindow extends javax.swing.JFrame {
             throw new IllegalStateException(ex);
         }
 
+        arrowToggleButton.doClick();
     }
 
     public void openComputationPalette() {
         computationPalette.pack();
-        
+
         // position palette in top-right corner of the MapComponent.
         Dimension dlgDim = computationPalette.getPreferredSize();
         java.awt.Point mapTopLeft = mapComponent.getLocationOnScreen();
@@ -184,14 +183,12 @@ public class MainWindow extends javax.swing.JFrame {
         this.model = model;
         mapComponent.setModel(model);
         mapComponent.refreshMap();
-        writeModelToGUI();
 
-        //FIXME
-        //This activates the ScaleMoveSelectTool when settings are uploaded. 
-        //This was put here to activate the tool at startup, but it also
-        //activates the tool anytime settings are imported. There's probably
-        //a better place to put this.
+        // switch to default tool. This updates the GUI and installs a new map 
+        // tool that has a reference to the new model.
         arrowToggleButton.doClick();
+
+        writeModelToGUI();
     }
 
     /**
@@ -327,8 +324,6 @@ public class MainWindow extends javax.swing.JFrame {
         selectFlowsFileButton = new javax.swing.JButton();
         importPanelOKButton = new javax.swing.JButton();
         importPanelCancelButton = new javax.swing.JButton();
-        buttonGroup1 = new javax.swing.ButtonGroup();
-        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
         computationPalette = new javax.swing.JDialog();
         jPanel1 = new javax.swing.JPanel();
         jLabel37 = new javax.swing.JLabel();
@@ -529,7 +524,6 @@ public class MainWindow extends javax.swing.JFrame {
         resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
-        liveDrawingCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
         jSeparator14 = new javax.swing.JPopupMenu.Separator();
         openSettingsMenuItem = new javax.swing.JMenuItem();
@@ -612,9 +606,6 @@ public class MainWindow extends javax.swing.JFrame {
                 importPanelCancelButtonActionPerformed(evt);
             }
         });
-
-        jCheckBoxMenuItem1.setSelected(true);
-        jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
 
         computationPalette.setTitle("Computation");
         computationPalette.setFocusableWindowState(false);
@@ -790,6 +781,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         mapToolsButtonGroup.add(arrowToggleButton);
         arrowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Arrow16x16.gif"))); // NOI18N
+        arrowToggleButton.setSelected(true);
         arrowToggleButton.setToolTipText("Select and Move Nodes and Flows (V)");
         arrowToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         arrowToggleButton.setPreferredSize(new java.awt.Dimension(24, 24));
@@ -2077,7 +2069,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.setText("File");
 
         importFlowsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        importFlowsMenuItem.setText("Open Flows…");
+        importFlowsMenuItem.setText("Open CSV File with Flows…");
         importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 importFlowsMenuItemActionPerformed(evt);
@@ -2085,7 +2077,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(importFlowsMenuItem);
 
-        openPointsAndFlowsMenuItem.setText("Open Nodes and Flows…");
+        openPointsAndFlowsMenuItem.setText("Open CSV File with Nodes and Flows…");
         openPointsAndFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openPointsAndFlowsMenuItemActionPerformed(evt);
@@ -2111,7 +2103,7 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(exportImageMenuItem);
         fileMenu.add(jSeparator4);
 
-        exportFlowsCSVMenuItem.setText("Export Flows to CSV...");
+        exportFlowsCSVMenuItem.setText("Export Flows to CSV File...");
         exportFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exportFlowsCSVMenuItemActionPerformed(evt);
@@ -2490,14 +2482,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(recomputeMenuItem);
-
-        liveDrawingCheckBoxMenuItem.setText("Live Drawing");
-        liveDrawingCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                liveDrawingCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(liveDrawingCheckBoxMenuItem);
 
         printFlowsToConsoleMenuItem.setText("Print Flows to Console");
         printFlowsToConsoleMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2965,10 +2949,6 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_flowRangeboxSizeSliderStateChanged
 
-    public void setScaleMoveSelectionTool() {
-        arrowToggleButton.doClick();
-    }
-
     public void setAddFlowTool() {
         addFlowToggleButton.doClick();
     }
@@ -3414,12 +3394,9 @@ public class MainWindow extends javax.swing.JFrame {
 
     /**
      * Sets the icon of the lockUnlockButton to the appropriate icon for the
-     * locked status of selected flows. FIXME This code is repeated in the
-     * SelectionTool. Any way it could access this method here instead? Or is
-     * there some kind of action listener this code could go into that the
-     * SelectionTool could trigger?
+     * locked status of selected flows.
      */
-    private void updateLockUnlockButtonIcon() {
+    public void updateLockUnlockButtonIcon() {
         ArrayList<Flow> selectedFlows = model.getSelectedFlows();
         if (selectedFlows.size() > 0) {
             lockUnlockButton.setEnabled(true);
@@ -3464,12 +3441,9 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void lockUnlockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockUnlockButtonActionPerformed
         ArrayList<Flow> selectedFlows = model.getSelectedFlows();
-        int locked = 0; // FIXME not used
         int unlocked = 0;
         for (Flow flow : selectedFlows) {
-            if (flow.isLocked()) {
-                locked++;
-            } else {
+            if (!flow.isLocked()) {
                 unlocked++;
             }
         }
@@ -3654,7 +3628,8 @@ public class MainWindow extends javax.swing.JFrame {
                     double dx = cellX - ctrlPt.x;
                     double dy = cellY - ctrlPt.y;
                     double d = Math.sqrt(dx * dx + dy * dy);
-                    double idw = inverseDistanceWeight(d);
+                    double p = 2;
+                    double idw = 1. / Math.pow(d, p);
 
                     // direction vector with length == 1
                     dx /= d;
@@ -3713,10 +3688,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_arrowLengthRatioSliderStateChanged
-
-    private void liveDrawingCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_liveDrawingCheckBoxMenuItemActionPerformed
-        model.liveDrawing = liveDrawingCheckBoxMenuItem.isSelected();
-    }//GEN-LAST:event_liveDrawingCheckBoxMenuItemActionPerformed
 
     private void selectOverlappingFlowsInfoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectOverlappingFlowsInfoMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
@@ -3861,6 +3832,9 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void showComputationSettingsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showComputationSettingsCheckBoxMenuItemActionPerformed
         computationPalette.setVisible(showComputationSettingsCheckBoxMenuItem.isSelected());
+        if (showComputationSettingsCheckBoxMenuItem.isSelected()) {
+            openComputationPalette();
+        }
     }//GEN-LAST:event_showComputationSettingsCheckBoxMenuItemActionPerformed
 
     private void viewMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_viewMenuMenuSelected
@@ -4034,7 +4008,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadLengthSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
-    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JPanel clipAreaControlPanel;
     private javax.swing.JPanel clipAreaPanel;
@@ -4074,7 +4047,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem infoMenuItem;
     private javax.swing.JCheckBoxMenuItem inlineArrowsCheckBoxMenuItem;
     private javax.swing.JSpinner iterationsSpinner;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -4132,7 +4104,6 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private edu.oregonstate.cartography.flox.gui.ColorButton layerStrokeColorButton;
-    private javax.swing.JCheckBoxMenuItem liveDrawingCheckBoxMenuItem;
     private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;

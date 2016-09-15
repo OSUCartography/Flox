@@ -66,7 +66,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             }
 
             // Get an arraylist selectedNodes that were clicked
-            // FIXME, a magic number of 2 is passed in for the pixel tolorance
             int tolPx = SelectionTool.CLICK_PIXEL_TOLERANCE;
             FloxMapComponent map = (FloxMapComponent) mapComponent;
             Point clickedNode = map.getClickedNode(selectedNodes, point, tolPx);
