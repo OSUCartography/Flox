@@ -631,6 +631,10 @@ public class Flow {
             startY = endY;
         }
 
+        if (regularPoints.size() == 1) {
+            regularPoints.add(new Point(endPt.x, endPt.y));
+        }
+        
         // replace last point with end point
         regularPoints.set(regularPoints.size() - 1,
                 irregularPoints.get(irregularPoints.size() - 1));
