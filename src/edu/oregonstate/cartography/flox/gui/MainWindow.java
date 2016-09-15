@@ -2644,7 +2644,7 @@ public class MainWindow extends javax.swing.JFrame {
             setFlows(flows, name);
             if (model.getMaxNodeValue() == model.getMinNodeValue()) {
                 maximumNodeSizeSlider.setValue(10);
-                
+
             }
             mapComponent.showAll();
 
@@ -2923,10 +2923,10 @@ public class MainWindow extends javax.swing.JFrame {
 
         if (canvasSizeSlider.getValueIsAdjusting() == false) {
             layout("Canvas Size");
-             mapComponent.setDrawCanvas(viewCanvasToggleButton.isSelected());
+            mapComponent.setDrawCanvas(viewCanvasToggleButton.isSelected());
         } else {
             // show canvas extent while slider is being dragged.
-             mapComponent.setDrawCanvas(true);
+            mapComponent.setDrawCanvas(true);
         }
     }//GEN-LAST:event_canvasSizeSliderStateChanged
 
@@ -3908,6 +3908,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void zoomOnReferenceMapScaleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOnReferenceMapScaleMenuItemActionPerformed
         mapComponent.setScale(model.getReferenceMapScale());
+        Rectangle2D bb = model.getFlowsBoundingBox();
+        mapComponent.centerOnPoint(bb.getCenterX(), bb.getCenterY());
     }//GEN-LAST:event_zoomOnReferenceMapScaleMenuItemActionPerformed
 
     private void minDistToObstaclesSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_minDistToObstaclesSpinnerStateChanged

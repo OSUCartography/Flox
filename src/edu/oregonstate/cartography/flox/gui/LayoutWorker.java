@@ -76,10 +76,8 @@ class LayoutWorker extends SwingWorker<Void, Void> {
 
     @Override
     public Void doInBackground() {
-        double startTime = System.currentTimeMillis();
         setProgress(0);
         layout();
-        System.out.println("Milliseconds: " + (System.currentTimeMillis() - startTime));
         return null;
     }
 
