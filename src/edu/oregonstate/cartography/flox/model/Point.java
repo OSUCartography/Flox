@@ -123,4 +123,17 @@ public final class Point {
         double dy = y - p.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
+    
+    /**
+     * Distance to another point.
+     *
+     * @param x
+     * @param y
+     * @return The distance to the other point.
+     */
+    public double distance(double x, double y) {
+        double dx = this.x - x;
+        double dy = this.y - y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
 }

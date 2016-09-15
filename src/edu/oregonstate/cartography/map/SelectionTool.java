@@ -6,6 +6,7 @@
 package edu.oregonstate.cartography.map;
 
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
+import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
@@ -202,17 +203,35 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     @Override
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
-        super.mouseClicked(point, evt);
 
-        if (model.isControlPtSelected()) {
-            // deselect all control points
-            Iterator<Flow> iterator = model.flowIterator();
-            while (iterator.hasNext()) {
-                Flow flow = iterator.next();
-                Point cPt = flow.getCtrlPt();
-                cPt.setSelected(false);
+        // detect click on lock icon and unlock clicked flow
+        Iterator<Flow> iterator = model.flowIterator();
+        double tolWorldCoord = FloxRenderer.LOCK_ICON_RADIUS / mapComponent.getScale();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.isLocked() && flow.getBoundingBox().contains(point)) {
+                Point lockCenter = flow.pointOnCurve(0.5);
+                double dist = lockCenter.distance(point.x, point.y);
+                if (dist < tolWorldCoord) {
+                    flow.setLocked(false);
+                    mapComponent.refreshMap();
+                    // compute new flow layout
+                    ((FloxMapComponent) mapComponent).layout("Unlock");
+                    return;
+                }
             }
         }
+
+        super.mouseClicked(point, evt);
+
+        // deselect all control points
+        iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            Point cPt = flow.getCtrlPt();
+            cPt.setSelected(false);
+        }
+        
         mapComponent.refreshMap();
     }
 

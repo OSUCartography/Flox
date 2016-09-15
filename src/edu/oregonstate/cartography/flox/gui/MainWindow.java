@@ -224,12 +224,12 @@ public class MainWindow extends javax.swing.JFrame {
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
             minColorButton.setColor(model.getMinFlowColor());
             maxColorButton.setColor(model.getMaxFlowColor());
-            
+
             // nodes
             nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
             nodeStrokeColorButton.setColor(model.getNodeStrokeColor());
             nodeFillColorButton.setColor(model.getNodeFillColor());
-            
+
             // Force Settings
             enforceRangeboxCheckbox.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
@@ -3202,7 +3202,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void unlockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockMenuItemActionPerformed
         model.setLockOfSelectedFlows(false);
-        addUndo("Unlock");
+        mapComponent.layout("Unlock");
         lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
         mapComponent.refreshMap();
     }//GEN-LAST:event_unlockMenuItemActionPerformed
@@ -3549,7 +3549,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void selectOverlappingFlowsInfoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectOverlappingFlowsInfoMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
-        
+
         // get a list of all flows that intersect obstacles
         ForceLayouter layouter = new ForceLayouter(model);
         List<Obstacle> obstacles = layouter.getObstacles();

@@ -11,10 +11,12 @@ import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.simplefeature.SimpleFeatureRenderer;
+import edu.oregonstate.cartography.utils.IconUtils;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Shape;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
@@ -40,6 +42,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Color for drawing selected flows.
      */
     public static final Color SELECTION_COLOR = Color.decode("#59A4FF");
+
+    /**
+     * Icon for locked flows.
+     */
+    private static final Image LOCK_ICON;
+
+    public static final int LOCK_ICON_RADIUS;
+
+    static {
+        LOCK_ICON = IconUtils.loadImageIcon("lock.png", "").getImage();
+        int h = LOCK_ICON.getHeight(null);
+        int w = LOCK_ICON.getWidth(null);
+        LOCK_ICON_RADIUS = (int) Math.round(Math.max(h, w) / 2.);
+    }
 
     /**
      * Radius of circles for control points (in pixels)
@@ -115,7 +131,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
 
         if (drawFlows) {
-            drawFlows(highlightSelected, drawLocks);
+            drawFlows(highlightSelected);
         }
 
         if (drawNodes) {
@@ -125,10 +141,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         if (drawFlowRangebox) {
             drawFlowRangebox();
         }
-
-        if (drawControlPoints) {
-            drawControlPoints();
-        }
+        
         if (drawLineSegments) {
             drawStraightLinesSegments();
         }
@@ -136,10 +149,18 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         if (drawStartClipAreas || drawEndClipAreas) {
             drawClipAreas(drawStartClipAreas, drawEndClipAreas);
         }
+        
+        if (drawLocks) {
+            drawLockIcons();
+        }
 
+        if (drawControlPoints) {
+            drawControlPoints();
+        }
+        
         if (drawObstacles) {
             drawObstacles();
-        }
+        }        
     }
 
     /**
@@ -235,7 +256,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param highlightSelected If true, selected flows are drawn with
      * SELECTION_COLOR.
      */
-    private void drawFlows(boolean highlightSelected, boolean drawLocks) {
+    private void drawFlows(boolean highlightSelected) {
 
         double s = scale / model.getReferenceMapScale();
         boolean colorVaries = !model.getMinFlowColor().equals(model.getMaxFlowColor());
@@ -262,11 +283,23 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
             double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
             drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
+        }
+    }
 
-            // draw symbol for locked flow
-            if (drawLocks && flow.isLocked()) {
+    /**
+     * Draw lock icons for all locked flows. This is separate from drawFlows()
+     * to visually stack lock icons above all flows to avoid flows overlapping
+     * lock icons.
+     */
+    private void drawLockIcons() {
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.isLocked()) {
                 Point pt = flow.pointOnCurve(0.5);
-                drawCross(pt.x, pt.y);
+                int iconX = (int) Math.round(xToPx(pt.x)) - LOCK_ICON_RADIUS;
+                int iconY = (int) Math.round(yToPx(pt.y)) - LOCK_ICON_RADIUS;
+                g2d.drawImage(LOCK_ICON, iconX, iconY, null);
             }
         }
     }
@@ -510,25 +543,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         } else {
             drawCircle(cpt.x, cpt.y, CR, Color.ORANGE, Color.GRAY);
         }
-    }
-
-    private void drawCross(double x, double y) {
-        final double L = 4;
-
-        Line2D line1 = new Line2D.Double(xToPx(x) - L, yToPx(y) - L,
-                xToPx(x) + L, yToPx(y) + L);
-        Line2D line2 = new Line2D.Double(xToPx(x) - L, yToPx(y) + L,
-                xToPx(x) + L, yToPx(y) - L);
-
-        g2d.setStroke(new BasicStroke(2f));
-        g2d.setColor(Color.WHITE);
-        g2d.draw(line1);
-        g2d.draw(line2);
-
-        g2d.setStroke(new BasicStroke(1f));
-        g2d.setColor(Color.BLACK);
-        g2d.draw(line1);
-        g2d.draw(line2);
     }
 
     /**
