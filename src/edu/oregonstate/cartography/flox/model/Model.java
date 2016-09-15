@@ -343,8 +343,7 @@ public class Model {
     /**
      * A geometry (collection) used for clipping start or end of flows.
      */
-    // FIXME should not be transient?
-    @XmlTransient
+    @XmlJavaTypeAdapter(GeometrySerializer.class)
     private Geometry clipAreas;
 
     /**
