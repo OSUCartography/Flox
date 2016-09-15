@@ -535,6 +535,15 @@ public class Model {
     }
 
     /**
+     * Gets the minimum value of all nodes on the map.
+     *
+     * @return maximum node value
+     */
+    public double getMinNodeValue() {
+        return graph.getMinNodeValue();
+    }
+    
+    /**
      * Gets the average value of all nodes on the map.
      *
      * @return mean node value
@@ -1459,7 +1468,7 @@ public class Model {
      * @param antiTorsionWeight the antiTorsionWeight to set
      */
     public void setAntiTorsionWeight(double antiTorsionWeight) {
-        assert (antiTorsionWeight >= 0 && antiTorsionWeight <= 1);
+        //assert (antiTorsionWeight >= 0 && antiTorsionWeight <= 1);
         this.antiTorsionWeight = antiTorsionWeight;
     }
 

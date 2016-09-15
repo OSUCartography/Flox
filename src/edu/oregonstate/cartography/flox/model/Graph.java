@@ -332,6 +332,13 @@ public final class Graph {
     }
 
     /**
+     * @return the minNodeValue
+     */
+    public double getMinNodeValue() {
+        return minNodeValue;
+    }
+
+    /**
      * Gets the average value of all nodes on the map.
      *
      * @return mean node value

@@ -199,8 +199,6 @@ public class MainWindow extends javax.swing.JFrame {
      * Write the data values from the model to the GUI elements
      */
     private void writeModelToGUI() {
-        // TODO could disable GUI elements when no flows are defined
-
         if (model == null) {
             return;
         }
@@ -243,9 +241,9 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             }
 
-            nodeWeightSlider.setValue((int) (model.getNodesWeight() * 10d));
-            antiTorsionSlider.setValue((int) (model.getAntiTorsionWeight() * 100d));
-            peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 100));
+            nodeWeightSlider.setValue((int) (model.getNodesWeight() * 100));
+            antiTorsionSlider.setValue((int) (model.getAntiTorsionWeight() * 50));
+            peripheralStiffnessSlider.setValue((int) (model.getPeripheralStiffnessFactor() * 20));
             canvasSizeSlider.setValue((int) (model.getCanvasPadding() * 100));
             flowRangeboxSizeSlider.setValue((int) (model.getFlowRangeboxHeight() * 100));
             if (null != model.getFlowNodeDensity()) {
@@ -263,7 +261,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             iterationsSpinner.setValue(model.getNbrIterations());
 
-            angularDistributionSlider.setValue((int) (model.getAngularDistributionWeight() * 100));
+            angularDistributionSlider.setValue((int) (model.getAngularDistributionWeight() * 20));
 
             // clipping
             boolean hasFlowsAndClipAreas = model.hasClipAreas() && model.getNbrFlows() > 0;
@@ -343,6 +341,12 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel38 = new javax.swing.JLabel();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
+        debugDialog = new javax.swing.JDialog();
+        jPanel5 = new javax.swing.JPanel();
+        exponentSlider = new javax.swing.JSlider();
+        javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel6 = new javax.swing.JLabel();
+        nodeWeightSlider = new javax.swing.JSlider();
         jToolBar1 = new javax.swing.JToolBar();
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
@@ -363,15 +367,12 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         rightPanel = new javax.swing.JPanel();
         controlsTabbedPane = new javax.swing.JTabbedPane();
-        forcesPanel = new TransparentMacPanel();
+        javax.swing.JPanel flowsPanel = new TransparentMacPanel();
+        flowsContentPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
-        exponentSlider = new javax.swing.JSlider();
-        javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
         longestFlowStiffnessSlider = new javax.swing.JSlider();
         zeroLengthStiffnessSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
-        javax.swing.JLabel jLabel6 = new javax.swing.JLabel();
-        nodeWeightSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel7 = new javax.swing.JLabel();
         antiTorsionSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel8 = new javax.swing.JLabel();
@@ -380,47 +381,39 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel13 = new javax.swing.JLabel();
         angularDistributionSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel28 = new javax.swing.JLabel();
-        mapPanel = new TransparentMacPanel();
-        mapControlPanel = new TransparentMacPanel();
-        javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
-        layerListScrollPane = new javax.swing.JScrollPane();
-        layerList = new edu.oregonstate.cartography.flox.gui.DraggableList();
-        fillCheckBox = new javax.swing.JCheckBox();
-        strokeCheckBox = new javax.swing.JCheckBox();
-        layerFillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
-        layerStrokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
-        maximumFlowWidthSlider = new javax.swing.JSlider();
-        jLabel26 = new javax.swing.JLabel();
-        maximumNodeSizeSlider = new javax.swing.JSlider();
-        jLabel27 = new javax.swing.JLabel();
-        showNodesToggleButton = new javax.swing.JToggleButton();
-        showFlowsToggleButton = new javax.swing.JToggleButton();
-        jSeparator9 = new javax.swing.JSeparator();
-        nodeStrokeSpinner = new javax.swing.JSpinner();
-        javax.swing.JLabel jLabel36 = new javax.swing.JLabel();
-        jLabel39 = new javax.swing.JLabel();
-        jLabel40 = new javax.swing.JLabel();
-        jSeparator18 = new javax.swing.JSeparator();
+        jLabel33 = new javax.swing.JLabel();
+        jLabel41 = new javax.swing.JLabel();
+        jLabel42 = new javax.swing.JLabel();
+        jLabel43 = new javax.swing.JLabel();
+        jLabel44 = new javax.swing.JLabel();
+        jLabel45 = new javax.swing.JLabel();
         jPanel3 = new TransparentMacPanel();
         jLabel34 = new javax.swing.JLabel();
         minColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         jLabel35 = new javax.swing.JLabel();
         maxColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        maximumFlowWidthSlider = new javax.swing.JSlider();
+        jLabel26 = new javax.swing.JLabel();
+        showFlowsToggleButton = new javax.swing.JToggleButton();
+        jSeparator24 = new javax.swing.JSeparator();
+        jSeparator25 = new javax.swing.JSeparator();
+        nodesPanel = new TransparentMacPanel();
+        nodesContentPanel = new TransparentMacPanel();
+        jLabel27 = new javax.swing.JLabel();
+        maximumNodeSizeSlider = new javax.swing.JSlider();
         nodeStrokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
-        nodeFillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        nodeStrokeSpinner = new javax.swing.JSpinner();
+        javax.swing.JLabel jLabel36 = new javax.swing.JLabel();
         jLabel31 = new javax.swing.JLabel();
-        minDistToObstaclesSpinner = new javax.swing.JSpinner();
-        jLabel32 = new javax.swing.JLabel();
+        nodeFillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        showNodesToggleButton = new javax.swing.JToggleButton();
         jLabel14 = new javax.swing.JLabel();
         endDistanceSpinner = new javax.swing.JSpinner();
         jLabel29 = new javax.swing.JLabel();
         startDistanceSpinner = new javax.swing.JSpinner();
-        javax.swing.JPanel jPanel4 = new TransparentMacPanel();
-        addLayerButton = new javax.swing.JButton();
-        removeLayerButton = new javax.swing.JButton();
-        jLabel11 = new javax.swing.JLabel();
-        canvasSizeSlider = new javax.swing.JSlider();
-        viewCanvasToggleButton = new javax.swing.JToggleButton();
+        minDistToObstaclesSpinner = new javax.swing.JSpinner();
+        jLabel32 = new javax.swing.JLabel();
+        jSeparator23 = new javax.swing.JSeparator();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         addArrowsCheckbox = new javax.swing.JCheckBox();
@@ -456,6 +449,22 @@ public class MainWindow extends javax.swing.JFrame {
         jTextArea2 = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        mapPanel = new TransparentMacPanel();
+        mapControlPanel = new TransparentMacPanel();
+        javax.swing.JLabel jLabel9 = new javax.swing.JLabel();
+        layerListScrollPane = new javax.swing.JScrollPane();
+        layerList = new edu.oregonstate.cartography.flox.gui.DraggableList();
+        fillCheckBox = new javax.swing.JCheckBox();
+        strokeCheckBox = new javax.swing.JCheckBox();
+        layerFillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        layerStrokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
+        javax.swing.JPanel jPanel4 = new TransparentMacPanel();
+        addLayerButton = new javax.swing.JButton();
+        removeLayerButton = new javax.swing.JButton();
+        jLabel11 = new javax.swing.JLabel();
+        canvasSizeSlider = new javax.swing.JSlider();
+        viewCanvasToggleButton = new javax.swing.JToggleButton();
+        jSeparator26 = new javax.swing.JSeparator();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         importFlowsMenuItem = new javax.swing.JMenuItem();
@@ -531,6 +540,8 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator21 = new javax.swing.JPopupMenu.Separator();
         constrainControlPointsToRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator22 = new javax.swing.JPopupMenu.Separator();
+        showOptionsMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -692,6 +703,87 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         computationPalette.getContentPane().add(progressBarPanel, gridBagConstraints);
+
+        debugDialog.setTitle("Debug Options");
+        debugDialog.setAlwaysOnTop(true);
+        debugDialog.setFocusableWindowState(false);
+        debugDialog.setType(java.awt.Window.Type.UTILITY);
+        debugDialog.getContentPane().setLayout(new java.awt.BorderLayout(20, 20));
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        jPanel5.setLayout(new java.awt.GridBagLayout());
+
+        exponentSlider.setMajorTickSpacing(1);
+        exponentSlider.setMaximum(5);
+        exponentSlider.setMinimum(1);
+        exponentSlider.setPaintLabels(true);
+        exponentSlider.setPaintTicks(true);
+        exponentSlider.setSnapToTicks(true);
+        exponentSlider.setValue(3);
+        exponentSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = exponentSlider.createStandardLabels(exponentSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    int i = Integer.parseInt(label.getText());
+                    int p = (int)Math.round(Math.pow(2, i-1));
+                    label.setText(Integer.toString(p));
+                }
+            }
+            exponentSlider.setLabelTable(labels);
+        }
+        exponentSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                exponentSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
+        jPanel5.add(exponentSlider, gridBagConstraints);
+
+        jLabel4.setText("Weight Exponent");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 11;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        jPanel5.add(jLabel4, gridBagConstraints);
+
+        jLabel6.setText("Repulsion of Start and End Nodes");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(20, 0, 0, 0);
+        jPanel5.add(jLabel6, gridBagConstraints);
+
+        nodeWeightSlider.setMajorTickSpacing(50);
+        nodeWeightSlider.setMinorTickSpacing(10);
+        nodeWeightSlider.setPaintLabels(true);
+        nodeWeightSlider.setPaintTicks(true);
+        nodeWeightSlider.setValue(0);
+        nodeWeightSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        nodeWeightSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                nodeWeightSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
+        jPanel5.add(nodeWeightSlider, gridBagConstraints);
+
+        debugDialog.getContentPane().add(jPanel5, java.awt.BorderLayout.CENTER);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -861,463 +953,299 @@ public class MainWindow extends javax.swing.JFrame {
 
         rightPanel.setLayout(new java.awt.BorderLayout());
 
-        controlsTabbedPane.setPreferredSize(new java.awt.Dimension(330, 800));
+        controlsTabbedPane.setPreferredSize(new java.awt.Dimension(350, 800));
 
-        forcesPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 10, 10, 10));
-        forcesPanel.setLayout(new java.awt.GridBagLayout());
+        flowsPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 10, 10, 10));
+        flowsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
 
-        jLabel3.setText("Stiffness of Longest Flow");
+        flowsContentPanel.setLayout(new java.awt.GridBagLayout());
+
+        jLabel3.setText("Long Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel3, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        flowsContentPanel.add(jLabel3, gridBagConstraints);
 
-        exponentSlider.setMajorTickSpacing(1);
-        exponentSlider.setMaximum(5);
-        exponentSlider.setMinimum(1);
-        exponentSlider.setPaintLabels(true);
-        exponentSlider.setPaintTicks(true);
-        exponentSlider.setSnapToTicks(true);
-        exponentSlider.setValue(3);
-        exponentSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        longestFlowStiffnessSlider.setMajorTickSpacing(25);
+        longestFlowStiffnessSlider.setMinorTickSpacing(5);
+        longestFlowStiffnessSlider.setPaintLabels(true);
+        longestFlowStiffnessSlider.setPaintTicks(true);
+        longestFlowStiffnessSlider.setValue(0);
+        longestFlowStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
         {
-            java.util.Hashtable labels = exponentSlider.createStandardLabels(exponentSlider.getMajorTickSpacing());
+            java.util.Hashtable labels = longestFlowStiffnessSlider.createStandardLabels(longestFlowStiffnessSlider.getMajorTickSpacing());
             java.util.Enumeration e = labels.elements();
             while(e.hasMoreElements()) {
                 javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
                 if (comp instanceof javax.swing.JLabel) {
                     javax.swing.JLabel label = (javax.swing.JLabel)(comp);
-                    int i = Integer.parseInt(label.getText());
-                    int p = (int)Math.round(Math.pow(2, i-1));
-                    label.setText(Integer.toString(p));
+                    label.setText(label.getText() + "%");
                 }
             }
-            exponentSlider.setLabelTable(labels);
+            longestFlowStiffnessSlider.setLabelTable(labels);
         }
-        exponentSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                exponentSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        forcesPanel.add(exponentSlider, gridBagConstraints);
-
-        jLabel4.setText("Weight Exponent");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel4, gridBagConstraints);
-
-        longestFlowStiffnessSlider.setMajorTickSpacing(20);
-        longestFlowStiffnessSlider.setMinorTickSpacing(10);
-        longestFlowStiffnessSlider.setPaintLabels(true);
-        longestFlowStiffnessSlider.setPaintTicks(true);
-        longestFlowStiffnessSlider.setValue(0);
-        longestFlowStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
         longestFlowStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 longestFlowStiffnessSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 21;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        forcesPanel.add(longestFlowStiffnessSlider, gridBagConstraints);
+        flowsContentPanel.add(longestFlowStiffnessSlider, gridBagConstraints);
 
-        zeroLengthStiffnessSlider.setMajorTickSpacing(100);
-        zeroLengthStiffnessSlider.setMaximum(500);
-        zeroLengthStiffnessSlider.setMinorTickSpacing(50);
+        zeroLengthStiffnessSlider.setMajorTickSpacing(25);
+        zeroLengthStiffnessSlider.setMinorTickSpacing(5);
         zeroLengthStiffnessSlider.setPaintLabels(true);
         zeroLengthStiffnessSlider.setPaintTicks(true);
         zeroLengthStiffnessSlider.setValue(0);
         zeroLengthStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = zeroLengthStiffnessSlider.createStandardLabels(zeroLengthStiffnessSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            zeroLengthStiffnessSlider.setLabelTable(labels);
+        }
         zeroLengthStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 zeroLengthStiffnessSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 23;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        forcesPanel.add(zeroLengthStiffnessSlider, gridBagConstraints);
+        flowsContentPanel.add(zeroLengthStiffnessSlider, gridBagConstraints);
 
-        jLabel5.setText("Stiffness of Zero-Length Flow");
+        jLabel5.setText("Short Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 22;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel5, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        flowsContentPanel.add(jLabel5, gridBagConstraints);
 
-        jLabel6.setText("Repulsion of Start and End Nodes");
+        jLabel7.setText("Symmetry");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel6, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 2, 0);
+        flowsContentPanel.add(jLabel7, gridBagConstraints);
 
-        nodeWeightSlider.setMajorTickSpacing(50);
-        nodeWeightSlider.setMinorTickSpacing(10);
-        nodeWeightSlider.setPaintLabels(true);
-        nodeWeightSlider.setPaintTicks(true);
-        nodeWeightSlider.setValue(0);
-        nodeWeightSlider.setPreferredSize(new java.awt.Dimension(190, 38));
-        nodeWeightSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                nodeWeightSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        forcesPanel.add(nodeWeightSlider, gridBagConstraints);
-
-        jLabel7.setText("Anti-Torsion Forces");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel7, gridBagConstraints);
-
-        antiTorsionSlider.setMajorTickSpacing(10);
+        antiTorsionSlider.setMajorTickSpacing(25);
         antiTorsionSlider.setMinorTickSpacing(5);
         antiTorsionSlider.setPaintLabels(true);
         antiTorsionSlider.setPaintTicks(true);
         antiTorsionSlider.setValue(100);
         antiTorsionSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = antiTorsionSlider.createStandardLabels(antiTorsionSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            antiTorsionSlider.setLabelTable(labels);
+        }
         antiTorsionSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 antiTorsionSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 17;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        forcesPanel.add(antiTorsionSlider, gridBagConstraints);
+        flowsContentPanel.add(antiTorsionSlider, gridBagConstraints);
 
-        jLabel8.setText("Stiffness Factor for Peripheral Flows");
+        jLabel8.setText("Peripheral Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 24;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel8, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        flowsContentPanel.add(jLabel8, gridBagConstraints);
 
-        peripheralStiffnessSlider.setMajorTickSpacing(250);
-        peripheralStiffnessSlider.setMaximum(1000);
-        peripheralStiffnessSlider.setMinorTickSpacing(50);
+        peripheralStiffnessSlider.setMajorTickSpacing(25);
+        peripheralStiffnessSlider.setMinorTickSpacing(5);
         peripheralStiffnessSlider.setPaintLabels(true);
         peripheralStiffnessSlider.setPaintTicks(true);
         peripheralStiffnessSlider.setValue(0);
         peripheralStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = peripheralStiffnessSlider.createStandardLabels(peripheralStiffnessSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            peripheralStiffnessSlider.setLabelTable(labels);
+        }
         peripheralStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 peripheralStiffnessSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 25;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        forcesPanel.add(peripheralStiffnessSlider, gridBagConstraints);
+        flowsContentPanel.add(peripheralStiffnessSlider, gridBagConstraints);
 
-        flowRangeboxSizeSlider.setMajorTickSpacing(10);
+        flowRangeboxSizeSlider.setMajorTickSpacing(25);
+        flowRangeboxSizeSlider.setMinorTickSpacing(5);
         flowRangeboxSizeSlider.setPaintLabels(true);
         flowRangeboxSizeSlider.setPaintTicks(true);
         flowRangeboxSizeSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = flowRangeboxSizeSlider.createStandardLabels(flowRangeboxSizeSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            flowRangeboxSizeSlider.setLabelTable(labels);
+        }
         flowRangeboxSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 flowRangeboxSizeSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        forcesPanel.add(flowRangeboxSizeSlider, gridBagConstraints);
+        flowsContentPanel.add(flowRangeboxSizeSlider, gridBagConstraints);
 
         jLabel13.setText("Maximum Curvature");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel13, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+        flowsContentPanel.add(jLabel13, gridBagConstraints);
 
-        angularDistributionSlider.setMajorTickSpacing(100);
-        angularDistributionSlider.setMaximum(500);
-        angularDistributionSlider.setMinorTickSpacing(25);
+        angularDistributionSlider.setMajorTickSpacing(25);
+        angularDistributionSlider.setMinorTickSpacing(5);
         angularDistributionSlider.setPaintLabels(true);
         angularDistributionSlider.setPaintTicks(true);
         angularDistributionSlider.setValue(100);
         angularDistributionSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = angularDistributionSlider.createStandardLabels(angularDistributionSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            angularDistributionSlider.setLabelTable(labels);
+        }
         angularDistributionSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 angularDistributionSliderStateChanged(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 29;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        forcesPanel.add(angularDistributionSlider, gridBagConstraints);
+        flowsContentPanel.add(angularDistributionSlider, gridBagConstraints);
 
         jLabel28.setText("Angular Distribution");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 28;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        forcesPanel.add(jLabel28, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(12, 0, 2, 0);
+        flowsContentPanel.add(jLabel28, gridBagConstraints);
 
-        controlsTabbedPane.addTab("Layout", forcesPanel);
-
-        mapControlPanel.setLayout(new java.awt.GridBagLayout());
-
-        jLabel9.setText("Map Layers");
+        jLabel33.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/curvature1.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 28;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
-        mapControlPanel.add(jLabel9, gridBagConstraints);
-
-        layerListScrollPane.setPreferredSize(new java.awt.Dimension(220, 80));
-
-        layerList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                layerListValueChanged(evt);
-            }
-        });
-        layerListScrollPane.setViewportView(layerList);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 29;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        mapControlPanel.add(layerListScrollPane, gridBagConstraints);
-
-        fillCheckBox.setText("Fill");
-        fillCheckBox.setEnabled(false);
-        fillCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fillCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 30;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        mapControlPanel.add(fillCheckBox, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
+        flowsContentPanel.add(jLabel33, gridBagConstraints);
 
-        strokeCheckBox.setText("Stroke");
-        strokeCheckBox.setEnabled(false);
-        strokeCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                strokeCheckBoxActionPerformed(evt);
-            }
-        });
+        jLabel41.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/curvature2.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 30;
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        mapControlPanel.add(strokeCheckBox, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
+        flowsContentPanel.add(jLabel41, gridBagConstraints);
 
-        layerFillColorButton.setEnabled(false);
-        layerFillColorButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                layerFillColorButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 30;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(layerFillColorButton, gridBagConstraints);
-
-        layerStrokeColorButton.setEnabled(false);
-        layerStrokeColorButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                layerStrokeColorButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 30;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        mapControlPanel.add(layerStrokeColorButton, gridBagConstraints);
-
-        maximumFlowWidthSlider.setMajorTickSpacing(20);
-        maximumFlowWidthSlider.setMinorTickSpacing(10);
-        maximumFlowWidthSlider.setPaintLabels(true);
-        maximumFlowWidthSlider.setPaintTicks(true);
-        maximumFlowWidthSlider.setPreferredSize(new java.awt.Dimension(220, 37));
-        maximumFlowWidthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                maximumFlowWidthSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.gridheight = 4;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 15, 0);
-        mapControlPanel.add(maximumFlowWidthSlider, gridBagConstraints);
-
-        jLabel26.setText("Maximum Line Width");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        mapControlPanel.add(jLabel26, gridBagConstraints);
-
-        maximumNodeSizeSlider.setMajorTickSpacing(20);
-        maximumNodeSizeSlider.setMinorTickSpacing(10);
-        maximumNodeSizeSlider.setPaintLabels(true);
-        maximumNodeSizeSlider.setPaintTicks(true);
-        maximumNodeSizeSlider.setPreferredSize(new java.awt.Dimension(220, 52));
-        maximumNodeSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                maximumNodeSizeSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 3, 0);
-        mapControlPanel.add(maximumNodeSizeSlider, gridBagConstraints);
-
-        jLabel27.setText("Maximum Radius");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 20;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        mapControlPanel.add(jLabel27, gridBagConstraints);
-
-        showNodesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
-        showNodesToggleButton.setSelected(true);
-        showNodesToggleButton.setBorderPainted(false);
-        showNodesToggleButton.setPreferredSize(new java.awt.Dimension(20, 20));
-        showNodesToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
-        showNodesToggleButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showNodesToggleButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 21;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
-        mapControlPanel.add(showNodesToggleButton, gridBagConstraints);
-
-        showFlowsToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
-        showFlowsToggleButton.setSelected(true);
-        showFlowsToggleButton.setBorderPainted(false);
-        showFlowsToggleButton.setPreferredSize(new java.awt.Dimension(20, 20));
-        showFlowsToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
-        showFlowsToggleButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showFlowsToggleButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridheight = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
-        mapControlPanel.add(showFlowsToggleButton, gridBagConstraints);
+        jLabel42.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/asymmetric.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 17;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 8, 0);
-        mapControlPanel.add(jSeparator9, gridBagConstraints);
-
-        nodeStrokeSpinner.setModel(new javax.swing.SpinnerNumberModel(1.0f, 0.0f, null, 1.0f));
-        nodeStrokeSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
-        nodeStrokeSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                nodeStrokeSpinnerStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 23;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        mapControlPanel.add(nodeStrokeSpinner, gridBagConstraints);
-
-        jLabel36.setText("Stroke");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 23;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        mapControlPanel.add(jLabel36, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
+        flowsContentPanel.add(jLabel42, gridBagConstraints);
 
-        jLabel39.setText("Flows");
+        jLabel43.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/symmetric.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 17;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(6, 0, 20, 0);
-        mapControlPanel.add(jLabel39, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
+        flowsContentPanel.add(jLabel43, gridBagConstraints);
 
-        jLabel40.setText("Nodes");
+        jLabel44.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/angular2.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
-        mapControlPanel.add(jLabel40, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
+        flowsContentPanel.add(jLabel44, gridBagConstraints);
+
+        jLabel45.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/angular1.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 27;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
-        mapControlPanel.add(jSeparator18, gridBagConstraints);
+        gridBagConstraints.gridy = 15;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
+        flowsContentPanel.add(jLabel45, gridBagConstraints);
 
         jPanel3.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 4, 0));
 
@@ -1345,9 +1273,101 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 7;
-        gridBagConstraints.gridwidth = 5;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 16, 0);
-        mapControlPanel.add(jPanel3, gridBagConstraints);
+        gridBagConstraints.gridwidth = 4;
+        flowsContentPanel.add(jPanel3, gridBagConstraints);
+
+        maximumFlowWidthSlider.setMajorTickSpacing(20);
+        maximumFlowWidthSlider.setMinorTickSpacing(10);
+        maximumFlowWidthSlider.setPaintLabels(true);
+        maximumFlowWidthSlider.setPaintTicks(true);
+        maximumFlowWidthSlider.setPreferredSize(new java.awt.Dimension(190, 37));
+        maximumFlowWidthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                maximumFlowWidthSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridheight = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 15, 0);
+        flowsContentPanel.add(maximumFlowWidthSlider, gridBagConstraints);
+
+        jLabel26.setText("Maximum Line Width");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        flowsContentPanel.add(jLabel26, gridBagConstraints);
+
+        showFlowsToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        showFlowsToggleButton.setSelected(true);
+        showFlowsToggleButton.setBorderPainted(false);
+        showFlowsToggleButton.setPreferredSize(new java.awt.Dimension(20, 20));
+        showFlowsToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
+        showFlowsToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showFlowsToggleButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridheight = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        flowsContentPanel.add(showFlowsToggleButton, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(7, 0, 19, 0);
+        flowsContentPanel.add(jSeparator24, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
+        flowsContentPanel.add(jSeparator25, gridBagConstraints);
+
+        flowsPanel.add(flowsContentPanel);
+
+        controlsTabbedPane.addTab("Flows", flowsPanel);
+
+        nodesPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+
+        nodesContentPanel.setLayout(new java.awt.GridBagLayout());
+
+        jLabel27.setText("Maximum Radius");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+        nodesContentPanel.add(jLabel27, gridBagConstraints);
+
+        maximumNodeSizeSlider.setMajorTickSpacing(20);
+        maximumNodeSizeSlider.setMinorTickSpacing(10);
+        maximumNodeSizeSlider.setPaintLabels(true);
+        maximumNodeSizeSlider.setPaintTicks(true);
+        maximumNodeSizeSlider.setPreferredSize(new java.awt.Dimension(220, 52));
+        maximumNodeSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                maximumNodeSizeSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 21;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 3, 0);
+        nodesContentPanel.add(maximumNodeSizeSlider, gridBagConstraints);
 
         nodeStrokeColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1359,7 +1379,37 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 23;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        mapControlPanel.add(nodeStrokeColorButton, gridBagConstraints);
+        nodesContentPanel.add(nodeStrokeColorButton, gridBagConstraints);
+
+        nodeStrokeSpinner.setModel(new javax.swing.SpinnerNumberModel(1.0f, 0.0f, null, 1.0f));
+        nodeStrokeSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
+        nodeStrokeSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                nodeStrokeSpinnerStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 23;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        nodesContentPanel.add(nodeStrokeSpinner, gridBagConstraints);
+
+        jLabel36.setText("Stroke");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 23;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+        nodesContentPanel.add(jLabel36, gridBagConstraints);
+
+        jLabel31.setText("Fill");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 24;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        nodesContentPanel.add(jLabel31, gridBagConstraints);
 
         nodeFillColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1371,46 +1421,31 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 24;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        mapControlPanel.add(nodeFillColorButton, gridBagConstraints);
+        nodesContentPanel.add(nodeFillColorButton, gridBagConstraints);
 
-        jLabel31.setText("Fill");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 24;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        mapControlPanel.add(jLabel31, gridBagConstraints);
-
-        minDistToObstaclesSpinner.setModel(new javax.swing.SpinnerNumberModel());
-        minDistToObstaclesSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
-        minDistToObstaclesSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                minDistToObstaclesSpinnerStateChanged(evt);
+        showNodesToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        showNodesToggleButton.setSelected(true);
+        showNodesToggleButton.setBorderPainted(false);
+        showNodesToggleButton.setPreferredSize(new java.awt.Dimension(20, 20));
+        showNodesToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
+        showNodesToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showNodesToggleButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 21;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(10, 5, 10, 0);
-        mapControlPanel.add(minDistToObstaclesSpinner, gridBagConstraints);
-
-        jLabel32.setText("Distance to Nodes and Arrows");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        mapControlPanel.add(jLabel32, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        nodesContentPanel.add(showNodesToggleButton, gridBagConstraints);
 
         jLabel14.setText("End Trim");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 27;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 40, 0, 0);
-        mapControlPanel.add(jLabel14, gridBagConstraints);
+        nodesContentPanel.add(jLabel14, gridBagConstraints);
 
         endDistanceSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, 200.0d, 1.0d));
         endDistanceSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
@@ -1421,19 +1456,19 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 27;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        mapControlPanel.add(endDistanceSpinner, gridBagConstraints);
+        nodesContentPanel.add(endDistanceSpinner, gridBagConstraints);
 
         jLabel29.setText("Start Trim");
         jLabel29.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 20, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 27;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
-        mapControlPanel.add(jLabel29, gridBagConstraints);
+        nodesContentPanel.add(jLabel29, gridBagConstraints);
 
         startDistanceSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, 200.0d, 1.0d));
         startDistanceSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
@@ -1444,85 +1479,46 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridy = 27;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        mapControlPanel.add(startDistanceSpinner, gridBagConstraints);
+        nodesContentPanel.add(startDistanceSpinner, gridBagConstraints);
 
-        addLayerButton.setText("+");
-        addLayerButton.setPreferredSize(new java.awt.Dimension(22, 22));
-        addLayerButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addLayerButtonActionPerformed(evt);
+        minDistToObstaclesSpinner.setModel(new javax.swing.SpinnerNumberModel());
+        minDistToObstaclesSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
+        minDistToObstaclesSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                minDistToObstaclesSpinnerStateChanged(evt);
             }
         });
-        jPanel4.add(addLayerButton);
-
-        removeLayerButton.setText("-");
-        removeLayerButton.setPreferredSize(new java.awt.Dimension(22, 22));
-        removeLayerButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                removeLayerButtonActionPerformed(evt);
-            }
-        });
-        jPanel4.add(removeLayerButton);
-
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 28;
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 29;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(10, 5, 10, 0);
+        nodesContentPanel.add(minDistToObstaclesSpinner, gridBagConstraints);
+
+        jLabel32.setText("Minimum Distance to Flows");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 29;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        mapControlPanel.add(jPanel4, gridBagConstraints);
-
-        jLabel11.setText("Canvas Size");
+        nodesContentPanel.add(jLabel32, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 32;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(20, 0, 0, 0);
-        mapControlPanel.add(jLabel11, gridBagConstraints);
-
-        canvasSizeSlider.setMajorTickSpacing(5);
-        canvasSizeSlider.setMaximum(30);
-        canvasSizeSlider.setMinorTickSpacing(1);
-        canvasSizeSlider.setPaintLabels(true);
-        canvasSizeSlider.setPaintTicks(true);
-        canvasSizeSlider.setPreferredSize(new java.awt.Dimension(220, 52));
-        canvasSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                canvasSizeSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 33;
+        gridBagConstraints.gridy = 26;
         gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
-        mapControlPanel.add(canvasSizeSlider, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
+        nodesContentPanel.add(jSeparator23, gridBagConstraints);
 
-        viewCanvasToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
-        viewCanvasToggleButton.setToolTipText("View");
-        viewCanvasToggleButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        viewCanvasToggleButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
-        viewCanvasToggleButton.setFocusable(false);
-        viewCanvasToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
-        viewCanvasToggleButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewCanvasToggleButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 33;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
-        mapControlPanel.add(viewCanvasToggleButton, gridBagConstraints);
+        nodesPanel.add(nodesContentPanel);
 
-        mapPanel.add(mapControlPanel);
+        controlsTabbedPane.addTab("Nodes", nodesPanel);
 
-        controlsTabbedPane.addTab("Map", mapPanel);
+        arrowHeadsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
 
         arrowHeadsControlPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1701,6 +1697,8 @@ public class MainWindow extends javax.swing.JFrame {
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
         controlsTabbedPane.addTab("Arrows", arrowHeadsPanel);
+
+        clipAreaPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
 
         clipAreaControlPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1882,6 +1880,168 @@ public class MainWindow extends javax.swing.JFrame {
         clipAreaPanel.add(clipAreaControlPanel);
 
         controlsTabbedPane.addTab("Clipping", clipAreaPanel);
+
+        mapPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+
+        mapControlPanel.setLayout(new java.awt.GridBagLayout());
+
+        jLabel9.setText("Map Layers");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        mapControlPanel.add(jLabel9, gridBagConstraints);
+
+        layerListScrollPane.setPreferredSize(new java.awt.Dimension(220, 80));
+
+        layerList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                layerListValueChanged(evt);
+            }
+        });
+        layerListScrollPane.setViewportView(layerList);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        mapControlPanel.add(layerListScrollPane, gridBagConstraints);
+
+        fillCheckBox.setText("Fill");
+        fillCheckBox.setEnabled(false);
+        fillCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fillCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+        mapControlPanel.add(fillCheckBox, gridBagConstraints);
+
+        strokeCheckBox.setText("Stroke");
+        strokeCheckBox.setEnabled(false);
+        strokeCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                strokeCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+        mapControlPanel.add(strokeCheckBox, gridBagConstraints);
+
+        layerFillColorButton.setEnabled(false);
+        layerFillColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                layerFillColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(layerFillColorButton, gridBagConstraints);
+
+        layerStrokeColorButton.setEnabled(false);
+        layerStrokeColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                layerStrokeColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(layerStrokeColorButton, gridBagConstraints);
+
+        addLayerButton.setText("+");
+        addLayerButton.setPreferredSize(new java.awt.Dimension(22, 22));
+        addLayerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addLayerButtonActionPerformed(evt);
+            }
+        });
+        jPanel4.add(addLayerButton);
+
+        removeLayerButton.setText("-");
+        removeLayerButton.setPreferredSize(new java.awt.Dimension(22, 22));
+        removeLayerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeLayerButtonActionPerformed(evt);
+            }
+        });
+        jPanel4.add(removeLayerButton);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        mapControlPanel.add(jPanel4, gridBagConstraints);
+
+        jLabel11.setText("Canvas Size");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(jLabel11, gridBagConstraints);
+
+        canvasSizeSlider.setMajorTickSpacing(5);
+        canvasSizeSlider.setMaximum(30);
+        canvasSizeSlider.setMinorTickSpacing(1);
+        canvasSizeSlider.setPaintLabels(true);
+        canvasSizeSlider.setPaintTicks(true);
+        canvasSizeSlider.setPreferredSize(new java.awt.Dimension(220, 52));
+        canvasSizeSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                canvasSizeSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+        mapControlPanel.add(canvasSizeSlider, gridBagConstraints);
+
+        viewCanvasToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        viewCanvasToggleButton.setToolTipText("View");
+        viewCanvasToggleButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        viewCanvasToggleButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
+        viewCanvasToggleButton.setFocusable(false);
+        viewCanvasToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
+        viewCanvasToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewCanvasToggleButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        mapControlPanel.add(viewCanvasToggleButton, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(7, 0, 19, 0);
+        mapControlPanel.add(jSeparator26, gridBagConstraints);
+
+        mapPanel.add(mapControlPanel);
+
+        controlsTabbedPane.addTab("Map", mapPanel);
 
         rightPanel.add(controlsTabbedPane, java.awt.BorderLayout.NORTH);
 
@@ -2365,6 +2525,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showRangeBoxCheckBoxMenuItem);
+        debugMenu.add(jSeparator22);
+
+        showOptionsMenuItem.setText("Show Options...");
+        showOptionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showOptionsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(showOptionsMenuItem);
 
         menuBar.add(debugMenu);
         debugMenu.setVisible(false);
@@ -2476,6 +2645,10 @@ public class MainWindow extends javax.swing.JFrame {
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             String name = FileUtils.getFileNameWithoutExtension(inFilePath);
             setFlows(flows, name);
+            if (model.getMaxNodeValue() == model.getMinNodeValue()) {
+                maximumNodeSizeSlider.setValue(10);
+                
+            }
             mapComponent.showAll();
 
             // the user might have loaded clipping areas before. Apply these
@@ -2666,21 +2839,21 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void nodeWeightSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeWeightSliderStateChanged
         if (nodeWeightSlider.getValueIsAdjusting() == false) {
-            model.setNodesWeight(nodeWeightSlider.getValue() / 10d);
+            model.setNodesWeight(nodeWeightSlider.getValue() / 100d);
             layout("Node Weight");
         }
     }//GEN-LAST:event_nodeWeightSliderStateChanged
 
     private void antiTorsionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_antiTorsionSliderStateChanged
         if (antiTorsionSlider.getValueIsAdjusting() == false) {
-            model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 100d);
+            model.setAntiTorsionWeight(antiTorsionSlider.getValue() / 50d);
             layout("Anti-Torsion");
         }
     }//GEN-LAST:event_antiTorsionSliderStateChanged
 
     private void peripheralStiffnessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_peripheralStiffnessSliderStateChanged
         if (peripheralStiffnessSlider.getValueIsAdjusting() == false) {
-            model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 100d);
+            model.setPeripheralStiffnessFactor(peripheralStiffnessSlider.getValue() / 20d);
             layout("Peripheral Stiffness");
         }
     }//GEN-LAST:event_peripheralStiffnessSliderStateChanged
@@ -3491,7 +3664,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_emptySpaceMenuItemActionPerformed
 
     private void angularDistributionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_angularDistributionSliderStateChanged
-        model.setAngularDistributionWeight(angularDistributionSlider.getValue() / 100d);
+        model.setAngularDistributionWeight(angularDistributionSlider.getValue() / 20d);
         mapComponent.refreshMap();
         if (angularDistributionSlider.getValueIsAdjusting() == false) {
             layout("Angular Distribution");
@@ -3759,6 +3932,12 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_constrainControlPointsToRangeBoxCheckBoxMenuItemActionPerformed
 
+    private void showOptionsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showOptionsMenuItemActionPerformed
+        debugDialog.setLocationRelativeTo(this);
+        debugDialog.pack();
+        debugDialog.setVisible(true);
+    }//GEN-LAST:event_showOptionsMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -3839,6 +4018,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem constrainControlPointsToRangeBoxCheckBoxMenuItem;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
+    private javax.swing.JDialog debugDialog;
     private javax.swing.JMenu debugMenu;
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
@@ -3856,9 +4036,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
     private javax.swing.JSlider flowRangeboxSizeSlider;
+    private javax.swing.JPanel flowsContentPanel;
     private javax.swing.JLabel flowsFilePathLabel;
     private javax.swing.JMenuItem floxReportMenuItem;
-    private javax.swing.JPanel forcesPanel;
     private javax.swing.JToggleButton handToggleButton;
     private javax.swing.JMenuItem importFlowsMenuItem;
     private javax.swing.JPanel importPanel;
@@ -3890,25 +4070,33 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
-    private javax.swing.JLabel jLabel39;
-    private javax.swing.JLabel jLabel40;
+    private javax.swing.JLabel jLabel41;
+    private javax.swing.JLabel jLabel42;
+    private javax.swing.JLabel jLabel43;
+    private javax.swing.JLabel jLabel44;
+    private javax.swing.JLabel jLabel45;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator16;
     private javax.swing.JPopupMenu.Separator jSeparator17;
-    private javax.swing.JSeparator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator21;
+    private javax.swing.JPopupMenu.Separator jSeparator22;
+    private javax.swing.JSeparator jSeparator23;
+    private javax.swing.JSeparator jSeparator24;
+    private javax.swing.JSeparator jSeparator25;
+    private javax.swing.JSeparator jSeparator26;
     private javax.swing.JPopupMenu.Separator jSeparator7;
-    private javax.swing.JSeparator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextArea jTextArea2;
     private javax.swing.JToolBar jToolBar1;
@@ -3938,6 +4126,8 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.ColorButton nodeStrokeColorButton;
     private javax.swing.JSpinner nodeStrokeSpinner;
     private javax.swing.JSlider nodeWeightSlider;
+    private javax.swing.JPanel nodesContentPanel;
+    private javax.swing.JPanel nodesPanel;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openSettingsMenuItem;
     private javax.swing.JMenuItem openShapefileMenuItem;
@@ -3975,6 +4165,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton showLineSegmentsToggleButton;
     private javax.swing.JToggleButton showNodesToggleButton;
     private javax.swing.JCheckBoxMenuItem showObstaclesCheckBoxMenuItem;
+    private javax.swing.JMenuItem showOptionsMenuItem;
     private javax.swing.JCheckBoxMenuItem showRangeBoxCheckBoxMenuItem;
     private javax.swing.JMenuItem spiralPointsMenuItem;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
