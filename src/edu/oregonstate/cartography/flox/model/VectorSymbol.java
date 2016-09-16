@@ -1,6 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
 import java.awt.Color;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * A symbol for drawing vector lines and polygons.
@@ -8,10 +11,16 @@ import java.awt.Color;
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
+
+//Every non static, non transient field in a JAXB-bound class will be 
+//automatically bound to XML, unless annotated by @XmlTransient
+@XmlAccessorType(XmlAccessType.FIELD)
+
 public class VectorSymbol {
      /**
      * color of stroked lines
      */
+    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
     private Color strokeColor = Color.LIGHT_GRAY;
     
     /**
@@ -22,6 +31,7 @@ public class VectorSymbol {
     /**
      * color of filling
      */
+    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
     private Color fillColor = Color.decode("#F3F3F3");
     
     /**

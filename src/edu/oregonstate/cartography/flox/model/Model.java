@@ -369,7 +369,6 @@ public class Model {
     /**
      * A map with a set of symbolized layers.
      */
-    @XmlTransient
     private Map map = new Map();
 
     /**
@@ -454,11 +453,6 @@ public class Model {
                 Logger.getLogger(Model.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }
-
-    public void copyTransientFields(Model destination) {
-        // map layers are not currently serialized
-        destination.map = map;
     }
 
     @Override
@@ -1010,7 +1004,7 @@ public class Model {
     /**
      * Returns the bounding box of all flows, excluding the other geometry.
      *
-     * @return
+     * @return null if no flows exist.
      */
     public Rectangle2D getFlowsBoundingBox() {
         return graph.getFlowsBoundingBox();

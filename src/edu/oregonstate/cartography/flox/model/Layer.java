@@ -5,6 +5,9 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import java.awt.geom.Rectangle2D;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * A layer for a map. Contains OGC Simple Feature geometry and a symbol definition
@@ -13,6 +16,11 @@ import java.awt.geom.Rectangle2D;
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
+
+//Every non static, non transient field in a JAXB-bound class will be 
+//automatically bound to XML, unless annotated by @XmlTransient
+@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Layer {
 
     /**
@@ -23,6 +31,7 @@ public class Layer {
     /**
      * layer geometry
      */
+    @XmlJavaTypeAdapter(GeometrySerializer.class)
     private Geometry geometry;
 
     /**

@@ -7,6 +7,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 
 /**
  * A map contains a set of layers with symbolization.
@@ -14,6 +16,11 @@ import java.util.Iterator;
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
+
+//Every non static, non transient field in a JAXB-bound class will be 
+//automatically bound to XML, unless annotated by @XmlTransient
+@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Map {
 
     /**

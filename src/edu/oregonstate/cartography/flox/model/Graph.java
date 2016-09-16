@@ -184,7 +184,7 @@ public final class Graph {
     /**
      * Returns the bounding box of all flows, excluding the other geometry.
      *
-     * @return
+     * @return null if no flows exist.
      */
     public Rectangle2D getFlowsBoundingBox() {
         int nFlows = graph.edgeSet().size();

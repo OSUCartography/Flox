@@ -86,6 +86,7 @@ public class MainWindow extends javax.swing.JFrame {
                 DnDListModel m = (DnDListModel) model;
                 Layer layer = (Layer) m.get(row);
                 layer.setName(value);
+                addUndo("Layer Name");
             }
         });
 
@@ -102,6 +103,7 @@ public class MainWindow extends javax.swing.JFrame {
                     model.addLayer((Layer) m.get(i));
                 }
                 mapComponent.repaint();
+                addUndo("Layer Order");
             }
         });
         mapComponent.addMouseMotionListener(coordinateInfoPanel);
@@ -152,9 +154,6 @@ public class MainWindow extends javax.swing.JFrame {
         if (undoData != null) {
             try {
                 Model newModel = Model.unmarshal((byte[]) undoData);
-                // copy map from previous model (changes to map layers and 
-                // layer styles are not undoable).
-                model.copyTransientFields(newModel);
                 setModel(newModel);
                 layout(null);
             } catch (Throwable ex) {
@@ -201,7 +200,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         updatingGUI = true;
         try {
-            // Arrow Settings
+            // arrows
             addArrowsCheckbox.setSelected(model.isDrawArrowheads());
             arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 100));
             arrowheadWidthSlider.setValue((int) (model.getArrowWidthScaleFactor() * 100));
@@ -210,7 +209,8 @@ public class MainWindow extends javax.swing.JFrame {
             arrowCornerPositionSlider.setValue((int) (model.getArrowCornerPosition() * 100));
             arrowSizeRatioSlider.setValue((int) (model.getArrowSizeRatio() * 100));
             arrowLengthRatioSlider.setValue((int) Math.abs((model.getArrowLengthRatio() * 100) - 100));
-
+            updateArrowGUIEnabledState();
+            
             // flows
             startDistanceSpinner.setValue(model.getFlowDistanceFromStartPointPixel());
             endDistanceSpinner.setValue(model.getFlowDistanceFromEndPointPixel());
@@ -224,7 +224,7 @@ public class MainWindow extends javax.swing.JFrame {
             nodeStrokeColorButton.setColor(model.getNodeStrokeColor());
             nodeFillColorButton.setColor(model.getNodeFillColor());
 
-            // Force Settings
+            // force Settings
             constrainControlPointsToRangeBoxCheckBoxMenuItem.setSelected(model.isEnforceRangebox());
             longestFlowStiffnessSlider.setValue((int) (model.getMaxFlowLengthSpringConstant() * 100d));
             zeroLengthStiffnessSlider.setValue((int) (model.getMinFlowLengthSpringConstant() * 100d));
@@ -280,7 +280,11 @@ public class MainWindow extends javax.swing.JFrame {
             drawStartClipAreasCheckBox.setEnabled(hasFlowsAndClipAreas && clipStart);
 
             minDistToObstaclesSpinner.setValue(model.getMinObstacleDistPx());
-            updateArrowGUIEnabledState();
+            
+            // map
+            updateLayerList();
+            writeSymbolGUI();
+            
         } finally {
             updatingGUI = false;
         }
@@ -463,6 +467,9 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu = new javax.swing.JMenu();
         importFlowsMenuItem = new javax.swing.JMenuItem();
         openPointsAndFlowsMenuItem = new javax.swing.JMenuItem();
+        jSeparator14 = new javax.swing.JPopupMenu.Separator();
+        openSettingsMenuItem = new javax.swing.JMenuItem();
+        saveSettingsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
@@ -525,9 +532,6 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
         printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
-        jSeparator14 = new javax.swing.JPopupMenu.Separator();
-        openSettingsMenuItem = new javax.swing.JMenuItem();
-        saveSettingsMenuItem = new javax.swing.JMenuItem();
         jSeparator17 = new javax.swing.JPopupMenu.Separator();
         inlineArrowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator21 = new javax.swing.JPopupMenu.Separator();
@@ -2084,6 +2088,23 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(openPointsAndFlowsMenuItem);
+        fileMenu.add(jSeparator14);
+
+        openSettingsMenuItem.setText("Open XML Project…");
+        openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(openSettingsMenuItem);
+
+        saveSettingsMenuItem.setText("Save XML Project…");
+        saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(saveSettingsMenuItem);
         fileMenu.add(jSeparator3);
 
         exportSVGMenuItem.setText("Export SVG…");
@@ -2258,7 +2279,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(editMenu);
 
-        mapMenu.setText("Layers");
+        mapMenu.setText("Map");
 
         openShapefileMenuItem.setText("Add Layer from Shapefile…");
         openShapefileMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2490,23 +2511,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(printFlowsToConsoleMenuItem);
-        debugMenu.add(jSeparator14);
-
-        openSettingsMenuItem.setText("Open XML…");
-        openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openSettingsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(openSettingsMenuItem);
-
-        saveSettingsMenuItem.setText("Save XML…");
-        saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveSettingsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(saveSettingsMenuItem);
         debugMenu.add(jSeparator17);
 
         inlineArrowsCheckBoxMenuItem.setText("Draw Inline Arrows");
@@ -2595,6 +2599,7 @@ public class MainWindow extends javax.swing.JFrame {
         updateLayerList();
         layerList.setSelectedIndex(0);
         mapComponent.showAll();
+        addUndo("Add Layer");
     }
 
     /**
@@ -2724,10 +2729,12 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.showAll();
         mapComponent.refreshMap();
         updateLayerList();
+        addUndo("Remove All Layer");
     }//GEN-LAST:event_removeAllLayersMenuItemActionPerformed
 
     private void layerListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_layerListValueChanged
         if (!evt.getValueIsAdjusting()) {
+            mapComponent.refreshMap();
             writeSymbolGUI();
         }
     }//GEN-LAST:event_layerListValueChanged
@@ -2735,12 +2742,13 @@ public class MainWindow extends javax.swing.JFrame {
     private void fillCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fillCheckBoxActionPerformed
         readSymbolGUI();
         mapComponent.refreshMap();
-        addUndo("Add/Remove Fill");
+        addUndo("Fill Layer");
     }//GEN-LAST:event_fillCheckBoxActionPerformed
 
     private void strokeCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_strokeCheckBoxActionPerformed
         readSymbolGUI();
         mapComponent.refreshMap();
+        addUndo("Stroke Layer");
     }//GEN-LAST:event_strokeCheckBoxActionPerformed
 
     private void layerFillColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_layerFillColorButtonActionPerformed
@@ -2748,7 +2756,8 @@ public class MainWindow extends javax.swing.JFrame {
             fillCheckBox.setSelected(true);
         }
         readSymbolGUI();
-        mapComponent.repaint();
+        mapComponent.refreshMap();
+        addUndo("Fill Color");
     }//GEN-LAST:event_layerFillColorButtonActionPerformed
 
     private void layerStrokeColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_layerStrokeColorButtonActionPerformed
@@ -2756,7 +2765,8 @@ public class MainWindow extends javax.swing.JFrame {
             strokeCheckBox.setSelected(true);
         }
         readSymbolGUI();
-        mapComponent.repaint();
+        mapComponent.refreshMap();
+        addUndo("Stroke Color");
     }//GEN-LAST:event_layerStrokeColorButtonActionPerformed
 
     private void removeSelectedLayer() {
@@ -2769,6 +2779,7 @@ public class MainWindow extends javax.swing.JFrame {
         layerList.setSelectedIndex(--selectedLayerID);
         writeSymbolGUI();
         mapComponent.refreshMap();
+        addUndo("Remove Layer");
     }
 
     private void removeSelectedLayerMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeSelectedLayerMenuItemActionPerformed
@@ -2871,7 +2882,12 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_floxReportMenuItemActionPerformed
 
     private void zoomOnFlowslMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOnFlowslMenuItemActionPerformed
-        mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
+        Rectangle2D bb = model.getFlowsBoundingBox();
+        if (bb == null) {
+            mapComponent.showAll();
+        } else {
+            mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
+        }        
     }//GEN-LAST:event_zoomOnFlowslMenuItemActionPerformed
 
     private void infoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoMenuItemActionPerformed
@@ -3252,10 +3268,9 @@ public class MainWindow extends javax.swing.JFrame {
         String filePath = FileUtils.askFile(null, "Load XML Settings", null, true, "xml");
         if (filePath != null) {
             try {
-                Model newModel = Model.unmarshal(filePath);
-                model.copyTransientFields(newModel);
-                setModel(newModel);
-                mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
+                setModel(Model.unmarshal(filePath));
+                mapComponent.showAll();
+                addUndo("Open XML Project");
             } catch (Throwable ex) {
                 showErrorDialog("Could not read the file.", ex);
             }
@@ -3892,7 +3907,11 @@ public class MainWindow extends javax.swing.JFrame {
     private void zoomOnReferenceMapScaleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOnReferenceMapScaleMenuItemActionPerformed
         mapComponent.setScale(model.getReferenceMapScale());
         Rectangle2D bb = model.getFlowsBoundingBox();
-        mapComponent.centerOnPoint(bb.getCenterX(), bb.getCenterY());
+        if (bb == null) {
+            mapComponent.showAll();
+        } else {
+            mapComponent.centerOnPoint(bb.getCenterX(), bb.getCenterY());
+        }
     }//GEN-LAST:event_zoomOnReferenceMapScaleMenuItemActionPerformed
 
     private void minDistToObstaclesSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_minDistToObstaclesSpinnerStateChanged
