@@ -3823,9 +3823,12 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void showDebugCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showDebugCheckBoxMenuItemActionPerformed
         debugMenu.setVisible(showDebugCheckBoxMenuItem.isSelected());
-        String msg = "The Debug menu contains experimental and unstable features that are not meant for productive work.";
+        if (showDebugCheckBoxMenuItem.isSelected()) {
+        String msg = "<html>The Debug menu contains experimental and unstable"
+                + "<br>features that are not meant for productive work.</html>";
         String title = "Flox Debug Menu";
         JOptionPane.showMessageDialog(this, msg, title, JOptionPane.INFORMATION_MESSAGE);
+        }
     }//GEN-LAST:event_showDebugCheckBoxMenuItemActionPerformed
 
     private void inlineArrowsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inlineArrowsCheckBoxMenuItemActionPerformed

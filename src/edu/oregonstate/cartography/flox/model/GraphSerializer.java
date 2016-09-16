@@ -1,194 +1,49 @@
 package edu.oregonstate.cartography.flox.model;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-public class GraphSerializer extends XmlAdapter<String, Graph> {
-
-    // Separate values by this character. This character cannot be part of a WKT
-    // string.
-    private static final String SEPARATOR = ";";
+public class GraphSerializer extends XmlAdapter<SerializedGraph, Graph> {
 
     @Override
-    public Graph unmarshal(String s) throws IOException, ParseException {
-
-        // Create a reader to interpret the xml
-        BufferedReader reader = new BufferedReader(new StringReader(s));
-
-        // Create a hashmap to store the points with keys
-        HashMap<String, Point> points = new HashMap<>();
-
-        // Empty arraylist to store flowIterator
-        ArrayList<Flow> flows = new ArrayList<>();
-
-        // Empty graph to add nodes and flowIterator
+    public Graph unmarshal(SerializedGraph sg) throws IOException, ParseException {
         Graph graph = new Graph();
-
-        // The first line of the xml file is the number of nodes in the graph
-        StringTokenizer tokenizer = new StringTokenizer(reader.readLine(), SEPARATOR);
-        int numberOfNodes = Integer.parseInt(tokenizer.nextToken());
-
-        // If there are no nodes, return an empty graph
-        if (numberOfNodes == 0) {
-            return graph;
-        }
-
-        // Create a String object to store text from the xml file
-        String l;
-
-        // Read in node data, add nodes to the points HashMap
-        for (int i = 0; i < numberOfNodes; i++) {
-            l = reader.readLine();
-            tokenizer = new StringTokenizer(l, SEPARATOR);
-            String id = tokenizer.nextToken();
-            double x = Double.parseDouble(tokenizer.nextToken());
-            double y = Double.parseDouble(tokenizer.nextToken());
-            double nodeValue = Double.parseDouble(tokenizer.nextToken());
-            Point point = new Point(x, y, nodeValue);
-            points.put(id, point);
-        }
-
-        // Add all the points to the graph
-        for (Map.Entry<String, Point> entry : points.entrySet()) {
-            graph.addNode(entry.getValue());
-        }
-
-        // Read in flow data, add them to the flowIterator ArrayList
-        while ((l = reader.readLine()) != null) {
-
-            tokenizer = new StringTokenizer(l, SEPARATOR);
-            boolean locked = false;
-
-            long id = Long.parseLong(tokenizer.nextToken());
-            String startPtID = tokenizer.nextToken();
-            String endPtID = tokenizer.nextToken();
-            double cPtX = Double.parseDouble(tokenizer.nextToken());
-            double cPtY = Double.parseDouble(tokenizer.nextToken());
-            double flowValue = Double.parseDouble(tokenizer.nextToken());
-
-            if (Double.parseDouble(tokenizer.nextToken()) == 1) {
-                locked = true;
-            }
-           
-            Point startPoint = points.get(startPtID);
-            Point endPoint = points.get(endPtID);
-            Point cPoint = new Point(cPtX, cPtY);
-            Flow flow = new Flow(startPoint, cPoint, endPoint, flowValue, id);
-            flow.setLocked(locked);
-            String startClipAreaWKT = tokenizer.nextToken();
-            if (startClipAreaWKT.startsWith("POLYGON")) {
-                Geometry startClipArea = new WKTReader().read(startClipAreaWKT);
-                flow.setStartClipArea(startClipArea);
-            }
-
-            String endClipAreaWKT = tokenizer.nextToken();
-            if (endClipAreaWKT.startsWith("POLYGON")) {
-                Geometry endClipArea = new WKTReader().read(endClipAreaWKT);
-                flow.setEndClipArea(endClipArea);
-            }
-            flows.add(flow);
-        }
-
-        // Add all the flowIterator to the graph
-        for (Flow flow : flows) {
+        
+        // flows
+        for (Flow flow : sg.flows) {
             graph.addFlow(flow);
         }
-
+        
+        // unconnected nodes
+        for (Point unconnectedNode : sg.unconnectedNodes) {
+            graph.addNode(unconnectedNode);
+        }
+        
         return graph;
     }
 
     @Override
-    public String marshal(Graph graph) {
-
-        // A map of the nodes, with the node itself as the key.
-        // The string will be a new ID number.
-        HashMap<Point, String> points = new HashMap<>();
-
-        // Get the flowIterator
+    public SerializedGraph marshal(Graph graph) {
+        SerializedGraph sg = new SerializedGraph();        
+        
+        // flows
         Iterator<Flow> flowIterator = graph.flowIterator();
-
-        // Get the nodes
-        Iterator nodes = graph.nodeIterator();
-
-        // Make stringbuilders for nodes and flowIterator
-        StringBuilder nodeStr = new StringBuilder();
-        StringBuilder flowStr = new StringBuilder();
-
-        // Populate the points HashMap with all the nodes in the graph.
-        int key = 0;
-        while (nodes.hasNext()) {
-            Point node = (Point) nodes.next();
-            points.put(node, Integer.toString(key));
-            key += 1;
-        }
-
-        // Make a string of all the flows
         while (flowIterator.hasNext()) {
-            Flow flow = flowIterator.next();
-            flowStr.append(flow.id);
-            flowStr.append(SEPARATOR);
-            flowStr.append(points.get(flow.getStartPt()));
-            flowStr.append(SEPARATOR);
-            flowStr.append(points.get(flow.getEndPt()));
-            flowStr.append(SEPARATOR);
-            flowStr.append(flow.getCtrlPt().x);
-            flowStr.append(SEPARATOR);
-            flowStr.append(flow.getCtrlPt().y);
-            flowStr.append(SEPARATOR);
-
-            flowStr.append(flow.getValue());
-            flowStr.append(SEPARATOR);
-
-            // Append the locked status
-            if (flow.isLocked()) {
-                flowStr.append(1);
-            } else {
-                flowStr.append(0);
+            sg.flows.add(flowIterator.next());
+        }
+        
+        // unconnected nodes
+        Iterator<Point> nodeIterator = graph.nodeIterator();
+        while (nodeIterator.hasNext()) {
+            Point node = nodeIterator.next();
+            if (graph.getFlowsForNode(node).isEmpty()) {
+                sg.unconnectedNodes.add(node);
             }
-            flowStr.append(SEPARATOR);
-
-            flowStr.append(flow.getStartClipAreaWKT());
-            flowStr.append(SEPARATOR);
-            flowStr.append(flow.getEndClipAreaWKT());
-            flowStr.append(SEPARATOR);
-            flowStr.append("\n");
         }
-
-        // Make a string of the nodes in nodeMap
-        // Key first, then coordinates
-        nodeStr.append(points.size());
-        nodeStr.append(SEPARATOR);
-        nodeStr.append("\n");
-        for (Map.Entry<Point, String> entry : points.entrySet()) {
-            String id = entry.getValue();
-            double x = entry.getKey().x;
-            double y = entry.getKey().y;
-            double val = entry.getKey().getValue();
-
-            nodeStr.append(id);
-            nodeStr.append(SEPARATOR);
-            nodeStr.append(x);
-            nodeStr.append(SEPARATOR);
-            nodeStr.append(y);
-            nodeStr.append(SEPARATOR);
-            nodeStr.append(val);
-            nodeStr.append(SEPARATOR);
-            nodeStr.append("\n");
-        }
-
-        // Append the flowStr to the end of nodeStr and return the whole thing
-        return nodeStr.append(flowStr.toString()).toString();
-
+        
+        return sg;
     }
 
 }

@@ -42,6 +42,11 @@ public final class Point {
         this.value = value;
     }
     
+    public Point() {
+        x = y = 0;
+        value = Model.DEFAULT_NODE_VALUE;
+    }
+    
     /**
      * Rotates this point by the provided angle around an origin point and
      * returns the rotated point. The position of this point is not changed.

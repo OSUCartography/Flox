@@ -12,6 +12,9 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * A flow based on a quadratic Bézier curve.
@@ -19,6 +22,10 @@ import java.util.Iterator;
  * @author Bernhard Jenny
  * @author Daniel Stephen
  */
+//Every non static, non transient field in a JAXB-bound class will be 
+//automatically bound to XML, unless annotated by @XmlTransient
+@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Flow {
 
     private static long idCounter = 0;
@@ -58,6 +65,7 @@ public class Flow {
     /**
      * clip area for the start of the flow.
      */
+    @XmlJavaTypeAdapter(GeometrySerializer.class)
     private Geometry startClipArea;
 
     /**
@@ -67,6 +75,7 @@ public class Flow {
     /**
      * clip area for the end of the flow.
      */
+    @XmlJavaTypeAdapter(GeometrySerializer.class)
     private Geometry endClipArea;
 
     /**
@@ -117,6 +126,13 @@ public class Flow {
         this(startPt, new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2), endPt, value, createID());
     }
 
+    /**
+     * Default constructor for JAXB
+     */
+    public Flow() {
+        this(new Point(), new Point(), Model.DEFAULT_FLOW_VALUE);
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Flow ");

@@ -7,12 +7,21 @@ import java.util.Iterator;
 import org.jgrapht.graph.DirectedMultigraph;
 
 /**
+ * Graph of Flows (edges) and Points (nodes).
+ *
+ * The JAXB GraphSerializer converts a Graph to and from a SerializedGraph (and
+ * ultimately to XML).
  *
  * @author Bernhard Jenny, Cartography and Geovisualization Group, Oregon State
  * University
  */
 public final class Graph {
 
+    /**
+     * A set of cached values to accelerate computations. The cached values need
+     * to be updated whenever a node or flow value changes. Use
+     * updateCachedValues() to update.
+     */
     private double minFlowValue;
     private double maxFlowValue;
     private double meanFlowValue;
@@ -22,11 +31,17 @@ public final class Graph {
     private double maxNodeValue;
     private double meanNodeValue;
 
+    /**
+     * JGraphT graph
+     */
     private final DirectedMultigraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
 
     public Graph() {
     }
 
+    /**
+     * Update cached values. Call this whenever a node or flow value changes.
+     */
     public void updateCachedValues() {
         int nFlows = graph.edgeSet().size();
         if (nFlows < 1) {
@@ -86,13 +101,15 @@ public final class Graph {
     }
 
     /**
-     * Add a flow.
+     * Add a flow. If vertices with identical x and y coordinate already exist
+     * in the graph, the existing nodes are used and the passed flow is linked
+     * to these nodes.
      *
-     * @param flow The flow to add.
+     * @param flow The flow to add. Start and end nodes may be changed.
      */
     public void addFlow(Flow flow) {
         assert (hasFlowWithID(flow.id) == false);
-        
+
         Point startPoint = findNodeInGraph(flow.getStartPt());
         Point endPoint = findNodeInGraph(flow.getEndPt());
         flow.setStartPt(startPoint);
@@ -104,14 +121,18 @@ public final class Graph {
     }
 
     /**
-     * Add a node
+     * Add a node if no node with identical x and y coordinates already exists
+     * in the graph. Hence, there is no guarantee that the passed node will be
+     * added.
      *
      * @param node The node to add
+     * @return The added node.
      */
-    public void addNode(Point node) {
-        Point newNode = findNodeInGraph(node);
-        graph.addVertex(newNode);
+    public Point addNode(Point node) {
+        node = findNodeInGraph(node);
+        graph.addVertex(node);
         updateCachedValues();
+        return node;
     }
 
     void removeEdge(Flow flow) {
@@ -141,7 +162,7 @@ public final class Graph {
         }
         return target;
     }
-    
+
     private boolean hasFlowWithID(long id) {
         Iterator<Flow> iter = graph.edgeSet().iterator();
         while (iter.hasNext()) {
@@ -235,7 +256,7 @@ public final class Graph {
     }
 
     /**
-     * Returns a set of flows connected to a node. 
+     * Returns a set of flows connected to a node.
      *
      * @param node search for flows connected to this node
      * @return a collection of Flows connected to the passed node
@@ -243,9 +264,9 @@ public final class Graph {
     public Collection<Flow> getFlowsForNode(Point node) {
         return graph.edgesOf(node);
     }
-    
+
     /**
-     * Returns a flow connecting two nodes. 
+     * Returns a flow connecting two nodes.
      *
      * @param node1 search for flows connected to this node
      * @param node2 search for flows connected to this node
@@ -260,7 +281,6 @@ public final class Graph {
         }
         return null;
     }
-
 
     public ArrayList<Point> getSortedNodes(boolean increasing) {
         ArrayList<Point> nodes = new ArrayList<>(graph.vertexSet());
