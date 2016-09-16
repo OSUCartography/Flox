@@ -86,11 +86,6 @@ public class Flow {
     private boolean locked = false;
 
     /**
-     * The Arrow at the end of the flow, points towards endPt
-     */
-    private final Arrow endArrow = new Arrow(this);
-
-    /**
      * Construct a Flow from 3 points.
      *
      * @param startPt start point
@@ -241,16 +236,17 @@ public class Flow {
      * Computes geometry of arrow heads
      *
      * @param model model
-     * @param flowStrokeWidth width of flow in world units.
      * @param endClipRadius the tip of the arrow is placed at this distance from
      * the end of the flow
+     * @return a new Arrow instance
      */
-    public void computeArrowhead(Model model, double flowStrokeWidth, double endClipRadius) {
-        endArrow.computeArrowhead(model, flowStrokeWidth, endClipRadius);
+    public Arrow getArrow(Model model, double endClipRadius) {
+        return new Arrow(model, this, endClipRadius);
     }
 
-    public Arrow getEndArrow() {
-        return endArrow;
+    public Arrow getArrow(Model model) {
+        double endClipRadius = endClipRadius(model, false, null);
+        return new Arrow(model, this, endClipRadius);
     }
 
     /**
@@ -761,19 +757,30 @@ public class Flow {
      * @return Parameter t [0..1] where the circle intersects the flow.
      */
     public double getIntersectionTWithCircleAroundStartPoint(double r) {
-        // FIXME need to handle the case when the entire curve is within the circle with radius r
-        // comparing r to the distance between start and end node is not sufficient to handle this case.
         if (r <= 0) {
-            return 0;   // tx = 0: start of curve
+            return 0;   // t = 0: start of curve
         }
+
+        final double rSqr = r * r;
+
+        // Test whether the entire curve is within the circle with radius r.
+        // Compare r to the distance between start and end node.
+        double baseLineDx = startPt.x - endPt.x;
+        double baseLineDy = startPt.y - endPt.y;
+        double baseLineLengthSqr = baseLineDx * baseLineDx + baseLineDy * baseLineDy;
+        if (baseLineLengthSqr <= rSqr) {
+            return 0; // t = 1: start of curve
+        }
+
+        // FIXME should use distance tolerance instead of hard-coded number of iterations
         double t = 0.5;
         double t_step = 0.25;
         for (int i = 0; i < 20; i++) {
             Point pt = pointOnCurve(t);
             final double dx = startPt.x - pt.x;
             final double dy = startPt.y - pt.y;
-            final double d = Math.sqrt(dx * dx + dy * dy);
-            if (d < r) {
+            final double dSqr = dx * dx + dy * dy;
+            if (dSqr < rSqr) {
                 t += t_step;
             } else {
                 t -= t_step;
@@ -835,11 +842,30 @@ public class Flow {
         return new double[]{startR, endR};
     }
 
+    /**
+     * Computes clipping radius around end node.
+     *
+     * @param model model
+     * @param clipArrowhead if true, the circles with the returned radius
+     * includes the arrowhead (if arrowheads are drawn).
+     * @param lineString the geometry of this flow converted to straight line
+     * segments.
+     * @return radius of circle around end node
+     */
     public double endClipRadius(Model model, boolean clipArrowhead, LineString lineString) {
         // clipping radius for end node
         double endNodeClipRadius = 0;
         if (clipArrowhead && model.isDrawArrowheads()) {
-            endNodeClipRadius = getEndArrow().getClipRadius();
+            // Compute radius of clipping circle around end point without taking
+            // the arrow into account. This is a recursive call with 
+            // clipArrowhead flag set to false.
+            double arrowTipClipRadius = endClipRadius(model, false, lineString);
+
+            // Create an arrowhead
+            Arrow arrow = getArrow(model, arrowTipClipRadius);
+
+            // get clip radius including arrowhead
+            endNodeClipRadius = arrow.getClipRadius();
         } else if (model.getFlowDistanceFromEndPointPixel() > 0 || model.isDrawArrowheads()) {
             // clip the end if there must be a gap between the end of the 
             // flow line and the end node symbol.
@@ -863,10 +889,11 @@ public class Flow {
     }
 
     /**
-     * Computes the clipping radius for the location where the flow needs to be
-     * split for masking with the start or the end clip area.
+     * Computes the clipping radius around the start or end node. The circle
+     * intersects the passed lineString where the start or end clip area
+     * intersects the lineString.
      *
-     * @param lineString This flow's geometry converted to straight line
+     * @param lineString the geometry of this flow converted to straight line
      * segments.
      * @param clipWithStartArea If true, clip with start clip area, otherwise
      * clip with the end clip area.
@@ -903,6 +930,7 @@ public class Flow {
      *
      * @param xy Point x and y on input; the closest point on the curve on
      * output.
+     * @param tol Tolerance to test whether points are collinear.
      * @return The distance.
      */
     public double distance(double[] xy, double tol) {
@@ -916,6 +944,7 @@ public class Flow {
      *
      * @param xy Point x and y on input; the closest point on the curve on
      * output.
+     * @param tol Tolerance to test whether points are collinear.
      * @return The distance.
      */
     public double distanceSq(double[] xy, double tol) {

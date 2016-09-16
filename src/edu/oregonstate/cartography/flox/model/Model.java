@@ -459,8 +459,6 @@ public class Model {
     public void copyTransientFields(Model destination) {
         // map layers are not currently serialized
         destination.map = map;
-        // FIXME should not be transient?
-        destination.clipAreas = clipAreas;
     }
 
     @Override
@@ -939,7 +937,6 @@ public class Model {
         if (isClipFlowStarts()) {
             updateStartClipAreas();
         }
-        computeArrowheadsAndClipping();
     }
 
     /**
@@ -1984,34 +1981,6 @@ public class Model {
      */
     public void setReferenceMapScale(double referenceMapScale) {
         this.referenceMapScale = referenceMapScale;
-    }
-
-    /**
-     * Clip and compute arrowhead geometry for one flow.
-     *
-     * @param flow Flow to clip and compute arrowhead for
-     */
-    public void computeArrowheadAndClipping(Flow flow) {
-        // Compute radius of clipping circle around end point.
-        // Clip the flow with the clipping area and/or a circle around the end node
-        double arrowTipClipRadius = flow.endClipRadius(this, false, null);
-
-        // stroke width in world coordinates of the flow based on its value.
-        double flowStrokeWidth = getFlowWidthPx(flow) / getReferenceMapScale();
-
-        // Create an arrowhead
-        flow.computeArrowhead(this, flowStrokeWidth, arrowTipClipRadius);
-    }
-
-    /**
-     * Clip and compute arrowhead geometry for all flows.
-     */
-    public void computeArrowheadsAndClipping() {
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            computeArrowheadAndClipping(flow);
-        }
     }
 
     /**

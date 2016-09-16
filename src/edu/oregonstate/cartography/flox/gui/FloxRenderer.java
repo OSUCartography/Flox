@@ -273,7 +273,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             // draw the arrow head
             if (model.isDrawArrowheads()) {
-                Arrow arrow = flow.getEndArrow();
+                Arrow arrow = flow.getArrow(model);
                 if (arrow != null) {
                     g2d.fill(getArrowPath(arrow));
                 }

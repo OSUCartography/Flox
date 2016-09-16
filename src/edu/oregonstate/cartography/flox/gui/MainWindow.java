@@ -2985,7 +2985,6 @@ public class MainWindow extends javax.swing.JFrame {
         if (model != null) {
             updateArrowGUIEnabledState();
             model.setDrawArrowheads(addArrowsCheckbox.isSelected());
-            updateArrowHeads();
             mapComponent.refreshMap();
             layout("Add Arrows");
         }
@@ -2994,7 +2993,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowheadLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadLengthSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowLengthScaleFactor(arrowheadLengthSlider.getValue() / 100d);
-            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowheadLengthSlider.getValueIsAdjusting()) {
                 layout("Arrow Length");
@@ -3005,7 +3003,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowheadWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowheadWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowWidthScaleFactor(arrowheadWidthSlider.getValue() / 100d);
-            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowheadWidthSlider.getValueIsAdjusting()) {
                 layout("Arrow Width");
@@ -3016,7 +3013,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowEdgeCtrlLengthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlLengthSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowEdgeCtrlLength((arrowEdgeCtrlLengthSlider.getValue()) / 100d);
-            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowEdgeCtrlLengthSlider.getValueIsAdjusting()) {
                 layout("Arrow Edge Shape");
@@ -3027,7 +3023,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowEdgeCtrlWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowEdgeCtrlWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowEdgeCtrlWidth((arrowEdgeCtrlWidthSlider.getValue()) / 100d);
-            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowEdgeCtrlWidthSlider.getValueIsAdjusting()) {
                 layout("Arrow Edge Shape");
@@ -3038,7 +3033,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowCornerPositionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowCornerPositionSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowCornerPosition((arrowCornerPositionSlider.getValue()) / 100d);
-            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowCornerPositionSlider.getValueIsAdjusting()) {
                 layout("Arrow Corner Position");
@@ -3092,9 +3086,6 @@ public class MainWindow extends javax.swing.JFrame {
             } else {
                 model.removeEndClipAreasFromFlows();
             }
-            // update arrowhead geometries using the clipped but not properly arranged flows to show a preview
-            updateArrowHeads();
-
             layout("Clip with End Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -3232,8 +3223,6 @@ public class MainWindow extends javax.swing.JFrame {
             } else {
                 model.removeStartClipAreasFromFlows();
             }
-            // update arrowhead geometries using the clipped but not properly arranged flows to show a preview
-            updateArrowHeads();
 
             layout("Clip with Start Areas");
             mapComponent.refreshMap();
@@ -3244,7 +3233,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowSizeRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowSizeRatioSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowSizeRatio((arrowSizeRatioSlider.getValue()) / 100d);
-            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowSizeRatioSlider.getValueIsAdjusting()) {
                 layout("Arrow Size Ratio");
@@ -3354,7 +3342,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
         model.straightenFlows(true);
         model.setLockOfSelectedFlows(true);
-        model.computeArrowheadsAndClipping();
         addUndo("Straighten Flows");
         mapComponent.refreshMap();
     }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
@@ -3675,7 +3662,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void arrowLengthRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowLengthRatioSliderStateChanged
         if (updatingGUI == false && model != null) {
             model.setArrowLengthRatio(Math.abs(arrowLengthRatioSlider.getValue() - 100) / 100d);
-            updateArrowHeads();
             mapComponent.refreshMap();
             if (!arrowLengthRatioSlider.getValueIsAdjusting()) {
                 layout("Arrow Size Ratio");
@@ -3972,18 +3958,6 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
-    /**
-     * Update the arrowheads after a parameter for the arrowhead geometry
-     * changed. This allows for quick previews while arrow-related sliders are
-     * changed. This must be followed by a re-computation of the layout to take
-     * the new geometry of arrowheads into account.
-     */
-    private void updateArrowHeads() {
-        if (updatingGUI || model.getNbrFlows() == 0) {
-            return;
-        }
-        model.computeArrowheadsAndClipping();
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> accuracyComboBox;

@@ -124,7 +124,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
         updateLocation(point);
         updateCoordinateFields();
-        model.computeArrowheadsAndClipping();
     }
 
     @Override
@@ -227,10 +226,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             if (flow.getEndPt().isSelected() && model.isClipFlowEnds()) {
                 model.updateEndClipArea(flow);
             }
-
-            model.computeArrowheadAndClipping(flow);
         }
-
     }
 
     // Constructor

@@ -66,21 +66,18 @@ public class Arrow {
      * Constructor for the Arrow. Computes the location of the points comprising
      * the arrow head based on the stroke width and azimuth of the flow.
      *
-     * @param flow The flow an arrow will be created for
-     */
-    public Arrow(Flow flow) {
-        this.flow = flow;
-    }
-    
-    /**
-     * Computes the arrow head geometry.
-     *
      * @param model model
-     * @param flowStrokeWidth width of flow in world units.
+     * @param flow The flow an arrow will be created for
      * @param endClipRadius the tip of the arrow is placed at this distance from
      * the end of the flow
      */
-    public void computeArrowhead(Model model, double flowStrokeWidth, double endClipRadius) {
+    public Arrow(Model model, Flow flow, double endClipRadius) {
+        this.flow = flow;
+    
+        // stroke width in world coordinates of the flow based on its value.
+        double flowStrokeWidth = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
+        
+
         // Gets the ratio of the flows stroke width to it's value. This ratio
         // is the same for all drawn flows.
         double valueToStrokeRatio = flowStrokeWidth / flow.getValue();

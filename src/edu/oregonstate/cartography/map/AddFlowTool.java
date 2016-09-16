@@ -71,8 +71,6 @@ public class AddFlowTool extends DoubleBufferedTool {
         if (model.isClipFlowEnds()) {
             model.updateEndClipArea(flow);
         }
-
-        model.computeArrowheadAndClipping(flow);
         return flow;
     }
 

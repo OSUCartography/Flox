@@ -1,11 +1,19 @@
 package edu.oregonstate.cartography.flox.model;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
 /**
  * Two-dimensional point.
  *
  * @author Bernhard Jenny and Dan Stephen, Cartography and Geovisualization
- * Group, Oregon State University
+ * Group, Oregon State University, and RMIT University, Melbourne
  */
+
+//Every non static, non transient field in a JAXB-bound class will be 
+//automatically bound to XML, unless annotated by @XmlTransient
+@XmlAccessorType(XmlAccessType.FIELD)
+
 public final class Point {
 
     public double x;

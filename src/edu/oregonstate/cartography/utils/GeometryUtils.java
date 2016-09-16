@@ -181,7 +181,8 @@ public class GeometryUtils {
      *
      * @param startPt The start point of the line
      * @param endPt The end point of the line
-     * @return angle relative to horizontal x axis in counter-clockwise direction
+     * @return angle relative to horizontal x axis in counter-clockwise
+     * direction
      */
     public static double orientation(Point startPt, Point endPt) {
         final double dx = endPt.x - startPt.x;
@@ -361,7 +362,8 @@ public class GeometryUtils {
      * @param y2 point 2 y
      * @param x3 point 3 x
      * @param y3 point 3 y
-     * @param tol tolerance
+     * @param tol tolerance the points are collinear if the deviation is shorter
+     * than tolerance.
      * @return
      */
     public static boolean collinear(double x1, double y1, double x2, double y2, double x3, double y3, double tol) {
@@ -422,6 +424,7 @@ public class GeometryUtils {
      * @param p1y Control point y
      * @param p2x End point x
      * @param p2y End point x
+     * @param tol Tolerance to test whether points are collinear.
      * @param xy Point x and y on input; the closest point on the curve on
      * output.
      * @return The square distance between the point x/y and the quadratic

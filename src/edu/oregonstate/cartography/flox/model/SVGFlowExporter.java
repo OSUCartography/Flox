@@ -130,7 +130,7 @@ public class SVGFlowExporter extends SVGExporter {
             // arrowhead
             if (model.isDrawArrowheads()) {
                 Element arrowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-                Arrow arrow = flow.getEndArrow();
+                Arrow arrow = flow.getArrow(model);
                 arrowElement.setAttribute("d", arrowToPath(arrow));
                 setVectorStyle(arrowElement, null, 0, model.getFlowColor(flow));
                 flowsGroup.appendChild(arrowElement);
