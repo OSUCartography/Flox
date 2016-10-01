@@ -1788,6 +1788,26 @@ public class Model {
     }
 
     /**
+     * Maximizes maxFlowStrokeWidthPixel such that no flow is wider than the
+     * diameter of its connected nodes.
+     */
+    public void adjustMaxFlowStrokeWidthToNodeSize() {
+        double maxScaleFactor = Double.MAX_VALUE;
+        Iterator<Flow> flowIterator = flowIterator();
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
+            double r1 = getNodeRadiusPx(flow.startPt);
+            double r2 = getNodeRadiusPx(flow.endPt);
+            double flowWidth = Math.min(r1, r2) * 2d + nodeStrokeWidthPx;
+            double scaleFactor = flowWidth / flow.getValue();
+            if (scaleFactor < maxScaleFactor) {
+                maxScaleFactor = scaleFactor;
+            }
+        }
+        maxFlowStrokeWidthPx = maxScaleFactor * getMaxFlowValue();
+    }
+
+    /**
      * @return the maxNodeSizePx
      */
     public double getMaxNodeSizePx() {
