@@ -33,7 +33,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -59,6 +58,11 @@ public class Model {
      * The default value for a flow.
      */
     public static final double DEFAULT_FLOW_VALUE = 1;
+    
+    /**
+     * default value when all nodes have same value on import.
+     */
+    public static final int DEFAULT_NODE_RADIUS_PX = 10;
 
     /**
      * Density of points along flows.
@@ -369,7 +373,7 @@ public class Model {
     /**
      * A map with a set of symbolized layers.
      */
-    private Map map = new Map();
+    private final Map map = new Map();
 
     /**
      * Constructor of the model.

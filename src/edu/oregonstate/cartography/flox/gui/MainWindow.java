@@ -45,7 +45,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
@@ -2660,7 +2659,13 @@ public class MainWindow extends javax.swing.JFrame {
             model.setFlows(flows);
             mapComponent.showAll();
             model.setReferenceMapScale(mapComponent.getScale());
-            model.adjustMaxFlowStrokeWidthToNodeSize(maximumFlowWidthSlider.getMaximum());
+            if (model.getMaxNodeValue() == model.getMinNodeValue()) {
+                int r = Model.DEFAULT_NODE_RADIUS_PX;
+                maximumNodeSizeSlider.setValue(r);
+                model.setMaxFlowStrokeWidthPixel(r * 2 + model.getNodeStrokeWidthPx());
+            } else {
+                model.adjustMaxFlowStrokeWidthToNodeSize(maximumFlowWidthSlider.getMaximum());
+            }
             mapComponent.repaint();
             layout("Load Flows");
         }
@@ -2680,12 +2685,7 @@ public class MainWindow extends javax.swing.JFrame {
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             String name = FileUtils.getFileNameWithoutExtension(inFilePath);
             setFlows(flows, name);
-            if (model.getMaxNodeValue() == model.getMinNodeValue()) {
-                maximumNodeSizeSlider.setValue(10);
-
-            }
-            mapComponent.showAll();
-
+            
             // the user might have loaded clipping areas before. Apply these
             // clipping areas to the new flows.
             applyClippingSettings();
