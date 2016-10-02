@@ -211,7 +211,7 @@ public class MainWindow extends javax.swing.JFrame {
             arrowSizeRatioSlider.setValue((int) (model.getArrowSizeRatio() * 100));
             arrowLengthRatioSlider.setValue((int) Math.abs((model.getArrowLengthRatio() * 100) - 100));
             updateArrowGUIEnabledState();
-            
+
             // flows
             startDistanceSpinner.setValue(model.getFlowDistanceFromStartPointPixel());
             endDistanceSpinner.setValue(model.getFlowDistanceFromEndPointPixel());
@@ -281,11 +281,11 @@ public class MainWindow extends javax.swing.JFrame {
             drawStartClipAreasCheckBox.setEnabled(hasFlowsAndClipAreas && clipStart);
 
             minDistToObstaclesSpinner.setValue(model.getMinObstacleDistPx());
-            
+
             // map
             updateLayerList();
             writeSymbolGUI();
-            
+
         } finally {
             updatingGUI = false;
         }
@@ -2660,6 +2660,8 @@ public class MainWindow extends javax.swing.JFrame {
             model.setFlows(flows);
             mapComponent.showAll();
             model.setReferenceMapScale(mapComponent.getScale());
+            model.adjustMaxFlowStrokeWidthToNodeSize(maximumFlowWidthSlider.getMaximum());
+            mapComponent.repaint();
             layout("Load Flows");
         }
     }
@@ -2682,7 +2684,6 @@ public class MainWindow extends javax.swing.JFrame {
                 maximumNodeSizeSlider.setValue(10);
 
             }
-            model.adjustMaxFlowStrokeWidthToNodeSize();
             mapComponent.showAll();
 
             // the user might have loaded clipping areas before. Apply these
@@ -2908,7 +2909,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.showAll();
         } else {
             mapComponent.zoomOnRectangle(model.getFlowsBoundingBox());
-        }        
+        }
     }//GEN-LAST:event_zoomOnFlowslMenuItemActionPerformed
 
     private void infoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_infoMenuItemActionPerformed
@@ -3175,8 +3176,7 @@ public class MainWindow extends javax.swing.JFrame {
             String name = FileUtils.getFileNameWithoutExtension(flowsFilePath);
             setFlows(flows, name);
             mapComponent.showAll();
-            model.adjustMaxFlowStrokeWidthToNodeSize();
-            
+
             // the user might have loaded clipping areas before. Apply these
             // clipping areas to the new flows.
             applyClippingSettings();
@@ -3856,10 +3856,10 @@ public class MainWindow extends javax.swing.JFrame {
     private void showDebugCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showDebugCheckBoxMenuItemActionPerformed
         debugMenu.setVisible(showDebugCheckBoxMenuItem.isSelected());
         if (showDebugCheckBoxMenuItem.isSelected()) {
-        String msg = "<html>The Debug menu contains experimental and unstable"
-                + "<br>features that are not meant for productive work.</html>";
-        String title = "Flox Debug Menu";
-        JOptionPane.showMessageDialog(this, msg, title, JOptionPane.INFORMATION_MESSAGE);
+            String msg = "<html>The Debug menu contains experimental and unstable"
+                    + "<br>features that are not meant for productive work.</html>";
+            String title = "Flox Debug Menu";
+            JOptionPane.showMessageDialog(this, msg, title, JOptionPane.INFORMATION_MESSAGE);
         }
     }//GEN-LAST:event_showDebugCheckBoxMenuItemActionPerformed
 
@@ -3958,10 +3958,19 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_showOptionsMenuItemActionPerformed
 
     private void adjustFlowWidthMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adjustFlowWidthMenuItemActionPerformed
-        model.adjustMaxFlowStrokeWidthToNodeSize();
-        writeModelToGUI();                
-        mapComponent.refreshMap();
-        layout("Adjust Maximum Flow Width to Node Size");
+        double max = maximumFlowWidthSlider.getMaximum();
+        boolean maxFlowWidthChanged = model.adjustMaxFlowStrokeWidthToNodeSize(max);
+        if (maxFlowWidthChanged) {
+            writeModelToGUI();
+            mapComponent.refreshMap();
+            layout("Adjust Maximum Flow Width to Node Size");
+        } else {
+            String msg = "<html>The width of flows did not change. All nodes or "
+                    + "flows might have<br>zero values, or flows width were "
+                    + "already maximized to node sizes.</html>";
+            String title = "";
+            JOptionPane.showMessageDialog(this, msg, title, JOptionPane.INFORMATION_MESSAGE);
+        }
     }//GEN-LAST:event_adjustFlowWidthMenuItemActionPerformed
 
     private void showFlowsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showFlowsCheckBoxMenuItemActionPerformed

@@ -308,7 +308,7 @@ public class Model {
     /**
      * Stroke width for drawing node circles. In pixels.
      */
-    private float nodeStrokeWidthPx = 3;
+    private float nodeStrokeWidthPx = 2;
 
     /**
      * Color for drawing node outlines
@@ -1790,21 +1790,53 @@ public class Model {
     /**
      * Maximizes maxFlowStrokeWidthPixel such that no flow is wider than the
      * diameter of its connected nodes.
+     *
+     * @param maxFlowWidthPx the largest flow width cannot be wider than this
+     * width in pixels.
+     * @return true if maxFlowStrokeWidthPx changed
      */
-    public void adjustMaxFlowStrokeWidthToNodeSize() {
+    public boolean adjustMaxFlowStrokeWidthToNodeSize(double maxFlowWidthPx) {
         double maxScaleFactor = Double.MAX_VALUE;
         Iterator<Flow> flowIterator = flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            double r1 = getNodeRadiusPx(flow.startPt);
-            double r2 = getNodeRadiusPx(flow.endPt);
-            double flowWidth = Math.min(r1, r2) * 2d + nodeStrokeWidthPx;
-            double scaleFactor = flowWidth / flow.getValue();
+            double value = Math.abs(flow.getValue());
+
+            // disregard flows with zero value
+            if (value == 0) {
+                continue;
+            }
+
+            // compute line widths fitting the size of the two connected nodes
+            double w1 = 2d * getNodeRadiusPx(flow.startPt);
+            double w2 = 2d * getNodeRadiusPx(flow.endPt);
+
+            // disregard if both nodes have 0 values
+            if (w1 == 0 && w2 == 0) {
+                continue;
+            }
+            double flowWidth;
+            if (w1 == 0) {
+                flowWidth = w2;
+            } else if (w2 == 0) {
+                flowWidth = w1;
+            } else {
+                flowWidth = Math.min(w1, w2);
+            }
+            flowWidth += nodeStrokeWidthPx;
+            double scaleFactor = flowWidth / value;
             if (scaleFactor < maxScaleFactor) {
                 maxScaleFactor = scaleFactor;
             }
         }
-        maxFlowStrokeWidthPx = maxScaleFactor * getMaxFlowValue();
+        if (maxScaleFactor < Double.MAX_VALUE) {
+            double newMaxFlowWidth = Math.min(maxFlowWidthPx, maxScaleFactor * getMaxFlowValue());
+            boolean changed = newMaxFlowWidth != maxFlowStrokeWidthPx;
+            maxFlowStrokeWidthPx = newMaxFlowWidth;
+            return changed;
+        } else {
+            return false;
+        }
     }
 
     /**
