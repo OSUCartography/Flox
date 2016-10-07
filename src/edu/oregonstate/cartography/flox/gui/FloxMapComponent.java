@@ -72,15 +72,15 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     public void setMainWindow(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
     }
-    
+
     public MainWindow getMainWindow() {
         return mainWindow;
     }
-    
+
     public void layout(String undoMessage) {
         mainWindow.layout(undoMessage);
     }
-    
+
     /**
      * Returns the bounding box of the geometry that is drawn by the map.
      *
@@ -104,7 +104,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         }
 
         Graphics2D g2d = getGraphics2DBuffer();
-        
+
         // Give the current MapTool a chance to draw some background drawing.
         // Returns true if the the tool also painted the map, i.e. there is no
         // need to paint the map.
@@ -162,6 +162,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
     @Override
     public boolean deleteSelected() {
         if (model.deleteSelectedFlowsAndNodes() > 0) {
+
+            mainWindow.updateLockUnlockButtonIcon();
+            mainWindow.updateValueField();
+            mainWindow.updateCoordinateFields();
+
             layout("Delete");
             refreshMap();
             return true;
@@ -175,7 +180,8 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      *
      * @param nodes An ArrayList of nodes from which clicked nodes will be
      * returned
-     * @param click a Point2D.Double at the location of the click in world coordinates.
+     * @param click a Point2D.Double at the location of the click in world
+     * coordinates.
      * @param pixelTolerance If the click is within this pixel tolerance of the
      * node, it will be returned. This is to account for the the stroke width of
      * the node drawing. In pixels.
@@ -193,7 +199,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                 double rRefPx = model.getNodeRadiusPx(node) + model.getNodeStrokeWidthPx() / 2;
                 double rWorld = rRefPx / model.getReferenceMapScale();
                 rWorld += pixelTolerance / scale;
-                
+
                 // Calculate the distance of the click from the node center.
                 double dx = node.x - click.x;
                 double dy = node.y - click.y;
@@ -210,9 +216,9 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
         // sort by increasing node value
         java.util.Collections.sort(nodes, (Point node1, Point node2) -> {
             return Double.compare(node1.getValue(), node2.getValue());
-            
+
         });
-        
+
         // return the smallest node, which is visually on top of all others on the map
         return clickedNodes.isEmpty() ? null : clickedNodes.get(0);
     }

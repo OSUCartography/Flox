@@ -414,25 +414,36 @@ public class MainWindow extends javax.swing.JFrame {
     public void updateCoordinateFields() {
         updatingGUI = true;
         try {
-            boolean nodeSelected = model.isNodeSelected();
-            xFormattedTextField.setEnabled(nodeSelected);
-            yFormattedTextField.setEnabled(nodeSelected);
 
-            if (nodeSelected == false) {
-                xFormattedTextField.setValue(null);
-                yFormattedTextField.setValue(null);
-            } else {
-                // FIXME no need to copy points. We only need to know whether there is more than 1 selected node.
-                ArrayList<Point> selectedNodes = model.getSelectedNodes();
-                int nbrNodes = selectedNodes.size();
-                if (nbrNodes != 1) {
-                    xFormattedTextField.setValue(null);
-                    yFormattedTextField.setValue(null);
-                } else {
-                    xFormattedTextField.setValue(selectedNodes.get(0).x);
-                    yFormattedTextField.setValue(selectedNodes.get(0).y);
+            // search for number of selected nodes. Stop when two are found.
+            int nbrSelectedNodes = 0; // 0, 1 or 2. Never more than 2.
+            Point firstSelectedNode = null;
+
+            Iterator nodes = model.nodeIterator();
+            while (nodes.hasNext()) {
+                Point node = (Point) nodes.next();
+                if (node.isSelected()) {
+                    ++nbrSelectedNodes;
+                    if (firstSelectedNode != null) {
+                        // found the second selected node
+                        break;
+                    } else {
+                        firstSelectedNode = node;
+                    }
                 }
             }
+
+            xFormattedTextField.setEnabled(nbrSelectedNodes == 1);
+            yFormattedTextField.setEnabled(nbrSelectedNodes == 1);
+
+            if (nbrSelectedNodes == 1 && firstSelectedNode != null) {
+                xFormattedTextField.setValue(firstSelectedNode.x);
+                yFormattedTextField.setValue(firstSelectedNode.y);
+            } else {
+                xFormattedTextField.setValue(null);
+                yFormattedTextField.setValue(null);
+            }
+
         } finally {
             updatingGUI = false;
         }
@@ -3558,17 +3569,24 @@ public class MainWindow extends javax.swing.JFrame {
     private void deselectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectAllMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
         updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_deselectAllMenuItemActionPerformed
 
     private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(true);
         updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectAllMenuItemActionPerformed
 
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
         if (model.deleteSelectedFlowsAndNodes() > 0) {
+            updateLockUnlockButtonIcon();
+            updateValueField();
+            updateCoordinateFields();
             layout("Delete");
             mapComponent.refreshMap();
         }
@@ -3753,6 +3771,8 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
         updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectOverlappingFlowsInfoMenuItemActionPerformed
 
@@ -3828,6 +3848,9 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void mergeNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mergeNodesMenuItemActionPerformed
         model.mergeSelectedNodes();
+        updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
         layout("Merge Nodes");
     }//GEN-LAST:event_mergeNodesMenuItemActionPerformed
@@ -3840,6 +3863,8 @@ public class MainWindow extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, msg, "Flox", JOptionPane.INFORMATION_MESSAGE);
         }
         updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectUnconnectedNodesMenuItemActionPerformed
 
@@ -3909,6 +3934,8 @@ public class MainWindow extends javax.swing.JFrame {
         model.setSelectionOfAllFlows(false);
         model.setSelectionOfAllNodes(true);
         updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectNodesMenuItemActionPerformed
 
@@ -3916,6 +3943,8 @@ public class MainWindow extends javax.swing.JFrame {
         model.setSelectionOfAllFlows(true);
         model.setSelectionOfAllNodes(false);
         updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectFlowsMenuItemActionPerformed
 
@@ -4017,12 +4046,16 @@ public class MainWindow extends javax.swing.JFrame {
     private void deselectNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectNodesMenuItemActionPerformed
         model.setSelectionOfAllNodes(false);
         updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_deselectNodesMenuItemActionPerformed
 
     private void deselectFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectFlowsMenuItemActionPerformed
         model.setSelectionOfAllFlows(false);
         updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_deselectFlowsMenuItemActionPerformed
 
