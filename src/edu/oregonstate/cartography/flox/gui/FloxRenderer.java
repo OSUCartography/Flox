@@ -420,16 +420,31 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             Color strokeColor;
             if (strokeWidthPx == 0) {
                 strokeColor = null;
-            } else if (highlightSelected && node.isSelected()) {
-                strokeColor = SELECTION_COLOR;
             } else {
                 strokeColor = model.getNodeStrokeColor();
             }
+
+            Color fillColor = model.getNodeFillColor();
+            
+            // make sure tiny nodes are visible when selected
+            if (highlightSelected && node.isSelected()) {
+                strokeColor = SELECTION_COLOR;
+                fillColor = SELECTION_COLOR;
+                if (nodeRadiusPx < 2) {
+                    r = 2;
+                }
+            }
+
             // if the stroke width is larger than the radius of the circle, the
-            // drawing engine does not fill the circle entirely. This fix fills
-            // the circle with the stroke color.
-            Color fillColor = strokeWidthPx > nodeRadiusPx ? strokeColor : model.getNodeFillColor();
-            drawCircle(node.x, node.y, r, fillColor, strokeColor);
+            // drawing engine does not fill the circle entirely. Fix: only fill 
+            // with larger radius, do not stroke.
+            if (strokeWidthPx > nodeRadiusPx * 2) {
+                fillColor = strokeColor;
+                r = strokeWidthPx * s;
+                drawCircle(node.x, node.y, r, fillColor, null);
+            } else {
+                drawCircle(node.x, node.y, r, fillColor, strokeColor);
+            }
         }
     }
 
