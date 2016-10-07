@@ -36,8 +36,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -220,7 +220,7 @@ public class MainWindow extends javax.swing.JFrame {
             maxColorButton.setColor(model.getMaxFlowColor());
             minColorButton.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
             smallestFlowColorLabel.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
-            
+
             // nodes
             nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
             nodeStrokeColorButton.setColor(model.getNodeStrokeColor());
@@ -287,6 +287,10 @@ public class MainWindow extends javax.swing.JFrame {
             updateLayerList();
             writeSymbolGUI();
 
+            // value and coordinate fields
+            updateValueField();
+            updateCoordinateFields();
+
         } finally {
             updatingGUI = false;
         }
@@ -308,6 +312,130 @@ public class MainWindow extends javax.swing.JFrame {
         int selectedID = layerList.getSelectedIndex();
         layerList.setListData(model.getLayers().toArray());
         layerList.setSelectedIndex(selectedID);
+    }
+
+    /**
+     * Sets the icon of the lockUnlockButton to the appropriate icon for the
+     * locked status of selected flows.
+     */
+    public void updateLockUnlockButtonIcon() {
+        ArrayList<Flow> selectedFlows = model.getSelectedFlows();
+        if (selectedFlows.size() > 0) {
+            lockUnlockButton.setEnabled(true);
+
+            int locked = 0;
+            int unlocked = 0;
+            for (Flow flow : selectedFlows) {
+                if (flow.isLocked()) {
+                    locked++;
+                } else {
+                    unlocked++;
+                }
+            }
+            if (locked + unlocked == 0) {
+                lockUnlockButton.setEnabled(false);
+            } else if (locked > 0 && unlocked == 0) {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+            } else if (unlocked > 0 && locked == 0) {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
+            } else {
+                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockedUnlocked16x16.gif")));
+            }
+        } else {
+            lockUnlockButton.setEnabled(false);
+        }
+    }
+
+    /**
+     * Update the valueField's value. If the value of all selected features is
+     * the same, set the valueField to that value. Otherwise, set it to null.
+     */
+    public void updateValueField() {
+        updatingGUI = true;
+        try {
+            if (model.isFlowSelected() == false && model.isNodeSelected() == false) {
+                // nothing selected
+                valueFormattedTextField.setValue(null);
+                valueFormattedTextField.setEnabled(false);
+                return;
+            }
+
+            ArrayList<Flow> flows = model.getSelectedFlows();
+            ArrayList<Point> nodes = model.getSelectedNodes();
+
+            // get the number of selected features
+            int nbrFlowsAndNodes = flows.size() + nodes.size();
+
+            // enable the text field if anything is selected
+            valueFormattedTextField.setEnabled(true);
+
+            if (nbrFlowsAndNodes == 1) { // If just one feature is selected
+                double value;
+                if (flows.size() == 1) { // If the selected feature is a flow
+                    value = flows.get(0).getValue();
+                } else { // The selected feature is a node
+                    value = nodes.get(0).getValue();
+                }
+                valueFormattedTextField.setValue(value);
+            } else { // More than one thing is selected
+                // Check to see if all values are the same.
+
+                // FIXME no need to copy values to third array
+                // Make an ArrayList of all values.
+                ArrayList<Double> values = new ArrayList();
+                for (Flow flow : flows) {
+                    values.add(flow.getValue());
+                }
+                for (Point node : nodes) {
+                    values.add(node.getValue());
+                }
+
+                // Get the first value in Values
+                double v = values.get(0);
+
+                // Compare v to all the other values.
+                // If any are different, set valueField to null and exit the method
+                for (double value : values) {
+                    if (v != value) {
+                        valueFormattedTextField.setValue(null);
+                        return;
+                    }
+                }
+
+                // All values are the same, set valueField to v
+                valueFormattedTextField.setValue(v);
+
+            }
+        } finally {
+            updatingGUI = false;
+        }
+    }
+
+    public void updateCoordinateFields() {
+        updatingGUI = true;
+        try {
+            boolean nodeSelected = model.isNodeSelected();
+            xFormattedTextField.setEnabled(nodeSelected);
+            yFormattedTextField.setEnabled(nodeSelected);
+
+            if (nodeSelected == false) {
+                xFormattedTextField.setValue(null);
+                yFormattedTextField.setValue(null);
+            } else {
+                // FIXME no need to copy points. We only need to know whether there is more than 1 selected node.
+                ArrayList<Point> selectedNodes = model.getSelectedNodes();
+                int nbrNodes = selectedNodes.size();
+                if (nbrNodes != 1) {
+                    xFormattedTextField.setValue(null);
+                    yFormattedTextField.setValue(null);
+                } else {
+                    xFormattedTextField.setValue(selectedNodes.get(0).x);
+                    yFormattedTextField.setValue(selectedNodes.get(0).y);
+                }
+            }
+        } finally {
+            updatingGUI = false;
+        }
     }
 
     /**
@@ -935,9 +1063,9 @@ public class MainWindow extends javax.swing.JFrame {
         valueFormattedTextField.setEnabled(false);
         valueFormattedTextField.setFont(valueFormattedTextField.getFont().deriveFont(valueFormattedTextField.getFont().getSize()-2f));
         valueFormattedTextField.setPreferredSize(new java.awt.Dimension(80, 28));
-        valueFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                valueFormattedTextFieldActionPerformed(evt);
+        valueFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                valueFormattedTextFieldPropertyChange(evt);
             }
         });
         jPanel2.add(valueFormattedTextField);
@@ -949,9 +1077,9 @@ public class MainWindow extends javax.swing.JFrame {
         xFormattedTextField.setEnabled(false);
         xFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
         xFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
-        xFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                xFormattedTextFieldActionPerformed(evt);
+        xFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                xyFormattedTextFieldPropertyChanged(evt);
             }
         });
         jPanel2.add(xFormattedTextField);
@@ -963,9 +1091,9 @@ public class MainWindow extends javax.swing.JFrame {
         yFormattedTextField.setEnabled(false);
         yFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
         yFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
-        yFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                yFormattedTextFieldActionPerformed(evt);
+        yFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                xyFormattedTextFieldPropertyChanged(evt);
             }
         });
         jPanel2.add(yFormattedTextField);
@@ -2685,11 +2813,12 @@ public class MainWindow extends javax.swing.JFrame {
             model.setReferenceMapScale(mapComponent.getScale());
             if (model.getMaxNodeValue() == model.getMinNodeValue()) {
                 int r = Model.DEFAULT_NODE_RADIUS_PX;
-                maximumNodeSizeSlider.setValue(r);
+                model.setMaxNodeSizePx(r);
                 model.setMaxFlowStrokeWidthPixel(r * 2 + model.getNodeStrokeWidthPx());
             } else {
                 model.adjustMaxFlowStrokeWidthToNodeSize(maximumFlowWidthSlider.getMaximum());
             }
+            writeModelToGUI();
             mapComponent.repaint();
             layout("Load Flows");
         }
@@ -2709,7 +2838,7 @@ public class MainWindow extends javax.swing.JFrame {
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             String name = FileUtils.getFileNameWithoutExtension(inFilePath);
             setFlows(flows, name);
-            
+
             // the user might have loaded clipping areas before. Apply these
             // clipping areas to the new flows.
             applyClippingSettings();
@@ -3016,9 +3145,7 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     private void arrowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowToggleButtonActionPerformed
-        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent,
-                valueFormattedTextField, xFormattedTextField, yFormattedTextField,
-                lockUnlockButton));
+        mapComponent.setMapTool(new ScaleMoveSelectionTool(mapComponent));
     }//GEN-LAST:event_arrowToggleButtonActionPerformed
 
     private void zoomInToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInToggleButtonActionPerformed
@@ -3440,38 +3567,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectAllMenuItemActionPerformed
 
-    /**
-     * Sets the icon of the lockUnlockButton to the appropriate icon for the
-     * locked status of selected flows.
-     */
-    public void updateLockUnlockButtonIcon() {
-        ArrayList<Flow> selectedFlows = model.getSelectedFlows();
-        if (selectedFlows.size() > 0) {
-            lockUnlockButton.setEnabled(true);
-
-            int locked = 0;
-            int unlocked = 0;
-            for (Flow flow : selectedFlows) {
-                if (flow.isLocked()) {
-                    locked++;
-                } else {
-                    unlocked++;
-                }
-            }
-            if (locked + unlocked == 0) {
-                lockUnlockButton.setEnabled(false);
-            } else if (locked > 0 && unlocked == 0) {
-                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
-            } else if (unlocked > 0 && locked == 0) {
-                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
-            } else {
-                lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockedUnlocked16x16.gif")));
-            }
-        } else {
-            lockUnlockButton.setEnabled(false);
-        }
-    }
-
     private void deleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuItemActionPerformed
         if (model.deleteSelectedFlowsAndNodes() > 0) {
             layout("Delete");
@@ -3513,92 +3608,6 @@ public class MainWindow extends javax.swing.JFrame {
         model.setEnforceCanvasRange(enforceCanvasCheckBoxMenuItem.isSelected());
         layout("");
     }//GEN-LAST:event_enforceCanvasCheckBoxMenuItemActionPerformed
-
-    /**
-     * Sets the x coordinate of selected nodes to the value that was just
-     * entered into this text box.
-     *
-     * @param evt
-     */
-    private void xFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_xFormattedTextFieldActionPerformed
-
-        if (model != null) {
-            try {
-                xFormattedTextField.commitEdit();
-            } catch (ParseException ex) {
-                // the text field does not currently contain a valid value
-                return;
-            }
-            if (xFormattedTextField.getValue() != null) {
-                double x = ((Number) xFormattedTextField.getValue()).doubleValue();
-                ArrayList<Point> selectedNodes = model.getSelectedNodes();
-                for (Point node : selectedNodes) {
-                    node.x = x;
-                }
-            }
-            mapComponent.refreshMap();
-        }
-        // Move focus to MainWindow
-        this.requestFocus();
-        layout("Edit X Coordinate");
-    }//GEN-LAST:event_xFormattedTextFieldActionPerformed
-
-    /**
-     * Sets the Y coordinate of selected nodes to the value that was just
-     * entered into this text box.
-     *
-     * @param evt
-     */
-    private void yFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_yFormattedTextFieldActionPerformed
-        if (model != null) {
-            try {
-                yFormattedTextField.commitEdit();
-            } catch (ParseException ex) {
-                // the text field does not currently contain a valid value
-                return;
-            }
-            if (yFormattedTextField.getValue() != null) {
-                double y = ((Number) yFormattedTextField.getValue()).doubleValue();
-                ArrayList<Point> selectedNodes = model.getSelectedNodes();
-                for (Point node : selectedNodes) {
-                    node.y = y;
-                }
-            }
-            mapComponent.refreshMap();
-        }
-        // Move focus to MainWindow
-        this.requestFocus();
-        layout("Edit Y Coordinate");
-    }//GEN-LAST:event_yFormattedTextFieldActionPerformed
-
-    /**
-     * Sets the value of any selected features to the value that was just
-     * entered into this text box.
-     *
-     * @param evt
-     */
-    private void valueFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldActionPerformed
-        if (model != null) {
-            // Makes sure the value of the box is the thing that changed.
-            try {
-                valueFormattedTextField.commitEdit();
-            } catch (ParseException ex) {
-                // the text field does not currently contain a valid value
-                return;
-            }
-            // Get the value of the field and pass it to the model
-            double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
-            model.setValueOfSelectedFlows(v);
-            model.setValueOfSelectedNodes(v);
-            mapComponent.refreshMap();
-            
-            // update GUI for selecting flow colors. May have to disable a color button.
-            writeModelToGUI();
-        }
-        // Move focus to MainWindow
-        this.requestFocus();
-        layout("Edit Value");
-    }//GEN-LAST:event_valueFormattedTextFieldActionPerformed
 
     private void showNodesToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showNodesToggleButtonActionPerformed
         mapComponent.setDrawNodes(showNodesToggleButton.isSelected());
@@ -4016,6 +4025,59 @@ public class MainWindow extends javax.swing.JFrame {
         updateLockUnlockButtonIcon();
         mapComponent.refreshMap();
     }//GEN-LAST:event_deselectFlowsMenuItemActionPerformed
+
+    /**
+     * Sets the value of any selected features to the value that was just
+     * entered into this text box.
+     *
+     * @param evt
+     */
+
+    private void valueFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_valueFormattedTextFieldPropertyChange
+        if (updatingGUI
+                || "value".equals(evt.getPropertyName()) == false
+                || model == null
+                || valueFormattedTextField.getValue() == null) {
+            return;
+        }
+
+        // Get the value of the field and pass it to the model
+        double v = ((Number) valueFormattedTextField.getValue()).doubleValue();
+        model.setValueOfSelectedFlows(v);
+        model.setValueOfSelectedNodes(v);
+        mapComponent.refreshMap();
+
+        // update GUI for selecting flow colors. May have to disable a color button.
+        writeModelToGUI();
+
+        layout("Edit Value");
+    }//GEN-LAST:event_valueFormattedTextFieldPropertyChange
+
+    private void xyFormattedTextFieldPropertyChanged(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_xyFormattedTextFieldPropertyChanged
+        if (updatingGUI
+                || "value".equals(evt.getPropertyName()) == false
+                || model == null
+                || xFormattedTextField.getValue() == null
+                || yFormattedTextField.getValue() == null) {
+            return;
+        }
+
+        Iterator nodes = model.nodeIterator();
+        while (nodes.hasNext()) {
+            Point node = (Point) nodes.next();
+            if (node.isSelected()) {
+                if (evt.getSource() == xFormattedTextField) {
+                    node.x = (Double) xFormattedTextField.getValue();
+                } else {
+                    node.y = (Double) yFormattedTextField.getValue();
+                }
+            }
+        }
+
+        mapComponent.refreshMap();
+
+        layout("Edit X/Y Coordinate");
+    }//GEN-LAST:event_xyFormattedTextFieldPropertyChanged
 
     /**
      * Returns a string that can be used for a file name when exporting to a

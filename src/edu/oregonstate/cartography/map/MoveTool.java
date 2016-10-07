@@ -9,8 +9,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
-import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
 
 /**
  *
@@ -18,33 +16,17 @@ import javax.swing.JFormattedTextField;
  */
 public class MoveTool extends DoubleBufferedTool implements CombinableTool {
 
-    private final Model model;
-
-    protected final JFormattedTextField xField;
-    protected final JFormattedTextField yField;
-    protected final JButton lockUnlockButton;
 
     boolean dragging = false;
 
     // Stores the coordinates of the previous drag events.
     double previousDrag_x, previousDrag_y;
 
-    private void updateCoordinateFields() {
-        ArrayList<Point> nodes = model.getSelectedNodes();
-        int nbrNodes = nodes.size();
-        xField.setEnabled(nbrNodes == 1);
-        yField.setEnabled(nbrNodes == 1);
-
-        if (nbrNodes != 1) {
-            xField.setValue(null);
-            yField.setValue(null);
-        } else {
-            xField.setValue(nodes.get(0).x);
-            yField.setValue(nodes.get(0).y);
-        }
-
+    // Constructor
+    public MoveTool(AbstractSimpleFeatureMapComponent mapComponent) {
+        super(mapComponent);
     }
-
+    
     /**
      * The mouse was clicked, while this MapTool was active.
      *
@@ -53,7 +35,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      */
     @Override
     public void mouseClicked(Point2D.Double point, MouseEvent evt) {
-
+        Model model = ((FloxMapComponent) mapComponent).getModel();
+        
         // If no dragging occured, deselect all nodes. If a node was clicked, 
         // select that one. If shift is held down, don't do anything.
         if (model.isNodeSelected() && !dragging && !(evt.isShiftDown())) {
@@ -85,7 +68,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      */
     @Override
     public void startDrag(Point2D.Double point, MouseEvent evt) {
-
+        Model model = ((FloxMapComponent) mapComponent).getModel();
         if (model.isNodeSelected()) {
             // There is at least one selected node
             // Was one of them clicked?
@@ -123,14 +106,15 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     @Override
     public void updateDrag(Point2D.Double point, MouseEvent evt) {
         updateLocation(point);
-        updateCoordinateFields();
+        ((FloxMapComponent)mapComponent).getMainWindow().updateCoordinateFields();
     }
 
     @Override
     public void endDrag(Point2D.Double point, MouseEvent evt) {
         // this calls mouseClicked
         super.endDrag(point, evt);
-
+        
+        Model model = ((FloxMapComponent) mapComponent).getModel();
         // deselect all Bezier control points
         if (model.isControlPtSelected()) {
             Iterator<Flow> iterator = model.flowIterator();
@@ -159,7 +143,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      *
      */
     public void updateLocation(Point2D.Double point) {
-
+        Model model = ((FloxMapComponent) mapComponent).getModel();
         if (model.isControlPtSelected()) {
             // If a control point is selected, move only the control point.
             Iterator<Flow> iterator = model.flowIterator();
@@ -212,6 +196,7 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
     }
 
     private void updateClippingAreas() {
+        Model model = ((FloxMapComponent) mapComponent).getModel();
         if (model.hasClipAreas() == false) {
             return;
         }
@@ -227,17 +212,6 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
                 model.updateEndClipArea(flow);
             }
         }
-    }
-
-    // Constructor
-    public MoveTool(AbstractSimpleFeatureMapComponent mapComponent,
-            JFormattedTextField xField, JFormattedTextField yField,
-            JButton lockUnlockButton) {
-        super(mapComponent);
-        this.model = ((FloxMapComponent) mapComponent).getModel();
-        this.xField = xField;
-        this.yField = yField;
-        this.lockUnlockButton = lockUnlockButton;
     }
 
     /**

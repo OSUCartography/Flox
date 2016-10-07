@@ -16,8 +16,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
-import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
 
 /**
  * SelectionTool - a tool to select map features by mouse clicks and mouse
@@ -35,97 +33,16 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     private final Model model;
 
-    protected final JFormattedTextField valueField;
-    protected final JFormattedTextField xField;
-    protected final JFormattedTextField yField;
-    protected final JButton lockUnlockButton;
-
     /**
      * Create a new instance.
      *
      * @param mapComponent The MapComponent for which this MapTool provides its
      * services.
-     * @param valueField Text field to display value of current node or flow.
      */
-    public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent,
-            JFormattedTextField valueField, JFormattedTextField xField,
-            JFormattedTextField yField, JButton lockUnlockButton) {
+    public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent) {
         super(mapComponent);
-        this.valueField = valueField;
-        this.xField = xField;
-        this.yField = yField;
-        this.lockUnlockButton = lockUnlockButton;
+       
         this.model = ((FloxMapComponent) mapComponent).getModel();
-    }
-
-    /**
-     * Update the valueField's value. If the value of all selected features is
-     * the same, set the valueField to that value. Otherwise, set it to null.
-     */
-    private void updateValueField() {
-        ArrayList<Flow> flows = model.getSelectedFlows();
-        ArrayList<Point> nodes = model.getSelectedNodes();
-
-        // get the number of selected features
-        int nbrFlowsAndNodes = flows.size() + nodes.size();
-
-        // enable the valueField if anything is selected
-        valueField.setEnabled(nbrFlowsAndNodes > 0);
-
-        if (nbrFlowsAndNodes == 0) { // If nothing is selected
-            valueField.setValue(null);
-        } else if (nbrFlowsAndNodes == 1) { // If just one feature is selected
-            double value;
-            if (flows.size() == 1) { // If the selected feature is a flow
-                value = flows.get(0).getValue();
-            } else { // The selected feature is a node
-                value = nodes.get(0).getValue();
-            }
-            valueField.setValue(value);
-        } else if (flows.size() + nodes.size() > 1) { // More than one thing is selected
-            // Check to see if all values are the same.
-
-            // Make an ArrayList of all values.
-            ArrayList<Double> values = new ArrayList();
-            for (Flow flow : flows) {
-                values.add(flow.getValue());
-            }
-            for (Point node : nodes) {
-                values.add(node.getValue());
-            }
-
-            // Get the first value in Values
-            double v = values.get(0);
-
-            // Compare v to all the other values.
-            // If any are different, set valueField to null and exit the method
-            for (double value : values) {
-                if (v != value) {
-                    valueField.setValue(null);
-                    return;
-                }
-            }
-
-            // All values are the same, set valueField to v
-            valueField.setValue(v);
-
-        }
-    }
-
-    private void updateCoordinateFields() {
-        ArrayList<Point> selectedNodes = model.getSelectedNodes();
-        int nbrNodes = selectedNodes.size();
-        xField.setEnabled(nbrNodes == 1);
-        yField.setEnabled(nbrNodes == 1);
-
-        if (nbrNodes != 1) {
-            xField.setValue(null);
-            yField.setValue(null);
-        } else {
-            xField.setValue(selectedNodes.get(0).x);
-            yField.setValue(selectedNodes.get(0).y);
-        }
-
     }
 
     /**
@@ -142,8 +59,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         if (rect != null) {
             selectByRectangle(rect, evt.isShiftDown());
-            updateValueField();
-            updateCoordinateFields();
+            ((FloxMapComponent)mapComponent).getMainWindow().updateValueField();
+            ((FloxMapComponent)mapComponent).getMainWindow().updateCoordinateFields();
             ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
         }
 
@@ -212,8 +129,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     @Override
     public void mouseDown(Point2D.Double point, MouseEvent evt) {
         selectByPoint(point, evt.isShiftDown(), SelectionTool.CLICK_PIXEL_TOLERANCE);
-        updateValueField();
-        updateCoordinateFields();
+        ((FloxMapComponent)mapComponent).getMainWindow().updateValueField();
+        ((FloxMapComponent)mapComponent).getMainWindow().updateCoordinateFields();
         ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
     }
 
@@ -317,7 +234,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             cPt.setSelected(true);
                             // Lock the flow
                             flow.setLocked(true);
-                            lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
+                            ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
                             controlPtGotSelected = true;
                             mapComponent.refreshMap();
                             // A control point was selected, so exit the method to 

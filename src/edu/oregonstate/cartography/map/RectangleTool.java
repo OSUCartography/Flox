@@ -129,6 +129,7 @@ public abstract class RectangleTool extends DoubleBufferedTool {
         this.dragStartPos = this.dragCurrentPos = null;
         releaseBackground();
         mapComponent.repaint();
+        mapComponent.requestFocus();
     }
 
     /**
