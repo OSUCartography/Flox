@@ -58,7 +58,7 @@ public class Model {
      * The default value for a flow.
      */
     public static final double DEFAULT_FLOW_VALUE = 1;
-    
+
     /**
      * default value when all nodes have same value on import.
      */
@@ -1887,11 +1887,14 @@ public class Model {
      * maximum values of all flows.
      *
      * @param flow the flow for which a relative value is needed.
-     * @return
+     * @return relative flow value between 0 and 1. Returns 1 if all flows have
+     * the same value.
      */
     public double getRelativeFlowValue(Flow flow) {
-        return (flow.getValue() - getMinFlowValue())
-                / (getMaxFlowValue() - getMinFlowValue());
+        double min = getMinFlowValue();
+        double max = getMaxFlowValue();
+        double dif = max - min;
+        return dif < 1e-12 ? 1 : (flow.getValue() - min) / dif;
     }
 
     /**

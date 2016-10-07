@@ -407,7 +407,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     private void drawNodes(boolean highlightSelected) {
         double s = scale / model.getReferenceMapScale();
-
         double strokeWidthPx = model.getNodeStrokeWidthPx();
 
         // same stroke width for all nodes
@@ -415,6 +414,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         ArrayList<Point> nodes = model.getSortedNodes(false);
         for (Point node : nodes) {
+            boolean drawSelected = highlightSelected && node.isSelected();
             double nodeRadiusPx = model.getNodeRadiusPx(node);
             double r = nodeRadiusPx * s;
             Color strokeColor;
@@ -427,9 +427,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             Color fillColor = model.getNodeFillColor();
             
             // make sure tiny nodes are visible when selected
-            if (highlightSelected && node.isSelected()) {
+            if (drawSelected) {
                 strokeColor = SELECTION_COLOR;
-                fillColor = SELECTION_COLOR;
                 if (nodeRadiusPx < 2) {
                     r = 2;
                 }
@@ -444,6 +443,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 drawCircle(node.x, node.y, r, fillColor, null);
             } else {
                 drawCircle(node.x, node.y, r, fillColor, strokeColor);
+                
+                // draw center of selected nodes
+                if (drawSelected) {
+                    drawCircle(node.x, node.y, 2, SELECTION_COLOR, null);
+                }
             }
         }
     }
