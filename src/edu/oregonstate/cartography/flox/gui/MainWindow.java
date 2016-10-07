@@ -484,14 +484,15 @@ public class MainWindow extends javax.swing.JFrame {
         redoMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator8 = new javax.swing.JPopupMenu.Separator();
         deleteMenuItem = new javax.swing.JMenuItem();
+        jSeparator18 = new javax.swing.JPopupMenu.Separator();
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNodesMenuItem = new javax.swing.JMenuItem();
         selectUnconnectedNodesMenuItem = new javax.swing.JMenuItem();
         selectFlowsMenuItem = new javax.swing.JMenuItem();
         selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
-        selectNoneMenuItem = new javax.swing.JMenuItem();
-        javax.swing.JPopupMenu.Separator jSeparator19 = new javax.swing.JPopupMenu.Separator();
-        referenceMapScaleMenuItem = new javax.swing.JMenuItem();
+        deselectAllMenuItem = new javax.swing.JMenuItem();
+        deselectNodesMenuItem = new javax.swing.JMenuItem();
+        deselectFlowsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator10 = new javax.swing.JPopupMenu.Separator();
         lockMenuItem = new javax.swing.JMenuItem();
         unlockMenuItem = new javax.swing.JMenuItem();
@@ -504,6 +505,8 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator19 = new javax.swing.JPopupMenu.Separator();
+        referenceMapScaleMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
         zoomOnReferenceMapScaleMenuItem = new javax.swing.JMenuItem();
@@ -2190,6 +2193,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(deleteMenuItem);
+        editMenu.add(jSeparator18);
 
         selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         selectAllMenuItem.setText("Select All");
@@ -2232,23 +2236,32 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(selectOverlappingFlowsInfoMenuItem);
 
-        selectNoneMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        selectNoneMenuItem.setText("Deselect All");
-        selectNoneMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        deselectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        deselectAllMenuItem.setText("Deselect All");
+        deselectAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectNoneMenuItemActionPerformed(evt);
+                deselectAllMenuItemActionPerformed(evt);
             }
         });
-        editMenu.add(selectNoneMenuItem);
-        editMenu.add(jSeparator19);
+        editMenu.add(deselectAllMenuItem);
 
-        referenceMapScaleMenuItem.setText("Set Reference Map Scale…");
-        referenceMapScaleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        deselectNodesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        deselectNodesMenuItem.setText("Deselect Nodes");
+        deselectNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                referenceMapScaleMenuItemActionPerformed(evt);
+                deselectNodesMenuItemActionPerformed(evt);
             }
         });
-        editMenu.add(referenceMapScaleMenuItem);
+        editMenu.add(deselectNodesMenuItem);
+
+        deselectFlowsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        deselectFlowsMenuItem.setText("Deselect Flows");
+        deselectFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deselectFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(deselectFlowsMenuItem);
         editMenu.add(jSeparator10);
 
         lockMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2324,6 +2337,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         mapMenu.add(removeSelectedLayerMenuItem);
+        mapMenu.add(jSeparator19);
+
+        referenceMapScaleMenuItem.setText("Set Reference Map Scale…");
+        referenceMapScaleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                referenceMapScaleMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(referenceMapScaleMenuItem);
 
         menuBar.add(mapMenu);
 
@@ -3367,7 +3389,7 @@ public class MainWindow extends javax.swing.JFrame {
         boolean hasNodes = model.getNbrNodes() > 1;
         deleteMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
         selectAllMenuItem.setEnabled(hasNodes);
-        selectNoneMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
+        deselectAllMenuItem.setEnabled(hasSelectedFlow || hasSelectedNode);
         selectUnconnectedNodesMenuItem.setEnabled(hasNodes);
         lockMenuItem.setEnabled(isUnlockedFlowSelected);
         unlockMenuItem.setEnabled(isLockedFlowSelected);
@@ -3404,11 +3426,11 @@ public class MainWindow extends javax.swing.JFrame {
 
     }//GEN-LAST:event_lockMenuItemActionPerformed
 
-    private void selectNoneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectNoneMenuItemActionPerformed
+    private void deselectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectAllMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
         updateLockUnlockButtonIcon();
         mapComponent.refreshMap();
-    }//GEN-LAST:event_selectNoneMenuItemActionPerformed
+    }//GEN-LAST:event_deselectAllMenuItemActionPerformed
 
     private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(true);
@@ -3978,6 +4000,18 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_showFlowsCheckBoxMenuItemActionPerformed
 
+    private void deselectNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectNodesMenuItemActionPerformed
+        model.setSelectionOfAllNodes(false);
+        updateLockUnlockButtonIcon();
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_deselectNodesMenuItemActionPerformed
+
+    private void deselectFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectFlowsMenuItemActionPerformed
+        model.setSelectionOfAllFlows(false);
+        updateLockUnlockButtonIcon();
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_deselectFlowsMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4049,6 +4083,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JDialog debugDialog;
     private javax.swing.JMenu debugMenu;
     private javax.swing.JMenuItem deleteMenuItem;
+    private javax.swing.JMenuItem deselectAllMenuItem;
+    private javax.swing.JMenuItem deselectFlowsMenuItem;
+    private javax.swing.JMenuItem deselectNodesMenuItem;
     private javax.swing.JToggleButton distanceToggleButton;
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
@@ -4121,6 +4158,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator14;
     private javax.swing.JPopupMenu.Separator jSeparator16;
     private javax.swing.JPopupMenu.Separator jSeparator17;
+    private javax.swing.JPopupMenu.Separator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator21;
     private javax.swing.JPopupMenu.Separator jSeparator22;
     private javax.swing.JSeparator jSeparator23;
@@ -4184,7 +4222,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem selectFlowsMenuItem;
     private javax.swing.JMenuItem selectIntersectingSiblingFlowsMenuItem;
     private javax.swing.JMenuItem selectNodesMenuItem;
-    private javax.swing.JMenuItem selectNoneMenuItem;
     private javax.swing.JMenuItem selectOverlappingFlowsInfoMenuItem;
     private javax.swing.JButton selectPointsFileButton;
     private javax.swing.JMenuItem selectUnconnectedNodesMenuItem;
