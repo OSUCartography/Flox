@@ -1644,7 +1644,7 @@
                         <Property name="verticalGap" type="int" value="0"/>
                       </Layout>
                       <SubComponents>
-                        <Component class="javax.swing.JLabel" name="jLabel34">
+                        <Component class="javax.swing.JLabel" name="smallestFlowColorLabel">
                           <Properties>
                             <Property name="text" type="java.lang.String" value="Smallest"/>
                           </Properties>

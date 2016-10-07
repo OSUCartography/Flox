@@ -218,7 +218,9 @@ public class MainWindow extends javax.swing.JFrame {
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
             minColorButton.setColor(model.getMinFlowColor());
             maxColorButton.setColor(model.getMaxFlowColor());
-
+            minColorButton.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
+            smallestFlowColorLabel.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
+            
             // nodes
             nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
             nodeStrokeColorButton.setColor(model.getNodeStrokeColor());
@@ -388,7 +390,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel44 = new javax.swing.JLabel();
         jLabel45 = new javax.swing.JLabel();
         jPanel3 = new TransparentMacPanel();
-        jLabel34 = new javax.swing.JLabel();
+        smallestFlowColorLabel = new javax.swing.JLabel();
         minColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         jLabel35 = new javax.swing.JLabel();
         maxColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
@@ -1271,8 +1273,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         jPanel3.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 4, 0));
 
-        jLabel34.setText("Smallest");
-        jPanel3.add(jLabel34);
+        smallestFlowColorLabel.setText("Smallest");
+        jPanel3.add(smallestFlowColorLabel);
 
         minColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3589,6 +3591,9 @@ public class MainWindow extends javax.swing.JFrame {
             model.setValueOfSelectedFlows(v);
             model.setValueOfSelectedNodes(v);
             mapComponent.refreshMap();
+            
+            // update GUI for selecting flow colors. May have to disable a color button.
+            writeModelToGUI();
         }
         // Move focus to MainWindow
         this.requestFocus();
@@ -4137,7 +4142,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
-    private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
@@ -4235,6 +4239,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem showObstaclesCheckBoxMenuItem;
     private javax.swing.JMenuItem showOptionsMenuItem;
     private javax.swing.JCheckBoxMenuItem showRangeBoxCheckBoxMenuItem;
+    private javax.swing.JLabel smallestFlowColorLabel;
     private javax.swing.JMenuItem spiralPointsMenuItem;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
     private javax.swing.JSpinner startDistanceSpinner;
