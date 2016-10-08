@@ -89,6 +89,74 @@ public class Model {
     }
 
     /**
+     * A Comparator defines conditions to compare two double values. Used to
+     * select flows and nodes by their values.
+     */
+    public enum Comparator {
+
+        /**
+         * first value is greater than second value
+         */
+        GREATER_THAN("greater than (>)"),
+        /**
+         * first value is greater than or equal to second value
+         */
+        GREATER_THAN_OR_EQUAL("greater than or equal to (>=)"),
+        /**
+         * the two values are equal
+         */
+        EQUAL("equal to (=)"),
+        /**
+         * the first value is smaller than the second value
+         */
+        SMALLER_THAN("smaller than (<)"),
+        /**
+         * the first value is smaller than or equal to the second value
+         */
+        SMALLER_THAN_OR_EQUAL("smaller than or equal to (<=)");
+
+        private final String description;
+
+        private Comparator(String s) {
+            description = s;
+        }
+
+        /**
+         * Returned string is meant for use in GUI.
+         * @return 
+         */
+        @Override
+        public String toString() {
+            return description;
+        }
+
+        /**
+         * Returns whether two values satisfy the conditions of this comparator.
+         *
+         * @param v1 first value
+         * @param v2 second value
+         * @return true if values satisfy requirements, false otherwise.
+         */
+        public boolean match(double v1, double v2) {
+            int i = Double.compare(v1, v2);
+            switch (this) {
+                case GREATER_THAN:
+                    return i == 1;
+                case GREATER_THAN_OR_EQUAL:
+                    return i == 1 || i == 0;
+                case EQUAL:
+                    return i == 0;
+                case SMALLER_THAN:
+                    return i == -1;
+                case SMALLER_THAN_OR_EQUAL:
+                    return i == -1 || i == 0;
+                default:
+                    return false;
+            }
+        }
+    }
+
+    /**
      * Determines the maximum number of intermediate nodes per flow.
      */
     private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
@@ -593,6 +661,48 @@ public class Model {
             Point node = iter.next();
             if (graph.getFlowsForNode(node).isEmpty()) {
                 node.setSelected(true);
+                ++n;
+            }
+        }
+        return n;
+    }
+
+    /**
+     * Select all nodes that satisfy the conditions of a Comparator.
+     *
+     * @param comparator determines what conditions need to be met to select a
+     * node
+     * @param threshold threshold value
+     * @return number of nodes that meet the conditions of the Comparator
+     */
+    public int selectNodesByValue(Comparator comparator, double threshold) {
+        int n = 0;
+        Iterator<Point> iter = nodeIterator();
+        while (iter.hasNext()) {
+            Point node = iter.next();
+            if (comparator.match(node.getValue(), threshold)) {
+                node.setSelected(true);
+                ++n;
+            }
+        }
+        return n;
+    }
+
+    /**
+     * Select all flows that satisfy the conditions of a Comparator.
+     *
+     * @param comparator determines what conditions need to be met to select a
+     * flow
+     * @param threshold threshold value
+     * @return number of flows that meet the conditions of the Comparator
+     */
+    public int selectFlowsByValue(Comparator comparator, double threshold) {
+        int n = 0;
+        Iterator<Flow> iter = flowIterator();
+        while (iter.hasNext()) {
+            Flow flow = iter.next();
+            if (comparator.match(flow.getValue(), threshold)) {
+                flow.setSelected(true);
                 ++n;
             }
         }

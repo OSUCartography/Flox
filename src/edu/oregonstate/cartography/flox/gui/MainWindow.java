@@ -42,7 +42,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
@@ -128,9 +130,10 @@ public class MainWindow extends javax.swing.JFrame {
         java.awt.Point mapTopLeft = mapComponent.getLocationOnScreen();
         int x = mapTopLeft.x + mapComponent.getWidth() - (int) dlgDim.getWidth() - 5;
         int y = mapTopLeft.y + +5;
-        computationPalette.setAlwaysOnTop(true);
         computationPalette.setLocation(x, y);
         computationPalette.setVisible(true);
+        
+        this.requestFocus();
     }
 
     /**
@@ -469,7 +472,7 @@ public class MainWindow extends javax.swing.JFrame {
         selectFlowsFileButton = new javax.swing.JButton();
         importPanelOKButton = new javax.swing.JButton();
         importPanelCancelButton = new javax.swing.JButton();
-        computationPalette = new javax.swing.JDialog();
+        computationPalette = new JDialog(this);
         jPanel1 = new javax.swing.JPanel();
         jLabel37 = new javax.swing.JLabel();
         accuracyComboBox = new javax.swing.JComboBox<>();
@@ -478,7 +481,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel38 = new javax.swing.JLabel();
         progressBarPanel = new javax.swing.JPanel();
         progressBar = new javax.swing.JProgressBar();
-        debugDialog = new javax.swing.JDialog();
+        debugDialog = new JDialog(this);
         jPanel5 = new javax.swing.JPanel();
         exponentSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel4 = new javax.swing.JLabel();
@@ -488,6 +491,14 @@ public class MainWindow extends javax.swing.JFrame {
         adjustFlowWidthMenuItem = new javax.swing.JMenuItem();
         jSeparator9 = new javax.swing.JPopupMenu.Separator();
         showFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        selectionDialog = new JDialog(this);
+        selectionPanel = new javax.swing.JPanel();
+        jLabel34 = new javax.swing.JLabel();
+        selectFlowNodeComboBox = new javax.swing.JComboBox<>();
+        selectTypeComboBox = new javax.swing.JComboBox<>();
+        selectValueFormattedTextField = new javax.swing.JFormattedTextField();
+        selectButton = new javax.swing.JButton();
+        selectInfoLabel = new javax.swing.JLabel();
         jToolBar1 = new javax.swing.JToolBar();
         jPanel2 = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
@@ -625,12 +636,15 @@ public class MainWindow extends javax.swing.JFrame {
         redoMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator8 = new javax.swing.JPopupMenu.Separator();
         deleteMenuItem = new javax.swing.JMenuItem();
+        jSeparator27 = new javax.swing.JPopupMenu.Separator();
+        selectionDialogMenuItem = new javax.swing.JMenuItem();
         jSeparator18 = new javax.swing.JPopupMenu.Separator();
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNodesMenuItem = new javax.swing.JMenuItem();
         selectUnconnectedNodesMenuItem = new javax.swing.JMenuItem();
         selectFlowsMenuItem = new javax.swing.JMenuItem();
         selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
+        jSeparator28 = new javax.swing.JPopupMenu.Separator();
         deselectAllMenuItem = new javax.swing.JMenuItem();
         deselectNodesMenuItem = new javax.swing.JMenuItem();
         deselectFlowsMenuItem = new javax.swing.JMenuItem();
@@ -760,7 +774,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
 
         computationPalette.setTitle("Computation");
-        computationPalette.setFocusableWindowState(false);
         computationPalette.setResizable(false);
         computationPalette.setType(java.awt.Window.Type.UTILITY);
         computationPalette.getContentPane().setLayout(new java.awt.GridBagLayout());
@@ -847,8 +860,6 @@ public class MainWindow extends javax.swing.JFrame {
         computationPalette.getContentPane().add(progressBarPanel, gridBagConstraints);
 
         debugDialog.setTitle("Debug Options");
-        debugDialog.setAlwaysOnTop(true);
-        debugDialog.setFocusableWindowState(false);
         debugDialog.setType(java.awt.Window.Type.UTILITY);
         debugDialog.getContentPane().setLayout(new java.awt.BorderLayout(20, 20));
 
@@ -946,6 +957,55 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         flowWidthOptionsPopupMenu.add(showFlowsCheckBoxMenuItem);
+
+        selectionDialog.setTitle("Selection");
+        selectionDialog.setResizable(false);
+        selectionDialog.getContentPane().setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 15, 15));
+
+        selectionPanel.setLayout(new java.awt.GridBagLayout());
+
+        jLabel34.setText("Select");
+        selectionPanel.add(jLabel34, new java.awt.GridBagConstraints());
+
+        selectFlowNodeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "flows", "nodes" }));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        selectionPanel.add(selectFlowNodeComboBox, gridBagConstraints);
+
+        selectTypeComboBox.setModel(new DefaultComboBoxModel(Model.Comparator.values()));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+        selectionPanel.add(selectTypeComboBox, gridBagConstraints);
+
+        selectValueFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.############"))));
+        selectValueFormattedTextField.setPreferredSize(new java.awt.Dimension(200, 28));
+        selectionPanel.add(selectValueFormattedTextField, new java.awt.GridBagConstraints());
+
+        selectButton.setText("Select");
+        selectButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+        selectionPanel.add(selectButton, gridBagConstraints);
+
+        selectInfoLabel.setFont(selectInfoLabel.getFont().deriveFont(selectInfoLabel.getFont().getSize()-2f));
+        selectInfoLabel.setText(" ");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        selectionPanel.add(selectInfoLabel, gridBagConstraints);
+
+        selectionDialog.getContentPane().add(selectionPanel);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -2334,6 +2394,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(deleteMenuItem);
+        editMenu.add(jSeparator27);
+
+        selectionDialogMenuItem.setText("Select by Value…");
+        selectionDialogMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectionDialogMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectionDialogMenuItem);
         editMenu.add(jSeparator18);
 
         selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2376,6 +2445,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(selectOverlappingFlowsInfoMenuItem);
+        editMenu.add(jSeparator28);
 
         deselectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         deselectAllMenuItem.setText("Deselect All");
@@ -4112,6 +4182,50 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Edit X/Y Coordinate");
     }//GEN-LAST:event_xyFormattedTextFieldPropertyChanged
 
+    private void selectionDialogMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectionDialogMenuItemActionPerformed
+        selectionDialog.pack();
+        selectionDialog.setLocationRelativeTo(this);
+        selectionDialog.setVisible(true);
+        
+        if (selectValueFormattedTextField.getValue() == null) {
+            boolean selectFlows = selectFlowNodeComboBox.getSelectedIndex() == 0;
+            if (selectFlows) {
+                double v = (model.getMinFlowValue() + model.getMaxFlowValue()) / 2d;
+                selectValueFormattedTextField.setValue(v);
+            } else {
+                double v = (model.getMinNodeValue()+ model.getMaxNodeValue()) / 2d;
+                selectValueFormattedTextField.setValue(v);
+            }
+        }
+    }//GEN-LAST:event_selectionDialogMenuItemActionPerformed
+
+    private void selectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectButtonActionPerformed
+        // deselect currently selected flows or nodes
+        boolean selectFlows = selectFlowNodeComboBox.getSelectedIndex() == 0;
+        if (selectFlows) {
+            model.setSelectionOfAllFlows(false);
+        } else {
+            model.setSelectionOfAllNodes(false);
+        }
+
+        // select flows or nodes
+        double threshold = ((Number) selectValueFormattedTextField.getValue()).doubleValue();  
+        Model.Comparator comparator = (Model.Comparator) (selectTypeComboBox.getSelectedItem());
+        final int nSelected;
+        if (selectFlows) {
+            nSelected = model.selectFlowsByValue(comparator, threshold);
+        } else {
+            nSelected = model.selectNodesByValue(comparator, threshold);
+        }
+        
+        // update GUI
+        selectInfoLabel.setText("Selected " + nSelected + (selectFlows ? " flows." : " nodes."));
+        updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_selectButtonActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4237,6 +4351,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
@@ -4264,6 +4379,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator24;
     private javax.swing.JSeparator jSeparator25;
     private javax.swing.JSeparator jSeparator26;
+    private javax.swing.JPopupMenu.Separator jSeparator27;
+    private javax.swing.JPopupMenu.Separator jSeparator28;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
@@ -4316,14 +4433,22 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveSettingsMenuItem;
     private javax.swing.JMenuItem selectAllMenuItem;
+    private javax.swing.JButton selectButton;
     private javax.swing.JButton selectEndClipAreaButton;
+    private javax.swing.JComboBox<String> selectFlowNodeComboBox;
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JMenuItem selectFlowsMenuItem;
+    private javax.swing.JLabel selectInfoLabel;
     private javax.swing.JMenuItem selectIntersectingSiblingFlowsMenuItem;
     private javax.swing.JMenuItem selectNodesMenuItem;
     private javax.swing.JMenuItem selectOverlappingFlowsInfoMenuItem;
     private javax.swing.JButton selectPointsFileButton;
+    private javax.swing.JComboBox<String> selectTypeComboBox;
     private javax.swing.JMenuItem selectUnconnectedNodesMenuItem;
+    private javax.swing.JFormattedTextField selectValueFormattedTextField;
+    private javax.swing.JDialog selectionDialog;
+    private javax.swing.JMenuItem selectionDialogMenuItem;
+    private javax.swing.JPanel selectionPanel;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JCheckBoxMenuItem showComputationSettingsCheckBoxMenuItem;
