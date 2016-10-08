@@ -26,6 +26,7 @@ import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.geom.Rectangle2D;
@@ -43,6 +44,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
@@ -132,7 +134,7 @@ public class MainWindow extends javax.swing.JFrame {
         int y = mapTopLeft.y + +5;
         computationPalette.setLocation(x, y);
         computationPalette.setVisible(true);
-        
+
         this.requestFocus();
     }
 
@@ -662,6 +664,8 @@ public class MainWindow extends javax.swing.JFrame {
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator19 = new javax.swing.JPopupMenu.Separator();
         referenceMapScaleMenuItem = new javax.swing.JMenuItem();
+        jSeparator29 = new javax.swing.JPopupMenu.Separator();
+        backgroundColorMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
         zoomOnReferenceMapScaleMenuItem = new javax.swing.JMenuItem();
@@ -2557,6 +2561,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         mapMenu.add(referenceMapScaleMenuItem);
+        mapMenu.add(jSeparator29);
+
+        backgroundColorMenuItem.setText("Background Color…");
+        backgroundColorMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backgroundColorMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(backgroundColorMenuItem);
 
         menuBar.add(mapMenu);
 
@@ -4186,14 +4199,14 @@ public class MainWindow extends javax.swing.JFrame {
         selectionDialog.pack();
         selectionDialog.setLocationRelativeTo(this);
         selectionDialog.setVisible(true);
-        
+
         if (selectValueFormattedTextField.getValue() == null) {
             boolean selectFlows = selectFlowNodeComboBox.getSelectedIndex() == 0;
             if (selectFlows) {
                 double v = (model.getMinFlowValue() + model.getMaxFlowValue()) / 2d;
                 selectValueFormattedTextField.setValue(v);
             } else {
-                double v = (model.getMinNodeValue()+ model.getMaxNodeValue()) / 2d;
+                double v = (model.getMinNodeValue() + model.getMaxNodeValue()) / 2d;
                 selectValueFormattedTextField.setValue(v);
             }
         }
@@ -4209,7 +4222,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
         // select flows or nodes
-        double threshold = ((Number) selectValueFormattedTextField.getValue()).doubleValue();  
+        double threshold = ((Number) selectValueFormattedTextField.getValue()).doubleValue();
         Model.Comparator comparator = (Model.Comparator) (selectTypeComboBox.getSelectedItem());
         final int nSelected;
         if (selectFlows) {
@@ -4217,7 +4230,7 @@ public class MainWindow extends javax.swing.JFrame {
         } else {
             nSelected = model.selectNodesByValue(comparator, threshold);
         }
-        
+
         // update GUI
         selectInfoLabel.setText("Selected " + nSelected + (selectFlows ? " flows." : " nodes."));
         updateLockUnlockButtonIcon();
@@ -4225,6 +4238,14 @@ public class MainWindow extends javax.swing.JFrame {
         updateCoordinateFields();
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectButtonActionPerformed
+
+    private void backgroundColorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backgroundColorMenuItemActionPerformed
+        Color color = JColorChooser.showDialog(this, "Choose Background Color",
+                model.getBackgroundColor());
+        model.setBackgroundColor(color);
+        addUndo("Background Color");
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_backgroundColorMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4285,6 +4306,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadLengthSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
+    private javax.swing.JMenuItem backgroundColorMenuItem;
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JPanel clipAreaControlPanel;
     private javax.swing.JPanel clipAreaPanel;
@@ -4381,6 +4403,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator26;
     private javax.swing.JPopupMenu.Separator jSeparator27;
     private javax.swing.JPopupMenu.Separator jSeparator28;
+    private javax.swing.JPopupMenu.Separator jSeparator29;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;

@@ -113,6 +113,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             boolean drawEndClipAreas,
             boolean drawObstacles) {
 
+        g2d.setColor(model.getBackgroundColor());
+        g2d.fillRect(0, 0, canvasWidth, canvasHeight);
+        
         if (drawCanvas) {
             drawCanvas();
         }

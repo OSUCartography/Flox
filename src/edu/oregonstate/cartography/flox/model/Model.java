@@ -123,7 +123,8 @@ public class Model {
 
         /**
          * Returned string is meant for use in GUI.
-         * @return 
+         *
+         * @return
          */
         @Override
         public String toString() {
@@ -442,6 +443,12 @@ public class Model {
      * A map with a set of symbolized layers.
      */
     private final Map map = new Map();
+
+    /**
+     * Background color of map.
+     */
+    @XmlJavaTypeAdapter(ColorJaxbAdaptor.class)
+    private Color backgroundColor = Color.WHITE;
 
     /**
      * Constructor of the model.
@@ -1559,6 +1566,23 @@ public class Model {
      */
     public int getNbrLayers() {
         return map.getNbrLayers();
+    }
+
+    /**
+     * Returns the background color of the map
+     * @return the backgroundColor
+     */
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    /**
+     * Set the background color of the map.
+     * 
+     * @param backgroundColor the backgroundColor to set
+     */
+    public void setBackgroundColor(Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
     /**
