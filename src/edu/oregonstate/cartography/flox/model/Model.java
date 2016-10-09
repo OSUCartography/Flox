@@ -1570,6 +1570,7 @@ public class Model {
 
     /**
      * Returns the background color of the map
+     *
      * @return the backgroundColor
      */
     public Color getBackgroundColor() {
@@ -1578,7 +1579,7 @@ public class Model {
 
     /**
      * Set the background color of the map.
-     * 
+     *
      * @param backgroundColor the backgroundColor to set
      */
     public void setBackgroundColor(Color backgroundColor) {
@@ -1690,9 +1691,29 @@ public class Model {
     }
 
     /**
+     * Returns the size of the map canvas. The canvas is defined by the bounding
+     * box around all start and end nodes and the percentage defined by
+     * canvasPadding.
+     *
+     * @return canvas rectangle in world coordinates
+     */
+    public Rectangle2D getCanvas() {
+        Rectangle2D nodesBoundingBox = getNodesBoundingBox();
+        double w = nodesBoundingBox.getWidth();
+        double h = nodesBoundingBox.getHeight();
+        double x = nodesBoundingBox.getX();
+        double y = nodesBoundingBox.getY();
+        // the additional padding around the nodes is a percentage of the bounding box
+        double xPad = w * getCanvasPadding();
+        double yPad = h * getCanvasPadding();
+        nodesBoundingBox.setRect(x - xPad, y - yPad, w + 2 * xPad, h + 2 * yPad);
+        return nodesBoundingBox;
+    }
+
+    /**
      * Returns the bounding box containing all start and end points.
      *
-     * @return the bounding box
+     * @return the bounding box in world coordinates
      */
     public Rectangle2D getNodesBoundingBox() {
         Iterator<Point> nodeIterator = nodeIterator();

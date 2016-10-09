@@ -55,7 +55,7 @@ class LayoutWorker extends SwingWorker<Void, Void> {
 
         // store initial lock flags of all flows
         boolean[] initialLocks = layouter.getModel().getLocks();
-        Rectangle2D canvas = layouter.getModel().getNodesBoundingBox();
+        Rectangle2D canvas = layouter.getModel().getCanvas();
         for (int i = 0; i < nbrIterations; i++) {
             if (isCancelled()) {
                 break;

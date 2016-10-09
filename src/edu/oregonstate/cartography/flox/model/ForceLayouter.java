@@ -122,7 +122,7 @@ public class ForceLayouter {
 
         // compute one iteration of forces with a linearly decreasing weight
         double weight = 1d - (double) i / model.getNbrIterations();
-        computeForces(weight);
+        computeForces(weight, canvas);
 
         if (model.isResolveIntersectionsForSiblings()) {
             List<Model.IntersectingFlowPair> pairs = getIntersectingSiblings();
@@ -181,12 +181,14 @@ public class ForceLayouter {
     }
 
     /**
-     * Compute on iteration of forces exerted on control points of all flows.
+     * Compute one iteration of forces exerted on control points of all flows.
      *
      * @param weight the weight for the displacements resulting from this
      * iteration
+     * @param canvas map canvas. Control points may be forces to stay within
+     * this rectangle.
      */
-    public void computeForces(double weight) {
+    public void computeForces(double weight, Rectangle2D canvas) {
         if (model.getNbrFlows() < 2) {
             return;
         }
@@ -221,7 +223,6 @@ public class ForceLayouter {
 
         // compute velocity at time t + dt
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
-        Rectangle2D nodesBoundingBox = model.getNodesBoundingBox();
         flowIterator = model.flowIterator();
         int i = 0;
         while (flowIterator.hasNext()) {
@@ -253,7 +254,7 @@ public class ForceLayouter {
                 enforcer.enforceFlowControlPointRange(flow);
             }
             if (model.isEnforceCanvasRange()) {
-                enforcer.enforceCanvasBoundingBox(flow, nodesBoundingBox);
+                enforcer.enforceCanvasBoundingBox(flow, canvas);
             }
             i++;
         }

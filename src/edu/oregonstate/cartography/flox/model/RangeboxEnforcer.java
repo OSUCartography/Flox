@@ -98,68 +98,55 @@ public class RangeboxEnforcer {
      * @param canvas canvas rectangle
      */
     public void enforceCanvasBoundingBox(Flow flow, Rectangle2D canvas) {
-
         if (flow.isLocked()) {
             return;
         }
 
-        double cWidth = canvas.getWidth();
-        double cHeight = canvas.getHeight();
-
-        // Outer padding of the canvas bounding box
-        // Is a percentage of the canvas size
-        double xPad = cWidth * model.getCanvasPadding();
-        double yPad = cHeight * model.getCanvasPadding();
-
         // Get the corner points of the canvas
-        Point b1 = new Point(canvas.getX() - xPad, canvas.getY() - yPad);
-        Point b2 = new Point(canvas.getMaxX() + xPad, canvas.getY() - yPad);
-        Point b3 = new Point(canvas.getX() - xPad, canvas.getMaxY() + yPad);
-        Point b4 = new Point(canvas.getMaxX() + xPad, canvas.getMaxY() + yPad);
-
+        double x1 = canvas.getX();
+        double y1 = canvas.getY();
+        double x2 = canvas.getMaxX();
+        double y2 = canvas.getY();
+        double x3 = canvas.getX();
+        double y3 = canvas.getMaxY();
+        double x4 = canvas.getMaxX();
+        double y4 = canvas.getMaxY();
+        
         Point cPt = flow.getCtrlPt();
         Point refPt = flow.getBaseLineMidPoint();
 
-        if (GeometryUtils.linesIntersect(
-                refPt.x, refPt.y,
+        if (GeometryUtils.linesIntersect(refPt.x, refPt.y,
                 cPt.x, cPt.y,
-                b1.x, b1.y,
-                b2.x, b2.y)) {
-            GeometryUtils.getLineLineIntersection(
-                    refPt.x, refPt.y,
+                x1, y1,
+                x2, y2)) {
+            GeometryUtils.getLineLineIntersection(refPt.x, refPt.y,
                     cPt.x, cPt.y,
-                    b1.x, b1.y,
-                    b2.x, b2.y, cPt);
-        } else if (GeometryUtils.linesIntersect(
-                refPt.x, refPt.y,
+                    x1, y1,
+                    x2, y2, cPt);
+        } else if (GeometryUtils.linesIntersect(refPt.x, refPt.y,
                 cPt.x, cPt.y,
-                b3.x, b3.y,
-                b4.x, b4.y)) {
-            GeometryUtils.getLineLineIntersection(
-                    refPt.x, refPt.y,
+                x3, y3,
+                x4, y4)) {
+            GeometryUtils.getLineLineIntersection(refPt.x, refPt.y,
                     cPt.x, cPt.y,
-                    b3.x, b3.y,
-                    b4.x, b4.y, cPt);
-        } else if (GeometryUtils.linesIntersect(
-                refPt.x, refPt.y,
+                    x3, y3,
+                    x4, y4, cPt);
+        } else if (GeometryUtils.linesIntersect(refPt.x, refPt.y,
                 cPt.x, cPt.y,
-                b1.x, b1.y,
-                b3.x, b3.y)) {
-            GeometryUtils.getLineLineIntersection(
-                    refPt.x, refPt.y,
+                x1, y1,
+                x3, y3)) {
+            GeometryUtils.getLineLineIntersection(refPt.x, refPt.y,
                     cPt.x, cPt.y,
-                    b1.x, b1.y,
-                    b3.x, b3.y, cPt);
-        } else if (GeometryUtils.linesIntersect(
-                refPt.x, refPt.y,
+                    x1, y1,
+                    x3, y3, cPt);
+        } else if (GeometryUtils.linesIntersect(refPt.x, refPt.y,
                 cPt.x, cPt.y,
-                b2.x, b2.y,
-                b4.x, b4.y)) {
-            GeometryUtils.getLineLineIntersection(
-                    refPt.x, refPt.y,
+                x2, y2,
+                x4, y4)) {
+            GeometryUtils.getLineLineIntersection(refPt.x, refPt.y,
                     cPt.x, cPt.y,
-                    b2.x, b2.y,
-                    b4.x, b4.y, cPt);
+                    x2, y2,
+                    x4, y4, cPt);
         }
     }
 
