@@ -460,44 +460,12 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      */
     private void drawCanvas() {
         g2d.setStroke(new BasicStroke(1));
-        Rectangle2D canvas = model.getNodesBoundingBox();
-
-        double cWidth = canvas.getWidth();
-        double cHeight = canvas.getHeight();
-
-        // Get the additional padding around the canvas, which is a
-        // percentage of the current canvas specified by the model.
-        double xPad = cWidth * model.getCanvasPadding();
-        double yPad = cHeight * model.getCanvasPadding();
-
-        // Calculate the points of the canvas rectangle, adding the 
-        // canvasPadding.
-        Point b1 = new Point(
-                xToPx(canvas.getX() - xPad),
-                yToPx(canvas.getY() - yPad));
-        Point b2 = new Point(
-                xToPx(canvas.getMaxX() + xPad),
-                yToPx(canvas.getY() - yPad));
-        Point b3 = new Point(
-                xToPx(canvas.getX() - xPad),
-                yToPx(canvas.getMaxY() + yPad));
-        Point b4 = new Point(
-                xToPx(canvas.getMaxX() + xPad),
-                yToPx(canvas.getMaxY() + yPad));
-
-        // Construct a GeneralPath from the canvas points
-        GeneralPath canvasPath = new GeneralPath();
-        canvasPath.moveTo(b1.x, b1.y);
-        canvasPath.lineTo(b2.x, b2.y);
-        canvasPath.lineTo(b4.x, b4.y);
-        canvasPath.lineTo(b3.x, b3.y);
-        canvasPath.lineTo(b1.x, b1.y);
-
-        // Draw the canvas
+        Rectangle2D canvas = model.getCanvas();
+        rectToPx(canvas);
         g2d.setColor(Color.BLACK);
-        g2d.draw(canvasPath);
+        g2d.draw(canvas);
         g2d.setColor(new Color(245, 245, 245));
-        g2d.fill(canvasPath);
+        g2d.fill(canvas);
     }
 
     private void drawFlowRangebox() {

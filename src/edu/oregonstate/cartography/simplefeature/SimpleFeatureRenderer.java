@@ -12,6 +12,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Renders JTS simple features to a Graphics2D context. Also provides access to
@@ -255,6 +256,17 @@ public class SimpleFeatureRenderer {
         return (north - y) * scale;
     }
 
+    /**
+     * Transform the coordinates of a rectangle from world to pixel coordinates.
+     * @param rect rectangle to transform
+     */
+    public void rectToPx(Rectangle2D rect) {
+        double x = xToPx(rect.getX());
+        double y = yToPx(rect.getMaxY());
+        double w = xToPx(rect.getMaxX()) - x;
+        double h = yToPx(rect.getY()) - y;
+        rect.setRect(x, y, w, h);
+    }
     /**
      * Returns the graphics destination context.
      *
