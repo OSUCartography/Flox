@@ -105,6 +105,7 @@ public class SVGFlowExporter extends SVGExporter {
         rect.setAttribute("y", "0");
         rect.setAttribute("width", df.format(canvasWidth));
         rect.setAttribute("height", df.format(canvasHeight));
+        rect.setAttribute("id", "Canvas");
         setVectorStyle(rect, null, 0, model.getBackgroundColor());
         svgRootElement.appendChild(rect);
 

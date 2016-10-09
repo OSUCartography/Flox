@@ -774,7 +774,17 @@ public class ForceLayouter {
         Iterator<Point> nodeIterator = model.nodeIterator();
         while (nodeIterator.hasNext()) {
             Point node = nodeIterator.next();
-            double rPx = model.getNodeRadiusPx(node) + 0.5 * model.getNodeStrokeWidthPx();
+
+            // nodes are obstacles
+            double nodeRadiusPx = model.getNodeRadiusPx(node);
+            double strokeWidthPx = model.getNodeStrokeWidthPx();
+            final double rPx;
+            if (strokeWidthPx > nodeRadiusPx * 2) {
+                // stroke is wider than the diameter of the circle
+                rPx = strokeWidthPx;
+            } else {
+                rPx = nodeRadiusPx + 0.5 * strokeWidthPx;
+            }
             double rWorld = rPx / model.getReferenceMapScale();
             obstacles.add(new Obstacle(node, node.x, node.y, rWorld));
         }
@@ -989,34 +999,4 @@ public class ForceLayouter {
         return flows.size() - nbrMovedFlows;
     }
 
-    /**
-     * Moves the control point of all flows that overlap unconnected obstacles.
-     * When a flow is moved, it will no longer overlap an obstacles and it will
-     * be locked. *
-     *
-     * @param onlySelectedFlows if true only selected flows will be moved away
-     * from obstacles
-     * @return the number of remaining flows that overlap obstacles
-     */
-    public int moveFlowsAwayFromObstacles(boolean onlySelectedFlows) {
-        List<Obstacle> obstacles = getObstacles();
-
-        // get a list of all flows that intersect obstacles
-        ArrayList<Flow> sortedOverlappingFlows = getSortedFlowsOverlappingObstacles(obstacles);
-
-        // move control points of overlapping flows, starts with largest flow
-        int nbrMovedFlows = 0;
-        for (Flow flow : sortedOverlappingFlows) {
-            if (onlySelectedFlows && flow.isSelected() == false) {
-                continue;
-            }
-            if (moveFlowAwayFromObstacles(flow, obstacles)) {
-                // moved one flow. Lock it.
-                flow.setLocked(true);
-            }
-        }
-
-        // return initial number of flows overlapping obstacles
-        return sortedOverlappingFlows.size() - nbrMovedFlows;
-    }
 }

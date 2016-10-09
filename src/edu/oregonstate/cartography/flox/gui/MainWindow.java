@@ -686,7 +686,6 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu = new javax.swing.JMenu();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        moveSelectedFromObstaclesMenuItem = new javax.swing.JMenuItem();
         spiralPointsMenuItem = new javax.swing.JMenuItem();
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -2718,14 +2717,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(showObstaclesCheckBoxMenuItem);
 
-        moveSelectedFromObstaclesMenuItem.setText("Move Selected Flow Away from Obstacles");
-        moveSelectedFromObstaclesMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                moveSelectedFromObstaclesMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(moveSelectedFromObstaclesMenuItem);
-
         spiralPointsMenuItem.setText("Create Map Layer with Spiral Points");
         spiralPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3895,12 +3886,6 @@ public class MainWindow extends javax.swing.JFrame {
         addUndo("Maxinum Color");
     }//GEN-LAST:event_maxColorButtonActionPerformed
 
-    private void moveSelectedFromObstaclesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveSelectedFromObstaclesMenuItemActionPerformed
-        ForceLayouter layouter = new ForceLayouter(model);
-        layouter.moveFlowsAwayFromObstacles(true);
-        mapComponent.refreshMap();
-    }//GEN-LAST:event_moveSelectedFromObstaclesMenuItemActionPerformed
-
     private void selectIntersectingSiblingFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectIntersectingSiblingFlowsMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
         List<Model.IntersectingFlowPair> pairs = new ForceLayouter(model).getIntersectingSiblings();
@@ -4447,7 +4432,6 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.ColorButton minColorButton;
     private javax.swing.JSpinner minDistToObstaclesSpinner;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
-    private javax.swing.JMenuItem moveSelectedFromObstaclesMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton nodeFillColorButton;
     private edu.oregonstate.cartography.flox.gui.ColorButton nodeStrokeColorButton;
     private javax.swing.JSpinner nodeStrokeSpinner;
