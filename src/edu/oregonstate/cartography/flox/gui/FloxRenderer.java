@@ -454,11 +454,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Draws the canvas.
      */
     private void drawCanvas(boolean strokeCanvas) {
-        g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getCanvas();
         if (canvas != null) {
             rectToPx(canvas);
             if (strokeCanvas) {
+                g2d.setStroke(new BasicStroke(1));
                 g2d.setColor(Color.BLACK);
                 g2d.draw(canvas);
             }

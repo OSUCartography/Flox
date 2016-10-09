@@ -84,12 +84,12 @@ public class SVGExporter {
     /**
      * Width of the SVG canvas in pixel.
      */
-    private double canvasWidth;
+    protected double canvasWidth;
 
     /**
      * Height of the SVG canvas in pixel.
      */
-    private double canvasHeight;
+    protected double canvasHeight;
 
     /**
      * Creates a new SVGExporter.

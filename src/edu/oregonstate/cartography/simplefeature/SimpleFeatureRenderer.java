@@ -267,6 +267,7 @@ public class SimpleFeatureRenderer {
         double h = yToPx(rect.getY()) - y;
         rect.setRect(x, y, w, h);
     }
+    
     /**
      * Returns the graphics destination context.
      *

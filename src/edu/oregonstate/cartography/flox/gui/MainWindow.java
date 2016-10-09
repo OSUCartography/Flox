@@ -2844,7 +2844,10 @@ public class MainWindow extends javax.swing.JFrame {
                 return;
             }
             SVGFlowExporter exporter = new SVGFlowExporter(model, mapComponent);
-            exporter.setSVGCanvasSize(mapComponent.getWidth(), mapComponent.getHeight());
+            Rectangle2D canvas = model.getCanvas();
+            double wPixel = canvas.getWidth() * model.getReferenceMapScale();
+            double hPixel = canvas.getHeight()* model.getReferenceMapScale();
+            exporter.setSVGCanvasSize(wPixel, hPixel);
             outputStream = new FileOutputStream(outFilePath);
             exporter.export(outputStream);
         } catch (Throwable ex) {
