@@ -101,7 +101,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     }
 
     public void render(boolean renderBackgroundLayers,
-            boolean drawCanvas,
+            boolean strokeCanvas,
             boolean drawFlows,
             boolean drawNodes,
             boolean drawFlowRangebox,
@@ -113,12 +113,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             boolean drawEndClipAreas,
             boolean drawObstacles) {
 
-        g2d.setColor(model.getBackgroundColor());
-        g2d.fillRect(0, 0, canvasWidth, canvasHeight);
-        
-        if (drawCanvas) {
-            drawCanvas();
-        }
+        drawCanvas(strokeCanvas);
 
         if (renderBackgroundLayers) {
             int nbrLayers = model.getNbrLayers();
@@ -428,7 +423,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
 
             Color fillColor = model.getNodeFillColor();
-            
+
             // make sure tiny nodes are visible when selected
             if (drawSelected) {
                 strokeColor = SELECTION_COLOR;
@@ -446,7 +441,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 drawCircle(node.x, node.y, r, fillColor, null);
             } else {
                 drawCircle(node.x, node.y, r, fillColor, strokeColor);
-                
+
                 // draw center of selected nodes
                 if (drawSelected) {
                     drawCircle(node.x, node.y, 2, SELECTION_COLOR, null);
@@ -458,14 +453,18 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     /**
      * Draws the canvas.
      */
-    private void drawCanvas() {
+    private void drawCanvas(boolean strokeCanvas) {
         g2d.setStroke(new BasicStroke(1));
         Rectangle2D canvas = model.getCanvas();
-        rectToPx(canvas);
-        g2d.setColor(Color.BLACK);
-        g2d.draw(canvas);
-        g2d.setColor(new Color(245, 245, 245));
-        g2d.fill(canvas);
+        if (canvas != null) {
+            rectToPx(canvas);
+            if (strokeCanvas) {
+                g2d.setColor(Color.BLACK);
+                g2d.draw(canvas);
+            }
+            g2d.setColor(model.getBackgroundColor());
+            g2d.fill(canvas);
+        }
     }
 
     private void drawFlowRangebox() {

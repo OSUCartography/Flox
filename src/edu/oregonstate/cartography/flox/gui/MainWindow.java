@@ -621,6 +621,8 @@ public class MainWindow extends javax.swing.JFrame {
         canvasSizeSlider = new javax.swing.JSlider();
         viewCanvasToggleButton = new javax.swing.JToggleButton();
         jSeparator26 = new javax.swing.JSeparator();
+        jLabel46 = new javax.swing.JLabel();
+        canvasColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         importFlowsMenuItem = new javax.swing.JMenuItem();
@@ -664,8 +666,6 @@ public class MainWindow extends javax.swing.JFrame {
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator19 = new javax.swing.JPopupMenu.Separator();
         referenceMapScaleMenuItem = new javax.swing.JMenuItem();
-        jSeparator29 = new javax.swing.JPopupMenu.Separator();
-        backgroundColorMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
         zoomOnReferenceMapScaleMenuItem = new javax.swing.JMenuItem();
@@ -2172,7 +2172,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 4);
         mapControlPanel.add(fillCheckBox, gridBagConstraints);
 
         strokeCheckBox.setText("Stroke");
@@ -2211,6 +2211,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 7;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         mapControlPanel.add(layerStrokeColorButton, gridBagConstraints);
 
         addLayerButton.setText("+");
@@ -2288,6 +2289,26 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         mapControlPanel.add(jSeparator26, gridBagConstraints);
+
+        jLabel46.setText("Canvas Color");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 4);
+        mapControlPanel.add(jLabel46, gridBagConstraints);
+
+        canvasColorButton.setColor(new java.awt.Color(255, 255, 255));
+        canvasColorButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                canvasColorButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        mapControlPanel.add(canvasColorButton, gridBagConstraints);
 
         mapPanel.add(mapControlPanel);
 
@@ -2561,15 +2582,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         mapMenu.add(referenceMapScaleMenuItem);
-        mapMenu.add(jSeparator29);
-
-        backgroundColorMenuItem.setText("Background Color…");
-        backgroundColorMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                backgroundColorMenuItemActionPerformed(evt);
-            }
-        });
-        mapMenu.add(backgroundColorMenuItem);
 
         menuBar.add(mapMenu);
 
@@ -4239,13 +4251,11 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectButtonActionPerformed
 
-    private void backgroundColorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backgroundColorMenuItemActionPerformed
-        Color color = JColorChooser.showDialog(this, "Choose Background Color",
-                model.getBackgroundColor());
-        model.setBackgroundColor(color);
-        addUndo("Background Color");
+    private void canvasColorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_canvasColorButtonActionPerformed
+        model.setBackgroundColor(canvasColorButton.getColor());
+        addUndo("Canvas Color");
         mapComponent.refreshMap();
-    }//GEN-LAST:event_backgroundColorMenuItemActionPerformed
+    }//GEN-LAST:event_canvasColorButtonActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4306,7 +4316,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadLengthSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
-    private javax.swing.JMenuItem backgroundColorMenuItem;
+    private edu.oregonstate.cartography.flox.gui.ColorButton canvasColorButton;
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JPanel clipAreaControlPanel;
     private javax.swing.JPanel clipAreaPanel;
@@ -4384,6 +4394,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel43;
     private javax.swing.JLabel jLabel44;
     private javax.swing.JLabel jLabel45;
+    private javax.swing.JLabel jLabel46;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -4403,7 +4414,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator26;
     private javax.swing.JPopupMenu.Separator jSeparator27;
     private javax.swing.JPopupMenu.Separator jSeparator28;
-    private javax.swing.JPopupMenu.Separator jSeparator29;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;

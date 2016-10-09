@@ -1695,25 +1695,27 @@ public class Model {
      * box around all start and end nodes and the percentage defined by
      * canvasPadding.
      *
-     * @return canvas rectangle in world coordinates
+     * @return canvas rectangle in world coordinates. Null if no nodes exist.
      */
     public Rectangle2D getCanvas() {
         Rectangle2D nodesBoundingBox = getNodesBoundingBox();
-        double w = nodesBoundingBox.getWidth();
-        double h = nodesBoundingBox.getHeight();
-        double x = nodesBoundingBox.getX();
-        double y = nodesBoundingBox.getY();
-        // the additional padding around the nodes is a percentage of the bounding box
-        double xPad = w * getCanvasPadding();
-        double yPad = h * getCanvasPadding();
-        nodesBoundingBox.setRect(x - xPad, y - yPad, w + 2 * xPad, h + 2 * yPad);
+        if (nodesBoundingBox != null) {
+            double w = nodesBoundingBox.getWidth();
+            double h = nodesBoundingBox.getHeight();
+            double x = nodesBoundingBox.getX();
+            double y = nodesBoundingBox.getY();
+            // the additional padding around the nodes is a percentage of the bounding box
+            double xPad = w * getCanvasPadding();
+            double yPad = h * getCanvasPadding();
+            nodesBoundingBox.setRect(x - xPad, y - yPad, w + 2 * xPad, h + 2 * yPad);
+        }
         return nodesBoundingBox;
     }
 
     /**
      * Returns the bounding box containing all start and end points.
      *
-     * @return the bounding box in world coordinates
+     * @return the bounding box in world coordinates. Null if no nodes exist.
      */
     public Rectangle2D getNodesBoundingBox() {
         Iterator<Point> nodeIterator = nodeIterator();
