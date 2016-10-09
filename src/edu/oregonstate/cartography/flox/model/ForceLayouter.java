@@ -195,10 +195,10 @@ public class ForceLayouter {
 
         double maxFlowLength = model.getLongestFlowLength();
 
-        Iterator<Flow> iterator = model.flowIterator();
+        Iterator<Flow> flowIterator = model.flowIterator();
         int j = 0;
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
             if (flow.isLocked()) {
                 continue;
             }
@@ -221,10 +221,11 @@ public class ForceLayouter {
 
         // compute velocity at time t + dt
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
-        iterator = model.flowIterator();
+        Rectangle2D nodesBoundingBox = model.getNodesBoundingBox();
+        flowIterator = model.flowIterator();
         int i = 0;
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
             if (flow.isLocked()) {
                 continue;
             }
@@ -252,7 +253,7 @@ public class ForceLayouter {
                 enforcer.enforceFlowControlPointRange(flow);
             }
             if (model.isEnforceCanvasRange()) {
-                enforcer.enforceCanvasBoundingBox(flow, model.getNodesBoundingBox());
+                enforcer.enforceCanvasBoundingBox(flow, nodesBoundingBox);
             }
             i++;
         }

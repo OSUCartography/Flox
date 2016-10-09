@@ -278,7 +278,7 @@ public class Model {
      * width of the minimum canvas by (length * this value) and (width * this
      * value).
      */
-    private double canvasPadding = 0.5;
+    private double canvasPadding = 0.2;
 
     /**
      * Flag to indicate whether the control points of intersecting flows
@@ -1695,14 +1695,14 @@ public class Model {
      * @return the bounding box
      */
     public Rectangle2D getNodesBoundingBox() {
-        Iterator<Point> iterator = nodeIterator();
-        if (iterator.hasNext() == false) {
+        Iterator<Point> nodeIterator = nodeIterator();
+        if (nodeIterator.hasNext() == false) {
             return null;
         }
-        Point pt = iterator.next();
+        Point pt = nodeIterator.next();
         Rectangle2D.Double bb = new Rectangle2D.Double(pt.x, pt.y, 0, 0);
-        while (iterator.hasNext()) {
-            pt = iterator.next();
+        while (nodeIterator.hasNext()) {
+            pt = nodeIterator.next();
             bb.add(pt.x, pt.y);
         }
         return bb;
