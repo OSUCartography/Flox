@@ -568,6 +568,7 @@ public class MainWindow extends javax.swing.JFrame {
         minDistToObstaclesSpinner = new javax.swing.JSpinner();
         jLabel32 = new javax.swing.JLabel();
         jSeparator23 = new javax.swing.JSeparator();
+        jSeparator29 = new javax.swing.JSeparator();
         arrowHeadsPanel = new TransparentMacPanel();
         arrowHeadsControlPanel = new TransparentMacPanel();
         addArrowsCheckbox = new javax.swing.JCheckBox();
@@ -1716,7 +1717,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 10;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(10, 5, 10, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         nodesContentPanel.add(minDistToObstaclesSpinner, gridBagConstraints);
 
         jLabel32.setText("Minimum Distance to Flows");
@@ -1728,11 +1729,18 @@ public class MainWindow extends javax.swing.JFrame {
         nodesContentPanel.add(jLabel32, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         nodesContentPanel.add(jSeparator23, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
+        nodesContentPanel.add(jSeparator29, gridBagConstraints);
 
         nodesPanel.add(nodesContentPanel);
 
@@ -2843,11 +2851,7 @@ public class MainWindow extends javax.swing.JFrame {
                 // user canceled
                 return;
             }
-            SVGFlowExporter exporter = new SVGFlowExporter(model, mapComponent);
-            Rectangle2D canvas = model.getCanvas();
-            double wPixel = canvas.getWidth() * model.getReferenceMapScale();
-            double hPixel = canvas.getHeight()* model.getReferenceMapScale();
-            exporter.setSVGCanvasSize(wPixel, hPixel);
+            SVGFlowExporter exporter = new SVGFlowExporter(model);
             outputStream = new FileOutputStream(outFilePath);
             exporter.export(outputStream);
         } catch (Throwable ex) {
@@ -4417,6 +4421,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator26;
     private javax.swing.JPopupMenu.Separator jSeparator27;
     private javax.swing.JPopupMenu.Separator jSeparator28;
+    private javax.swing.JSeparator jSeparator29;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;

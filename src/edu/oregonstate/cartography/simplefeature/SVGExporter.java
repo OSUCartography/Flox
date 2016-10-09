@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.simplefeature;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
@@ -9,6 +8,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import edu.oregonstate.cartography.utils.ColorUtils;
 import java.awt.Color;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -40,16 +40,11 @@ public class SVGExporter {
      * id of point symbol used by SVG use elements for Points
      */
     private static final String POINT_SYMBOL_ID = "PointSymbol";
-    
+
     /**
      * Radius of point symbol for SVG use element for Points
      */
     private static final double POINT_SYMBOL_RADIUS = 5;
-
-    /**
-     * Factor to convert from millimeter to pixels. Assumes 72 pixels per inch.
-     */
-    protected static final double MM2PX = 72. / 2.54 / 10.;
 
     /**
      * rounding of coordinates
@@ -67,14 +62,9 @@ public class SVGExporter {
     private final String applicationName;
 
     /**
-     * Geometry features to export.
-     */
-    private final GeometryCollection collection;
-
-    /**
      * Bounding box of the geometry collection that is exported.
      */
-    protected final Envelope bb;
+    protected final Rectangle2D bb;
 
     /**
      * Scale factor to fit geometry to SVG canvas.
@@ -94,19 +84,19 @@ public class SVGExporter {
     /**
      * Creates a new SVGExporter.
      *
-     * @param collection The geometries to export.
+     * @param bb bounding box of geometry will be mapped to SVG canvas.
      * @param authorName Name of the author creating the SVG document.
      * @param applicationName Name of the application creating the SVG document.
      */
-    public SVGExporter(GeometryCollection collection,
-            String authorName, String applicationName) {
-        this.collection = collection;
-        this.authorName = authorName;
-        this.applicationName = applicationName;
-        bb = collection.getEnvelopeInternal();
+    public SVGExporter(Rectangle2D bb, String authorName, String applicationName) {
+        this.bb = bb;
         if (bb == null) {
             throw new IllegalArgumentException("SVG export: Empty bounding box.");
         }
+        this.authorName = authorName;
+        this.applicationName = applicationName;
+
+        // default canvas size
         setSVGCanvasSize(600, 450);
     }
 
@@ -118,8 +108,8 @@ public class SVGExporter {
     public final void setSVGCanvasSize(double width, double height) {
         canvasWidth = width;
         canvasHeight = height;
-        double vScale = bb.getHeight() / (height / 1000 / MM2PX);
-        double hScale = bb.getWidth() / (width / 1000 / MM2PX);
+        double vScale = bb.getHeight() / height;
+        double hScale = bb.getWidth() / width;
         scale = vScale > hScale ? vScale : hScale;
     }
 
@@ -284,7 +274,7 @@ public class SVGExporter {
             } else if (geometry instanceof MultiPolygon) {
                 svgPath = convertToSVGSymbol((MultiPolygon) geometry);
             } else if (geometry instanceof Point) {
-                addPoint(document, svgRootElement, g, (Point)geometry);
+                addPoint(document, svgRootElement, g, (Point) geometry);
             } else if (geometry instanceof GeometryCollection) {
                 appendGeometryCollection((GeometryCollection) geometry, svgRootElement, g, document);
             } else {
@@ -368,15 +358,16 @@ public class SVGExporter {
 
     /**
      * Creates a SVG use element for a Point and adds it to the parent element.
+     *
      * @param document SVG document
      * @param parent parent element to receive the use element
      * @param point point to convert to use element
      */
     private void addPoint(Document document, Element svgRootElement, Element parent, Point point) {
-        
+
         // add SVG symbol if this is the first point
         addSVGPointSymbol(document, svgRootElement, parent);
-        
+
         // create a SVG use element in the format used by Illustrator CS6
         // <use xlink:href="#PointSymbol"  width="10" height="10" x="-5" y="-5" transform="matrix(1 0 0 -1 100 50)" overflow="visible"/>
         Element useElement = (Element) document.createElementNS(SVGNAMESPACE, "use");
@@ -391,7 +382,7 @@ public class SVGExporter {
         String yStr = df.format(yToSVGCanvas(point.getY()));
         String trasnformStr = String.format("matrix(1 0 0 -1 %s %s)", xStr, yStr);
         useElement.setAttribute("transform", trasnformStr);
-        
+
         parent.appendChild(useElement);
     }
 
@@ -438,7 +429,7 @@ public class SVGExporter {
         element.setAttribute("stroke", strokeColorStr);
         if (strokeColor != null) {
             strokeWidth = Double.max(0, strokeWidth);
-            element.setAttribute("stroke-width", Double.toString(strokeWidth));
+            element.setAttribute("stroke-width", df.format(strokeWidth));
         }
 
         // fill color
@@ -452,27 +443,36 @@ public class SVGExporter {
     }
 
     /**
-     * Transforms a horizontal x coordinate (usually in meters) to pixels. Takes
-     * the scale and bounding box defined by the PageFormat into account.
+     * Transforms a horizontal x coordinate (usually in meters) to SVG canvas
+     * coordinates.
      *
      * @param x The horizontal coordinate.
      * @return Returns the coordinate in pixels.
      */
     protected double xToSVGCanvas(double x) {
         double west = bb.getMinX();
-        return (x - west) / scale * 1000 * MM2PX;
+        return (x - west) / scale;
     }
 
     /**
-     * Transforms a vertical y coordinate to the scale and bounding box defined
-     * by the PageFormat.
+     * Transforms a vertical y coordinate to SVG canvas coordinates.
      *
      * @param y The vertical coordinate.
      * @return Returns the coordinate in the page coordinate system.
      */
     protected double yToSVGCanvas(double y) {
         double north = bb.getMaxY();
-        return (north - y) / scale * 1000 * MM2PX;
+        return (north - y) / scale;
+    }
+
+    /**
+     * Convert a distance from world coordinates to SVG coordinates.
+     *
+     * @param d distance to convert
+     * @return distance in SVG canvas coordinates
+     */
+    protected final double distToSVGCanvas(double d) {
+        return d / scale;
     }
 
     /**

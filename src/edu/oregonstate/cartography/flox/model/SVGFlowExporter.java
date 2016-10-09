@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.flox.model;
 
-import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.simplefeature.SVGExporter;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -18,15 +17,15 @@ import org.w3c.dom.Element;
 public class SVGFlowExporter extends SVGExporter {
 
     private final Model model;
-    private final FloxMapComponent mapComponent;
 
-    public SVGFlowExporter(Model model, FloxMapComponent mapComponent) {
-        super(model.getLayerGeometry(), "", "Flox");
+    public SVGFlowExporter(Model model) {
+        super(model.getCanvas(), "", "Flox");
         this.model = model;
-
-        Rectangle2D b = model.getBoundingBox();
-        bb.init(b.getMinX(), b.getMaxX(), b.getMinY(), b.getMaxY());
-        this.mapComponent = mapComponent;
+        scale = 1d / model.getReferenceMapScale();
+        
+        Rectangle2D canvas = model.getCanvas();
+        canvasWidth = distToSVGCanvas(canvas.getWidth());
+        canvasHeight = distToSVGCanvas(canvas.getHeight());
     }
 
     private String flowToPath(Flow flow) {
@@ -104,8 +103,8 @@ public class SVGFlowExporter extends SVGExporter {
         Element rect = (Element) document.createElementNS(SVGNAMESPACE, "rect");
         rect.setAttribute("x", "0");
         rect.setAttribute("y", "0");
-        rect.setAttribute("width", Double.toString(canvasWidth));
-        rect.setAttribute("height", Double.toString(canvasHeight));
+        rect.setAttribute("width", df.format(canvasWidth));
+        rect.setAttribute("height", df.format(canvasHeight));
         setVectorStyle(rect, null, 0, model.getBackgroundColor());
         svgRootElement.appendChild(rect);
 
@@ -148,7 +147,7 @@ public class SVGFlowExporter extends SVGExporter {
             Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
             flowElement.setAttribute("id", Double.toString(flow.getValue()));
             flowElement.setAttribute("d", flowToPath(flow));
-            double flowWidth = dimPxToSVGCanvas(model.getFlowWidthPx(flow));
+            double flowWidth = model.getFlowWidthPx(flow);
             setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null);
             flowsGroup.appendChild(flowElement);
         }
@@ -162,21 +161,11 @@ public class SVGFlowExporter extends SVGExporter {
             Element circleElement = (Element) document.createElementNS(SVGNAMESPACE, "circle");
             circleElement.setAttribute("cx", df.format(xToSVGCanvas(node.x)));
             circleElement.setAttribute("cy", df.format(yToSVGCanvas(node.y)));
-            circleElement.setAttribute("r", Double.toString(dimPxToSVGCanvas(model.getNodeRadiusPx(node))));
-            double strokeWidth = dimPxToSVGCanvas(model.getNodeStrokeWidthPx());
+            circleElement.setAttribute("r", df.format(model.getNodeRadiusPx(node)));
+            double strokeWidth = model.getNodeStrokeWidthPx();
             setVectorStyle(circleElement, model.getNodeStrokeColor(),
                     strokeWidth, model.getNodeFillColor());
             nodesGroup.appendChild(circleElement);
         }
-    }
-
-    /**
-     * convert from pixels to SVG canvas coordinate system
-     *
-     * @param d
-     * @return
-     */
-    private double dimPxToSVGCanvas(double d) {
-        return d * mapComponent.getScale() / model.getReferenceMapScale();
     }
 }
