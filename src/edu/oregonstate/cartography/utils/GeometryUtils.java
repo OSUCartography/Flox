@@ -413,7 +413,11 @@ public class GeometryUtils {
 
     /**
      * Computes the square of the shortest distance between a point and any
-     * point on a quadratic Bézier curve. Attention: xy parameter is changed.
+     * point on a quadratic Bézier curve. Also computes the location of the
+     * point on the flow with the shortest distance.
+     *
+     * Attention: xy parameter is changed. 
+     * 
      * Based on
      * http://blog.gludion.com/2009/08/distance-to-quadratic-bezier-curve.html
      * and http://www.pouet.net/topic.php?which=9119&page=2
@@ -436,15 +440,18 @@ public class GeometryUtils {
             double tol,
             double[] xy) {
 
+        double x = xy[0];
+        double y = xy[1];
+
         if (collinear(p0x, p0y, p1x, p1y, p2x, p2y, tol)) {
-            return getDistanceToLineSegmentSquare(xy[0], xy[1], p0x, p0y, p2x, p2y);
+            return getDistanceToLineSegmentSquare(x, y, p0x, p0y, p2x, p2y);
         }
 
-        double dx1 = p0x - xy[0];
-        double dy1 = p0y - xy[1];
+        double dx1 = p0x - x;
+        double dy1 = p0y - y;
         double d0sq = dx1 * dx1 + dy1 * dy1;
-        double dx2 = p2x - xy[0];
-        double dy2 = p2y - xy[1];
+        double dx2 = p2x - x;
+        double dy2 = p2y - y;
         double d2sq = dx2 * dx2 + dy2 * dy2;
         double minDistSq = Math.min(d0sq, d2sq);
 
@@ -457,8 +464,8 @@ public class GeometryUtils {
 
         double k3 = 2.0 * (ax * ax + ay * ay);
         double k2 = 3.0 * (ax * bx + ay * by);
-        double k1 = bx * bx + by * by + 2.0 * ((cx - xy[0]) * ax + (cy - xy[1]) * ay);
-        double k0 = (cx - xy[0]) * bx + (cy - xy[1]) * by;
+        double k1 = bx * bx + by * by + 2.0 * ((cx - x) * ax + (cy - y) * ay);
+        double k0 = (cx - x) * bx + (cy - y) * by;
 
         // FIXME allocating this array each time might not be efficient
         double res[] = new double[3];
@@ -474,13 +481,87 @@ public class GeometryUtils {
                 double posx = w0 * p0x + w1 * p1x + w2 * p2x;
                 double posy = w0 * p0y + w1 * p1y + w2 * p2y;
 
-                double dx = posx - xy[0];
-                double dy = posy - xy[1];
+                double dx = posx - x;
+                double dy = posy - y;
                 double distSq = dx * dx + dy * dy;
                 if (distSq < minDistSq) {
                     minDistSq = distSq;
                     xy[0] = posx;
                     xy[1] = posy;
+                }
+            }
+        }
+
+        return minDistSq;
+    }
+
+    /**
+     * Computes the square of the shortest distance between a point and any
+     * point on a quadratic Bézier curve. Based on
+     * http://blog.gludion.com/2009/08/distance-to-quadratic-bezier-curve.html
+     * and http://www.pouet.net/topic.php?which=9119&page=2
+     *
+     * @param p0x Start point x
+     * @param p0y Start point y
+     * @param p1x Control point x
+     * @param p1y Control point y
+     * @param p2x End point x
+     * @param p2y End point x
+     * @param tol Tolerance to test whether points are collinear.
+     * @param x Point x
+     * @param y point y
+     * @return The square distance between the point x/y and the quadratic
+     * Bezier curve.
+     */
+    public static double getDistanceToQuadraticBezierCurveSq(double p0x, double p0y,
+            double p1x, double p1y,
+            double p2x, double p2y,
+            double tol,
+            double x, double y) {
+
+        if (collinear(p0x, p0y, p1x, p1y, p2x, p2y, tol)) {
+            return getDistanceToLineSegmentSquare(x, y, p0x, p0y, p2x, p2y);
+        }
+
+        double dx1 = p0x - x;
+        double dy1 = p0y - y;
+        double d0sq = dx1 * dx1 + dy1 * dy1;
+        double dx2 = p2x - x;
+        double dy2 = p2y - y;
+        double d2sq = dx2 * dx2 + dy2 * dy2;
+        double minDistSq = Math.min(d0sq, d2sq);
+
+        double ax = p0x - 2.0 * p1x + p2x;
+        double ay = p0y - 2.0 * p1y + p2y;
+        double bx = 2.0 * (p1x - p0x);
+        double by = 2.0 * (p1y - p0y);
+        double cx = p0x;
+        double cy = p0y;
+
+        double k3 = 2.0 * (ax * ax + ay * ay);
+        double k2 = 3.0 * (ax * bx + ay * by);
+        double k1 = bx * bx + by * by + 2.0 * ((cx - x) * ax + (cy - y) * ay);
+        double k0 = (cx - x) * bx + (cy - y) * by;
+
+        // FIXME allocating this array each time might not be efficient
+        double res[] = new double[3];
+        int n = solveCubic(k2 / k3, k1 / k3, k0 / k3, res);
+        for (int i = 0; i < n; i++) {
+            double t = res[i];
+            if (t >= 0.0 && t <= 1.0) {
+                double _1_t = 1.0 - t;
+                double w0 = _1_t * _1_t;
+                double w1 = 2.0 * t * _1_t;
+                double w2 = t * t;
+                // point on Bézier curve
+                double posx = w0 * p0x + w1 * p1x + w2 * p2x;
+                double posy = w0 * p0y + w1 * p1y + w2 * p2y;
+
+                double dx = posx - x;
+                double dy = posy - y;
+                double distSq = dx * dx + dy * dy;
+                if (distSq < minDistSq) {
+                    minDistSq = distSq;
                 }
             }
         }
