@@ -9,13 +9,19 @@ package edu.oregonstate.cartography.flox.model;
 public final class Obstacle extends Circle {
 
     /**
-     * The node associated with this obstacle. The node can be the obstacle
-     * itself, or it can be the target of an arrowhead obstacle.
+     * The node associated with this obstacle. Can be null if the obstacle is an
+     * arrowhead.
      */
     public final Point node;
 
     /**
-     * Construct new Obstacle.
+     * If this obstacle is for an arrowhead, the arrowhead is for this flow.
+     * Null if this obstacle is a node.
+     */
+    public final Flow flow;
+
+    /**
+     * Construct new Obstacle for a node.
      *
      * @param node node associated with this obstacle.
      * @param x center x
@@ -25,19 +31,30 @@ public final class Obstacle extends Circle {
     public Obstacle(Point node, double x, double y, double r) {
         super(x, y, r);
         this.node = node;
+        this.flow = null;
+    }
+
+    /**
+     * Returns whether this obstacle is for an arrowhead.
+     *
+     * @return true if for arrowhead, false if for a node.
+     */
+    public boolean isArrowObstacle() {
+        return flow != null;
     }
 
     /**
      * Construct an obstacle from three points that are on the obstacle circle.
      *
-     * @param node node associated with this obstacle.
      * @param p1 point 1 on obstacle circle
      * @param p2 point 2 on obstacle circle
      * @param p3 point 3 on obstacle circle
+     * @param flow
      */
-    public Obstacle(Point node, Point p1, Point p2, Point p3) {
+    public Obstacle(Point p1, Point p2, Point p3, Flow flow) {
         super(p1, p2, p3);
-        this.node = node;
+        this.node = null;
+        this.flow = flow;
     }
 
 }

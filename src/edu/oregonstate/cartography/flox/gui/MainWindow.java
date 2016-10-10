@@ -841,7 +841,9 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         jPanel1.add(jLabel38, gridBagConstraints);
 
-        computationPalette.getContentPane().add(jPanel1, new java.awt.GridBagConstraints());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+        computationPalette.getContentPane().add(jPanel1, gridBagConstraints);
 
         progressBarPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 5, 10));
         progressBarPanel.setLayout(new java.awt.GridBagLayout());
@@ -859,6 +861,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
         computationPalette.getContentPane().add(progressBarPanel, gridBagConstraints);
 
         debugDialog.setTitle("Debug Options");
@@ -1600,7 +1603,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         nodesContentPanel.add(nodeStrokeColorButton, gridBagConstraints);
 
-        nodeStrokeSpinner.setModel(new javax.swing.SpinnerNumberModel(1.0f, 0.0f, null, 1.0f));
+        nodeStrokeSpinner.setModel(new javax.swing.SpinnerNumberModel(1.0f, null, null, 1.0f));
         nodeStrokeSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
         nodeStrokeSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -1702,7 +1705,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         nodesContentPanel.add(startDistanceSpinner, gridBagConstraints);
 
-        minDistToObstaclesSpinner.setModel(new javax.swing.SpinnerNumberModel());
+        minDistToObstaclesSpinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         minDistToObstaclesSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
         minDistToObstaclesSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -2900,7 +2903,7 @@ public class MainWindow extends javax.swing.JFrame {
             writeSymbolGUI();
         }
     }
-    
+
     public void openXMLFile(String filePath) {
         if (filePath == null) {
             filePath = FileUtils.askFile(null, "Load XML Settings", null, true, "xml");
@@ -2943,6 +2946,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     /**
      * Open a CSV file with flows
+     *
+     * @param inFilePath path of file to open
      */
     public void openFlowsCSVFile(String inFilePath) {
         try {
@@ -2950,7 +2955,6 @@ public class MainWindow extends javax.swing.JFrame {
             if (inFilePath == null) {
                 inFilePath = FileUtils.askFile(this, "CSV Flows File", true);
             }
-            System.out.println(inFilePath);
             if (inFilePath == null) {
                 // user canceled
                 return;
@@ -2967,7 +2971,7 @@ public class MainWindow extends javax.swing.JFrame {
             showErrorDialog("The file could not be read.", ex);
         }
     }
-    
+
     public void openClippingShapefile(String inFilePath) {
         try {
             // ask for import file

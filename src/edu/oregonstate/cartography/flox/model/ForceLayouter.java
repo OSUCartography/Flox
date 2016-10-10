@@ -715,7 +715,7 @@ public class ForceLayouter {
      * Returns true if a flow intersects an obstacle.
      *
      * @param flow a flow.
-     * @param node a node.
+     * @param obstacle obstacle
      * @return
      */
     private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle) {
@@ -726,7 +726,7 @@ public class ForceLayouter {
 
         // obstacle radius is in world coordinates
         // add minimum obstacle distance
-        double obstacleRadiusWorld = obstacle.r 
+        double obstacleRadiusWorld = obstacle.r
                 + model.getMinObstacleDistPx() / model.getReferenceMapScale();
 
         // the minimum distance between the obstacle center and the flow axis
@@ -757,11 +757,18 @@ public class ForceLayouter {
      * @return true if the flow overlaps a node
      */
     public boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles) {
+
         for (Obstacle obstacle : obstacles) {
-            if (obstacle.node != flow.getStartPt() && obstacle.node != flow.getEndPt()) {
-                if (flowIntersectsObstacle(flow, obstacle)) {
-                    return true;
-                }
+            if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
+                continue;
+            }
+            
+            if (flow == obstacle.flow) {
+                continue;
+            }
+            
+            if (ForceLayouter.this.flowIntersectsObstacle(flow, obstacle)) {
+                return true;
             }
         }
         return false;
@@ -796,8 +803,8 @@ public class ForceLayouter {
                 Flow flow = flowIterator.next();
                 Arrow arrow = flow.getArrow(model);
                 if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
-                    Obstacle obstacle = new Obstacle(flow.endPt, arrow.getTipPt(),
-                            arrow.getCorner1Pt(), arrow.getCorner2Pt());
+                    Obstacle obstacle = new Obstacle(arrow.getTipPt(),
+                            arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
                     obstacles.add(obstacle);
                 }
             }
@@ -818,13 +825,21 @@ public class ForceLayouter {
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
             for (Obstacle obstacle : obstacles) {
+
                 // ignore obstacles that are start or end nodes of the flow
-                Point node = obstacle.node;
-                if (node != flow.getStartPt() && node != flow.getEndPt()) {
-                    if (flowIntersectsObstacle(flow, obstacle)) {
-                        flowsArray.add(flow);
-                        break;
-                    }
+                if (obstacle.node == flow.getStartPt()
+                        || obstacle.node == flow.getEndPt()) {
+                    continue;
+                }
+
+                // ignore arrowhead attached to this flow
+                if (model.isDrawArrowheads() && flow == obstacle.flow) {
+                    continue;
+                }
+
+                if (ForceLayouter.this.flowIntersectsObstacle(flow, obstacle)) {
+                    flowsArray.add(flow);
+                    break;
                 }
             }
         }
@@ -909,9 +924,9 @@ public class ForceLayouter {
         // compute spacing of sample points in world coordinates
         // The spacing between candidate control points is equal to the minimum
         // distance to obstacles. Increase to accelerate computations.
-        // minObstacleDistPx can be zero. We require a distance of at least 1 
+        // minObstacleDistPx can be zero. We require a distance of at least 3 
         // pixel to move along the spiral.
-        double minObstacleDistPx = Math.max(model.getMinObstacleDistPx(), 1);
+        double minObstacleDistPx = Math.max(model.getMinObstacleDistPx(), 3);
         double dist = minObstacleDistPx / model.getReferenceMapScale();
 
         Point cPt = flow.getCtrlPt();
@@ -983,7 +998,8 @@ public class ForceLayouter {
      * @param nbrFlowsToMove stop when this many flows have been moved
      * @return number of remaining flows that overlap an obstacle
      */
-    public int moveFlowsAwayFromObstacles(List<Obstacle> obstacles, ArrayList<Flow> flows, int nbrFlowsToMove) {
+    public int moveFlowsAwayFromObstacles(List<Obstacle> obstacles,
+            ArrayList<Flow> flows, int nbrFlowsToMove) {
         int nbrMovedFlows = 0;
         for (Flow flow : flows) {
             if (moveFlowAwayFromObstacles(flow, obstacles)) {
