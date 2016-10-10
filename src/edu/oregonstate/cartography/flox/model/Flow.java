@@ -132,7 +132,7 @@ public class Flow {
     public Flow() {
         this(new Point(), new Point(), Model.DEFAULT_FLOW_VALUE);
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Flow ");
@@ -346,7 +346,7 @@ public class Flow {
      * line width into account. Based on
      * http://pomax.github.io/bezierinfo/#boundingbox
      *
-     * @return Bounding box.
+     * @return a new rectangular bounding box.
      */
     public Rectangle2D.Double getBoundingBox() {
         // initialize bounding box with start and end points
@@ -958,14 +958,14 @@ public class Flow {
      * Computes the square of the shortest distance between a point and any
      * point on this quadratic Bézier curve. Attention: xy parameter is changed.
      *
-     * @param xy Point x and y on input; the closest point on the curve on
-     * output.
+     * @param x point x
+     * @param y point y
      * @param tol Tolerance to test whether points are collinear.
-     * @return The distance.
+     * @return the distance
      */
-    public double distanceSq(double[] xy, double tol) {
+    public double distanceSq(double x, double y, double tol) {
         return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
-                cPt.x, cPt.y, endPt.x, endPt.y, tol, xy);
+                cPt.x, cPt.y, endPt.x, endPt.y, tol, x, y);
     }
 
     public double getDistanceBetweenStartPointAndControlPoint() {

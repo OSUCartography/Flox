@@ -26,7 +26,6 @@ import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.geom.Rectangle2D;
@@ -44,7 +43,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
@@ -642,7 +640,7 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator jSeparator8 = new javax.swing.JPopupMenu.Separator();
         deleteMenuItem = new javax.swing.JMenuItem();
         jSeparator27 = new javax.swing.JPopupMenu.Separator();
-        selectionDialogMenuItem = new javax.swing.JMenuItem();
+        selectByValueCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator18 = new javax.swing.JPopupMenu.Separator();
         selectAllMenuItem = new javax.swing.JMenuItem();
         selectNodesMenuItem = new javax.swing.JMenuItem();
@@ -962,7 +960,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         flowWidthOptionsPopupMenu.add(showFlowsCheckBoxMenuItem);
 
-        selectionDialog.setTitle("Selection");
+        selectionDialog.setTitle("Select by Value");
         selectionDialog.setResizable(false);
         selectionDialog.getContentPane().setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 15, 15));
 
@@ -2428,13 +2426,13 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu.add(deleteMenuItem);
         editMenu.add(jSeparator27);
 
-        selectionDialogMenuItem.setText("Select by Value…");
-        selectionDialogMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        selectByValueCheckBoxMenuItem.setText("Select by Value…");
+        selectByValueCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectionDialogMenuItemActionPerformed(evt);
+                selectByValueCheckBoxMenuItemActionPerformed(evt);
             }
         });
-        editMenu.add(selectionDialogMenuItem);
+        editMenu.add(selectByValueCheckBoxMenuItem);
         editMenu.add(jSeparator18);
 
         selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -2902,6 +2900,21 @@ public class MainWindow extends javax.swing.JFrame {
             writeSymbolGUI();
         }
     }
+    
+    public void openXMLFile(String filePath) {
+        if (filePath == null) {
+            filePath = FileUtils.askFile(null, "Load XML Settings", null, true, "xml");
+        }
+        if (filePath != null) {
+            try {
+                setModel(Model.unmarshal(filePath));
+                mapComponent.showAll();
+                addUndo("Open XML Project");
+            } catch (Throwable ex) {
+                showErrorDialog("Could not read the file.", ex);
+            }
+        }
+    }
 
     /**
      * Passes flows to the model and initializes the GUI for the flows.
@@ -2931,14 +2944,18 @@ public class MainWindow extends javax.swing.JFrame {
     /**
      * Open a CSV file with flows
      */
-    public void openFlowsCSVFile() {
+    public void openFlowsCSVFile(String inFilePath) {
         try {
             // ask for import file
-            String inFilePath = FileUtils.askFile(this, "CSV Flows File", true);
+            if (inFilePath == null) {
+                inFilePath = FileUtils.askFile(this, "CSV Flows File", true);
+            }
+            System.out.println(inFilePath);
             if (inFilePath == null) {
                 // user canceled
                 return;
             }
+
             ArrayList<Flow> flows = FlowImporter.readFlows(inFilePath);
             String name = FileUtils.getFileNameWithoutExtension(inFilePath);
             setFlows(flows, name);
@@ -2948,6 +2965,45 @@ public class MainWindow extends javax.swing.JFrame {
             applyClippingSettings();
         } catch (Throwable ex) {
             showErrorDialog("The file could not be read.", ex);
+        }
+    }
+    
+    public void openClippingShapefile(String inFilePath) {
+        try {
+            // ask for import file
+            if (inFilePath == null) {
+                inFilePath = FileUtils.askFile(this, "Shapefile", true);
+            }
+            if (inFilePath == null) {
+                // user canceled
+                return;
+            }
+
+            // read shapefile
+            GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
+            if (collection == null) {
+                showErrorDialog("The selected file is not a shapefile.", null);
+                return;
+            }
+
+            model.setClipAreas(collection);
+            writeModelToGUI();
+
+            String fileName = FileUtils.getFileNameWithoutExtension(inFilePath);
+            Layer layer = model.getLayer(fileName);
+            if (layer == null) {
+                String msg = "Do you want to add the clipping areas as a layer to the map?";
+                String title = "Flox";
+                Object[] options = {"Add as Layer", "No"};
+                int res = JOptionPane.showOptionDialog(this, msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+                if (res == 0) {
+                    addLayer(collection, fileName);
+                }
+            }
+        } catch (Throwable ex) {
+            showErrorDialog("An error occured.", ex);
+        } finally {
+            writeSymbolGUI();
         }
     }
 
@@ -3066,7 +3122,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_removeSelectedLayerMenuItemActionPerformed
 
     private void importFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importFlowsMenuItemActionPerformed
-        openFlowsCSVFile();
+        openFlowsCSVFile(null);
     }//GEN-LAST:event_importFlowsMenuItemActionPerformed
 
     private void showAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllMenuItemActionPerformed
@@ -3334,40 +3390,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_arrowCornerPositionSliderStateChanged
 
     private void selectEndClipAreaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectEndClipAreaButtonActionPerformed
-        try {
-            // ask for import file
-            String inFilePath = FileUtils.askFile(this, "Shapefile", true);
-            if (inFilePath == null) {
-                // user canceled
-                return;
-            }
-
-            // read shapefile
-            GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
-            if (collection == null) {
-                showErrorDialog("The selected file is not a shapefile.", null);
-                return;
-            }
-
-            model.setClipAreas(collection);
-            writeModelToGUI();
-
-            String fileName = FileUtils.getFileNameWithoutExtension(inFilePath);
-            Layer layer = model.getLayer(fileName);
-            if (layer == null) {
-                String msg = "Do you want to add the clipping areas as a layer to the map?";
-                String title = "Flox";
-                Object[] options = {"Add as Layer", "No"};
-                int res = JOptionPane.showOptionDialog(this, msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-                if (res == 0) {
-                    addLayer(collection, fileName);
-                }
-            }
-        } catch (Throwable ex) {
-            showErrorDialog("An error occured.", ex);
-        } finally {
-            writeSymbolGUI();
-        }
+        openClippingShapefile(null);
     }//GEN-LAST:event_selectEndClipAreaButtonActionPerformed
 
     private void clipWithEndAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithEndAreasCheckBoxActionPerformed
@@ -3542,16 +3565,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_removeLayerButtonActionPerformed
 
     private void openSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openSettingsMenuItemActionPerformed
-        String filePath = FileUtils.askFile(null, "Load XML Settings", null, true, "xml");
-        if (filePath != null) {
-            try {
-                setModel(Model.unmarshal(filePath));
-                mapComponent.showAll();
-                addUndo("Open XML Project");
-            } catch (Throwable ex) {
-                showErrorDialog("Could not read the file.", ex);
-            }
-        }
+        openXMLFile(null);
     }//GEN-LAST:event_openSettingsMenuItemActionPerformed
 
     private void saveSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveSettingsMenuItemActionPerformed
@@ -4199,23 +4213,6 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Edit X/Y Coordinate");
     }//GEN-LAST:event_xyFormattedTextFieldPropertyChanged
 
-    private void selectionDialogMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectionDialogMenuItemActionPerformed
-        selectionDialog.pack();
-        selectionDialog.setLocationRelativeTo(this);
-        selectionDialog.setVisible(true);
-
-        if (selectValueFormattedTextField.getValue() == null) {
-            boolean selectFlows = selectFlowNodeComboBox.getSelectedIndex() == 0;
-            if (selectFlows) {
-                double v = (model.getMinFlowValue() + model.getMaxFlowValue()) / 2d;
-                selectValueFormattedTextField.setValue(v);
-            } else {
-                double v = (model.getMinNodeValue() + model.getMaxNodeValue()) / 2d;
-                selectValueFormattedTextField.setValue(v);
-            }
-        }
-    }//GEN-LAST:event_selectionDialogMenuItemActionPerformed
-
     private void selectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectButtonActionPerformed
         // deselect currently selected flows or nodes
         boolean selectFlows = selectFlowNodeComboBox.getSelectedIndex() == 0;
@@ -4248,6 +4245,27 @@ public class MainWindow extends javax.swing.JFrame {
         addUndo("Canvas Color");
         mapComponent.refreshMap();
     }//GEN-LAST:event_canvasColorButtonActionPerformed
+
+    private void selectByValueCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectByValueCheckBoxMenuItemActionPerformed
+        if (selectByValueCheckBoxMenuItem.isSelected()) {
+            selectionDialog.pack();
+            selectionDialog.setLocationRelativeTo(this);
+            selectionDialog.setVisible(true);
+
+            if (selectValueFormattedTextField.getValue() == null) {
+                boolean selectFlows = selectFlowNodeComboBox.getSelectedIndex() == 0;
+                if (selectFlows) {
+                    double v = (model.getMinFlowValue() + model.getMaxFlowValue()) / 2d;
+                    selectValueFormattedTextField.setValue(v);
+                } else {
+                    double v = (model.getMinNodeValue() + model.getMaxNodeValue()) / 2d;
+                    selectValueFormattedTextField.setValue(v);
+                }
+            }
+        } else {
+            selectionDialog.setVisible(false);
+        }
+    }//GEN-LAST:event_selectByValueCheckBoxMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4459,6 +4477,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem saveSettingsMenuItem;
     private javax.swing.JMenuItem selectAllMenuItem;
     private javax.swing.JButton selectButton;
+    private javax.swing.JCheckBoxMenuItem selectByValueCheckBoxMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
     private javax.swing.JComboBox<String> selectFlowNodeComboBox;
     private javax.swing.JButton selectFlowsFileButton;
@@ -4472,7 +4491,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem selectUnconnectedNodesMenuItem;
     private javax.swing.JFormattedTextField selectValueFormattedTextField;
     private javax.swing.JDialog selectionDialog;
-    private javax.swing.JMenuItem selectionDialogMenuItem;
     private javax.swing.JPanel selectionPanel;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;

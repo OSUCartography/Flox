@@ -311,7 +311,7 @@ public class Model {
     /**
      * Used by the Arrow class to determine the length of arrowheads.
      */
-    private double arrowLengthScaleFactor = 1.6;
+    private double arrowLengthScaleFactor = 2.0;
 
     /**
      * Used by the Arrow class to determine the width of arrowheads.

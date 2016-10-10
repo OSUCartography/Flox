@@ -390,7 +390,7 @@
     </Container>
     <Container class="javax.swing.JDialog" name="selectionDialog">
       <Properties>
-        <Property name="title" type="java.lang.String" value="Selection"/>
+        <Property name="title" type="java.lang.String" value="Select by Value"/>
         <Property name="resizable" type="boolean" value="false"/>
       </Properties>
       <AuxValues>
@@ -624,12 +624,12 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator27">
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="selectionDialogMenuItem">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="selectByValueCheckBoxMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Select by Value&#x2026;"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectionDialogMenuItemActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectByValueCheckBoxMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator18">

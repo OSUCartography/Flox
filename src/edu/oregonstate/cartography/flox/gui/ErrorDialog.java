@@ -53,6 +53,9 @@ public class ErrorDialog {
                     }
                     JOptionPane.showMessageDialog(component, message,
                             title, JOptionPane.ERROR_MESSAGE);
+                    if (component != null) {
+                        component.requestFocus();
+                    }
                 }
             };
             

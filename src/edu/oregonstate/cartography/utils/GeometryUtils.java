@@ -416,8 +416,8 @@ public class GeometryUtils {
      * point on a quadratic Bézier curve. Also computes the location of the
      * point on the flow with the shortest distance.
      *
-     * Attention: xy parameter is changed. 
-     * 
+     * Attention: xy parameter is changed.
+     *
      * Based on
      * http://blog.gludion.com/2009/08/distance-to-quadratic-bezier-curve.html
      * and http://www.pouet.net/topic.php?which=9119&page=2

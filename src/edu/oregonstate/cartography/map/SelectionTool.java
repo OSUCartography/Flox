@@ -318,9 +318,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
                 if (flowBB.contains(point)) {
                     // Get the distance of the click to the flow.
-                    xy[0] = point.x;
-                    xy[1] = point.y;
-                    double distanceSqWorld = flow.distanceSq(xy, tol);
+                    double distanceSqWorld = flow.distanceSq(point.x, point.y, tol);
                     // If that distance is less than the tolerance, select it.
                     if (distanceSqWorld <= maxDistWorld * maxDistWorld && !nodeGotSelected) {
                         if (shiftDown) {

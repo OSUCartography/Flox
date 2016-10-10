@@ -724,15 +724,16 @@ public class ForceLayouter {
         // flow width in world coordinates
         double strokeWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
 
-        // Find out what that radius is in world coordinates
-        // Add a bit to the pixel radius in order to make the radius a few pixels 
-        // wider than the actual node and to account for the node's stroke width. 
-        double obstacleRadiusWorld = obstacle.r + model.getMinObstacleDistPx() / model.getReferenceMapScale();
+        // obstacle radius is in world coordinates
+        // add minimum obstacle distance
+        double obstacleRadiusWorld = obstacle.r 
+                + model.getMinObstacleDistPx() / model.getReferenceMapScale();
 
         // the minimum distance between the obstacle center and the flow axis
         double minDist = (strokeWidthWorld / 2) + obstacleRadiusWorld;
 
-        // Get the flow's bounding box, and add a padding to it of minDist.
+        // test with flow bounding box
+        // extend bounding box by minDist.
         Rectangle2D flowBB = flow.getBoundingBox();
         flowBB.add((flowBB.getMinX() - minDist), (flowBB.getMinY() - minDist));
         flowBB.add((flowBB.getMaxX() + minDist), (flowBB.getMaxY() + minDist));
@@ -744,8 +745,7 @@ public class ForceLayouter {
 
         // Check the shortest distance between the obstacle and the flow. If it's 
         // less than the minimum distance, then the flow intersects the obstacle. 
-        double[] xy = {obstacle.x, obstacle.y};
-        double shortestDistSquare = flow.distanceSq(xy, tol);
+        double shortestDistSquare = flow.distanceSq(obstacle.x, obstacle.y, tol);
         return shortestDistSquare < minDist * minDist;
     }
 
