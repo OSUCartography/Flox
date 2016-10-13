@@ -692,6 +692,7 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator16 = new javax.swing.JPopupMenu.Separator();
         resolveIntersectionsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
+        resolveSelectedIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
@@ -2680,7 +2681,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         infoMenu.setText("Info");
 
-        floxReportMenuItem.setText("Layout Report…");
+        floxReportMenuItem.setText("Report…");
         floxReportMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 floxReportMenuItemActionPerformed(evt);
@@ -2762,6 +2763,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(selectIntersectingSiblingFlowsMenuItem);
+
+        resolveSelectedIntersectingSiblingsMenuItem.setText("Resolve Selected Intersecting Flows Connected to Same Nodes");
+        resolveSelectedIntersectingSiblingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resolveSelectedIntersectingSiblingsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(resolveSelectedIntersectingSiblingsMenuItem);
 
         resolveIntersectingSiblingsMenuItem.setText("Resolve Intersecting Flows Connected to Same Nodes");
         resolveIntersectingSiblingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -3159,8 +3168,21 @@ public class MainWindow extends javax.swing.JFrame {
         int nbrUnconnectedNodes = model.countUnconnectedNodes();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Flows: ").append(nbrFlows);
-        sb.append("\nNodes: ").append(nbrNodes);
+
+        // flows
+        sb.append("Flows\n");
+        sb.append("\t").append(nbrFlows).append(" flows").append("\n");
+        sb.append("\tMinimum flow value: ").append(model.getMinFlowValue()).append("\n");
+        sb.append("\tMaximum flow value: ").append(model.getMaxFlowValue()).append("\n");
+        sb.append("\tMean flow value: ").append(model.getMeanFlowValue()).append("\n");
+        
+        // nodes
+        sb.append("\nNodes\n");
+        sb.append("\t").append(nbrNodes).append(" nodes").append("\n");
+        sb.append("\tMinimum node value: ").append(model.getMinNodeValue()).append("\n");
+        sb.append("\tMaximum node value: ").append(model.getMaxNodeValue()).append("\n");
+        sb.append("\tMean node value: ").append(model.getMeanNodeValue()).append("\n");
+        
         sb.append("\nIntersections: ").append(nbrIntersections);
         sb.append("\nUnconnected nodes: ").append(nbrUnconnectedNodes);
 
@@ -4271,6 +4293,10 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_selectByValueCheckBoxMenuItemActionPerformed
 
+    private void resolveSelectedIntersectingSiblingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveSelectedIntersectingSiblingsMenuItemActionPerformed
+        
+    }//GEN-LAST:event_resolveSelectedIntersectingSiblingsMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4476,6 +4502,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JMenuItem resolveIntersectingSiblingsMenuItem;
     private javax.swing.JCheckBoxMenuItem resolveIntersectionsCheckBoxMenuItem;
+    private javax.swing.JMenuItem resolveSelectedIntersectingSiblingsMenuItem;
     private javax.swing.JMenuItem reverseFlowDirectionMenuItem;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveSettingsMenuItem;

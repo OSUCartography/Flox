@@ -937,7 +937,7 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="floxReportMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Layout Report&#x2026;"/>
+                <Property name="text" type="java.lang.String" value="Report&#x2026;"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="floxReportMenuItemActionPerformed"/>
@@ -1030,6 +1030,14 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectIntersectingSiblingFlowsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="resolveSelectedIntersectingSiblingsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Resolve Selected Intersecting Flows Connected to Same Nodes"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resolveSelectedIntersectingSiblingsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="resolveIntersectingSiblingsMenuItem">
