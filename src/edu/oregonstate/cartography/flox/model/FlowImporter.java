@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
+import edu.oregonstate.cartography.flox.gui.ErrorDialog;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -109,12 +110,15 @@ public class FlowImporter {
     public static ArrayList<Flow> readFlows(String pointsFilePath, String flowsFilePath) throws IOException {
         HashMap<String, Point> points = new HashMap<>();
         ArrayList<Flow> flows = new ArrayList<>();
+        String line = "";
 
-        // read points
+        // read nodes
+        int lineCounter = 0;
         try (BufferedReader inputStream = new BufferedReader(new FileReader(pointsFilePath))) {
-            String l;
-            while ((l = inputStream.readLine()) != null) {
-                StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
+
+            while ((line = inputStream.readLine()) != null) {
+                ++lineCounter;
+                StringTokenizer tokenizer = new StringTokenizer(line, " ,\t");
                 String id = tokenizer.nextToken();
                 double x = Double.parseDouble(tokenizer.nextToken());
                 double y = Double.parseDouble(tokenizer.nextToken());
@@ -122,28 +126,71 @@ public class FlowImporter {
 
                 if (tokenizer.hasMoreTokens()) {
                     val = Double.parseDouble(tokenizer.nextToken());
-                };
+                }
 
                 Point point = new Point(x, y, val);
                 points.put(id, point);
             }
+        } catch (Throwable exc) {
+            line = line.trim();
+            if (line.length() > 200) {
+                line = line.substring(200) + "\u2026";
+            }
+            String msg = "<html>Could not read the node at line " + lineCounter + ".<br>"
+                    + "Line: " + line + "/<html>";
+            String title = "Node Reading Error";
+            ErrorDialog.showErrorDialog(msg, title, exc, null);
         }
 
         // read flows
+        lineCounter = 0;
         try (BufferedReader inputStream = new BufferedReader(new FileReader(flowsFilePath))) {
-            String l;
-            while ((l = inputStream.readLine()) != null) {
-                StringTokenizer tokenizer = new StringTokenizer(l, " ,\t");
+            while ((line = inputStream.readLine()) != null) {
+                ++lineCounter;
+                StringTokenizer tokenizer = new StringTokenizer(line, " ,\t");
                 String startPtID = tokenizer.nextToken();
                 String endPtID = tokenizer.nextToken();
                 double value = Double.parseDouble(tokenizer.nextToken());
                 Point startPoint = points.get(startPtID);
+                if (startPoint == null) {
+                    showMissingNodeError(lineCounter, line, startPtID);
+                    return flows;
+                }
                 Point endPoint = points.get(endPtID);
+                if (endPoint == null) {
+                    showMissingNodeError(lineCounter, line, endPtID);
+                    return flows;
+                }
                 Flow flow = new Flow(startPoint, endPoint, value);
                 flows.add(flow);
             }
+        } catch (Throwable exc) {
+            line = line.trim();
+            if (line.length() > 200) {
+                line = line.substring(200) + "\u2026";
+            }
+            String msg = "<html>Could not read the flow at line " + lineCounter + ".<br>"
+                    + "Line: " + line + "/<html>";
+            String title = "Flow Reading Error";
+            ErrorDialog.showErrorDialog(msg, title, exc, null);
         }
 
         return flows;
+    }
+
+    private static void showMissingNodeError(int lineCounter, String line, String missingNodeID) {
+        line = line.trim();
+        if (line.length() > 200) {
+            line = line.substring(200) + "\u2026";
+        }
+        if (missingNodeID.length() > 100) {
+            missingNodeID = missingNodeID.substring(100) + "\u2026";
+        }
+        String msg = "<html>Line " + lineCounter + " of the flows file references "
+                + "a node with the identifier \"" + missingNodeID + "\".<br>"
+                + "The nodes file does not contain a node with this identifier.<br>"
+                + "Line: " + line + "/<html>";
+        String title = "Missing Node Error";
+        ErrorDialog.showErrorDialog(msg, title);
     }
 }
