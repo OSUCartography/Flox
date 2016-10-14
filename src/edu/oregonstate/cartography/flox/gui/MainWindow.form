@@ -1791,6 +1791,9 @@
                           </Properties>
                         </Component>
                         <Component class="edu.oregonstate.cartography.flox.gui.ColorButton" name="minColorButton">
+                          <Properties>
+                            <Property name="colorChooserTitle" type="java.lang.String" value="Smalles Flow Color"/>
+                          </Properties>
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="minColorButtonActionPerformed"/>
                           </Events>
@@ -1806,6 +1809,9 @@
                           </Properties>
                         </Component>
                         <Component class="edu.oregonstate.cartography.flox.gui.ColorButton" name="maxColorButton">
+                          <Properties>
+                            <Property name="colorChooserTitle" type="java.lang.String" value="Largest Flow Color"/>
+                          </Properties>
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="maxColorButtonActionPerformed"/>
                           </Events>
@@ -1932,6 +1938,9 @@
                       </Constraints>
                     </Component>
                     <Component class="edu.oregonstate.cartography.flox.gui.ColorButton" name="nodeStrokeColorButton">
+                      <Properties>
+                        <Property name="colorChooserTitle" type="java.lang.String" value="Nodes Stroke Color"/>
+                      </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nodeStrokeColorButtonActionPerformed"/>
                       </Events>
@@ -1984,6 +1993,9 @@
                       </Constraints>
                     </Component>
                     <Component class="edu.oregonstate.cartography.flox.gui.ColorButton" name="nodeFillColorButton">
+                      <Properties>
+                        <Property name="colorChooserTitle" type="java.lang.String" value="Nodes Fill Color"/>
+                      </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nodeFillColorButtonActionPerformed"/>
                       </Events>
@@ -2750,6 +2762,7 @@
                     </Component>
                     <Component class="edu.oregonstate.cartography.flox.gui.ColorButton" name="layerFillColorButton">
                       <Properties>
+                        <Property name="colorChooserTitle" type="java.lang.String" value="Map Layer Fill Color"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -2763,6 +2776,7 @@
                     </Component>
                     <Component class="edu.oregonstate.cartography.flox.gui.ColorButton" name="layerStrokeColorButton">
                       <Properties>
+                        <Property name="colorChooserTitle" type="java.lang.String" value="Map Layer Stroke Color"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
@@ -2892,6 +2906,7 @@
                         <Property name="color" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                           <Color blue="ff" green="ff" red="ff" type="rgb"/>
                         </Property>
+                        <Property name="colorChooserTitle" type="java.lang.String" value="Canvas Color"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="canvasColorButtonActionPerformed"/>

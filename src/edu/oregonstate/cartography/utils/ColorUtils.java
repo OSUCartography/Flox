@@ -99,7 +99,7 @@ public class ColorUtils {
         int g = (int) (g1 + (g2 - g1) * ratio);
         int b = (int) (b1 + (b2 - b1) * ratio);
 
-        return new Color(a << 24 | r << 16 | g << 8 | b);
+        return new Color(r, g, b, a);
     }
 
 }

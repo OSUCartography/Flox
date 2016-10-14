@@ -1483,6 +1483,7 @@ public class MainWindow extends javax.swing.JFrame {
         smallestFlowColorLabel.setText("Smallest");
         jPanel3.add(smallestFlowColorLabel);
 
+        minColorButton.setColorChooserTitle("Smalles Flow Color");
         minColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 minColorButtonActionPerformed(evt);
@@ -1494,6 +1495,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel35.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 12, 0, 0));
         jPanel3.add(jLabel35);
 
+        maxColorButton.setColorChooserTitle("Largest Flow Color");
         maxColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 maxColorButtonActionPerformed(evt);
@@ -1594,6 +1596,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 20, 3, 4);
         nodesContentPanel.add(maximumNodeSizeSlider, gridBagConstraints);
 
+        nodeStrokeColorButton.setColorChooserTitle("Nodes Stroke Color");
         nodeStrokeColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 nodeStrokeColorButtonActionPerformed(evt);
@@ -1635,6 +1638,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         nodesContentPanel.add(jLabel31, gridBagConstraints);
 
+        nodeFillColorButton.setColorChooserTitle("Nodes Fill Color");
         nodeFillColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 nodeFillColorButtonActionPerformed(evt);
@@ -2200,6 +2204,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         mapControlPanel.add(strokeCheckBox, gridBagConstraints);
 
+        layerFillColorButton.setColorChooserTitle("Map Layer Fill Color");
         layerFillColorButton.setEnabled(false);
         layerFillColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2212,6 +2217,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         mapControlPanel.add(layerFillColorButton, gridBagConstraints);
 
+        layerStrokeColorButton.setColorChooserTitle("Map Layer Stroke Color");
         layerStrokeColorButton.setEnabled(false);
         layerStrokeColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2310,6 +2316,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapControlPanel.add(jLabel46, gridBagConstraints);
 
         canvasColorButton.setColor(new java.awt.Color(255, 255, 255));
+        canvasColorButton.setColorChooserTitle("Canvas Color");
         canvasColorButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 canvasColorButtonActionPerformed(evt);
