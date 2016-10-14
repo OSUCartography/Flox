@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
+import edu.oregonstate.cartography.flox.model.ProcessMonitor;
 
 /**
  * SwingWorker for creating a new flow map layout. This is the controller
@@ -17,7 +18,7 @@ import javax.swing.SwingWorker;
  *
  * @author Bernhard Jenny, School of Science, RMIT University, Melbourne
  */
-class LayoutWorker extends SwingWorker<Void, Void> {
+class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
 
     private final ForceLayouter layouter;
     private final JProgressBar progressBar;
@@ -30,6 +31,8 @@ class LayoutWorker extends SwingWorker<Void, Void> {
         this.progressBar = progressBar;
         this.mapComponent = mapComponent;
 
+        this.layouter.setProcessMonitor(this);
+        
         this.addPropertyChangeListener(new PropertyChangeListener() {
 
             @Override
@@ -60,7 +63,8 @@ class LayoutWorker extends SwingWorker<Void, Void> {
             if (isCancelled()) {
                 break;
             }
-            iterBeforeMovingFlows = layouter.layoutIteration(i, iterBeforeMovingFlows, canvas);
+            iterBeforeMovingFlows = layouter.layoutIteration(i, 
+                    iterBeforeMovingFlows, canvas);
 
             // update progress indicator
             double progress = 100d * i / nbrIterations;

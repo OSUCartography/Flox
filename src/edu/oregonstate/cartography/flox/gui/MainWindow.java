@@ -659,7 +659,7 @@ public class MainWindow extends javax.swing.JFrame {
         mergeNodesMenuItem = new javax.swing.JMenuItem();
         jSeparator30 = new javax.swing.JPopupMenu.Separator();
         totalFlowsMenuItem = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        netFlowsMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
@@ -2565,13 +2565,13 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(totalFlowsMenuItem);
 
-        jMenuItem1.setText("Convert to Net Flows");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        netFlowsMenuItem.setText("Convert to Net Flows");
+        netFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
+                netFlowsMenuItemActionPerformed(evt);
             }
         });
-        editMenu.add(jMenuItem1);
+        editMenu.add(netFlowsMenuItem);
 
         menuBar.add(editMenu);
 
@@ -4328,7 +4328,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_totalFlowsMenuItemActionPerformed
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+    private void netFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_netFlowsMenuItemActionPerformed
         try {
             model.convertToNetFlows();
             updateLockUnlockButtonIcon();
@@ -4339,7 +4339,7 @@ public class MainWindow extends javax.swing.JFrame {
         } catch (Throwable e) {
             ErrorDialog.showErrorDialog("Could not convert to net flows.", "Flox Error", e, this);
         }
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    }//GEN-LAST:event_netFlowsMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4474,7 +4474,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel44;
     private javax.swing.JLabel jLabel45;
     private javax.swing.JLabel jLabel46;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -4523,6 +4522,7 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.ColorButton minColorButton;
     private javax.swing.JSpinner minDistToObstaclesSpinner;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
+    private javax.swing.JMenuItem netFlowsMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton nodeFillColorButton;
     private edu.oregonstate.cartography.flox.gui.ColorButton nodeStrokeColorButton;
     private javax.swing.JSpinner nodeStrokeSpinner;

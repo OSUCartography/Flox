@@ -22,8 +22,15 @@ import java.util.List;
  */
 public class ForceLayouter {
 
-    // model with all map features.
+    /**
+     * data model with all flows, nodes, and layout settings.
+     */
     private final Model model;
+
+    /**
+     * regularly checked for cancellation; can be null
+     */
+    private ProcessMonitor processMonitor = null;
 
     /**
      * hash map with a line string of straight segments for each curved flow.
@@ -40,10 +47,9 @@ public class ForceLayouter {
     private final ArrayList<Force> angularDistForces;
 
     /**
-     * Constructor for the ForceLayouter. Requires a Model object containing
-     * flow map features.
+     * Constructor
      *
-     * @param model
+     * @param model data model
      */
     public ForceLayouter(Model model) {
         this.model = model;
@@ -86,6 +92,10 @@ public class ForceLayouter {
             Flow clippedFlow = model.clipFlow(flow, false);
             ArrayList<Point> points = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
             straightLinesMap.put(flow, points.toArray(new Point[points.size()]));
+
+            if (isCancelled()) {
+                return;
+            }
         }
     }
 
@@ -117,17 +127,27 @@ public class ForceLayouter {
      * @return number of remaining iterations until flows are moved away from
      * obstacles
      */
-    public int layoutIteration(int i, int iterBeforeMovingFlowsOffObstacles, Rectangle2D canvas) {
+    public int layoutIteration(int i, int iterBeforeMovingFlowsOffObstacles,
+            Rectangle2D canvas) {
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
 
         // compute one iteration of forces with a linearly decreasing weight
         double weight = 1d - (double) i / model.getNbrIterations();
         computeForces(weight, canvas);
 
+        // try moving flows that intersect and are connected to the same node
         if (model.isResolveIntersectionsForSiblings()) {
             List<Model.IntersectingFlowPair> pairs = getIntersectingSiblings();
+            if (isCancelled()) {
+                return 0;
+            }
+
             for (Model.IntersectingFlowPair pair : pairs) {
                 pair.resolveIntersection();
+
+                if (isCancelled()) {
+                    return 0;
+                }
 
                 // move control points if they are outside of the range box or the canvas
                 if (model.isEnforceRangebox()) {
@@ -145,6 +165,7 @@ public class ForceLayouter {
         if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlowsOffObstacles == 0) {
             int remainingIterations = model.getNbrIterations() - i - 1;
 
+            // nodes and arrowheads are obstacles
             List<Obstacle> obstacles = getObstacles();
 
             // get a list of all flows that intersect obstacles
@@ -152,14 +173,16 @@ public class ForceLayouter {
             int nbrOverlaps = sortedOverlappingFlows.size();
 
             // Compute the number of flows to move. Default is 1, but this might 
-            // have to be larger for when there are more overlapping flows than 
+            // have to be larger when there are more overlapping flows than 
             // remaining iterations.
             int nbrFlowsToMove = 1;
             if (nbrOverlaps > remainingIterations && remainingIterations > 0) {
                 nbrFlowsToMove = (int) Math.ceil(nbrOverlaps / remainingIterations);
             }
 
-            int nbrRemainingOverlaps = moveFlowsAwayFromObstacles(obstacles, sortedOverlappingFlows, nbrFlowsToMove);
+            // move flows
+            int nbrRemainingOverlaps = moveFlowsAwayFromObstacles(obstacles,
+                    sortedOverlappingFlows, nbrFlowsToMove);
 
             // compute the number of iterations until the next flow will 
             // be moved away from obstacles
@@ -205,17 +228,17 @@ public class ForceLayouter {
                 continue;
             }
 
-            // compute force exerted by flows and nodes
-            Force fnew = computeForceOnFlow(flow, maxFlowLength);
+            // compute and store force exerted by flows and nodes
             Force f = forces.get(j);
-
-            f.fx = fnew.fx;
-            f.fy = fnew.fy;
+            computeForceOnFlow(flow, maxFlowLength, f);
 
             // compute force creating an even angular distribution of flows around 
             // nodes
             Force angularDistF = angularDistForces.get(j);
             Force newAngularDistF = computeAngularDistributionForce(flow);
+            if (isCancelled()) {
+                return;
+            }
             angularDistF.fx = newAngularDistF.fx;
             angularDistF.fy = newAngularDistF.fy;
             j++;
@@ -257,6 +280,10 @@ public class ForceLayouter {
                 enforcer.enforceCanvasBoundingBox(flow, canvas);
             }
             i++;
+
+            if (isCancelled()) {
+                return;
+            }
         }
     }
 
@@ -266,9 +293,10 @@ public class ForceLayouter {
      * @param targetPoint the point that receives the forces.
      * @param targetFlow the flow that receives the forces. targetPt is on this
      * flow.
-     * @return the force exerted on the targetPoint.
+     * @param outForce the force exerted on the targetPoint. Only used to return
+     * the new force.
      */
-    private Force computeForceOnPoint(Point targetPoint, Flow targetFlow) {
+    private void computeForceOnPoint(Point targetPoint, Flow targetFlow, Force outForce) {
         Iterator<Flow> flowIterator = model.flowIterator();
         int distWeightExponent = model.getDistanceWeightExponent();
 
@@ -308,12 +336,15 @@ public class ForceLayouter {
                 fyTotal += yDist;
                 wTotal += w;
             }
+
+            if (isCancelled()) {
+                return;
+            }
         }
 
         // Calculate the final force of all nodes on the target point
-        double fxFinal = fxTotal / wTotal;
-        double fyFinal = fyTotal / wTotal;
-        return new Force(fxFinal, fyFinal);
+        outForce.fx = fxTotal / wTotal;
+        outForce.fy = fyTotal / wTotal;
     }
 
     private static Force computeSpringForce(Point startPt, Point endPt, double springConstant) {
@@ -430,11 +461,12 @@ public class ForceLayouter {
      * flow is computed and then these forces are summed. The summed force is
      * then applied onto the control point of the Bézier curve.
      *
-     * @param flow
-     * @param maxFlowLength
-     * @return The force that is exerted onto the control point
+     * @param flow flow to compute force for.
+     * @param maxFlowLength FIXME
+     * @param on output outForce the force that is exerted onto the control
+     * point.
      */
-    private Force computeForceOnFlow(Flow flow, double maxFlowLength) {
+    private void computeForceOnFlow(Flow flow, double maxFlowLength, Force outForce) {
 
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
@@ -443,8 +475,14 @@ public class ForceLayouter {
         // Compute forces applied by all flows on current flow
         Force externalF = new Force();
         double lengthOfForceVectorsSum = 0;
+        
+        Force f = new Force();
         for (Point pt : flowPoints) {
-            Force f = computeForceOnPoint(pt, flow);
+            computeForceOnPoint(pt, flow, f);
+            if (isCancelled()) {
+                return;
+            }
+
             // add to totals
             externalF.add(f);
             lengthOfForceVectorsSum += f.length();
@@ -460,6 +498,9 @@ public class ForceLayouter {
 
         // compute force applied by all start and end nodes on current flow
         Force nodeF = computeNodeForceOnFlow(flow);
+        if (isCancelled()) {
+            return;
+        }
 
         // compute anti-torsion force of flow
         Force antiTorsionF = computeAntiTorsionForce(flow);
@@ -470,9 +511,8 @@ public class ForceLayouter {
         Force springF = computeSpringForce(basePt, cPt, flowSpringConstant);
 
         // compute total force: external forces + spring force + anti-torsion force
-        double fx = externalF.fx + springF.fx + antiTorsionF.fx + nodeF.fx;
-        double fy = externalF.fy + springF.fy + antiTorsionF.fy + nodeF.fy;
-        return new Force(fx, fy);
+        outForce.fx = externalF.fx + springF.fx + antiTorsionF.fx + nodeF.fx;
+        outForce.fy = externalF.fy + springF.fy + antiTorsionF.fy + nodeF.fy;
     }
 
     private Force computeNodeForceOnFlow(Flow flow) {
@@ -513,6 +553,10 @@ public class ForceLayouter {
             fxTotal += dx * idw;
             fyTotal += dy * idw;
             wTotal += idw;
+
+            if (isCancelled()) {
+                return null;
+            }
         }
 
         double fxFinal = fxTotal / wTotal;
@@ -583,6 +627,10 @@ public class ForceLayouter {
                     if (geometry1.crosses(geometry2)) {
                         pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));
                     }
+                }
+
+                if (isCancelled()) {
+                    return null;
                 }
             }
         }
@@ -664,6 +712,10 @@ public class ForceLayouter {
                 double fEndToCtrlAngle = f.endToCtrlAngle();
                 double d = GeometryUtils.angleDif(endToCtrlAngle, fEndToCtrlAngle);
                 endAngleSum += angularW(d);
+            }
+
+            if (isCancelled()) {
+                return null;
             }
         }
 
@@ -762,11 +814,11 @@ public class ForceLayouter {
             if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
                 continue;
             }
-            
+
             if (flow == obstacle.flow) {
                 continue;
             }
-            
+
             if (ForceLayouter.this.flowIntersectsObstacle(flow, obstacle)) {
                 return true;
             }
@@ -1009,10 +1061,25 @@ public class ForceLayouter {
                     break;
                 }
             }
+
+            if (isCancelled()) {
+                return 0;
+            }
         }
 
         // return initial number of flows overlapping obstacles
         return flows.size() - nbrMovedFlows;
+    }
+
+    /**
+     * @param processMonitor the processMonitor to set
+     */
+    public void setProcessMonitor(ProcessMonitor processMonitor) {
+        this.processMonitor = processMonitor;
+    }
+
+    private boolean isCancelled() {
+        return (processMonitor == null) ? false : processMonitor.isCancelled();
     }
 
 }
