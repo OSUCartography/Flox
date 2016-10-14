@@ -2294,6 +2294,14 @@ public class Model {
         this.nodeFillColor = nodeFillColor;
     }
 
+    private double sumFlowValues(Collection<Flow> flows) {
+        double totalValue = 0;
+        for (Flow flow : flows) {
+            totalValue += flow.getValue();
+        }
+        return totalValue;
+    }
+
     /**
      * Sum values of flows between same start and end nodes.
      */
@@ -2306,14 +2314,45 @@ public class Model {
                 Point node2 = nodes.get(j);
                 Set<Flow> flows = graph.getAllFlowsBetweenNodes(node1, node2);
                 if (flows.isEmpty() == false) {
-                    double totalValue = 0;
-                    for (Flow flow : flows) {
-                        totalValue += flow.getValue();
-                    }
-                    totalFlows.add(new Flow(node1, node2, totalValue));
+                    totalFlows.add(new Flow(node1, node2, sumFlowValues(flows)));
                 }
             }
         }
         setFlows(totalFlows);
     }
+
+    /**
+     * Computes net flows by computing the difference between opposing flows
+     * between the same nodes. Net values are always positive. If the two
+     * opposing flows have the same value, no net flow is created.
+     *
+     * If there are multiple flows with the same direction between two nodes,
+     * the total value of all flows pointing in the same direction is first
+     * computed.
+     */
+    public void convertToNetFlows() {
+        ArrayList<Flow> netFlows = new ArrayList<>();
+        List<Point> nodes = getNodes();
+        for (int i = 0; i < nodes.size(); i++) {
+            Point node1 = nodes.get(i);
+            for (int j = i + 1; j < nodes.size(); j++) {
+                Point node2 = nodes.get(j);
+                Set<Flow> flows12 = graph.getDirectedFlowsBetweenNodes(node1, node2);
+                Set<Flow> flows21 = graph.getDirectedFlowsBetweenNodes(node2, node1);
+                if (flows12.isEmpty() && flows21.isEmpty()) {
+                    continue;
+                }
+                double v12 = sumFlowValues(flows12);
+                double v21 = sumFlowValues(flows21);
+                if (v12 > v21) {
+                    netFlows.add(new Flow(node1, node2, v12 - v21));
+                } else if (v12 < v21) {
+                    netFlows.add(new Flow(node2, node1, v21 - v12));
+                }
+                // if v12 == v21, no flow is created
+            }
+        }
+        setFlows(netFlows);
+    }
+
 }

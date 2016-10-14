@@ -341,6 +341,16 @@ public final class Graph {
         set1.addAll(set2);
         return set1;
     }
+    
+    /**
+     * Returns all flows starting at node 1 and ending at node 2.
+     * @param node1 start node
+     * @param node2 end node
+     * @return all directed flows between the two nodes.
+     */
+    public Set<Flow> getDirectedFlowsBetweenNodes(Point node1, Point node2) {
+        return graph.getAllEdges(node1, node2);
+    }
 
     public ArrayList<Point> getSortedNodes(boolean increasing) {
         ArrayList<Point> nodes = new ArrayList<>(graph.vertexSet());
