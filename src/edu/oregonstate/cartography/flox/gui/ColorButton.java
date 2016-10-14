@@ -10,6 +10,9 @@ import java.awt.event.*;
 import java.awt.image.*;
 import javax.swing.*;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
+import javax.swing.colorchooser.ColorSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * A button to select a color. The currently selected color is displayed by the
@@ -24,6 +27,11 @@ public class ColorButton extends JToggleButton implements ActionListener {
      */
     private Color color;
 
+    /**
+     * Color to restore when user presses cancel button.
+     */
+    private Color originalColor;
+    
     /**
      * The horizontal width of the icon that displays the color.
      */
@@ -68,7 +76,16 @@ public class ColorButton extends JToggleButton implements ActionListener {
                 colorChooser.removeChooserPanel(chooser);
             }
         }
-       
+
+        ColorSelectionModel model = colorChooser.getSelectionModel();
+        model.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent evt) {
+                ColorSelectionModel model = (ColorSelectionModel) evt.getSource();
+
+                setColor(model.getSelectedColor());
+            }
+        });
+
         this.updateIcon();
     }
 
@@ -81,7 +98,6 @@ public class ColorButton extends JToggleButton implements ActionListener {
                 BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = (Graphics2D) image.getGraphics();
 
-        g2d.setColor(this.color);
         // turn antialiasing off
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -89,6 +105,11 @@ public class ColorButton extends JToggleButton implements ActionListener {
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
                 RenderingHints.VALUE_RENDER_SPEED);
 
+        // first draw white background to show semi-transparent color
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, iconWidth, iconHeight);
+
+        g2d.setColor(this.color);
         g2d.fillRect(0, 0, iconWidth, iconHeight);
         g2d.setColor(Color.GRAY);
         g2d.drawRect(0, 0, iconWidth - 1, iconHeight - 1);
@@ -110,7 +131,7 @@ public class ColorButton extends JToggleButton implements ActionListener {
     protected void fireActionPerformed(ActionEvent event) {
         try {
             this.setSelected(true);
-
+            
             // create the dialog if this has not been done yet.
             if (this.dialog == null) {
                 // Get the top level ancestor as parent for the new dialog.
@@ -121,13 +142,23 @@ public class ColorButton extends JToggleButton implements ActionListener {
                         colorChooserTitle,
                         true, //modal
                         colorChooser,
-                        this, //OK button handler
-                        null); //no CANCEL button handler
+                        // OK button handler           
+                        this,
+                        // cancel button handler
+                        new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // restore original color
+                        setColor(originalColor);
+                    }
+                }); //no CANCEL button handler
                 dialog.pack();
                 dialog.setResizable(false);
             }
 
             // show the dialog
+            originalColor = new Color(color.getRed(), color.getGreen(), 
+                    color.getBlue(), color.getAlpha());
             colorChooser.setColor(color);
             dialog.setVisible(true);
 
