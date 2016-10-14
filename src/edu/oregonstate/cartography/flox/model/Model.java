@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
@@ -761,7 +762,7 @@ public class Model {
 
         // remove flows that will be merged from the graph
         for (Flow flow : flowsToMerg) {
-            graph.removeEdge(flow);
+            graph.removeFlow(flow);
         }
 
         // add merged flows
@@ -771,9 +772,9 @@ public class Model {
                 continue;
             }
             // test whether a flow has been added between the merged node and the opposite node of this flow 
-            Flow existingFlow = graph.getFlowBetweenNodes(flow.getStartPt(), mergedNode);
+            Flow existingFlow = graph.getFirstFlowBetweenNodes(flow.getStartPt(), mergedNode);
             if (existingFlow == null) {
-                existingFlow = graph.getFlowBetweenNodes(flow.getEndPt(), mergedNode);
+                existingFlow = graph.getFirstFlowBetweenNodes(flow.getEndPt(), mergedNode);
             }
 
             if (existingFlow == null) {
@@ -802,7 +803,7 @@ public class Model {
      * @param flow The flow to delete
      */
     public void deleteFlow(Flow flow) {
-        graph.removeEdge(flow);
+        graph.removeFlow(flow);
     }
 
     /**
@@ -830,7 +831,7 @@ public class Model {
         System.out.println("# bidirectional flows to add: " + flowsToAdd.size());
 
         for (Flow flow : flowsToRemove) {
-            graph.removeEdge(flow);
+            graph.removeFlow(flow);
         }
         for (BidirectionalFlow bidirectionalFlow : flowsToAdd) {
             graph.addFlow(bidirectionalFlow);
@@ -861,7 +862,7 @@ public class Model {
         System.out.println("# opposing flows to add: " + flowsToAdd.size());
 
         for (BidirectionalFlow flow : flowsToRemove) {
-            graph.removeEdge(flow);
+            graph.removeFlow(flow);
         }
         for (Flow bidirectionalFlow : flowsToAdd) {
             graph.addFlow(bidirectionalFlow);
@@ -872,7 +873,7 @@ public class Model {
     public void reverseSelectedFlows() {
         ArrayList<Flow> flows = getSelectedFlows();
         for (Flow flow : flows) {
-            graph.removeEdge(flow);
+            graph.removeFlow(flow);
             flow.reverseFlow();
             graph.addFlow(flow);
         }
@@ -884,7 +885,7 @@ public class Model {
      * @param node The node to delete.
      */
     public void deleteNode(Point node) {
-        graph.removeVertex(node);
+        graph.removeNode(node);
     }
 
     /**
@@ -936,9 +937,7 @@ public class Model {
         graph = new Graph();
 
         // add new flows
-        flows.stream().forEach((flow) -> {
-            addFlow(flow);
-        });
+        graph.addFlows(flows);
     }
 
     /**
@@ -2295,4 +2294,26 @@ public class Model {
         this.nodeFillColor = nodeFillColor;
     }
 
+    /**
+     * Sum values of flows between same start and end nodes.
+     */
+    public void convertToTotalFlows() {
+        ArrayList<Flow> totalFlows = new ArrayList<>();
+        List<Point> nodes = getNodes();
+        for (int i = 0; i < nodes.size(); i++) {
+            Point node1 = nodes.get(i);
+            for (int j = i + 1; j < nodes.size(); j++) {
+                Point node2 = nodes.get(j);
+                Set<Flow> flows = graph.getAllFlowsBetweenNodes(node1, node2);
+                if (flows.isEmpty() == false) {
+                    double totalValue = 0;
+                    for (Flow flow : flows) {
+                        totalValue += flow.getValue();
+                    }
+                    totalFlows.add(new Flow(node1, node2, totalValue));
+                }
+            }
+        }
+        setFlows(totalFlows);
+    }
 }

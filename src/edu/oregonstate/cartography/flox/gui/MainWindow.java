@@ -12,7 +12,6 @@ import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Obstacle;
 import edu.oregonstate.cartography.flox.model.Layer;
-import edu.oregonstate.cartography.flox.model.LayoutGrader;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
 import edu.oregonstate.cartography.flox.model.Point;
@@ -545,13 +544,13 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel35 = new javax.swing.JLabel();
         maxColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         maximumFlowWidthSlider = new javax.swing.JSlider();
-        jLabel26 = new javax.swing.JLabel();
+        maxFlowWidthLabel = new javax.swing.JLabel();
         jSeparator24 = new javax.swing.JSeparator();
         jSeparator25 = new javax.swing.JSeparator();
         flowsWidthOptionsButton = new ika.gui.MenuToggleButton();
         nodesPanel = new TransparentMacPanel();
         nodesContentPanel = new TransparentMacPanel();
-        jLabel27 = new javax.swing.JLabel();
+        maxNodeRadiusLabel = new javax.swing.JLabel();
         maximumNodeSizeSlider = new javax.swing.JSlider();
         nodeStrokeColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         nodeStrokeSpinner = new javax.swing.JSpinner();
@@ -559,12 +558,12 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel31 = new javax.swing.JLabel();
         nodeFillColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         showNodesToggleButton = new javax.swing.JToggleButton();
-        jLabel14 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel14 = new javax.swing.JLabel();
         endDistanceSpinner = new javax.swing.JSpinner();
-        jLabel29 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel29 = new javax.swing.JLabel();
         startDistanceSpinner = new javax.swing.JSpinner();
         minDistToObstaclesSpinner = new javax.swing.JSpinner();
-        jLabel32 = new javax.swing.JLabel();
+        javax.swing.JLabel jLabel32 = new javax.swing.JLabel();
         jSeparator23 = new javax.swing.JSeparator();
         jSeparator29 = new javax.swing.JSeparator();
         arrowHeadsPanel = new TransparentMacPanel();
@@ -658,6 +657,8 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator jSeparator11 = new javax.swing.JPopupMenu.Separator();
         reverseFlowDirectionMenuItem = new javax.swing.JMenuItem();
         mergeNodesMenuItem = new javax.swing.JMenuItem();
+        jSeparator30 = new javax.swing.JPopupMenu.Separator();
+        totalFlowsMenuItem = new javax.swing.JMenuItem();
         mapMenu = new javax.swing.JMenu();
         openShapefileMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
@@ -1523,14 +1524,14 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 15, 0);
         flowsContentPanel.add(maximumFlowWidthSlider, gridBagConstraints);
 
-        jLabel26.setText("Maximum Width");
+        maxFlowWidthLabel.setText("Maximum Width");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
-        flowsContentPanel.add(jLabel26, gridBagConstraints);
+        flowsContentPanel.add(maxFlowWidthLabel, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 12;
@@ -1565,14 +1566,14 @@ public class MainWindow extends javax.swing.JFrame {
 
         nodesContentPanel.setLayout(new java.awt.GridBagLayout());
 
-        jLabel27.setText("Maximum Radius");
+        maxNodeRadiusLabel.setText("Maximum Radius");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
-        nodesContentPanel.add(jLabel27, gridBagConstraints);
+        nodesContentPanel.add(maxNodeRadiusLabel, gridBagConstraints);
 
         maximumNodeSizeSlider.setMajorTickSpacing(20);
         maximumNodeSizeSlider.setMinorTickSpacing(10);
@@ -1604,7 +1605,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         nodesContentPanel.add(nodeStrokeColorButton, gridBagConstraints);
 
-        nodeStrokeSpinner.setModel(new javax.swing.SpinnerNumberModel(1.0f, null, null, 1.0f));
+        nodeStrokeSpinner.setModel(new javax.swing.SpinnerNumberModel(1.0f, 0.0f, null, 1.0f));
         nodeStrokeSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
         nodeStrokeSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -2338,7 +2339,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(importFlowsMenuItem);
 
-        openPointsAndFlowsMenuItem.setText("Open CSV File with Nodes and Flows…");
+        openPointsAndFlowsMenuItem.setText("Open 2 CSV Files with Nodes and Flows…");
         openPointsAndFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openPointsAndFlowsMenuItemActionPerformed(evt);
@@ -2553,6 +2554,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(mergeNodesMenuItem);
+        editMenu.add(jSeparator30);
+
+        totalFlowsMenuItem.setText("Convert to Total Flows");
+        totalFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                totalFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(totalFlowsMenuItem);
 
         menuBar.add(editMenu);
 
@@ -3162,29 +3172,21 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_zoomOnSelectedLayerMenuItemActionPerformed
 
     private void showReport() {
-        int nbrIntersections = LayoutGrader.countFlowIntersections(model);
-        int nbrFlows = model.getNbrFlows();
-        int nbrNodes = model.getNbrNodes();
-        int nbrUnconnectedNodes = model.countUnconnectedNodes();
-
         StringBuilder sb = new StringBuilder();
 
         // flows
         sb.append("Flows\n");
-        sb.append("\t").append(nbrFlows).append(" flows").append("\n");
+        sb.append("\t").append(model.getNbrFlows()).append(" flows").append("\n");
         sb.append("\tMinimum flow value: ").append(model.getMinFlowValue()).append("\n");
         sb.append("\tMaximum flow value: ").append(model.getMaxFlowValue()).append("\n");
         sb.append("\tMean flow value: ").append(model.getMeanFlowValue()).append("\n");
-        
+
         // nodes
         sb.append("\nNodes\n");
-        sb.append("\t").append(nbrNodes).append(" nodes").append("\n");
+        sb.append("\t").append(model.getNbrNodes()).append(" nodes").append("\n");
         sb.append("\tMinimum node value: ").append(model.getMinNodeValue()).append("\n");
         sb.append("\tMaximum node value: ").append(model.getMaxNodeValue()).append("\n");
         sb.append("\tMean node value: ").append(model.getMeanNodeValue()).append("\n");
-        
-        sb.append("\nIntersections: ").append(nbrIntersections);
-        sb.append("\nUnconnected nodes: ").append(nbrUnconnectedNodes);
 
         sb.append("\nFlows overlapping obstacles: ");
         ForceLayouter layouter = new ForceLayouter(model);
@@ -3967,19 +3969,26 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_resolveIntersectionsCheckBoxMenuItemActionPerformed
 
     private void printFlowsToConsoleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printFlowsToConsoleMenuItemActionPerformed
+        boolean onlySelected = model.isFlowSelected();
         ArrayList<Flow> flows = model.getFlows();
         for (Flow flow : flows) {
-            System.out.println(flow.toString());
+            if (onlySelected && flow.isSelected()) {
+                System.out.println(flow.toString());
+            }
         }
     }//GEN-LAST:event_printFlowsToConsoleMenuItemActionPerformed
 
     private void mergeNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mergeNodesMenuItemActionPerformed
-        model.mergeSelectedNodes();
-        updateLockUnlockButtonIcon();
-        updateValueField();
-        updateCoordinateFields();
-        mapComponent.refreshMap();
-        layout("Merge Nodes");
+        try {
+            model.mergeSelectedNodes();
+            updateLockUnlockButtonIcon();
+            updateValueField();
+            updateCoordinateFields();
+            mapComponent.refreshMap();
+            layout("Merge Nodes");
+        } catch (Throwable e) {
+            ErrorDialog.showErrorDialog("Could not merge nodes.", "Flox Error", e, this);
+        }
     }//GEN-LAST:event_mergeNodesMenuItemActionPerformed
 
     private void selectUnconnectedNodesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectUnconnectedNodesMenuItemActionPerformed
@@ -4294,8 +4303,21 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_selectByValueCheckBoxMenuItemActionPerformed
 
     private void resolveSelectedIntersectingSiblingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveSelectedIntersectingSiblingsMenuItemActionPerformed
-        
+        // FIXME
     }//GEN-LAST:event_resolveSelectedIntersectingSiblingsMenuItemActionPerformed
+
+    private void totalFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_totalFlowsMenuItemActionPerformed
+        try {
+            model.convertToTotalFlows();
+            updateLockUnlockButtonIcon();
+            updateValueField();
+            updateCoordinateFields();
+            mapComponent.refreshMap();
+            layout("Convert to Total Flows");
+        } catch (Throwable e) {
+            ErrorDialog.showErrorDialog("Could not compute total flows.", "Flox Error", e, this);
+        }
+    }//GEN-LAST:event_totalFlowsMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4406,7 +4428,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
@@ -4416,12 +4437,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel25;
-    private javax.swing.JLabel jLabel26;
-    private javax.swing.JLabel jLabel27;
-    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
-    private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
@@ -4455,6 +4472,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator27;
     private javax.swing.JPopupMenu.Separator jSeparator28;
     private javax.swing.JSeparator jSeparator29;
+    private javax.swing.JPopupMenu.Separator jSeparator30;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
@@ -4473,6 +4491,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel mapPanel;
     private javax.swing.ButtonGroup mapToolsButtonGroup;
     private edu.oregonstate.cartography.flox.gui.ColorButton maxColorButton;
+    private javax.swing.JLabel maxFlowWidthLabel;
+    private javax.swing.JLabel maxNodeRadiusLabel;
     private javax.swing.JSlider maximumFlowWidthSlider;
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JMenuBar menuBar;
@@ -4539,6 +4559,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSpinner startDistanceSpinner;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
+    private javax.swing.JMenuItem totalFlowsMenuItem;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
     private javax.swing.JLabel vallueLabel;

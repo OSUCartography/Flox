@@ -108,6 +108,10 @@ public class Flow {
         assert (endPt != null);
         assert (Double.isFinite(value));
 
+        if (startPt.equals(endPt)) {
+            throw new IllegalArgumentException("The start and end node of a flow cannot be identical.");
+        }
+        
         this.startPt = startPt;
         this.cPt = ctrlPt;
         this.endPt = endPt;
@@ -143,6 +147,8 @@ public class Flow {
         sb.append(", value=").append(value);
         sb.append(", selected=").append(selected);
         sb.append(", locked=").append(locked);
+        sb.append(", start point hash code=").append(startPt.hashCode());
+        sb.append(", end point hash code=").append(endPt.hashCode());
         return sb.toString();
     }
 

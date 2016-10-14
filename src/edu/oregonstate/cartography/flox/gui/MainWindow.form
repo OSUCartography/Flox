@@ -516,7 +516,7 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="openPointsAndFlowsMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Open CSV File with Nodes and Flows&#x2026;"/>
+                <Property name="text" type="java.lang.String" value="Open 2 CSV Files with Nodes and Flows&#x2026;"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="openPointsAndFlowsMenuItemActionPerformed"/>
@@ -774,6 +774,16 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mergeNodesMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator30">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="totalFlowsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Convert to Total Flows"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="totalFlowsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -1813,7 +1823,7 @@
                         </Constraint>
                       </Constraints>
                     </Component>
-                    <Component class="javax.swing.JLabel" name="jLabel26">
+                    <Component class="javax.swing.JLabel" name="maxFlowWidthLabel">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Maximum Width"/>
                       </Properties>
@@ -1884,7 +1894,7 @@
 
                   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout"/>
                   <SubComponents>
-                    <Component class="javax.swing.JLabel" name="jLabel27">
+                    <Component class="javax.swing.JLabel" name="maxNodeRadiusLabel">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Maximum Radius"/>
                       </Properties>
@@ -1926,7 +1936,7 @@
                     <Component class="javax.swing.JSpinner" name="nodeStrokeSpinner">
                       <Properties>
                         <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-                          <SpinnerModel initial="1.0" numberType="java.lang.Float" stepSize="1.0" type="number"/>
+                          <SpinnerModel initial="1.0" minimum="0.0" numberType="java.lang.Float" stepSize="1.0" type="number"/>
                         </Property>
                         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[55, 28]"/>
@@ -2002,6 +2012,10 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="End Trim"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+                        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+                      </AuxValues>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
                           <GridBagConstraints gridX="0" gridY="8" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="22" weightX="0.0" weightY="0.0"/>
@@ -2035,6 +2049,10 @@
                           </Border>
                         </Property>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+                        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+                      </AuxValues>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
                           <GridBagConstraints gridX="2" gridY="8" gridWidth="1" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="10" insetsBottom="0" insetsRight="0" anchor="22" weightX="0.0" weightY="0.0"/>
@@ -2081,6 +2099,10 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Minimum Distance to Flows"/>
                       </Properties>
+                      <AuxValues>
+                        <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+                        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+                      </AuxValues>
                       <Constraints>
                         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
                           <GridBagConstraints gridX="0" gridY="10" gridWidth="3" gridHeight="1" fill="0" ipadX="0" ipadY="0" insetsTop="0" insetsLeft="0" insetsBottom="0" insetsRight="0" anchor="22" weightX="0.0" weightY="0.0"/>

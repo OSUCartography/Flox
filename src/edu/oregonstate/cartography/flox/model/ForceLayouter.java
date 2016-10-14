@@ -548,7 +548,7 @@ public class ForceLayouter {
             Point[] points1 = straightLinesMap.get(flow1);
             // FIXME the first and last points are ignored, because sibling 
             // lines are connected at either the first or last point and 
-            // crosses() will return true.. Without start and end points, at 
+            // crosses() will return true. Without start and end points, at 
             // least 2 intermediate points are needed to define a line.
             if (points1.length < 4) {
                 continue;

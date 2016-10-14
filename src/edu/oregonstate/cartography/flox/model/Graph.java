@@ -4,6 +4,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import org.jgrapht.graph.DirectedMultigraph;
 
 /**
@@ -108,6 +110,29 @@ public final class Graph {
      * @param flow The flow to add. Start and end nodes may be changed.
      */
     public void addFlow(Flow flow) {
+        addFlowNoCacheUpdate(flow);
+        updateCachedValues();
+    }
+
+    /**
+     * Add a list of flows. This is more efficient than calling addFlow multiple
+     * times.
+     *
+     * @param flows flows to add. Start and end nodes may be changed.
+     */
+    public void addFlows(Collection<Flow> flows) {
+        for (Flow flow : flows) {
+            addFlowNoCacheUpdate(flow);
+        }
+        updateCachedValues();
+    }
+
+    /**
+     * Add a flow without updating the cached values.
+     *
+     * @param flow flow to add. Start and end nodes may be changed.
+     */
+    private void addFlowNoCacheUpdate(Flow flow) {
         assert (hasFlowWithID(flow.id) == false);
 
         Point startPoint = findNodeInGraph(flow.getStartPt());
@@ -117,7 +142,6 @@ public final class Graph {
         graph.addVertex(startPoint);
         graph.addVertex(endPoint);
         graph.addEdge(startPoint, endPoint, flow);
-        updateCachedValues();
     }
 
     /**
@@ -135,12 +159,30 @@ public final class Graph {
         return node;
     }
 
-    void removeEdge(Flow flow) {
+    /**
+     * Remove one flow.
+     *
+     * @param flow flow to remove
+     */
+    void removeFlow(Flow flow) {
         graph.removeEdge(flow);
         updateCachedValues();
     }
 
-    void removeVertex(Point node) {
+    /**
+     * Remove all flows
+     */
+    void removeAllFlows() {
+        graph.removeAllEdges(graph.edgeSet());
+        updateCachedValues();
+    }
+
+    /**
+     * Remove on node
+     *
+     * @param node node to remove
+     */
+    void removeNode(Point node) {
         graph.removeVertex(node);
         updateCachedValues();
     }
@@ -266,13 +308,15 @@ public final class Graph {
     }
 
     /**
-     * Returns a flow connecting two nodes.
+     * Returns the first flow that can be found connecting two nodes.
+     *
+     * Throws an exception if either of the two nodes is not in this graph.
      *
      * @param node1 search for flows connected to this node
      * @param node2 search for flows connected to this node
      * @return a flow connected to the passed two nodes or null
      */
-    public Flow getFlowBetweenNodes(Point node1, Point node2) {
+    public Flow getFirstFlowBetweenNodes(Point node1, Point node2) {
         Collection<Flow> flows = graph.edgesOf(node1);
         for (Flow flow : flows) {
             if (flow.endPt == node2 || flow.startPt == node2) {
@@ -280,6 +324,22 @@ public final class Graph {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns all flows starting at node 1 and ending at node 2 and vice versa.
+     *
+     * Throws an exception if either of the two nodes is not in this graph.
+     *
+     * @param node1 search for flows connected to this node
+     * @param node2 search for flows connected to this node
+     * @return all flows between the two nodes. This set can be empty.
+     */
+    public Set<Flow> getAllFlowsBetweenNodes(Point node1, Point node2) {
+        Set<Flow> set1 = graph.getAllEdges(node1, node2);
+        Set<Flow> set2 = graph.getAllEdges(node2, node1);
+        set1.addAll(set2);
+        return set1;
     }
 
     public ArrayList<Point> getSortedNodes(boolean increasing) {
