@@ -709,6 +709,7 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator22 = new javax.swing.JPopupMenu.Separator();
         showOptionsMenuItem = new javax.swing.JMenuItem();
 
+        importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
 
         jLabel22.setText("Nodes File");
@@ -4334,7 +4335,24 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_selectByValueCheckBoxMenuItemActionPerformed
 
     private void resolveSelectedIntersectingSiblingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveSelectedIntersectingSiblingsMenuItemActionPerformed
-        // FIXME
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        if (flows.size() !=2) {
+            ErrorDialog.showErrorDialog("Select two flows");
+            return;
+        }
+        
+        Point sharedNode = flows.get(0).getSharedNode(flows.get(1));
+        if (sharedNode == null) {
+            ErrorDialog.showErrorDialog("Flows do not share a node.");
+            return;
+        }
+        Model.IntersectingFlowPair pair 
+                = new Model.IntersectingFlowPair(flows.get(0), flows.get(1), sharedNode);
+        pair.resolveIntersection();
+        flows.get(0).setLocked(true);
+        flows.get(1).setLocked(true);
+        mapComponent.refreshMap();
+        layout("Resolve Intersection");
     }//GEN-LAST:event_resolveSelectedIntersectingSiblingsMenuItemActionPerformed
 
     private void totalFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_totalFlowsMenuItemActionPerformed

@@ -7,9 +7,10 @@ public class GeometryUtils {
 
     /**
      *
-     * This method returns true if 2 line segments intersect. The coordinates
-     * below are the endpoints of two line segments. Points 1 & 2 are a line
-     * segment Points 3 & 4 are a line segment
+     * This method returns true if two line segments intersect. Point 1 and
+     * point 2 form the first line segment; point 3 and point 4 form the second
+     * line segment. The result is true if the two line segments share a point,
+     * or when the two segments are collinear and partially or entirely overlap.
      *
      * Copied from here: http://www.java-gaming.org/index.php?topic=22590.0
      *

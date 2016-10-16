@@ -4,7 +4,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -595,7 +594,6 @@ public class ForceLayouter {
      */
     public ArrayList<Model.IntersectingFlowPair> getIntersectingSiblings() {
         initStraightLinesHashMap();
-        GeometryFactory geometryFactory = new GeometryFactory();
         ArrayList<Flow> flows = model.getFlows();
 
         // sort flows to pair large flows
@@ -604,21 +602,8 @@ public class ForceLayouter {
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
         for (int i = 0; i < flows.size(); i++) {
             Flow flow1 = flows.get(i);
-            Point[] points1 = straightLinesMap.get(flow1);
-            // FIXME the first and last points are ignored, because sibling 
-            // lines are connected at either the first or last point and 
-            // crosses() will return true. Without start and end points, at 
-            // least 2 intermediate points are needed to define a line.
-            if (points1.length < 4) {
-                continue;
-            }
-            LinearGeometryBuilder lineBuilder1 = new LinearGeometryBuilder(geometryFactory);
-            for (int ptID = 1; ptID < points1.length - 1; ptID++) {
-                Point point = points1[ptID];
-                lineBuilder1.add(new Coordinate(point.x, point.y));
-            }
-            Geometry geometry1 = lineBuilder1.getGeometry();
-
+            Point[] polyline1 = straightLinesMap.get(flow1);
+            // FIXME need a better way here
             for (int j = i + 1; j < flows.size(); j++) {
                 Flow flow2 = flows.get(j);
                 // pairs where both flows are locked are ignored, as nothing can be changed for locked flows.
@@ -628,18 +613,9 @@ public class ForceLayouter {
 
                 Point sharedNode = flow1.getSharedNode(flow2);
                 if (sharedNode != null) {
-                    Point[] points2 = straightLinesMap.get(flow2);
-                    if (points2.length < 4) { // FIXME see above
-                        continue;
-                    }
-                    LinearGeometryBuilder lineBuilder2 = new LinearGeometryBuilder(geometryFactory);
-                    for (int ptID = 1; ptID < points2.length - 1; ptID++) {
-                        Point point = points2[ptID];
-                        lineBuilder2.add(new Coordinate(point.x, point.y));
-                    }
-                    Geometry geometry2 = lineBuilder2.getGeometry();
-
-                    if (geometry1.crosses(geometry2)) {
+                    Point[] polyline2 = straightLinesMap.get(flow2);
+                    
+                    if (polylinesIntersect(polyline1, polyline2)) {
                         pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));
                     }
                 }
@@ -650,6 +626,32 @@ public class ForceLayouter {
             }
         }
         return pairs;
+    }
+
+    /**
+     * Test whether two polylines intersect.
+     * 
+     * @param polyline1
+     * @param polyline2
+     * @return 
+     */
+    private static boolean polylinesIntersect(Point[] polyline1, Point[] polyline2) {
+        for (int i = 0; i < polyline1.length - 1; i++) {
+            double x1 = polyline1[i].x;
+            double y1 = polyline1[i].y;
+            double x2 = polyline1[i + 1].x;
+            double y2 = polyline1[i + 1].y;
+            for (int j = 0; j < polyline2.length - 1; j++) {
+                double x3 = polyline2[j].x;
+                double y3 = polyline2[j].y;
+                double x4 = polyline2[j + 1].x;
+                double y4 = polyline2[j + 1].y;
+                if (GeometryUtils.linesIntersect(x1, y1, x2, y2, x3, y3, x4, y4)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

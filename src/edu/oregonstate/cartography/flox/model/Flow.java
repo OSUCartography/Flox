@@ -111,7 +111,7 @@ public class Flow {
         if (startPt.equals(endPt)) {
             throw new IllegalArgumentException("The start and end node of a flow cannot be identical.");
         }
-        
+
         this.startPt = startPt;
         this.cPt = ctrlPt;
         this.endPt = endPt;
@@ -595,9 +595,15 @@ public class Flow {
     }
 
     /**
-     * Converts this Bezier curve to straight line segments with regular length.
-     * Does not apply clipping with start and end nodes, mask areas, or
-     * arrowheads.
+     * Converts this Bezier curve to a polyline with straight line segments with
+     * regular length. Does not apply clipping with start and end nodes, mask
+     * areas, or arrowheads.
+     *
+     * The first point of the polyline is moved by the distance equal to the
+     * deCasteljauTol parameter towards the second point. The last point of the
+     * polyline is moved by the same distance towards the second to the last
+     * point. This is to avoid that intersection tests between two polylines
+     * connected to the same start or end node return true.
      *
      * @param deCasteljauTol the maximum distance between the curve and the
      * straight line segments.
@@ -607,55 +613,95 @@ public class Flow {
     public ArrayList<Point> toUnclippedStraightLineSegments(double deCasteljauTol) {
         assert (deCasteljauTol > 0);
 
-        ArrayList<Point> regularPoints = new ArrayList<>();
         ArrayList<Point> irregularPoints
                 = toStraightLineSegmentsWithIrregularLength(deCasteljauTol);
-
-        // compute distance between points in regular line string
+        
+        // compute the length of an ideal regular line segment
         double totalLength = lineStringLength(irregularPoints);
-        // the length of an ideal, unbroken line segment
-        double targetDist = totalLength / Math.round(totalLength / (deCasteljauTol * Model.FlowNodeDensity.DE_CASTELJAU_TO_LINE_SEGMENT_LENGTH));
+        double idealDist = deCasteljauTol * Model.FlowNodeDensity.DE_CASTELJAU_TO_LINE_SEGMENT_LENGTH;
+        // adjust the length to avoid an irregular point at the end of the line
+        double targetDist = totalLength / Math.round(totalLength / idealDist);
 
-        // create new point set with regularly distributed points
-        double startX = irregularPoints.get(0).x;
-        double startY = irregularPoints.get(0).y;
+        // create new point list with regularly distributed points
+        ArrayList<Point> regularPoints = new ArrayList<>();
 
-        // add start point
-        regularPoints.add(new Point(startX, startY));
+        double segmentStartX = irregularPoints.get(0).x;
+        double segmentStartY = irregularPoints.get(0).y;
+        
+        // remainding length of previous line segment
+        double remainder = 0;
 
-        double length = 0;
+        // iterate over line segments
         int nPoints = irregularPoints.size();
         for (int i = 1; i < nPoints; i++) {
-            Point inputPt = irregularPoints.get(i);
-            double endX = inputPt.x;
-            double endY = inputPt.y;
+            Point segmentEndPt = irregularPoints.get(i);
+            double segmentEndX = segmentEndPt.x;
+            double segmentEndY = segmentEndPt.y;
 
             // normalized direction dx and dy
-            double dx = endX - startX;
-            double dy = endY - startY;
-            final double l = Math.sqrt(dx * dx + dy * dy);
-
-            double rest = length;
-            length += l;
-            while (length >= targetDist) {
-                // compute new point
-                length -= targetDist;
-                startX += dx / l * (targetDist - rest);
-                startY += dy / l * (targetDist - rest);
-                rest = 0;
-                regularPoints.add(new Point(startX, startY));
+            double dx = segmentEndX - segmentStartX;
+            double dy = segmentEndY - segmentStartY;
+            double segmentLength = Math.sqrt(dx * dx + dy * dy);
+            if (segmentLength == 0) {
+                continue;
             }
-            startX = endX;
-            startY = endY;
+            dx /= segmentLength;
+            dy /= segmentLength;
+
+            // the number of points to place along the current line segment
+            int nPtsForSegment;
+            if (i == nPoints - 1) {
+                // compensate for numerical imprecissions for last segment
+                nPtsForSegment = (int) Math.round((segmentLength + remainder) / targetDist);
+            } else {
+                nPtsForSegment = (int) ((segmentLength + remainder) / targetDist);
+            }
+
+            // place points along line segment
+            for (int j = 0; j < nPtsForSegment; j++) {
+                double x = segmentStartX + dx * (j * targetDist - remainder);
+                double y = segmentStartY + dy * (j * targetDist - remainder);
+                regularPoints.add(new Point(x, y));
+            }
+
+            // update remainder and start coordinate for the next line segment
+            remainder += segmentLength - nPtsForSegment * targetDist;
+            segmentStartX = segmentEndX;
+            segmentStartY = segmentEndY;
         }
 
-        if (regularPoints.size() == 1) {
+        // add flow start point if no point has been added so far
+        if (regularPoints.isEmpty()) {
             regularPoints.add(new Point(endPt.x, endPt.y));
         }
 
-        // replace last point with end point
-        regularPoints.set(regularPoints.size() - 1,
-                irregularPoints.get(irregularPoints.size() - 1));
+        // add flow end point
+        regularPoints.add(irregularPoints.get(irregularPoints.size() - 1));
+
+        // move the first point by deCasteljauTol distance towards the second point
+        {
+            Point firstPoint = regularPoints.get(0);
+            Point secondPoint = regularPoints.get(1);
+            double dx = secondPoint.x - firstPoint.x;
+            double dy = secondPoint.y - firstPoint.y;
+            double l = Math.sqrt(dx * dx + dy * dy);
+            firstPoint.x += deCasteljauTol * dx / l;
+            firstPoint.y += deCasteljauTol * dy / l;
+        }
+
+        // move the last point by deCasteljauTol distance towards the second to the last point
+        {
+            Point lastPt = regularPoints.get(regularPoints.size() - 1);
+            Point secondLastPt = regularPoints.get(regularPoints.size() - 2);
+            double dx = secondLastPt.x - lastPt.x;
+            double dy = secondLastPt.y - lastPt.y;
+            double l = Math.sqrt(dx * dx + dy * dy);
+            lastPt.x += deCasteljauTol * dx / l;
+            lastPt.y += deCasteljauTol * dy / l;
+        }
+        
+        System.out.println("irregular " + irregularPoints.size());
+        System.out.println("regular " + regularPoints.size());
 
         return regularPoints;
     }
@@ -1040,7 +1086,7 @@ public class Flow {
 
     /**
      * If this and the passed flow share a common start or end node, the shared
-     * node is returned. Ohterwise null is returned.
+     * node is returned. Otherwise null is returned.
      *
      * @param flow flow to test.
      * @return the shared node or null.

@@ -539,17 +539,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * Draw straight line segments for a Bezier curve. Useful for debugging.
      */
     private void drawStraightLinesSegments() {
-
-        Iterator<Flow> iter = model.flowIterator();
-
-        // If there are no flows, stop
-        if (!iter.hasNext()) {
-            return;
-        }
-
         setStrokeWidth(2f);
         double deCasteljauTol = model.getDeCasteljauTolerance();
 
+        Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
             Flow clippedFlow = model.clipFlow(flow, false);
