@@ -202,6 +202,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         updatingGUI = true;
         try {
+            setTitle(model.getName());
+
             // arrows
             addArrowsCheckbox.setSelected(model.isDrawArrowheads());
             arrowheadLengthSlider.setValue((int) (model.getArrowLengthScaleFactor() * 100));
@@ -980,7 +982,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         selectionPanel.add(selectFlowNodeComboBox, gridBagConstraints);
 
-        selectTypeComboBox.setModel(new DefaultComboBoxModel(Model.Comparator.values()));
+        selectTypeComboBox.setModel(new DefaultComboBoxModel(Model.FlowSelector.values()));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
         selectionPanel.add(selectTypeComboBox, gridBagConstraints);
@@ -2958,11 +2960,12 @@ public class MainWindow extends javax.swing.JFrame {
      * Passes flows to the model and initializes the GUI for the flows.
      *
      * @param flows new flows
-     * @param name name of the flow data set, used for window title
+     * @param name name of the flow data set, used for window title and file
+     * names.
      */
     private void setFlows(ArrayList<Flow> flows, String name) {
         if (flows != null) {
-            setTitle(name);
+            model.setName(name.trim());
             model.setFlows(flows);
             mapComponent.showAll();
             model.setReferenceMapScale(mapComponent.getScale());
@@ -4287,7 +4290,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         // select flows or nodes
         double threshold = ((Number) selectValueFormattedTextField.getValue()).doubleValue();
-        Model.Comparator comparator = (Model.Comparator) (selectTypeComboBox.getSelectedItem());
+        Model.FlowSelector comparator = (Model.FlowSelector) (selectTypeComboBox.getSelectedItem());
         final int nSelected;
         if (selectFlows) {
             nSelected = model.selectFlowsByValue(comparator, threshold);
@@ -4367,8 +4370,8 @@ public class MainWindow extends javax.swing.JFrame {
      * @return file name without file extension.
      */
     private String getFileName() {
-        String title = getTitle();
-        return (title == null || title.isEmpty()) ? "Flows" : title;
+        String name = model.getName();
+        return (name == null || name.isEmpty()) ? "Flows" : name;
     }
 
     public void layout(String undoString) {

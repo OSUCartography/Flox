@@ -93,7 +93,7 @@ public class Model {
      * A Comparator defines conditions to compare two double values. Used to
      * select flows and nodes by their values.
      */
-    public enum Comparator {
+    public enum FlowSelector {
 
         /**
          * first value is greater than second value
@@ -118,7 +118,7 @@ public class Model {
 
         private final String description;
 
-        private Comparator(String s) {
+        private FlowSelector(String s) {
             description = s;
         }
 
@@ -209,6 +209,14 @@ public class Model {
         }
     }
 
+    /**
+     * Name of this model
+     */
+    private String name;
+    
+    /**
+     * Number of iterations for layout computation
+     */
     private int nbrIterations = 50;
 
     /**
@@ -683,7 +691,7 @@ public class Model {
      * @param threshold threshold value
      * @return number of nodes that meet the conditions of the Comparator
      */
-    public int selectNodesByValue(Comparator comparator, double threshold) {
+    public int selectNodesByValue(FlowSelector comparator, double threshold) {
         int n = 0;
         Iterator<Point> iter = nodeIterator();
         while (iter.hasNext()) {
@@ -704,7 +712,7 @@ public class Model {
      * @param threshold threshold value
      * @return number of flows that meet the conditions of the Comparator
      */
-    public int selectFlowsByValue(Comparator comparator, double threshold) {
+    public int selectFlowsByValue(FlowSelector comparator, double threshold) {
         int n = 0;
         Iterator<Flow> iter = flowIterator();
         while (iter.hasNext()) {
@@ -2353,6 +2361,20 @@ public class Model {
             }
         }
         setFlows(netFlows);
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
 }
