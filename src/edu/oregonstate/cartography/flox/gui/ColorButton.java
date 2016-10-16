@@ -77,11 +77,11 @@ public class ColorButton extends JToggleButton implements ActionListener {
             }
         }
 
-        ColorSelectionModel model = colorChooser.getSelectionModel();
-        model.addChangeListener(new ChangeListener() {
+        ColorSelectionModel colorSelectionModel = colorChooser.getSelectionModel();
+        colorSelectionModel.addChangeListener(new ChangeListener() {
+            @Override
             public void stateChanged(ChangeEvent evt) {
                 ColorSelectionModel model = (ColorSelectionModel) evt.getSource();
-
                 setColor(model.getSelectedColor());
             }
         });
@@ -121,6 +121,7 @@ public class ColorButton extends JToggleButton implements ActionListener {
     /**
      * Action listener for the OK button in the color chooser.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         // ok button in color chooser was pressed.
         this.setColor(colorChooser.getColor());
@@ -151,7 +152,7 @@ public class ColorButton extends JToggleButton implements ActionListener {
                         // restore original color
                         setColor(originalColor);
                     }
-                }); //no CANCEL button handler
+                });
                 dialog.pack();
                 dialog.setResizable(false);
             }
