@@ -823,7 +823,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
         jPanel1.add(showLineSegmentsToggleButton, gridBagConstraints);
 
-        iterationsSpinner.setModel(new javax.swing.SpinnerNumberModel(100, 10, 500, 10));
+        iterationsSpinner.setModel(new javax.swing.SpinnerNumberModel(100, 5, 500, 10));
         iterationsSpinner.setPreferredSize(new java.awt.Dimension(70, 28));
         iterationsSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -2973,6 +2973,17 @@ public class MainWindow extends javax.swing.JFrame {
             } else {
                 model.adjustMaxFlowStrokeWidthToNodeSize(maximumFlowWidthSlider.getMaximum());
             }
+
+            // reduce he number of iterations and the computation accuracy for 
+            // large datasets to reduce computation time.
+            if (model.getNbrFlows() > 200) {
+                model.setFlowNodeDensity(FlowNodeDensity.LOW);
+
+                SpinnerNumberModel spinnerModel = (SpinnerNumberModel) iterationsSpinner.getModel();
+                int minIterations = ((Number) spinnerModel.getMinimum()).intValue();
+                model.setNbrIterations(minIterations);
+            }
+
             writeModelToGUI();
             mapComponent.repaint();
             layout("Load Flows");
