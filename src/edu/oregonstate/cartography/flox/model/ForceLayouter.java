@@ -8,6 +8,8 @@ import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -100,16 +102,17 @@ public class ForceLayouter {
     }
 
     /**
-     * Apply the control points to the model and recompute arrowheads. This
-     * method should be called when all iterations are completed and a new
-     * layout has been generated.
+     * Apply now control point locations to a model. This method should be
+     * called when all iterations are completed and a new layout has been
+     * generated.
      *
      * @param destinationModel the graph of this model will be replaced with a
      * reference to the model of this ForceLayouter.
      */
     public void applyChangesToModel(Model destinationModel) {
-        ArrayList<Flow> flows = model.getFlows();
-        for (Flow flow : flows) {
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             Point ctrlPt = flow.getCtrlPt();
             destinationModel.replaceControlPoint(flow.id, ctrlPt.x, ctrlPt.y);
         }
@@ -137,17 +140,27 @@ public class ForceLayouter {
 
         // try moving flows that intersect and are connected to the same node
         if (model.isResolveIntersectionsForSiblings()) {
-            List<Model.IntersectingFlowPair> pairs = getIntersectingSiblings();
+            ArrayList<Model.IntersectingFlowPair> pairs = getIntersectingSiblings();
             if (isCancelled()) {
                 return 0;
             }
 
-            for (Model.IntersectingFlowPair pair : pairs) {
-                pair.resolveIntersection();
+            // sort intersecting flow pairs by summed flow values
+            Collections.sort(pairs, new Comparator<Model.IntersectingFlowPair>() {
+                @Override
+                public int compare(Model.IntersectingFlowPair o1, Model.IntersectingFlowPair o2) {
+                    double v1 = o1.flow1.getValue() + o1.flow2.getValue();
+                    double v2 = o2.flow1.getValue() + o2.flow2.getValue();
+                    return Double.compare(v1, v2);
+                }
+            });
 
+            for (Model.IntersectingFlowPair pair : pairs) {
                 if (isCancelled()) {
                     return 0;
                 }
+
+                pair.resolveIntersection();
 
                 // move control points if they are outside of the range box or the canvas
                 if (model.isEnforceRangebox()) {
@@ -475,7 +488,7 @@ public class ForceLayouter {
         // Compute forces applied by all flows on current flow
         Force externalF = new Force();
         double lengthOfForceVectorsSum = 0;
-        
+
         Force f = new Force();
         for (Point pt : flowPoints) {
             computeForceOnPoint(pt, flow, f);
@@ -584,6 +597,8 @@ public class ForceLayouter {
         initStraightLinesHashMap();
         GeometryFactory geometryFactory = new GeometryFactory();
         ArrayList<Flow> flows = model.getFlows();
+
+        // sort flows to pair large flows
         Model.sortFlows(flows, false);
 
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();

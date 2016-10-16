@@ -49,7 +49,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class Model {
-
+    
     /**
      * The default value for a new node.
      */
@@ -228,9 +228,9 @@ public class Model {
     private double antiTorsionWeight = 0.8;
 
     /**
-     * Weight of angular distribution force. Currently modified by a GUI slider.
+     * Weight of angular distribution force.
      */
-    private double angularDistributionWeight = 2;
+    private double angularDistributionWeight = 3.75;
 
     /**
      * Stiffness factor for peripheral flows.
@@ -255,8 +255,8 @@ public class Model {
     private int distanceWeightExponent = 4;
 
     /**
-     * If this is true, control points of flows are prevented from movingm
-     * outside of its flow's rangebox.
+     * If this is true, control points of flows are prevented from moving
+     * outside of the range box of a flow.
      */
     private boolean enforceRangebox = true;
 

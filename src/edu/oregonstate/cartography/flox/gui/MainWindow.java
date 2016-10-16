@@ -3986,8 +3986,9 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void printFlowsToConsoleMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printFlowsToConsoleMenuItemActionPerformed
         boolean onlySelected = model.isFlowSelected();
-        ArrayList<Flow> flows = model.getFlows();
-        for (Flow flow : flows) {
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
             if (onlySelected && flow.isSelected()) {
                 System.out.println(flow.toString());
             }
