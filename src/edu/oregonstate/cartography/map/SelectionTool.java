@@ -304,6 +304,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
             while (flows.hasNext()) {
                 Flow flow = flows.next();
+                Flow clipppedFlow = model.clipFlow(flow, false);
 
                 // flow width
                 double flowWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
@@ -312,13 +313,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 double maxDistWorld = toleranceWorld + flowWidthWorld / 2;
 
                 // Add a little padding to the bounding box in the amount of tol
-                Rectangle2D flowBB = flow.getBoundingBox();
+                Rectangle2D flowBB = clipppedFlow.getBoundingBox();
                 flowBB.add(flowBB.getMinX() - maxDistWorld, flowBB.getMinY() - maxDistWorld);
                 flowBB.add(flowBB.getMaxX() + maxDistWorld, flowBB.getMaxY() + maxDistWorld);
 
                 if (flowBB.contains(point)) {
                     // Get the distance of the click to the flow.
-                    double distanceSqWorld = flow.distanceSq(point.x, point.y, tol);
+                    double distanceSqWorld = clipppedFlow.distanceSq(point.x, point.y, tol);
                     // If that distance is less than the tolerance, select it.
                     if (distanceSqWorld <= maxDistWorld * maxDistWorld && !nodeGotSelected) {
                         if (shiftDown) {
