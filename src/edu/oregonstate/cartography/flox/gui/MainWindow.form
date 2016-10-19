@@ -1057,6 +1057,14 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectIntersectingSiblingFlowsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="isIntersectingSiblingMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Is Intersecting and Connected to Same Node"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="isIntersectingSiblingMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="resolveSelectedIntersectingSiblingsMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Resolve Selected Intersecting Flows Connected to Same Nodes"/>

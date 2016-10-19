@@ -178,7 +178,7 @@ public class ForceLayouter {
             int remainingIterations = model.getNbrIterations() - i - 1;
 
             // nodes and arrowheads are obstacles
-            List<Obstacle> obstacles = getObstacles();
+            List<Obstacle> obstacles = model.getObstacles();
 
             // get a list of all flows that intersect obstacles
             ArrayList<Flow> sortedOverlappingFlows = getSortedFlowsOverlappingObstacles(obstacles);
@@ -223,7 +223,7 @@ public class ForceLayouter {
      * @param canvas map canvas. Control points may be forces to stay within
      * this rectangle.
      */
-    public void computeForces(double weight, Rectangle2D canvas) {
+    private void computeForces(double weight, Rectangle2D canvas) {
         if (model.getNbrFlows() < 2) {
             return;
         }
@@ -825,7 +825,7 @@ public class ForceLayouter {
      * @param obstacles circular obstacles
      * @return true if the flow overlaps a node
      */
-    public boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles) {
+    private boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles) {
 
         for (Obstacle obstacle : obstacles) {
             if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
@@ -843,52 +843,23 @@ public class ForceLayouter {
         return false;
     }
 
-    public List<Obstacle> getObstacles() {
-        List<Obstacle> obstacles = new ArrayList<>();
-
-        // nodes are obstacles
-        Iterator<Point> nodeIterator = model.nodeIterator();
-        while (nodeIterator.hasNext()) {
-            Point node = nodeIterator.next();
-
-            // nodes are obstacles
-            double nodeRadiusPx = model.getNodeRadiusPx(node);
-            double strokeWidthPx = model.getNodeStrokeWidthPx();
-            final double rPx;
-            if (strokeWidthPx > nodeRadiusPx * 2) {
-                // stroke is wider than the diameter of the circle
-                rPx = strokeWidthPx;
-            } else {
-                rPx = nodeRadiusPx + 0.5 * strokeWidthPx;
-            }
-            double rWorld = rPx / model.getReferenceMapScale();
-            obstacles.add(new Obstacle(node, node.x, node.y, rWorld));
-        }
-
-        // arrowheads are obstacles
-        if (model.isDrawArrowheads()) {
-            Iterator<Flow> flowIterator = model.flowIterator();
-            while (flowIterator.hasNext()) {
-                Flow flow = flowIterator.next();
-                Arrow arrow = flow.getArrow(model);
-                if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
-                    Obstacle obstacle = new Obstacle(arrow.getTipPt(),
-                            arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
-                    obstacles.add(obstacle);
-                }
-            }
-        }
-
-        return obstacles;
+     /**
+     * Returns a list of all flows that intersect obstacles.
+     *
+     * @return a list of flows overlapping any of the passed obstacles
+     */
+    public ArrayList<Flow> getFlowsOverlappingObstacles() {
+        List<Obstacle> obstacles = model.getObstacles();
+        return getFlowsOverlappingObstacles(obstacles);
     }
-
+    
     /**
-     * Returns a list of all flows that intersect obstacle circles.
+     * Returns a list of all flows that intersect a list of passed obstacles.
      *
      * @param obstacles a list of obstacles
      * @return a list of flows overlapping any of the passed obstacles
      */
-    public ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
+    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
         ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
@@ -923,7 +894,7 @@ public class ForceLayouter {
      */
     public void createSpiralPointsLayer() {
         List<Flow> flows = model.getSelectedFlows();
-        List<Obstacle> obstacles = getObstacles();
+        List<Obstacle> obstacles = model.getObstacles();
 
         ArrayList<Geometry> geometries = new ArrayList<>();
         GeometryFactory geometryFactory = new GeometryFactory();
@@ -1067,7 +1038,7 @@ public class ForceLayouter {
      * @param nbrFlowsToMove stop when this many flows have been moved
      * @return number of remaining flows that overlap an obstacle
      */
-    public int moveFlowsAwayFromObstacles(List<Obstacle> obstacles,
+    private int moveFlowsAwayFromObstacles(List<Obstacle> obstacles,
             ArrayList<Flow> flows, int nbrFlowsToMove) {
         int nbrMovedFlows = 0;
         for (Flow flow : flows) {

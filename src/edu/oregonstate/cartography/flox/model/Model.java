@@ -878,6 +878,9 @@ public class Model {
         System.out.println("# final flows: " + graph.getNbrFlows());
     }
 
+    /**
+     * Inverse the direction of all selected flows.
+     */
     public void reverseSelectedFlows() {
         ArrayList<Flow> flows = getSelectedFlows();
         for (Flow flow : flows) {
@@ -1118,6 +1121,45 @@ public class Model {
     public void setEndClipAreaBufferDistancePx(double endClipAreaBufferDistance) {
         this.endClipAreaBufferDistancePx = endClipAreaBufferDistance;
         updateEndClipAreas();
+    }
+    
+    public List<Obstacle> getObstacles() {
+        List<Obstacle> obstacles = new ArrayList<>();
+
+        // nodes are obstacles
+        Iterator<Point> nodeIterator = nodeIterator();
+        while (nodeIterator.hasNext()) {
+            Point node = nodeIterator.next();
+
+            // nodes are obstacles
+            double nodeRadiusPx = getNodeRadiusPx(node);
+            double strokeWidthPx = getNodeStrokeWidthPx();
+            final double rPx;
+            if (strokeWidthPx > nodeRadiusPx * 2) {
+                // stroke is wider than the diameter of the circle
+                rPx = strokeWidthPx;
+            } else {
+                rPx = nodeRadiusPx + 0.5 * strokeWidthPx;
+            }
+            double rWorld = rPx / getReferenceMapScale();
+            obstacles.add(new Obstacle(node, node.x, node.y, rWorld));
+        }
+
+        // arrowheads are obstacles
+        if (isDrawArrowheads()) {
+            Iterator<Flow> flowIterator = flowIterator();
+            while (flowIterator.hasNext()) {
+                Flow flow = flowIterator.next();
+                Arrow arrow = flow.getArrow(this);
+                if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
+                    Obstacle obstacle = new Obstacle(arrow.getTipPt(),
+                            arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
+                    obstacles.add(obstacle);
+                }
+            }
+        }
+
+        return obstacles;
     }
 
     /**

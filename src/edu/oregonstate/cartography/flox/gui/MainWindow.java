@@ -696,6 +696,7 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator16 = new javax.swing.JPopupMenu.Separator();
         resolveIntersectionsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
+        isIntersectingSiblingMenuItem = new javax.swing.JMenuItem();
         resolveSelectedIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
@@ -2793,6 +2794,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(selectIntersectingSiblingFlowsMenuItem);
 
+        isIntersectingSiblingMenuItem.setText("Is Intersecting and Connected to Same Node");
+        isIntersectingSiblingMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                isIntersectingSiblingMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(isIntersectingSiblingMenuItem);
+
         resolveSelectedIntersectingSiblingsMenuItem.setText("Resolve Selected Intersecting Flows Connected to Same Nodes");
         resolveSelectedIntersectingSiblingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3221,8 +3230,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         sb.append("\nFlows overlapping obstacles: ");
         ForceLayouter layouter = new ForceLayouter(model);
-        List<Obstacle> obstacles = layouter.getObstacles();
-        List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles(obstacles);
+        List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles();
         sb.append(flowsOverlappingObstacles.size());
 
         JOptionPane.showMessageDialog(mapComponent, sb.toString(), "Layout Report", JOptionPane.INFORMATION_MESSAGE);
@@ -3926,8 +3934,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         // get a list of all flows that intersect obstacles
         ForceLayouter layouter = new ForceLayouter(model);
-        List<Obstacle> obstacles = layouter.getObstacles();
-        List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles(obstacles);
+        List<Flow> flowsOverlappingObstacles = layouter.getFlowsOverlappingObstacles();
         if (flowsOverlappingObstacles.isEmpty()) {
             String msg = "There are no flows overlapping nodes or arrowheads.";
             JOptionPane.showMessageDialog(this, msg, "Flox", JOptionPane.INFORMATION_MESSAGE);
@@ -4381,6 +4388,21 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_netFlowsMenuItemActionPerformed
 
+    private void isIntersectingSiblingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_isIntersectingSiblingMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        if (flows.size() !=2) {
+            ErrorDialog.showErrorDialog("Select two flows");
+            return;
+        }
+        
+        Point sharedNode = flows.get(0).getSharedNode(flows.get(1));
+        if (sharedNode == null) {
+            JOptionPane.showMessageDialog(this, "Selected flows are not intersecting.");
+        } else {
+            JOptionPane.showMessageDialog(this, "Selected flows are intersecting.");
+        }
+    }//GEN-LAST:event_isIntersectingSiblingMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4484,6 +4506,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
     private javax.swing.JCheckBoxMenuItem inlineArrowsCheckBoxMenuItem;
+    private javax.swing.JMenuItem isIntersectingSiblingMenuItem;
     private javax.swing.JSpinner iterationsSpinner;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

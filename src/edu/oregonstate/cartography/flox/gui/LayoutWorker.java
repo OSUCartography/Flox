@@ -63,9 +63,14 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
             if (isCancelled()) {
                 break;
             }
+            long startTime = System.nanoTime();    
+
             iterBeforeMovingFlows = layouter.layoutIteration(i, 
                     iterBeforeMovingFlows, canvas);
-
+            
+            long estimatedTime = System.nanoTime() - startTime;
+            System.out.format("%d %.3f seconds\n", i, estimatedTime / 1000d / 1000d / 1000d);
+            
             // update progress indicator
             double progress = 100d * i / nbrIterations;
             setProgress((int) Math.round(progress));

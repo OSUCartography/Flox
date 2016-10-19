@@ -578,8 +578,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
     private void drawObstacles() {
         g2d.setStroke(new BasicStroke(model.getNodeStrokeWidthPx()));
-        ForceLayouter layouter = new ForceLayouter(model);
-        List<Obstacle> obstacles = layouter.getObstacles();
+        List<Obstacle> obstacles = model.getObstacles();
         Color fillColor = new Color(200, 0, 0, 80);
         for (Obstacle obstacle : obstacles) {
             drawCircle(obstacle.x, obstacle.y, obstacle.r * scale, fillColor, null);
