@@ -86,14 +86,15 @@ public class ForceLayouter {
      */
     private void initStraightLinesHashMap() {
         straightLinesMap.clear();
-        double deCasteljauTol = model.getDeCasteljauTolerance();
+        double segmentLength = model.segmentLength();
+        
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
             Flow clippedFlow = model.clipFlow(flow, false);
-            ArrayList<Point> points = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
+            // ArrayList<Point> points = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
+            ArrayList<Point> points = clippedFlow.regularIntervals(segmentLength);
             straightLinesMap.put(flow, points.toArray(new Point[points.size()]));
-
             if (isCancelled()) {
                 return;
             }
@@ -582,13 +583,71 @@ public class ForceLayouter {
     }
 
     /**
+     * Returns a list with pairs of flows that intersect and are connected to
+     * the same start and end nodes. The list does not include pairs where both
+     * flows are locked.
+     *
+     * FIXME remove?
+     *
+     * @return pairs of flows that have a common start or end node.
+     */
+    public ArrayList<Model.IntersectingFlowPair> getIntersectingOpposingFlows() {
+        initStraightLinesHashMap();
+        ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow1 = iterator.next();
+            Flow flow2 = model.getOpposingFlow(flow1);
+            if (flow2 == null) {
+                continue;
+            }
+
+            if (flow1.isLocked() && flow2.isLocked()) {
+                continue;
+            }
+
+            Point[] polyline1 = straightLinesMap.get(flow1);
+            Point[] polyline2 = straightLinesMap.get(flow2);
+            if (polylinesIntersect(polyline1, polyline2)) {
+                pairs.add(new Model.IntersectingFlowPair(flow1, flow2, flow1.endPt));
+            }
+
+        }
+
+        return pairs;
+    }
+
+    /**
+     * 
+     * FIXME remove?
+     * 
+     * @param flow1
+     * @return 
+     */
+    public Model.IntersectingFlowPair getIntersectingFlow(Flow flow1) {
+        initStraightLinesHashMap();
+        Point[] polyline1 = straightLinesMap.get(flow1);
+        ArrayList<Flow> flows = model.getFlows();
+        for (Flow flow2 : flows) {
+            if (flow2 == flow1) {
+                continue;
+            }
+            
+            Point sharedNode = flow2.getSharedNode(flow1);
+            if (sharedNode != null) {
+                Point[] polyline2 = straightLinesMap.get(flow2);
+
+                if (polylinesIntersect(polyline1, polyline2)) {
+                    return new Model.IntersectingFlowPair(flow2, flow1, sharedNode);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns a list with pairs of flows that intersect and are connected to a
      * shared node. The list does not include pairs where both flows are locked.
-     *
-     * FIXME should either cache JTS Geometry objects or write intersection test
-     * for lines in straightLinesMap. JTS.crosses() returns true for lines
-     * sharing a start or end node. Therefore either move start and end points
-     * slightly, or code own crosses() method.
      *
      * @return pairs of flows that have a common start or end node.
      */
@@ -614,7 +673,7 @@ public class ForceLayouter {
                 Point sharedNode = flow1.getSharedNode(flow2);
                 if (sharedNode != null) {
                     Point[] polyline2 = straightLinesMap.get(flow2);
-                    
+
                     if (polylinesIntersect(polyline1, polyline2)) {
                         pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));
                     }
@@ -630,10 +689,10 @@ public class ForceLayouter {
 
     /**
      * Test whether two polylines intersect.
-     * 
+     *
      * @param polyline1
      * @param polyline2
-     * @return 
+     * @return
      */
     private static boolean polylinesIntersect(Point[] polyline1, Point[] polyline2) {
         for (int i = 0; i < polyline1.length - 1; i++) {
@@ -843,7 +902,7 @@ public class ForceLayouter {
         return false;
     }
 
-     /**
+    /**
      * Returns a list of all flows that intersect obstacles.
      *
      * @return a list of flows overlapping any of the passed obstacles
@@ -852,7 +911,7 @@ public class ForceLayouter {
         List<Obstacle> obstacles = model.getObstacles();
         return getFlowsOverlappingObstacles(obstacles);
     }
-    
+
     /**
      * Returns a list of all flows that intersect a list of passed obstacles.
      *

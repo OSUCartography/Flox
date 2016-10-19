@@ -49,7 +49,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 
 public class Model {
-    
+
     /**
      * The default value for a new node.
      */
@@ -70,22 +70,15 @@ public class Model {
      */
     public enum FlowNodeDensity {
 
-        // de Casteljau tolerance in pixels relative to current map reference scale.
-        LOW(2.5d),
-        MEDIUM(1d),
-        HIGH(0.5);
+        // segment length in pixels relative to current map reference scale.
+        LOW(50d),
+        MEDIUM(20d),
+        HIGH(10d);
 
-        private final double deCasteljauTolerance;
+        private final double segmentLength;
 
-        /**
-         * Multiply deCasteljauTolerance by DE_CASTELJAU_TO_LINE_SEGMENT_LENGTH
-         * to compute target line segment length when converting from Bezier
-         * curves to straight line segments.
-         */
-        public static final double DE_CASTELJAU_TO_LINE_SEGMENT_LENGTH = 20;
-
-        FlowNodeDensity(double deCasteljauTolerance) {
-            this.deCasteljauTolerance = deCasteljauTolerance;
+        FlowNodeDensity(double segmentLength) {
+            this.segmentLength = segmentLength;
         }
     }
 
@@ -213,7 +206,7 @@ public class Model {
      * Name of this model
      */
     private String name;
-    
+
     /**
      * Number of iterations for layout computation
      */
@@ -815,7 +808,18 @@ public class Model {
     }
 
     /**
-     * Experimental. Not currently used.
+     * Returns the flow from the end to the start point of the passed flow, if
+     * it exists.
+     *
+     * @param flow search for flow in opposite direction to this flow
+     * @return flow with opposite direction or null
+     */
+    public Flow getOpposingFlow(Flow flow) {
+        return graph.getOpposingFlow(flow);
+    }
+
+    /**
+     * FIXME Experimental. Not currently used.
      */
     public void changeToBidirectionalFlows() {
         ArrayList<BidirectionalFlow> flowsToAdd = new ArrayList<>();
@@ -848,7 +852,7 @@ public class Model {
     }
 
     /**
-     * Experimental. Not currently used.
+     * FIXME Experimental. Not currently used.
      */
     public void changeToUnidirectionalFlows() {
         ArrayList<Flow> flowsToAdd = new ArrayList<>();
@@ -1122,7 +1126,7 @@ public class Model {
         this.endClipAreaBufferDistancePx = endClipAreaBufferDistance;
         updateEndClipAreas();
     }
-    
+
     public List<Obstacle> getObstacles() {
         List<Obstacle> obstacles = new ArrayList<>();
 
@@ -1328,14 +1332,12 @@ public class Model {
     }
 
     /**
-     * Returns an empirical tolerance value for the De Casteljau algorithm,
-     * which converts a Bezier curve to straight line segments. The returned
-     * value is relative to the current reference map scale.
+     * Returns an ideal length for segmenting flows.
      *
-     * @return de Casteljau tolerance in world units.
+     * @return the segment length
      */
-    public double getDeCasteljauTolerance() {
-        return flowNodeDensity.deCasteljauTolerance / getReferenceMapScale();
+    public double segmentLength() {
+        return flowNodeDensity.segmentLength / getReferenceMapScale();
     }
 
     /**

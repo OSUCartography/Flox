@@ -142,7 +142,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
 
         if (drawLineSegments) {
-            drawStraightLinesSegments();
+            drawStraightLinesSegments(highlightSelected);
         }
 
         if (drawStartClipAreas || drawEndClipAreas) {
@@ -538,17 +538,18 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     /**
      * Draw straight line segments for a Bezier curve. Useful for debugging.
      */
-    private void drawStraightLinesSegments() {
+    private void drawStraightLinesSegments(boolean highlightSelected) {
         setStrokeWidth(2f);
-        double deCasteljauTol = model.getDeCasteljauTolerance();
-
+        double segmentLength = model.segmentLength();
+        
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
             Flow clippedFlow = model.clipFlow(flow, false);
-            ArrayList<Point> points = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
+            ArrayList<Point> points = clippedFlow.regularIntervals(segmentLength);
+            Color fillColor = highlightSelected && flow.isSelected() ? Color.PINK : SELECTION_COLOR;
             for (Point point : points) {
-                drawCircle(point.x, point.y, CR, Color.pink, Color.white);
+                drawCircle(point.x, point.y, CR, fillColor, Color.WHITE);
             }
         }
     }

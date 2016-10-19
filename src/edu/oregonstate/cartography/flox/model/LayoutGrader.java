@@ -28,14 +28,13 @@ public class LayoutGrader {
 
         ArrayList<Geometry> flowPolylines = new ArrayList<>();
 
-        double deCasteljauTol = model.getDeCasteljauTolerance();
         GeometryFactory geometryFactory = new GeometryFactory();
-        
+        double segmentLength = model.segmentLength();
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = model.clipFlow(iterator.next(), false);
             LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
-            ArrayList<Point> flowPoints = flow.toUnclippedStraightLineSegments(deCasteljauTol);
+            ArrayList<Point> flowPoints = flow.regularIntervals(segmentLength);           
             for (Point point : flowPoints) {
                 lineBuilder.add(new Coordinate(point.x, point.y));
             }

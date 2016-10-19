@@ -1049,12 +1049,28 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resolveIntersectionsCheckBoxMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="resolveOpposingIntersectionsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Resolve Intersections in Opposing Flows"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resolveOpposingIntersectionsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="selectIntersectingSiblingFlowsMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Select Intersecting Flows Connected to Same Nodes"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectIntersectingSiblingFlowsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="selectIntersectingMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Select Intersecting Partner Flow Connected to Same Node"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectIntersectingMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="isIntersectingSiblingMenuItem">

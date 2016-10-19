@@ -695,7 +695,9 @@ public class MainWindow extends javax.swing.JFrame {
         emptySpaceMenuItem = new javax.swing.JMenuItem();
         jSeparator16 = new javax.swing.JPopupMenu.Separator();
         resolveIntersectionsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        resolveOpposingIntersectionsMenuItem = new javax.swing.JMenuItem();
         selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
+        selectIntersectingMenuItem = new javax.swing.JMenuItem();
         isIntersectingSiblingMenuItem = new javax.swing.JMenuItem();
         resolveSelectedIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
@@ -2786,6 +2788,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(resolveIntersectionsCheckBoxMenuItem);
 
+        resolveOpposingIntersectionsMenuItem.setText("Resolve Intersections in Opposing Flows");
+        resolveOpposingIntersectionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resolveOpposingIntersectionsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(resolveOpposingIntersectionsMenuItem);
+
         selectIntersectingSiblingFlowsMenuItem.setText("Select Intersecting Flows Connected to Same Nodes");
         selectIntersectingSiblingFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2793,6 +2803,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(selectIntersectingSiblingFlowsMenuItem);
+
+        selectIntersectingMenuItem.setText("Select Intersecting Partner Flow Connected to Same Node");
+        selectIntersectingMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectIntersectingMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(selectIntersectingMenuItem);
 
         isIntersectingSiblingMenuItem.setText("Is Intersecting and Connected to Same Node");
         isIntersectingSiblingMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -4343,17 +4361,17 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void resolveSelectedIntersectingSiblingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveSelectedIntersectingSiblingsMenuItemActionPerformed
         ArrayList<Flow> flows = model.getSelectedFlows();
-        if (flows.size() !=2) {
+        if (flows.size() != 2) {
             ErrorDialog.showErrorDialog("Select two flows");
             return;
         }
-        
+
         Point sharedNode = flows.get(0).getSharedNode(flows.get(1));
         if (sharedNode == null) {
             ErrorDialog.showErrorDialog("Flows do not share a node.");
             return;
         }
-        Model.IntersectingFlowPair pair 
+        Model.IntersectingFlowPair pair
                 = new Model.IntersectingFlowPair(flows.get(0), flows.get(1), sharedNode);
         pair.resolveIntersection();
         flows.get(0).setLocked(true);
@@ -4390,11 +4408,11 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void isIntersectingSiblingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_isIntersectingSiblingMenuItemActionPerformed
         ArrayList<Flow> flows = model.getSelectedFlows();
-        if (flows.size() !=2) {
+        if (flows.size() != 2) {
             ErrorDialog.showErrorDialog("Select two flows");
             return;
         }
-        
+
         Point sharedNode = flows.get(0).getSharedNode(flows.get(1));
         if (sharedNode == null) {
             JOptionPane.showMessageDialog(this, "Selected flows are not intersecting.");
@@ -4402,6 +4420,33 @@ public class MainWindow extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Selected flows are intersecting.");
         }
     }//GEN-LAST:event_isIntersectingSiblingMenuItemActionPerformed
+
+    private void resolveOpposingIntersectionsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveOpposingIntersectionsMenuItemActionPerformed
+        ForceLayouter layouter = new ForceLayouter(model);
+        ArrayList<Model.IntersectingFlowPair> opposingIntersecting = layouter.getIntersectingOpposingFlows();
+        for (Model.IntersectingFlowPair pair : opposingIntersecting) {
+            pair.resolveIntersection();
+            pair.flow1.setSelected(true);
+            pair.flow2.setSelected(true);
+            pair.flow1.setLocked(true);
+            pair.flow2.setLocked(true);
+        }
+        mapComponent.refreshMap();
+        layout("Resolve Intersection");
+    }//GEN-LAST:event_resolveOpposingIntersectionsMenuItemActionPerformed
+
+    private void selectIntersectingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectIntersectingMenuItemActionPerformed
+        if (model.getSelectedFlows().size() != 1) {
+            ErrorDialog.showErrorDialog("Select one flow.");
+            return;
+        }
+        Flow flow = model.getSelectedFlows().get(0);
+        ForceLayouter layouter = new ForceLayouter(model);
+        Model.IntersectingFlowPair pair = layouter.getIntersectingFlow(flow);
+        pair.flow1.setSelected(true);
+        pair.flow2.setSelected(true);
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_selectIntersectingMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4608,6 +4653,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JMenuItem resolveIntersectingSiblingsMenuItem;
     private javax.swing.JCheckBoxMenuItem resolveIntersectionsCheckBoxMenuItem;
+    private javax.swing.JMenuItem resolveOpposingIntersectionsMenuItem;
     private javax.swing.JMenuItem resolveSelectedIntersectingSiblingsMenuItem;
     private javax.swing.JMenuItem reverseFlowDirectionMenuItem;
     private javax.swing.JPanel rightPanel;
@@ -4620,6 +4666,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JMenuItem selectFlowsMenuItem;
     private javax.swing.JLabel selectInfoLabel;
+    private javax.swing.JMenuItem selectIntersectingMenuItem;
     private javax.swing.JMenuItem selectIntersectingSiblingFlowsMenuItem;
     private javax.swing.JMenuItem selectNodesMenuItem;
     private javax.swing.JMenuItem selectOverlappingFlowsInfoMenuItem;

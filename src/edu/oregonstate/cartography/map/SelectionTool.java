@@ -158,8 +158,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         // Select flows
         boolean flowGotSelected = false;
         if (((FloxMapComponent) mapComponent).isDrawFlows()) {
-            double deCasteljauTol = model.getDeCasteljauTolerance();
-
+            double segmentLength = model.segmentLength();
             Iterator<Flow> flows = model.flowIterator();
             if (rect.height == 0 || rect.width == 0) {
                 rect.add(rect.getMaxX() + (1 / mapComponent.getScale()),
@@ -169,7 +168,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 Flow flow = flows.next();
                 Flow clippedFlow = model.clipFlow(flow, false);
                 if (clippedFlow.getBoundingBox().intersects(rect)) {
-                    ArrayList<Point> pts = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
+                    ArrayList<Point> pts = clippedFlow.regularIntervals(segmentLength);
                     for (int i = 0; i < pts.size() - 1; i++) {
                         // Get the points
                         Point pt1 = pts.get(i);

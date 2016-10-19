@@ -571,142 +571,6 @@ public class Flow {
     }
 
     /**
-     * Returns the length of a simple line string defined by a series of points.
-     *
-     * @param lineString
-     * @return The length.
-     */
-    private double lineStringLength(ArrayList<Point> lineString) {
-        double l = 0;
-        int nPoints = lineString.size();
-        double x0 = lineString.get(0).x;
-        double y0 = lineString.get(0).y;
-
-        for (int i = 1; i < nPoints; i++) {
-            double x1 = lineString.get(i).x;
-            double y1 = lineString.get(i).y;
-            double dx = x0 - x1;
-            double dy = y0 - y1;
-            l += Math.sqrt(dx * dx + dy * dy);
-            x0 = x1;
-            y0 = y1;
-        }
-        return l;
-    }
-
-    /**
-     * Converts this Bezier curve to a polyline with straight line segments with
-     * regular length. Does not apply clipping with start and end nodes, mask
-     * areas, or arrowheads.
-     *
-     * The first point of the polyline is moved by the distance equal to the
-     * deCasteljauTol parameter towards the second point. The last point of the
-     * polyline is moved by the same distance towards the second to the last
-     * point. This is to avoid that intersection tests between two polylines
-     * connected to the same start or end node return true.
-     *
-     * @param deCasteljauTol the maximum distance between the curve and the
-     * straight line segments.
-     * @return a list of points, including copies of the start point and the end
-     * point.
-     */
-    public ArrayList<Point> toUnclippedStraightLineSegments(double deCasteljauTol) {
-        assert (deCasteljauTol > 0);
-
-        ArrayList<Point> irregularPoints
-                = toStraightLineSegmentsWithIrregularLength(deCasteljauTol);
-        
-        // compute the length of an ideal regular line segment
-        double totalLength = lineStringLength(irregularPoints);
-        double idealDist = deCasteljauTol * Model.FlowNodeDensity.DE_CASTELJAU_TO_LINE_SEGMENT_LENGTH;
-        // adjust the length to avoid an irregular point at the end of the line
-        double targetDist = totalLength / Math.round(totalLength / idealDist);
-
-        // create new point list with regularly distributed points
-        ArrayList<Point> regularPoints = new ArrayList<>();
-
-        double segmentStartX = irregularPoints.get(0).x;
-        double segmentStartY = irregularPoints.get(0).y;
-        
-        // remainding length of previous line segment
-        double remainder = 0;
-
-        // iterate over line segments
-        int nPoints = irregularPoints.size();
-        for (int i = 1; i < nPoints; i++) {
-            Point segmentEndPt = irregularPoints.get(i);
-            double segmentEndX = segmentEndPt.x;
-            double segmentEndY = segmentEndPt.y;
-
-            // normalized direction dx and dy
-            double dx = segmentEndX - segmentStartX;
-            double dy = segmentEndY - segmentStartY;
-            double segmentLength = Math.sqrt(dx * dx + dy * dy);
-            if (segmentLength == 0) {
-                continue;
-            }
-            dx /= segmentLength;
-            dy /= segmentLength;
-
-            // the number of points to place along the current line segment
-            int nPtsForSegment;
-            if (i == nPoints - 1) {
-                // compensate for numerical imprecissions for last segment
-                nPtsForSegment = (int) Math.round((segmentLength + remainder) / targetDist);
-            } else {
-                nPtsForSegment = (int) ((segmentLength + remainder) / targetDist);
-            }
-
-            // place points along line segment
-            for (int j = 0; j < nPtsForSegment; j++) {
-                double x = segmentStartX + dx * (j * targetDist - remainder);
-                double y = segmentStartY + dy * (j * targetDist - remainder);
-                regularPoints.add(new Point(x, y));
-            }
-
-            // update remainder and start coordinate for the next line segment
-            remainder += segmentLength - nPtsForSegment * targetDist;
-            segmentStartX = segmentEndX;
-            segmentStartY = segmentEndY;
-        }
-
-        // add flow start point if no point has been added so far
-        if (regularPoints.isEmpty()) {
-            regularPoints.add(new Point(endPt.x, endPt.y));
-        }
-
-        // add flow end point
-        regularPoints.add(irregularPoints.get(irregularPoints.size() - 1));
-
-        // move the first point by deCasteljauTol distance towards the second point
-        {
-            Point firstPoint = regularPoints.get(0);
-            Point secondPoint = regularPoints.get(1);
-            double dx = secondPoint.x - firstPoint.x;
-            double dy = secondPoint.y - firstPoint.y;
-            double l = Math.sqrt(dx * dx + dy * dy);
-            firstPoint.x += deCasteljauTol * dx / l;
-            firstPoint.y += deCasteljauTol * dy / l;
-        }
-
-        // move the last point by deCasteljauTol distance towards the second to the last point
-        {
-            Point lastPt = regularPoints.get(regularPoints.size() - 1);
-            Point secondLastPt = regularPoints.get(regularPoints.size() - 2);
-            double dx = secondLastPt.x - lastPt.x;
-            double dy = secondLastPt.y - lastPt.y;
-            double l = Math.sqrt(dx * dx + dy * dy);
-            lastPt.x += deCasteljauTol * dx / l;
-            lastPt.y += deCasteljauTol * dy / l;
-        }
-        
-        System.out.println("irregular " + irregularPoints.size());
-        System.out.println("regular " + regularPoints.size());
-
-        return regularPoints;
-    }
-
-    /**
      * Returns the location on the Bézier curve at parameter value t.
      *
      * @param t Parameter [0..1]
@@ -863,8 +727,8 @@ public class Flow {
         // construct LineString from the current Bezier flow geometry if there is
         // a mask area attached to the start node or the end node
         if (getEndClipArea() != null || getStartClipArea() != null) {
-            double deCasteljauTol = model.getDeCasteljauTolerance();
-            ArrayList<Point> points = toUnclippedStraightLineSegments(deCasteljauTol);
+            double segmentLength = model.segmentLength();
+            ArrayList<Point> points = regularIntervals(segmentLength);
             return Flow.pointsToLineString(points);
         }
         return null;
@@ -1100,5 +964,89 @@ public class Flow {
         }
         return null;
     }
+    
+    /**
+     * Returns a list of points at regular intervals on the flow curve.
+     *
+     * @param intervalLength target interval length. The actual length will vary
+     * to create an entire number of intervals.
+     * @return list of points, including copies of the start and end points of
+     * this flow
+     */
+    public ArrayList<Point> regularIntervals(double intervalLength) {
+        ArrayList<Point> intervalPoints = new ArrayList<>();
 
+        // compute size of lookup table
+        // The length of the curve is always shorter or equal to the distance 
+        // between the start point and the control point plus the distance 
+        // between the control point and the end point. Use this longer distance
+        // as an approximation for the real curve length to compute the number
+        // of points in the lookup table.
+        double d1 = getDistanceBetweenStartPointAndControlPoint();
+        double d2 = getDistanceBetweenEndPointAndControlPoint();
+        int lutSize = (int) ((d1 + d2) / intervalLength) + 1;
+        double[] lut = new double[lutSize];
+
+        // fill lookup table with length values for regularly increasing t value
+        double x0 = startPt.x;
+        double y0 = startPt.y;
+        double lineLength = 0;
+        lut[0] = 0;
+        for (int i = 1; i < lutSize; i++) {
+            // t parameter
+            double t = 1d / (lutSize - 1) * i;
+
+            // compute position on curve for t
+            double t_1 = t - 1;
+            double a = t * t;
+            double b = 2 * t * t_1;
+            double c = t_1 * t_1;
+            double x1 = a * endPt.x - b * cPt.x + c * startPt.x;
+            double y1 = a * endPt.y - b * cPt.y + c * startPt.y;
+
+            // distance to previous point. Use Eucledian distance.
+            double dx = x0 - x1;
+            double dy = y0 - y1;
+            lineLength += Math.sqrt(dx * dx + dy * dy);
+            lut[i] = lineLength;
+
+            x0 = x1;
+            y0 = y1;
+        }
+
+        // number and length of intervals
+        int nbrIntervals = (int) Math.round(lineLength / intervalLength);
+        nbrIntervals = Math.max(nbrIntervals, 2);
+        intervalLength = lineLength / nbrIntervals;
+
+        // add start point
+        //intervalPoints.add(new Point(startPt.x, startPt.y));
+
+        // add intermediate points
+        for (int i = 0; i < nbrIntervals; i++) {
+            double distance = (i + 0.5) * intervalLength;
+            double t = 1d;
+
+            // find t parameter in lookup table for given distance
+            for (int lutID = 1; lutID < lutSize; lutID++) {
+                if (lut[lutID] > distance) {
+                    double t1 = (lutID - 1d) / (lutSize - 1);
+                    double dT = 1d / (lutSize - 1);
+                    double l1 = lut[lutID - 1];
+                    double l2 = lut[lutID];
+                    t = dT * (distance - l1) / (l2 - l1) + t1;
+                    break;
+                }
+            }
+
+            t = Math.max(Math.min(t, 1d), 0d);
+            intervalPoints.add(pointOnCurve(t));
+
+        }
+
+        // add end point
+        //intervalPoints.add(new Point(endPt.x, endPt.y));
+
+        return intervalPoints;
+    }
 }
