@@ -278,7 +278,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             }
 
             // draw flow line
-            Flow clippedFlow = model.clipFlow(flow, true);
+            Flow clippedFlow = model.clipFlow(flow, true, false);
             GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
             double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
             drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
@@ -545,7 +545,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            Flow clippedFlow = model.clipFlow(flow, false);
+            Flow clippedFlow = model.clipFlow(flow, false, true);
             ArrayList<Point> points = clippedFlow.regularIntervals(segmentLength);
             Color fillColor = highlightSelected && flow.isSelected() ? Color.PINK : SELECTION_COLOR;
             for (Point point : points) {

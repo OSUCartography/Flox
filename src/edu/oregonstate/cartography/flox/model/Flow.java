@@ -267,7 +267,7 @@ public class Flow {
     }
 
     public Arrow getArrow(Model model) {
-        double endClipRadius = endClipRadius(model, false, null);
+        double endClipRadius = model.endClipRadius(this, false, null, true);
         return new Arrow(model, this, endClipRadius);
     }
 
@@ -558,18 +558,6 @@ public class Flow {
         return irregularPoints;
     }
 
-    public static LineString pointsToLineString(ArrayList<Point> points) {
-        // construct LineString from the current Bezier flow geometry
-        GeometryFactory geometryFactory = new GeometryFactory();
-        int numPoints = points.size();
-        Coordinate[] xy = new Coordinate[numPoints];
-        for (int i = 0; i < numPoints; i++) {
-            Point point = points.get(i);
-            xy[i] = new Coordinate(point.x, point.y);
-        }
-        return geometryFactory.createLineString(xy);
-    }
-
     /**
      * Returns the location on the Bézier curve at parameter value t.
      *
@@ -723,101 +711,23 @@ public class Flow {
         return t;
     }
 
-    private LineString toLineStringIfClipAreaIsAttached(Model model) {
+    public LineString toLineStringIfClipAreaIsAttached(double segmentLength) {
         // construct LineString from the current Bezier flow geometry if there is
         // a mask area attached to the start node or the end node
         if (getEndClipArea() != null || getStartClipArea() != null) {
-            double segmentLength = model.segmentLength();
             ArrayList<Point> points = regularIntervals(segmentLength);
-            return Flow.pointsToLineString(points);
+
+            GeometryFactory geometryFactory = new GeometryFactory();
+            int numPoints = points.size();
+            Coordinate[] xy = new Coordinate[numPoints];
+            for (int i = 0; i < numPoints; i++) {
+                Point point = points.get(i);
+                xy[i] = new Coordinate(point.x, point.y);
+            }
+            return geometryFactory.createLineString(xy);
+
         }
         return null;
-    }
-
-    /**
-     * Returns radii of circles around start and end nodes that can be used to
-     * clip the flows. The radii take the node size, gap around nodes, and mask
-     * areas and optionally the arrowhead into account. The radii only take the
-     * nodes into account, if there is gap between the line and the nodes.
-     *
-     * @param model model with clipping distances
-     * @param clipArrowhead if true, the flow line is clipped to make space for
-     * an arrowhead
-     * @return clip radii around start and end nodes, first start, then end
-     * point
-     */
-    public double[] clipRadii(Model model, boolean clipArrowhead) {
-
-        LineString lineString = toLineStringIfClipAreaIsAttached(model);
-
-        // clipping radius for start node
-        double startNodeClipRadius = 0;
-        // clip the start if there must be a gap between the start of 
-        // the flow line and the start node symbol.
-        // distance between start of flow and start node
-        double gap = model.getFlowDistanceFromStartPointPixel();
-        if (gap > 0) {
-            // Compute the radius of the start node (add half stroke width)
-            double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
-            startNodeClipRadius = (gap + startNodeRadiusPx) / model.getReferenceMapScale();
-        }
-
-        // clipping radius for start mask area
-        double startMaskClipRadius = 0;
-        if (getStartClipArea() != null) {
-            startMaskClipRadius = maskClippingRadius(lineString, true);
-        }
-
-        // start and end clipping radius
-        double startR = Math.max(startNodeClipRadius, startMaskClipRadius);
-        double endR = endClipRadius(model, clipArrowhead, lineString);
-        return new double[]{startR, endR};
-    }
-
-    /**
-     * Computes clipping radius around end node.
-     *
-     * @param model model
-     * @param clipArrowhead if true, the circles with the returned radius
-     * includes the arrowhead (if arrowheads are drawn).
-     * @param lineString the geometry of this flow converted to straight line
-     * segments.
-     * @return radius of circle around end node
-     */
-    public double endClipRadius(Model model, boolean clipArrowhead, LineString lineString) {
-        // clipping radius for end node
-        double endNodeClipRadius = 0;
-        if (clipArrowhead && model.isDrawArrowheads()) {
-            // Compute radius of clipping circle around end point without taking
-            // the arrow into account. This is a recursive call with 
-            // clipArrowhead flag set to false.
-            double arrowTipClipRadius = endClipRadius(model, false, lineString);
-
-            // Create an arrowhead
-            Arrow arrow = getArrow(model, arrowTipClipRadius);
-
-            // get clip radius including arrowhead
-            endNodeClipRadius = arrow.getClipRadius();
-        } else if (model.getFlowDistanceFromEndPointPixel() > 0 || model.isDrawArrowheads()) {
-            // clip the end if there must be a gap between the end of the 
-            // flow line and the end node symbol.
-            double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
-            // Compute the radius of the end node (add stroke width / 2 to radius)
-            double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(endPt);
-            endNodeClipRadius = (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
-        }
-
-        // clipping radius for end mask area
-        double endMaskClipRadius = 0;
-        if (getEndClipArea() != null) {
-            if (lineString == null) {
-                lineString = toLineStringIfClipAreaIsAttached(model);
-            }
-            endMaskClipRadius = maskClippingRadius(lineString, false);
-        }
-
-        // end clipping radius
-        return Math.max(endNodeClipRadius, endMaskClipRadius);
     }
 
     /**
@@ -831,7 +741,7 @@ public class Flow {
      * clip with the end clip area.
      * @return The parameter t in [0, 1]
      */
-    private double maskClippingRadius(LineString lineString, boolean clipWithStartArea) {
+    public double maskClippingRadius(LineString lineString, boolean clipWithStartArea) {
         Geometry clipArea = clipWithStartArea ? getStartClipArea() : getEndClipArea();
         Geometry clippedFlowLineGeometry = lineString.difference(clipArea);
         double d = 0;
@@ -964,9 +874,11 @@ public class Flow {
         }
         return null;
     }
-    
+
     /**
-     * Returns a list of points at regular intervals on the flow curve.
+     * Returns a list of points at regular intervals on the flow curve. The
+     * first and last points are slightly moved along the flow line away from
+     * the start and end points. There are always at least two points returned.
      *
      * @param intervalLength target interval length. The actual length will vary
      * to create an entire number of intervals.
@@ -974,6 +886,11 @@ public class Flow {
      * this flow
      */
     public ArrayList<Point> regularIntervals(double intervalLength) {
+        assert (intervalLength > 0);
+        
+        // move first and last points away from flow start and end nodes by 5 percent of the interval length 
+        final double OFFSET = 0.05;
+        
         ArrayList<Point> intervalPoints = new ArrayList<>();
 
         // compute size of lookup table
@@ -985,6 +902,7 @@ public class Flow {
         double d1 = getDistanceBetweenStartPointAndControlPoint();
         double d2 = getDistanceBetweenEndPointAndControlPoint();
         int lutSize = (int) ((d1 + d2) / intervalLength) + 1;
+        lutSize = Math.max(2, lutSize);
         double[] lut = new double[lutSize];
 
         // fill lookup table with length values for regularly increasing t value
@@ -994,7 +912,7 @@ public class Flow {
         lut[0] = 0;
         for (int i = 1; i < lutSize; i++) {
             // t parameter
-            double t = 1d / (lutSize - 1) * i;
+            double t = (double) i / (lutSize - 1);
 
             // compute position on curve for t
             double t_1 = t - 1;
@@ -1014,21 +932,31 @@ public class Flow {
             y0 = y1;
         }
 
+        // make sure there are at least two points
+        if (lineLength <= intervalLength) {
+            // add start point
+            intervalPoints.add(pointOnCurve(tForLength(lut, lineLength * OFFSET)));
+            // add end point
+            intervalPoints.add(pointOnCurve(tForLength(lut, lineLength * (1. - OFFSET))));
+            return intervalPoints;
+        }
+
         // number and length of intervals
         int nbrIntervals = (int) Math.round(lineLength / intervalLength);
         nbrIntervals = Math.max(nbrIntervals, 2);
         intervalLength = lineLength / nbrIntervals;
 
         // add start point
-        //intervalPoints.add(new Point(startPt.x, startPt.y));
+        intervalPoints.add(pointOnCurve(tForLength(lut, intervalLength * OFFSET)));
 
         // add intermediate points
-        for (int i = 0; i < nbrIntervals; i++) {
-            double distance = (i + 0.5) * intervalLength;
+        int lutID = 1;
+        for (int i = 1; i < nbrIntervals; i++) {
+            double distance = i * intervalLength;
             double t = 1d;
 
             // find t parameter in lookup table for given distance
-            for (int lutID = 1; lutID < lutSize; lutID++) {
+            for (; lutID < lutSize; lutID++) {
                 if (lut[lutID] > distance) {
                     double t1 = (lutID - 1d) / (lutSize - 1);
                     double dT = 1d / (lutSize - 1);
@@ -1045,8 +973,29 @@ public class Flow {
         }
 
         // add end point
-        //intervalPoints.add(new Point(endPt.x, endPt.y));
+        intervalPoints.add(pointOnCurve(tForLength(lut, lineLength - intervalLength * OFFSET)));
 
         return intervalPoints;
+    }
+
+    /**
+     * Read t parameter from lookup table for given distance from start of flow.
+     * 
+     * @param lut lookup table
+     * @param distance distance from start of flow
+     * @return t parameter
+     */
+    private double tForLength(double[] lut, double distance) {
+        for (int lutID = 1; lutID < lut.length; lutID++) {
+            if (lut[lutID] > distance) {
+                double t1 = (lutID - 1d) / (lut.length - 1);
+                double dT = 1d / (lut.length - 1);
+                double l1 = lut[lutID - 1];
+                double l2 = lut[lutID];
+                double t = dT * (distance - l1) / (l2 - l1) + t1;
+                return Math.max(Math.min(t, 1d), 0d);
+            }
+        }
+        return 1d;
     }
 }

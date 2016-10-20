@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import edu.oregonstate.cartography.utils.ColorUtils;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.Color;
@@ -2184,22 +2185,98 @@ public class Model {
      * @return a flow with clipped start and end segments. If nothing is
      * clipped, the passed flow is returned unaltered.
      */
-    public Flow clipFlow(Flow flow, boolean clipArrowhead) {
-        double[] clipRadii = flow.clipRadii(this, clipArrowhead);
+    public Flow clipFlow(Flow flow, boolean clipArrowhead, boolean clipNodes) {
+
+        LineString lineString = flow.toLineStringIfClipAreaIsAttached(segmentLength());
+
+        // clipping radius for start node
+        double startNodeClipR = 0;
+
+        // clip the start if there must be a gap between the start of 
+        // the flow line and the start node symbol.
+        // distance between start of flow and start node
+        if (clipNodes || flowDistanceFromStartPointPx > 0) {
+            // Compute the radius of the start node (add half stroke width)
+            double startNodeRadiusPx = getNodeStrokeWidthPx() / 2 + getNodeRadiusPx(flow.getStartPt());
+            startNodeClipR = (flowDistanceFromStartPointPx + startNodeRadiusPx) / getReferenceMapScale();
+        }
+
+        // clipping radius for start mask area
+        double startMaskClipR = 0;
+        if (flow.getStartClipArea() != null) {
+            startMaskClipR = flow.maskClippingRadius(lineString, true);
+        }
+
+        // start and end clipping radius
+        double startR = Math.max(startNodeClipR, startMaskClipR);
+        double endR = endClipRadius(flow, clipArrowhead, lineString, clipNodes);
 
         // cut off the end piece
-        double endT = flow.getIntersectionTWithCircleAroundEndPoint(clipRadii[1]);
+        double endT = flow.getIntersectionTWithCircleAroundEndPoint(endR);
         if (endT < 1) {
             flow = flow.split(endT)[0];
         }
 
         // cut off the start piece
-        double startT = flow.getIntersectionTWithCircleAroundStartPoint(clipRadii[0]);
+        double startT = flow.getIntersectionTWithCircleAroundStartPoint(startR);
         if (startT > 0) {
             flow = flow.split(startT)[1];
         }
 
         return flow;
+    }
+
+    /**
+     * Computes clipping radius around end node for a flow. The clipping radius
+     * can include the arrowhead, the end node radius, a gap between the end of
+     * the line (or the tip of the arrowhead) and the end node, and the end mask
+     * clip area.
+     *
+     * @param flow flow compute radius for
+     * @param clipArrowhead if true, the circle radius includes the arrowhead
+     * (if arrowheads are drawn).
+     * @param lineString the geometry of this flow converted to straight line
+     * segments.
+     * @param clipEndNode if true, the returned circle radius includes the end
+     * node. The end node and a gap to the end node are also included when there
+     * is a gap greater than 0.
+     * @return radius of circle around end node
+     */
+    public double endClipRadius(Flow flow, boolean clipArrowhead, 
+            LineString lineString, boolean clipEndNode) {
+        // clipping radius for end node
+        double endNodeClipRadius = 0;
+        if (clipArrowhead && isDrawArrowheads()) {
+            // Compute radius of clipping circle around end point without taking
+            // the arrow into account. This is a recursive call with 
+            // clipArrowhead flag set to false.
+            double arrowTipClipRadius = endClipRadius(flow, false, lineString, clipEndNode);
+
+            // Create an arrowhead
+            Arrow arrow = flow.getArrow(this, arrowTipClipRadius);
+
+            // get clip radius including arrowhead
+            endNodeClipRadius = arrow.getClipRadius();
+        } else if (clipEndNode || getFlowDistanceFromEndPointPixel() > 0 || isDrawArrowheads()) {
+            // clip the end if there must be a gap between the end of the 
+            // flow line and the end node symbol.
+            double gapDistanceToEndNodesPx = getFlowDistanceFromEndPointPixel();
+            // Compute the radius of the end node (add stroke width / 2 to radius)
+            double endNodeRadiusPx = getNodeStrokeWidthPx() / 2 + getNodeRadiusPx(flow.getEndPt());
+            endNodeClipRadius = (gapDistanceToEndNodesPx + endNodeRadiusPx) / getReferenceMapScale();
+        }
+
+        // clipping radius for end mask area
+        double endMaskClipRadius = 0;
+        if (flow.getEndClipArea() != null) {
+            if (lineString == null) {
+                lineString = flow.toLineStringIfClipAreaIsAttached(segmentLength());
+            }
+            endMaskClipRadius = flow.maskClippingRadius(lineString, false);
+        }
+
+        // end clipping radius
+        return Math.max(endNodeClipRadius, endMaskClipRadius);
     }
 
     /**

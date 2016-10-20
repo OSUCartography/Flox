@@ -166,7 +166,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             }
             while (flows.hasNext()) {
                 Flow flow = flows.next();
-                Flow clippedFlow = model.clipFlow(flow, false);
+                Flow clippedFlow = model.clipFlow(flow, false, false);
                 if (clippedFlow.getBoundingBox().intersects(rect)) {
                     ArrayList<Point> pts = clippedFlow.regularIntervals(segmentLength);
                     for (int i = 0; i < pts.size() - 1; i++) {
@@ -303,7 +303,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
             while (flows.hasNext()) {
                 Flow flow = flows.next();
-                Flow clipppedFlow = model.clipFlow(flow, false);
+                Flow clipppedFlow = model.clipFlow(flow, false, false);
 
                 // flow width
                 double flowWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();

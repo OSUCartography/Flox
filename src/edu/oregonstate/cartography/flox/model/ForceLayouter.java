@@ -91,8 +91,7 @@ public class ForceLayouter {
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            Flow clippedFlow = model.clipFlow(flow, false);
-            // ArrayList<Point> points = clippedFlow.toUnclippedStraightLineSegments(deCasteljauTol);
+            Flow clippedFlow = model.clipFlow(flow, false, true);
             ArrayList<Point> points = clippedFlow.regularIntervals(segmentLength);
             straightLinesMap.put(flow, points.toArray(new Point[points.size()]));
             if (isCancelled()) {

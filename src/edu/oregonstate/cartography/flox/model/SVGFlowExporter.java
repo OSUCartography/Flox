@@ -144,7 +144,7 @@ public class SVGFlowExporter extends SVGExporter {
             }
 
             // flow line
-            flow = model.clipFlow(flow, true);
+            flow = model.clipFlow(flow, true, false);
             Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
             flowElement.setAttribute("id", Double.toString(flow.getValue()));
             flowElement.setAttribute("d", flowToPath(flow));
