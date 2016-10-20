@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import edu.oregonstate.cartography.utils.ColorUtils;
 import edu.oregonstate.cartography.utils.GeometryUtils;
+import edu.oregonstate.cartography.utils.JTSUtils;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
@@ -2187,7 +2188,11 @@ public class Model {
      */
     public Flow clipFlow(Flow flow, boolean clipArrowhead, boolean clipNodes) {
 
-        LineString lineString = flow.toLineStringIfClipAreaIsAttached(segmentLength());
+        LineString lineString = null;
+        if (flow.getEndClipArea() != null || flow.getStartClipArea() != null) {
+            // FIXME better use irregular intervals
+            lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
+        }
 
         // clipping radius for start node
         double startNodeClipR = 0;
@@ -2242,7 +2247,7 @@ public class Model {
      * is a gap greater than 0.
      * @return radius of circle around end node
      */
-    public double endClipRadius(Flow flow, boolean clipArrowhead, 
+    public double endClipRadius(Flow flow, boolean clipArrowhead,
             LineString lineString, boolean clipEndNode) {
         // clipping radius for end node
         double endNodeClipRadius = 0;
@@ -2269,8 +2274,9 @@ public class Model {
         // clipping radius for end mask area
         double endMaskClipRadius = 0;
         if (flow.getEndClipArea() != null) {
-            if (lineString == null) {
-                lineString = flow.toLineStringIfClipAreaIsAttached(segmentLength());
+            if (lineString == null && (flow.getEndClipArea() != null || flow.getStartClipArea() != null)) {
+                // FIXME better use irregular intervals
+                lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
             }
             endMaskClipRadius = flow.maskClippingRadius(lineString, false);
         }

@@ -284,8 +284,8 @@ public final class Graph {
         Collection<Flow> unsorted = graph.edgesOf(node);
         ArrayList<Flow> list = new ArrayList<>(unsorted);
         java.util.Collections.sort(list, (Flow f1, Flow f2) -> {
-            double a1 = f1.getBaselineAzimuth();
-            double a2 = f2.getBaselineAzimuth();
+            double a1 = f1.getBaselineOrientation();
+            double a2 = f2.getBaselineOrientation();
             if (a1 < a2) {
                 return -1;
             }

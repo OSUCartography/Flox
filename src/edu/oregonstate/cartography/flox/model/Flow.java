@@ -216,20 +216,29 @@ public class Flow {
     }
 
     /**
-     * Returns the azimuthal angle for a line between a start and end point
+     * Returns the orientation angle of the line connecting the start point and
+     * the end point
      *
      * @return Angle in radians, counter-clockwise, 0 is pointing eastwards
      */
-    public double getBaselineAzimuth() {
+    public double getBaselineOrientation() {
         final double dx = endPt.x - startPt.x;
         final double dy = endPt.y - startPt.y;
         return Math.atan2(dy, dx);
     }
 
+    /**
+     * Returns a point between the start point and the end point.
+     *
+     * @return the mid-point
+     */
     public Point getBaseLineMidPoint() {
         return new Point((endPt.x + startPt.x) / 2, (endPt.y + startPt.y) / 2);
     }
 
+    /**
+     * Inverse start and end point.
+     */
     public void reverseFlow() {
         Point temp = startPt;
         startPt = endPt;
@@ -237,6 +246,8 @@ public class Flow {
     }
 
     /**
+     * Returns the mapped value.
+     *
      * @return the flow value
      */
     public double getValue() {
@@ -252,23 +263,6 @@ public class Flow {
     protected void setValue(double value) {
         assert (Double.isFinite(value));
         this.value = value;
-    }
-
-    /**
-     * Computes geometry of arrow heads
-     *
-     * @param model model
-     * @param endClipRadius the tip of the arrow is placed at this distance from
-     * the end of the flow
-     * @return a new Arrow instance
-     */
-    public Arrow getArrow(Model model, double endClipRadius) {
-        return new Arrow(model, this, endClipRadius);
-    }
-
-    public Arrow getArrow(Model model) {
-        double endClipRadius = model.endClipRadius(this, false, null, true);
-        return new Arrow(model, this, endClipRadius);
     }
 
     /**
@@ -419,7 +413,7 @@ public class Flow {
     }
 
     /**
-     * Returns the slope at t.
+     * Returns the slope at curve parameter t.
      *
      * @param t t parameter, must be within 0 and 1.
      * @return slope in radians
@@ -531,34 +525,6 @@ public class Flow {
     }
 
     /**
-     * Converts the Bezier curve to segments of straight line. The segments are
-     * of irregular length. Uses standard Java2D functionality.
-     *
-     * @param deCasteljauTol the de Casteljau tolerance, which is the maximum
-     * distance between the Bezier curve and the approximation by straight line
-     * segments.
-     * @return
-     */
-    public ArrayList<Point> toStraightLineSegmentsWithIrregularLength(
-            double deCasteljauTol) {
-        assert (deCasteljauTol > 0);
-
-        ArrayList<Point> irregularPoints = new ArrayList<>();
-        GeneralPath path = new GeneralPath();
-        path.moveTo(startPt.x, startPt.y);
-        path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
-        PathIterator iter = path.getPathIterator(null, deCasteljauTol);
-        double[] coords = new double[6];
-        while (!iter.isDone()) {
-            iter.currentSegment(coords);
-            irregularPoints.add(new Point(coords[0], coords[1]));
-            iter.next();
-        }
-
-        return irregularPoints;
-    }
-
-    /**
      * Returns the location on the Bézier curve at parameter value t.
      *
      * @param t Parameter [0..1]
@@ -576,7 +542,7 @@ public class Flow {
     }
 
     /**
-     * Split a flow into two new flows. The new flows have the same value,
+     * Split a flow into two new flows. The new flows have the same id, value,
      * selection and lock state as this flow. The split flows have new start,
      * end, and control points. The first flow has the same start clip area as
      * this flow. The second flow has the same end clip area as this flow.
@@ -711,25 +677,6 @@ public class Flow {
         return t;
     }
 
-    public LineString toLineStringIfClipAreaIsAttached(double segmentLength) {
-        // construct LineString from the current Bezier flow geometry if there is
-        // a mask area attached to the start node or the end node
-        if (getEndClipArea() != null || getStartClipArea() != null) {
-            ArrayList<Point> points = regularIntervals(segmentLength);
-
-            GeometryFactory geometryFactory = new GeometryFactory();
-            int numPoints = points.size();
-            Coordinate[] xy = new Coordinate[numPoints];
-            for (int i = 0; i < numPoints; i++) {
-                Point point = points.get(i);
-                xy[i] = new Coordinate(point.x, point.y);
-            }
-            return geometryFactory.createLineString(xy);
-
-        }
-        return null;
-    }
-
     /**
      * Computes the clipping radius around the start or end node. The circle
      * intersects the passed lineString where the start or end clip area
@@ -768,7 +715,8 @@ public class Flow {
 
     /**
      * Computes the shortest distance between a point and any point on this
-     * quadratic Bézier curve. Attention: xy parameter is changed.
+     * quadratic Bézier curve. <STRONG>Attention: xy parameter is
+     * changed.</STRONG>
      *
      * @param xy Point x and y on input; the closest point on the curve on
      * output.
@@ -782,7 +730,8 @@ public class Flow {
 
     /**
      * Computes the square of the shortest distance between a point and any
-     * point on this quadratic Bézier curve. Attention: xy parameter is changed.
+     * point on this quadratic Bézier curve. <STRONG>Attention: xy parameter is
+     * changed</STRONG>.
      *
      * @param x point x
      * @param y point y
@@ -794,18 +743,34 @@ public class Flow {
                 cPt.x, cPt.y, endPt.x, endPt.y, tol, x, y);
     }
 
+    /**
+     * The length of the line connecting the start point and the control point.
+     *
+     * @return the length
+     */
     public double getDistanceBetweenStartPointAndControlPoint() {
         double dx = cPt.x - startPt.x;
         double dy = cPt.y - startPt.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    /**
+     * The length of the line connecting the end point and the control point.
+     *
+     * @return the length
+     */
     public double getDistanceBetweenEndPointAndControlPoint() {
         double dx = cPt.x - endPt.x;
         double dy = cPt.y - endPt.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    /**
+     * The 2D vector pointing from the start point to the control point with
+     * length 1.
+     *
+     * @return the vector
+     */
     public double[] getDirectionVectorFromStartPointToControlPoint() {
         double dx = cPt.x - startPt.x;
         double dy = cPt.y - startPt.y;
@@ -813,6 +778,12 @@ public class Flow {
         return new double[]{dx / d, dy / d};
     }
 
+    /**
+     * The 2D vector pointing from the end point to the control point with
+     * length 1.
+     *
+     * @return the vector
+     */
     public double[] getDirectionVectorFromEndPointToControlPoint() {
         double dx = cPt.x - endPt.x;
         double dy = cPt.y - endPt.y;
@@ -845,6 +816,8 @@ public class Flow {
     }
 
     /**
+     * The clip area for the flow start in WKT format.
+     *
      * @return the startClipAreaWKT
      */
     public String getStartClipAreaWKT() {
@@ -852,6 +825,8 @@ public class Flow {
     }
 
     /**
+     * The clip area for the flow end in WKT format.
+     *
      * @return the endClipAreaWKT
      */
     public String getEndClipAreaWKT() {
@@ -876,6 +851,32 @@ public class Flow {
     }
 
     /**
+     * Converts the Bézier curve to straight-line segments with irregular
+     * length. Uses the de Casteljau algorithm of the Java2D library.
+     *
+     * @param deCasteljauTol the de Casteljau tolerance, which is the maximum
+     * distance between the Bézier curve and the approximation by straight line
+     * segments.
+     * @return
+     */
+    public ArrayList<Point> irregularIntervals(double deCasteljauTol) {
+        assert (deCasteljauTol > 0);
+
+        ArrayList<Point> irregularPoints = new ArrayList<>();
+        GeneralPath path = new GeneralPath();
+        path.moveTo(startPt.x, startPt.y);
+        path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
+        PathIterator iter = path.getPathIterator(null, deCasteljauTol);
+        double[] coords = new double[6];
+        while (!iter.isDone()) {
+            iter.currentSegment(coords);
+            irregularPoints.add(new Point(coords[0], coords[1]));
+            iter.next();
+        }
+        return irregularPoints;
+    }
+
+    /**
      * Returns a list of points at regular intervals on the flow curve. The
      * first and last points are slightly moved along the flow line away from
      * the start and end points. There are always at least two points returned.
@@ -887,10 +888,10 @@ public class Flow {
      */
     public ArrayList<Point> regularIntervals(double intervalLength) {
         assert (intervalLength > 0);
-        
+
         // move first and last points away from flow start and end nodes by 5 percent of the interval length 
         final double OFFSET = 0.05;
-        
+
         ArrayList<Point> intervalPoints = new ArrayList<>();
 
         // compute size of lookup table
@@ -980,7 +981,7 @@ public class Flow {
 
     /**
      * Read t parameter from lookup table for given distance from start of flow.
-     * 
+     *
      * @param lut lookup table
      * @param distance distance from start of flow
      * @return t parameter
@@ -998,4 +999,22 @@ public class Flow {
         }
         return 1d;
     }
+
+    /**
+     * Computes geometry of arrow heads
+     *
+     * @param model model
+     * @param endClipRadius the tip of the arrow is placed at this distance from
+     * the end of the flow
+     * @return a new Arrow instance
+     */
+    public Arrow getArrow(Model model, double endClipRadius) {
+        return new Arrow(model, this, endClipRadius);
+    }
+
+    public Arrow getArrow(Model model) {
+        double endClipRadius = model.endClipRadius(this, false, null, true);
+        return new Arrow(model, this, endClipRadius);
+    }
+
 }

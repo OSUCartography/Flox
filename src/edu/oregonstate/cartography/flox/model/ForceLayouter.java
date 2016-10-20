@@ -405,7 +405,7 @@ public class ForceLayouter {
         double dy = basePt.y - cPt.y;
         double l = Math.sqrt(dx * dx + dy * dy);
         double alpha = Math.atan2(dy, dx);
-        double baseLineAzimuth = flow.getBaselineAzimuth();
+        double baseLineAzimuth = flow.getBaselineOrientation();
         double diffToBaseNormal = Math.PI / 2 - baseLineAzimuth + alpha;
         double torsionF = Math.sin(diffToBaseNormal) * l;
         double antiTorsionW = model.getAntiTorsionWeight();
