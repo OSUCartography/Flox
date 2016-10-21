@@ -571,6 +571,12 @@ public class ForceLayouter {
             }
         }
 
+        // if there are are only two nodes and all flows are between these two 
+        // nodes, the total weigth will be 0.
+        if (wTotal == 0) {
+            return new Force(0, 0);
+        }
+        
         double fxFinal = fxTotal / wTotal;
         double fyFinal = fyTotal / wTotal;
 
