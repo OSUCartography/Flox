@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
  * @author Bernhard Jenny and Dan Stephen, Cartography and Geovisualization
  * Group, Oregon State University, and RMIT University, Melbourne
  */
-
 //Every non static, non transient field in a JAXB-bound class will be 
 //automatically bound to XML, unless annotated by @XmlTransient
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -24,29 +23,29 @@ public final class Point {
     private double value;
 
     public Point(double x, double y) {
-        assert(Double.isFinite(x));
-        assert(Double.isFinite(y));
-        
+        assert (Double.isFinite(x));
+        assert (Double.isFinite(y));
+
         this.x = x;
         this.y = y;
         this.value = 1;
     }
-    
+
     public Point(double x, double y, double value) {
-        assert(Double.isFinite(x));
-        assert(Double.isFinite(y));
-        assert(Double.isFinite(value));
-        
+        assert (Double.isFinite(x));
+        assert (Double.isFinite(y));
+        assert (Double.isFinite(value));
+
         this.x = x;
         this.y = y;
         this.value = value;
     }
-    
+
     public Point() {
         x = y = 0;
         value = Model.DEFAULT_NODE_VALUE;
     }
-    
+
     /**
      * Rotates this point by the provided angle around an origin point and
      * returns the rotated point. The position of this point is not changed.
@@ -57,8 +56,8 @@ public final class Point {
      * @return
      */
     public Point rotatePoint(Point origin, double angle) {
-        assert(Double.isFinite(angle));
-        
+        assert (Double.isFinite(angle));
+
         double tempX = x - origin.x;
         double tempY = y - origin.y;
         double cos = Math.cos(angle);
@@ -77,10 +76,10 @@ public final class Point {
      * counter- clockwise, negative numbers will rotate clockwise.
      */
     public void transform(double dx, double dy, double angle) {
-        assert(Double.isFinite(dx));
-        assert(Double.isFinite(dy));
-        assert(Double.isFinite(angle));
-        
+        assert (Double.isFinite(dx));
+        assert (Double.isFinite(dy));
+        assert (Double.isFinite(angle));
+
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
         double newX = x * cos - y * sin + dx;
@@ -121,7 +120,7 @@ public final class Point {
      * @param value the value to set
      */
     protected void setValue(double value) {
-        assert(Double.isFinite(value));
+        assert (Double.isFinite(value));
         this.value = value;
     }
 
@@ -136,7 +135,7 @@ public final class Point {
         double dy = y - p.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
-    
+
     /**
      * Distance to another point.
      *
@@ -148,5 +147,19 @@ public final class Point {
         double dx = this.x - x;
         double dy = this.y - y;
         return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    /**
+     * Create a new point between this and a passed point. The value of the new
+     * point is the mean of the value of this and the value of the passed point.
+     *
+     * @param point point
+     * @return new point
+     */
+    public Point mean(Point point) {
+        double ptx = (x + point.x) / 2;
+        double pty = (y + point.y) / 2;
+        double ptv = (value + point.value) / 2;
+        return new Point(ptx, pty, ptv);
     }
 }
