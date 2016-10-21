@@ -120,7 +120,7 @@ public final class Graph {
      *
      * @param flows flows to add. Start and end nodes may be changed.
      */
-    public void addFlows(Collection<Flow> flows) {
+    public void addFlows(Collection<? extends Flow> flows) {
         for (Flow flow : flows) {
             addFlowNoCacheUpdate(flow);
         }
@@ -166,6 +166,19 @@ public final class Graph {
      */
     void removeFlow(Flow flow) {
         graph.removeEdge(flow);
+        updateCachedValues();
+    }
+
+    /**
+     * Remove all flows contained in a collection. This is more efficient than
+     * calling addFlow multiple times.
+     *
+     * @param flows flows to add. Start and end nodes may be changed.
+     */
+    public void removeFlows(Collection<? extends Flow> flows) {
+        for (Flow flow : flows) {
+            graph.removeEdge(flow);
+        }
         updateCachedValues();
     }
 
@@ -341,9 +354,10 @@ public final class Graph {
         set1.addAll(set2);
         return set1;
     }
-    
+
     /**
      * Returns all flows starting at node 1 and ending at node 2.
+     *
      * @param node1 start node
      * @param node2 end node
      * @return all directed flows between the two nodes.
