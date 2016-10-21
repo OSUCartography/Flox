@@ -844,12 +844,9 @@ public class Model {
         System.out.println("# opposing flows to remove: " + flowsToRemove.size());
         System.out.println("# bidirectional flows to add: " + flowsToAdd.size());
 
-        for (Flow flow : flowsToRemove) {
-            graph.removeFlow(flow);
-        }
-        for (BidirectionalFlow bidirectionalFlow : flowsToAdd) {
-            graph.addFlow(bidirectionalFlow);
-        }
+        graph.removeFlows(flowsToRemove);
+        graph.addFlows(flowsToAdd);
+
         System.out.println("# final flows: " + graph.getNbrFlows());
     }
 
@@ -875,12 +872,9 @@ public class Model {
         System.out.println("# bidirectional flows to remove: " + flowsToRemove.size());
         System.out.println("# opposing flows to add: " + flowsToAdd.size());
 
-        for (BidirectionalFlow flow : flowsToRemove) {
-            graph.removeFlow(flow);
-        }
-        for (Flow bidirectionalFlow : flowsToAdd) {
-            graph.addFlow(bidirectionalFlow);
-        }
+        graph.removeFlows(flowsToRemove);
+        graph.addFlows(flowsToAdd);
+
         System.out.println("# final flows: " + graph.getNbrFlows());
     }
 

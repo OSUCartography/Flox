@@ -711,6 +711,9 @@ public class MainWindow extends javax.swing.JFrame {
         showRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator22 = new javax.swing.JPopupMenu.Separator();
         showOptionsMenuItem = new javax.swing.JMenuItem();
+        jSeparator31 = new javax.swing.JPopupMenu.Separator();
+        toBidirectionalFlowsMenuItem = new javax.swing.JMenuItem();
+        toUnidirectionalFlowsMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
@@ -2888,9 +2891,26 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showOptionsMenuItem);
+        debugMenu.add(jSeparator31);
+
+        toBidirectionalFlowsMenuItem.setText("Convert to Bidirectional Flows");
+        toBidirectionalFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toBidirectionalFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(toBidirectionalFlowsMenuItem);
+
+        toUnidirectionalFlowsMenuItem.setText("Convert to Unidirectional Flows");
+        toUnidirectionalFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toUnidirectionalFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(toUnidirectionalFlowsMenuItem);
 
         menuBar.add(debugMenu);
-        debugMenu.setVisible(false);
+        //debugMenu.setVisible(false);
 
         setJMenuBar(menuBar);
 
@@ -4448,6 +4468,18 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectIntersectingMenuItemActionPerformed
 
+    private void toUnidirectionalFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toUnidirectionalFlowsMenuItemActionPerformed
+        model.changeToUnidirectionalFlows();
+        mapComponent.refreshMap();
+        layout("To Unidirectional");
+    }//GEN-LAST:event_toUnidirectionalFlowsMenuItemActionPerformed
+
+    private void toBidirectionalFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toBidirectionalFlowsMenuItemActionPerformed
+        model.changeToBidirectionalFlows();
+        mapComponent.refreshMap();
+        layout("To Bidirectional");
+    }//GEN-LAST:event_toBidirectionalFlowsMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4603,6 +4635,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator28;
     private javax.swing.JSeparator jSeparator29;
     private javax.swing.JPopupMenu.Separator jSeparator30;
+    private javax.swing.JPopupMenu.Separator jSeparator31;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
@@ -4692,6 +4725,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSpinner startDistanceSpinner;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
+    private javax.swing.JMenuItem toBidirectionalFlowsMenuItem;
+    private javax.swing.JMenuItem toUnidirectionalFlowsMenuItem;
     private javax.swing.JMenuItem totalFlowsMenuItem;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;

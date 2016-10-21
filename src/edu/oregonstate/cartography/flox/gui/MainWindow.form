@@ -989,7 +989,7 @@
             <Property name="text" type="java.lang.String" value="Debug"/>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="debugMenu.setVisible(false);"/>
+            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="//debugMenu.setVisible(false);"/>
           </AuxValues>
           <SubComponents>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="moveFlowsCheckBoxMenuItem">
@@ -1154,6 +1154,24 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showOptionsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator31">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="toBidirectionalFlowsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Convert to Bidirectional Flows"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="toBidirectionalFlowsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="toUnidirectionalFlowsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Convert to Unidirectional Flows"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="toUnidirectionalFlowsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
