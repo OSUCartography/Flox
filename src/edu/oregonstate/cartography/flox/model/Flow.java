@@ -1,9 +1,7 @@
 package edu.oregonstate.cartography.flox.model;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKTWriter;
 import edu.oregonstate.cartography.utils.GeometryUtils;
@@ -26,7 +24,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 //automatically bound to XML, unless annotated by @XmlTransient
 @XmlAccessorType(XmlAccessType.FIELD)
 
-public class Flow {
+public class Flow implements Comparable<Flow> {
 
     private static long idCounter = 0;
 
@@ -150,6 +148,78 @@ public class Flow {
         sb.append(", start point hash code=").append(startPt.hashCode());
         sb.append(", end point hash code=").append(endPt.hashCode());
         return sb.toString();
+    }
+
+    /**
+     * Compares this flow to the specified flow for order. Compares values,
+     * lengths, start point coordinates, and end point coordinates, in this
+     * order. Returns a negative integer, zero, or a positive integer as this
+     * object is less than, equal to, or greater than the specified object.
+     *
+     * @param flow flow to compare to
+     * @return a negative integer, zero, or a positive integer as this object is
+     * less than, equal to, or greater than the specified flow.
+     */
+    @Override
+    public int compareTo(Flow flow) {
+        if (flow == null) {
+            throw new NullPointerException();
+        }
+
+        // call getValue to give overriding classes a chance to modify the returned value
+        int i = Double.compare(getValue(), flow.getValue());
+
+        // if values are identical, compare base lengths
+        if (i == 0) {
+            double dx1 = startPt.x - endPt.x;
+            double dy1 = startPt.y - endPt.y;
+            double l1 = dx1 * dx1 + dy1 * dy1;
+
+            double dx2 = flow.startPt.x - flow.endPt.x;
+            double dy2 = flow.startPt.y - flow.endPt.y;
+            double l2 = dx2 * dx2 + dy2 * dy2;
+            i = Double.compare(l1, l2);
+        }
+
+        // if values and base lengths are identical, compare lengths of convex hulls
+        if (i == 0) {
+            double dx1 = cPt.x - endPt.x;
+            double dy1 = cPt.y - endPt.y;
+            double dx2 = cPt.x - startPt.x;
+            double dy2 = cPt.y - startPt.y;
+            double l1 = dx1 * dx1 + dy1 * dy1 + dx2 * dx2 + dy2 * dy2;
+            
+            dx1 = flow.cPt.x - flow.endPt.x;
+            dy1 = flow.cPt.y - flow.endPt.y;
+            dx2 = flow.cPt.x - flow.startPt.x;
+            dy2 = flow.cPt.y - flow.startPt.y;
+            double l2 = dx1 * dx1 + dy1 * dy1 + dx2 * dx2 + dy2 * dy2;
+            i = Double.compare(l1, l2);
+        }
+
+        // if values and lengths are identical, compare coordinates
+        if (i == 0) {
+            i = Double.compare(startPt.x, flow.startPt.x);
+        }
+        if (i == 0) {
+            i = Double.compare(startPt.y, flow.startPt.y);
+        }
+        if (i == 0) {
+            i = Double.compare(endPt.x, flow.endPt.x);
+        }
+        if (i == 0) {
+            i = Double.compare(endPt.y, flow.endPt.y);
+        }
+        if (i == 0) {
+            i = Double.compare(cPt.x, flow.cPt.x);
+        }
+        if (i == 0) {
+            i = Double.compare(cPt.y, flow.cPt.y);
+        }
+
+        // if i equals 0, the two flows have the same values and start and end
+        // at the same locations
+        return i;
     }
 
     /**
@@ -787,6 +857,21 @@ public class Flow {
     public double[] getDirectionVectorFromEndPointToControlPoint() {
         double dx = cPt.x - endPt.x;
         double dy = cPt.y - endPt.y;
+        double d = Math.sqrt(dx * dx + dy * dy);
+        return new double[]{dx / d, dy / d};
+    }
+
+    /**
+     * The 2D vector pointing from point between the start point and the end
+     * point to the control point with length 1.
+     *
+     * @return the vector
+     */
+    public double[] getDirectionVectorFromBaseLineMidPointToControlPoint() {
+        double mx = (endPt.x + startPt.x) / 2;
+        double my = (endPt.y + startPt.y) / 2;
+        double dx = cPt.x - mx;
+        double dy = cPt.y - my;
         double d = Math.sqrt(dx * dx + dy * dy);
         return new double[]{dx / d, dy / d};
     }
