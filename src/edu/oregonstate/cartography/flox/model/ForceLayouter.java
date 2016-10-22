@@ -87,7 +87,7 @@ public class ForceLayouter {
     private void initStraightLinesHashMap() {
         straightLinesMap.clear();
         double segmentLength = model.segmentLength();
-        
+
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
@@ -139,20 +139,10 @@ public class ForceLayouter {
 
         // try moving flows that intersect and are connected to the same node
         if (model.isResolveIntersectionsForSiblings()) {
-            ArrayList<Model.IntersectingFlowPair> pairs = getIntersectingSiblings();
+            ArrayList<Model.IntersectingFlowPair> pairs = getSortedIntersectingSiblings();
             if (isCancelled()) {
                 return 0;
             }
-
-            // sort intersecting flow pairs by summed flow values
-            Collections.sort(pairs, new Comparator<Model.IntersectingFlowPair>() {
-                @Override
-                public int compare(Model.IntersectingFlowPair o1, Model.IntersectingFlowPair o2) {
-                    double v1 = o1.flow1.getValue() + o1.flow2.getValue();
-                    double v2 = o2.flow1.getValue() + o2.flow2.getValue();
-                    return Double.compare(v1, v2);
-                }
-            });
 
             for (Model.IntersectingFlowPair pair : pairs) {
                 if (isCancelled()) {
@@ -180,8 +170,9 @@ public class ForceLayouter {
             // nodes and arrowheads are obstacles
             List<Obstacle> obstacles = model.getObstacles();
 
-            // get a list of all flows that intersect obstacles
-            ArrayList<Flow> sortedOverlappingFlows = getSortedFlowsOverlappingObstacles(obstacles);
+            // get a list of sorted flows that intersect obstacles
+            ArrayList<Flow> sortedOverlappingFlows = getFlowsOverlappingObstacles(obstacles);
+            sortedOverlappingFlows.sort(null);
             int nbrOverlaps = sortedOverlappingFlows.size();
 
             // Compute the number of flows to move. Default is 1, but this might 
@@ -576,7 +567,7 @@ public class ForceLayouter {
         if (wTotal == 0) {
             return new Force(0, 0);
         }
-        
+
         double fxFinal = fxTotal / wTotal;
         double fyFinal = fyTotal / wTotal;
 
@@ -623,11 +614,11 @@ public class ForceLayouter {
     }
 
     /**
-     * 
+     *
      * FIXME remove?
-     * 
+     *
      * @param flow1
-     * @return 
+     * @return
      */
     public Model.IntersectingFlowPair getIntersectingFlow(Flow flow1) {
         initStraightLinesHashMap();
@@ -637,7 +628,7 @@ public class ForceLayouter {
             if (flow2 == flow1) {
                 continue;
             }
-            
+
             Point sharedNode = flow2.getSharedNode(flow1);
             if (sharedNode != null) {
                 Point[] polyline2 = straightLinesMap.get(flow2);
@@ -656,12 +647,9 @@ public class ForceLayouter {
      *
      * @return pairs of flows that have a common start or end node.
      */
-    public ArrayList<Model.IntersectingFlowPair> getIntersectingSiblings() {
+    public ArrayList<Model.IntersectingFlowPair> getSortedIntersectingSiblings() {
         initStraightLinesHashMap();
         ArrayList<Flow> flows = model.getFlows();
-
-        // sort flows to pair large flows
-        Model.sortFlows(flows, false);
 
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
         for (int i = 0; i < flows.size(); i++) {
@@ -689,6 +677,8 @@ public class ForceLayouter {
                 }
             }
         }
+        
+        pairs.sort(null);
         return pairs;
     }
 
@@ -1078,20 +1068,6 @@ public class ForceLayouter {
         cPt.x = originalX;
         cPt.y = originalY;
         return false;
-    }
-
-    /**
-     * Returns all flows that overlap the passed obstacles. Returned flows are
-     * sorted by decreasing value.
-     *
-     * @param obstacles obstacles to test for
-     * @return flows that overlap at least one of the obstacles, sorted by
-     * decreasing value.
-     */
-    public ArrayList<Flow> getSortedFlowsOverlappingObstacles(List<Obstacle> obstacles) {
-        ArrayList<Flow> flowsOverlappingObstacles = getFlowsOverlappingObstacles(obstacles);
-        Model.sortFlows(flowsOverlappingObstacles, false);
-        return flowsOverlappingObstacles;
     }
 
     /**

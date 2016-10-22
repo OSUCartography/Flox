@@ -161,7 +161,7 @@ public class Model {
     /**
      * Helper class for pairs of intersecting flows.
      */
-    public static class IntersectingFlowPair {
+    public static class IntersectingFlowPair implements Comparable<Model.IntersectingFlowPair> {
 
         public Flow flow1;
         public Flow flow2;
@@ -201,6 +201,29 @@ public class Model {
                     flow2.setControlPoint(cPt2New);
                 }
             }
+        }
+
+        /**
+         * Sort intersecting flow pairs by summed flow values and length.
+         * Returns a negative integer, zero, or a positive integer as this pair
+         * is less than, equal to, or greater than the specified pair.
+         *
+         * @param pair pair to compare to
+         * @return a negative integer, zero, or a positive integer as this
+         * object is less than, equal to, or greater than the specified pair.
+         */
+        @Override
+        public int compareTo(Model.IntersectingFlowPair pair) {
+            double v1 = flow1.getValue() + flow2.getValue();
+            double v2 = pair.flow1.getValue() + pair.flow2.getValue();
+            int i = Double.compare(v1, v2);
+            if (i == 0) {
+                // if both pairs have same total value, compare lengths
+                double l1 = flow1.getBaselineLength() + flow2.getBaselineLength();
+                double l2 = pair.flow1.getBaselineLength() + pair.flow2.getBaselineLength();
+                i = Double.compare(l1, l2);
+            }
+            return i;
         }
     }
 
@@ -821,10 +844,11 @@ public class Model {
     }
 
     /**
-     * FIXME Experimental. Not currently used.
+     * Replaces pairs of opposing flows between the same two nodes with a single
+     * FlowPair.
      */
-    public void changeToBidirectionalFlows() {
-        ArrayList<BidirectionalFlow> flowsToAdd = new ArrayList<>();
+    public void toBidirectionalFlows() {
+        ArrayList<FlowPair> flowsToAdd = new ArrayList<>();
         HashSet<Flow> flowsToRemove = new HashSet<>();
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
@@ -832,50 +856,36 @@ public class Model {
             Flow flow2 = graph.getOpposingFlow(flow);
             if (flow2 != null) {
                 if (flowsToRemove.contains(flow) == false) {
-                    flowsToAdd.add(new BidirectionalFlow(flow, flow2));
+                    flowsToAdd.add(new FlowPair(flow, flow2));
                     flowsToRemove.add(flow);
                     flowsToRemove.add(flow2);
                 }
             }
         }
-        System.out.println();
-        System.out.println("changeToBidirectionalFlows");
-        System.out.println("# initial flows: " + graph.getNbrFlows());
-        System.out.println("# opposing flows to remove: " + flowsToRemove.size());
-        System.out.println("# bidirectional flows to add: " + flowsToAdd.size());
 
         graph.removeFlows(flowsToRemove);
         graph.addFlows(flowsToAdd);
-
-        System.out.println("# final flows: " + graph.getNbrFlows());
     }
 
     /**
-     * FIXME Experimental. Not currently used.
+     * Replaces instances of FlowPair with two Flow instances.
      */
-    public void changeToUnidirectionalFlows() {
+    public void toUnidirectionalFlows() {
         ArrayList<Flow> flowsToAdd = new ArrayList<>();
-        ArrayList<BidirectionalFlow> flowsToRemove = new ArrayList<>();
+        ArrayList<FlowPair> flowsToRemove = new ArrayList<>();
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (flow instanceof BidirectionalFlow) {
-                BidirectionalFlow biFlow = (BidirectionalFlow) flow;
+            if (flow instanceof FlowPair) {
+                FlowPair biFlow = (FlowPair) flow;
                 flowsToRemove.add(biFlow);
-                flowsToAdd.add(biFlow.createFlow1());
-                flowsToAdd.add(biFlow.createFlow2());
+                flowsToAdd.add(biFlow.createFlow1(this));
+                flowsToAdd.add(biFlow.createFlow2(this));
             }
         }
-        System.out.println();
-        System.out.println("changeToUnidirectionalFlows");
-        System.out.println("# initial flows: " + graph.getNbrFlows());
-        System.out.println("# bidirectional flows to remove: " + flowsToRemove.size());
-        System.out.println("# opposing flows to add: " + flowsToAdd.size());
 
         graph.removeFlows(flowsToRemove);
         graph.addFlows(flowsToAdd);
-
-        System.out.println("# final flows: " + graph.getNbrFlows());
     }
 
     /**
@@ -1206,31 +1216,15 @@ public class Model {
     /**
      * Returns an iterator for all flows sorted by their value.
      *
-     * @param increasing sort by increasing (true) or decreasing (false) values
      * @return iterator for sorted flows
      */
-    public Iterator<Flow> sortedFlowIterator(boolean increasing) {
-        return graph.getOrderedFlows(increasing).iterator();
+    public Iterator<Flow> sortedFlowIterator() {
+        return graph.getSortedFlows().iterator();
     }
 
+    // FIXME remove?
     public ArrayList<Flow> getFlows() {
         return graph.getFlows();
-    }
-
-    /**
-     * Sort a list of flows by flow values.
-     *
-     * @param flows flows to order
-     * @param increasing increasing or decreasing sort
-     */
-    public static void sortFlows(List<Flow> flows, boolean increasing) {
-        java.util.Collections.sort(flows, (Flow flow1, Flow flow2) -> {
-            if (increasing) {
-                return Double.compare(flow1.getValue(), flow2.getValue());
-            } else {
-                return Double.compare(flow2.getValue(), flow1.getValue());
-            }
-        });
     }
 
     /**

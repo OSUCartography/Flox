@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -714,6 +715,7 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator31 = new javax.swing.JPopupMenu.Separator();
         toBidirectionalFlowsMenuItem = new javax.swing.JMenuItem();
         toUnidirectionalFlowsMenuItem = new javax.swing.JMenuItem();
+        bidirectionalFlowTestMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
@@ -2909,6 +2911,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(toUnidirectionalFlowsMenuItem);
 
+        bidirectionalFlowTestMenuItem.setText("Convert to Bidirectional Flows and Back");
+        bidirectionalFlowTestMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bidirectionalFlowTestMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(bidirectionalFlowTestMenuItem);
+
         menuBar.add(debugMenu);
         //debugMenu.setVisible(false);
 
@@ -3251,20 +3261,21 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void showReport() {
         StringBuilder sb = new StringBuilder();
-
+        DecimalFormat df = new DecimalFormat("#,##0.######");
+        
         // flows
         sb.append("Flows\n");
         sb.append("\t").append(model.getNbrFlows()).append(" flows").append("\n");
-        sb.append("\tMinimum flow value: ").append(model.getMinFlowValue()).append("\n");
-        sb.append("\tMaximum flow value: ").append(model.getMaxFlowValue()).append("\n");
-        sb.append("\tMean flow value: ").append(model.getMeanFlowValue()).append("\n");
+        sb.append("\tMinimum flow value: ").append(df.format(model.getMinFlowValue())).append("\n");
+        sb.append("\tMaximum flow value: ").append(df.format(model.getMaxFlowValue())).append("\n");
+        sb.append("\tMean flow value: ").append(df.format(model.getMeanFlowValue())).append("\n");
 
         // nodes
         sb.append("\nNodes\n");
         sb.append("\t").append(model.getNbrNodes()).append(" nodes").append("\n");
-        sb.append("\tMinimum node value: ").append(model.getMinNodeValue()).append("\n");
-        sb.append("\tMaximum node value: ").append(model.getMaxNodeValue()).append("\n");
-        sb.append("\tMean node value: ").append(model.getMeanNodeValue()).append("\n");
+        sb.append("\tMinimum node value: ").append(df.format(model.getMinNodeValue())).append("\n");
+        sb.append("\tMaximum node value: ").append(df.format(model.getMaxNodeValue())).append("\n");
+        sb.append("\tMean node value: ").append(df.format(model.getMeanNodeValue())).append("\n");
 
         sb.append("\nFlows overlapping obstacles: ");
         ForceLayouter layouter = new ForceLayouter(model);
@@ -4006,7 +4017,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void selectIntersectingSiblingFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectIntersectingSiblingFlowsMenuItemActionPerformed
         model.setSelectionOfAllFlowsAndNodes(false);
-        List<Model.IntersectingFlowPair> pairs = new ForceLayouter(model).getIntersectingSiblings();
+        List<Model.IntersectingFlowPair> pairs = new ForceLayouter(model).getSortedIntersectingSiblings();
         for (Model.IntersectingFlowPair pair : pairs) {
             pair.flow1.setSelected(true);
             pair.flow2.setSelected(true);
@@ -4031,7 +4042,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_nodeStrokeSpinnerStateChanged
 
     private void resolveIntersectingSiblingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveIntersectingSiblingsMenuItemActionPerformed
-        List<Model.IntersectingFlowPair> pairs = new ForceLayouter(model).getIntersectingSiblings();
+        List<Model.IntersectingFlowPair> pairs = new ForceLayouter(model).getSortedIntersectingSiblings();
         for (Model.IntersectingFlowPair pair : pairs) {
             pair.resolveIntersection();
         }
@@ -4469,16 +4480,23 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_selectIntersectingMenuItemActionPerformed
 
     private void toUnidirectionalFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toUnidirectionalFlowsMenuItemActionPerformed
-        model.changeToUnidirectionalFlows();
+        model.toUnidirectionalFlows();
         mapComponent.refreshMap();
-        layout("To Unidirectional");
+        addUndo("To Unidirectional");
     }//GEN-LAST:event_toUnidirectionalFlowsMenuItemActionPerformed
 
     private void toBidirectionalFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toBidirectionalFlowsMenuItemActionPerformed
-        model.changeToBidirectionalFlows();
+        model.toBidirectionalFlows();
         mapComponent.refreshMap();
-        layout("To Bidirectional");
+        addUndo("To Bidirectional");
     }//GEN-LAST:event_toBidirectionalFlowsMenuItemActionPerformed
+
+    private void bidirectionalFlowTestMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bidirectionalFlowTestMenuItemActionPerformed
+        model.toBidirectionalFlows();
+         model.toUnidirectionalFlows();
+        mapComponent.refreshMap();
+        layout("Test Bidirectional Flow Conversion");
+    }//GEN-LAST:event_bidirectionalFlowTestMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4539,6 +4557,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadLengthSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
+    private javax.swing.JMenuItem bidirectionalFlowTestMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton canvasColorButton;
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JPanel clipAreaControlPanel;

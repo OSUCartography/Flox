@@ -4,7 +4,6 @@ import edu.oregonstate.cartography.flox.model.Arrow;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.Flow;
-import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Obstacle;
@@ -262,7 +261,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         // Iterate through the flows
         Iterator<Flow> iterator = colorVaries
-                ? model.sortedFlowIterator(false) : model.flowIterator();
+                ? model.sortedFlowIterator() : model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
 

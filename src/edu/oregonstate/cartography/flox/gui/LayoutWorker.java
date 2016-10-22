@@ -58,23 +58,29 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
 
         // store initial lock flags of all flows
         boolean[] initialLocks = layouter.getModel().getLocks();
+        layouter.getModel().toBidirectionalFlows();
+        if (isCancelled()) {
+            return;
+        }
+        
         Rectangle2D canvas = layouter.getModel().getCanvas();
         for (int i = 0; i < nbrIterations; i++) {
             if (isCancelled()) {
                 break;
             }
-            long startTime = System.nanoTime();    
+            //long startTime = System.nanoTime();    
 
             iterBeforeMovingFlows = layouter.layoutIteration(i, 
                     iterBeforeMovingFlows, canvas);
             
-            long estimatedTime = System.nanoTime() - startTime;
-            System.out.format("%d %.3f seconds\n", i, estimatedTime / 1000d / 1000d / 1000d);
+            //long estimatedTime = System.nanoTime() - startTime;
+            //System.out.format("%d %.3f seconds\n", i, estimatedTime / 1000d / 1000d / 1000d);
             
             // update progress indicator
             double progress = 100d * i / nbrIterations;
             setProgress((int) Math.round(progress));
         }
+        layouter.getModel().toUnidirectionalFlows();
         // reset lock flags to initial values
         layouter.getModel().applyLocks(initialLocks);
     }

@@ -5,13 +5,13 @@ package edu.oregonstate.cartography.flox.model;
  *
  * @author Bernhard Jenny, School of Science, RMIT University, Melbourne
  */
-public class BidirectionalFlow extends Flow {
+public class FlowPair extends Flow {
 
     private final Flow hiddenFlow;
 
-    public BidirectionalFlow(Flow flow1, Flow flow2) {
-        super(flow1.getStartPt(), flow1.getCtrlPt().mean(flow2.getCtrlPt()), 
-                flow1.getEndPt(), flow1.getValue(), 
+    public FlowPair(Flow flow1, Flow flow2) {
+        super(flow1.getStartPt(), flow1.getCtrlPt().mean(flow2.getCtrlPt()),
+                flow1.getEndPt(), flow1.getValue(),
                 // FIXME use id of flow1?
                 createID());
         hiddenFlow = flow2;
@@ -31,22 +31,34 @@ public class BidirectionalFlow extends Flow {
         return super.getValue() + hiddenFlow.getValue();
     }
 
-    public Flow createFlow1() {
+    public Flow createFlow1(Model model) {
+        Point cPt = flowCtrlPt(model, this, 1);
         double value = super.getValue();
-        Flow flow = new Flow(startPt, getCtrlPt(), endPt, value, id);
+        Flow flow = new Flow(startPt, cPt, endPt, value, id);
         flow.setLocked(isLocked());
         flow.setStartClipArea(getStartClipArea());
         flow.setEndClipArea(getEndClipArea());
         return flow;
     }
 
-    public Flow createFlow2() {
-        Point midPt = getBaseLineMidPoint();
-        Point cPt = new Point(2 * midPt.x - getCtrlPt().x, 2 * midPt.y - getCtrlPt().y);
-        Flow flow = new Flow(endPt, cPt, startPt, hiddenFlow.getValue(), hiddenFlow.id);
+    public Flow createFlow2(Model model) {
+        Point pt1 = new Point(endPt.x, endPt.y);
+        Point cPt = flowCtrlPt(model, hiddenFlow, -1);
+        Point pt2 = new Point(startPt.x, startPt.y);
+        
+        Flow flow = new Flow(pt1, cPt, pt2, hiddenFlow.getValue(), hiddenFlow.id);
         flow.setLocked(isLocked());
         flow.setStartClipArea(getEndClipArea());
         flow.setEndClipArea(getStartClipArea());
         return flow;
+    }
+
+    private Point flowCtrlPt(Model model, Flow flow, double s) {
+        double lineWidth = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
+        double [] dir = getDirectionVectorFromBaseLineMidPointToControlPoint();
+        Point cPt = new Point(getCtrlPt().x, getCtrlPt().y);
+        cPt.x += dir[0] * lineWidth * s;
+        cPt.y += dir[1] * lineWidth * s;
+        return cPt;
     }
 }

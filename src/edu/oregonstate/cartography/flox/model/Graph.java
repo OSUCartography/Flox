@@ -378,15 +378,9 @@ public final class Graph {
         return nodes;
     }
 
-    public ArrayList<Flow> getOrderedFlows(boolean increasing) {
+    public ArrayList<Flow> getSortedFlows() {
         ArrayList<Flow> flows = new ArrayList<>(graph.edgeSet());
-        java.util.Collections.sort(flows, (Flow f1, Flow f2) -> {
-            if (increasing) {
-                return Double.compare(f1.getValue(), f2.getValue());
-            } else {
-                return Double.compare(f2.getValue(), f1.getValue());
-            }
-        });
+        flows.sort(null);
         return flows;
     }
 
