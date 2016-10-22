@@ -172,7 +172,7 @@ public class AddFlowTool extends DoubleBufferedTool {
             double s = map.getScale() / model.getReferenceMapScale();
             FloxRenderer.enableHighQualityRenderingHints(g2d, true);
             Flow flow = makeFlow(mouse.getX(), mouse.getY());
-            double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
+            double flowStrokeWidth = model.getFlowWidthPx(flow.getValue()) * s;
             g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
 

@@ -75,7 +75,7 @@ public class Arrow {
         this.flow = flow;
     
         // stroke width in world coordinates of the flow based on its value.
-        double flowStrokeWidth = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
+        double flowStrokeWidth = model.getFlowWidthPx(flow.getValue()) / model.getReferenceMapScale();
         
 
         // Gets the ratio of the flows stroke width to it's value. This ratio

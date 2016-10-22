@@ -279,7 +279,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             // draw flow line
             Flow clippedFlow = model.clipFlow(flow, true, false);
             GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
-            double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
+            double flowStrokeWidth = model.getFlowWidthPx(flow.getValue()) * s;
             drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
         }
     }

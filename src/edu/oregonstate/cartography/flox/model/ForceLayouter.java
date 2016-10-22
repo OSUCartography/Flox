@@ -845,7 +845,7 @@ public class ForceLayouter {
         double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
 
         // flow width in world coordinates
-        double strokeWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
+        double strokeWidthWorld = model.getFlowWidthPx(flow.getValue()) / model.getReferenceMapScale();
 
         // obstacle radius is in world coordinates
         // add minimum obstacle distance

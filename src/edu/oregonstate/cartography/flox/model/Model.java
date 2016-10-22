@@ -852,12 +852,17 @@ public class Model {
         HashSet<Flow> flowsToRemove = new HashSet<>();
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            Flow flow2 = graph.getOpposingFlow(flow);
+            Flow flow1 = iterator.next();
+            Flow flow2 = graph.getOpposingFlow(flow1);
             if (flow2 != null) {
-                if (flowsToRemove.contains(flow) == false) {
-                    flowsToAdd.add(new FlowPair(flow, flow2));
-                    flowsToRemove.add(flow);
+                
+                if (flow1.isLocked() || flow2.isLocked()) {
+                    continue;
+                }
+                
+                if (flowsToRemove.contains(flow1) == false) {
+                    flowsToAdd.add(new FlowPair(flow1, flow2));
+                    flowsToRemove.add(flow1);
                     flowsToRemove.add(flow2);
                 }
             }
@@ -2070,14 +2075,14 @@ public class Model {
     }
 
     /**
-     * Returns the stroke width in pixels of a flow based on its value.
+     * Returns the stroke width in pixels for a flow value.
      *
-     * @param flow the flow
+     * @param value the flow value
      * @return width in pixels
      */
-    public double getFlowWidthPx(Flow flow) {
+    public double getFlowWidthPx(double value) {
         double flowWidthScaleFactor = getMaxFlowStrokeWidthPixel() / getMaxFlowValue();
-        return Math.abs(flow.getValue()) * flowWidthScaleFactor;
+        return Math.abs(value) * flowWidthScaleFactor;
     }
 
     /**
