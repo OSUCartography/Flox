@@ -137,7 +137,8 @@ public class Flow implements Comparable<Flow> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Flow ");
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getName()).append(" ");
         sb.append("id=").append(id);
         sb.append(" start=").append(startPt);
         sb.append(", end=").append(endPt);
@@ -188,7 +189,7 @@ public class Flow implements Comparable<Flow> {
             double dx2 = cPt.x - startPt.x;
             double dy2 = cPt.y - startPt.y;
             double l1 = dx1 * dx1 + dy1 * dy1 + dx2 * dx2 + dy2 * dy2;
-            
+
             dx1 = flow.cPt.x - flow.endPt.x;
             dy1 = flow.cPt.y - flow.endPt.y;
             dx2 = flow.cPt.x - flow.startPt.x;
@@ -839,7 +840,8 @@ public class Flow implements Comparable<Flow> {
      * The 2D vector pointing from the start point to the control point with
      * length 1.
      *
-     * @return the vector
+     * @return the vector. Components are NaN if the start point and the end
+     * point coincide.
      */
     public double[] getDirectionVectorFromStartPointToControlPoint() {
         double dx = cPt.x - startPt.x;
@@ -852,7 +854,8 @@ public class Flow implements Comparable<Flow> {
      * The 2D vector pointing from the end point to the control point with
      * length 1.
      *
-     * @return the vector
+     * @return the vector. Components are NaN if the start point and the end
+     * point coincide.
      */
     public double[] getDirectionVectorFromEndPointToControlPoint() {
         double dx = cPt.x - endPt.x;
@@ -863,16 +866,23 @@ public class Flow implements Comparable<Flow> {
 
     /**
      * The 2D vector pointing from point between the start point and the end
-     * point to the control point with length 1.
+     * point to the control point with length 1. If the control point is on the
+     * line between start and end point, then null is returned.
      *
      * @return the vector
      */
     public double[] getDirectionVectorFromBaseLineMidPointToControlPoint() {
-        double mx = (endPt.x + startPt.x) / 2;
-        double my = (endPt.y + startPt.y) / 2;
-        double dx = cPt.x - mx;
-        double dy = cPt.y - my;
+        double midX = (endPt.x + startPt.x) / 2;
+        double midY = (endPt.y + startPt.y) / 2;
+        double dx = cPt.x - midX;
+        double dy = cPt.y - midY;
         double d = Math.sqrt(dx * dx + dy * dy);
+
+        // if control point is on base line, return null
+        if (d == 0) {
+            return null;
+        }
+
         return new double[]{dx / d, dy / d};
     }
 
