@@ -716,6 +716,8 @@ public class MainWindow extends javax.swing.JFrame {
         toBidirectionalFlowsMenuItem = new javax.swing.JMenuItem();
         toUnidirectionalFlowsMenuItem = new javax.swing.JMenuItem();
         bidirectionalFlowTestMenuItem = new javax.swing.JMenuItem();
+        jSeparator32 = new javax.swing.JPopupMenu.Separator();
+        testCurveOffsettingMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
@@ -2918,6 +2920,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(bidirectionalFlowTestMenuItem);
+        debugMenu.add(jSeparator32);
+
+        testCurveOffsettingMenuItem.setText("Test Curve Offsetting");
+        testCurveOffsettingMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                testCurveOffsettingMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(testCurveOffsettingMenuItem);
 
         menuBar.add(debugMenu);
         //debugMenu.setVisible(false);
@@ -3262,7 +3273,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void showReport() {
         StringBuilder sb = new StringBuilder();
         DecimalFormat df = new DecimalFormat("#,##0.######");
-        
+
         // flows
         sb.append("Flows\n");
         sb.append("\t").append(model.getNbrFlows()).append(" flows").append("\n");
@@ -4493,10 +4504,56 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void bidirectionalFlowTestMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bidirectionalFlowTestMenuItemActionPerformed
         model.toBidirectionalFlows();
-         model.toUnidirectionalFlows();
+        model.toUnidirectionalFlows();
         mapComponent.refreshMap();
         layout("Test Bidirectional Flow Conversion");
     }//GEN-LAST:event_bidirectionalFlowTestMenuItemActionPerformed
+
+    private void testCurveOffsettingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testCurveOffsettingMenuItemActionPerformed
+        double baseLength = 10;
+        double maxCtrlY = baseLength * 1.5d;
+        double flowOffset = baseLength / 3d;
+        double xSpacing = flowOffset * 1.5;
+        model.removeAllLayers();
+        model.setSelectionOfAllFlowsAndNodes(true);
+        model.deleteSelectedFlowsAndNodes();
+        model.setMaxFlowStrokeWidthPixel(4);
+        model.setMaxNodeSizePx(5);
+        writeModelToGUI();
+
+        ArrayList<Flow> flows = new ArrayList<>();
+        for (int i = 1; i < 10; i++) {
+            double cy = -i / 10d * maxCtrlY;
+            double x1 = baseLength * i;
+            double x2 = baseLength * (i + 1);
+            x1 += xSpacing * i;
+            x2 += xSpacing * i;
+            Flow originalFlow = new Flow(new Point(x1, 0), new Point(x1, cy), new Point(x2, 0), 1d);
+            flows.add(originalFlow);
+            originalFlow.setLocked(true);
+            model.addFlow(originalFlow);
+        }
+
+        // set reference scale which is needed for offsetting
+        mapComponent.showAll();
+        model.setReferenceMapScale(mapComponent.getScale());
+
+        for (int i = 1; i < 10; i++) {
+            double ctrlY = -i / 10d * maxCtrlY;
+            double x1 = baseLength * i;
+            double x2 = baseLength * (i + 1);
+            x1 += xSpacing * i;
+            x2 += xSpacing * i;
+
+            for (int j = 0; j < 5; j++) {
+                Flow offsetFlow = new Flow(new Point(x1, 0), new Point(x1, ctrlY), new Point(x2, 0), 1d);
+                offsetFlow.offsetFlow(flowOffset / 5d * (j + 1), model);
+                offsetFlow.setLocked(true);
+                offsetFlow.setLocked(true);
+                model.addFlow(offsetFlow);
+            }
+        }
+    }//GEN-LAST:event_testCurveOffsettingMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4655,6 +4712,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator29;
     private javax.swing.JPopupMenu.Separator jSeparator30;
     private javax.swing.JPopupMenu.Separator jSeparator31;
+    private javax.swing.JPopupMenu.Separator jSeparator32;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
@@ -4744,6 +4802,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSpinner startDistanceSpinner;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
+    private javax.swing.JMenuItem testCurveOffsettingMenuItem;
     private javax.swing.JMenuItem toBidirectionalFlowsMenuItem;
     private javax.swing.JMenuItem toUnidirectionalFlowsMenuItem;
     private javax.swing.JMenuItem totalFlowsMenuItem;
