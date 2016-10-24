@@ -47,6 +47,18 @@ public final class Point {
     }
 
     /**
+     * Copy constructor.
+     * 
+     * @param point 
+     */
+    public Point(Point point) {
+        this.x = point.x;
+        this.y = point.y;
+        this.value = point.value;
+        this.selected = point.selected;
+    }
+    
+    /**
      * Rotates this point by the provided angle around an origin point and
      * returns the rotated point. The position of this point is not changed.
      *
