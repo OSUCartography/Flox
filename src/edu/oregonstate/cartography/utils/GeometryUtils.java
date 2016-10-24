@@ -443,7 +443,7 @@ public class GeometryUtils {
 
         double x = xy[0];
         double y = xy[1];
-
+        
         if (collinear(p0x, p0y, p1x, p1y, p2x, p2y, tol)) {
             return getDistanceToLineSegmentSquare(x, y, p0x, p0y, p2x, p2y);
         }
@@ -454,7 +454,16 @@ public class GeometryUtils {
         double dx2 = p2x - x;
         double dy2 = p2y - y;
         double d2sq = dx2 * dx2 + dy2 * dy2;
-        double minDistSq = Math.min(d0sq, d2sq);
+        double minDistSq;
+        if (d0sq < d2sq) {
+            minDistSq = d0sq;
+            xy[0] = p0x;
+            xy[1] = p0y;
+        } else {
+            minDistSq = d2sq;
+            xy[0] = p2x;
+            xy[1] = p2y;
+        }
 
         double ax = p0x - 2.0 * p1x + p2x;
         double ay = p0y - 2.0 * p1y + p2y;
@@ -580,6 +589,7 @@ public class GeometryUtils {
      * @param p1y Control point y
      * @param p2x End point x
      * @param p2y End point x
+     * @param tol Tolerance to test whether points are collinear.
      * @param xy Point x and y on input; the closest point on the curve on
      * output.
      * @return Distance between the point x/y and the quadratic Bezier curve.
