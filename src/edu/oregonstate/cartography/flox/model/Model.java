@@ -1093,6 +1093,11 @@ public class Model {
         updateEndClipAreas();
     }
 
+    /**
+     * Returns a list of obstacles, i.e., arrowheads and nodes.
+     *
+     * @return list of obstacles
+     */
     public List<Obstacle> getObstacles() {
         List<Obstacle> obstacles = new ArrayList<>();
 
@@ -1120,7 +1125,19 @@ public class Model {
             Iterator<Flow> flowIterator = flowIterator();
             while (flowIterator.hasNext()) {
                 Flow flow = flowIterator.next();
-                Arrow arrow = flow.getArrow(this);
+                Arrow arrow;
+                if (flow instanceof FlowPair) {
+                    arrow = ((FlowPair) flow).createParallelFlow1(this).getArrow(this);
+                    if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
+                        Obstacle obstacle = new Obstacle(arrow.getTipPt(),
+                                arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
+                        obstacles.add(obstacle);
+                    }
+                    arrow = ((FlowPair) flow).createParallelFlow2(this).getArrow(this);
+                } else {
+                    arrow = flow.getArrow(this);
+                }
+
                 if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
                     Obstacle obstacle = new Obstacle(arrow.getTipPt(),
                             arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
@@ -2031,8 +2048,9 @@ public class Model {
 
     /**
      * Returns the stroke width in pixels for a flow value.
+     *
      * @param value the value
-     * @return  width in pixels
+     * @return width in pixels
      */
     protected double getFlowWidthPx(double value) {
         double flowWidthScaleFactor = getMaxFlowStrokeWidthPixel() / getMaxFlowValue();
