@@ -100,6 +100,20 @@ public final class Point {
     }
 
     /**
+     * Translate point.
+     * 
+     * @param dx horizontal offset
+     * @param dy vertical offset
+     */
+    public void offset(double dx, double dy) {
+        assert (Double.isFinite(dx));
+        assert (Double.isFinite(dy));
+        
+        x += dx;
+        y += dy;
+    }
+    
+    /**
      * @return the selected
      */
     public boolean isSelected() {
