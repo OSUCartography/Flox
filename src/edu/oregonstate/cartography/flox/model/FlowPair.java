@@ -49,6 +49,17 @@ public class FlowPair extends Flow {
     }
 
     /**
+     * Value cannot be set for a FlowPair. An exception is thrown when this
+     * method is called.
+     *
+     * @param value
+     */
+    @Override
+    protected void setValue(double value) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Computes the offset in world coordinates for either of the two flows. The
      * offset is such that the sum of width of the two flows and the gap
      * in-between the two flows is centered on the axis of this flow.
