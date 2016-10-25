@@ -306,7 +306,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 Flow clipppedFlow = model.clipFlow(flow, false, false);
 
                 // flow width
-                double flowWidthWorld = model.getFlowWidthPx(flow.getValue()) / model.getReferenceMapScale();
+                double flowWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
 
                 // Add half the width to tol, scaled to the map scale
                 double maxDistWorld = toleranceWorld + flowWidthWorld / 2;

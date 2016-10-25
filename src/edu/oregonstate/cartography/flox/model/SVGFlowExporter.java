@@ -95,7 +95,7 @@ public class SVGFlowExporter extends SVGExporter {
             Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
             flowElement.setAttribute("id", Double.toString(flow.getValue()));
             flowElement.setAttribute("d", flowToPath(flow));
-            double flowWidth = model.getFlowWidthPx(flow.getValue());
+            double flowWidth = model.getFlowWidthPx(flow);
             setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null);
             return flowElement;
     }

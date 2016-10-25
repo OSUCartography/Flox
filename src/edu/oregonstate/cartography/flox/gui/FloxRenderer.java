@@ -275,7 +275,17 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
     }
 
+    /**
+     * Draws one flow. Not for FlowPairs.
+     * 
+     * @param flow flow to draw
+     * @param highlightSelected If true, selected flows are drawn with
+     * SELECTION_COLOR.
+     * @param s current scale factor of the map 
+     */
     private void drawFlow(Flow flow, boolean highlightSelected, double s) {
+        assert (flow instanceof FlowPair == false);
+        
         g2d.setColor(highlightSelected && flow.isSelected()
                 ? SELECTION_COLOR : model.getFlowColor(flow));
 
@@ -290,7 +300,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         // draw flow line
         Flow clippedFlow = model.clipFlow(flow, true, false);
         GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
-        double flowStrokeWidth = model.getFlowWidthPx(flow.getValue()) * s;
+        double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
         drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
     }
 

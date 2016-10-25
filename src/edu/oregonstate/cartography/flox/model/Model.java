@@ -2031,13 +2031,28 @@ public class Model {
 
     /**
      * Returns the stroke width in pixels for a flow value.
-     *
-     * @param value the flow value
-     * @return width in pixels
+     * @param value the value
+     * @return  width in pixels
      */
-    public double getFlowWidthPx(double value) {
+    protected double getFlowWidthPx(double value) {
         double flowWidthScaleFactor = getMaxFlowStrokeWidthPixel() / getMaxFlowValue();
         return Math.abs(value) * flowWidthScaleFactor;
+    }
+
+    /**
+     * Returns the stroke width in pixels for a flow. Includes
+     * parallelFlowsGapPx if the flow is a FlowPair.
+     *
+     * @param flow the flow
+     * @return width in pixels
+     */
+    public double getFlowWidthPx(Flow flow) {
+        double value = flow.getValue();
+        double flowWidthPx = getFlowWidthPx(value);
+        if (flow instanceof FlowPair) {
+            flowWidthPx += parallelFlowsGapPx;
+        }
+        return flowWidthPx;
     }
 
     /**
@@ -2485,7 +2500,7 @@ public class Model {
      * two parallel flows.
      */
     public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel) {
-        graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel);      
+        graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel);
     }
 
 }
