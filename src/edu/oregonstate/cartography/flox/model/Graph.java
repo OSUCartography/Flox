@@ -3,8 +3,8 @@ package edu.oregonstate.cartography.flox.model;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import org.jgrapht.graph.DirectedMultigraph;
 
@@ -37,6 +37,12 @@ public final class Graph {
      * JGraphT graph
      */
     private final DirectedMultigraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
+
+    /**
+     * show opposing flows between the same start node and end node as parallel
+     * lines.
+     */
+    private boolean bidirectionalFlowsParallel = true;
 
     public Graph() {
     }
@@ -135,12 +141,29 @@ public final class Graph {
     private void addFlowNoCacheUpdate(Flow flow) {
         assert (hasFlowWithID(flow.id) == false);
 
+        // replace start and end node of flow if they are already in the graph
         Point startPoint = findNodeInGraph(flow.getStartPt());
         Point endPoint = findNodeInGraph(flow.getEndPt());
         flow.setStartPt(startPoint);
         flow.setEndPt(endPoint);
+
+        // add the nodes and the flow
         graph.addVertex(startPoint);
         graph.addVertex(endPoint);
+
+        // update bidirectional flows
+        if (bidirectionalFlowsParallel) {
+            if (flow instanceof FlowPair == false && flow.isLocked() == false) {
+                Flow oppositeFlow = getOpposingFlow(flow);
+                if (oppositeFlow != null
+                        && oppositeFlow instanceof FlowPair == false
+                        && !oppositeFlow.isLocked()) {
+                    removeFlow(oppositeFlow);
+                    flow = new FlowPair(flow, oppositeFlow);
+                }
+            }
+        }
+
         graph.addEdge(startPoint, endPoint, flow);
     }
 
@@ -472,4 +495,90 @@ public final class Graph {
         return minFlowLength;
     }
 
+    /**
+     * Returns whether opposing flows between the same start point and end point
+     * are to be shown as two parallel flows.
+     *
+     * @return the bidirectionalFlowsParallel if true, opposing flows are shown
+     * as two parallel flows.
+     */
+    public boolean isBidirectionalFlowsParallel() {
+        return bidirectionalFlowsParallel;
+    }
+
+    /**
+     * Set whether opposing flows between the same start point and end point are
+     * to be shown as two parallel flows.
+     *
+     * @param bidirectionalFlowsParallel if true, opposing flows are shown as
+     * two parallel flows.
+     */
+    public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel) {
+        if (this.bidirectionalFlowsParallel == bidirectionalFlowsParallel) {
+            return;
+        }
+        this.bidirectionalFlowsParallel = bidirectionalFlowsParallel;
+        
+        if (bidirectionalFlowsParallel) {
+            toBidirectionalFlows();
+        } else {
+            toUnidirectionalFlows();
+        }
+    }
+    
+    /**
+     * Replaces pairs of opposing flows between the same two nodes with a single
+     * FlowPair.
+     */
+    public void toBidirectionalFlows() {
+        ArrayList<FlowPair> flowsToAdd = new ArrayList<>();
+        HashSet<Flow> flowsToRemove = new HashSet<>();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow1 = iterator.next();
+            if (flow1 instanceof FlowPair) {
+                continue;
+            }
+
+            Flow flow2 = getOpposingFlow(flow1);
+            if (flow2 != null) {
+                if (flow2 instanceof FlowPair) {
+                    continue;
+                }
+                if (flow1.isLocked() || flow2.isLocked()) {
+                    continue;
+                }
+
+                if (flowsToRemove.contains(flow1) == false) {
+                    flowsToAdd.add(new FlowPair(flow1, flow2));
+                    flowsToRemove.add(flow1);
+                    flowsToRemove.add(flow2);
+                }
+            }
+        }
+
+        removeFlows(flowsToRemove);
+        addFlows(flowsToAdd);
+    }
+
+    /**
+     * Replaces instances of FlowPair with two Flow instances.
+     */
+    public void toUnidirectionalFlows() {
+        ArrayList<Flow> flowsToAdd = new ArrayList<>();
+        ArrayList<FlowPair> flowsToRemove = new ArrayList<>();
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow instanceof FlowPair) {
+                FlowPair biFlow = (FlowPair) flow;
+                flowsToRemove.add(biFlow);
+                flowsToAdd.add(biFlow.createFlow1());
+                flowsToAdd.add(biFlow.createFlow2());
+            }
+        }
+
+        removeFlows(flowsToRemove);
+        addFlows(flowsToAdd);
+    }
 }

@@ -36,12 +36,6 @@ public class FlowPair extends Flow {
 
         // store flow2
         hiddenFlow = flow2;
-
-        // FIXME
-//        assert (flow1.getStartPt() == flow2.getEndPt());
-//        assert (flow2.getStartPt() == flow1.getEndPt());
-//        assert (flow1.getStartClipArea() == flow2.getEndClipArea());
-//        assert (flow2.getStartClipArea() == flow1.getEndClipArea());
     }
 
     /**
@@ -77,18 +71,65 @@ public class FlowPair extends Flow {
         }
     }
 
-    public Flow createFlow1(Model model) {
+    /**
+     * Returns a new instance of the Flow class that can be used to draw the
+     * first of the two flows of this FlowPair. The returned flow is offset from
+     * the center line of this flow. <STRONG>The start node and end node of the
+     * returned flow do not align with the nodes of this FlowPair. The nodes
+     * have been moved to create a nice parallel line.</STRONG>
+     *
+     * @param model data model
+     * @return a new flow
+     */
+    public Flow createParallelFlow1(Model model) {
         Flow flow = new Flow(this);
         flow.setValue(super.getValue());
         flow.offsetFlow(offset(model, true), model);
         return flow;
     }
 
-    public Flow createFlow2(Model model) {
+    /**
+     * Returns a new instance of the Flow class that can be used to draw the
+     * second of the two flows of this FlowPair. The returned flow is offset
+     * from the center line of this flow. <STRONG>The start node and end node of
+     * the returned flow do not align with the nodes of this FlowPair. The nodes
+     * have been moved to create a nice parallel line.</STRONG>
+     *
+     * @param model data model
+     * @return a new flow
+     */
+    public Flow createParallelFlow2(Model model) {
         Flow flow = new Flow(this);
         flow.setValue(hiddenFlow.getValue());
         flow.reverseFlow();
         flow.offsetFlow(offset(model, false), model);
+        return flow;
+    }
+
+    /**
+     * Returns a new instance of the Flow class representing the first flow of
+     * this FlowPair. The returned flow is not offset from the center line of
+     * this flow.
+     *
+     * @return a new flow
+     */
+    public Flow createFlow1() {
+        Flow flow = new Flow(this);
+        flow.setValue(super.getValue());
+        return flow;
+    }
+
+    /**
+     * Returns a new instance of the Flow class representing the second flow of
+     * this FlowPair. The returned flow is not offset from the center line of
+     * this flow.
+     *
+     * @return a new flow
+     */
+    public Flow createFlow2() {
+        Flow flow = new Flow(this);
+        flow.setValue(hiddenFlow.getValue());
+        flow.reverseFlow();
         return flow;
     }
 

@@ -156,8 +156,8 @@ public class SVGFlowExporter extends SVGExporter {
             // flow line
             if (flow instanceof FlowPair) {
                 FlowPair flowPair = (FlowPair)flow;
-                flowsGroup.appendChild(flowToDOMElement(flowPair.createFlow1(model), document));
-                flowsGroup.appendChild(flowToDOMElement(flowPair.createFlow2(model), document));
+                flowsGroup.appendChild(flowToDOMElement(flowPair.createParallelFlow1(model), document));
+                flowsGroup.appendChild(flowToDOMElement(flowPair.createParallelFlow2(model), document));
             } else {
                 flowsGroup.appendChild(flowToDOMElement(flow, document));
             }

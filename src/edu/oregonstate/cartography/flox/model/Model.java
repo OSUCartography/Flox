@@ -399,7 +399,7 @@ public class Model {
      * value.
      */
     private double maxFlowStrokeWidthPx = 20;
-    
+
     /**
      * Distance between parallel flows in pixels.
      */
@@ -846,62 +846,6 @@ public class Model {
      */
     public Flow getOpposingFlow(Flow flow) {
         return graph.getOpposingFlow(flow);
-    }
-
-    /**
-     * Replaces pairs of opposing flows between the same two nodes with a single
-     * FlowPair.
-     */
-    public void toBidirectionalFlows() {
-        ArrayList<FlowPair> flowsToAdd = new ArrayList<>();
-        HashSet<Flow> flowsToRemove = new HashSet<>();
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow1 = iterator.next();
-            if (flow1 instanceof FlowPair) {
-                continue;
-            }
-            
-            Flow flow2 = graph.getOpposingFlow(flow1);
-            if (flow2 != null) {
-                if (flow2 instanceof FlowPair) {
-                    continue;
-                }    
-                if (flow1.isLocked() || flow2.isLocked()) {
-                    continue;
-                }
-                
-                if (flowsToRemove.contains(flow1) == false) {
-                    flowsToAdd.add(new FlowPair(flow1, flow2));
-                    flowsToRemove.add(flow1);
-                    flowsToRemove.add(flow2);
-                }
-            }
-        }
-
-        graph.removeFlows(flowsToRemove);
-        graph.addFlows(flowsToAdd);
-    }
-
-    /**
-     * Replaces instances of FlowPair with two Flow instances.
-     */
-    public void toUnidirectionalFlows() {
-        ArrayList<Flow> flowsToAdd = new ArrayList<>();
-        ArrayList<FlowPair> flowsToRemove = new ArrayList<>();
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            if (flow instanceof FlowPair) {
-                FlowPair biFlow = (FlowPair) flow;
-                flowsToRemove.add(biFlow);
-                flowsToAdd.add(biFlow.createFlow1(this));
-                flowsToAdd.add(biFlow.createFlow2(this));
-            }
-        }
-
-        graph.removeFlows(flowsToRemove);
-        graph.addFlows(flowsToAdd);
     }
 
     /**
@@ -2520,6 +2464,28 @@ public class Model {
      */
     public void setParallelFlowsGapPx(double parallelFlowsGapPx) {
         this.parallelFlowsGapPx = parallelFlowsGapPx;
+    }
+
+    /**
+     * Returns whether opposing flows between the same start point and end point
+     * are to be shown as two parallel flows.
+     *
+     * @return the bidirectionalFlowsParallel if true, opposing flows are shown
+     * as two parallel flows.
+     */
+    public boolean isBidirectionalFlowsParallel() {
+        return graph.isBidirectionalFlowsParallel();
+    }
+
+    /**
+     * Set whether opposing flows between the same start point and end point are
+     * to be shown as two parallel flows.
+     *
+     * @param bidirectionalFlowsParallel if true, opposing flows are shown as
+     * two parallel flows.
+     */
+    public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel) {
+        graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel);      
     }
 
 }

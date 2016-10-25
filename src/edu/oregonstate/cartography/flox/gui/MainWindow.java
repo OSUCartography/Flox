@@ -10,7 +10,6 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
-import edu.oregonstate.cartography.flox.model.Obstacle;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
@@ -225,6 +224,9 @@ public class MainWindow extends javax.swing.JFrame {
             maxColorButton.setColor(model.getMaxFlowColor());
             minColorButton.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
             smallestFlowColorLabel.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
+            parallelFlowsCheckBox.setSelected(model.isBidirectionalFlowsParallel());
+            parallelFlowsGapSpinner.setValue(model.getParallelFlowsGapPx());
+            parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
 
             // nodes
             nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
@@ -551,6 +553,10 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator24 = new javax.swing.JSeparator();
         jSeparator25 = new javax.swing.JSeparator();
         flowsWidthOptionsButton = new ika.gui.MenuToggleButton();
+        parallelFlowsCheckBox = new javax.swing.JCheckBox();
+        parallelFlowsGapSpinner = new javax.swing.JSpinner();
+        javax.swing.JLabel jLabel47 = new javax.swing.JLabel();
+        jSeparator33 = new javax.swing.JSeparator();
         nodesPanel = new TransparentMacPanel();
         nodesContentPanel = new TransparentMacPanel();
         maxNodeRadiusLabel = new javax.swing.JLabel();
@@ -713,10 +719,6 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator22 = new javax.swing.JPopupMenu.Separator();
         showOptionsMenuItem = new javax.swing.JMenuItem();
         jSeparator31 = new javax.swing.JPopupMenu.Separator();
-        toBidirectionalFlowsMenuItem = new javax.swing.JMenuItem();
-        toUnidirectionalFlowsMenuItem = new javax.swing.JMenuItem();
-        bidirectionalFlowTestMenuItem = new javax.swing.JMenuItem();
-        jSeparator32 = new javax.swing.JPopupMenu.Separator();
         testCurveOffsettingMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -1207,7 +1209,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel3.setText("Long Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 17;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1238,7 +1240,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 15;
+        gridBagConstraints.gridy = 18;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1269,7 +1271,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 17;
+        gridBagConstraints.gridy = 20;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1278,7 +1280,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel5.setText("Short Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 19;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1327,7 +1329,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel8.setText("Peripheral Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridy = 21;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1358,7 +1360,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridy = 22;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1573,6 +1575,49 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
         flowsContentPanel.add(flowsWidthOptionsButton, gridBagConstraints);
+
+        parallelFlowsCheckBox.setText("Opposing Flows as Parallels");
+        parallelFlowsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                parallelFlowsCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
+        flowsContentPanel.add(parallelFlowsCheckBox, gridBagConstraints);
+
+        parallelFlowsGapSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, 200.0d, 1.0d));
+        parallelFlowsGapSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
+        parallelFlowsGapSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                parallelFlowsGapSpinnerStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 14;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        flowsContentPanel.add(parallelFlowsGapSpinner, gridBagConstraints);
+
+        jLabel47.setText("Gap");
+        jLabel47.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 20, 0, 0));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridwidth = 2;
+        flowsContentPanel.add(jLabel47, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
+        flowsContentPanel.add(jSeparator33, gridBagConstraints);
 
         flowsPanel.add(flowsContentPanel);
 
@@ -2896,31 +2941,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(showOptionsMenuItem);
         debugMenu.add(jSeparator31);
-
-        toBidirectionalFlowsMenuItem.setText("Convert to Bidirectional Flows");
-        toBidirectionalFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                toBidirectionalFlowsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(toBidirectionalFlowsMenuItem);
-
-        toUnidirectionalFlowsMenuItem.setText("Convert to Unidirectional Flows");
-        toUnidirectionalFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                toUnidirectionalFlowsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(toUnidirectionalFlowsMenuItem);
-
-        bidirectionalFlowTestMenuItem.setText("Convert to Bidirectional Flows and Back");
-        bidirectionalFlowTestMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bidirectionalFlowTestMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(bidirectionalFlowTestMenuItem);
-        debugMenu.add(jSeparator32);
 
         testCurveOffsettingMenuItem.setText("Test Curve Offsetting");
         testCurveOffsettingMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -4490,35 +4510,16 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectIntersectingMenuItemActionPerformed
 
-    private void toUnidirectionalFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toUnidirectionalFlowsMenuItemActionPerformed
-        model.toUnidirectionalFlows();
-        mapComponent.refreshMap();
-        addUndo("To Unidirectional");
-    }//GEN-LAST:event_toUnidirectionalFlowsMenuItemActionPerformed
-
-    private void toBidirectionalFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toBidirectionalFlowsMenuItemActionPerformed
-        model.toBidirectionalFlows();
-        mapComponent.refreshMap();
-        addUndo("To Bidirectional");
-    }//GEN-LAST:event_toBidirectionalFlowsMenuItemActionPerformed
-
-    private void bidirectionalFlowTestMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bidirectionalFlowTestMenuItemActionPerformed
-        model.toBidirectionalFlows();
-        model.toUnidirectionalFlows();
-        mapComponent.refreshMap();
-        layout("Test Bidirectional Flow Conversion");
-    }//GEN-LAST:event_bidirectionalFlowTestMenuItemActionPerformed
-
     public void testOffsetting() {
         testCurveOffsettingMenuItemActionPerformed(null);
     }
-    
+
     private void testCurveOffsettingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testCurveOffsettingMenuItemActionPerformed
         double baseLength = 10;
         double maxCtrlY = baseLength * 1.5d;
         double flowOffset = baseLength / 15d;
         double xSpacing = baseLength * 0.8;
-         
+
         model.removeAllLayers();
         model.setSelectionOfAllFlowsAndNodes(true);
         model.deleteSelectedFlowsAndNodes();
@@ -4558,6 +4559,21 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_testCurveOffsettingMenuItemActionPerformed
 
+    private void parallelFlowsGapSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_parallelFlowsGapSpinnerStateChanged
+        SpinnerModel spinnerModel = parallelFlowsGapSpinner.getModel();
+        double gap = ((SpinnerNumberModel) spinnerModel).getNumber().doubleValue();
+        model.setParallelFlowsGapPx(gap);
+        mapComponent.refreshMap();
+        layout("Parallel Flows Gap");
+    }//GEN-LAST:event_parallelFlowsGapSpinnerStateChanged
+
+    private void parallelFlowsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parallelFlowsCheckBoxActionPerformed
+        model.setBidirectionalFlowsParallel(parallelFlowsCheckBox.isSelected());
+        parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
+        mapComponent.refreshMap();
+        layout("Parallel Opposing Flows");
+    }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4588,10 +4604,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         if (model.getFlowRangeboxHeight() > 0) {
             progressBar.setEnabled(true);
-            
-            // replace opposing flows between same start and end nodes with FlowPairs
-            model.toBidirectionalFlows();
-        
+
             Model modelCopy = model.copy();
             modelCopy.straightenFlows(false);
             ForceLayouter layouter = new ForceLayouter(modelCopy);
@@ -4621,7 +4634,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadLengthSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
-    private javax.swing.JMenuItem bidirectionalFlowTestMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton canvasColorButton;
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JPanel clipAreaControlPanel;
@@ -4719,7 +4731,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator29;
     private javax.swing.JPopupMenu.Separator jSeparator30;
     private javax.swing.JPopupMenu.Separator jSeparator31;
-    private javax.swing.JPopupMenu.Separator jSeparator32;
+    private javax.swing.JSeparator jSeparator33;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
@@ -4757,6 +4769,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openSettingsMenuItem;
     private javax.swing.JMenuItem openShapefileMenuItem;
+    private javax.swing.JCheckBox parallelFlowsCheckBox;
+    private javax.swing.JSpinner parallelFlowsGapSpinner;
     private javax.swing.JSlider peripheralStiffnessSlider;
     private javax.swing.JLabel pointsFilePathLabel;
     private javax.swing.JMenuItem printFlowsToConsoleMenuItem;
@@ -4810,8 +4824,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
     private javax.swing.JMenuItem testCurveOffsettingMenuItem;
-    private javax.swing.JMenuItem toBidirectionalFlowsMenuItem;
-    private javax.swing.JMenuItem toUnidirectionalFlowsMenuItem;
     private javax.swing.JMenuItem totalFlowsMenuItem;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;

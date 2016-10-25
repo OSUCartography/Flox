@@ -267,8 +267,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             Flow flow = iterator.next();
             if (flow instanceof FlowPair) {
                 FlowPair flowPair = (FlowPair)flow;
-                drawFlow(flowPair.createFlow1(model), highlightSelected, s);
-                drawFlow(flowPair.createFlow2(model), highlightSelected, s);
+                drawFlow(flowPair.createParallelFlow1(model), highlightSelected, s);
+                drawFlow(flowPair.createParallelFlow2(model), highlightSelected, s);
             } else {
                 drawFlow(flow, highlightSelected, s);
             }
