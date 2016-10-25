@@ -8,6 +8,7 @@ import edu.oregonstate.cartography.flox.model.BooleanGrid;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
+import edu.oregonstate.cartography.flox.model.FlowPair;
 import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
@@ -373,13 +374,15 @@ public class MainWindow extends javax.swing.JFrame {
             // get the number of selected features
             int nbrFlowsAndNodes = flows.size() + nodes.size();
 
-            // enable the text field if anything is selected
-            valueFormattedTextField.setEnabled(true);
-
+            // the value of a FlowPair cannot be changed. Find out whether only 
+            // FlowPairs are selected. 
+            boolean onlyFlowPairsSelected = nodes.isEmpty();
+            
             if (nbrFlowsAndNodes == 1) { // If just one feature is selected
                 double value;
                 if (flows.size() == 1) { // If the selected feature is a flow
                     value = flows.get(0).getValue();
+                    onlyFlowPairsSelected = (flows.get(0) instanceof FlowPair);
                 } else { // The selected feature is a node
                     value = nodes.get(0).getValue();
                 }
@@ -392,6 +395,9 @@ public class MainWindow extends javax.swing.JFrame {
                 ArrayList<Double> values = new ArrayList();
                 for (Flow flow : flows) {
                     values.add(flow.getValue());
+                    if (flow instanceof FlowPair == false) {
+                        onlyFlowPairsSelected = false;
+                    }
                 }
                 for (Point node : nodes) {
                     values.add(node.getValue());
@@ -413,6 +419,10 @@ public class MainWindow extends javax.swing.JFrame {
                 valueFormattedTextField.setValue(v);
 
             }
+            
+            // enable the text field if anything is selected that can change its value
+            valueFormattedTextField.setEnabled(!onlyFlowPairsSelected);
+
         } finally {
             updatingGUI = false;
         }
