@@ -4509,11 +4509,16 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Test Bidirectional Flow Conversion");
     }//GEN-LAST:event_bidirectionalFlowTestMenuItemActionPerformed
 
+    public void testOffsetting() {
+        testCurveOffsettingMenuItemActionPerformed(null);
+    }
+    
     private void testCurveOffsettingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testCurveOffsettingMenuItemActionPerformed
         double baseLength = 10;
         double maxCtrlY = baseLength * 1.5d;
-        double flowOffset = baseLength / 3d;
-        double xSpacing = flowOffset * 1.5;
+        double flowOffset = baseLength / 15d;
+        double xSpacing = baseLength * 0.8;
+         
         model.removeAllLayers();
         model.setSelectionOfAllFlowsAndNodes(true);
         model.deleteSelectedFlowsAndNodes();
@@ -4523,7 +4528,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         ArrayList<Flow> flows = new ArrayList<>();
         for (int i = 1; i < 10; i++) {
-            double cy = -i / 10d * maxCtrlY;
+            double cy = i / 10d * maxCtrlY;
             double x1 = baseLength * i;
             double x2 = baseLength * (i + 1);
             x1 += xSpacing * i;
@@ -4531,6 +4536,7 @@ public class MainWindow extends javax.swing.JFrame {
             Flow originalFlow = new Flow(new Point(x1, 0), new Point(x1, cy), new Point(x2, 0), 1d);
             flows.add(originalFlow);
             originalFlow.setLocked(true);
+            originalFlow.setSelected(true);
             model.addFlow(originalFlow);
         }
 
@@ -4538,17 +4544,14 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.showAll();
         model.setReferenceMapScale(mapComponent.getScale());
 
-        for (int i = 1; i < 10; i++) {
-            double ctrlY = -i / 10d * maxCtrlY;
-            double x1 = baseLength * i;
-            double x2 = baseLength * (i + 1);
-            x1 += xSpacing * i;
-            x2 += xSpacing * i;
-
-            for (int j = 0; j < 5; j++) {
-                Flow offsetFlow = new Flow(new Point(x1, 0), new Point(x1, ctrlY), new Point(x2, 0), 1d);
-                offsetFlow.offsetFlow(flowOffset / 5d * (j + 1), model);
-                offsetFlow.setLocked(true);
+        for (int i = 0; i < flows.size(); i++) {
+            for (int j = -8; j <= 8; j++) {
+                if (j == 0) {
+                    continue;
+                }
+                Flow offsetFlow = new Flow(flows.get(i));
+                offsetFlow.setSelected(false);
+                offsetFlow.offsetFlow(flowOffset * j, model);
                 offsetFlow.setLocked(true);
                 model.addFlow(offsetFlow);
             }

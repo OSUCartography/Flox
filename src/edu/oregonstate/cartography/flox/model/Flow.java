@@ -3,6 +3,8 @@ package edu.oregonstate.cartography.flox.model;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
@@ -10,6 +12,8 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -145,6 +149,40 @@ public class Flow implements Comparable<Flow> {
      */
     public Flow() {
         this(new Point(), new Point(), Model.DEFAULT_FLOW_VALUE);
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param flow
+     */
+    public Flow(Flow flow) {
+        id = createID();
+        startPt = new Point(flow.startPt);
+        endPt = new Point(flow.endPt);
+        cPt = new Point(flow.cPt);
+        value = flow.value;
+
+        startClipAreaWKT = flow.startClipAreaWKT;
+
+        endClipAreaWKT = flow.endClipAreaWKT;
+        selected = flow.selected;
+        locked = flow.locked;
+
+        try {
+            if (flow.startClipAreaWKT != null) {
+                startClipArea = new WKTReader().read(flow.startClipAreaWKT);
+            } else {
+                startClipArea = null;
+            }
+            if (flow.endClipAreaWKT != null) {
+                endClipArea = new WKTReader().read(flow.endClipAreaWKT);
+            } else {
+                endClipArea = null;
+            }
+        } catch (ParseException ex) {
+            Logger.getLogger(Flow.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -552,14 +590,13 @@ public class Flow implements Comparable<Flow> {
         final double w1 = 0.8;
         // heuristic weight for moving along the original curve
         final double w2 = 1 - w1;
-        
+
         assert (Double.isFinite(offset));
-        
+
         // The offset start and end points are not on a normal vector through 
         // the start and end points of the flow. Instead, the normal vector for 
         // the location where the flow touches the node is used. This results in 
         // nicer parallel flows.
-        
         // compute t paramter for computing the normal for the flow end
         double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
         double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
@@ -570,7 +607,7 @@ public class Flow implements Comparable<Flow> {
         double[] endNormal = getNormal(endT);
         double endX = endPt.x + endNormal[0] * offset;
         double endY = endPt.y + endNormal[1] * offset;
-        
+
         // compute t paramter for computing the normal for the flow start
         double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
         double gapDistanceToStartNodesPx = model.getFlowDistanceFromStartPointPixel();
@@ -581,8 +618,8 @@ public class Flow implements Comparable<Flow> {
         double[] startNormal = getNormal(startT);
         double startX = startPt.x + startNormal[0] * offset;
         double startY = startPt.y + startNormal[1] * offset;
-        
-        // construct control point position. The geometry of the new start point, 
+
+        // construct control point position. The initial geometry of the new start point, 
         // end point and control point are identical to the original geometry, 
         // but are scaled and rotated.
         double dx = startX - endX;
@@ -600,11 +637,11 @@ public class Flow implements Comparable<Flow> {
         double newY = cPtX * sin + cPtY * cos;
         cPtX = newX + startX;
         cPtY = newY + startY;
-        
+
+        // improve the control point position such that the distance between the
+        // original curve and the offset curve are approximately constant
         for (int i = 0; i < nbrIterations; i++) {
-
             Flow offsetFlow = new Flow(new Point(startX, startY), new Point(cPtX, cPtY), new Point(endX, endY), 1d);
-
             double moveX = 0;
             double moveY = 0;
             for (int j = 0; j < nbrTSamples; j++) {
@@ -614,47 +651,47 @@ public class Flow implements Comparable<Flow> {
                 // This results in a curve without excessive curvature, but 
                 // the offset curve is too distant from the original curve where 
                 // the original curve is strongly bent
-                Point ptOnOffsetCurve = offsetFlow.pointOnCurve(t);
-                Point ptOnOriginalCurve = closestPointOnCurve(ptOnOffsetCurve);
-                double curveDistance = ptOnOffsetCurve.distance(ptOnOriginalCurve);
-                // direction of control point movement
-                double dirX = ptOnOffsetCurve.x - ptOnOriginalCurve.x;
-                double dirY = ptOnOffsetCurve.y - ptOnOriginalCurve.y;
-                double dCtrl = Math.sqrt(dirX * dirX + dirY * dirY);
-                if (dCtrl == 0) {
-                    continue;
-                }
-                dirX /= dCtrl;
-                dirY /= dCtrl;
-                moveX += dirX * (Math.abs(offset) - curveDistance) * w1;
-                moveY += dirY * (Math.abs(offset) - curveDistance) * w1;
+                Point ptOnOffsetCurve1 = offsetFlow.pointOnCurve(t);
+                Point ptOnOriginalCurve1 = closestPointOnCurve(ptOnOffsetCurve1);
+                double curveDistance1 = ptOnOffsetCurve1.distance(ptOnOriginalCurve1);
+                double gap1 = Math.abs(offset) - curveDistance1;
+                double gapW1 = gap1 * w1;
 
+                // direction of control point movement
+                double dirX1 = ptOnOffsetCurve1.x - ptOnOriginalCurve1.x;
+                double dirY1 = ptOnOffsetCurve1.y - ptOnOriginalCurve1.y;
+                double dCtrl1 = Math.sqrt(dirX1 * dirX1 + dirY1 * dirY1);
+                if (dCtrl1 > 0) {
+                    dirX1 /= dCtrl1;
+                    dirY1 /= dCtrl1;
+                    moveX += dirX1 * gapW1;
+                    moveY += dirY1 * gapW1;
+                }
+                
                 // Move along the offset curve and find closest points on the original curve.
                 // This results in a curve with approximately correct distance to the original curve,
                 // but curves tend to by curvy where the original curve is strongly bent
-                ptOnOriginalCurve = pointOnCurve(t);
-                ptOnOffsetCurve = offsetFlow.closestPointOnCurve(ptOnOriginalCurve);
-                curveDistance = ptOnOffsetCurve.distance(ptOnOriginalCurve);
+                Point ptOnOriginalCurve2 = pointOnCurve(t);
+                Point ptOnOffsetCurve2 = offsetFlow.closestPointOnCurve(ptOnOriginalCurve2);
+                double curveDistance2 = ptOnOffsetCurve2.distance(ptOnOriginalCurve2);
+                double gap2 = Math.abs(offset) - curveDistance2;
+                double gapW2 = gap2 * w2;
+
                 // direction of control point movement
-                dirX = ptOnOffsetCurve.x - ptOnOriginalCurve.x;
-                dirY = ptOnOffsetCurve.y - ptOnOriginalCurve.y;
-                dCtrl = Math.sqrt(dirX * dirX + dirY * dirY);
-                if (dCtrl == 0) {
-                    continue;
+                double dirX2 = ptOnOffsetCurve2.x - ptOnOriginalCurve2.x;
+                double dirY2 = ptOnOffsetCurve2.y - ptOnOriginalCurve2.y;
+                double dCtrl2 = Math.sqrt(dirX2 * dirX2 + dirY2 * dirY2);
+                if (dCtrl2 > 0) {
+                    dirX2 /= dCtrl2;
+                    dirY2 /= dCtrl2;
+                    moveX += dirX2 * gapW2;
+                    moveY += dirY2 * gapW2;
                 }
-                dirX /= dCtrl;
-                dirY /= dCtrl;
-                moveX += dirX * (Math.abs(offset) - curveDistance) * w2;
-                moveY += dirY * (Math.abs(offset) - curveDistance) * w2;
             }
 
             // move control point
             moveX /= nbrTSamples;
             moveY /= nbrTSamples;
-            if (offset < 0) {
-                moveX = -moveX;
-                moveY = -moveY;
-            }
             cPtX += moveX;
             cPtY += moveY;
         }
@@ -689,7 +726,7 @@ public class Flow implements Comparable<Flow> {
      * Returns an array of flows that are offset.
      *
      * FIXME remove?
-     * 
+     *
      * http://pomax.github.io/bezierinfo/#offsetting
      *
      * @param d offset distance
