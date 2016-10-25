@@ -89,6 +89,16 @@ public class SVGFlowExporter extends SVGExporter {
 
         return str.toString();
     }
+    
+    private Element flowToDOMElement(Flow flow, Document document) {
+        flow = model.clipFlow(flow, true, false);
+            Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
+            flowElement.setAttribute("id", Double.toString(flow.getValue()));
+            flowElement.setAttribute("d", flowToPath(flow));
+            double flowWidth = model.getFlowWidthPx(flow.getValue());
+            setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null);
+            return flowElement;
+    }
 
     /**
      * Add flows, nodes and map layers to the SVG document
@@ -144,13 +154,13 @@ public class SVGFlowExporter extends SVGExporter {
             }
 
             // flow line
-            flow = model.clipFlow(flow, true, false);
-            Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-            flowElement.setAttribute("id", Double.toString(flow.getValue()));
-            flowElement.setAttribute("d", flowToPath(flow));
-            double flowWidth = model.getFlowWidthPx(flow.getValue());
-            setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null);
-            flowsGroup.appendChild(flowElement);
+            if (flow instanceof FlowPair) {
+                FlowPair flowPair = (FlowPair)flow;
+                flowsGroup.appendChild(flowToDOMElement(flowPair.createFlow1(model), document));
+                flowsGroup.appendChild(flowToDOMElement(flowPair.createFlow2(model), document));
+            } else {
+                flowsGroup.appendChild(flowToDOMElement(flow, document));
+            }
         }
 
         // nodes
