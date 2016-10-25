@@ -63,17 +63,25 @@ public final class Graph {
         maxFlowLength = 0;
         minFlowValue = Double.MAX_VALUE;
         maxFlowValue = -Double.MAX_VALUE;
+
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            double v = flow.getValue();
-            if (v < minFlowValue) {
-                minFlowValue = v;
+            double v;
+            if (flow instanceof FlowPair) {
+                v = ((FlowPair) flow).getValue1();
+                minFlowValue = Math.min(minFlowValue, v);
+                maxFlowValue = Math.max(maxFlowValue, v);
+                flowSum += v;
+                ++flowCounter;
+                v = ((FlowPair) flow).getValue2();
+            } else {
+                v = flow.getValue();
             }
-            if (v > maxFlowValue) {
-                maxFlowValue = v;
-            }
+            minFlowValue = Math.min(minFlowValue, v);
+            maxFlowValue = Math.max(maxFlowValue, v);
             flowSum += v;
-            flowCounter++;
+            ++flowCounter;
+
             double l = flow.getBaselineLength();
             if (l > maxFlowLength) {
                 maxFlowLength = l;
@@ -518,14 +526,14 @@ public final class Graph {
             return;
         }
         this.bidirectionalFlowsParallel = bidirectionalFlowsParallel;
-        
+
         if (bidirectionalFlowsParallel) {
             toBidirectionalFlows();
         } else {
             toUnidirectionalFlows();
         }
     }
-    
+
     /**
      * Replaces pairs of opposing flows between the same two nodes with a single
      * FlowPair.

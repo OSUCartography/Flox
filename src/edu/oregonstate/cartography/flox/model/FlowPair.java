@@ -45,7 +45,7 @@ public class FlowPair extends Flow {
      */
     @Override
     public double getValue() {
-        return super.getValue() + hiddenFlow.getValue();
+        return getValue1() + getValue2();
     }
 
     /**
@@ -60,6 +60,24 @@ public class FlowPair extends Flow {
     }
 
     /**
+     * Returns the value of the first flow of this FlowPair.
+     *
+     * @return the value
+     */
+    public double getValue1() {
+        return super.getValue();
+    }
+
+    /**
+     * Returns the value of the second flow of this flow pair.
+     *
+     * @return the value
+     */
+    public double getValue2() {
+        return hiddenFlow.getValue();
+    }
+
+    /**
      * Computes the offset in world coordinates for either of the two flows. The
      * offset is such that the sum of width of the two flows and the gap
      * in-between the two flows is centered on the axis of this flow.
@@ -69,8 +87,8 @@ public class FlowPair extends Flow {
      * @return offset in world coordinates
      */
     private double offset(Model model, boolean forFlow1) {
-        double value1 = super.getValue();
-        double value2 = hiddenFlow.getValue();
+        double value1 = getValue1();
+        double value2 = getValue2();
         double width1 = model.getFlowWidthPx(value1);
         double width2 = model.getFlowWidthPx(value2);
         double gap = model.getParallelFlowsGapPx();
@@ -94,7 +112,7 @@ public class FlowPair extends Flow {
      */
     public Flow createParallelFlow1(Model model) {
         Flow flow = new Flow(this);
-        flow.setValue(super.getValue());
+        flow.setValue(getValue1());
         flow.offsetFlow(offset(model, true), model);
         return flow;
     }
@@ -111,7 +129,7 @@ public class FlowPair extends Flow {
      */
     public Flow createParallelFlow2(Model model) {
         Flow flow = new Flow(this);
-        flow.setValue(hiddenFlow.getValue());
+        flow.setValue(getValue2());
         flow.reverseFlow();
         flow.offsetFlow(offset(model, false), model);
         return flow;
@@ -126,7 +144,7 @@ public class FlowPair extends Flow {
      */
     public Flow createFlow1() {
         Flow flow = new Flow(this);
-        flow.setValue(super.getValue());
+        flow.setValue(getValue1());
         return flow;
     }
 
@@ -139,7 +157,7 @@ public class FlowPair extends Flow {
      */
     public Flow createFlow2() {
         Flow flow = new Flow(this);
-        flow.setValue(hiddenFlow.getValue());
+        flow.setValue(getValue2());
         flow.reverseFlow();
         return flow;
     }
