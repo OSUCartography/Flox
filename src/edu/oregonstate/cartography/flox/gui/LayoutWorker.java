@@ -59,9 +59,6 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
         // store initial lock flags of all flows
         boolean[] initialLocks = layouter.getModel().getLocks();
         
-        // replace opposing between same start and end nodes with FlowPairs
-        layouter.getModel().toBidirectionalFlows();
-        
         if (isCancelled()) {
             return;
         }
@@ -83,9 +80,6 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
             double progress = 100d * i / nbrIterations;
             setProgress((int) Math.round(progress));
         }
-        
-        // replace FlowPairs with regular flows
-        layouter.getModel().toUnidirectionalFlows();
         
         // reset lock flags to initial values
         layouter.getModel().applyLocks(initialLocks);

@@ -44,7 +44,7 @@ public class Flow implements Comparable<Flow> {
      * start point of flow.
      */
     private Point startPt;
-    
+
     /**
      * end point of flow.
      */
@@ -342,9 +342,17 @@ public class Flow implements Comparable<Flow> {
      * Inverse start and end point.
      */
     public void reverseFlow() {
-        Point temp = startPt;
+        Point tempPt = startPt;
         startPt = endPt;
-        endPt = temp;
+        endPt = tempPt;
+        
+        Geometry tempGeometry = startClipArea;
+        startClipArea = endClipArea;
+        endClipArea = tempGeometry;
+        
+        String tempWKT = startClipAreaWKT;
+        startClipAreaWKT = endClipAreaWKT;
+        endClipAreaWKT = tempWKT;
     }
 
     /**
@@ -574,6 +582,7 @@ public class Flow implements Comparable<Flow> {
 
         assert (Double.isFinite(offset));
 
+        // coordinates of offset flow
         double startX, startY, cPtX, cPtY, endX, endY;
 
         // The offset start and end points are not on a normal vector through 
@@ -581,35 +590,26 @@ public class Flow implements Comparable<Flow> {
         // the location where the flow touches the node is used. This results in 
         // nicer parallel flows.
         // compute t paramter for computing the normal for the flow end
-        if (model == null) {
-            startX = startPt.x;
-            startY = startPt.y;
-            cPtX = cPt.x;
-            cPtY = cPt.y;
-            endX = endPt.x;
-            endY = endPt.y;
-        } else {
-            double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
-            double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
-            double endNodeClipRadius = (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
-            double endT = getIntersectionTWithCircleAroundEndPoint(endNodeClipRadius);
+        double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
+        double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
+        double endNodeClipRadius = (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
+        double endT = getIntersectionTWithCircleAroundEndPoint(endNodeClipRadius);
 
-            // offset the end point
-            double[] endNormal = getNormal(endT);
-            endX = endPt.x + endNormal[0] * offset;
-            endY = endPt.y + endNormal[1] * offset;
+        // offset the end point
+        double[] endNormal = getNormal(endT);
+        endX = endPt.x + endNormal[0] * offset;
+        endY = endPt.y + endNormal[1] * offset;
 
-            // compute t paramter for computing the normal for the flow start
-            double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
-            double gapDistanceToStartNodesPx = model.getFlowDistanceFromStartPointPixel();
-            double startNodeClipRadius = (gapDistanceToStartNodesPx + startNodeRadiusPx) / model.getReferenceMapScale();
-            double startT = getIntersectionTWithCircleAroundStartPoint(startNodeClipRadius);
+        // compute t paramter for computing the normal for the flow start
+        double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
+        double gapDistanceToStartNodesPx = model.getFlowDistanceFromStartPointPixel();
+        double startNodeClipRadius = (gapDistanceToStartNodesPx + startNodeRadiusPx) / model.getReferenceMapScale();
+        double startT = getIntersectionTWithCircleAroundStartPoint(startNodeClipRadius);
 
-            // offset the start point
-            double[] startNormal = getNormal(startT);
-            startX = startPt.x + startNormal[0] * offset;
-            startY = startPt.y + startNormal[1] * offset;
-        }
+        // offset the start point
+        double[] startNormal = getNormal(startT);
+        startX = startPt.x + startNormal[0] * offset;
+        startY = startPt.y + startNormal[1] * offset;
 
         // construct control point position. The initial geometry of the new start point, 
         // end point and control point are identical to the original geometry, 
@@ -697,78 +697,8 @@ public class Flow implements Comparable<Flow> {
         cPt.y = cPtY;
     }
 
-    // FIXME remove?
-    private double splitT() {
-        // Compute parameter t for the root of the first derivative of the x 
-        // position. This is the t parameter for the extremum in x of the curve, 
-        // as the first derivative is 0 at the extremum.
-        double tx = (startPt.x - cPt.x) / (startPt.x - 2 * cPt.x + endPt.x);
-        if (tx >= 0d && tx <= 1d) {
-            return tx;
-        }
-        // same for y
-        double ty = (startPt.y - cPt.y) / (startPt.y - 2 * cPt.y + endPt.y);
-        if (ty >= 0d && ty <= 1d) {
-            return ty;
-        }
-        return 0.5;
-    }
-
     /**
-     * Returns an array of flows that are offset.
-     *
-     * FIXME remove?
-     *
-     * http://pomax.github.io/bezierinfo/#offsetting
-     *
-     * @param d offset distance
-     * @return a new offset flow
-     */
-    public Flow[] splitAndOffsetFlow(double d, Model model) {
-        // FIXME adjust segmentation to curvature of flow.
-        // http://pomax.github.io/bezierinfo/#offsetting suggests testing whether 
-        // the control point is close to center of triangle defined by the 
-        // three Bezier points
-        Flow[] flows = split(0.5);
-        Flow[] flows12 = flows[0].split(0.5);
-        Flow[] flows34 = flows[1].split(0.5);
-        flows = new Flow[]{flows12[0], flows12[1], flows34[0], flows34[1]};
-        for (Flow flow : flows) {
-            flow.offsetFlow(d, model);
-        }
-        return flows;
-    }
-
-    /**
-     * Constructs a GeneralPath object for drawing a Flow and optionally offsets
-     * the path parallel to its direction.
-     *
-     * @param scale scale factor for converting from world to pixel coordinates
-     * @param west horizontal origin in world coordinates
-     * @param north vertical origin in world coordinates
-     * @param offset parallel offset in world coordinates
-     * @return A GeneralPath for drawing in pixel coordinates.
-     */
-    public GeneralPath toGeneralPath(double scale, double west, double north, double offset) {
-        // FIXME Flow[] flows = (offset == 0d) ? new Flow[]{this} : splitAndOffsetFlow(offset);
-        Flow[] flows = new Flow[]{this};
-        GeneralPath path = new GeneralPath();
-        for (int i = 0; i < flows.length; i++) {
-            Flow flow = flows[i];
-            if (i == 0) {
-                Point pt0 = flow.getStartPt();
-                path.moveTo((pt0.x - west) * scale, (north - pt0.y) * scale);
-            }
-            Point pt1 = flow.getCtrlPt();
-            Point pt2 = flow.getEndPt();
-            path.quadTo((pt1.x - west) * scale, (north - pt1.y) * scale,
-                    (pt2.x - west) * scale, (north - pt2.y) * scale);
-        }
-        return path;
-    }
-
-    /**
-     * Constructs a GeneralPath object for drawing a Flow.
+     * Constructs a GeneralPath object for drawing the Flow.
      *
      * @param scale scale factor for converting from world to pixel coordinates
      * @param west horizontal origin in world coordinates
@@ -776,7 +706,14 @@ public class Flow implements Comparable<Flow> {
      * @return A GeneralPath for drawing in pixel coordinates.
      */
     public GeneralPath toGeneralPath(double scale, double west, double north) {
-        return toGeneralPath(scale, west, north, 0);
+        GeneralPath path = new GeneralPath();
+        Point pt0 = getStartPt();
+        path.moveTo((pt0.x - west) * scale, (north - pt0.y) * scale);
+        Point pt1 = getCtrlPt();
+        Point pt2 = getEndPt();
+        path.quadTo((pt1.x - west) * scale, (north - pt1.y) * scale,
+                (pt2.x - west) * scale, (north - pt2.y) * scale);
+        return path;
     }
 
     /**
@@ -788,11 +725,12 @@ public class Flow implements Comparable<Flow> {
     public Point pointOnCurve(double t) {
         assert (t >= 0d && t <= 1d);
 
-        double t2 = t * t;
-        double mt = 1 - t;
-        double mt2 = mt * mt;
-        double x = startPt.x * mt2 + cPt.x * 2 * mt * t + endPt.x * t2;
-        double y = startPt.y * mt2 + cPt.y * 2 * mt * t + endPt.y * t2;
+        double w3 = t * t;
+        double _1_t = 1 - t;
+        double w2 = 2 * _1_t * t;
+        double w1 = _1_t * _1_t;
+        double x = startPt.x * w1 + cPt.x * w2 + endPt.x * w3;
+        double y = startPt.y * w1 + cPt.y * w2 + endPt.y * w3;
         return new Point(x, y);
     }
 
@@ -1045,28 +983,6 @@ public class Flow implements Comparable<Flow> {
         double dx = cPt.x - endPt.x;
         double dy = cPt.y - endPt.y;
         double d = Math.sqrt(dx * dx + dy * dy);
-        return new double[]{dx / d, dy / d};
-    }
-
-    /**
-     * The 2D vector pointing from point between the start point and the end
-     * point to the control point with length 1. If the control point is on the
-     * line between start and end point, then null is returned.
-     *
-     * @return the vector
-     */
-    public double[] getDirectionVectorFromBaseLineMidPointToControlPoint() {
-        double midX = (endPt.x + startPt.x) / 2;
-        double midY = (endPt.y + startPt.y) / 2;
-        double dx = cPt.x - midX;
-        double dy = cPt.y - midY;
-        double d = Math.sqrt(dx * dx + dy * dy);
-
-        // if control point is on base line, return null
-        if (d == 0) {
-            return null;
-        }
-
         return new double[]{dx / d, dy / d};
     }
 

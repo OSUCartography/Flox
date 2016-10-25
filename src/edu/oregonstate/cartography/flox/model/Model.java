@@ -399,6 +399,11 @@ public class Model {
      * value.
      */
     private double maxFlowStrokeWidthPx = 20;
+    
+    /**
+     * Distance between parallel flows in pixels.
+     */
+    private double parallelFlowsGapPx = 4;
 
     /**
      * Radius of largest node in pixels.
@@ -853,9 +858,15 @@ public class Model {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow1 = iterator.next();
+            if (flow1 instanceof FlowPair) {
+                continue;
+            }
+            
             Flow flow2 = graph.getOpposingFlow(flow1);
             if (flow2 != null) {
-                
+                if (flow2 instanceof FlowPair) {
+                    continue;
+                }    
                 if (flow1.isLocked() || flow2.isLocked()) {
                     continue;
                 }
@@ -2495,6 +2506,20 @@ public class Model {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * @return the parallelFlowsGapPx
+     */
+    public double getParallelFlowsGapPx() {
+        return parallelFlowsGapPx;
+    }
+
+    /**
+     * @param parallelFlowsGapPx the parallelFlowsGapPx to set
+     */
+    public void setParallelFlowsGapPx(double parallelFlowsGapPx) {
+        this.parallelFlowsGapPx = parallelFlowsGapPx;
     }
 
 }

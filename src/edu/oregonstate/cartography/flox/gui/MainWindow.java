@@ -4588,6 +4588,10 @@ public class MainWindow extends javax.swing.JFrame {
 
         if (model.getFlowRangeboxHeight() > 0) {
             progressBar.setEnabled(true);
+            
+            // replace opposing flows between same start and end nodes with FlowPairs
+            model.toBidirectionalFlows();
+        
             Model modelCopy = model.copy();
             modelCopy.straightenFlows(false);
             ForceLayouter layouter = new ForceLayouter(modelCopy);

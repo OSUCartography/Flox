@@ -30,10 +30,10 @@ public class FlowPair extends Flow {
                 flow1.id);
         setStartClipArea(flow1.getStartClipArea());
         setEndClipArea(flow1.getEndClipArea());
-        
+
         assert (flow1.isLocked() == false);
         assert (flow2.isLocked() == false);
-        
+
         // store flow2
         hiddenFlow = flow2;
 
@@ -42,69 +42,54 @@ public class FlowPair extends Flow {
 //        assert (flow2.getStartPt() == flow1.getEndPt());
 //        assert (flow1.getStartClipArea() == flow2.getEndClipArea());
 //        assert (flow2.getStartClipArea() == flow1.getEndClipArea());
-        
     }
 
     /**
      * Overridden getValue returns sum of the two flow values of this FlowPair.
-     * @return 
+     *
+     * @return
      */
     @Override
     public double getValue() {
         return super.getValue() + hiddenFlow.getValue();
     }
 
-    public Flow createFlow1(Model model) {
-        double value = super.getValue();
-        double lineWidth = (model.getFlowWidthPx(value)) / model.getReferenceMapScale();
-        Flow flow = new Flow(this);
-        offsetFlow(lineWidth, null);
-        flow.setLocked(isLocked());
-        
-//        Point cPt = flowCtrlPt(lineWidth, 5); // FIXME
-//        Flow flow = new Flow(startPt, cPt, endPt, value, id);
-//        flow.setStartClipArea(getStartClipArea());
-//        flow.setEndClipArea(getEndClipArea());
+    /**
+     * Computes the offset in world coordinates for either of the two flows. The
+     * offset is such that the sum of width of the two flows and the gap
+     * in-between the two flows is centered on the axis of this flow.
+     *
+     * @param model model
+     * @param forFlow1 true for flow 1, false for flow 2.
+     * @return offset in world coordinates
+     */
+    private double offset(Model model, boolean forFlow1) {
+        double value1 = super.getValue();
+        double value2 = hiddenFlow.getValue();
+        double width1 = model.getFlowWidthPx(value1);
+        double width2 = model.getFlowWidthPx(value2);
+        double gap = model.getParallelFlowsGapPx();
+        double totalWidth = width1 + width2 + gap;
+        if (forFlow1) {
+            return (totalWidth - width1) / 2 / model.getReferenceMapScale();
+        } else {
+            return (totalWidth - width2) / 2 / model.getReferenceMapScale();
+        }
+    }
 
+    public Flow createFlow1(Model model) {
+        Flow flow = new Flow(this);
+        flow.setValue(super.getValue());
+        flow.offsetFlow(offset(model, true), model);
         return flow;
     }
 
     public Flow createFlow2(Model model) {
-        double value = hiddenFlow.getValue();
-        double lineWidth = (model.getFlowWidthPx(value)) / model.getReferenceMapScale();
         Flow flow = new Flow(this);
+        flow.setValue(hiddenFlow.getValue());
         flow.reverseFlow();
-        flow.offsetFlow(-lineWidth, null);
-        flow.setLocked(isLocked());
-        
-//        double value = hiddenFlow.getValue();
-//        double lineWidth = model.getFlowWidthPx(value) / model.getReferenceMapScale();
-//        Point cPt = flowCtrlPt(lineWidth, -5); // FIXME
-//        Point pt1 = new Point(endPt.x, endPt.y);
-//        Point pt2 = new Point(startPt.x, startPt.y);
-//
-//        Flow flow = new Flow(pt1, cPt, pt2, value, hiddenFlow.id);
-//        flow.setLocked(isLocked());
-//        flow.setStartClipArea(getEndClipArea());
-//        flow.setEndClipArea(getStartClipArea());
+        flow.offsetFlow(offset(model, false), model);
         return flow;
     }
 
-    private Point flowCtrlPt(double lineWidth, double s) {
-
-        double[] dir = getDirectionVectorFromBaseLineMidPointToControlPoint();
-
-        // FIXME also handle situations where control point is close to base line
-        // handle control point on line between start point and end point
-        if (dir == null) {
-            dir = getDirectionVectorFromStartPointToControlPoint();
-            double temp = dir[0];
-            dir[0] = -dir[1];
-            dir[1] = temp;
-        }
-        Point cPt = new Point(getCtrlPt().x, getCtrlPt().y);
-        cPt.x += dir[0] * lineWidth * s;
-        cPt.y += dir[1] * lineWidth * s;
-        return cPt;
-    }
 }

@@ -4,6 +4,7 @@ import edu.oregonstate.cartography.flox.model.Arrow;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.Flow;
+import edu.oregonstate.cartography.flox.model.FlowPair;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Obstacle;
@@ -264,24 +265,33 @@ public class FloxRenderer extends SimpleFeatureRenderer {
                 ? model.sortedFlowIterator() : model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-
-            g2d.setColor(highlightSelected && flow.isSelected()
-                    ? SELECTION_COLOR : model.getFlowColor(flow));
-
-            // draw the arrow head
-            if (model.isDrawArrowheads()) {
-                Arrow arrow = flow.getArrow(model);
-                if (arrow != null) {
-                    g2d.fill(getArrowPath(arrow));
-                }
+            if (flow instanceof FlowPair) {
+                FlowPair flowPair = (FlowPair)flow;
+                drawFlow(flowPair.createFlow1(model), highlightSelected, s);
+                drawFlow(flowPair.createFlow2(model), highlightSelected, s);
+            } else {
+                drawFlow(flow, highlightSelected, s);
             }
-
-            // draw flow line
-            Flow clippedFlow = model.clipFlow(flow, true, false);
-            GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
-            double flowStrokeWidth = model.getFlowWidthPx(flow.getValue()) * s;
-            drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
         }
+    }
+
+    private void drawFlow(Flow flow, boolean highlightSelected, double s) {
+        g2d.setColor(highlightSelected && flow.isSelected()
+                ? SELECTION_COLOR : model.getFlowColor(flow));
+
+        // draw the arrow head
+        if (model.isDrawArrowheads()) {
+            Arrow arrow = flow.getArrow(model);
+            if (arrow != null) {
+                g2d.fill(getArrowPath(arrow));
+            }
+        }
+
+        // draw flow line
+        Flow clippedFlow = model.clipFlow(flow, true, false);
+        GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
+        double flowStrokeWidth = model.getFlowWidthPx(flow.getValue()) * s;
+        drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
     }
 
     /**
@@ -540,7 +550,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
     private void drawStraightLinesSegments(boolean highlightSelected) {
         setStrokeWidth(2f);
         double segmentLength = model.segmentLength();
-        
+
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
