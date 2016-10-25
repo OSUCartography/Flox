@@ -332,7 +332,7 @@ public final class Graph {
     public Flow getFirstFlowBetweenNodes(Point node1, Point node2) {
         Collection<Flow> flows = graph.edgesOf(node1);
         for (Flow flow : flows) {
-            if (flow.endPt == node2 || flow.startPt == node2) {
+            if (flow.getEndPt() == node2 || flow.getStartPt() == node2) {
                 return flow;
             }
         }

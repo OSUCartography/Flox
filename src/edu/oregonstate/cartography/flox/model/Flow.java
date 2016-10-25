@@ -3,8 +3,6 @@ package edu.oregonstate.cartography.flox.model;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.GeneralPath;
@@ -12,8 +10,6 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -47,12 +43,12 @@ public class Flow implements Comparable<Flow> {
     /**
      * start point of flow.
      */
-    protected Point startPt;
-
+    private Point startPt;
+    
     /**
      * end point of flow.
      */
-    protected Point endPt;
+    private Point endPt;
 
     /**
      * control point.
@@ -162,27 +158,12 @@ public class Flow implements Comparable<Flow> {
         endPt = new Point(flow.endPt);
         cPt = new Point(flow.cPt);
         value = flow.value;
-
+        startClipArea = flow.startClipArea;
         startClipAreaWKT = flow.startClipAreaWKT;
-
+        endClipArea = flow.endClipArea;
         endClipAreaWKT = flow.endClipAreaWKT;
         selected = flow.selected;
         locked = flow.locked;
-
-        try {
-            if (flow.startClipAreaWKT != null) {
-                startClipArea = new WKTReader().read(flow.startClipAreaWKT);
-            } else {
-                startClipArea = null;
-            }
-            if (flow.endClipAreaWKT != null) {
-                endClipArea = new WKTReader().read(flow.endClipAreaWKT);
-            } else {
-                endClipArea = null;
-            }
-        } catch (ParseException ex) {
-            Logger.getLogger(Flow.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     @Override
@@ -593,31 +574,42 @@ public class Flow implements Comparable<Flow> {
 
         assert (Double.isFinite(offset));
 
+        double startX, startY, cPtX, cPtY, endX, endY;
+
         // The offset start and end points are not on a normal vector through 
         // the start and end points of the flow. Instead, the normal vector for 
         // the location where the flow touches the node is used. This results in 
         // nicer parallel flows.
         // compute t paramter for computing the normal for the flow end
-        double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
-        double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
-        double endNodeClipRadius = (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
-        double endT = getIntersectionTWithCircleAroundEndPoint(endNodeClipRadius);
+        if (model == null) {
+            startX = startPt.x;
+            startY = startPt.y;
+            cPtX = cPt.x;
+            cPtY = cPt.y;
+            endX = endPt.x;
+            endY = endPt.y;
+        } else {
+            double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
+            double gapDistanceToEndNodesPx = model.getFlowDistanceFromEndPointPixel();
+            double endNodeClipRadius = (gapDistanceToEndNodesPx + endNodeRadiusPx) / model.getReferenceMapScale();
+            double endT = getIntersectionTWithCircleAroundEndPoint(endNodeClipRadius);
 
-        // offset the end point
-        double[] endNormal = getNormal(endT);
-        double endX = endPt.x + endNormal[0] * offset;
-        double endY = endPt.y + endNormal[1] * offset;
+            // offset the end point
+            double[] endNormal = getNormal(endT);
+            endX = endPt.x + endNormal[0] * offset;
+            endY = endPt.y + endNormal[1] * offset;
 
-        // compute t paramter for computing the normal for the flow start
-        double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
-        double gapDistanceToStartNodesPx = model.getFlowDistanceFromStartPointPixel();
-        double startNodeClipRadius = (gapDistanceToStartNodesPx + startNodeRadiusPx) / model.getReferenceMapScale();
-        double startT = getIntersectionTWithCircleAroundStartPoint(startNodeClipRadius);
+            // compute t paramter for computing the normal for the flow start
+            double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
+            double gapDistanceToStartNodesPx = model.getFlowDistanceFromStartPointPixel();
+            double startNodeClipRadius = (gapDistanceToStartNodesPx + startNodeRadiusPx) / model.getReferenceMapScale();
+            double startT = getIntersectionTWithCircleAroundStartPoint(startNodeClipRadius);
 
-        // offset the start point
-        double[] startNormal = getNormal(startT);
-        double startX = startPt.x + startNormal[0] * offset;
-        double startY = startPt.y + startNormal[1] * offset;
+            // offset the start point
+            double[] startNormal = getNormal(startT);
+            startX = startPt.x + startNormal[0] * offset;
+            startY = startPt.y + startNormal[1] * offset;
+        }
 
         // construct control point position. The initial geometry of the new start point, 
         // end point and control point are identical to the original geometry, 
@@ -629,8 +621,8 @@ public class Flow implements Comparable<Flow> {
         double originalBaselineOrientation = getBaselineOrientation();
         double baselineOrientation = Math.atan2(endY - startY, endX - startX);
         double rot = baselineOrientation - originalBaselineOrientation;
-        double cPtX = scale * (cPt.x - startPt.x);
-        double cPtY = scale * (cPt.y - startPt.y);
+        cPtX = scale * (cPt.x - startPt.x);
+        cPtY = scale * (cPt.y - startPt.y);
         double cos = Math.cos(rot);
         double sin = Math.sin(rot);
         double newX = cPtX * cos - cPtY * sin;
@@ -667,7 +659,7 @@ public class Flow implements Comparable<Flow> {
                     moveX += dirX1 * gapW1;
                     moveY += dirY1 * gapW1;
                 }
-                
+
                 // Move along the offset curve and find closest points on the original curve.
                 // This results in a curve with approximately correct distance to the original curve,
                 // but curves tend to by curvy where the original curve is strongly bent

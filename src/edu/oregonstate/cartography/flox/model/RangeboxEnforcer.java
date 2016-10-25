@@ -161,10 +161,12 @@ public class RangeboxEnforcer {
         double baseDist = flow.getBaselineLength();
         double boxHeight = model.getFlowRangeboxHeight();
 
-        double x1 = flow.startPt.x;
-        double y1 = flow.startPt.y;
-        double x2 = flow.endPt.x;
-        double y2 = flow.endPt.y;
+        Point startPt = flow.getStartPt();
+        Point endPt = flow.getEndPt();
+        double x1 = startPt.x;
+        double y1 = startPt.y;
+        double x2 = endPt.x;
+        double y2 = endPt.y;
         double dx = x2 - x1;
         double dy = y2 - y1;
         double l = Math.sqrt(dx * dx + dy * dy);
@@ -197,10 +199,12 @@ public class RangeboxEnforcer {
         double baseDist = flow.getBaselineLength();
         double boxHeight = model.getFlowRangeboxHeight();
 
-        double x1 = flow.startPt.x;
-        double y1 = flow.startPt.y;
-        double x2 = flow.endPt.x;
-        double y2 = flow.endPt.y;
+        Point startPt = flow.getStartPt();
+        Point endPt = flow.getEndPt();
+        double x1 = startPt.x;
+        double y1 = startPt.y;
+        double x2 = endPt.x;
+        double y2 = endPt.y;
         double dx = x2 - x1;
         double dy = y2 - y1;
         double l = Math.sqrt(dx * dx + dy * dy);

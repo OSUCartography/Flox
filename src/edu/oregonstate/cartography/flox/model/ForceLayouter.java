@@ -605,7 +605,7 @@ public class ForceLayouter {
             Point[] polyline1 = straightLinesMap.get(flow1);
             Point[] polyline2 = straightLinesMap.get(flow2);
             if (polylinesIntersect(polyline1, polyline2)) {
-                pairs.add(new Model.IntersectingFlowPair(flow1, flow2, flow1.endPt));
+                pairs.add(new Model.IntersectingFlowPair(flow1, flow2, flow1.getEndPt()));
             }
 
         }

@@ -20,14 +20,14 @@ public class CSVFlowExporter {
         while (flows.hasNext()) {
             Flow flow = (Flow) flows.next();
 
-            str.append(flow.startPt.x);
+            str.append(flow.getStartPt().x);
             str.append(",");
-            str.append(flow.startPt.y);
+            str.append(flow.getStartPt().y);
             str.append(",");
 
-            str.append(flow.endPt.x);
+            str.append(flow.getEndPt().x);
             str.append(",");
-            str.append(flow.endPt.y);
+            str.append(flow.getEndPt().y);
             str.append(",");
 
             str.append(flow.getValue());

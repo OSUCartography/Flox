@@ -56,27 +56,37 @@ public class FlowPair extends Flow {
 
     public Flow createFlow1(Model model) {
         double value = super.getValue();
-        double lineWidth = model.getFlowWidthPx(value) / model.getReferenceMapScale();
-        Point cPt = flowCtrlPt(lineWidth, 5); // FIXME
-
-        Flow flow = new Flow(startPt, cPt, endPt, value, id);
+        double lineWidth = (model.getFlowWidthPx(value)) / model.getReferenceMapScale();
+        Flow flow = new Flow(this);
+        offsetFlow(lineWidth, null);
         flow.setLocked(isLocked());
-        flow.setStartClipArea(getStartClipArea());
-        flow.setEndClipArea(getEndClipArea());
+        
+//        Point cPt = flowCtrlPt(lineWidth, 5); // FIXME
+//        Flow flow = new Flow(startPt, cPt, endPt, value, id);
+//        flow.setStartClipArea(getStartClipArea());
+//        flow.setEndClipArea(getEndClipArea());
+
         return flow;
     }
 
     public Flow createFlow2(Model model) {
         double value = hiddenFlow.getValue();
-        double lineWidth = model.getFlowWidthPx(value) / model.getReferenceMapScale();
-        Point cPt = flowCtrlPt(lineWidth, -5); // FIXME
-        Point pt1 = new Point(endPt.x, endPt.y);
-        Point pt2 = new Point(startPt.x, startPt.y);
-
-        Flow flow = new Flow(pt1, cPt, pt2, value, hiddenFlow.id);
+        double lineWidth = (model.getFlowWidthPx(value)) / model.getReferenceMapScale();
+        Flow flow = new Flow(this);
+        flow.reverseFlow();
+        flow.offsetFlow(-lineWidth, null);
         flow.setLocked(isLocked());
-        flow.setStartClipArea(getEndClipArea());
-        flow.setEndClipArea(getStartClipArea());
+        
+//        double value = hiddenFlow.getValue();
+//        double lineWidth = model.getFlowWidthPx(value) / model.getReferenceMapScale();
+//        Point cPt = flowCtrlPt(lineWidth, -5); // FIXME
+//        Point pt1 = new Point(endPt.x, endPt.y);
+//        Point pt2 = new Point(startPt.x, startPt.y);
+//
+//        Flow flow = new Flow(pt1, cPt, pt2, value, hiddenFlow.id);
+//        flow.setLocked(isLocked());
+//        flow.setStartClipArea(getEndClipArea());
+//        flow.setEndClipArea(getStartClipArea());
         return flow;
     }
 

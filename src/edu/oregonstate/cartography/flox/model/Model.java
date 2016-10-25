@@ -2015,8 +2015,8 @@ public class Model {
             }
 
             // compute line widths fitting the size of the two connected nodes
-            double w1 = 2d * getNodeRadiusPx(flow.startPt);
-            double w2 = 2d * getNodeRadiusPx(flow.endPt);
+            double w1 = 2d * getNodeRadiusPx(flow.getStartPt());
+            double w2 = 2d * getNodeRadiusPx(flow.getEndPt());
 
             // disregard if both nodes have 0 values
             if (w1 == 0 && w2 == 0) {
