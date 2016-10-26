@@ -3033,11 +3033,16 @@ public class MainWindow extends javax.swing.JFrame {
         }
         if (filePath != null) {
             try {
-                setModel(Model.unmarshal(filePath));
+                Model m = Model.unmarshal(filePath);
+                // create useful name (to appear in window title)
+                if (m.getName() == null || m.getName().trim().isEmpty()) {
+                    m.setName(FileUtils.getFileNameWithoutExtension(filePath));
+                }
+                setModel(m);
                 mapComponent.showAll();
                 addUndo("Open XML Project");
             } catch (Throwable ex) {
-                showErrorDialog("Could not read the file.", ex);
+                showErrorDialog("Could not read the XML project file.", ex);
             }
         }
     }

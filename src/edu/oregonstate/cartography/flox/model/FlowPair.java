@@ -1,17 +1,32 @@
 package edu.oregonstate.cartography.flox.model;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
 /**
  * Two flows with opposing directions connected to the same start node and end
  * node.
  *
  * @author Bernhard Jenny, School of Science, RMIT University, Melbourne
  */
+/**
+ * Every non static, non transient field in a JAXB-bound class will be
+ * automatically bound to XML, unless annotated by @XmlTransient
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
 public class FlowPair extends Flow {
 
     /**
      * Value of the second flow of this pair.
      */
     private final double value2;
+
+    /**
+     * Constructor without parameters for JAXB.
+     */
+    private FlowPair() {
+        value2 = 0;
+    }
     
     /**
      * Constructor
