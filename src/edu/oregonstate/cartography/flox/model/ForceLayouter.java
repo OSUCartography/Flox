@@ -881,6 +881,10 @@ public class ForceLayouter {
      */
     private boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles) {
 
+        // lazy initialisation of the clipped flow. Only clip the flow once it 
+        // is needed for an intersection test.
+        Flow clippedFlow = null;
+        
         for (Obstacle obstacle : obstacles) {
             
             // ignore obstacles that are start or end nodes of the flow
@@ -893,7 +897,10 @@ public class ForceLayouter {
                 continue;
             }
 
-            if (flowIntersectsObstacle(flow, obstacle)) {
+            if (clippedFlow == null) {
+                clippedFlow = model.clipFlow(flow, false, true);
+            }
+            if (flowIntersectsObstacle(clippedFlow, obstacle)) {
                 return true;
             }
         }
