@@ -677,7 +677,7 @@ public class ForceLayouter {
                 }
             }
         }
-        
+
         pairs.sort(null);
         return pairs;
     }
@@ -882,15 +882,18 @@ public class ForceLayouter {
     private boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles) {
 
         for (Obstacle obstacle : obstacles) {
+            
+            // ignore obstacles that are start or end nodes of the flow
             if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
                 continue;
             }
 
-            if (flow == obstacle.flow) {
+            // ignore arrowhead attached to this flow
+            if (model.isDrawArrowheads() && flow == obstacle.flow) {
                 continue;
             }
 
-            if (ForceLayouter.this.flowIntersectsObstacle(flow, obstacle)) {
+            if (flowIntersectsObstacle(flow, obstacle)) {
                 return true;
             }
         }
@@ -918,23 +921,8 @@ public class ForceLayouter {
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            for (Obstacle obstacle : obstacles) {
-
-                // ignore obstacles that are start or end nodes of the flow
-                if (obstacle.node == flow.getStartPt()
-                        || obstacle.node == flow.getEndPt()) {
-                    continue;
-                }
-
-                // ignore arrowhead attached to this flow
-                if (model.isDrawArrowheads() && flow == obstacle.flow) {
-                    continue;
-                }
-
-                if (ForceLayouter.this.flowIntersectsObstacle(flow, obstacle)) {
-                    flowsArray.add(flow);
-                    break;
-                }
+            if (flowIntersectsObstacle(flow, obstacles)) {
+                flowsArray.add(flow);
             }
         }
         return flowsArray;
