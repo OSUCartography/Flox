@@ -340,19 +340,28 @@ public class Flow implements Comparable<Flow> {
 
     /**
      * Inverse start and end point.
+     *
+     * @param model model (used for finding start and end clipping areas)
      */
-    public void reverseFlow() {
+    public void reverseFlow(Model model) {
         Point tempPt = startPt;
         startPt = endPt;
         endPt = tempPt;
-        
-        Geometry tempGeometry = startClipArea;
-        startClipArea = endClipArea;
-        endClipArea = tempGeometry;
-        
-        String tempWKT = startClipAreaWKT;
-        startClipAreaWKT = endClipAreaWKT;
-        endClipAreaWKT = tempWKT;
+
+        if (model.isClipFlowStarts() && model.isClipFlowEnds()) {
+            // swap clipping geometry
+            Geometry tempGeometry = startClipArea;
+            startClipArea = endClipArea;
+            endClipArea = tempGeometry;
+
+            String tempWKT = startClipAreaWKT;
+            startClipAreaWKT = endClipAreaWKT;
+            endClipAreaWKT = tempWKT;
+        } else if (model.isClipFlowStarts()) {
+            model.updateStartClipArea(this);
+        } else if (model.isClipFlowEnds()) {
+            model.updateEndClipArea(this);
+        }
     }
 
     /**
@@ -884,6 +893,7 @@ public class Flow implements Comparable<Flow> {
     public double maskClippingRadius(LineString lineString, boolean clipWithStartArea) {
         Geometry clipArea = clipWithStartArea ? getStartClipArea() : getEndClipArea();
         Geometry clippedFlowLineGeometry = lineString.difference(clipArea);
+        Point flowPoint = clipWithStartArea ? startPt : endPt;
         double d = 0;
         Iterator geometryIterator = new GeometryCollectionIterator(clippedFlowLineGeometry);
         while (geometryIterator.hasNext()) {
@@ -893,7 +903,6 @@ public class Flow implements Comparable<Flow> {
                 if (l.getNumPoints() >= 2) {
                     com.vividsolutions.jts.geom.Point linePoint
                             = clipWithStartArea ? l.getStartPoint() : l.getEndPoint();
-                    Point flowPoint = clipWithStartArea ? startPt : endPt;
                     double dx = flowPoint.x - linePoint.getX();
                     double dy = flowPoint.y - linePoint.getY();
                     double dist = Math.sqrt(dx * dx + dy * dy);

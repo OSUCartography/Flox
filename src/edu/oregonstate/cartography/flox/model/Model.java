@@ -855,7 +855,7 @@ public class Model {
         ArrayList<Flow> flows = getSelectedFlows();
         for (Flow flow : flows) {
             graph.removeFlow(flow);
-            flow.reverseFlow();
+            flow.reverseFlow(this);
             graph.addFlow(flow);
         }
     }
@@ -2164,10 +2164,17 @@ public class Model {
      * @param flow flow to clip
      * @param clipArrowhead if true, the flow line is clipped to make space for
      * an arrowhead
+     * @param forceClipNodes if true, the start and end of the flow are clipped
+     * by at least the radius of the respective node. This is useful for overlap
+     * test, for example. If false, the start and end of the flow are clipped
+     * only by the radius of the respective node if there is a gap required
+     * between the node and the end of the flow. This is useful for drawing a
+     * flow, where the start and end of the flow are hidden by an overlaying
+     * node symbol.
      * @return a flow with clipped start and end segments. If nothing is
      * clipped, the passed flow is returned unaltered.
      */
-    public Flow clipFlow(Flow flow, boolean clipArrowhead, boolean clipNodes) {
+    public Flow clipFlow(Flow flow, boolean clipArrowhead, boolean forceClipNodes) {
 
         LineString lineString = null;
         if (flow.getEndClipArea() != null || flow.getStartClipArea() != null) {
@@ -2181,7 +2188,7 @@ public class Model {
         // clip the start if there must be a gap between the start of 
         // the flow line and the start node symbol.
         // distance between start of flow and start node
-        if (clipNodes || flowDistanceFromStartPointPx > 0) {
+        if (forceClipNodes || flowDistanceFromStartPointPx > 0) {
             // Compute the radius of the start node (add half stroke width)
             double startNodeRadiusPx = getNodeStrokeWidthPx() / 2 + getNodeRadiusPx(flow.getStartPt());
             startNodeClipR = (flowDistanceFromStartPointPx + startNodeRadiusPx) / getReferenceMapScale();
@@ -2195,7 +2202,7 @@ public class Model {
 
         // start and end clipping radius
         double startR = Math.max(startNodeClipR, startMaskClipR);
-        double endR = endClipRadius(flow, clipArrowhead, lineString, clipNodes);
+        double endR = endClipRadius(flow, clipArrowhead, lineString, forceClipNodes);
 
         // cut off the end piece
         double endT = flow.getIntersectionTWithCircleAroundEndPoint(endR);
@@ -2518,7 +2525,7 @@ public class Model {
      * two parallel flows.
      */
     public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel) {
-        graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel);
+        graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel, this);
     }
 
 }

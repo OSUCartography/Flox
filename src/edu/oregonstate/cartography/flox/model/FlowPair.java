@@ -13,7 +13,7 @@ public class FlowPair extends Flow {
      * computations. hiddenFlow references flow2, which is a constructor
      * argument.
      */
-    private final Flow hiddenFlow;
+    private final Flow hiddenFlow; // FIXME remove
 
     /**
      * Constructor
@@ -130,7 +130,7 @@ public class FlowPair extends Flow {
     public Flow createParallelFlow2(Model model) {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
-        flow.reverseFlow();
+        flow.reverseFlow(model);
         flow.offsetFlow(offset(model, false), model);
         return flow;
     }
@@ -153,12 +153,13 @@ public class FlowPair extends Flow {
      * this FlowPair. The returned flow is not offset from the center line of
      * this flow.
      *
+     * @param model data model
      * @return a new flow
      */
-    public Flow createFlow2() {
+    public Flow createFlow2(Model model) {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
-        flow.reverseFlow();
+        flow.reverseFlow(model);
         return flow;
     }
 

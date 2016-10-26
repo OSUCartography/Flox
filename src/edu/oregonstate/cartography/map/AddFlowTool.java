@@ -185,7 +185,7 @@ public class AddFlowTool extends DoubleBufferedTool {
             }
 
             // draw clipped flow in black
-            flow = model.clipFlow(flow, true, false);
+            flow = model.clipFlow(flow, false, false);
             GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
             g2d.setColor(Color.BLACK);
             g2d.draw(flowPath);

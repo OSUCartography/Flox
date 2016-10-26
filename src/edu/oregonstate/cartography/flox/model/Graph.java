@@ -520,8 +520,10 @@ public final class Graph {
      *
      * @param bidirectionalFlowsParallel if true, opposing flows are shown as
      * two parallel flows.
+     * @param model data model
      */
-    public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel) {
+    public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel, 
+            Model model) {
         if (this.bidirectionalFlowsParallel == bidirectionalFlowsParallel) {
             return;
         }
@@ -530,7 +532,7 @@ public final class Graph {
         if (bidirectionalFlowsParallel) {
             toBidirectionalFlows();
         } else {
-            toUnidirectionalFlows();
+            toUnidirectionalFlows(model);
         }
     }
 
@@ -572,7 +574,7 @@ public final class Graph {
     /**
      * Replaces instances of FlowPair with two Flow instances.
      */
-    public void toUnidirectionalFlows() {
+    public void toUnidirectionalFlows(Model model) {
         ArrayList<Flow> flowsToAdd = new ArrayList<>();
         ArrayList<FlowPair> flowsToRemove = new ArrayList<>();
         Iterator<Flow> iterator = flowIterator();
@@ -582,7 +584,7 @@ public final class Graph {
                 FlowPair biFlow = (FlowPair) flow;
                 flowsToRemove.add(biFlow);
                 flowsToAdd.add(biFlow.createFlow1());
-                flowsToAdd.add(biFlow.createFlow2());
+                flowsToAdd.add(biFlow.createFlow2(model));
             }
         }
 
