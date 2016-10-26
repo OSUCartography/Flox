@@ -92,8 +92,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         double tolWorldCoord = FloxRenderer.LOCK_ICON_RADIUS / mapComponent.getScale();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (flow.isLocked() && flow.getBoundingBox().contains(point)) {
-                Point lockCenter = flow.pointOnCurve(0.5);
+            if (flow.isLocked() && flow.getBoundingBox().contains(point)) {               
+                Flow clippedFlow = model.clipFlow(flow, false, true);
+                Point lockCenter = clippedFlow.pointOnCurve(0.5);
                 double dist = lockCenter.distance(point.x, point.y);
                 if (dist < tolWorldCoord) {
                     flow.setLocked(false);

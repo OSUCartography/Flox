@@ -172,7 +172,7 @@ public class ForceLayouter {
 
             // get a list of sorted flows that intersect obstacles
             ArrayList<Flow> sortedOverlappingFlows = getFlowsOverlappingObstacles(obstacles);
-            sortedOverlappingFlows.sort(null);
+            sortedOverlappingFlows.sort(Collections.reverseOrder());
             int nbrOverlaps = sortedOverlappingFlows.size();
 
             // Compute the number of flows to move. Default is 1, but this might 
@@ -650,8 +650,8 @@ public class ForceLayouter {
     public ArrayList<Model.IntersectingFlowPair> getSortedIntersectingSiblings() {
         initStraightLinesHashMap();
         ArrayList<Flow> flows = model.getFlows();
-
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
+        
         for (int i = 0; i < flows.size(); i++) {
             Flow flow1 = flows.get(i);
             Point[] polyline1 = straightLinesMap.get(flow1);

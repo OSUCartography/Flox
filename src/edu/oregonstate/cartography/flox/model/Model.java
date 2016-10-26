@@ -23,7 +23,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -2530,11 +2529,4 @@ public class Model {
         graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel, this);
     }
 
-    public void shortenOverlappingFlows() {
-        Iterator<Flow> iterator = sortedFlowIteratorForDrawing(true);
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-
-        }
-    }
 }
