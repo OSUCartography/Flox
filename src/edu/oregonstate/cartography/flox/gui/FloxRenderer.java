@@ -261,8 +261,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         boolean colorVaries = !model.getMinFlowColor().equals(model.getMaxFlowColor());
 
         // Iterate through the flows
-        Iterator<Flow> iterator = colorVaries
-                ? model.sortedFlowIteratorForDrawing(false) : model.flowIterator();
+        Iterator<Flow> iterator = model.sortedFlowIteratorForDrawing(false);
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
             drawFlow(flow, highlightSelected, s);

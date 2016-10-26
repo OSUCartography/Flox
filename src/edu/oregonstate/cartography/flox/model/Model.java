@@ -1191,8 +1191,8 @@ public class Model {
     }
 
     /**
-     * Returns an iterator for all sorted flows. Each FlowPair is converted to two
-     * regular Flows.
+     * Returns an iterator for all sorted flows. Each FlowPair is converted to
+     * two regular Flows.
      *
      * @param increasing increasing or decreasing sort order
      * @return iterator for sorted flows
@@ -2531,6 +2531,10 @@ public class Model {
     }
 
     public void shortenOverlappingFlows() {
-        
+        Iterator<Flow> iterator = sortedFlowIteratorForDrawing(true);
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+
+        }
     }
 }
