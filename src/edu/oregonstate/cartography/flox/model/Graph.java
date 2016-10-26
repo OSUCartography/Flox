@@ -415,9 +415,11 @@ public final class Graph {
      * the reverse of the natural order). Each FlowPair is converted to two
      * regular Flows.
      *
+     * @param model data model
+     * @param increasing increasing or decreasing sort order
      * @return a sorted list
      */
-    public ArrayList<Flow> getSortedFlowsForDrawing(Model model) {
+    public ArrayList<Flow> getSortedFlowsForDrawing(Model model, boolean increasing) {
         Set<Flow> flows = graph.edgeSet();
         ArrayList<Flow> sortedFlows = new ArrayList<>(flows.size());
         for (Flow flow : flows) {
@@ -429,7 +431,7 @@ public final class Graph {
                 sortedFlows.add(flow);
             }
         }
-        sortedFlows.sort(Collections.reverseOrder());
+        sortedFlows.sort(increasing ? null : Collections.reverseOrder());
         return sortedFlows;
     }
 

@@ -1191,14 +1191,14 @@ public class Model {
     }
 
     /**
-     * Returns an iterator for all flows sorted from largest to smallest (i.e.
-     * the reverse of the natural order). Each FlowPair is converted to two
+     * Returns an iterator for all sorted flows. Each FlowPair is converted to two
      * regular Flows.
      *
+     * @param increasing increasing or decreasing sort order
      * @return iterator for sorted flows
      */
-    public Iterator<Flow> sortedFlowIteratorForDrawing() {
-        return graph.getSortedFlowsForDrawing(this).iterator();
+    public Iterator<Flow> sortedFlowIteratorForDrawing(boolean increasing) {
+        return graph.getSortedFlowsForDrawing(this, increasing).iterator();
     }
 
     // FIXME remove?

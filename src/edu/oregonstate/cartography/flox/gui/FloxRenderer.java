@@ -262,16 +262,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         // Iterate through the flows
         Iterator<Flow> iterator = colorVaries
-                ? model.sortedFlowIteratorForDrawing() : model.flowIterator();
+                ? model.sortedFlowIteratorForDrawing(false) : model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (flow instanceof FlowPair) {
-                FlowPair flowPair = (FlowPair)flow;
-                drawFlow(flowPair.createParallelFlow1(model), highlightSelected, s);
-                drawFlow(flowPair.createParallelFlow2(model), highlightSelected, s);
-            } else {
-                drawFlow(flow, highlightSelected, s);
-            }
+            drawFlow(flow, highlightSelected, s);
         }
     }
 

@@ -140,7 +140,7 @@ public class SVGFlowExporter extends SVGExporter {
         svgRootElement.appendChild(flowsGroup);
         boolean colorVaries = !model.getMinFlowColor().equals(model.getMaxFlowColor());
         Iterator<Flow> iterator = colorVaries
-                ? model.sortedFlowIteratorForDrawing() : model.flowIterator();
+                ? model.sortedFlowIteratorForDrawing(false) : model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
 
@@ -154,13 +154,7 @@ public class SVGFlowExporter extends SVGExporter {
             }
 
             // flow line
-            if (flow instanceof FlowPair) {
-                FlowPair flowPair = (FlowPair)flow;
-                flowsGroup.appendChild(flowToDOMElement(flowPair.createParallelFlow1(model), document));
-                flowsGroup.appendChild(flowToDOMElement(flowPair.createParallelFlow2(model), document));
-            } else {
-                flowsGroup.appendChild(flowToDOMElement(flow, document));
-            }
+            flowsGroup.appendChild(flowToDOMElement(flow, document));
         }
 
         // nodes
