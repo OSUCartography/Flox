@@ -3,6 +3,7 @@ package edu.oregonstate.cartography.flox.model;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -409,10 +410,27 @@ public final class Graph {
         return nodes;
     }
 
-    public ArrayList<Flow> getSortedFlows() {
-        ArrayList<Flow> flows = new ArrayList<>(graph.edgeSet());
-        flows.sort(null);
-        return flows;
+    /**
+     * Returns a new array with all flows sorted from largest to smallest (i.e.
+     * the reverse of the natural order). Each FlowPair is converted to two
+     * regular Flows.
+     *
+     * @return a sorted list
+     */
+    public ArrayList<Flow> getSortedFlowsForDrawing(Model model) {
+        Set<Flow> flows = graph.edgeSet();
+        ArrayList<Flow> sortedFlows = new ArrayList<>(flows.size());
+        for (Flow flow : flows) {
+            if (flow instanceof FlowPair) {
+                FlowPair flowPair = (FlowPair) flow;
+                sortedFlows.add(flowPair.createParallelFlow1(model));
+                sortedFlows.add(flowPair.createParallelFlow2(model));
+            } else {
+                sortedFlows.add(flow);
+            }
+        }
+        sortedFlows.sort(Collections.reverseOrder());
+        return sortedFlows;
     }
 
     /**
@@ -522,7 +540,7 @@ public final class Graph {
      * two parallel flows.
      * @param model data model
      */
-    public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel, 
+    public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel,
             Model model) {
         if (this.bidirectionalFlowsParallel == bidirectionalFlowsParallel) {
             return;

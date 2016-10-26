@@ -140,7 +140,7 @@ public class SVGFlowExporter extends SVGExporter {
         svgRootElement.appendChild(flowsGroup);
         boolean colorVaries = !model.getMinFlowColor().equals(model.getMaxFlowColor());
         Iterator<Flow> iterator = colorVaries
-                ? model.sortedFlowIterator() : model.flowIterator();
+                ? model.sortedFlowIteratorForDrawing() : model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
 

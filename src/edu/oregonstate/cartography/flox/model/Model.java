@@ -1191,12 +1191,14 @@ public class Model {
     }
 
     /**
-     * Returns an iterator for all flows sorted by their value.
+     * Returns an iterator for all flows sorted from largest to smallest (i.e.
+     * the reverse of the natural order). Each FlowPair is converted to two
+     * regular Flows.
      *
      * @return iterator for sorted flows
      */
-    public Iterator<Flow> sortedFlowIterator() {
-        return graph.getSortedFlows().iterator();
+    public Iterator<Flow> sortedFlowIteratorForDrawing() {
+        return graph.getSortedFlowsForDrawing(this).iterator();
     }
 
     // FIXME remove?
@@ -2528,4 +2530,7 @@ public class Model {
         graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel, this);
     }
 
+    public void shortenOverlappingFlows() {
+        
+    }
 }
