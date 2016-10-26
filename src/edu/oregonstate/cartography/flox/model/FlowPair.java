@@ -9,12 +9,10 @@ package edu.oregonstate.cartography.flox.model;
 public class FlowPair extends Flow {
 
     /**
-     * This hidden flow is not part of the graph and will not influence layout
-     * computations. hiddenFlow references flow2, which is a constructor
-     * argument.
+     * Value of the second flow of this pair.
      */
-    private final Flow hiddenFlow; // FIXME remove
-
+    private final double value2;
+    
     /**
      * Constructor
      *
@@ -34,8 +32,8 @@ public class FlowPair extends Flow {
         assert (flow1.isLocked() == false);
         assert (flow2.isLocked() == false);
 
-        // store flow2
-        hiddenFlow = flow2;
+        // store value of flow 2
+        value2 = flow2.getValue();
     }
 
     /**
@@ -74,7 +72,7 @@ public class FlowPair extends Flow {
      * @return the value
      */
     public double getValue2() {
-        return hiddenFlow.getValue();
+        return value2;
     }
 
     /**
@@ -88,7 +86,6 @@ public class FlowPair extends Flow {
      */
     private double offset(Model model, boolean forFlow1) {
         double value1 = getValue1();
-        double value2 = getValue2();
         double width1 = model.getFlowWidthPx(value1);
         double width2 = model.getFlowWidthPx(value2);
         double gap = model.getParallelFlowsGapPx();
