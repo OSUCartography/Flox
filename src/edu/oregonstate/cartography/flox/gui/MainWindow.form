@@ -1030,16 +1030,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator13">
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="emptySpaceMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Attract First Selected Flow by Empty Space"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="emptySpaceMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator16">
-            </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="resolveIntersectionsCheckBoxMenuItem">
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>

@@ -4,12 +4,10 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.Polygon;
-import edu.oregonstate.cartography.flox.model.BooleanGrid;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.FlowPair;
-import edu.oregonstate.cartography.flox.model.Force;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
@@ -709,8 +707,6 @@ public class MainWindow extends javax.swing.JFrame {
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
-        emptySpaceMenuItem = new javax.swing.JMenuItem();
-        jSeparator16 = new javax.swing.JPopupMenu.Separator();
         resolveIntersectionsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         resolveOpposingIntersectionsMenuItem = new javax.swing.JMenuItem();
         selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
@@ -2832,15 +2828,6 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu.add(enforceCanvasCheckBoxMenuItem);
         debugMenu.add(jSeparator13);
 
-        emptySpaceMenuItem.setText("Attract First Selected Flow by Empty Space");
-        emptySpaceMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                emptySpaceMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(emptySpaceMenuItem);
-        debugMenu.add(jSeparator16);
-
         resolveIntersectionsCheckBoxMenuItem.setSelected(true);
         resolveIntersectionsCheckBoxMenuItem.setText("Resolve Intersections");
         resolveIntersectionsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -3896,102 +3883,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_showNodesToggleButtonActionPerformed
 
-    private void emptySpaceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emptySpaceMenuItemActionPerformed
-
-        // FIXME this is not the right class for this
-        // experiment for moving flow towards empty space. Attracting forces are 
-        // computed between white space and the control point of the flow.
-        // It might be better to compute forces between empty space and flow line
-        // segments, because the control point can be quite distant from the 
-        // flow line.
-        if (model.getSelectedFlows().size() < 1) {
-            System.err.println("no flow selected");
-            return;
-        }
-
-        // FIXME hard coded tesselation size of the map space
-        int size = 1000;
-        Rectangle2D bb = mapComponent.getVisibleArea();
-        BufferedImage image = FloxRenderer.renderToImage(model, size, bb,
-                false, // antialiasing
-                false, // draw background 
-                true, // fill node circles
-                false, // draw selected flows 
-                true, // draw flows
-                true); // draw nodes
-
-        // display the image
-        // edu.oregonstate.cartography.utils.ImageUtils.displayImageInWindow(image);
-        // convert image to a boolean grid
-        // false values are not occupied by flows or nodes, true values are occupied.
-        int cols = image.getWidth();
-        int rows = image.getHeight();
-        double cellSize = bb.getWidth() / (cols - 1);
-        BooleanGrid booleanGrid = new BooleanGrid(cols, rows, cellSize);
-        booleanGrid.setWest(bb.getMinX());
-        booleanGrid.setNorth(bb.getMaxY());
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                // FIXME this is slow and could be accelarated by accessing the
-                // raster model.
-                // to acclerate, we could also render to a B/W image.
-                int rgb = image.getRGB(c, r);
-                int b = rgb & 0xFF;
-                booleanGrid.setValue(b == 0, c, r);
-            }
-        }
-        System.out.println(booleanGrid.toString());
-
-        // get first selected flow. 
-        // FIXME Ignore other selected flows for the moment.
-        Flow selectedFlow = model.getSelectedFlows().get(0);
-        Point ctrlPt = selectedFlow.getCtrlPt();
-
-        // find attracting forces on the selected flow
-        double vx = 0;
-        double vy = 0;
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                boolean attractor = booleanGrid.getValue(c, r) == false;
-                if (attractor) {
-                    double cellX = booleanGrid.getWest() + c * booleanGrid.getCellSize();
-                    double cellY = booleanGrid.getNorth() - r * booleanGrid.getCellSize();
-                    double dx = cellX - ctrlPt.x;
-                    double dy = cellY - ctrlPt.y;
-                    double d = Math.sqrt(dx * dx + dy * dy);
-                    double p = 2;
-                    double idw = 1. / Math.pow(d, p);
-
-                    // direction vector with length == 1
-                    dx /= d;
-                    dy /= d;
-
-                    // weight direction vector with inverse distance weight
-                    vx += dx * idw;
-                    vy += dy * idw;
-                }
-            }
-        }
-
-        // FIXME hard-coded weight factor. Should be entered by user with GUI.
-        double attractorWeight = 0.2;
-
-        // we are only interested in the direction of the total attracting white space
-        Force v = new Force(vx, vy);
-        v.normalize();
-        v.scale(selectedFlow.getBaselineLength());
-
-        // Multiply by the value of the GUI slider for attractor weight.
-        v.scale(attractorWeight);
-
-        // move control point
-        ctrlPt.x += v.fx;
-        ctrlPt.y += v.fy;
-
-        mapComponent.eraseBufferImage();
-        mapComponent.repaint();
-    }//GEN-LAST:event_emptySpaceMenuItemActionPerformed
-
     private void angularDistributionSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_angularDistributionSliderStateChanged
         model.setAngularDistributionWeight(angularDistributionSlider.getValue() / 20d);
         mapComponent.refreshMap();
@@ -4664,7 +4555,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox drawEndClipAreasCheckBox;
     private javax.swing.JCheckBox drawStartClipAreasCheckBox;
     private javax.swing.JMenu editMenu;
-    private javax.swing.JMenuItem emptySpaceMenuItem;
     private javax.swing.JFormattedTextField endAreasBufferDistanceFormattedTextField;
     private javax.swing.JSpinner endDistanceSpinner;
     private javax.swing.JCheckBoxMenuItem enforceCanvasCheckBoxMenuItem;
@@ -4727,7 +4617,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
-    private javax.swing.JPopupMenu.Separator jSeparator16;
     private javax.swing.JPopupMenu.Separator jSeparator17;
     private javax.swing.JPopupMenu.Separator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator21;
