@@ -684,6 +684,8 @@ public class MainWindow extends javax.swing.JFrame {
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator19 = new javax.swing.JPopupMenu.Separator();
         referenceMapScaleMenuItem = new javax.swing.JMenuItem();
+        jSeparator16 = new javax.swing.JPopupMenu.Separator();
+        nameMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
         showAllMenuItem = new javax.swing.JMenuItem();
         zoomOnReferenceMapScaleMenuItem = new javax.swing.JMenuItem();
@@ -2681,6 +2683,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         mapMenu.add(referenceMapScaleMenuItem);
+        mapMenu.add(jSeparator16);
+
+        nameMenuItem.setText("Set Name…");
+        nameMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nameMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(nameMenuItem);
 
         menuBar.add(mapMenu);
 
@@ -4480,6 +4491,14 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Parallel Opposing Flows");
     }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
 
+    private void nameMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameMenuItemActionPerformed
+        String name = (String)JOptionPane.showInputDialog(this, "Name", "Flox", JOptionPane.PLAIN_MESSAGE, null, null, model.getName());
+        if (name != null) {
+            model.setName(name);
+            setTitle(name);
+        }
+    }//GEN-LAST:event_nameMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4622,6 +4641,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JPopupMenu.Separator jSeparator14;
+    private javax.swing.JPopupMenu.Separator jSeparator16;
     private javax.swing.JPopupMenu.Separator jSeparator17;
     private javax.swing.JPopupMenu.Separator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator21;
@@ -4663,6 +4683,7 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.ColorButton minColorButton;
     private javax.swing.JSpinner minDistToObstaclesSpinner;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
+    private javax.swing.JMenuItem nameMenuItem;
     private javax.swing.JMenuItem netFlowsMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton nodeFillColorButton;
     private edu.oregonstate.cartography.flox.gui.ColorButton nodeStrokeColorButton;
