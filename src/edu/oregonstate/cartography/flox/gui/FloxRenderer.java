@@ -150,7 +150,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
 
         if (drawLocks) {
-            drawLockIcons();
+            drawLockIcons(model);
         }
 
         if (drawControlPoints) {
@@ -309,12 +309,13 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * to visually stack lock icons above all flows to avoid flows overlapping
      * lock icons.
      */
-    private void drawLockIcons() {
+    private void drawLockIcons(Model model) {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
             if (flow.isLocked()) {
-                Point pt = flow.pointOnCurve(0.5);
+                Flow clippedFlow = model.clipFlow(flow, false, true);
+                Point pt = clippedFlow.pointOnCurve(0.5);
                 int iconX = (int) Math.round(xToPx(pt.x)) - LOCK_ICON_RADIUS;
                 int iconY = (int) Math.round(yToPx(pt.y)) - LOCK_ICON_RADIUS;
                 g2d.drawImage(LOCK_ICON, iconX, iconY, null);
