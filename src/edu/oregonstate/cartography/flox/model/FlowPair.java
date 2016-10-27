@@ -39,8 +39,7 @@ public class FlowPair extends Flow {
     public FlowPair(Flow flow1, Flow flow2) {
         // create a copy of flow1
         super(flow1.getStartPt(), flow1.getCtrlPt().mean(flow2.getCtrlPt()),
-                flow1.getEndPt(), flow1.getValue(),
-                flow1.id);
+                flow1.getEndPt(), flow1.getValue());
         setStartClipArea(flow1.getStartClipArea());
         setEndClipArea(flow1.getEndClipArea());
 
@@ -60,7 +59,7 @@ public class FlowPair extends Flow {
         super(new Point(flowPair.getStartPt()),
                 new Point(flowPair.getCtrlPt()),
                 new Point(flowPair.getEndPt()),
-                flowPair.getValue1(), createID());
+                flowPair.getValue1());
         shallowCopyClipAreas(flowPair, this);
         setSelected(flowPair.isSelected());
         setLocked(flowPair.isLocked());

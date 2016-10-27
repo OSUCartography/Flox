@@ -29,7 +29,7 @@ public class Flow implements Comparable<Flow> {
     private static long idCounter = 0;
 
     // FIXME this does not guarantee a unique ID when flows are loaded from an XML file
-    protected static synchronized long createID() {
+    protected static long createID() {
         return idCounter++;
     }
 
@@ -100,9 +100,8 @@ public class Flow implements Comparable<Flow> {
      * @param ctrlPt control point
      * @param endPt end point
      * @param value flow value
-     * @param id id for this flow
      */
-    public Flow(Point startPt, Point ctrlPt, Point endPt, double value, long id) {
+    public Flow(Point startPt, Point ctrlPt, Point endPt, double value) {
         assert (startPt != null);
         assert (endPt != null);
         assert (Double.isFinite(value));
@@ -115,7 +114,7 @@ public class Flow implements Comparable<Flow> {
         this.cPt = ctrlPt;
         this.endPt = endPt;
         this.value = value;
-        this.id = id;
+        this.id = createID();
     }
 
     /**
@@ -126,19 +125,7 @@ public class Flow implements Comparable<Flow> {
      * @param value value of this flow
      */
     public Flow(Point startPt, Point endPt, double value) {
-        this(startPt, new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2), endPt, value, createID());
-    }
-
-    /**
-     * Construct a Flow from 3 points.
-     *
-     * @param startPt start point
-     * @param ctrlPt control point
-     * @param endPt end point
-     * @param value flow value
-     */
-    public Flow(Point startPt, Point ctrlPt, Point endPt, double value) {
-        this(startPt, ctrlPt, endPt, value, createID());
+        this(startPt, new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2), endPt, value);
     }
 
     /**
@@ -158,8 +145,7 @@ public class Flow implements Comparable<Flow> {
         this(new Point(flow.startPt),
                 new Point(flow.cPt),
                 new Point(flow.endPt),
-                flow.value, 
-                createID());
+                flow.value);
         shallowCopyClipAreas(flow, this);
         selected = flow.selected;
         locked = flow.locked;
@@ -180,7 +166,7 @@ public class Flow implements Comparable<Flow> {
      * @param src source flow
      * @param dst destination flow
      */
-    protected static void shallowCopyClipAreas(Flow src, Flow dst) {
+    final protected static void shallowCopyClipAreas(Flow src, Flow dst) {
         dst.startClipArea = src.startClipArea;
         dst.startClipAreaWKT = src.startClipAreaWKT;
         dst.endClipArea = src.endClipArea;
@@ -453,7 +439,7 @@ public class Flow implements Comparable<Flow> {
     /**
      * @param selected the selected to set
      */
-    public void setSelected(boolean selected) {
+    final public void setSelected(boolean selected) {
         this.selected = selected;
     }
 
@@ -467,7 +453,7 @@ public class Flow implements Comparable<Flow> {
     /**
      * @param locked the locked to set
      */
-    public final void setLocked(boolean locked) {
+    final public void setLocked(boolean locked) {
         this.locked = locked;
     }
 
