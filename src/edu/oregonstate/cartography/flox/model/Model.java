@@ -2425,7 +2425,7 @@ public class Model {
         }
         return totalValue;
     }
-
+    
     /**
      * Sum values of flows between same start and end nodes.
      */
@@ -2461,19 +2461,13 @@ public class Model {
             Point node1 = nodes.get(i);
             for (int j = i + 1; j < nodes.size(); j++) {
                 Point node2 = nodes.get(j);
-                Set<Flow> flows12 = graph.getDirectedFlowsBetweenNodes(node1, node2);
-                Set<Flow> flows21 = graph.getDirectedFlowsBetweenNodes(node2, node1);
-                if (flows12.isEmpty() && flows21.isEmpty()) {
-                    continue;
+                double netSum = graph.netSum(node1, node2);
+                if (netSum > 0) {
+                    netFlows.add(new Flow(node1, node2, netSum));
+                } else if (netSum < 0) {
+                    netFlows.add(new Flow(node2, node1, Math.abs(netSum)));
                 }
-                double v12 = sumFlowValues(flows12);
-                double v21 = sumFlowValues(flows21);
-                if (v12 > v21) {
-                    netFlows.add(new Flow(node1, node2, v12 - v21));
-                } else if (v12 < v21) {
-                    netFlows.add(new Flow(node2, node1, v21 - v12));
-                }
-                // if v12 == v21, no flow is created
+                // if netSum equals 0, no flow is created
             }
         }
         setFlows(netFlows);

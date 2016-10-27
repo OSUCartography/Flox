@@ -163,6 +163,7 @@ public class Flow implements Comparable<Flow> {
 
     /**
      * Shallow-copies clip areas from one flow to another flow.
+     *
      * @param src source flow
      * @param dst destination flow
      */
@@ -800,7 +801,7 @@ public class Flow implements Comparable<Flow> {
         flow2.setStartPt(start2);
         flow2.setControlPoint(ctrl2);
         flow2.setEndPt(end2);
-        
+
         return new Flow[]{flow1, flow2};
     }
 

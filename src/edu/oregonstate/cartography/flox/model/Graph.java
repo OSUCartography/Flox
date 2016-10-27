@@ -40,8 +40,8 @@ public final class Graph {
     private final DirectedMultigraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
 
     /**
-     * show opposing flows between the same start node and end node as parallel
-     * lines.
+     * show opposing flows between the same start node and end node as
+     * parallel lines.
      */
     private boolean bidirectionalFlowsParallel = true;
 
@@ -130,8 +130,8 @@ public final class Graph {
     }
 
     /**
-     * Add a list of flows. This is more efficient than calling addFlow multiple
-     * times.
+     * Add a list of flows. This is more efficient than calling addFlow
+     * multiple times.
      *
      * @param flows flows to add. Start and end nodes may be changed.
      */
@@ -372,7 +372,8 @@ public final class Graph {
     }
 
     /**
-     * Returns all flows starting at node 1 and ending at node 2 and vice versa.
+     * Returns all flows starting at node 1 and ending at node 2 and vice
+     * versa.
      *
      * Throws an exception if either of the two nodes is not in this graph.
      *
@@ -381,21 +382,50 @@ public final class Graph {
      * @return all flows between the two nodes. This set can be empty.
      */
     public Set<Flow> getAllFlowsBetweenNodes(Point node1, Point node2) {
-        Set<Flow> set1 = graph.getAllEdges(node1, node2);
-        Set<Flow> set2 = graph.getAllEdges(node2, node1);
-        set1.addAll(set2);
-        return set1;
+        Set<Flow> set12 = graph.getAllEdges(node1, node2);
+        Set<Flow> set21 = graph.getAllEdges(node2, node1);
+        set12.addAll(set21);
+        return set12;
     }
 
     /**
-     * Returns all flows starting at node 1 and ending at node 2.
+     * Returns the net sum of flow values for all flows between node 1 and node
+     * 2. The net sum is the sum of all flow values moving from node 1 to node 2
+     * minus the sum of all flow values moving from node 2 to node 1. The
+     * returned value can be smaller than 0.
      *
      * @param node1 start node
      * @param node2 end node
-     * @return all directed flows between the two nodes.
+     * @return The sum of all flow values moving from node 1 to node 2 minus the
+     * sum of all flow values moving from node 2 to node 1. The returned value
+     * can be smaller than 0.
      */
-    public Set<Flow> getDirectedFlowsBetweenNodes(Point node1, Point node2) {
-        return graph.getAllEdges(node1, node2);
+    public double netSum(Point node1, Point node2) {
+        double sum12 = 0;
+        double sum21 = 0;
+        Set<Flow> flows12 = graph.getAllEdges(node1, node2);
+        for (Flow flow : flows12) {
+            if (flow instanceof FlowPair) {
+                FlowPair flowPair = (FlowPair) flow;
+                sum12 += flowPair.getValue1();
+                sum21 += flowPair.getValue2();
+            } else {
+                sum12 += flow.getValue();
+            }
+        }
+
+        Set<Flow> flows21 = graph.getAllEdges(node2, node1);
+        for (Flow flow : flows21) {
+            if (flow instanceof FlowPair) {
+                FlowPair flowPair = (FlowPair) flow;
+                sum21 += flowPair.getValue1();
+                sum12 += flowPair.getValue2();
+            } else {
+                sum21 += flow.getValue();
+            }
+        }
+
+        return sum12 - sum21;
     }
 
     public ArrayList<Point> getSortedNodes(boolean increasing) {
@@ -411,9 +441,9 @@ public final class Graph {
     }
 
     /**
-     * Returns a new array with all flows sorted from largest to smallest (i.e.
-     * the reverse of the natural order). Each FlowPair is converted to two
-     * regular Flows.
+     * Returns a new array with all flows sorted from largest to smallest
+     * (i.e. the reverse of the natural order). Each FlowPair is converted to
+     * two regular Flows.
      *
      * @param model data model
      * @param increasing increasing or decreasing sort order
@@ -524,19 +554,19 @@ public final class Graph {
     }
 
     /**
-     * Returns whether opposing flows between the same start point and end point
-     * are to be shown as two parallel flows.
+     * Returns whether opposing flows between the same start point and end
+     * point are to be shown as two parallel flows.
      *
-     * @return the bidirectionalFlowsParallel if true, opposing flows are shown
-     * as two parallel flows.
+     * @return the bidirectionalFlowsParallel if true, opposing flows are
+     * shown as two parallel flows.
      */
     public boolean isBidirectionalFlowsParallel() {
         return bidirectionalFlowsParallel;
     }
 
     /**
-     * Set whether opposing flows between the same start point and end point are
-     * to be shown as two parallel flows.
+     * Set whether opposing flows between the same start point and end point
+     * are to be shown as two parallel flows.
      *
      * @param bidirectionalFlowsParallel if true, opposing flows are shown as
      * two parallel flows.
@@ -557,8 +587,8 @@ public final class Graph {
     }
 
     /**
-     * Replaces pairs of opposing flows between the same two nodes with a single
-     * FlowPair.
+     * Replaces pairs of opposing flows between the same two nodes with a
+     * single FlowPair.
      */
     public void toBidirectionalFlows() {
         ArrayList<FlowPair> flowsToAdd = new ArrayList<>();
