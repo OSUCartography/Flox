@@ -8,8 +8,6 @@ import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,14 +30,6 @@ public class ForceLayouter {
      * regularly checked for cancellation; can be null
      */
     private ProcessMonitor processMonitor = null;
-
-    /**
-     * hash map with a line string of straight segments for each curved flow.
-     * Used for accelerating computations. The content of the hash map needs to
-     * be updated whenever the start, end, or control point of a Bézier flow
-     * changes.
-     */
-    private final HashMap<Flow, Point[]> straightLinesMap = new HashMap<>();
 
     // store per flow force
     private final ArrayList<Force> forces;
@@ -84,16 +74,12 @@ public class ForceLayouter {
     /**
      * Updates the hash map with line strings for each flow.
      */
-    private void initStraightLinesHashMap() {
-        straightLinesMap.clear();
+    private void updatePolylines() {
         double segmentLength = model.segmentLength();
 
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
-            Flow flow = iter.next();
-            Flow clippedFlow = model.clipFlow(flow, false, true);
-            ArrayList<Point> points = clippedFlow.regularIntervals(segmentLength);
-            straightLinesMap.put(flow, points.toArray(new Point[points.size()]));
+            iter.next().updateCachedPolylineApproximation(model, segmentLength);
             if (isCancelled()) {
                 return;
             }
@@ -219,7 +205,7 @@ public class ForceLayouter {
             return;
         }
 
-        initStraightLinesHashMap();
+        updatePolylines();
 
         double maxFlowLength = model.getLongestFlowLength();
 
@@ -315,7 +301,7 @@ public class ForceLayouter {
                 continue;
             }
 
-            Point[] points = straightLinesMap.get(flow);
+            Point[] points = flow.getCachedPolylineApproximation();
             for (Point point : points) {
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
@@ -473,7 +459,7 @@ public class ForceLayouter {
 
         Point basePt = flow.getBaseLineMidPoint();
         Point cPt = flow.getCtrlPt();
-        Point[] flowPoints = straightLinesMap.get(flow);
+        Point[] flowPoints = flow.getCachedPolylineApproximation();
 
         // Compute forces applied by all flows on current flow
         Force externalF = new Force();
@@ -579,82 +565,19 @@ public class ForceLayouter {
     }
 
     /**
-     * Returns a list with pairs of flows that intersect and are connected to
-     * the same start and end nodes. The list does not include pairs where both
-     * flows are locked.
-     *
-     * FIXME remove?
-     *
-     * @return pairs of flows that have a common start or end node.
-     */
-    public ArrayList<Model.IntersectingFlowPair> getIntersectingOpposingFlows() {
-        initStraightLinesHashMap();
-        ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
-        Iterator<Flow> iterator = model.flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow1 = iterator.next();
-            Flow flow2 = model.getOpposingFlow(flow1);
-            if (flow2 == null) {
-                continue;
-            }
-
-            if (flow1.isLocked() && flow2.isLocked()) {
-                continue;
-            }
-
-            Point[] polyline1 = straightLinesMap.get(flow1);
-            Point[] polyline2 = straightLinesMap.get(flow2);
-            if (polylinesIntersect(polyline1, polyline2)) {
-                pairs.add(new Model.IntersectingFlowPair(flow1, flow2, flow1.getEndPt()));
-            }
-
-        }
-
-        return pairs;
-    }
-
-    /**
-     *
-     * FIXME remove?
-     *
-     * @param flow1
-     * @return
-     */
-    public Model.IntersectingFlowPair getIntersectingFlow(Flow flow1) {
-        initStraightLinesHashMap();
-        Point[] polyline1 = straightLinesMap.get(flow1);
-        ArrayList<Flow> flows = model.getFlows();
-        for (Flow flow2 : flows) {
-            if (flow2 == flow1) {
-                continue;
-            }
-
-            Point sharedNode = flow2.getSharedNode(flow1);
-            if (sharedNode != null) {
-                Point[] polyline2 = straightLinesMap.get(flow2);
-
-                if (polylinesIntersect(polyline1, polyline2)) {
-                    return new Model.IntersectingFlowPair(flow2, flow1, sharedNode);
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns a list with pairs of flows that intersect and are connected to a
      * shared node. The list does not include pairs where both flows are locked.
      *
      * @return pairs of flows that have a common start or end node.
      */
     public ArrayList<Model.IntersectingFlowPair> getSortedIntersectingSiblings() {
-        initStraightLinesHashMap();
+        updatePolylines();
         ArrayList<Flow> flows = model.getFlows();
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
 
         for (int i = 0; i < flows.size(); i++) {
             Flow flow1 = flows.get(i);
-            Point[] polyline1 = straightLinesMap.get(flow1);
+            Point[] polyline1 = flow1.getCachedPolylineApproximation();
             // FIXME need a better way here
             for (int j = i + 1; j < flows.size(); j++) {
                 Flow flow2 = flows.get(j);
@@ -665,7 +588,7 @@ public class ForceLayouter {
 
                 Point sharedNode = flow1.getSharedNode(flow2);
                 if (sharedNode != null) {
-                    Point[] polyline2 = straightLinesMap.get(flow2);
+                    Point[] polyline2 = flow2.getCachedPolylineApproximation();
 
                     if (polylinesIntersect(polyline1, polyline2)) {
                         pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));

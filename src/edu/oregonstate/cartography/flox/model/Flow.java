@@ -94,6 +94,19 @@ public class Flow implements Comparable<Flow> {
     private boolean locked = false;
 
     /**
+     * A cached approximation of the flow geometry by a straight polyline to
+     * avoid repeated expensive conversions to a polyline.
+     *
+     * <STRONG>The polyline is not initialized or updated by this Flow. It is
+     * the responsibility of the user to update the polyline when any of the
+     * following change: start point, end point, control point, startClipArea,
+     * endClipArea, size of nodes, gap between start and end of line and
+     * nodes.</STRONG> Note that a change to the arrowhead geometry does not
+     * require an update to the polyline.
+     */
+    private Point[] polyline;
+
+    /**
      * Construct a Flow from 3 points.
      *
      * @param startPt start point
@@ -260,6 +273,42 @@ public class Flow implements Comparable<Flow> {
         // if i equals 0, the two flows have the same values and start and end
         // at the same locations
         return i;
+    }
+
+    /**
+     * Updates the cached polyline. The polyline is not initialized or updated
+     * by this Flow. It is the responsibility of the user to update the polyline
+     * when any of the following change: start point, end point, control point,
+     * startClipArea, endClipArea, size of nodes, gap between start and end of
+     * line and nodes. Note that a change to the arrowhead geometry does not
+     * require an update to the polyline.
+     *
+     * @param model data model
+     * @param segmentLength the target segment length. The actual length will
+     * differ.
+     */
+    public void updateCachedPolylineApproximation(Model model, double segmentLength) {
+        Flow clippedFlow = model.clipFlow(this, false, true);
+        ArrayList<Point> points = clippedFlow.regularIntervals(segmentLength);
+        polyline = points.toArray(new Point[points.size()]);
+    }
+
+    /**
+     * Returns the cached polyline. The polyline is not initialized or updated
+     * by this Flow. It is the responsibility of the user to update the polyline
+     * by calling updateCachedPolylineApproximation() when any of the following
+     * change: start point, end point, control point, startClipArea,
+     * endClipArea, size of nodes, gap between start and end of line and nodes.
+     * Note that a change to the arrowhead geometry does not require an update
+     * to the polyline.
+     *
+     * @return a reference to the polyline approximating the geometry of this
+     * flow. Can be null or inaccurate if getCachedPolylineApproximation() has
+     * never been called or if the geometry changed since the last call to
+     * getCachedPolylineApproximation().
+     */
+    public Point[] getCachedPolylineApproximation() {
+        return polyline;
     }
 
     /**

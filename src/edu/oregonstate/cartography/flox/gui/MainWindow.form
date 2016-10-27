@@ -1049,28 +1049,12 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resolveIntersectionsCheckBoxMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="resolveOpposingIntersectionsMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Resolve Intersections in Opposing Flows"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resolveOpposingIntersectionsMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="selectIntersectingSiblingFlowsMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Select Intersecting Flows Connected to Same Nodes"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectIntersectingSiblingFlowsMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="selectIntersectingMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Select Intersecting Partner Flow Connected to Same Node"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectIntersectingMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="isIntersectingSiblingMenuItem">
@@ -1948,7 +1932,7 @@
                     <Component class="javax.swing.JSpinner" name="parallelFlowsGapSpinner">
                       <Properties>
                         <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-                          <SpinnerModel initial="0.0" maximum="200.0" minimum="0.0" numberType="java.lang.Double" stepSize="1.0" type="number"/>
+                          <SpinnerModel initial="0.0" minimum="0.0" numberType="java.lang.Double" stepSize="1.0" type="number"/>
                         </Property>
                         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[55, 28]"/>
@@ -2153,7 +2137,7 @@
                     <Component class="javax.swing.JSpinner" name="endDistanceSpinner">
                       <Properties>
                         <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-                          <SpinnerModel initial="0.0" maximum="200.0" minimum="0.0" numberType="java.lang.Double" stepSize="1.0" type="number"/>
+                          <SpinnerModel initial="0.0" minimum="0.0" numberType="java.lang.Double" stepSize="1.0" type="number"/>
                         </Property>
                         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[55, 28]"/>
@@ -2190,7 +2174,7 @@
                     <Component class="javax.swing.JSpinner" name="startDistanceSpinner">
                       <Properties>
                         <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-                          <SpinnerModel initial="0.0" maximum="200.0" minimum="0.0" numberType="java.lang.Double" stepSize="1.0" type="number"/>
+                          <SpinnerModel initial="0.0" minimum="0.0" numberType="java.lang.Double" stepSize="1.0" type="number"/>
                         </Property>
                         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[55, 28]"/>

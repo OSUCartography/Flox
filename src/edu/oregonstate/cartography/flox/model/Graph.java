@@ -40,8 +40,8 @@ public final class Graph {
     private final DirectedMultigraph<Point, Flow> graph = new DirectedMultigraph<>(Flow.class);
 
     /**
-     * show opposing flows between the same start node and end node as
-     * parallel lines.
+     * show opposing flows between the same start node and end node as parallel
+     * lines.
      */
     private boolean bidirectionalFlowsParallel = true;
 
@@ -130,8 +130,8 @@ public final class Graph {
     }
 
     /**
-     * Add a list of flows. This is more efficient than calling addFlow
-     * multiple times.
+     * Add a list of flows. This is more efficient than calling addFlow multiple
+     * times.
      *
      * @param flows flows to add. Start and end nodes may be changed.
      */
@@ -372,8 +372,7 @@ public final class Graph {
     }
 
     /**
-     * Returns all flows starting at node 1 and ending at node 2 and vice
-     * versa.
+     * Returns all flows starting at node 1 and ending at node 2 and vice versa.
      *
      * Throws an exception if either of the two nodes is not in this graph.
      *
@@ -441,9 +440,9 @@ public final class Graph {
     }
 
     /**
-     * Returns a new array with all flows sorted from largest to smallest
-     * (i.e. the reverse of the natural order). Each FlowPair is converted to
-     * two regular Flows.
+     * Returns a new array with all flows sorted from largest to smallest (i.e.
+     * the reverse of the natural order). Each FlowPair is converted to two
+     * regular Flows.
      *
      * @param model data model
      * @param increasing increasing or decreasing sort order
@@ -554,19 +553,18 @@ public final class Graph {
     }
 
     /**
-     * Returns whether opposing flows between the same start point and end
-     * point are to be shown as two parallel flows.
+     * Returns whether opposing flows between the same start point and end point
+     * are to be shown as two parallel flows.
      *
-     * @return the bidirectionalFlowsParallel if true, opposing flows are
-     * shown as two parallel flows.
+     * @return if true, opposing flows are shown as two parallel flows.
      */
     public boolean isBidirectionalFlowsParallel() {
         return bidirectionalFlowsParallel;
     }
 
     /**
-     * Set whether opposing flows between the same start point and end point
-     * are to be shown as two parallel flows.
+     * Set whether opposing flows between the same start point and end point are
+     * to be shown as two parallel flows.
      *
      * @param bidirectionalFlowsParallel if true, opposing flows are shown as
      * two parallel flows.
@@ -587,8 +585,8 @@ public final class Graph {
     }
 
     /**
-     * Replaces pairs of opposing flows between the same two nodes with a
-     * single FlowPair.
+     * Replaces pairs of opposing flows between the same two nodes with a single
+     * FlowPair.
      */
     public void toBidirectionalFlows() {
         ArrayList<FlowPair> flowsToAdd = new ArrayList<>();
@@ -623,6 +621,8 @@ public final class Graph {
 
     /**
      * Replaces instances of FlowPair with two Flow instances.
+     *
+     * @param model data model
      */
     public void toUnidirectionalFlows(Model model) {
         ArrayList<Flow> flowsToAdd = new ArrayList<>();

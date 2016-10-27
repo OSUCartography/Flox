@@ -710,9 +710,7 @@ public class MainWindow extends javax.swing.JFrame {
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
         resolveIntersectionsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        resolveOpposingIntersectionsMenuItem = new javax.swing.JMenuItem();
         selectIntersectingSiblingFlowsMenuItem = new javax.swing.JMenuItem();
-        selectIntersectingMenuItem = new javax.swing.JMenuItem();
         isIntersectingSiblingMenuItem = new javax.swing.JMenuItem();
         resolveSelectedIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
@@ -1600,7 +1598,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
         flowsContentPanel.add(parallelFlowsCheckBox, gridBagConstraints);
 
-        parallelFlowsGapSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, 200.0d, 1.0d));
+        parallelFlowsGapSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, null, 1.0d));
         parallelFlowsGapSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
         parallelFlowsGapSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -1743,7 +1741,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         nodesContentPanel.add(jLabel14, gridBagConstraints);
 
-        endDistanceSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, 200.0d, 1.0d));
+        endDistanceSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, null, 1.0d));
         endDistanceSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
         endDistanceSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -1766,7 +1764,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         nodesContentPanel.add(jLabel29, gridBagConstraints);
 
-        startDistanceSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, 200.0d, 1.0d));
+        startDistanceSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, null, 1.0d));
         startDistanceSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
         startDistanceSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -2850,14 +2848,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(resolveIntersectionsCheckBoxMenuItem);
 
-        resolveOpposingIntersectionsMenuItem.setText("Resolve Intersections in Opposing Flows");
-        resolveOpposingIntersectionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resolveOpposingIntersectionsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(resolveOpposingIntersectionsMenuItem);
-
         selectIntersectingSiblingFlowsMenuItem.setText("Select Intersecting Flows Connected to Same Nodes");
         selectIntersectingSiblingFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2865,14 +2855,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(selectIntersectingSiblingFlowsMenuItem);
-
-        selectIntersectingMenuItem.setText("Select Intersecting Partner Flow Connected to Same Node");
-        selectIntersectingMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectIntersectingMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(selectIntersectingMenuItem);
 
         isIntersectingSiblingMenuItem.setText("Is Intersecting and Connected to Same Node");
         isIntersectingSiblingMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -4135,6 +4117,7 @@ public class MainWindow extends javax.swing.JFrame {
         SpinnerModel spinnerModel = endDistanceSpinner.getModel();
         double d = ((SpinnerNumberModel) spinnerModel).getNumber().doubleValue();
         model.setFlowDistanceFromEndPointPixel(d);
+        mapComponent.refreshMap();
         layout("End Gap");
     }//GEN-LAST:event_endDistanceSpinnerStateChanged
 
@@ -4142,6 +4125,7 @@ public class MainWindow extends javax.swing.JFrame {
         SpinnerModel spinnerModel = startDistanceSpinner.getModel();
         double d = ((SpinnerNumberModel) spinnerModel).getNumber().doubleValue();
         model.setFlowDistanceFromStartPointPixel(d);
+        mapComponent.refreshMap();
         layout("Start Gap");
     }//GEN-LAST:event_startDistanceSpinnerStateChanged
 
@@ -4410,33 +4394,6 @@ public class MainWindow extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Selected flows are intersecting.");
         }
     }//GEN-LAST:event_isIntersectingSiblingMenuItemActionPerformed
-
-    private void resolveOpposingIntersectionsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveOpposingIntersectionsMenuItemActionPerformed
-        ForceLayouter layouter = new ForceLayouter(model);
-        ArrayList<Model.IntersectingFlowPair> opposingIntersecting = layouter.getIntersectingOpposingFlows();
-        for (Model.IntersectingFlowPair pair : opposingIntersecting) {
-            pair.resolveIntersection();
-            pair.flow1.setSelected(true);
-            pair.flow2.setSelected(true);
-            pair.flow1.setLocked(true);
-            pair.flow2.setLocked(true);
-        }
-        mapComponent.refreshMap();
-        layout("Resolve Intersection");
-    }//GEN-LAST:event_resolveOpposingIntersectionsMenuItemActionPerformed
-
-    private void selectIntersectingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectIntersectingMenuItemActionPerformed
-        if (model.getSelectedFlows().size() != 1) {
-            ErrorDialog.showErrorDialog("Select one flow.");
-            return;
-        }
-        Flow flow = model.getSelectedFlows().get(0);
-        ForceLayouter layouter = new ForceLayouter(model);
-        Model.IntersectingFlowPair pair = layouter.getIntersectingFlow(flow);
-        pair.flow1.setSelected(true);
-        pair.flow2.setSelected(true);
-        mapComponent.refreshMap();
-    }//GEN-LAST:event_selectIntersectingMenuItemActionPerformed
 
     public void testOffsetting() {
         testCurveOffsettingMenuItemActionPerformed(null);
@@ -4727,7 +4684,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem removeSelectedLayerMenuItem;
     private javax.swing.JMenuItem resolveIntersectingSiblingsMenuItem;
     private javax.swing.JCheckBoxMenuItem resolveIntersectionsCheckBoxMenuItem;
-    private javax.swing.JMenuItem resolveOpposingIntersectionsMenuItem;
     private javax.swing.JMenuItem resolveSelectedIntersectingSiblingsMenuItem;
     private javax.swing.JMenuItem reverseFlowDirectionMenuItem;
     private javax.swing.JPanel rightPanel;
@@ -4740,7 +4696,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JMenuItem selectFlowsMenuItem;
     private javax.swing.JLabel selectInfoLabel;
-    private javax.swing.JMenuItem selectIntersectingMenuItem;
     private javax.swing.JMenuItem selectIntersectingSiblingFlowsMenuItem;
     private javax.swing.JMenuItem selectNodesMenuItem;
     private javax.swing.JMenuItem selectOverlappingFlowsInfoMenuItem;
