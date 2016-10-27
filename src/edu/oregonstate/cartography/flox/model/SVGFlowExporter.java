@@ -22,7 +22,7 @@ public class SVGFlowExporter extends SVGExporter {
         super(model.getCanvas(), "", "Flox");
         this.model = model;
         scale = 1d / model.getReferenceMapScale();
-        
+
         Rectangle2D canvas = model.getCanvas();
         canvasWidth = distToSVGCanvas(canvas.getWidth());
         canvasHeight = distToSVGCanvas(canvas.getHeight());
@@ -89,15 +89,15 @@ public class SVGFlowExporter extends SVGExporter {
 
         return str.toString();
     }
-    
+
     private Element flowToDOMElement(Flow flow, Document document) {
         flow = model.clipFlow(flow, true, false);
-            Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
-            flowElement.setAttribute("id", Double.toString(flow.getValue()));
-            flowElement.setAttribute("d", flowToPath(flow));
-            double flowWidth = model.getFlowWidthPx(flow);
-            setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null);
-            return flowElement;
+        Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
+        flowElement.setAttribute("id", Double.toString(flow.getValue()));
+        flowElement.setAttribute("d", flowToPath(flow));
+        double flowWidth = model.getFlowWidthPx(flow);
+        setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null);
+        return flowElement;
     }
 
     /**
@@ -138,6 +138,8 @@ public class SVGFlowExporter extends SVGExporter {
         Element flowsGroup = (Element) document.createElementNS(SVGNAMESPACE, "g");
         flowsGroup.setAttribute("id", "Flows");
         svgRootElement.appendChild(flowsGroup);
+        
+        // convert each FlowPair to two Flows and sort from large to small
         Iterator<Flow> iterator = model.sortedFlowIteratorForDrawing(false);
         while (iterator.hasNext()) {
             Flow flow = iterator.next();

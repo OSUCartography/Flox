@@ -27,7 +27,7 @@ public class FlowPair extends Flow {
     private FlowPair() {
         value2 = 0;
     }
-    
+
     /**
      * Constructor
      *
@@ -49,6 +49,32 @@ public class FlowPair extends Flow {
 
         // store value of flow 2
         value2 = flow2.getValue();
+    }
+
+    /**
+     * Copy constructor
+     *
+     * @param flowPair a FlowPair to copy
+     */
+    public FlowPair(FlowPair flowPair) {
+        super(new Point(flowPair.getStartPt()),
+                new Point(flowPair.getCtrlPt()),
+                new Point(flowPair.getEndPt()),
+                flowPair.getValue1(), createID());
+        shallowCopyClipAreas(flowPair, this);
+        setSelected(flowPair.isSelected());
+        setLocked(flowPair.isLocked());
+        value2 = flowPair.value2;
+    }
+
+    /**
+     * Returns a copy of this FlowPair. The id of the new flow is unique.
+     *
+     * @return a copy
+     */
+    @Override
+    public FlowPair copyFlow() {
+        return new FlowPair(this);
     }
 
     /**

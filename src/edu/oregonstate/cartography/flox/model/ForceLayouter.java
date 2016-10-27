@@ -651,7 +651,7 @@ public class ForceLayouter {
         initStraightLinesHashMap();
         ArrayList<Flow> flows = model.getFlows();
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
-        
+
         for (int i = 0; i < flows.size(); i++) {
             Flow flow1 = flows.get(i);
             Point[] polyline1 = straightLinesMap.get(flow1);
@@ -861,7 +861,7 @@ public class ForceLayouter {
         flowBB.add((flowBB.getMinX() - minDist), (flowBB.getMinY() - minDist));
         flowBB.add((flowBB.getMaxX() + minDist), (flowBB.getMaxY() + minDist));
 
-        // the obstacle must be inside the extended bounding box
+        // the obstacle's circle center must be inside the extended bounding box
         if (flowBB.contains(obstacle.x, obstacle.y) == false) {
             return false;
         }
@@ -880,13 +880,8 @@ public class ForceLayouter {
      * @return true if the flow overlaps a node
      */
     private boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles) {
-
-        // lazy initialisation of the clipped flow. Only clip the flow once it 
-        // is needed for an intersection test.
-        Flow clippedFlow = null;
-        
         for (Obstacle obstacle : obstacles) {
-            
+
             // ignore obstacles that are start or end nodes of the flow
             if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
                 continue;
@@ -897,9 +892,7 @@ public class ForceLayouter {
                 continue;
             }
 
-            if (clippedFlow == null) {
-                clippedFlow = model.clipFlow(flow, false, true);
-            }
+            Flow clippedFlow = model.clipFlow(flow, false, true);
             if (flowIntersectsObstacle(clippedFlow, obstacle)) {
                 return true;
             }

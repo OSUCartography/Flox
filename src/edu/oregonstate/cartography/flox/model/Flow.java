@@ -28,6 +28,7 @@ public class Flow implements Comparable<Flow> {
 
     private static long idCounter = 0;
 
+    // FIXME this does not guarantee a unique ID when flows are loaded from an XML file
     protected static synchronized long createID() {
         return idCounter++;
     }
@@ -143,27 +144,47 @@ public class Flow implements Comparable<Flow> {
     /**
      * Default constructor for JAXB
      */
-    public Flow() {
+    protected Flow() {
         this(new Point(), new Point(), Model.DEFAULT_FLOW_VALUE);
     }
 
     /**
-     * Copy constructor.
+     * Copy constructor. Creates deep copies of points. Creates shallow copies
+     * of clip areas.
      *
-     * @param flow
+     * @param flow Flow to copy
      */
     public Flow(Flow flow) {
-        id = createID();
-        startPt = new Point(flow.startPt);
-        endPt = new Point(flow.endPt);
-        cPt = new Point(flow.cPt);
-        value = flow.value;
-        startClipArea = flow.startClipArea;
-        startClipAreaWKT = flow.startClipAreaWKT;
-        endClipArea = flow.endClipArea;
-        endClipAreaWKT = flow.endClipAreaWKT;
+        this(new Point(flow.startPt),
+                new Point(flow.cPt),
+                new Point(flow.endPt),
+                flow.value, 
+                createID());
+        shallowCopyClipAreas(flow, this);
         selected = flow.selected;
         locked = flow.locked;
+    }
+
+    /**
+     * Returns a copy of this Flow. The id of the new flow is unique. Creates
+     * deep copies of points. Creates shallow copies of clip areas.
+     *
+     * @return a copy
+     */
+    public Flow copyFlow() {
+        return new Flow(this);
+    }
+
+    /**
+     * Shallow-copies clip areas from one flow to another flow.
+     * @param src source flow
+     * @param dst destination flow
+     */
+    protected static void shallowCopyClipAreas(Flow src, Flow dst) {
+        dst.startClipArea = src.startClipArea;
+        dst.startClipAreaWKT = src.startClipAreaWKT;
+        dst.endClipArea = src.endClipArea;
+        dst.endClipAreaWKT = src.endClipAreaWKT;
     }
 
     @Override
@@ -782,16 +803,18 @@ public class Flow implements Comparable<Flow> {
         Point ctrl2 = new Point(ctrlX2, ctrlY2);
         Point end2 = new Point(endX2, endY2);
 
-        Flow flow1 = new Flow(start1, ctrl1, end1, getValue(), id);
-        flow1.setSelected(isSelected());
-        flow1.setLocked(isLocked());
-        flow1.setStartClipArea(getStartClipArea());
+        // create copies of this flow using copyFlow() method instead of copy 
+        // constructor to allow overriding classes to copy themselves.
+        Flow flow1 = copyFlow();
+        flow1.setStartPt(start1);
+        flow1.setControlPoint(ctrl1);
+        flow1.setEndPt(end1);
 
-        Flow flow2 = new Flow(start2, ctrl2, end2, getValue(), id);
-        flow2.setSelected(isSelected());
-        flow2.setLocked(isLocked());
-        flow2.setEndClipArea(getEndClipArea());
-
+        Flow flow2 = copyFlow();
+        flow2.setStartPt(start2);
+        flow2.setControlPoint(ctrl2);
+        flow2.setEndPt(end2);
+        
         return new Flow[]{flow1, flow2};
     }
 

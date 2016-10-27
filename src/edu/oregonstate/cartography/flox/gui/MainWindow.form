@@ -1166,6 +1166,16 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="testCurveOffsettingMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator32">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="testCurveShorteningMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Test Curve Shortening"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="testCurveShorteningMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
           </SubComponents>
         </Menu>
       </SubComponents>

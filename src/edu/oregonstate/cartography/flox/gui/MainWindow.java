@@ -728,6 +728,8 @@ public class MainWindow extends javax.swing.JFrame {
         showOptionsMenuItem = new javax.swing.JMenuItem();
         jSeparator31 = new javax.swing.JPopupMenu.Separator();
         testCurveOffsettingMenuItem = new javax.swing.JMenuItem();
+        jSeparator32 = new javax.swing.JPopupMenu.Separator();
+        testCurveShorteningMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
@@ -2957,6 +2959,15 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(testCurveOffsettingMenuItem);
+        debugMenu.add(jSeparator32);
+
+        testCurveShorteningMenuItem.setText("Test Curve Shortening");
+        testCurveShorteningMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                testCurveShorteningMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(testCurveShorteningMenuItem);
 
         menuBar.add(debugMenu);
         //debugMenu.setVisible(false);
@@ -4467,7 +4478,7 @@ public class MainWindow extends javax.swing.JFrame {
                 if (j == 0) {
                     continue;
                 }
-                Flow offsetFlow = new Flow(flows.get(i));
+                Flow offsetFlow = flows.get(i).copyFlow();
                 offsetFlow.setSelected(false);
                 offsetFlow.offsetFlow(flowOffset * j, model);
                 offsetFlow.setLocked(true);
@@ -4492,12 +4503,18 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
 
     private void nameMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameMenuItemActionPerformed
-        String name = (String)JOptionPane.showInputDialog(this, "Name", "Flox", JOptionPane.PLAIN_MESSAGE, null, null, model.getName());
+        String name = (String)JOptionPane.showInputDialog(this, "Name", "Flox", 
+                JOptionPane.PLAIN_MESSAGE, null, null, model.getName());
         if (name != null) {
             model.setName(name);
             setTitle(name);
         }
     }//GEN-LAST:event_nameMenuItemActionPerformed
+
+    private void testCurveShorteningMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testCurveShorteningMenuItemActionPerformed
+        mapComponent.refreshMap();
+        addUndo("Shorten Flows");
+    }//GEN-LAST:event_testCurveShorteningMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4655,6 +4672,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator29;
     private javax.swing.JPopupMenu.Separator jSeparator30;
     private javax.swing.JPopupMenu.Separator jSeparator31;
+    private javax.swing.JPopupMenu.Separator jSeparator32;
     private javax.swing.JSeparator jSeparator33;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
@@ -4749,6 +4767,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
     private javax.swing.JMenuItem testCurveOffsettingMenuItem;
+    private javax.swing.JMenuItem testCurveShorteningMenuItem;
     private javax.swing.JMenuItem totalFlowsMenuItem;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
