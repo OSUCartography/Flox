@@ -29,7 +29,7 @@ public class RangeboxEnforcer {
             return;
         }
 
-        Point cPt = flow.getCtrlPt();
+        Point cPt = new Point(flow.cPtX(), flow.cPtY());
         Point refPt = flow.getBaseLineMidPoint();
 
         Point[] box = computeRangebox(flow);
@@ -87,7 +87,8 @@ public class RangeboxEnforcer {
                     box[0].x, box[0].y,
                     box[3].x, box[3].y, cPt);
         }
-
+        
+        flow.setCtrlPt(cPt.x, cPt.y);
     }
 
     /**
@@ -112,7 +113,7 @@ public class RangeboxEnforcer {
         double x4 = canvas.getMaxX();
         double y4 = canvas.getMaxY();
         
-        Point cPt = flow.getCtrlPt();
+        Point cPt = new Point(flow.cPtX(), flow.cPtY());
         Point refPt = flow.getBaseLineMidPoint();
 
         if (GeometryUtils.linesIntersect(refPt.x, refPt.y,
@@ -148,6 +149,8 @@ public class RangeboxEnforcer {
                     x2, y2,
                     x4, y4, cPt);
         }
+        
+        flow.setCtrlPt(cPt.x, cPt.y);
     }
 
     /**

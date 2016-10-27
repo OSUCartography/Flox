@@ -39,9 +39,9 @@ public class CSVFlowExporter {
             str.append(flow.getEndPt().getValue());
             str.append(",");
             
-            str.append(flow.getCtrlPt().x);
+            str.append(flow.cPtX());
             str.append(",");
-            str.append(flow.getCtrlPt().y);
+            str.append(flow.cPtY());
             str.append(",");
 
             if (flow.isLocked()) {

@@ -72,11 +72,10 @@ public class ForceLayouter {
     }
 
     /**
-     * Updates the hash map with line strings for each flow.
+     * Updates the approximative line string of each flow.
      */
-    private void updatePolylines() {
+    private void updateCachedPolylineApproximations() {
         double segmentLength = model.segmentLength();
-
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             iter.next().updateCachedPolylineApproximation(model, segmentLength);
@@ -98,8 +97,7 @@ public class ForceLayouter {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            Point ctrlPt = flow.getCtrlPt();
-            destinationModel.replaceControlPoint(flow.id, ctrlPt.x, ctrlPt.y);
+            destinationModel.replaceControlPoint(flow.id, flow.cPtX(), flow.cPtY());
         }
     }
 
@@ -205,7 +203,7 @@ public class ForceLayouter {
             return;
         }
 
-        updatePolylines();
+        updateCachedPolylineApproximations();
 
         double maxFlowLength = model.getLongestFlowLength();
 
@@ -242,14 +240,13 @@ public class ForceLayouter {
             if (flow.isLocked()) {
                 continue;
             }
-            Point ctrlPt = flow.getCtrlPt();
 
-            // Move the control point by the total force
+            // displacement of the control point by the total force
             Force f = forces.get(i);
-            ctrlPt.x += weight * f.fx;
-            ctrlPt.y += weight * f.fy;
+            double dx = weight * f.fx;
+            double dy = weight * f.fy;
 
-            // Move the control point by the angular distribution force.
+            // Displacement of the control point by the angular distribution force.
             // Angular distribution forces are not applied from the beginning 
             // of the iterative layout computation. Angular distribution forces 
             // kick in slowly to avoid creating crossing flows. 
@@ -258,9 +255,13 @@ public class ForceLayouter {
             // distribution forces is wÕ = -weight * weight + weight.    
             double angularDistWeight = weight * (1 - weight);
             Force angularDistForce = angularDistForces.get(i);
-            ctrlPt.x += angularDistWeight * angularDistForce.fx;
-            ctrlPt.y += angularDistWeight * angularDistForce.fy;
+            flow.offsetCtrlPt(weight * f.fx, weight * f.fy);
+            dx += angularDistWeight * angularDistForce.fx;
+            dx += angularDistWeight * angularDistForce.fy;
 
+            // move control point
+            flow.offsetCtrlPt(dx, dy);
+            
             // move control point if it is outside of the range box or the canvas
             if (model.isEnforceRangebox()) {
                 enforcer.enforceFlowControlPointRange(flow);
@@ -336,11 +337,11 @@ public class ForceLayouter {
         outForce.fy = fyTotal / wTotal;
     }
 
-    private static Force computeSpringForce(Point startPt, Point endPt, double springConstant) {
+    private static Force computeSpringForce(Point startPt, double endX, double endY, double springConstant) {
         // Calculates the length of the spring.  The spring is a vector connecting
         // the two points.
-        double springLengthX = startPt.x - endPt.x; // x-length of the spring
-        double springLengthY = startPt.y - endPt.y; // y-length of the spring
+        double springLengthX = startPt.x - endX; // x-length of the spring
+        double springLengthY = startPt.y - endY; // y-length of the spring
 
         // Calculates the total spring force as determined by the
         // distance between start/end points.
@@ -377,9 +378,8 @@ public class ForceLayouter {
      */
     private Force computeAntiTorsionForce(Flow flow) {
         Point basePt = flow.getBaseLineMidPoint();
-        Point cPt = flow.getCtrlPt();
-        double dx = basePt.x - cPt.x;
-        double dy = basePt.y - cPt.y;
+        double dx = basePt.x - flow.cPtX();
+        double dy = basePt.y - flow.cPtY();
         double l = Math.sqrt(dx * dx + dy * dy);
         double alpha = Math.atan2(dy, dx);
         double baseLineAzimuth = flow.getBaselineOrientation();
@@ -458,7 +458,6 @@ public class ForceLayouter {
     private void computeForceOnFlow(Flow flow, double maxFlowLength, Force outForce) {
 
         Point basePt = flow.getBaseLineMidPoint();
-        Point cPt = flow.getCtrlPt();
         Point[] flowPoints = flow.getCachedPolylineApproximation();
 
         // Compute forces applied by all flows on current flow
@@ -497,7 +496,7 @@ public class ForceLayouter {
         // compute spring force of flow
         double flowSpringConstant = computeSpringConstant(flow, maxFlowLength);
         flowSpringConstant *= forceRatio * forceRatio * model.getPeripheralStiffnessFactor() + 1;
-        Force springF = computeSpringForce(basePt, cPt, flowSpringConstant);
+        Force springF = computeSpringForce(basePt, flow.cPtX(), flow.cPtY(), flowSpringConstant);
 
         // compute total force: external forces + spring force + anti-torsion force
         outForce.fx = externalF.fx + springF.fx + antiTorsionF.fx + nodeF.fx;
@@ -571,13 +570,12 @@ public class ForceLayouter {
      * @return pairs of flows that have a common start or end node.
      */
     public ArrayList<Model.IntersectingFlowPair> getSortedIntersectingSiblings() {
-        updatePolylines();
+        updateCachedPolylineApproximations();
         ArrayList<Flow> flows = model.getFlows();
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
 
         for (int i = 0; i < flows.size(); i++) {
             Flow flow1 = flows.get(i);
-            Point[] polyline1 = flow1.getCachedPolylineApproximation();
             // FIXME need a better way here
             for (int j = i + 1; j < flows.size(); j++) {
                 Flow flow2 = flows.get(j);
@@ -585,16 +583,10 @@ public class ForceLayouter {
                 if (flow1.isLocked() && flow2.isLocked()) {
                     continue;
                 }
-
                 Point sharedNode = flow1.getSharedNode(flow2);
-                if (sharedNode != null) {
-                    Point[] polyline2 = flow2.getCachedPolylineApproximation();
-
-                    if (polylinesIntersect(polyline1, polyline2)) {
-                        pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));
-                    }
+                if (sharedNode != null && flow1.intersects(flow2)) {
+                    pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));
                 }
-
                 if (isCancelled()) {
                     return null;
                 }
@@ -603,32 +595,6 @@ public class ForceLayouter {
 
         pairs.sort(null);
         return pairs;
-    }
-
-    /**
-     * Test whether two polylines intersect.
-     *
-     * @param polyline1
-     * @param polyline2
-     * @return
-     */
-    private static boolean polylinesIntersect(Point[] polyline1, Point[] polyline2) {
-        for (int i = 0; i < polyline1.length - 1; i++) {
-            double x1 = polyline1[i].x;
-            double y1 = polyline1[i].y;
-            double x2 = polyline1[i + 1].x;
-            double y2 = polyline1[i + 1].y;
-            for (int j = 0; j < polyline2.length - 1; j++) {
-                double x3 = polyline2[j].x;
-                double y3 = polyline2[j].y;
-                double x4 = polyline2[j + 1].x;
-                double y4 = polyline2[j + 1].y;
-                if (GeometryUtils.linesIntersect(x1, y1, x2, y2, x3, y3, x4, y4)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -791,7 +757,12 @@ public class ForceLayouter {
 
         // Check the shortest distance between the obstacle and the flow. If it's 
         // less than the minimum distance, then the flow intersects the obstacle. 
-        double shortestDistSquare = flow.distanceSq(obstacle.x, obstacle.y, tol);
+        double shortestDistSquare;
+        if (flow instanceof FlowPair) {
+            shortestDistSquare = 0;
+        } else {
+            shortestDistSquare = flow.distanceSq(obstacle.x, obstacle.y, tol);
+        }        
         return shortestDistSquare < minDist * minDist;
     }
 
@@ -852,67 +823,6 @@ public class ForceLayouter {
     }
 
     /**
-     * Create map layer with spiral points used for moving flows away from
-     * obstacles. Only for selected flows. This is only meant or debugging
-     * purposes. Look at moveFlowFromObstacles() for documentation. Selected
-     * flows are not changed.
-     */
-    public void createSpiralPointsLayer() {
-        List<Flow> flows = model.getSelectedFlows();
-        List<Obstacle> obstacles = model.getObstacles();
-
-        ArrayList<Geometry> geometries = new ArrayList<>();
-        GeometryFactory geometryFactory = new GeometryFactory();
-        PrecisionModel precisionModel = geometryFactory.getPrecisionModel();
-        double dist = model.getMinObstacleDistPx() / model.getReferenceMapScale();
-
-        for (Flow flow : flows) {
-            if (flowIntersectsObstacle(flow, obstacles) == false) {
-                continue;
-            }
-            Point cPt = flow.getCtrlPt();
-            double originalX = cPt.x;
-            double originalY = cPt.y;
-            double angleRad = Math.PI;
-            RangeboxEnforcer rangeBoxEnforcer = new RangeboxEnforcer(model);
-
-            Point[] rangeBox = rangeBoxEnforcer.computeRangebox(flow);
-            double maxSpiralRSq = rangeBoxEnforcer.longestDistanceSqToCorner(rangeBox, cPt.x, cPt.y);
-
-            double spiralR;
-            do {
-                spiralR = dist * angleRad / Math.PI / 2;
-                double dx = Math.cos(angleRad) * spiralR;
-                double dy = Math.sin(angleRad) * spiralR;
-                cPt.x = dx + originalX;
-                cPt.y = dy + originalY;
-
-                Coordinate coord = new Coordinate(cPt.x, cPt.y);
-                precisionModel.makePrecise(coord);
-                com.vividsolutions.jts.geom.Point point = geometryFactory.createPoint(coord);
-                geometries.add(point);
-                angleRad += dist / spiralR;
-
-                if (rangeBoxEnforcer.isPointInRangebox(flow, cPt.x, cPt.y)
-                        && flowIntersectsObstacle(flow, obstacles) == false) {
-                    Geometry[] array = new Geometry[geometries.size()];
-                    Geometry geometry = geometryFactory.createGeometryCollection((Geometry[]) geometries.toArray(array));
-                    Layer layer = new Layer(geometry);
-                    layer.setName("Spiral points");
-                    model.addLayer(layer);
-                    break;
-                }
-
-            } // move along the spiral until the entire range box is covered
-            while (spiralR * spiralR < maxSpiralRSq);
-
-            // restore original position
-            cPt.x = originalX;
-            cPt.y = originalY;
-        }
-    }
-
-    /**
      * Moves the control point location such that the flow does not overlap any
      * obstacle. If no position can be found, the control point is not changed.
      * Tests control point locations placed along an Archimedean spiral centered
@@ -934,9 +844,8 @@ public class ForceLayouter {
         double minObstacleDistPx = Math.max(model.getMinObstacleDistPx(), 3);
         double dist = minObstacleDistPx / model.getReferenceMapScale();
 
-        Point cPt = flow.getCtrlPt();
-        double originalX = cPt.x;
-        double originalY = cPt.y;
+        double originalX = flow.cPtX();
+        double originalY = flow.cPtY();
         double angleRad = Math.PI;
         RangeboxEnforcer rangeBoxEnforcer = new RangeboxEnforcer(model);
 
@@ -945,7 +854,7 @@ public class ForceLayouter {
         // is the center of the spiral) and the corner point of the range box
         // that is the farthest away from the control point.
         Point[] rangeBox = rangeBoxEnforcer.computeRangebox(flow);
-        double maxSpiralRSq = rangeBoxEnforcer.longestDistanceSqToCorner(rangeBox, cPt.x, cPt.y);
+        double maxSpiralRSq = rangeBoxEnforcer.longestDistanceSqToCorner(rangeBox, originalX, originalY);
 
         // place the control point along the spiral until a position is found 
         // that does not result in any overlap
@@ -958,17 +867,18 @@ public class ForceLayouter {
             // new control point location
             double dx = Math.cos(angleRad) * spiralR;
             double dy = Math.sin(angleRad) * spiralR;
-            cPt.x = dx + originalX;
-            cPt.y = dy + originalY;
-
+            double cPtX = dx + originalX;
+            double cPtY = dy + originalY;
+            flow.setCtrlPt(cPtX, cPtY);
+            
             // increment rotation angle, such that the next point on the spiral 
             // has an approximate distance of dist to the current point
             angleRad += dist / spiralR;
 
-            if (rangeBoxEnforcer.isPointInRangebox(flow, cPt.x, cPt.y)
+            if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY)
                     && flowIntersectsObstacle(flow, obstacles) == false) {
                 // found a new position for the control point that does not 
-                // result in an overlap with any obstacle                
+                // result in an overlap with any obstacle
                 return true;
             }
         } // move along the spiral until the entire range box is covered
@@ -976,8 +886,8 @@ public class ForceLayouter {
 
         // could not find a control point position that does not overlap an 
         // obstacle. Restore the original coordinates.
-        cPt.x = originalX;
-        cPt.y = originalY;
+        flow.setCtrlPt(originalX, originalY);
+        
         return false;
     }
 

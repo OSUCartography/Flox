@@ -54,7 +54,10 @@ public class Flow implements Comparable<Flow> {
     /**
      * control point.
      */
-    private Point cPt;
+    private double cPtX;
+    private double cPtY;
+
+    private boolean controlPointSelected;
 
     /**
      * mapped value.
@@ -104,17 +107,18 @@ public class Flow implements Comparable<Flow> {
      * nodes.</STRONG> Note that a change to the arrowhead geometry does not
      * require an update to the polyline.
      */
-    private Point[] polyline;
+    protected Point[] polyline;
 
     /**
      * Construct a Flow from 3 points.
      *
      * @param startPt start point
-     * @param ctrlPt control point
+     * @param ctrlX control point x
+     * @param ctrlY control point y
      * @param endPt end point
      * @param value flow value
      */
-    public Flow(Point startPt, Point ctrlPt, Point endPt, double value) {
+    public Flow(Point startPt, double ctrlX, double ctrlY, Point endPt, double value) {
         assert (startPt != null);
         assert (endPt != null);
         assert (Double.isFinite(value));
@@ -124,7 +128,8 @@ public class Flow implements Comparable<Flow> {
         }
 
         this.startPt = startPt;
-        this.cPt = ctrlPt;
+        this.cPtX = ctrlX;
+        this.cPtY = ctrlY;
         this.endPt = endPt;
         this.value = value;
         this.id = createID();
@@ -138,7 +143,9 @@ public class Flow implements Comparable<Flow> {
      * @param value value of this flow
      */
     public Flow(Point startPt, Point endPt, double value) {
-        this(startPt, new Point((startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2), endPt, value);
+        this(startPt,
+                (startPt.x + endPt.x) / 2, (startPt.y + endPt.y) / 2,
+                endPt, value);
     }
 
     /**
@@ -156,7 +163,7 @@ public class Flow implements Comparable<Flow> {
      */
     public Flow(Flow flow) {
         this(new Point(flow.startPt),
-                new Point(flow.cPt),
+                flow.cPtX, flow.cPtY,
                 new Point(flow.endPt),
                 flow.value);
         shallowCopyClipAreas(flow, this);
@@ -194,7 +201,7 @@ public class Flow implements Comparable<Flow> {
         sb.append("id=").append(id);
         sb.append(" start=").append(startPt);
         sb.append(", end=").append(endPt);
-        sb.append(", ctrl=").append(cPt);
+        sb.append(", ctrl=").append(new Point(cPtX, cPtY));
         sb.append(", value=").append(value);
         sb.append(", selected=").append(selected);
         sb.append(", locked=").append(locked);
@@ -236,16 +243,16 @@ public class Flow implements Comparable<Flow> {
 
         // if values and base lengths are identical, compare lengths of convex hulls
         if (i == 0) {
-            double dx1 = cPt.x - endPt.x;
-            double dy1 = cPt.y - endPt.y;
-            double dx2 = cPt.x - startPt.x;
-            double dy2 = cPt.y - startPt.y;
+            double dx1 = cPtX - endPt.x;
+            double dy1 = cPtY - endPt.y;
+            double dx2 = cPtX - startPt.x;
+            double dy2 = cPtY - startPt.y;
             double l1 = dx1 * dx1 + dy1 * dy1 + dx2 * dx2 + dy2 * dy2;
 
-            dx1 = flow.cPt.x - flow.endPt.x;
-            dy1 = flow.cPt.y - flow.endPt.y;
-            dx2 = flow.cPt.x - flow.startPt.x;
-            dy2 = flow.cPt.y - flow.startPt.y;
+            dx1 = flow.cPtX - flow.endPt.x;
+            dy1 = flow.cPtY - flow.endPt.y;
+            dx2 = flow.cPtX - flow.startPt.x;
+            dy2 = flow.cPtY - flow.startPt.y;
             double l2 = dx1 * dx1 + dy1 * dy1 + dx2 * dx2 + dy2 * dy2;
             i = Double.compare(l1, l2);
         }
@@ -264,10 +271,10 @@ public class Flow implements Comparable<Flow> {
             i = Double.compare(endPt.y, flow.endPt.y);
         }
         if (i == 0) {
-            i = Double.compare(cPt.x, flow.cPt.x);
+            i = Double.compare(cPtX, flow.cPtX);
         }
         if (i == 0) {
-            i = Double.compare(cPt.y, flow.cPt.y);
+            i = Double.compare(cPtY, flow.cPtY);
         }
 
         // if i equals 0, the two flows have the same values and start and end
@@ -279,9 +286,9 @@ public class Flow implements Comparable<Flow> {
      * Updates the cached polyline. The polyline is not initialized or updated
      * by this Flow. It is the responsibility of the user to update the polyline
      * when any of the following change: start point, end point, control point,
-     * startClipArea, endClipArea, size of nodes, gap between start and end of
-     * line and nodes. Note that a change to the arrowhead geometry does not
-     * require an update to the polyline.
+     * startClipArea, endClipArea, size of nodes, gap between start/end of line
+     * and nodes. A change to the arrowhead geometry does not require an update
+     * to the polyline.
      *
      * @param model data model
      * @param segmentLength the target segment length. The actual length will
@@ -298,9 +305,9 @@ public class Flow implements Comparable<Flow> {
      * by this Flow. It is the responsibility of the user to update the polyline
      * by calling updateCachedPolylineApproximation() when any of the following
      * change: start point, end point, control point, startClipArea,
-     * endClipArea, size of nodes, gap between start and end of line and nodes.
-     * Note that a change to the arrowhead geometry does not require an update
-     * to the polyline.
+     * endClipArea, size of nodes, gap between start/end of line and nodes. A
+     * change to the arrowhead geometry does not require an update to the
+     * polyline.
      *
      * @return a reference to the polyline approximating the geometry of this
      * flow. Can be null or inaccurate if getCachedPolylineApproximation() has
@@ -309,6 +316,68 @@ public class Flow implements Comparable<Flow> {
      */
     public Point[] getCachedPolylineApproximation() {
         return polyline;
+    }
+
+    /**
+     * Tests whether this Flow intersects with another Flow. This is an
+     * approximate test.
+     *
+     * <STRONG>updateCachedPolylineApproximation() needs to be called before
+     * this method can be called.</STRONG>
+     *
+     * @param flow flow to detect intersection with
+     * @return true if the two flows intersect
+     */
+    public boolean intersects(Flow flow) {
+        Point[] thisPolyline = getCachedPolylineApproximation();
+        Point[] thatPolyline = flow.getCachedPolylineApproximation();
+        return polylinesIntersect(thisPolyline, thatPolyline);
+    }
+
+    /**
+     * Tests whether this Flow intersects with another FlowPair. This is an
+     * approximate test.
+     *
+     * <STRONG>updateCachedPolylineApproximation() needs to be called before
+     * this method can be called.</STRONG>
+     *
+     * @param flowPair FlowPair to detect intersection with
+     * @return true if the two flows intersect
+     */
+    public boolean intersects(FlowPair flowPair) {
+        Point[] thisPolyline = getCachedPolylineApproximation();
+        Point[] thatPolyline1 = flowPair.getCachedPolylineApproximation();
+        if (polylinesIntersect(thisPolyline, thatPolyline1)) {
+            return true;
+        }
+        Point[] thatPolyline2 = flowPair.getCachedPolylineApproximation2();
+        return polylinesIntersect(thisPolyline, thatPolyline2);
+    }
+
+    /**
+     * Test whether two polylines intersect.
+     *
+     * @param polyline1
+     * @param polyline2
+     * @return
+     */
+    static protected boolean polylinesIntersect(Point[] polyline1, Point[] polyline2) {
+        for (int i = 0; i < polyline1.length - 1; i++) {
+            double x1 = polyline1[i].x;
+            double y1 = polyline1[i].y;
+            double x2 = polyline1[i + 1].x;
+            double y2 = polyline1[i + 1].y;
+            for (int j = 0; j < polyline2.length - 1; j++) {
+                double x3 = polyline2[j].x;
+                double y3 = polyline2[j].y;
+                double x4 = polyline2[j + 1].x;
+                double y4 = polyline2[j + 1].y;
+                if (GeometryUtils.linesIntersect(x1, y1, x2, y2, x3, y3, x4, y4)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -512,8 +581,8 @@ public class Flow implements Comparable<Flow> {
      * point and the end point.
      */
     public void straighten() {
-        cPt.x = (startPt.x + endPt.x) / 2;
-        cPt.y = (startPt.y + endPt.y) / 2;
+        cPtX = (startPt.x + endPt.x) / 2;
+        cPtY = (startPt.y + endPt.y) / 2;
     }
 
     /**
@@ -545,24 +614,24 @@ public class Flow implements Comparable<Flow> {
         // Compute parameter t for the root of the first derivative of the x 
         // position. This is the t parameter for the extremum in x of the curve, 
         // as the first derivative is 0 at the extremum.
-        double tx = (startPt.x - cPt.x) / (startPt.x - 2 * cPt.x + endPt.x);
+        double tx = (startPt.x - cPtX) / (startPt.x - 2 * cPtX + endPt.x);
         // t must be in [0,1]
         if (Double.isFinite(tx) && tx >= 0 && tx <= 1) {
             double one_minus_tx = 1d - tx;
             // compute x position of extrema
             double x = one_minus_tx * one_minus_tx * startPt.x
-                    + 2 * one_minus_tx * tx * cPt.x + tx * tx * endPt.x;
+                    + 2 * one_minus_tx * tx * cPtX + tx * tx * endPt.x;
             // extend bounding box
             xmin = Math.min(xmin, x);
             xmax = Math.max(xmax, x);
         }
 
         // repeat for y
-        double ty = (startPt.y - cPt.y) / (startPt.y - 2 * cPt.y + endPt.y);
+        double ty = (startPt.y - cPtY) / (startPt.y - 2 * cPtY + endPt.y);
         if (Double.isFinite(ty) && ty >= 0 && ty <= 1) {
             double one_minus_ty = 1d - ty;
             double y = one_minus_ty * one_minus_ty * startPt.y
-                    + 2 * one_minus_ty * ty * cPt.y + ty * ty * endPt.y;
+                    + 2 * one_minus_ty * ty * cPtY + ty * ty * endPt.y;
             ymin = Math.min(ymin, y);
             ymax = Math.max(ymax, y);
         }
@@ -570,22 +639,30 @@ public class Flow implements Comparable<Flow> {
         return new Rectangle2D.Double(xmin, ymin, xmax - xmin, ymax - ymin);
     }
 
-    /**
-     * Returns the control point.
-     *
-     * @return the control point
-     */
-    public Point getCtrlPt() {
-        return cPt;
+    public double cPtX() {
+        return cPtX;
     }
 
-    /**
-     * Sets the control point.
-     *
-     * @param cPt the control point to set
-     */
-    public void setControlPoint(Point cPt) {
-        this.cPt = cPt;
+    public double cPtY() {
+        return cPtY;
+    }
+
+    public void setCtrlPt(double x, double y) {
+        cPtX = x;
+        cPtY = y;
+    }
+
+    public void offsetCtrlPt(double dx, double dy) {
+        cPtX += dx;
+        cPtY += dy;
+    }
+
+    public boolean isControlPointSelected() {
+        return controlPointSelected;
+    }
+
+    public void setControlPointSelected(boolean selected) {
+        controlPointSelected = selected;
     }
 
     /**
@@ -596,8 +673,8 @@ public class Flow implements Comparable<Flow> {
      */
     public double getSlope(double t) {
         assert (t >= 0 && t <= 1);
-        double dx = (1 - t) * (cPt.x - startPt.x) + t * (endPt.x - cPt.x);
-        double dy = (1 - t) * (cPt.y - startPt.y) + t * (endPt.y - cPt.y);
+        double dx = (1 - t) * (cPtX - startPt.x) + t * (endPt.x - cPtX);
+        double dy = (1 - t) * (cPtY - startPt.y) + t * (endPt.y - cPtY);
         return Math.atan2(dy, dx);
     }
 
@@ -611,8 +688,8 @@ public class Flow implements Comparable<Flow> {
      */
     public double[] getNormal(double t) {
         assert (t >= 0 && t <= 1);
-        double dx = (1 - t) * (cPt.x - startPt.x) + t * (endPt.x - cPt.x);
-        double dy = (1 - t) * (cPt.y - startPt.y) + t * (endPt.y - cPt.y);
+        double dx = (1 - t) * (cPtX - startPt.x) + t * (endPt.x - cPtX);
+        double dy = (1 - t) * (cPtY - startPt.y) + t * (endPt.y - cPtY);
         double l = Math.sqrt(dx * dx + dy * dy);
         return new double[]{-dy / l, dx / l};
     }
@@ -626,7 +703,7 @@ public class Flow implements Comparable<Flow> {
     private Point closestPointOnCurve(Point pt) {
         double[] xy = new double[]{pt.x, pt.y};
         GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
-                cPt.x, cPt.y, endPt.x, endPt.y, 0.001, xy);
+                cPtX, cPtY, endPt.x, endPt.y, 0.001, xy);
         return new Point(xy[0], xy[1]);
     }
 
@@ -649,7 +726,7 @@ public class Flow implements Comparable<Flow> {
         assert (Double.isFinite(offset));
 
         // coordinates of offset flow
-        double startX, startY, cPtX, cPtY, endX, endY;
+        double startX, startY, ctrlPtX, ctrlPtY, endX, endY;
 
         // The offset start and end points are not on a normal vector through 
         // the start and end points of the flow. Instead, the normal vector for 
@@ -687,19 +764,21 @@ public class Flow implements Comparable<Flow> {
         double originalBaselineOrientation = getBaselineOrientation();
         double baselineOrientation = Math.atan2(endY - startY, endX - startX);
         double rot = baselineOrientation - originalBaselineOrientation;
-        cPtX = scale * (cPt.x - startPt.x);
-        cPtY = scale * (cPt.y - startPt.y);
+        ctrlPtX = scale * (cPtX - startPt.x);
+        ctrlPtY = scale * (cPtY - startPt.y);
         double cos = Math.cos(rot);
         double sin = Math.sin(rot);
-        double newX = cPtX * cos - cPtY * sin;
-        double newY = cPtX * sin + cPtY * cos;
-        cPtX = newX + startX;
-        cPtY = newY + startY;
+        double newX = ctrlPtX * cos - ctrlPtY * sin;
+        double newY = ctrlPtX * sin + ctrlPtY * cos;
+        ctrlPtX = newX + startX;
+        ctrlPtY = newY + startY;
 
         // improve the control point position such that the distance between the
         // original curve and the offset curve are approximately constant
         for (int i = 0; i < nbrIterations; i++) {
-            Flow offsetFlow = new Flow(new Point(startX, startY), new Point(cPtX, cPtY), new Point(endX, endY), 1d);
+            Flow offsetFlow = new Flow(new Point(startX, startY),
+                    ctrlPtX, ctrlPtY,
+                    new Point(endX, endY), 1d);
             double moveX = 0;
             double moveY = 0;
             for (int j = 0; j < nbrTSamples; j++) {
@@ -750,8 +829,8 @@ public class Flow implements Comparable<Flow> {
             // move control point
             moveX /= nbrTSamples;
             moveY /= nbrTSamples;
-            cPtX += moveX;
-            cPtY += moveY;
+            ctrlPtX += moveX;
+            ctrlPtY += moveY;
         }
 
         // copy new geometry to this flow
@@ -759,8 +838,8 @@ public class Flow implements Comparable<Flow> {
         startPt.y = startY;
         endPt.x = endX;
         endPt.y = endY;
-        cPt.x = cPtX;
-        cPt.y = cPtY;
+        cPtX = ctrlPtX;
+        cPtY = ctrlPtY;
     }
 
     /**
@@ -775,9 +854,8 @@ public class Flow implements Comparable<Flow> {
         GeneralPath path = new GeneralPath();
         Point pt0 = getStartPt();
         path.moveTo((pt0.x - west) * scale, (north - pt0.y) * scale);
-        Point pt1 = getCtrlPt();
         Point pt2 = getEndPt();
-        path.quadTo((pt1.x - west) * scale, (north - pt1.y) * scale,
+        path.quadTo((cPtX - west) * scale, (north - cPtY) * scale,
                 (pt2.x - west) * scale, (north - pt2.y) * scale);
         return path;
     }
@@ -795,8 +873,8 @@ public class Flow implements Comparable<Flow> {
         double _1_t = 1 - t;
         double w2 = 2 * _1_t * t;
         double w1 = _1_t * _1_t;
-        double x = startPt.x * w1 + cPt.x * w2 + endPt.x * w3;
-        double y = startPt.y * w1 + cPt.y * w2 + endPt.y * w3;
+        double x = startPt.x * w1 + cPtX * w2 + endPt.x * w3;
+        double y = startPt.y * w1 + cPtY * w2 + endPt.y * w3;
         return new Point(x, y);
     }
 
@@ -819,36 +897,34 @@ public class Flow implements Comparable<Flow> {
 
         double startX1 = startPt.x;
         double startY1 = startPt.y;
-        double ctrlX1 = t * cPt.x - (t - 1) * startPt.x;
-        double ctrlY1 = t * cPt.y - (t - 1) * startPt.y;
-        double endX1 = t * t * endPt.x - 2 * t * (t - 1) * cPt.x + (t - 1) * (t - 1) * startPt.x;
-        double endY1 = t * t * endPt.y - 2 * t * (t - 1) * cPt.y + (t - 1) * (t - 1) * startPt.y;
+        double ctrlX1 = t * cPtX - (t - 1) * startPt.x;
+        double ctrlY1 = t * cPtY - (t - 1) * startPt.y;
+        double endX1 = t * t * endPt.x - 2 * t * (t - 1) * cPtX + (t - 1) * (t - 1) * startPt.x;
+        double endY1 = t * t * endPt.y - 2 * t * (t - 1) * cPtY + (t - 1) * (t - 1) * startPt.y;
 
         Point start1 = new Point(startX1, startY1);
-        Point ctrl1 = new Point(ctrlX1, ctrlY1);
         Point end1 = new Point(endX1, endY1);
 
-        double startX2 = t * t * endPt.x - 2 * t * (t - 1) * cPt.x + (t - 1) * (t - 1) * startPt.x;
-        double startY2 = t * t * endPt.y - 2 * t * (t - 1) * cPt.y + (t - 1) * (t - 1) * startPt.y;
-        double ctrlX2 = t * endPt.x - (t - 1) * cPt.x;
-        double ctrlY2 = t * endPt.y - (t - 1) * cPt.y;
+        double startX2 = t * t * endPt.x - 2 * t * (t - 1) * cPtX + (t - 1) * (t - 1) * startPt.x;
+        double startY2 = t * t * endPt.y - 2 * t * (t - 1) * cPtY + (t - 1) * (t - 1) * startPt.y;
+        double ctrlX2 = t * endPt.x - (t - 1) * cPtX;
+        double ctrlY2 = t * endPt.y - (t - 1) * cPtY;
         double endX2 = endPt.x;
         double endY2 = endPt.y;
 
         Point start2 = new Point(startX2, startY2);
-        Point ctrl2 = new Point(ctrlX2, ctrlY2);
         Point end2 = new Point(endX2, endY2);
 
         // create copies of this flow using copyFlow() method instead of copy 
         // constructor to allow overriding classes to copy themselves.
         Flow flow1 = copyFlow();
         flow1.setStartPt(start1);
-        flow1.setControlPoint(ctrl1);
+        flow1.setCtrlPt(ctrlX1, ctrlY1);
         flow1.setEndPt(end1);
 
         Flow flow2 = copyFlow();
         flow2.setStartPt(start2);
-        flow2.setControlPoint(ctrl2);
+        flow2.setCtrlPt(ctrlX2, ctrlY2);
         flow2.setEndPt(end2);
 
         return new Flow[]{flow1, flow2};
@@ -986,13 +1062,12 @@ public class Flow implements Comparable<Flow> {
      */
     public double distance(double[] xy, double tol) {
         return GeometryUtils.getDistanceToQuadraticBezierCurve(startPt.x, startPt.y,
-                cPt.x, cPt.y, endPt.x, endPt.y, tol, xy);
+                cPtX, cPtY, endPt.x, endPt.y, tol, xy);
     }
 
     /**
      * Computes the square of the shortest distance between a point and any
-     * point on this quadratic Bézier curve. <STRONG>Attention: xy parameter is
-     * changed</STRONG>.
+     * point on this quadratic Bézier curve.
      *
      * @param x point x
      * @param y point y
@@ -1001,7 +1076,7 @@ public class Flow implements Comparable<Flow> {
      */
     public double distanceSq(double x, double y, double tol) {
         return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
-                cPt.x, cPt.y, endPt.x, endPt.y, tol, x, y);
+                cPtX, cPtY, endPt.x, endPt.y, tol, x, y);
     }
 
     /**
@@ -1010,8 +1085,8 @@ public class Flow implements Comparable<Flow> {
      * @return the length
      */
     public double getDistanceBetweenStartPointAndControlPoint() {
-        double dx = cPt.x - startPt.x;
-        double dy = cPt.y - startPt.y;
+        double dx = cPtX - startPt.x;
+        double dy = cPtY - startPt.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -1021,8 +1096,8 @@ public class Flow implements Comparable<Flow> {
      * @return the length
      */
     public double getDistanceBetweenEndPointAndControlPoint() {
-        double dx = cPt.x - endPt.x;
-        double dy = cPt.y - endPt.y;
+        double dx = cPtX - endPt.x;
+        double dy = cPtY - endPt.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -1034,8 +1109,8 @@ public class Flow implements Comparable<Flow> {
      * point coincide.
      */
     public double[] getDirectionVectorFromStartPointToControlPoint() {
-        double dx = cPt.x - startPt.x;
-        double dy = cPt.y - startPt.y;
+        double dx = cPtX - startPt.x;
+        double dy = cPtY - startPt.y;
         double d = Math.sqrt(dx * dx + dy * dy);
         return new double[]{dx / d, dy / d};
     }
@@ -1048,8 +1123,8 @@ public class Flow implements Comparable<Flow> {
      * point coincide.
      */
     public double[] getDirectionVectorFromEndPointToControlPoint() {
-        double dx = cPt.x - endPt.x;
-        double dy = cPt.y - endPt.y;
+        double dx = cPtX - endPt.x;
+        double dy = cPtY - endPt.y;
         double d = Math.sqrt(dx * dx + dy * dy);
         return new double[]{dx / d, dy / d};
     }
@@ -1061,8 +1136,8 @@ public class Flow implements Comparable<Flow> {
      * counter-clockwise direction.
      */
     public double startToCtrlAngle() {
-        double dx = cPt.x - startPt.x;
-        double dy = cPt.y - startPt.y;
+        double dx = cPtX - startPt.x;
+        double dy = cPtY - startPt.y;
         return Math.atan2(dy, dx);
     }
 
@@ -1073,8 +1148,8 @@ public class Flow implements Comparable<Flow> {
      * counter-clockwise direction.
      */
     public double endToCtrlAngle() {
-        double dx = cPt.x - endPt.x;
-        double dy = cPt.y - endPt.y;
+        double dx = cPtX - endPt.x;
+        double dy = cPtY - endPt.y;
         return Math.atan2(dy, dx);
     }
 
@@ -1128,7 +1203,7 @@ public class Flow implements Comparable<Flow> {
         ArrayList<Point> irregularPoints = new ArrayList<>();
         GeneralPath path = new GeneralPath();
         path.moveTo(startPt.x, startPt.y);
-        path.quadTo(cPt.x, cPt.y, endPt.x, endPt.y);
+        path.quadTo(cPtX, cPtY, endPt.x, endPt.y);
         PathIterator iter = path.getPathIterator(null, deCasteljauTol);
         double[] coords = new double[6];
         while (!iter.isDone()) {
@@ -1183,8 +1258,8 @@ public class Flow implements Comparable<Flow> {
             double a = t * t;
             double b = 2 * t * t_1;
             double c = t_1 * t_1;
-            double x1 = a * endPt.x - b * cPt.x + c * startPt.x;
-            double y1 = a * endPt.y - b * cPt.y + c * startPt.y;
+            double x1 = a * endPt.x - b * cPtX + c * startPt.x;
+            double y1 = a * endPt.y - b * cPtY + c * startPt.y;
 
             // distance to previous point. Use Eucledian distance.
             double dx = x0 - x1;

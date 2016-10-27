@@ -68,9 +68,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             // deselect all control points
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
-                Flow flow = iterator.next();
-                Point cPt = flow.getCtrlPt();
-                cPt.setSelected(false);
+                iterator.next().setControlPointSelected(false);
             }
             mapComponent.refreshMap();
         }
@@ -112,9 +110,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         // deselect all control points
         iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            Point cPt = flow.getCtrlPt();
-            cPt.setSelected(false);
+            iterator.next().setControlPointSelected(false);
         }
         
         mapComponent.refreshMap();
@@ -218,20 +214,21 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 while (iterator.hasNext()) {
                     Flow flow = iterator.next();
                     if (flow.isSelected()) {
-                        // See if the event point is near the control point.
-                        Point cPt = flow.getCtrlPt();
-
                         // If a control point already got selected, exit the loop
                         if (controlPtGotSelected) {
-                            cPt.setSelected(false);
+                            flow.setControlPointSelected(false);
                             continue;
                         }
 
-                        if (((mapComponent.xToPx(cPt.x) >= mapComponent.xToPx(point.x) - 5)
-                                && (mapComponent.xToPx(cPt.x) <= mapComponent.xToPx(point.x) + 5))
-                                && ((mapComponent.yToPx(cPt.y) >= mapComponent.yToPx(point.y) - 5)
-                                && (mapComponent.yToPx(cPt.y) <= mapComponent.yToPx(point.y) + 5))) {
-                            cPt.setSelected(true);
+                        // See if the event point is near the control point.
+                        double cPtx = flow.cPtX();
+                        double cPty = flow.cPtY();
+                        
+                        if (((mapComponent.xToPx(cPtx) >= mapComponent.xToPx(point.x) - 5)
+                                && (mapComponent.xToPx(cPtx) <= mapComponent.xToPx(point.x) + 5))
+                                && ((mapComponent.yToPx(cPty) >= mapComponent.yToPx(point.y) - 5)
+                                && (mapComponent.yToPx(cPty) <= mapComponent.yToPx(point.y) + 5))) {
+                            flow.setControlPointSelected(true);
                             // Lock the flow
                             flow.setLocked(true);
                             ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
@@ -241,7 +238,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             // avoid deselecting flows
                             return true;
                         } else {
-                            cPt.setSelected(false);
+                            flow.setControlPointSelected(false);
                         }
                     }
                 }

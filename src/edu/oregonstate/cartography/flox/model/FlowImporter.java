@@ -74,7 +74,7 @@ public class FlowImporter {
             Flow flow = new Flow(startNode, endNode, value);
 
             if (cPt != null) {
-                flow.setControlPoint(cPt);
+                flow.setCtrlPt(cPt.x, cPt.y);
             }
             flow.setLocked(locked);
 

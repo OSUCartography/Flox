@@ -22,6 +22,19 @@ public class FlowPair extends Flow {
     private final double value2;
 
     /**
+     * A cached approximation of the flow geometry of the second flow by a
+     * straight polyline to avoid repeated expensive conversions to a polyline.
+     *
+     * <STRONG>The polyline is not initialized or updated by this FlowPair. It
+     * is the responsibility of the user to update the polyline when any of the
+     * following change: start point, end point, control point, startClipArea,
+     * endClipArea, size of nodes, gap between start/end of line and
+     * nodes.</STRONG> A change to the arrowhead geometry does not require an
+     * update to the polyline.
+     */
+    private Point[] polyline2;
+
+    /**
      * Constructor without parameters for JAXB.
      */
     private FlowPair() {
@@ -38,8 +51,11 @@ public class FlowPair extends Flow {
      */
     public FlowPair(Flow flow1, Flow flow2) {
         // create a copy of flow1
-        super(flow1.getStartPt(), flow1.getCtrlPt().mean(flow2.getCtrlPt()),
-                flow1.getEndPt(), flow1.getValue());
+        super(flow1.getStartPt(),
+                // mean of the two control points
+                (flow1.cPtX() + flow2.cPtX()) / 2, (flow1.cPtY() + flow2.cPtY()) / 2,
+                flow1.getEndPt(),
+                flow1.getValue());
         setStartClipArea(flow1.getStartClipArea());
         setEndClipArea(flow1.getEndClipArea());
 
@@ -57,9 +73,10 @@ public class FlowPair extends Flow {
      */
     public FlowPair(FlowPair flowPair) {
         super(new Point(flowPair.getStartPt()),
-                new Point(flowPair.getCtrlPt()),
+                flowPair.cPtX(), flowPair.cPtY(),
                 new Point(flowPair.getEndPt()),
                 flowPair.getValue1());
+
         shallowCopyClipAreas(flowPair, this);
         setSelected(flowPair.isSelected());
         setLocked(flowPair.isLocked());
@@ -113,6 +130,76 @@ public class FlowPair extends Flow {
      */
     public double getValue2() {
         return value2;
+    }
+
+    public Point[] getCachedPolylineApproximation2() {
+        return polyline2;
+    }
+
+    /**
+     * Updates the two cached polylines. The polylines are not initialized or
+     * updated by this Flow. It is the responsibility of the user to update the
+     * polylines when any of the following change: start point, end point,
+     * control point, startClipArea, endClipArea, size of nodes, gap between
+     * start/end of line and nodes. A change to the arrowhead geometry does not
+     * require an update to the polylines.
+     *
+     * @param model data model
+     * @param segmentLength the target segment length. The actual length will
+     * differ.
+     */
+    @Override
+    public void updateCachedPolylineApproximation(Model model, double segmentLength) {
+        // FIXME need option to either use central line or offset lines
+        Flow flow1 = createParallelFlow1(model);
+        Flow flow2 = createParallelFlow2(model);
+        flow1.updateCachedPolylineApproximation(model, segmentLength);
+        flow2.updateCachedPolylineApproximation(model, segmentLength);
+        this.polyline = flow1.polyline;
+        this.polyline2 = flow2.polyline;
+    }
+
+    /**
+     * Tests whether this FlowPair intersects with another Flow. This is an
+     * approximate test.
+     *
+     * <STRONG>updateCachedPolylineApproximation() needs to be called before
+     * intersects() can be called.</STRONG>
+     *
+     * @param flow flow to detect intersection with
+     * @return true if the two flows intersect
+     */
+    @Override
+    public boolean intersects(Flow flow) {
+        return flow.intersects(this);
+    }
+
+    /**
+     * Tests whether this FlowPair intersects with another FlowPair. This is an
+     * approximate test.
+     *
+     * <STRONG>updateCachedPolylineApproximation() needs to be called before
+     * this method can be called.</STRONG>
+     *
+     * @param flowPair FlowPair to detect intersection with
+     * @return true if the two flows intersect
+     */
+    @Override
+    public boolean intersects(FlowPair flowPair) {
+        Point[] thisPolyline1 = getCachedPolylineApproximation();
+        Point[] thatPolyline1 = flowPair.getCachedPolylineApproximation();
+        if (polylinesIntersect(thisPolyline1, thatPolyline1)) {
+            return true;
+        }
+        Point[] thatPolyline2 = flowPair.getCachedPolylineApproximation2();
+        if (polylinesIntersect(thisPolyline1, thatPolyline2)) {
+            return true;
+        }
+        Point[] thisPolyline2 = getCachedPolylineApproximation2();
+        if (polylinesIntersect(thisPolyline2, thatPolyline1)) {
+            return true;
+        }
+        return polylinesIntersect(thisPolyline2, thatPolyline2);
     }
 
     /**

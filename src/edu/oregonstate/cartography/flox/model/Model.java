@@ -188,16 +188,19 @@ public class Model {
             Point node1 = flow1.getOppositePoint(sharedNode);
             Point node2 = flow2.getOppositePoint(sharedNode);
 
-            Point cPt1 = flow1.getCtrlPt();
-            Point cPt2 = flow2.getCtrlPt();
-            Point cPt1New = GeometryUtils.getLineLineIntersection(x, y, cPt2.x, cPt2.y, cPt1.x, cPt1.y, node1.x, node1.y);
-            Point cPt2New = GeometryUtils.getLineLineIntersection(x, y, cPt1.x, cPt1.y, cPt2.x, cPt2.y, node2.x, node2.y);
+            double cPt1x = flow1.cPtX();
+            double cPt1y = flow1.cPtY();
+            double cPt2x = flow2.cPtX();
+            double cPt2y = flow2.cPtY();
+           
+            Point cPt1New = GeometryUtils.getLineLineIntersection(x, y, cPt2x, cPt2y, cPt1x, cPt1y, node1.x, node1.y);
+            Point cPt2New = GeometryUtils.getLineLineIntersection(x, y, cPt1x, cPt1y, cPt2x, cPt2y, node2.x, node2.y);
             if (cPt1New != null && cPt2New != null) {
                 if (flow1.isLocked() == false) {
-                    flow1.setControlPoint(cPt1New);
+                    flow1.setCtrlPt(cPt1New.x, cPt1New.y);
                 }
                 if (flow2.isLocked() == false) {
-                    flow2.setControlPoint(cPt2New);
+                    flow2.setCtrlPt(cPt2New.x, cPt2New.y);
                 }
             }
         }
@@ -590,8 +593,7 @@ public class Model {
         while (iter.hasNext()) {
             Flow flow = iter.next();
             if (flow.id == id) {
-                flow.getCtrlPt().x = x;
-                flow.getCtrlPt().y = y;
+                flow.setCtrlPt(x, y);
                 break;
             }
         }
@@ -1932,7 +1934,7 @@ public class Model {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (flow.getCtrlPt().isSelected()) {
+            if (flow.isControlPointSelected()) {
                 return true;
             }
         }

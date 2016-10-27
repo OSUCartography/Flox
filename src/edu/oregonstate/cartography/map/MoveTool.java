@@ -120,9 +120,8 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             Iterator<Flow> iterator = model.flowIterator();
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
-                Point cPt = flow.getCtrlPt();
-                if (cPt.isSelected()) {
-                    cPt.setSelected(false);
+                if (flow.isControlPointSelected()) {
+                    flow.setControlPointSelected(false);
                 }
             }
         }
@@ -150,10 +149,10 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
                 if (flow.isSelected()) {
-                    Point cPt = flow.getCtrlPt();
-                    if (cPt.isSelected()) {
-                        cPt.x += (point.x - previousDrag_x);
-                        cPt.y += (point.y - previousDrag_y);
+                    if (flow.isControlPointSelected()) {
+                        double dx = (point.x - previousDrag_x);
+                        double dy = (point.y - previousDrag_y);
+                        flow.offsetCtrlPt(dx, dy);
                     }
                 }
             }
@@ -173,13 +172,17 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
             Iterator<Flow> flows = model.flowIterator();
             while (flows.hasNext()) {
                 Flow flow = flows.next();
+                // if start point is selected, move by half distance
                 if (flow.getStartPt().isSelected()) {
-                    flow.getCtrlPt().x += (point.x - previousDrag_x) / 2;
-                    flow.getCtrlPt().y += (point.y - previousDrag_y) / 2;
+                    double dx = (point.x - previousDrag_x) / 2;
+                    double dy = (point.y - previousDrag_y) / 2;
+                    flow.offsetCtrlPt(dx, dy);
                 }
+                // if end point is selected, move by half distance
                 if (flow.getEndPt().isSelected()) {
-                    flow.getCtrlPt().x += (point.x - previousDrag_x) / 2;
-                    flow.getCtrlPt().y += (point.y - previousDrag_y) / 2;
+                    double dx = (point.x - previousDrag_x) / 2;
+                    double dy = (point.y - previousDrag_y) / 2;
+                    flow.offsetCtrlPt(dx, dy);
                 }
             }
 

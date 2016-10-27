@@ -705,7 +705,6 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu = new javax.swing.JMenu();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        spiralPointsMenuItem = new javax.swing.JMenuItem();
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
@@ -2819,14 +2818,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showObstaclesCheckBoxMenuItem);
-
-        spiralPointsMenuItem.setText("Create Map Layer with Spiral Points");
-        spiralPointsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                spiralPointsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(spiralPointsMenuItem);
         debugMenu.add(jSeparator12);
 
         enforceCanvasCheckBoxMenuItem.setSelected(true);
@@ -3966,14 +3957,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectIntersectingSiblingFlowsMenuItemActionPerformed
 
-    private void spiralPointsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spiralPointsMenuItemActionPerformed
-        new ForceLayouter(model).createSpiralPointsLayer();
-        writeSymbolGUI();
-        updateLayerList();
-        layerList.setSelectedIndex(0);
-        mapComponent.refreshMap();
-    }//GEN-LAST:event_spiralPointsMenuItemActionPerformed
-
     private void nodeStrokeSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_nodeStrokeSpinnerStateChanged
         SpinnerModel spinnerModel = nodeStrokeSpinner.getModel();
         float strokeWidth = ((SpinnerNumberModel) spinnerModel).getNumber().floatValue();
@@ -4419,7 +4402,9 @@ public class MainWindow extends javax.swing.JFrame {
             double x2 = baseLength * (i + 1);
             x1 += xSpacing * i;
             x2 += xSpacing * i;
-            Flow originalFlow = new Flow(new Point(x1, 0), new Point(x1, cy), new Point(x2, 0), 1d);
+            Flow originalFlow = new Flow(new Point(x1, 0), 
+                    x1, cy,
+                    new Point(x2, 0), 1d);
             flows.add(originalFlow);
             originalFlow.setLocked(true);
             originalFlow.setSelected(true);
@@ -4716,7 +4701,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem showOptionsMenuItem;
     private javax.swing.JCheckBoxMenuItem showRangeBoxCheckBoxMenuItem;
     private javax.swing.JLabel smallestFlowColorLabel;
-    private javax.swing.JMenuItem spiralPointsMenuItem;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
     private javax.swing.JSpinner startDistanceSpinner;
     private javax.swing.JMenuItem straightenFlowsMenuItem;

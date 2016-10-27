@@ -532,18 +532,19 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         g2d.setStroke(new BasicStroke(1f));
         Point startPt = flow.getStartPt();
         Point endPt = flow.getEndPt();
-        Point cpt = flow.getCtrlPt();
+        double cPtX = flow.cPtX();
+        double cPtY = flow.cPtY();
         g2d.setColor(Color.GRAY);
         Line2D line1 = new Line2D.Double(xToPx(startPt.x),
-                yToPx(startPt.y), xToPx(cpt.x), yToPx(cpt.y));
+                yToPx(startPt.y), xToPx(cPtX), yToPx(cPtY));
         g2d.draw(line1);
         Line2D line2 = new Line2D.Double(xToPx(endPt.x),
-                yToPx(endPt.y), xToPx(cpt.x), yToPx(cpt.y));
+                yToPx(endPt.y), xToPx(cPtX), yToPx(cPtY));
         g2d.draw(line2);
-        if (cpt.isSelected()) {
-            drawCircle(cpt.x, cpt.y, CR, Color.CYAN, Color.GRAY);
+        if (flow.isControlPointSelected()) {
+            drawCircle(cPtX, cPtY, CR, Color.CYAN, Color.GRAY);
         } else {
-            drawCircle(cpt.x, cpt.y, CR, Color.ORANGE, Color.GRAY);
+            drawCircle(cPtX, cPtY, CR, Color.ORANGE, Color.GRAY);
         }
     }
 

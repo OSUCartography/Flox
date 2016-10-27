@@ -9,7 +9,7 @@ import edu.oregonstate.cartography.utils.GeometryUtils;
  *
  * @author danielstephen
  */
-public class Arrow {
+public final class Arrow {
 
     /**
      * The length of the arrowhead.
@@ -167,7 +167,9 @@ public class Arrow {
         // and the base line of the arrow are aligned diffrently. The clipRadius
         // is reduced to compensate for this gap. The size of the gap is 
         // computed from the orientation of the line and the orientation of the arrow.
-        double lineOrientation = GeometryUtils.orientation(flow.split(t)[0].getCtrlPt(), getBasePt());
+        Flow f = flow.split(t)[0];
+        Point cPt = new Point(f.cPtX(), f.cPtY());
+        double lineOrientation = GeometryUtils.orientation(cPt, getBasePt());
         double dAlpha = GeometryUtils.angleDif(lineOrientation, arrowheadOrientation);
         double dRadius = Math.abs(Math.tan(dAlpha) * flowStrokeWidth / 2);
         

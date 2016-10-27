@@ -36,9 +36,9 @@ public class SVGFlowExporter extends SVGExporter {
         str.append(df.format(yToSVGCanvas(flow.getStartPt().y)));
 
         str.append(" Q");
-        str.append(df.format(xToSVGCanvas(flow.getCtrlPt().x)));
+        str.append(df.format(xToSVGCanvas(flow.cPtX())));
         str.append(" ");
-        str.append(df.format(yToSVGCanvas(flow.getCtrlPt().y)));
+        str.append(df.format(yToSVGCanvas(flow.cPtY())));
         str.append(", ");
         str.append(df.format(xToSVGCanvas(flow.getEndPt().x)));
         str.append(", ");
