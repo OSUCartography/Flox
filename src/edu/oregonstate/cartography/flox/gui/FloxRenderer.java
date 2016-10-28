@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowPair;
+import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Obstacle;
@@ -592,7 +593,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
     private void drawObstacles() {
         g2d.setStroke(new BasicStroke(model.getNodeStrokeWidthPx()));
-        List<Obstacle> obstacles = model.getObstacles();
+        List<Obstacle> obstacles = new ForceLayouter(model).getObstacles();
         Color fillColor = new Color(200, 0, 0, 80);
         for (Obstacle obstacle : obstacles) {
             drawCircle(obstacle.x, obstacle.y, obstacle.r * scale, fillColor, null);

@@ -32,6 +32,17 @@ public class Flow implements Comparable<Flow> {
     protected static long createID() {
         return idCounter++;
     }
+    
+    public enum FlowOffsettingQuality {
+        LOW(1),
+        HIGH(10);
+
+        public final int iterations;
+
+        FlowOffsettingQuality(int iterations) {
+            this.iterations = iterations;
+        }
+    }
 
     /**
      * An identifier that is used to find Flows in a Graph. The id is not
@@ -309,7 +320,7 @@ public class Flow implements Comparable<Flow> {
      * @param model data model
      * @return
      */
-    public boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model) {
+    protected boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model) {
         double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
 
         // flow width in world coordinates
@@ -496,9 +507,9 @@ public class Flow implements Comparable<Flow> {
             startClipAreaWKT = endClipAreaWKT;
             endClipAreaWKT = tempWKT;
         } else if (model.isClipFlowStarts()) {
-            model.updateStartClipArea(this);
+            model.findStartClipAreaForFlow(this);
         } else if (model.isClipFlowEnds()) {
-            model.updateEndClipArea(this);
+            model.findEndClipAreaForFlow(this);
         }
     }
 
@@ -713,12 +724,14 @@ public class Flow implements Comparable<Flow> {
      *
      * @param offset offset distance
      * @param model data model
+     * @param quality 
      */
-    public void offsetFlow(double offset, Model model) {
+    public void offsetFlow(double offset, Model model, FlowOffsettingQuality quality) {
+        
         // number of iterations
-        final int nbrIterations = 10;
+        final int nbrIterations = quality.iterations;
         // number of samples along the curves for computing distances
-        final int nbrTSamples = 10;
+        final int nbrTSamples = quality.iterations;;
         // heuristic weight for moving along the offset curve
         final double w1 = 0.8;
         // heuristic weight for moving along the original curve

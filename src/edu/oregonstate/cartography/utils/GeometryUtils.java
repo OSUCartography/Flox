@@ -2,6 +2,7 @@ package edu.oregonstate.cartography.utils;
 
 import edu.oregonstate.cartography.flox.model.Point;
 import java.awt.geom.Rectangle2D;
+import net.jafama.FastMath;
 
 public class GeometryUtils {
 
@@ -395,7 +396,7 @@ public class GeometryUtils {
         double d = q * q + 4.0 * p3 / 27.0;
         double offset = -a / 3.0;
         if (d >= 0) { // Single solution
-            double z = Math.sqrt(d);
+            double z = FastMath.sqrt(d);
             double u = (-q + z) / 2.0;
             double v = (-q - z) / 2.0;
             u = cuberoot(u);
@@ -403,9 +404,9 @@ public class GeometryUtils {
             r[0] = offset + u + v;
             return 1;
         }
-        double u = Math.sqrt(-p / 3);
-        double v = Math.acos(-Math.sqrt(-27.0 / p3) * q / 2.0) / 3.0;
-        double m = Math.cos(v), n = Math.sin(v) * Math.sqrt(3.0);
+        double u = FastMath.sqrt(-p / 3);
+        double v = FastMath.acos(-FastMath.sqrt(-27.0 / p3) * q / 2.0) / 3.0;
+        double m = FastMath.cos(v), n = FastMath.sin(v) * FastMath.sqrt(3.0);
         r[0] = offset + u * (m + m);
         r[1] = offset - u * (n + m);
         r[2] = offset + u * (n - m);

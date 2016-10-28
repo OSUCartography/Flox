@@ -136,14 +136,14 @@ public class FlowPair extends Flow {
 
     public Flow cachedOffsetFlow1(Model model) {
         if (cachedOffsetFlow1 == null) {
-            cachedOffsetFlow1 = createOffsetFlow1(model);
+            cachedOffsetFlow1 = createOffsetFlow1(model, Flow.FlowOffsettingQuality.LOW);
         }
         return cachedOffsetFlow1;
     }
 
     public Flow cachedOffsetFlow2(Model model) {
         if (cachedOffsetFlow2 == null) {
-            cachedOffsetFlow2 = createOffsetFlow2(model);
+            cachedOffsetFlow2 = createOffsetFlow2(model, Flow.FlowOffsettingQuality.LOW);
         }
         return cachedOffsetFlow2;
     }
@@ -173,6 +173,12 @@ public class FlowPair extends Flow {
      */
     @Override
     public boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model) {
+        
+        // to accelerate this test, first test with the combined flow curve before creating offset flows, which is expensive
+        if (super.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model) == false) {
+            return false;
+        }
+        
         Flow flow1 = cachedClippedCurve1IncludingArrow(model);
         boolean intersection = flow1.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model);
         if (intersection == false) {
@@ -258,10 +264,10 @@ public class FlowPair extends Flow {
      * @param model data model
      * @return a new flow
      */
-    public Flow createOffsetFlow1(Model model) {
+    public Flow createOffsetFlow1(Model model, Flow.FlowOffsettingQuality quality) {
         Flow flow = new Flow(this);
         flow.setValue(getValue1());
-        flow.offsetFlow(offset(model, true), model);
+        flow.offsetFlow(offset(model, true), model, quality);
         return flow;
     }
 
@@ -275,11 +281,11 @@ public class FlowPair extends Flow {
      * @param model data model
      * @return a new flow
      */
-    public Flow createOffsetFlow2(Model model) {
+    public Flow createOffsetFlow2(Model model, Flow.FlowOffsettingQuality quality) {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
         flow.reverseFlow(model);
-        flow.offsetFlow(offset(model, false), model);
+        flow.offsetFlow(offset(model, false), model, quality);
         return flow;
     }
 

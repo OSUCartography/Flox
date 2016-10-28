@@ -66,10 +66,10 @@ public class AddFlowTool extends DoubleBufferedTool {
         Point endNode = new Point(endX, endY, originNode.getValue());
         Flow flow = new Flow(originNode, endNode, flowValue);
         if (model.isClipFlowStarts()) {
-            model.updateStartClipArea(flow);
+            model.findStartClipAreaForFlow(flow);
         }
         if (model.isClipFlowEnds()) {
-            model.updateEndClipArea(flow);
+            model.findEndClipAreaForFlow(flow);
         }
         return flow;
     }

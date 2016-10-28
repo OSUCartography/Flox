@@ -4422,7 +4422,7 @@ public class MainWindow extends javax.swing.JFrame {
                 }
                 Flow offsetFlow = flows.get(i).copyFlow();
                 offsetFlow.setSelected(false);
-                offsetFlow.offsetFlow(flowOffset * j, model);
+                offsetFlow.offsetFlow(flowOffset * j, model, Flow.FlowOffsettingQuality.HIGH);
                 offsetFlow.setLocked(true);
                 model.addFlow(offsetFlow);
             }

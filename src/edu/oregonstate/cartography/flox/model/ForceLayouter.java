@@ -101,9 +101,9 @@ public class ForceLayouter {
      */
     public int layoutIteration(int i, int iterBeforeMovingFlowsOffObstacles,
             Rectangle2D canvas) {
-        
+
         model.invalidateCachedValues();
-        
+
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
 
         // compute one iteration of forces with a linearly decreasing weight
@@ -141,7 +141,7 @@ public class ForceLayouter {
             int remainingIterations = model.getNbrIterations() - i - 1;
 
             // nodes and arrowheads are obstacles
-            List<Obstacle> obstacles = model.getObstacles();
+            List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
 
             // get a list of sorted flows that intersect obstacles
             ArrayList<Flow> sortedOverlappingFlows = getFlowsOverlappingObstacles(obstacles);
@@ -248,7 +248,7 @@ public class ForceLayouter {
 
             // move control point
             flow.offsetCtrlPt(dx, dy);
-            
+
             // move control point if it is outside of the range box or the canvas
             if (model.isEnforceRangebox()) {
                 enforcer.enforceFlowControlPointRange(flow);
@@ -742,8 +742,71 @@ public class ForceLayouter {
      * @return a list of flows overlapping any of the passed obstacles
      */
     public ArrayList<Flow> getFlowsOverlappingObstacles() {
-        List<Obstacle> obstacles = model.getObstacles();
+        model.invalidateCachedValues();
+        List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
         return getFlowsOverlappingObstacles(obstacles);
+    }
+
+    public List<Obstacle> getObstacles() {
+        model.invalidateCachedValues();
+        return getObstaclesFromCachedCurves(model);
+    }
+
+    /**
+     * Returns a list of obstacles, i.e., arrowheads and nodes.
+     *
+     * @return list of obstacles
+     */
+    private List<Obstacle> getObstaclesFromCachedCurves(Model model) {
+        List<Obstacle> obstacles = new ArrayList<>();
+
+        // nodes are obstacles
+        Iterator<Point> nodeIterator = model.nodeIterator();
+        while (nodeIterator.hasNext()) {
+            Point node = nodeIterator.next();
+
+            // nodes are obstacles
+            double nodeRadiusPx = model.getNodeRadiusPx(node);
+            double strokeWidthPx = model.getNodeStrokeWidthPx();
+            final double rPx;
+            if (strokeWidthPx > nodeRadiusPx * 2) {
+                // stroke is wider than the diameter of the circle
+                rPx = strokeWidthPx;
+            } else {
+                rPx = nodeRadiusPx + 0.5 * strokeWidthPx;
+            }
+            double rWorld = rPx / model.getReferenceMapScale();
+            obstacles.add(new Obstacle(node, node.x, node.y, rWorld));
+        }
+
+        // arrowheads are obstacles
+        if (model.isDrawArrowheads()) {
+            Iterator<Flow> flowIterator = model.flowIterator();
+            while (flowIterator.hasNext()) {
+                Flow flow = flowIterator.next();
+                Arrow arrow;
+                if (flow instanceof FlowPair) {
+                    FlowPair flowPair = (FlowPair) flow;
+                    arrow = flowPair.cachedOffsetFlow1(model).getArrow(model);
+                    if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
+                        Obstacle obstacle = new Obstacle(arrow.getTipPt(),
+                                arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
+                        obstacles.add(obstacle);
+                    }
+                    arrow = flowPair.cachedOffsetFlow2(model).getArrow(model);
+                } else {
+                    arrow = flow.getArrow(model);
+                }
+
+                if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
+                    Obstacle obstacle = new Obstacle(arrow.getTipPt(),
+                            arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
+                    obstacles.add(obstacle);
+                }
+            }
+        }
+
+        return obstacles;
     }
 
     /**
@@ -812,7 +875,7 @@ public class ForceLayouter {
             double cPtX = dx + originalX;
             double cPtY = dy + originalY;
             flow.setCtrlPt(cPtX, cPtY);
-            
+
             // increment rotation angle, such that the next point on the spiral 
             // has an approximate distance of dist to the current point
             angleRad += dist / spiralR;
@@ -829,7 +892,7 @@ public class ForceLayouter {
         // could not find a control point position that does not overlap an 
         // obstacle. Restore the original coordinates.
         flow.setCtrlPt(originalX, originalY);
-        
+
         return false;
     }
 

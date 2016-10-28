@@ -84,6 +84,11 @@ public class Model {
     }
 
     /**
+     * Determines the maximum number of intermediate nodes per flow.
+     */
+    private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
+    
+    /**
      * A Comparator defines conditions to compare two double values. Used to
      * select flows and nodes by their values.
      */
@@ -153,11 +158,6 @@ public class Model {
     }
 
     /**
-     * Determines the maximum number of intermediate nodes per flow.
-     */
-    private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
-
-    /**
      * Helper class for pairs of intersecting flows.
      */
     public static class IntersectingFlowPair implements Comparable<Model.IntersectingFlowPair> {
@@ -192,7 +192,7 @@ public class Model {
             double cPt1y = flow1.cPtY();
             double cPt2x = flow2.cPtX();
             double cPt2y = flow2.cPtY();
-           
+
             Point cPt1New = GeometryUtils.getLineLineIntersection(x, y, cPt2x, cPt2y, cPt1x, cPt1y, node1.x, node1.y);
             Point cPt2New = GeometryUtils.getLineLineIntersection(x, y, cPt1x, cPt1y, cPt2x, cPt2y, node2.x, node2.y);
             if (cPt1New != null && cPt2New != null) {
@@ -453,6 +453,12 @@ public class Model {
     @XmlJavaTypeAdapter(GeometrySerializer.class)
     private Geometry clipAreas;
 
+    @XmlJavaTypeAdapter(GeometrySerializer.class)
+    private Geometry clipAreasEndBuffered;
+
+    @XmlJavaTypeAdapter(GeometrySerializer.class)
+    private Geometry clipAreasStartBuffered;
+
     /**
      * Buffer width for start clip areas in pixels.
      */
@@ -581,12 +587,12 @@ public class Model {
     }
 
     protected void invalidateCachedValues() {
-       Iterator<Flow> iter = graph.flowIterator();
+        Iterator<Flow> iter = graph.flowIterator();
         while (iter.hasNext()) {
             iter.next().invalidateCachedValues();
         }
     }
-    
+
     /**
      * Change control point location of a flow.
      *
@@ -958,13 +964,11 @@ public class Model {
     }
 
     /**
-     * Finds the clip areas for the start of one flow. First buffers the clip
-     * area geometry, then finds containing geometry for the start point of the
-     * flow, then assigns the start clip area to the flow.
+     * Finds the clip areas for the start of one flow.
      *
      * @param flow flow to find start clip area for
      */
-    public void updateStartClipArea(Flow flow) {
+    public void findStartClipAreaForFlow(Flow flow) {
         if (clipAreas == null) {
             return;
         }
@@ -972,33 +976,47 @@ public class Model {
         GeometryFactory f = new GeometryFactory();
         Geometry startClipArea = findContainingGeometry(clipAreas, flow.getStartPt(), f);
         if (startClipArea != null) {
-            double d = startClipAreaBufferDistancePx / getReferenceMapScale();
-            startClipArea = startClipArea.buffer(-d);
+            Geometry[] bufferedGeometries = (Geometry[]) startClipArea.getUserData();
+            if (bufferedGeometries != null && bufferedGeometries[0] != null) {
+                flow.setStartClipArea(bufferedGeometries[0]);
+            }
         }
-        flow.setStartClipArea(startClipArea);
     }
 
     /**
-     * Finds the clip areas for the start of flows.
+     * Buffers all clip areas with the end clip distance and finds a clip area
+     * for each end of flow (if inside an area).
      */
     public void updateStartClipAreas() {
         if (clipAreas == null) {
             return;
         }
+
+        // compute buffered geometry
+        double d = startClipAreaBufferDistancePx / getReferenceMapScale();
+        Iterator geomi = new GeometryCollectionIterator(clipAreas);
+        while (geomi.hasNext()) {
+            Geometry g = (Geometry) geomi.next();
+            if (g.getUserData() == null) {
+                g.setUserData(new Geometry[2]);
+            }
+            Geometry[] bufferedGeometries = (Geometry[]) g.getUserData();
+            bufferedGeometries[0] = g.buffer(-d);
+        }
+
+        // find clip area for each flow
         Iterator<Flow> flowIterator = flowIterator();
         while (flowIterator.hasNext()) {
-            updateStartClipArea(flowIterator.next());
+            findStartClipAreaForFlow(flowIterator.next());
         }
     }
 
     /**
-     * Finds the clip areas for the the end of one flow. First buffers the clip
-     * area geometry, then finds the containing geometry for the end point of
-     * the flow, then assigns the end clip area to the flow.
+     * Finds the clip area for the end of one flow.
      *
      * @param flow flow to find end clip area for
      */
-    public void updateEndClipArea(Flow flow) {
+    public void findEndClipAreaForFlow(Flow flow) {
         if (clipAreas == null) {
             return;
         }
@@ -1006,23 +1024,38 @@ public class Model {
         GeometryFactory f = new GeometryFactory();
         Geometry endClipArea = findContainingGeometry(clipAreas, flow.getEndPt(), f);
         if (endClipArea != null) {
-            double d = endClipAreaBufferDistancePx / getReferenceMapScale();
-            endClipArea = endClipArea.buffer(-d);
+            Geometry[] bufferedGeometries = (Geometry[]) endClipArea.getUserData();
+            if (bufferedGeometries != null && bufferedGeometries[1] != null) {
+                flow.setEndClipArea(bufferedGeometries[1]);
+            }
         }
-        flow.setEndClipArea(endClipArea);
     }
 
     /**
-     * Finds the clip areas for the the end of flows.
+     * Buffers all clip areas with the end clip distance and finds a clip area
+     * for each end of flow (if inside an area).
      */
     public void updateEndClipAreas() {
         if (clipAreas == null) {
             return;
         }
+
+        // compute buffered geometry
+        double d = endClipAreaBufferDistancePx / getReferenceMapScale();
+        Iterator geomi = new GeometryCollectionIterator(clipAreas);
+        while (geomi.hasNext()) {
+            Geometry g = (Geometry) geomi.next();
+            if (g.getUserData() == null) {
+                g.setUserData(new Geometry[2]);
+            }
+            Geometry[] bufferedGeometries = (Geometry[]) g.getUserData();
+            bufferedGeometries[1] = g.buffer(-d);
+        }
+
+        // find clip area for each flow
         Iterator<Flow> flowIterator = flowIterator();
-        GeometryFactory f = new GeometryFactory();
         while (flowIterator.hasNext()) {
-            updateEndClipArea(flowIterator.next());
+            findEndClipAreaForFlow(flowIterator.next());
         }
     }
 
@@ -1033,6 +1066,13 @@ public class Model {
      */
     public void setClipAreas(Geometry clipAreas) {
         this.clipAreas = clipAreas;
+
+        // add storage for clipped areas to each original area
+        Iterator geomi = new GeometryCollectionIterator(clipAreas);
+        while (geomi.hasNext()) {
+            Geometry g = (Geometry) geomi.next();
+            g.setUserData(new Geometry[2]);
+        }
 
         if (isClipFlowEnds()) {
             updateEndClipAreas();
@@ -1099,62 +1139,6 @@ public class Model {
     public void setEndClipAreaBufferDistancePx(double endClipAreaBufferDistance) {
         this.endClipAreaBufferDistancePx = endClipAreaBufferDistance;
         updateEndClipAreas();
-    }
-
-    /**
-     * Returns a list of obstacles, i.e., arrowheads and nodes.
-     *
-     * @return list of obstacles
-     */
-    public List<Obstacle> getObstacles() {
-        List<Obstacle> obstacles = new ArrayList<>();
-
-        // nodes are obstacles
-        Iterator<Point> nodeIterator = nodeIterator();
-        while (nodeIterator.hasNext()) {
-            Point node = nodeIterator.next();
-
-            // nodes are obstacles
-            double nodeRadiusPx = getNodeRadiusPx(node);
-            double strokeWidthPx = getNodeStrokeWidthPx();
-            final double rPx;
-            if (strokeWidthPx > nodeRadiusPx * 2) {
-                // stroke is wider than the diameter of the circle
-                rPx = strokeWidthPx;
-            } else {
-                rPx = nodeRadiusPx + 0.5 * strokeWidthPx;
-            }
-            double rWorld = rPx / getReferenceMapScale();
-            obstacles.add(new Obstacle(node, node.x, node.y, rWorld));
-        }
-
-        // arrowheads are obstacles
-        if (isDrawArrowheads()) {
-            Iterator<Flow> flowIterator = flowIterator();
-            while (flowIterator.hasNext()) {
-                Flow flow = flowIterator.next();
-                Arrow arrow;
-                if (flow instanceof FlowPair) {
-                    arrow = ((FlowPair) flow).createOffsetFlow1(this).getArrow(this);
-                    if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
-                        Obstacle obstacle = new Obstacle(arrow.getTipPt(),
-                                arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
-                        obstacles.add(obstacle);
-                    }
-                    arrow = ((FlowPair) flow).createOffsetFlow2(this).getArrow(this);
-                } else {
-                    arrow = flow.getArrow(this);
-                }
-
-                if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
-                    Obstacle obstacle = new Obstacle(arrow.getTipPt(),
-                            arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
-                    obstacles.add(obstacle);
-                }
-            }
-        }
-
-        return obstacles;
     }
 
     /**
@@ -2272,7 +2256,7 @@ public class Model {
         // clipping radius for end mask area
         double endMaskClipRadius = 0;
         if (flow.getEndClipArea() != null) {
-            if (lineString == null && (flow.getEndClipArea() != null || flow.getStartClipArea() != null)) {
+            if (lineString == null && (flow.getEndClipArea() != null || flow.getStartClipArea() != null)) { // FIXME a mess with logical conditions
                 // FIXME better use irregular intervals
                 lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
             }
@@ -2323,6 +2307,11 @@ public class Model {
      */
     public void setReferenceMapScale(double referenceMapScale) {
         this.referenceMapScale = referenceMapScale;
+
+        // buffer distance is specified in pixels, so update buffered areas
+        // FIXME this will block the event dispatching thread EDT
+        updateStartClipAreas();
+        updateEndClipAreas();
     }
 
     /**
@@ -2434,7 +2423,7 @@ public class Model {
         }
         return totalValue;
     }
-    
+
     /**
      * Sum values of flows between same start and end nodes.
      */
