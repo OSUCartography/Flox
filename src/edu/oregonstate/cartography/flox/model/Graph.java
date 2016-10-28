@@ -454,8 +454,8 @@ public final class Graph {
         for (Flow flow : flows) {
             if (flow instanceof FlowPair) {
                 FlowPair flowPair = (FlowPair) flow;
-                sortedFlows.add(flowPair.createParallelFlow1(model));
-                sortedFlows.add(flowPair.createParallelFlow2(model));
+                sortedFlows.add(flowPair.createOffsetFlow1(model));
+                sortedFlows.add(flowPair.createOffsetFlow2(model));
             } else {
                 sortedFlows.add(flow);
             }

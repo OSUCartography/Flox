@@ -72,20 +72,6 @@ public class ForceLayouter {
     }
 
     /**
-     * Updates the approximative line string of each flow.
-     */
-    private void updateCachedPolylineApproximations() {
-        double segmentLength = model.segmentLength();
-        Iterator<Flow> iter = model.flowIterator();
-        while (iter.hasNext()) {
-            iter.next().updateCachedPolylineApproximation(model, segmentLength);
-            if (isCancelled()) {
-                return;
-            }
-        }
-    }
-
-    /**
      * Apply now control point locations to a model. This method should be
      * called when all iterations are completed and a new layout has been
      * generated.
@@ -115,6 +101,9 @@ public class ForceLayouter {
      */
     public int layoutIteration(int i, int iterBeforeMovingFlowsOffObstacles,
             Rectangle2D canvas) {
+        
+        model.invalidateCachedValues();
+        
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
 
         // compute one iteration of forces with a linearly decreasing weight
@@ -202,8 +191,6 @@ public class ForceLayouter {
         if (model.getNbrFlows() < 2) {
             return;
         }
-
-        updateCachedPolylineApproximations();
 
         double maxFlowLength = model.getLongestFlowLength();
 
@@ -302,7 +289,7 @@ public class ForceLayouter {
                 continue;
             }
 
-            Point[] points = flow.getCachedPolylineApproximation();
+            Point[] points = flow.cachedClippedPolylineIncludingArrow(model);
             for (Point point : points) {
                 double xDist = targetPoint.x - point.x; // x distance from node to target
                 double yDist = targetPoint.y - point.y; // y distance from node to target
@@ -458,7 +445,7 @@ public class ForceLayouter {
     private void computeForceOnFlow(Flow flow, double maxFlowLength, Force outForce) {
 
         Point basePt = flow.getBaseLineMidPoint();
-        Point[] flowPoints = flow.getCachedPolylineApproximation();
+        Point[] flowPoints = flow.cachedClippedPolylineIncludingArrow(model);
 
         // Compute forces applied by all flows on current flow
         Force externalF = new Force();
@@ -570,7 +557,6 @@ public class ForceLayouter {
      * @return pairs of flows that have a common start or end node.
      */
     public ArrayList<Model.IntersectingFlowPair> getSortedIntersectingSiblings() {
-        updateCachedPolylineApproximations();
         ArrayList<Flow> flows = model.getFlows();
         ArrayList<Model.IntersectingFlowPair> pairs = new ArrayList<>();
 
@@ -584,7 +570,7 @@ public class ForceLayouter {
                     continue;
                 }
                 Point sharedNode = flow1.getSharedNode(flow2);
-                if (sharedNode != null && flow1.intersects(flow2)) {
+                if (sharedNode != null && flow1.intersects(flow2, model)) {
                     pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));
                 }
                 if (isCancelled()) {
@@ -773,7 +759,7 @@ public class ForceLayouter {
      * @param obstacles circular obstacles
      * @return true if the flow overlaps a node
      */
-    private boolean flowIntersectsObstacle(Flow flow, List<Obstacle> obstacles) {
+    private boolean flowIntersectsObstacles(Flow flow, List<Obstacle> obstacles) {
         for (Obstacle obstacle : obstacles) {
 
             // ignore obstacles that are start or end nodes of the flow
@@ -786,7 +772,7 @@ public class ForceLayouter {
                 continue;
             }
 
-            Flow clippedFlow = model.clipFlow(flow, false, true);
+            Flow clippedFlow = flow.cachedClippedCurveIncludingArrow(model);
             if (flowIntersectsObstacle(clippedFlow, obstacle)) {
                 return true;
             }
@@ -815,7 +801,7 @@ public class ForceLayouter {
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            if (flowIntersectsObstacle(flow, obstacles)) {
+            if (flowIntersectsObstacles(flow, obstacles)) {
                 flowsArray.add(flow);
             }
         }
@@ -876,7 +862,7 @@ public class ForceLayouter {
             angleRad += dist / spiralR;
 
             if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY)
-                    && flowIntersectsObstacle(flow, obstacles) == false) {
+                    && flowIntersectsObstacles(flow, obstacles) == false) {
                 // found a new position for the control point that does not 
                 // result in an overlap with any obstacle
                 return true;

@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
+import java.util.ArrayList;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -21,18 +22,10 @@ public class FlowPair extends Flow {
      */
     private final double value2;
 
-    /**
-     * A cached approximation of the flow geometry of the second flow by a
-     * straight polyline to avoid repeated expensive conversions to a polyline.
-     *
-     * <STRONG>The polyline is not initialized or updated by this FlowPair. It
-     * is the responsibility of the user to update the polyline when any of the
-     * following change: start point, end point, control point, startClipArea,
-     * endClipArea, size of nodes, gap between start/end of line and
-     * nodes.</STRONG> A change to the arrowhead geometry does not require an
-     * update to the polyline.
-     */
-    private Point[] polyline2;
+    private Flow cachedClippedCurve1IncludingArrow;
+    private Flow cachedClippedCurve2IncludingArrow;
+    private Flow cachedOffsetFlow1;
+    private Flow cachedOffsetFlow2;
 
     /**
      * Constructor without parameters for JAXB.
@@ -132,70 +125,83 @@ public class FlowPair extends Flow {
         return value2;
     }
 
-    public Point[] getCachedPolylineApproximation2() {
-        return polyline2;
+    @Override
+    public void invalidateCachedValues() {
+        super.invalidateCachedValues();
+        cachedClippedCurve1IncludingArrow = null;
+        cachedClippedCurve2IncludingArrow = null;
+        cachedOffsetFlow1 = null;
+        cachedOffsetFlow2 = null;
     }
 
-    /**
-     * Updates the two cached polylines. The polylines are not initialized or
-     * updated by this Flow. It is the responsibility of the user to update the
-     * polylines when any of the following change: start point, end point,
-     * control point, startClipArea, endClipArea, size of nodes, gap between
-     * start/end of line and nodes. A change to the arrowhead geometry does not
-     * require an update to the polylines.
-     *
-     * @param model data model
-     * @param segmentLength the target segment length. The actual length will
-     * differ.
-     */
-    @Override
-    public void updateCachedPolylineApproximation(Model model, double segmentLength) {
-        // FIXME need option to either use central line or offset lines
-        Flow flow1 = createParallelFlow1(model);
-        Flow flow2 = createParallelFlow2(model);
-        flow1.updateCachedPolylineApproximation(model, segmentLength);
-        flow2.updateCachedPolylineApproximation(model, segmentLength);
-        this.polyline = flow1.polyline;
-        this.polyline2 = flow2.polyline;
+    public Flow cachedOffsetFlow1(Model model) {
+        if (cachedOffsetFlow1 == null) {
+            cachedOffsetFlow1 = createOffsetFlow1(model);
+        }
+        return cachedOffsetFlow1;
+    }
+
+    public Flow cachedOffsetFlow2(Model model) {
+        if (cachedOffsetFlow2 == null) {
+            cachedOffsetFlow2 = createOffsetFlow2(model);
+        }
+        return cachedOffsetFlow2;
+    }
+    
+    public Flow cachedClippedCurve1IncludingArrow(Model model) {
+        if (cachedClippedCurve1IncludingArrow == null) {
+            Flow f1 = cachedOffsetFlow1(model);
+            cachedClippedCurve1IncludingArrow = model.clipFlow(f1, false, true);
+        }
+        return cachedClippedCurve1IncludingArrow;
+    }
+
+    public Flow cachedClippedCurve2IncludingArrow(Model model) {
+        if (cachedClippedCurve2IncludingArrow == null) {
+            Flow f2 = cachedOffsetFlow2(model);
+            cachedClippedCurve2IncludingArrow = model.clipFlow(f2, false, true);
+        }
+        return cachedClippedCurve2IncludingArrow;
     }
 
     /**
      * Tests whether this FlowPair intersects with another Flow. This is an
      * approximate test.
      *
-     * <STRONG>updateCachedPolylineApproximation() needs to be called before
-     * intersects() can be called.</STRONG>
-     *
      * @param flow flow to detect intersection with
+     * @param model data model
      * @return true if the two flows intersect
      */
     @Override
-    public boolean intersects(Flow flow) {
-        return flow.intersects(this);
+    public boolean intersects(Flow flow, Model model) {
+        Point[] thatPolyline = flow.cachedClippedPolylineIncludingArrow(model);
+        Point[] thisPolyline1 = cachedClippedCurve1IncludingArrow(model).cachedPolyline(model);
+        if (polylinesIntersect(thatPolyline, thisPolyline1)) {
+            return true;
+        }
+        Point[] thisPolyline2 = cachedClippedCurve2IncludingArrow(model).cachedPolyline(model);
+        return polylinesIntersect(thatPolyline, thisPolyline2);
     }
 
     /**
      * Tests whether this FlowPair intersects with another FlowPair. This is an
      * approximate test.
      *
-     * <STRONG>updateCachedPolylineApproximation() needs to be called before
-     * this method can be called.</STRONG>
-     *
      * @param flowPair FlowPair to detect intersection with
      * @return true if the two flows intersect
      */
     @Override
-    public boolean intersects(FlowPair flowPair) {
-        Point[] thisPolyline1 = getCachedPolylineApproximation();
-        Point[] thatPolyline1 = flowPair.getCachedPolylineApproximation();
+    public boolean intersects(FlowPair flowPair, Model model) {
+        Point[] thisPolyline1 = cachedClippedCurve1IncludingArrow(model).cachedPolyline(model);
+        Point[] thatPolyline1 = flowPair.cachedClippedCurve1IncludingArrow(model).cachedPolyline(model);
         if (polylinesIntersect(thisPolyline1, thatPolyline1)) {
             return true;
         }
-        Point[] thatPolyline2 = flowPair.getCachedPolylineApproximation2();
+        Point[] thatPolyline2 = flowPair.cachedClippedCurve2IncludingArrow(model).cachedPolyline(model);
         if (polylinesIntersect(thisPolyline1, thatPolyline2)) {
             return true;
         }
-        Point[] thisPolyline2 = getCachedPolylineApproximation2();
+        Point[] thisPolyline2 = cachedClippedCurve2IncludingArrow(model).cachedPolyline(model);
         if (polylinesIntersect(thisPolyline2, thatPolyline1)) {
             return true;
         }
@@ -234,7 +240,7 @@ public class FlowPair extends Flow {
      * @param model data model
      * @return a new flow
      */
-    public Flow createParallelFlow1(Model model) {
+    public Flow createOffsetFlow1(Model model) {
         Flow flow = new Flow(this);
         flow.setValue(getValue1());
         flow.offsetFlow(offset(model, true), model);
@@ -251,7 +257,7 @@ public class FlowPair extends Flow {
      * @param model data model
      * @return a new flow
      */
-    public Flow createParallelFlow2(Model model) {
+    public Flow createOffsetFlow2(Model model) {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
         flow.reverseFlow(model);

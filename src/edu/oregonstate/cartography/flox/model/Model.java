@@ -580,6 +580,13 @@ public class Model {
         }
     }
 
+    protected void invalidateCachedValues() {
+       Iterator<Flow> iter = graph.flowIterator();
+        while (iter.hasNext()) {
+            iter.next().invalidateCachedValues();
+        }
+    }
+    
     /**
      * Change control point location of a flow.
      *
@@ -1128,13 +1135,13 @@ public class Model {
                 Flow flow = flowIterator.next();
                 Arrow arrow;
                 if (flow instanceof FlowPair) {
-                    arrow = ((FlowPair) flow).createParallelFlow1(this).getArrow(this);
+                    arrow = ((FlowPair) flow).createOffsetFlow1(this).getArrow(this);
                     if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
                         Obstacle obstacle = new Obstacle(arrow.getTipPt(),
                                 arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
                         obstacles.add(obstacle);
                     }
-                    arrow = ((FlowPair) flow).createParallelFlow2(this).getArrow(this);
+                    arrow = ((FlowPair) flow).createOffsetFlow2(this).getArrow(this);
                 } else {
                     arrow = flow.getArrow(this);
                 }

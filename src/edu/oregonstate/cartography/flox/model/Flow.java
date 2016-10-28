@@ -97,18 +97,13 @@ public class Flow implements Comparable<Flow> {
     private boolean locked = false;
 
     /**
-     * A cached approximation of the flow geometry by a straight polyline to
-     * avoid repeated expensive conversions to a polyline.
-     *
-     * <STRONG>The polyline is not initialized or updated by this Flow. It is
-     * the responsibility of the user to update the polyline when any of the
-     * following change: start point, end point, control point, startClipArea,
-     * endClipArea, size of nodes, gap between start and end of line and
-     * nodes.</STRONG> Note that a change to the arrowhead geometry does not
-     * require an update to the polyline.
+     * A cached approximation of the flow geometry by a straight polyline
+     * to avoid repeated expensive conversions to a polyline.
      */
-    protected Point[] polyline;
+    private Point[] cachedPolyline;
 
+    private Flow cachedClippedCurveIncludingArrow;
+    
     /**
      * Construct a Flow from 3 points.
      *
@@ -282,55 +277,42 @@ public class Flow implements Comparable<Flow> {
         return i;
     }
 
-    /**
-     * Updates the cached polyline. The polyline is not initialized or updated
-     * by this Flow. It is the responsibility of the user to update the polyline
-     * when any of the following change: start point, end point, control point,
-     * startClipArea, endClipArea, size of nodes, gap between start/end of line
-     * and nodes. A change to the arrowhead geometry does not require an update
-     * to the polyline.
-     *
-     * @param model data model
-     * @param segmentLength the target segment length. The actual length will
-     * differ.
-     */
-    public void updateCachedPolylineApproximation(Model model, double segmentLength) {
-        Flow clippedFlow = model.clipFlow(this, false, true);
-        ArrayList<Point> points = clippedFlow.regularIntervals(segmentLength);
-        polyline = points.toArray(new Point[points.size()]);
+    public void invalidateCachedValues() {
+        cachedPolyline = null;
+        cachedClippedCurveIncludingArrow = null;
     }
-
-    /**
-     * Returns the cached polyline. The polyline is not initialized or updated
-     * by this Flow. It is the responsibility of the user to update the polyline
-     * by calling updateCachedPolylineApproximation() when any of the following
-     * change: start point, end point, control point, startClipArea,
-     * endClipArea, size of nodes, gap between start/end of line and nodes. A
-     * change to the arrowhead geometry does not require an update to the
-     * polyline.
-     *
-     * @return a reference to the polyline approximating the geometry of this
-     * flow. Can be null or inaccurate if getCachedPolylineApproximation() has
-     * never been called or if the geometry changed since the last call to
-     * getCachedPolylineApproximation().
-     */
-    public Point[] getCachedPolylineApproximation() {
-        return polyline;
+    
+    public Point[] cachedPolyline(Model model) {
+        if (cachedPolyline == null) {
+            Flow clippedFlow = cachedClippedCurveIncludingArrow(model);
+            ArrayList<Point> points = clippedFlow.regularIntervals(model.segmentLength());
+            cachedPolyline = points.toArray(new Point[points.size()]);
+        }
+        return cachedPolyline;
+    }    
+    
+    public Flow cachedClippedCurveIncludingArrow(Model model) {
+        if (cachedClippedCurveIncludingArrow == null) {
+            cachedClippedCurveIncludingArrow = model.clipFlow(this, false, true);
+        }
+        return cachedClippedCurveIncludingArrow;
+    }
+    
+    public Point[] cachedClippedPolylineIncludingArrow(Model model) {
+        return cachedClippedCurveIncludingArrow(model).cachedPolyline(model);
     }
 
     /**
      * Tests whether this Flow intersects with another Flow. This is an
      * approximate test.
      *
-     * <STRONG>updateCachedPolylineApproximation() needs to be called before
-     * this method can be called.</STRONG>
-     *
      * @param flow flow to detect intersection with
+     * @param model data model
      * @return true if the two flows intersect
      */
-    public boolean intersects(Flow flow) {
-        Point[] thisPolyline = getCachedPolylineApproximation();
-        Point[] thatPolyline = flow.getCachedPolylineApproximation();
+    public boolean intersects(Flow flow, Model model) {
+        Point[] thisPolyline = cachedClippedPolylineIncludingArrow(model);
+        Point[] thatPolyline = flow.cachedClippedPolylineIncludingArrow(model);
         return polylinesIntersect(thisPolyline, thatPolyline);
     }
 
@@ -338,20 +320,12 @@ public class Flow implements Comparable<Flow> {
      * Tests whether this Flow intersects with another FlowPair. This is an
      * approximate test.
      *
-     * <STRONG>updateCachedPolylineApproximation() needs to be called before
-     * this method can be called.</STRONG>
-     *
      * @param flowPair FlowPair to detect intersection with
+     * @param model data model
      * @return true if the two flows intersect
      */
-    public boolean intersects(FlowPair flowPair) {
-        Point[] thisPolyline = getCachedPolylineApproximation();
-        Point[] thatPolyline1 = flowPair.getCachedPolylineApproximation();
-        if (polylinesIntersect(thisPolyline, thatPolyline1)) {
-            return true;
-        }
-        Point[] thatPolyline2 = flowPair.getCachedPolylineApproximation2();
-        return polylinesIntersect(thisPolyline, thatPolyline2);
+    public boolean intersects(FlowPair flowPair, Model model) {
+        return flowPair.intersects(this, model);
     }
 
     /**
@@ -650,11 +624,13 @@ public class Flow implements Comparable<Flow> {
     public void setCtrlPt(double x, double y) {
         cPtX = x;
         cPtY = y;
+        invalidateCachedValues();
     }
 
     public void offsetCtrlPt(double dx, double dy) {
         cPtX += dx;
         cPtY += dy;
+        invalidateCachedValues();
     }
 
     public boolean isControlPointSelected() {
@@ -692,19 +668,6 @@ public class Flow implements Comparable<Flow> {
         double dy = (1 - t) * (cPtY - startPt.y) + t * (endPt.y - cPtY);
         double l = Math.sqrt(dx * dx + dy * dy);
         return new double[]{-dy / l, dx / l};
-    }
-
-    /**
-     * FIXME duplicate of distance method
-     *
-     * @param pt
-     * @return
-     */
-    private Point closestPointOnCurve(Point pt) {
-        double[] xy = new double[]{pt.x, pt.y};
-        GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
-                cPtX, cPtY, endPt.x, endPt.y, 0.001, xy);
-        return new Point(xy[0], xy[1]);
     }
 
     /**
