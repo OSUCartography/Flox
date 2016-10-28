@@ -35,7 +35,7 @@ public class Flow implements Comparable<Flow> {
     }
 
     public enum FlowOffsettingQuality {
-        LOW(2),
+        LOW(3),
         HIGH(10);
 
         public final int iterations;
@@ -802,19 +802,28 @@ public class Flow implements Comparable<Flow> {
         // construct control point position. The initial geometry of the new start point, 
         // end point and control point are identical to the original geometry, 
         // but are scaled and rotated.
-        double dx = startX - endX;
-        double dy = startY - endY;
-        double baselineLength = Math.sqrt(dx * dx + dy * dy);
-        double scale = baselineLength / getBaselineLength();
-        double originalBaselineOrientation = getBaselineOrientation();
-        double baselineOrientation = Math.atan2(endY - startY, endX - startX);
-        double rot = baselineOrientation - originalBaselineOrientation;
-        ctrlPtX = scale * (cPtX - startPt.x);
-        ctrlPtY = scale * (cPtY - startPt.y);
-        double cos = Math.cos(rot);
-        double sin = Math.sin(rot);
-        double newX = ctrlPtX * cos - ctrlPtY * sin;
-        double newY = ctrlPtX * sin + ctrlPtY * cos;
+        // first compute direction vector of current baseline with length 1
+        double dx1 = startPt.x - endPt.x;
+        double dy1 = startPt.y - endPt.y;
+        double baselineLength1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+        dx1 /= baselineLength1;
+        dy1 /= baselineLength1;
+        // then compute direction vector of new baseline with length 1
+        double dx2 = startX - endX;
+        double dy2 = startY - endY;
+        double baselineLength2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+        dx2 /= baselineLength2;
+        dy2 /= baselineLength2;        
+        // cross product for computing sin of rotation angle between the baselines
+        double sinRot = dx1 * dy2 - dy1 * dx2;
+        // dot product for computing cos of rotation angle between the baselines
+        double cosRot = dx1 * dx2 + dy1 * dy2;
+        // place control point
+        double scale = baselineLength2 / baselineLength1;
+        double newX = scale * (cPtX - startPt.x);
+        double newY = scale * (cPtY - startPt.y);
+        newX = newX * cosRot - newY * sinRot;
+        newY = newX * sinRot + newY * cosRot;
         ctrlPtX = newX + startX;
         ctrlPtY = newY + startY;
 
