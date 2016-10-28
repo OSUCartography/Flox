@@ -2191,7 +2191,7 @@ public class Model {
         // clipping radius for start mask area
         double startMaskClipR = 0;
         if (flow.getStartClipArea() != null) {
-            startMaskClipR = flow.maskClippingRadius(lineString, true);
+            startMaskClipR = flow.getApproximateStartAreaClipRadius(); // maskClippingRadius(lineString, true);
         }
 
         // start and end clipping radius
@@ -2260,7 +2260,7 @@ public class Model {
                 // FIXME better use irregular intervals
                 lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
             }
-            endMaskClipRadius = flow.maskClippingRadius(lineString, false);
+            endMaskClipRadius = flow.getApproximateEndAreaClipRadius(); // flow.maskClippingRadius(lineString, false);
         }
 
         // end clipping radius

@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKTWriter;
 import edu.oregonstate.cartography.utils.GeometryUtils;
+import edu.oregonstate.cartography.utils.JTSUtils;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
@@ -32,9 +33,9 @@ public class Flow implements Comparable<Flow> {
     protected static long createID() {
         return idCounter++;
     }
-    
+
     public enum FlowOffsettingQuality {
-        LOW(1),
+        LOW(2),
         HIGH(10);
 
         public final int iterations;
@@ -85,6 +86,9 @@ public class Flow implements Comparable<Flow> {
      * startClipArea serialized to WKT format
      */
     private String startClipAreaWKT;
+
+    private double approximateStartAreaClipRadius;
+
     /**
      * clip area for the end of the flow.
      */
@@ -95,6 +99,8 @@ public class Flow implements Comparable<Flow> {
      * endClipArea serialized to WKT format
      */
     private String endClipAreaWKT;
+
+    private double approximateEndAreaClipRadius;
 
     /**
      * selection flag
@@ -108,13 +114,13 @@ public class Flow implements Comparable<Flow> {
     private boolean locked = false;
 
     /**
-     * A cached approximation of the flow geometry by a straight polyline
-     * to avoid repeated expensive conversions to a polyline.
+     * A cached approximation of the flow geometry by a straight polyline to
+     * avoid repeated expensive conversions to a polyline.
      */
     private Point[] cachedPolyline;
 
     private Flow cachedClippedCurveIncludingArrow;
-    
+
     /**
      * Construct a Flow from 3 points.
      *
@@ -196,8 +202,10 @@ public class Flow implements Comparable<Flow> {
     final protected static void shallowCopyClipAreas(Flow src, Flow dst) {
         dst.startClipArea = src.startClipArea;
         dst.startClipAreaWKT = src.startClipAreaWKT;
+        dst.approximateStartAreaClipRadius = src.approximateStartAreaClipRadius;
         dst.endClipArea = src.endClipArea;
         dst.endClipAreaWKT = src.endClipAreaWKT;
+        dst.approximateEndAreaClipRadius = src.approximateEndAreaClipRadius;
     }
 
     @Override
@@ -292,7 +300,7 @@ public class Flow implements Comparable<Flow> {
         cachedPolyline = null;
         cachedClippedCurveIncludingArrow = null;
     }
-    
+
     public Point[] cachedPolyline(Model model) {
         if (cachedPolyline == null) {
             Flow clippedFlow = cachedClippedCurveIncludingArrow(model);
@@ -300,15 +308,15 @@ public class Flow implements Comparable<Flow> {
             cachedPolyline = points.toArray(new Point[points.size()]);
         }
         return cachedPolyline;
-    }    
-    
+    }
+
     public Flow cachedClippedCurveIncludingArrow(Model model) {
         if (cachedClippedCurveIncludingArrow == null) {
             cachedClippedCurveIncludingArrow = model.clipFlow(this, false, true);
         }
         return cachedClippedCurveIncludingArrow;
     }
-    
+
     public Point[] cachedClippedPolylineIncludingArrow(Model model) {
         return cachedClippedCurveIncludingArrow(model).cachedPolyline(model);
     }
@@ -350,7 +358,7 @@ public class Flow implements Comparable<Flow> {
         double shortestDistSquare = distanceSq(obstacle.x, obstacle.y, tol);
         return shortestDistSquare < minDist * minDist;
     }
-    
+
     /**
      * Tests whether this Flow intersects with another Flow. This is an
      * approximate test.
@@ -503,9 +511,15 @@ public class Flow implements Comparable<Flow> {
             startClipArea = endClipArea;
             endClipArea = tempGeometry;
 
+            // swap clipping WKT geometry
             String tempWKT = startClipAreaWKT;
             startClipAreaWKT = endClipAreaWKT;
             endClipAreaWKT = tempWKT;
+            
+            // swap area clip radii
+            double tempR = approximateStartAreaClipRadius;
+            approximateStartAreaClipRadius = approximateEndAreaClipRadius;
+            approximateEndAreaClipRadius = tempR;            
         } else if (model.isClipFlowStarts()) {
             model.findStartClipAreaForFlow(this);
         } else if (model.isClipFlowEnds()) {
@@ -547,8 +561,16 @@ public class Flow implements Comparable<Flow> {
         this.startClipArea = startClipArea;
         if (startClipArea != null) {
             startClipAreaWKT = new WKTWriter().write(startClipArea);
+
+            // compute clip radius for area from straight line connecting start and end point
+            ArrayList<Point> line = new ArrayList<>();
+            line.add(startPt);
+            line.add(endPt);
+            LineString lineString = JTSUtils.pointsToLineString(line);
+            approximateStartAreaClipRadius = maskClippingRadius(lineString, true);
         } else {
             startClipAreaWKT = null;
+            approximateStartAreaClipRadius = 0;
         }
     }
 
@@ -566,8 +588,17 @@ public class Flow implements Comparable<Flow> {
         this.endClipArea = endClipArea;
         if (endClipArea != null) {
             this.endClipAreaWKT = new WKTWriter().write(endClipArea);
+
+            // compute clip radius for area from straight line connecting start and end point
+            ArrayList<Point> line = new ArrayList<>();
+            line.add(startPt);
+            line.add(endPt);
+            LineString lineString = JTSUtils.pointsToLineString(line);
+            approximateEndAreaClipRadius = maskClippingRadius(lineString, false);
+
         } else {
             endClipAreaWKT = null;
+            approximateEndAreaClipRadius = 0;
         }
     }
 
@@ -724,10 +755,10 @@ public class Flow implements Comparable<Flow> {
      *
      * @param offset offset distance
      * @param model data model
-     * @param quality 
+     * @param quality
      */
     public void offsetFlow(double offset, Model model, FlowOffsettingQuality quality) {
-        
+
         // number of iterations
         final int nbrIterations = quality.iterations;
         // number of samples along the curves for computing distances
@@ -1091,7 +1122,7 @@ public class Flow implements Comparable<Flow> {
                 cPtX, cPtY, endPt.x, endPt.y, 0.001, xy);
         return new Point(xy[0], xy[1]);
     }
-    
+
     /**
      * Computes the square of the shortest distance between a point and any
      * point on this quadratic Bézier curve.
@@ -1380,6 +1411,20 @@ public class Flow implements Comparable<Flow> {
     public Arrow getArrow(Model model) {
         double endClipRadius = model.endClipRadius(this, false, null, true);
         return new Arrow(model, this, endClipRadius);
+    }
+
+    /**
+     * @return the approximateEndAreaClipRadius
+     */
+    public double getApproximateEndAreaClipRadius() {
+        return approximateEndAreaClipRadius;
+    }
+
+    /**
+     * @return the approximateStartAreaClipRadius
+     */
+    public double getApproximateStartAreaClipRadius() {
+        return approximateStartAreaClipRadius;
     }
 
 }
