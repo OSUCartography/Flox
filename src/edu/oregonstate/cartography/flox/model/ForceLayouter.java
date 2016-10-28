@@ -570,7 +570,7 @@ public class ForceLayouter {
                     continue;
                 }
                 Point sharedNode = flow1.getSharedNode(flow2);
-                if (sharedNode != null && flow1.intersects(flow2, model)) {
+                if (sharedNode != null && flow1.cachedClippedCurveIncludingArrowIntersects(flow2, model)) {
                     pairs.add(new Model.IntersectingFlowPair(flow1, flow2, sharedNode));
                 }
                 if (isCancelled()) {
@@ -710,49 +710,6 @@ public class ForceLayouter {
     }
 
     /**
-     * Returns true if a flow intersects an obstacle.
-     *
-     * @param flow a flow.
-     * @param obstacle obstacle
-     * @return
-     */
-    private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle) {
-        double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
-
-        // flow width in world coordinates
-        double strokeWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
-
-        // obstacle radius is in world coordinates
-        // add minimum obstacle distance
-        double obstacleRadiusWorld = obstacle.r
-                + model.getMinObstacleDistPx() / model.getReferenceMapScale();
-
-        // the minimum distance between the obstacle center and the flow axis
-        double minDist = (strokeWidthWorld / 2) + obstacleRadiusWorld;
-
-        // test with flow bounding box
-        // extend bounding box by minDist.
-        Rectangle2D flowBB = flow.getBoundingBox();
-        flowBB.add((flowBB.getMinX() - minDist), (flowBB.getMinY() - minDist));
-        flowBB.add((flowBB.getMaxX() + minDist), (flowBB.getMaxY() + minDist));
-
-        // the obstacle's circle center must be inside the extended bounding box
-        if (flowBB.contains(obstacle.x, obstacle.y) == false) {
-            return false;
-        }
-
-        // Check the shortest distance between the obstacle and the flow. If it's 
-        // less than the minimum distance, then the flow intersects the obstacle. 
-        double shortestDistSquare;
-        if (flow instanceof FlowPair) {
-            shortestDistSquare = 0;
-        } else {
-            shortestDistSquare = flow.distanceSq(obstacle.x, obstacle.y, tol);
-        }        
-        return shortestDistSquare < minDist * minDist;
-    }
-
-    /**
      * Tests whether a flow overlaps any obstacle.
      *
      * @param flow the flow to test
@@ -772,8 +729,7 @@ public class ForceLayouter {
                 continue;
             }
 
-            Flow clippedFlow = flow.cachedClippedCurveIncludingArrow(model);
-            if (flowIntersectsObstacle(clippedFlow, obstacle)) {
+            if (flow.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model)) {
                 return true;
             }
         }

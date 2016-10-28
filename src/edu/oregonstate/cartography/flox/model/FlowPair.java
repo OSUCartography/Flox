@@ -165,6 +165,24 @@ public class FlowPair extends Flow {
     }
 
     /**
+     * Returns true if this FlowPair intersects with an obstacle.
+     *
+     * @param obstacle obstacle
+     * @param model data model
+     * @return
+     */
+    @Override
+    public boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model) {
+        Flow flow1 = cachedClippedCurve1IncludingArrow(model);
+        boolean intersection = flow1.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model);
+        if (intersection == false) {
+            Flow flow2 = cachedClippedCurve2IncludingArrow(model);
+            intersection = flow2.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model);
+        }
+        return intersection;
+    }
+    
+    /**
      * Tests whether this FlowPair intersects with another Flow. This is an
      * approximate test.
      *
@@ -173,7 +191,7 @@ public class FlowPair extends Flow {
      * @return true if the two flows intersect
      */
     @Override
-    public boolean intersects(Flow flow, Model model) {
+    public boolean cachedClippedCurveIncludingArrowIntersects(Flow flow, Model model) {
         Point[] thatPolyline = flow.cachedClippedPolylineIncludingArrow(model);
         Point[] thisPolyline1 = cachedClippedCurve1IncludingArrow(model).cachedPolyline(model);
         if (polylinesIntersect(thatPolyline, thisPolyline1)) {
@@ -191,7 +209,7 @@ public class FlowPair extends Flow {
      * @return true if the two flows intersect
      */
     @Override
-    public boolean intersects(FlowPair flowPair, Model model) {
+    public boolean cachedClippedCurvedIncludingArrowIntersects(FlowPair flowPair, Model model) {
         Point[] thisPolyline1 = cachedClippedCurve1IncludingArrow(model).cachedPolyline(model);
         Point[] thatPolyline1 = flowPair.cachedClippedCurve1IncludingArrow(model).cachedPolyline(model);
         if (polylinesIntersect(thisPolyline1, thatPolyline1)) {

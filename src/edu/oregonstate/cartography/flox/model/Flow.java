@@ -303,6 +303,44 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
+     * Returns true if this flow intersects with an obstacle.
+     *
+     * @param obstacle obstacle
+     * @param model data model
+     * @return
+     */
+    public boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model) {
+        double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
+
+        // flow width in world coordinates
+        double strokeWidthWorld = model.getFlowWidthPx(this) / model.getReferenceMapScale();
+
+        // obstacle radius is in world coordinates
+        // add minimum obstacle distance
+        double obstacleRadiusWorld = obstacle.r
+                + model.getMinObstacleDistPx() / model.getReferenceMapScale();
+
+        // the minimum distance between the obstacle center and the flow axis
+        double minDist = (strokeWidthWorld / 2) + obstacleRadiusWorld;
+
+        // test with flow bounding box
+        // extend bounding box by minDist.
+        Rectangle2D flowBB = getBoundingBox();
+        flowBB.add((flowBB.getMinX() - minDist), (flowBB.getMinY() - minDist));
+        flowBB.add((flowBB.getMaxX() + minDist), (flowBB.getMaxY() + minDist));
+
+        // the obstacle's circle center must be inside the extended bounding box
+        if (flowBB.contains(obstacle.x, obstacle.y) == false) {
+            return false;
+        }
+
+        // Check the shortest distance between the obstacle and the flow. If it's 
+        // less than the minimum distance, then the flow intersects the obstacle. 
+        double shortestDistSquare = distanceSq(obstacle.x, obstacle.y, tol);
+        return shortestDistSquare < minDist * minDist;
+    }
+    
+    /**
      * Tests whether this Flow intersects with another Flow. This is an
      * approximate test.
      *
@@ -310,7 +348,7 @@ public class Flow implements Comparable<Flow> {
      * @param model data model
      * @return true if the two flows intersect
      */
-    public boolean intersects(Flow flow, Model model) {
+    public boolean cachedClippedCurveIncludingArrowIntersects(Flow flow, Model model) {
         Point[] thisPolyline = cachedClippedPolylineIncludingArrow(model);
         Point[] thatPolyline = flow.cachedClippedPolylineIncludingArrow(model);
         return polylinesIntersect(thisPolyline, thatPolyline);
@@ -324,8 +362,8 @@ public class Flow implements Comparable<Flow> {
      * @param model data model
      * @return true if the two flows intersect
      */
-    public boolean intersects(FlowPair flowPair, Model model) {
-        return flowPair.intersects(this, model);
+    public boolean cachedClippedCurvedIncludingArrowIntersects(FlowPair flowPair, Model model) {
+        return flowPair.cachedClippedCurveIncludingArrowIntersects(this, model);
     }
 
     /**
@@ -1028,6 +1066,19 @@ public class Flow implements Comparable<Flow> {
                 cPtX, cPtY, endPt.x, endPt.y, tol, xy);
     }
 
+    /**
+     * FIXME duplicate of distance method
+     *
+     * @param pt
+     * @return
+     */
+    private Point closestPointOnCurve(Point pt) {
+        double[] xy = new double[]{pt.x, pt.y};
+        GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
+                cPtX, cPtY, endPt.x, endPt.y, 0.001, xy);
+        return new Point(xy[0], xy[1]);
+    }
+    
     /**
      * Computes the square of the shortest distance between a point and any
      * point on this quadratic Bézier curve.
