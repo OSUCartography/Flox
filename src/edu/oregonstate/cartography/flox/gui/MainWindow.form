@@ -1030,6 +1030,14 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showObstaclesCheckBoxMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="moveSelectedAwayFromObstaclesMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Move Selected Flow Away from Obstacles"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="moveSelectedAwayFromObstaclesMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator12">
             </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="enforceCanvasCheckBoxMenuItem">

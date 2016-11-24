@@ -12,6 +12,7 @@ import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import edu.oregonstate.cartography.flox.model.Layer;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
+import edu.oregonstate.cartography.flox.model.Obstacle;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
@@ -23,6 +24,7 @@ import edu.oregonstate.cartography.map.ZoomInTool;
 import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
+import edu.oregonstate.cartography.utils.Sys;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.geom.Rectangle2D;
@@ -162,9 +164,36 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }
+    
+    /**
+     * Ask the user whether changes to the document should be saved.
+     * @return True if the document window can be closed, false otherwise.
+     */
+    public boolean canDocumentBeClosed() {
+        switch (SaveFilePanel.showSaveDialogForNamedDocument(this, getTitle())) {
+            case DONTSAVE:
+                // document has possibly been edited but user does not want to save it
+                return true;
+
+            case CANCEL:
+                // document has been edited and user canceled
+                return false;
+
+            case SAVE:
+                return saveXMLFile();
+        }
+        return false;
+    }
+    
+    private void setWindowModified(boolean modified) {
+        if (Sys.isMacOSX()) {
+            getRootPane( ).putClientProperty( "Window.documentModified", modified );
+        }
+    }
 
     protected void addUndo(String message) {
         try {
+            setWindowModified(true);
             if (updatingGUI == false) {
                 undo.add(message, model.marshal());
             }
@@ -375,7 +404,7 @@ public class MainWindow extends javax.swing.JFrame {
             // the value of a FlowPair cannot be changed. Find out whether only 
             // FlowPairs are selected. 
             boolean onlyFlowPairsSelected = nodes.isEmpty();
-            
+
             if (nbrFlowsAndNodes == 1) { // If just one feature is selected
                 double value;
                 if (flows.size() == 1) { // If the selected feature is a flow
@@ -417,7 +446,7 @@ public class MainWindow extends javax.swing.JFrame {
                 valueFormattedTextField.setValue(v);
 
             }
-            
+
             // enable the text field if anything is selected that can change its value
             valueFormattedTextField.setEnabled(!onlyFlowPairsSelected);
 
@@ -707,6 +736,7 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu = new javax.swing.JMenu();
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        moveSelectedAwayFromObstaclesMenuItem = new javax.swing.JMenuItem();
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
@@ -2830,6 +2860,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showObstaclesCheckBoxMenuItem);
+
+        moveSelectedAwayFromObstaclesMenuItem.setText("Move Selected Flow Away from Obstacles");
+        moveSelectedAwayFromObstaclesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                moveSelectedAwayFromObstaclesMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(moveSelectedAwayFromObstaclesMenuItem);
         debugMenu.add(jSeparator12);
 
         enforceCanvasCheckBoxMenuItem.setSelected(true);
@@ -3052,6 +3090,25 @@ public class MainWindow extends javax.swing.JFrame {
                 showFloxErrorDialog("Could not read the XML project file.", ex);
             }
         }
+    }
+    
+    public boolean saveXMLFile() {
+        try {
+            // ask user for file
+            String name = getFileName() + ".xml";
+            String filePath = FileUtils.askFile(this, "Save Project to XML File", name, false, "xml");
+            if (filePath == null) {
+                // user canceled
+                return false;
+            }
+            File file = new File(filePath);
+            model.marshal(file.getAbsolutePath());
+            
+            setWindowModified(false);
+        } catch (Throwable ex) {
+            showFloxErrorDialog("Could not save project to XML file.", ex);
+        }
+        return true;
     }
 
     /**
@@ -3712,19 +3769,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_openSettingsMenuItemActionPerformed
 
     private void saveSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveSettingsMenuItemActionPerformed
-        try {
-            // ask user for file
-            String name = getFileName() + ".xml";
-            String filePath = FileUtils.askFile(this, "Save Settings to XML File", name, false, "xml");
-            if (filePath == null) {
-                // user canceled
-                return;
-            }
-            File file = new File(filePath);
-            model.marshal(file.getAbsolutePath());
-        } catch (Throwable ex) {
-            showFloxErrorDialog("Could not save settings to XML file.", ex);
-        }
+        saveXMLFile();
     }//GEN-LAST:event_saveSettingsMenuItemActionPerformed
 
     private void exportFlowsCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFlowsCSVMenuItemActionPerformed
@@ -4401,7 +4446,7 @@ public class MainWindow extends javax.swing.JFrame {
             double x2 = baseLength * (i + 1);
             x1 += xSpacing * i;
             x2 += xSpacing * i;
-            Flow originalFlow = new Flow(new Point(x1, 0), 
+            Flow originalFlow = new Flow(new Point(x1, 0),
                     x1, cy,
                     new Point(x2, 0), 1d);
             flows.add(originalFlow);
@@ -4444,7 +4489,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
 
     private void nameMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameMenuItemActionPerformed
-        String name = (String)JOptionPane.showInputDialog(this, "Name", "Flox", 
+        String name = (String) JOptionPane.showInputDialog(this, "Name", "Flox",
                 JOptionPane.PLAIN_MESSAGE, null, null, model.getName());
         if (name != null) {
             model.setName(name);
@@ -4461,6 +4506,19 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.setDrawLockIcons(showLockStateCheckBoxMenuItem.isSelected());
         mapComponent.refreshMap();
     }//GEN-LAST:event_showLockStateCheckBoxMenuItemActionPerformed
+
+    private void moveSelectedAwayFromObstaclesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveSelectedAwayFromObstaclesMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        if (flows.isEmpty()) {
+            return;
+        }
+        ForceLayouter layouter = new ForceLayouter(model);
+        List<Obstacle> obstacles = layouter.getObstacles();
+        layouter.moveFlowsAwayFromObstacles(obstacles, flows, 1);
+        
+        mapComponent.refreshMap();
+        addUndo("Move Flow Away From Obstacles");
+    }//GEN-LAST:event_moveSelectedAwayFromObstaclesMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4648,6 +4706,7 @@ public class MainWindow extends javax.swing.JFrame {
     private edu.oregonstate.cartography.flox.gui.ColorButton minColorButton;
     private javax.swing.JSpinner minDistToObstaclesSpinner;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
+    private javax.swing.JMenuItem moveSelectedAwayFromObstaclesMenuItem;
     private javax.swing.JMenuItem nameMenuItem;
     private javax.swing.JMenuItem netFlowsMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton nodeFillColorButton;
