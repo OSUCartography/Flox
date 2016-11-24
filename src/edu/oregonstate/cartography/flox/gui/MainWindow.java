@@ -140,7 +140,7 @@ public class MainWindow extends javax.swing.JFrame {
      * @param msg The message to display.
      * @param ex An optional exception with additional information.
      */
-    private void showErrorDialog(String msg, Throwable ex) {
+    private void showFloxErrorDialog(String msg, Throwable ex) {
         Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         String title = "Flox Error";
         ErrorDialog.showErrorDialog(msg, title, ex, this);
@@ -158,7 +158,7 @@ public class MainWindow extends javax.swing.JFrame {
                 setModel(newModel);
                 layout(null);
             } catch (Throwable ex) {
-                showErrorDialog("Could not undo or redo the command.", ex);
+                showFloxErrorDialog("Could not undo or redo the command.", ex);
             }
         }
     }
@@ -169,7 +169,7 @@ public class MainWindow extends javax.swing.JFrame {
                 undo.add(message, model.marshal());
             }
         } catch (JAXBException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            showFloxErrorDialog("Could not serialize the flows.", ex);
         }
     }
 
@@ -695,8 +695,10 @@ public class MainWindow extends javax.swing.JFrame {
         viewZoomInMenuItem = new javax.swing.JMenuItem();
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator20 = new javax.swing.JPopupMenu.Separator();
-        showComputationSettingsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        showLockStateCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator15 = new javax.swing.JPopupMenu.Separator();
+        showComputationSettingsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator34 = new javax.swing.JPopupMenu.Separator();
         showDebugCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         infoMenu = new javax.swing.JMenu();
         floxReportMenuItem = new javax.swing.JMenuItem();
@@ -2759,6 +2761,16 @@ public class MainWindow extends javax.swing.JFrame {
         viewMenu.add(viewZoomOutMenuItem);
         viewMenu.add(jSeparator20);
 
+        showLockStateCheckBoxMenuItem.setSelected(true);
+        showLockStateCheckBoxMenuItem.setText("Show Lock State");
+        showLockStateCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showLockStateCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(showLockStateCheckBoxMenuItem);
+        viewMenu.add(jSeparator15);
+
         showComputationSettingsCheckBoxMenuItem.setSelected(true);
         showComputationSettingsCheckBoxMenuItem.setText("Show Computation Palette");
         showComputationSettingsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2767,7 +2779,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         viewMenu.add(showComputationSettingsCheckBoxMenuItem);
-        viewMenu.add(jSeparator15);
+        viewMenu.add(jSeparator34);
 
         showDebugCheckBoxMenuItem.setText("Show Debug Menu");
         showDebugCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2965,7 +2977,7 @@ public class MainWindow extends javax.swing.JFrame {
             outputStream = new FileOutputStream(outFilePath);
             exporter.export(outputStream);
         } catch (Throwable ex) {
-            showErrorDialog("Could not export to a SVG file.", ex);
+            showFloxErrorDialog("Could not export to a SVG file.", ex);
         } finally {
             try {
                 if (outputStream != null) {
@@ -3011,12 +3023,12 @@ public class MainWindow extends javax.swing.JFrame {
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
             if (collection == null) {
-                showErrorDialog("The selected file is not a shapefile.", null);
+                showFloxErrorDialog("The selected file is not a shapefile.", null);
                 return;
             }
             addLayer(collection, FileUtils.getFileNameWithoutExtension(inFilePath));
         } catch (Throwable ex) {
-            showErrorDialog("Could not open the Shapefile.", ex);
+            showFloxErrorDialog("Could not open the Shapefile.", ex);
         } finally {
             writeSymbolGUI();
         }
@@ -3037,7 +3049,7 @@ public class MainWindow extends javax.swing.JFrame {
                 mapComponent.showAll();
                 addUndo("Open XML Project");
             } catch (Throwable ex) {
-                showErrorDialog("Could not read the XML project file.", ex);
+                showFloxErrorDialog("Could not read the XML project file.", ex);
             }
         }
     }
@@ -3103,7 +3115,7 @@ public class MainWindow extends javax.swing.JFrame {
             // clipping areas to the new flows.
             applyClippingSettings();
         } catch (Throwable ex) {
-            showErrorDialog("The file could not be read.", ex);
+            showFloxErrorDialog("The file could not be read.", ex);
         }
     }
 
@@ -3121,7 +3133,7 @@ public class MainWindow extends javax.swing.JFrame {
             // read shapefile
             GeometryCollection collection = new ShapeGeometryImporter().read(inFilePath);
             if (collection == null) {
-                showErrorDialog("The selected file is not a shapefile.", null);
+                showFloxErrorDialog("The selected file is not a shapefile.", null);
                 return;
             }
 
@@ -3140,7 +3152,7 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             }
         } catch (Throwable ex) {
-            showErrorDialog("An error occured.", ex);
+            showFloxErrorDialog("An error occured.", ex);
         } finally {
             writeSymbolGUI();
         }
@@ -3384,11 +3396,11 @@ public class MainWindow extends javax.swing.JFrame {
             try {
                 size = Math.abs(Integer.parseInt(input));
             } catch (NumberFormatException ex) {
-                showErrorDialog("Invalid image size.", ex);
+                showFloxErrorDialog("Invalid image size.", ex);
                 return;
             }
             if (size > 5000) {
-                showErrorDialog("The entered size must be smaller than 5000.", null);
+                showFloxErrorDialog("The entered size must be smaller than 5000.", null);
                 return;
             }
 
@@ -3415,7 +3427,7 @@ public class MainWindow extends javax.swing.JFrame {
             // write image to file
             ImageIO.write(image, "png", new File(filePath));
         } catch (Throwable ex) {
-            showErrorDialog("Could not export the image.", ex);
+            showFloxErrorDialog("Could not export the image.", ex);
         }
     }//GEN-LAST:event_exportImageMenuItemActionPerformed
 
@@ -3539,13 +3551,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void clipWithEndAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithEndAreasCheckBoxActionPerformed
         if (updatingGUI == false && model != null) {
-            boolean clipEnds = clipWithEndAreasCheckBox.isSelected();
-            model.setClipFlowEnds(clipEnds);
-            if (clipEnds) {
-                model.updateEndClipAreas();
-            } else {
-                model.removeEndClipAreasFromFlows();
-            }
+            model.setClipFlowEnds(clipWithEndAreasCheckBox.isSelected());
             layout("Clip with End Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -3603,7 +3609,7 @@ public class MainWindow extends javax.swing.JFrame {
             // clipping areas to the new flows.
             applyClippingSettings();
         } catch (Throwable ex) {
-            showErrorDialog("The flows could not be imported.", ex);
+            showFloxErrorDialog("The flows could not be imported.", ex);
         }
     }//GEN-LAST:event_openPointsAndFlowsMenuItemActionPerformed
 
@@ -3676,14 +3682,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void clipWithStartAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithStartAreasCheckBoxActionPerformed
         if (updatingGUI == false && model != null) {
-            boolean clip = clipWithStartAreasCheckBox.isSelected();
-            model.setClipFlowStarts(clip);
-            if (clip) {
-                model.updateStartClipAreas();
-            } else {
-                model.removeStartClipAreasFromFlows();
-            }
-
+            model.setClipFlowStarts(clipWithStartAreasCheckBox.isSelected());
             layout("Clip with Start Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -3724,7 +3723,7 @@ public class MainWindow extends javax.swing.JFrame {
             File file = new File(filePath);
             model.marshal(file.getAbsolutePath());
         } catch (Throwable ex) {
-            showErrorDialog("Could not save settings to XML file.", ex);
+            showFloxErrorDialog("Could not save settings to XML file.", ex);
         }
     }//GEN-LAST:event_saveSettingsMenuItemActionPerformed
 
@@ -3739,7 +3738,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             CSVFlowExporter.export(outFilePath, model.flowIterator());
         } catch (Throwable ex) {
-            showErrorDialog("Could not export flows to CSV text file.", ex);
+            showFloxErrorDialog("Could not export flows to CSV text file.", ex);
         }
     }//GEN-LAST:event_exportFlowsCSVMenuItemActionPerformed
 
@@ -3999,7 +3998,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.refreshMap();
             layout("Merge Nodes");
         } catch (Throwable e) {
-            ErrorDialog.showErrorDialog("Could not merge nodes.", "Flox Error", e, this);
+            showFloxErrorDialog("Could not merge nodes.", e);
         }
     }//GEN-LAST:event_mergeNodesMenuItemActionPerformed
 
@@ -4346,7 +4345,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.refreshMap();
             layout("Convert to Total Flows");
         } catch (Throwable e) {
-            ErrorDialog.showErrorDialog("Could not convert to total flows.", "Flox Error", e, this);
+            showFloxErrorDialog("Could not convert to total flows.", e);
         }
     }//GEN-LAST:event_totalFlowsMenuItemActionPerformed
 
@@ -4359,7 +4358,7 @@ public class MainWindow extends javax.swing.JFrame {
             mapComponent.refreshMap();
             layout("Convert to Net Flows");
         } catch (Throwable e) {
-            ErrorDialog.showErrorDialog("Could not convert to net flows.", "Flox Error", e, this);
+            showFloxErrorDialog("Could not convert to net flows.", e);
         }
     }//GEN-LAST:event_netFlowsMenuItemActionPerformed
 
@@ -4458,6 +4457,11 @@ public class MainWindow extends javax.swing.JFrame {
         addUndo("Shorten Flows");
     }//GEN-LAST:event_testCurveShorteningMenuItemActionPerformed
 
+    private void showLockStateCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showLockStateCheckBoxMenuItemActionPerformed
+        mapComponent.setDrawLockIcons(showLockStateCheckBoxMenuItem.isSelected());
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_showLockStateCheckBoxMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4477,8 +4481,8 @@ public class MainWindow extends javax.swing.JFrame {
             addUndo(undoString);
         }
 
-        // If there are no flows, exit the method.
-        if (model.getNbrFlows() == 0) {
+        // If there are less than two flows, exit the method.
+        if (model.getNbrFlows() <= 1) {
             return;
         }
 
@@ -4616,6 +4620,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator31;
     private javax.swing.JPopupMenu.Separator jSeparator32;
     private javax.swing.JSeparator jSeparator33;
+    private javax.swing.JPopupMenu.Separator jSeparator34;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JTextArea jTextArea1;
@@ -4696,6 +4701,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem showDebugCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showFlowsCheckBoxMenuItem;
     private javax.swing.JToggleButton showLineSegmentsToggleButton;
+    private javax.swing.JCheckBoxMenuItem showLockStateCheckBoxMenuItem;
     private javax.swing.JToggleButton showNodesToggleButton;
     private javax.swing.JCheckBoxMenuItem showObstaclesCheckBoxMenuItem;
     private javax.swing.JMenuItem showOptionsMenuItem;
