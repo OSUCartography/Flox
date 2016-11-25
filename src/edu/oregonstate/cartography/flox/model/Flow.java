@@ -505,26 +505,20 @@ public class Flow implements Comparable<Flow> {
         startPt = endPt;
         endPt = tempPt;
 
-        if (model.isClipFlowStarts() && model.isClipFlowEnds()) {
-            // swap clipping geometry
-            Geometry tempGeometry = startClipArea;
-            startClipArea = endClipArea;
-            endClipArea = tempGeometry;
+        // swap clipping geometry
+        Geometry tempGeometry = startClipArea;
+        startClipArea = endClipArea;
+        endClipArea = tempGeometry;
 
-            // swap clipping WKT geometry
-            String tempWKT = startClipAreaWKT;
-            startClipAreaWKT = endClipAreaWKT;
-            endClipAreaWKT = tempWKT;
-            
-            // swap area clip radii
-            double tempR = approximateStartAreaClipRadius;
-            approximateStartAreaClipRadius = approximateEndAreaClipRadius;
-            approximateEndAreaClipRadius = tempR;            
-        } else if (model.isClipFlowStarts()) {
-            model.findStartClipAreaForFlow(this);
-        } else if (model.isClipFlowEnds()) {
-            model.findEndClipAreaForFlow(this);
-        }
+        // swap clipping WKT geometry
+        String tempWKT = startClipAreaWKT;
+        startClipAreaWKT = endClipAreaWKT;
+        endClipAreaWKT = tempWKT;
+
+        // swap area clip radii
+        double tempR = approximateStartAreaClipRadius;
+        approximateStartAreaClipRadius = approximateEndAreaClipRadius;
+        approximateEndAreaClipRadius = tempR;
     }
 
     /**
@@ -758,11 +752,14 @@ public class Flow implements Comparable<Flow> {
      * @param quality
      */
     public void offsetFlow(double offset, Model model, FlowOffsettingQuality quality) {
+        if (offset == 0d) {
+            return;
+        }
 
         // number of iterations
         final int nbrIterations = quality.iterations;
         // number of samples along the curves for computing distances
-        final int nbrTSamples = quality.iterations;;
+        final int nbrTSamples = 20;
         // heuristic weight for moving along the offset curve
         final double w1 = 0.8;
         // heuristic weight for moving along the original curve
@@ -813,7 +810,7 @@ public class Flow implements Comparable<Flow> {
         double dy2 = startY - endY;
         double baselineLength2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
         dx2 /= baselineLength2;
-        dy2 /= baselineLength2;        
+        dy2 /= baselineLength2;
         // cross product for computing sin of rotation angle between the baselines
         double sinRot = dx1 * dy2 - dy1 * dx2;
         // dot product for computing cos of rotation angle between the baselines
@@ -828,13 +825,84 @@ public class Flow implements Comparable<Flow> {
         ctrlPtY = newY + startY;
 
         // improve the control point position such that the distance between the
-        // original curve and the offset curve are approximately constant
+        // original curve and the offset curve are approximately constant along 
+        // the two curves
+//        Point[] offsetPts = new Point[nbrTSamples];
+//        Point[] originalPts = new Point[nbrTSamples];
         for (int i = 0; i < nbrIterations; i++) {
             Flow offsetFlow = new Flow(new Point(startX, startY),
                     ctrlPtX, ctrlPtY,
                     new Point(endX, endY), 1d);
             double moveX = 0;
             double moveY = 0;
+
+            /*    
+            // compute points along the two curves
+            for (int j = 0; j < nbrTSamples; j++) {
+                double t = (j + 0.5) * (1. / nbrTSamples);
+                offsetPts[j] = offsetFlow.pointOnCurve(t);
+                originalPts[j] = pointOnCurve(t);
+            }
+            
+            // move along the offset curve and for each point find the closest 
+            // point on the original curve
+            for (int offsetID = 0; offsetID < nbrTSamples; offsetID++) {
+                double minDistSqr = Double.MAX_VALUE;
+                Point offsetPt = offsetPts[offsetID];
+                int closestOriginalID = 0;
+                for (int originalID = 0; originalID < nbrTSamples; originalID++) {
+                    Point originalPt = originalPts[originalID];
+                    double distSqr = offsetPt.distanceSqr(originalPt);
+                    if (distSqr < minDistSqr) {
+                        closestOriginalID = originalID;
+                        minDistSqr = distSqr;
+                    }
+                }
+
+                // compute direction and length of displacement force for closest point
+                double dirX = offsetPt.x - originalPts[closestOriginalID].x;
+                double dirY = offsetPt.y - originalPts[closestOriginalID].y;
+                double curveDistance = Math.sqrt(dirX * dirX + dirY * dirY);
+                double gap = Math.abs(offset) - curveDistance;
+                double gapW1 = gap * w1;
+                if (curveDistance != 0d) {
+                    dirX /= curveDistance;
+                    dirY /= curveDistance;
+                    moveX += dirX * gapW1;
+                    moveY += dirY * gapW1;
+                }
+            }
+
+            // move along the original curve and for each point find the closest 
+            // point on the offset curve
+            for (int originalID = 0; originalID < nbrTSamples; originalID++) {
+                double minDistSqr = Double.MAX_VALUE;
+                Point originalPt = originalPts[originalID];
+                int closestOffsetID = 0;
+                for (int offsetID = 0; offsetID < nbrTSamples; offsetID++) {
+                    Point offsetPt = offsetPts[offsetID];
+                    double distSqr = offsetPt.distanceSqr(originalPt);
+                    if (distSqr < minDistSqr) {
+                        closestOffsetID = offsetID;
+                        minDistSqr = distSqr;
+                    }
+                }
+                
+                // compute direction and length of displacement force for closest point
+                double dirX = originalPt.x - offsetPts[closestOffsetID].x;
+                double dirY = originalPt.y - offsetPts[closestOffsetID].y;
+                double curveDistance = Math.sqrt(dirX * dirX + dirY * dirY);
+                double gap = Math.abs(offset) - curveDistance;
+                double gapW2 = gap * w2;
+                if (curveDistance > 0) {
+                    dirX /= curveDistance;
+                    dirY /= curveDistance;
+                    moveX -= dirX * gapW2;
+                    moveY -= dirY * gapW2;
+                }
+            }
+             */
+            // an alternative method that computes exact distances FIXME compare speed
             for (int j = 0; j < nbrTSamples; j++) {
                 double t = (j + 0.5) * (1. / nbrTSamples);
 
@@ -843,7 +911,9 @@ public class Flow implements Comparable<Flow> {
                 // the offset curve is too distant from the original curve where 
                 // the original curve is strongly bent
                 Point ptOnOffsetCurve1 = offsetFlow.pointOnCurve(t);
-                Point ptOnOriginalCurve1 = closestPointOnCurve(ptOnOffsetCurve1);
+                //Point ptOnOriginalCurve1 = closestPointOnCurve(ptOnOffsetCurve1);
+                Point ptOnOriginalCurve1 = closestPointOnCurve(t, ptOnOffsetCurve1);
+                //Point ptOnOriginalCurve1 = closestPointOnCurve(ptOnOffsetCurve1);
                 double curveDistance1 = ptOnOffsetCurve1.distance(ptOnOriginalCurve1);
                 double gap1 = Math.abs(offset) - curveDistance1;
                 double gapW1 = gap1 * w1;
@@ -863,7 +933,8 @@ public class Flow implements Comparable<Flow> {
                 // This results in a curve with approximately correct distance to the original curve,
                 // but curves tend to by curvy where the original curve is strongly bent
                 Point ptOnOriginalCurve2 = pointOnCurve(t);
-                Point ptOnOffsetCurve2 = offsetFlow.closestPointOnCurve(ptOnOriginalCurve2);
+                Point ptOnOffsetCurve2 = offsetFlow.closestPointOnCurve(t, ptOnOriginalCurve2);
+                //Point ptOnOffsetCurve2 = offsetFlow.closestPointOnCurve(ptOnOriginalCurve2);
                 double curveDistance2 = ptOnOffsetCurve2.distance(ptOnOriginalCurve2);
                 double gap2 = Math.abs(offset) - curveDistance2;
                 double gapW2 = gap2 * w2;
@@ -879,7 +950,6 @@ public class Flow implements Comparable<Flow> {
                     moveY += dirY2 * gapW2;
                 }
             }
-
             // move control point
             moveX /= nbrTSamples;
             moveY /= nbrTSamples;
@@ -921,8 +991,11 @@ public class Flow implements Comparable<Flow> {
      * @return Location on curve.
      */
     public Point pointOnCurve(double t) {
-        assert (t >= 0d && t <= 1d);
-
+        //assert (t >= 0d && t <= 1d);
+        if (Double.isFinite(t) == false) {
+            System.out.println(t);
+            assert (t >= 0d && t <= 1d);
+        }
         double w3 = t * t;
         double _1_t = 1 - t;
         double w2 = 2 * _1_t * t;
@@ -1117,6 +1190,169 @@ public class Flow implements Comparable<Flow> {
     public double distance(double[] xy, double tol) {
         return GeometryUtils.getDistanceToQuadraticBezierCurve(startPt.x, startPt.y,
                 cPtX, cPtY, endPt.x, endPt.y, tol, xy);
+    }
+
+    private double fp(double t, double x, double y) {
+        // return (f(t + h, x, y) - f(t - h, x, y)) / (2 * h);
+
+        // with square of distance
+        // http://www.wolframalpha.com
+        // derivative (i-(a*(1-x)^2+b*2*x(1-x)+c*x^2))^2 + (j-(d*(1-x)^2+e*2*x(1-x)+f*x^2))^2
+        // return 2 * (2 * x1 * (1 - t) - 2 * x2 * (1 - t) + 2 * x2 * t - 2 * x3 * t) * (-x1 * (1 - t) * (1 * t) - 2 * x2 * t * (1 - t) - x3 * t * t + x)
+        // + 2 * (2 * y1 * (1 - t) - 2 * y2 * (1 - t) + 2 * y2 * t - 2 * y3 * t) * (-y1 * (1 - t) * (1 - t) - 2 * y2 * t * (1 - t) - y3 * t * t + y);
+        // with distance
+        double x1 = startPt.x;
+        double y1 = startPt.y;
+        double x2 = cPtX;
+        double y2 = cPtY;
+        double x3 = endPt.x;
+        double y3 = endPt.y;
+
+        // D[sqrt ((x - (x1*(1 - t)^2 + x2*2*t (1 - t) + x3*t^2))^2 + (y - (y1*(1 - t)^2 + y2*2*t (1 - t) + y3*t^2))^2)), t]
+        // then simplify
+        /*
+        (4 ((-1 + t) x1 + x2 - 2 t x2 + t x3) (-x + (-1 + t)^2 x1 + t (2 x2 - 2 t x2 + t x3)) + 
+   4 ((-1 + t) y1 + y2 - 2 t y2 + t y3) (-y + (-1 + t)^2 y1 + 
+      t (2 y2 - 2 t y2 + t y3)))/(2 \[Sqrt]((x - (-1 + t)^2 x1 + 
+        t (2 (-1 + t) x2 - t x3))^2 + (y - (-1 + t)^2 y1 + 
+        t (2 (-1 + t) y2 - t y3))^2))
+         */
+        // FIXME reduce number of operation
+        double kx = (x - (-1 + t) * (-1 + t) * x1 + t * (2 * (-1 + t) * x2 - t * x3));
+        double ky = (y - (-1 + t) * (-1 + t) * y1 + t * (2 * (-1 + t) * 2 - t * y3));
+
+        return (4 * ((-1 + t) * x1 + x2 - 2 * t * x2 + t * x3) * (-x + (-1 + t) * (-1 + t) * x1
+                + t * (2 * x2 - 2 * t * x2 + t * x3))
+                + 4 * ((-1 + t) * y1 + y2 - 2 * t * y2 + t * y3) * (-y + (-1 + t) * (-1 + t) * y1
+                + t * (2 * y2 - 2 * t * y2 + t * y3)))
+                / (2 * Math.sqrt((kx * kx + ky * ky)));
+    }
+
+    private double fpp(double t, double x, double y) {
+        // return (f(t + h, x, y) - 2 * f(t, x, y) + f(t - h, x, y)) / (h * h);
+
+        // with square of distance
+//        double kx = (2 * x1 * (1 - t) - 2 * x2 * (1 - t) + 2 * x2 * t - 2 * x3 * t);
+//        double ky = (2 * y1 * (1 - t) - 2 * y2 * (1 - t) + 2 * y2 * t - 2 * y3 * t);
+//        return 2 * (-2 * x1 + 4 * x2 - 2 * x3) * (-x1 * (1 - t) * (1 - t) - 2 * x2 * t * (1 - t) - x3 * t * t + x)
+//                + 2 * kx * kx
+//                + 2 * (-2 * y1 + 4 * y2 - 2 * y3) * (-y1 * (1 - t) * (1 - t) - 2 * y2 * t * (1 - t) - y3 * t * t + y)
+//                + 2 * ky * ky;
+        // with distance
+        // second derivative with simplify
+        /*(8 ((x + (-1 + t) (x1 - t x1 + 2 t x2) - 
+        t^2 x3)^2 + (y + (-1 + t) (y1 - t y1 + 2 t y2) - 
+        t^2 y3)^2) (2 ((-1 + t) x1 + x2 - 2 t x2 + t x3)^2 + (x1 - 
+         2 x2 + x3) (-x + (-1 + t)^2 x1 + t (2 x2 - 2 t x2 + t x3)) + 
+      2 ((-1 + t) y1 + y2 - 2 t y2 + t y3)^2 + (y1 - 2 y2 + 
+         y3) (-y + (-1 + t)^2 y1 + 
+         t (2 y2 - 2 t y2 + t y3))) - (4 ((-1 + t) x1 + x2 - 2 t x2 + 
+        t x3) (-x + (-1 + t)^2 x1 + t (2 x2 - 2 t x2 + t x3)) + 
+     4 ((-1 + t) y1 + y2 - 2 t y2 + t y3) (-y + (-1 + t)^2 y1 + 
+        t (2 y2 - 2 t y2 + t y3)))^2)/(4 ((x + (-1 + t) (x1 - t x1 + 
+          2 t x2) - t^2 x3)^2 + (y + (-1 + t) (y1 - t y1 + 2 t y2) - 
+       t^2 y3)^2)^(3/2))
+         */
+        double x1 = startPt.x;
+        double y1 = startPt.y;
+        double x2 = cPtX;
+        double y2 = cPtY;
+        double x3 = endPt.x;
+        double y3 = endPt.y;
+
+        // FIXME reduce number of operation
+        double kx1 = (x + (-1 + t) * (x1 - t * x1 + 2 * t * x2) - t * t * x3);
+        double ky1 = (y + (-1 + t) * (y1 - t * y1 + 2 * t * y2) - t * t * y3);
+        double kx2 = ((-1 + t) * x1 + x2 - 2 * t * x2 + t * x3);
+        double ky2 = ((-1 + t) * y1 + y2 - 2 * t * y2 + t * y3);
+        double kx3 = (x + (-1 + t) * (x1 - t * x1 + 2 * t * x2) - t * t * x3);
+        double ky3 = (y + (-1 + t) * (y1 - t * y1 + 2 * t * y2) - t * t * y3);
+        double k = (4 * ((-1 + t) * x1 + x2 - 2 * t * x2 + t * x3) * (-x + (-1 + t) * (-1 + t) * x1 + t * (2 * x2 - 2 * t * x2 + t * x3))
+                + 4 * ((-1 + t) * y1 + y2 - 2 * t * y2 + t * y3) * (-y + (-1 + t) * (-1 + t) * y1
+                + t * (2 * y2 - 2 * t * y2 + t * y3)));
+
+        return (8 * (kx1 * kx1 + ky1 * ky1) * (2 * kx2 * kx2 + (x1 - 2 * x2 + x3) * (-x + (-1 + t) * (-1 + t) * x1 + t * (2 * x2 - 2 * t * x2 + t * x3))
+                + 2 * ky2 * ky2 + (y1 - 2 * y2 + y3) * (-y + (-1 + t) * (-1 + t) * y1
+                + t * (2 * y2 - 2 * t * y2 + t * y3))) - k * k) / (4 * Math.pow(kx3 * kx3 + ky3 * ky3, 3. / 2)); // FIXME replace pow(x, 1.5) with x * sqrt(x)
+    }
+
+    private double f(double t, double x, double y) {
+        Point point = pointOnCurve(t);
+        return point.distance(x, y);
+    }
+
+    public static void main(String[] args) {
+        double h = 0.0000001;
+
+        //Flow flow = new Flow(new Point(0,0), 0.5, 2, new Point(1, 0), 1);
+        Flow flow = new Flow(new Point(146.7, -0.04), 145.524, 6.855, new Point(151.97, -1.734), 1);
+
+        Flow flow2 = new Flow(new Point(144, 0), 144, 12, new Point(154, 0), 1);
+
+        for (int i = 0; i <= 20; i++) {
+            double t = i / 20d;
+            Point point = flow2.pointOnCurve(t);
+            double x = point.x;
+            double y = point.y;
+            double fp = flow.fp(t, x, y);
+            System.out.println("\nexact first derivative  \t" + fp);
+            fp = (flow.f(t + h, x, y) - flow.f(t - h, x, y)) / (2 * h);
+            System.out.println("approx first derivative \t" + fp);
+
+            double fpp = flow.fpp(t, x, y);
+            System.out.println("exact second derivative \t" + fpp);
+            fpp = (flow.f(t + h, x, y) - 2 * flow.f(t, x, y) + flow.f(t - h, x, y)) / (h * h);
+            System.out.println("approx second derivative \t" + fpp);
+
+            System.out.println("closest t               \t" + flow.closestTNewtonRaphson(t, x, y));
+
+            Point point1 = flow.closestPointOnCurve(t, new Point(x, y));
+            Point point2 = flow.closestPointOnCurve(new Point(x, y));
+            System.out.println("distance exact - Newton \t" + point1.distance(point2));
+        }
+
+    }
+
+    private double closestTNewtonRaphson(double t, double x, double y) {
+        final int MAX_ITER = 5;
+        final double EPS = 0.0001;
+        
+        double dT = Double.MAX_VALUE;
+        int iterationCounter = 0;        
+
+        // Newton-Raphson with first and second derivative to find minimum
+        do {
+            double fpp = fpp(t, x, y);
+            if (fpp == 0d) {
+                // found stationary point, which is the minimum
+                return (t < 0d || t > 1d) ? -1d : t;
+            }
+
+            double fp = fp(t, x, y);
+            double dT_ = fp / fpp;
+            if (Math.abs(dT_) > Math.abs(dT)) {
+                return -1d;
+            }
+            dT = dT_;
+            t -= dT;
+            if (++iterationCounter == MAX_ITER) {
+                return -1d;
+            }
+        } while (Math.abs(dT) > EPS);
+
+        if (t < 0d || t > 1d) {
+            return -1d;
+        }
+
+        return t;
+    }
+
+    private Point closestPointOnCurve(double t, Point pt) {
+        t = closestTNewtonRaphson(t, pt.x, pt.y);
+        if (t == -1d) {
+            return closestPointOnCurve(pt);
+        }
+        return pointOnCurve(t);
     }
 
     /**

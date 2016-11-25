@@ -63,6 +63,11 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      * flag for drawing obstacles (areas around nodes and arrowheads)
      */
     private boolean drawObstacles = false;
+    
+    /**
+     * flag for drawing icons placed on top of flow lines to indicate lock state
+     */
+    private boolean drawLockIcons = true;
 
     private MainWindow mainWindow;
 
@@ -124,7 +129,7 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
                     isDrawFlowRangebox(),
                     true, // draw control points
                     isDrawLineSegments(),
-                    true, // draw symbol for locked flows
+                    drawLockIcons, // draw symbol for locked flows
                     true, // highlight selected flows and nodes
                     isDrawStartClipAreas(),
                     isDrawEndClipAreas(),
@@ -321,6 +326,20 @@ public class FloxMapComponent extends AbstractSimpleFeatureMapComponent {
      */
     public void setDrawObstacles(boolean drawObstacles) {
         this.drawObstacles = drawObstacles;
+    }
+
+    /**
+     * @return the drawLockIcons
+     */
+    public boolean isDrawLockIcons() {
+        return drawLockIcons;
+    }
+
+    /**
+     * @param drawLockIcons the drawLockIcons to set
+     */
+    public void setDrawLockIcons(boolean drawLockIcons) {
+        this.drawLockIcons = drawLockIcons;
     }
 
 }

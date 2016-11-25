@@ -48,8 +48,8 @@ public final class Point {
 
     /**
      * Copy constructor.
-     * 
-     * @param point 
+     *
+     * @param point
      */
     public Point(Point point) {
         this.x = point.x;
@@ -57,7 +57,7 @@ public final class Point {
         this.value = point.value;
         this.selected = point.selected;
     }
-    
+
     /**
      * Rotates this point by the provided angle around an origin point and
      * returns the rotated point. The position of this point is not changed.
@@ -101,18 +101,31 @@ public final class Point {
 
     /**
      * Translate point.
-     * 
+     *
      * @param dx horizontal offset
      * @param dy vertical offset
      */
     public void offset(double dx, double dy) {
         assert (Double.isFinite(dx));
         assert (Double.isFinite(dy));
-        
+
         x += dx;
         y += dy;
     }
-    
+
+    /**
+     * Returns true if this point is on the left side of the line defined by
+     * point a and point b when viewed from a towards b.
+     *
+     * @param a start point of line
+     * @param b end point of line
+     * @return true if this point is on the left side of the line; false if the
+     * point is on the line or on the right side of the line
+     */
+    public boolean isLeft(Point a, Point b) {
+        return ((b.x - a.x) * (y - a.y) - (b.y - a.y) * (x - a.x)) > 0;
+    }
+
     /**
      * @return the selected
      */
@@ -174,7 +187,31 @@ public final class Point {
         double dy = this.y - y;
         return Math.sqrt(dx * dx + dy * dy);
     }
-
+ /**
+     * Square distance to another point.
+     *
+     * @param p another point.
+     * @return the square distance to the other point.
+     */
+    public double distanceSquare(Point p) {
+        double dx = x - p.x;
+        double dy = y - p.y;
+        return dx * dx + dy * dy;
+    }
+    
+     /**
+     * Square distance to another point.
+     *
+     * @param x x coordinate of another point.
+     * @param y y coordinate of another point.
+     * @return the square distance to the other point.
+     */
+    public double distanceSquare(double x, double y) {
+        double dx = this.x - x;
+        double dy = this.y - y;
+        return dx * dx + dy * dy;
+    }
+    
     /**
      * Create a new point between this and a passed point. The value of the new
      * point is the mean of the value of this and the value of the passed point.

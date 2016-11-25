@@ -1,13 +1,9 @@
 package edu.oregonstate.cartography.flox.model;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -72,12 +68,12 @@ public class ForceLayouter {
     }
 
     /**
-     * Apply now control point locations to a model. This method should be
-     * called when all iterations are completed and a new layout has been
+     * Apply new control point locations to a model. This method should be
+     * called after all iterations are completed and a new layout has been
      * generated.
      *
-     * @param destinationModel the graph of this model will be replaced with a
-     * reference to the model of this ForceLayouter.
+     * @param destinationModel the flow control points of this model will be
+     * replaced with a flow control points computed by this ForceLayouter.
      */
     public void applyChangesToModel(Model destinationModel) {
         Iterator<Flow> iterator = model.flowIterator();
@@ -144,8 +140,18 @@ public class ForceLayouter {
             List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
 
             // get a list of sorted flows that intersect obstacles
-            ArrayList<Flow> sortedOverlappingFlows = getFlowsOverlappingObstacles(obstacles);
-            sortedOverlappingFlows.sort(Collections.reverseOrder());
+            ArrayList<Flow> sortedOverlappingFlows = getFlowsOverlappingObstacles(obstacles, true);
+            // sortedOverlappingFlows.sort(Collections.reverseOrder());
+            // sort by numbers of intersections in decreasing order
+            sortedOverlappingFlows.sort(new Comparator<Flow>() {
+                @Override
+                public int compare(Flow f1, Flow f2) {
+                    int nbrIntersectingObstacles1 = countIntersectingObstacles(f1, obstacles, true);
+                    int nbrIntersectingObstacles2 = countIntersectingObstacles(f2, obstacles, true);
+                    return Integer.compare(nbrIntersectingObstacles2, nbrIntersectingObstacles1);
+                }
+            });
+
             int nbrOverlaps = sortedOverlappingFlows.size();
 
             // Compute the number of flows to move. Default is 1, but this might 
@@ -687,7 +693,6 @@ public class ForceLayouter {
         double endTangentY = endDir[0] * endVectorLength;
 
         // sum the two vectors
-        double angularDistributionWeight = model.getAngularDistributionWeight();
         double vectX = startTangentX + endTangentX;
         double vectY = startTangentY + endTangentY;
         Force f = new Force(vectX, vectY);
@@ -704,6 +709,7 @@ public class ForceLayouter {
         }
 
         // scale by weight
+        double angularDistributionWeight = model.getAngularDistributionWeight();
         f.scale(angularDistributionWeight);
 
         return f;
@@ -714,10 +720,53 @@ public class ForceLayouter {
      *
      * @param flow the flow to test
      * @param obstacles circular obstacles
+     * @param testArrowheadObstacles flag to indicate whether arrowhead
+     * obstacles are considered
      * @return true if the flow overlaps a node
      */
-    private boolean flowIntersectsObstacles(Flow flow, List<Obstacle> obstacles) {
+    private boolean flowIntersectsObstacles(Flow flow, List<Obstacle> obstacles,
+            boolean testArrowheadObstacles) {
         for (Obstacle obstacle : obstacles) {
+
+            // ignore arrowhead obstacles if requested
+            if (!testArrowheadObstacles && obstacle.isArrowObstacle()) {
+                // continue;
+            }
+
+            // ignore obstacles that are start or end nodes of the flow
+            if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
+                continue;
+            }
+
+            // ignore arrowhead attached to this flow
+            if (model.isDrawArrowheads() && flow == obstacle.flow) {
+                continue;
+            }
+
+            // ignore arrowheads that are attached to the start or end node of the flow
+            if (obstacle.isArrowObstacle()) {
+                if (obstacle.flow.getEndPt() == flow.getStartPt()
+                        || obstacle.flow.getEndPt() == flow.getEndPt()) {
+                    continue;
+                }
+            }
+
+            if (flow.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int countIntersectingObstacles(Flow flow, List<Obstacle> obstacles,
+            boolean testArrowheadObstacles) {
+        int nbrIntersections = 0;
+        for (Obstacle obstacle : obstacles) {
+
+            // ignore arrowhead obstacles if requested
+            if (!testArrowheadObstacles && obstacle.isArrowObstacle()) {
+                // continue;
+            }
 
             // ignore obstacles that are start or end nodes of the flow
             if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
@@ -730,10 +779,10 @@ public class ForceLayouter {
             }
 
             if (flow.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model)) {
-                return true;
+                ++nbrIntersections;
             }
         }
-        return false;
+        return nbrIntersections;
     }
 
     /**
@@ -744,7 +793,7 @@ public class ForceLayouter {
     public ArrayList<Flow> getFlowsOverlappingObstacles() {
         model.invalidateCachedValues();
         List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
-        return getFlowsOverlappingObstacles(obstacles);
+        return getFlowsOverlappingObstacles(obstacles, true);
     }
 
     public List<Obstacle> getObstacles() {
@@ -815,12 +864,13 @@ public class ForceLayouter {
      * @param obstacles a list of obstacles
      * @return a list of flows overlapping any of the passed obstacles
      */
-    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
+    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles,
+            boolean testArrowheadObstacles) {
         ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            if (flowIntersectsObstacles(flow, obstacles)) {
+            if (flowIntersectsObstacles(flow, obstacles, testArrowheadObstacles)) {
                 flowsArray.add(flow);
             }
         }
@@ -838,9 +888,6 @@ public class ForceLayouter {
      * @return true if a new position was found, false otherwise.
      */
     private boolean moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
-        if (flow.isLocked()) {
-            return false;
-        }
         // compute spacing of sample points in world coordinates
         // The spacing between candidate control points is equal to the minimum
         // distance to obstacles. Increase to accelerate computations.
@@ -859,7 +906,8 @@ public class ForceLayouter {
         // is the center of the spiral) and the corner point of the range box
         // that is the farthest away from the control point.
         Point[] rangeBox = rangeBoxEnforcer.computeRangebox(flow);
-        double maxSpiralRSq = rangeBoxEnforcer.longestDistanceSqToCorner(rangeBox, originalX, originalY);
+        double maxSpiralRadiusSquare = rangeBoxEnforcer.longestDistanceSqToCorner(
+                rangeBox, originalX, originalY);
 
         // place the control point along the spiral until a position is found 
         // that does not result in any overlap
@@ -874,24 +922,74 @@ public class ForceLayouter {
             double dy = Math.sin(angleRad) * spiralR;
             double cPtX = dx + originalX;
             double cPtY = dy + originalY;
-            flow.setCtrlPt(cPtX, cPtY);
-
             // increment rotation angle, such that the next point on the spiral 
             // has an approximate distance of dist to the current point
             angleRad += dist / spiralR;
 
-            if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY)
-                    && flowIntersectsObstacles(flow, obstacles) == false) {
+            if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY) == false) {
+                continue;
+            }
+            flow.setCtrlPt(cPtX, cPtY);
+
+            if (flowIntersectsObstacles(flow, obstacles, true) == false) {
                 // found a new position for the control point that does not 
                 // result in an overlap with any obstacle
                 return true;
             }
-        } // move along the spiral until the entire range box is covered
-        while (spiralR * spiralR < maxSpiralRSq);
 
-        // could not find a control point position that does not overlap an 
-        // obstacle. Restore the original coordinates.
-        flow.setCtrlPt(originalX, originalY);
+            if (flowIntersectsObstacles(flow, obstacles, false) == false) {
+                // found a new position for the control point that does not 
+                // result in an overlap with a node obstacle
+                return true;
+            }
+
+        } // move along the spiral until the entire range box is covered
+        while (spiralR * spiralR < maxSpiralRadiusSquare);
+
+        // search for position that results in smallest number of overlaps
+        int minNbrOverlaps = Integer.MAX_VALUE;
+        double minNbrOverlapsX = originalX;
+        double minNbrOverlapsY = originalY;
+        // FIXME instead of spiral proceed in grid pattern along axes of range box
+        angleRad = Math.PI;
+        double distToBasePointSquare = Double.MAX_VALUE;
+        Point basePoint = flow.getBaseLineMidPoint();
+        do {
+            // radius of spiral for the current angle.
+            // The distance between two windings is dist.
+            spiralR = dist * angleRad / Math.PI / 2;
+
+            // new control point location
+            double cPtX = Math.cos(angleRad) * spiralR + originalX;
+            double cPtY = Math.sin(angleRad) * spiralR + originalY;
+            // increment rotation angle, such that the next point on the spiral 
+            // has an approximate distance of dist to the current point
+            angleRad += dist / spiralR;
+
+            if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY) == false) {
+                continue;
+            }
+            flow.setCtrlPt(cPtX, cPtY);
+            int nbrOverlaps = countIntersectingObstacles(flow, obstacles, true);
+            if (nbrOverlaps < minNbrOverlaps) {
+                minNbrOverlapsX = cPtX;
+                minNbrOverlapsY = cPtY;
+                minNbrOverlaps = nbrOverlaps;
+            } else if (nbrOverlaps == minNbrOverlaps) {
+                // test whether this position with the same number of overlaps 
+                // is closer to the base point
+                double dsq = basePoint.distanceSquare(cPtX, cPtY);
+                if (dsq < distToBasePointSquare) {
+                    minNbrOverlapsX = cPtX;
+                    minNbrOverlapsY = cPtY;
+                    distToBasePointSquare = dsq;
+                }
+            }
+        } // move along the spiral until the entire range box is covered
+        while (spiralR * spiralR < maxSpiralRadiusSquare);
+
+        System.out.println(minNbrOverlaps);
+        flow.setCtrlPt(minNbrOverlapsX, minNbrOverlapsY);
 
         return false;
     }
@@ -904,12 +1002,25 @@ public class ForceLayouter {
      * @param nbrFlowsToMove stop when this many flows have been moved
      * @return number of remaining flows that overlap an obstacle
      */
-    private int moveFlowsAwayFromObstacles(List<Obstacle> obstacles,
+    public int moveFlowsAwayFromObstacles(List<Obstacle> obstacles,
             ArrayList<Flow> flows, int nbrFlowsToMove) {
         int nbrMovedFlows = 0;
+        for (int i = 0; i < Math.min(flows.size(), nbrFlowsToMove); i++) {
+            Flow flow = flows.get(i);
+            if (!flow.isLocked()) {
+                moveFlowAwayFromObstacles(flow, obstacles);
+                // lock the flow no matter whether it was moved or not
+                flow.setLocked(true);
+            }
+
+            if (isCancelled()) {
+                return 0;
+            }
+        }/*
         for (Flow flow : flows) {
-            if (moveFlowAwayFromObstacles(flow, obstacles)) {
-                // moved one flow. Lock it.
+            if (!flow.isLocked()) {
+                moveFlowAwayFromObstacles(flow, obstacles);
+                // lock the flow no matter whether it was moved or not
                 flow.setLocked(true);
                 if (++nbrMovedFlows == nbrFlowsToMove) {
                     break;
@@ -919,7 +1030,7 @@ public class ForceLayouter {
             if (isCancelled()) {
                 return 0;
             }
-        }
+        }*/
 
         // return initial number of flows overlapping obstacles
         return flows.size() - nbrMovedFlows;

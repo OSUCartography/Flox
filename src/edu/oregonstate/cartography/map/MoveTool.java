@@ -208,10 +208,10 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
         while (iter.hasNext()) {
             Flow flow = iter.next();
             // only update areas for selected nodes, because only those are moved
-            if (flow.getStartPt().isSelected() && model.isClipFlowStarts()) {
+            if (flow.getStartPt().isSelected()) {
                 model.findStartClipAreaForFlow(flow);
             }
-            if (flow.getEndPt().isSelected() && model.isClipFlowEnds()) {
+            if (flow.getEndPt().isSelected()) {
                 model.findEndClipAreaForFlow(flow);
             }
         }

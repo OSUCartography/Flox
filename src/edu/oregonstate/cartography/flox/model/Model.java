@@ -8,7 +8,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import edu.oregonstate.cartography.utils.ColorUtils;
 import edu.oregonstate.cartography.utils.GeometryUtils;
-import edu.oregonstate.cartography.utils.JTSUtils;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
@@ -87,7 +86,7 @@ public class Model {
      * Determines the maximum number of intermediate nodes per flow.
      */
     private FlowNodeDensity flowNodeDensity = FlowNodeDensity.MEDIUM;
-    
+
     /**
      * A Comparator defines conditions to compare two double values. Used to
      * select flows and nodes by their values.
@@ -494,6 +493,38 @@ public class Model {
      * Constructor of the model.
      */
     public Model() {
+
+                
+//        Flow flow1 = new Flow();
+//        flow1.setStartPt(new Point(728859.0206, 231293.5056));
+//        flow1.setEndPt(new Point(766109.7894, 172163.3169));
+//        flow1.setCtrlPt(802303.3320874976, 164484.4249772711);
+//        flow1.setLocked(true);
+//        Flow flow2 = new Flow(flow1);
+//        flow1.offsetFlow(1000, this, Flow.FlowOffsettingQuality.HIGH);
+////        addFlow(flow1);
+////        addFlow(flow2);
+//        flow1.setSelected(true);
+//        
+//        System.out.println();
+//        Point pt1 = new Point(755270.4832907076, 213766.60129870384);
+//        for (int i = 0; i <= 100; i++) {
+//            double t = i / 100d;
+//            Point pt2 = flow2.pointOnCurve(t);
+//            System.out.println(t + ", " + pt1.distance(pt2));
+//        }
+
+//        Flow flow = new Flow(new Point(0,0), 0.5, 0.5, new Point(1, 0), 1);
+//        long startNano = System.nanoTime();
+//        double dummy = 0;
+//        for (int i = 0; i < 1000000; i++) {
+//            double offset = 1d / 1000000;
+//            flow.offsetFlow(offset, this, Flow.FlowOffsettingQuality.LOW);
+//            dummy +=  flow.cPtX();
+//        }
+//        long endNano = System.nanoTime();
+//        System.out.println(dummy / 1000000.);
+//        System.out.println((endNano - startNano) / 1000 / 1000 + "ms");
     }
 
     /**
@@ -1074,12 +1105,8 @@ public class Model {
             g.setUserData(new Geometry[2]);
         }
 
-        if (isClipFlowEnds()) {
-            updateEndClipAreas();
-        }
-        if (isClipFlowStarts()) {
-            updateStartClipAreas();
-        }
+        updateEndClipAreas();
+        updateStartClipAreas();
     }
 
     /**
@@ -1089,26 +1116,6 @@ public class Model {
      */
     public boolean hasClipAreas() {
         return clipAreas != null;
-    }
-
-    /**
-     * Removes the end clip areas from all flows.
-     */
-    public void removeEndClipAreasFromFlows() {
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            iterator.next().setEndClipArea(null);
-        }
-    }
-
-    /**
-     * Removes the start clip areas from all flows.
-     */
-    public void removeStartClipAreasFromFlows() {
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            iterator.next().setStartClipArea(null);
-        }
     }
 
     /**
@@ -2171,10 +2178,10 @@ public class Model {
     public Flow clipFlow(Flow flow, boolean clipArrowhead, boolean forceClipNodes) {
 
         LineString lineString = null;
-        if (flow.getEndClipArea() != null || flow.getStartClipArea() != null) {
-            // FIXME better use irregular intervals
-            lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
-        }
+//        if (clipFlowStarts|| clipFlowEnds) {
+//            // FIXME better use irregular intervals
+//            lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
+//        }
 
         // clipping radius for start node
         double startNodeClipR = 0;
@@ -2190,8 +2197,10 @@ public class Model {
 
         // clipping radius for start mask area
         double startMaskClipR = 0;
-        if (flow.getStartClipArea() != null) {
-            startMaskClipR = flow.getApproximateStartAreaClipRadius(); // maskClippingRadius(lineString, true);
+        if (clipFlowStarts) {
+            startMaskClipR = flow.getApproximateStartAreaClipRadius();
+            // FIXME make both variants available
+            // startMaskClipR = maskClippingRadius(lineString, true);
         }
 
         // start and end clipping radius
@@ -2255,12 +2264,15 @@ public class Model {
 
         // clipping radius for end mask area
         double endMaskClipRadius = 0;
-        if (flow.getEndClipArea() != null) {
-            if (lineString == null && (flow.getEndClipArea() != null || flow.getStartClipArea() != null)) { // FIXME a mess with logical conditions
-                // FIXME better use irregular intervals
-                lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
-            }
-            endMaskClipRadius = flow.getApproximateEndAreaClipRadius(); // flow.maskClippingRadius(lineString, false);
+        if (clipFlowEnds) {
+            endMaskClipRadius = flow.getApproximateEndAreaClipRadius();
+            // FIXME make both variants available
+
+//            if (lineString == null && (flow.getEndClipArea() != null || flow.getStartClipArea() != null)) { // FIXME a mess with logical conditions
+//                // FIXME better use irregular intervals
+//                lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
+//            }
+//            endMaskClipRadius = flow.maskClippingRadius(lineString, false);
         }
 
         // end clipping radius
