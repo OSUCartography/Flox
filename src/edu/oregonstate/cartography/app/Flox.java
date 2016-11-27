@@ -6,7 +6,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 /**
@@ -49,21 +48,25 @@ public class Flox {
                 window.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
                 window.setVisible(true);
                 window.openComputationPalette();
-                //window.openFlowsCSVFile();
+                loadTestData(window);
 
                 window.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent e) {
-                        String msg = "This will exit Flox and all unsaved edits will be lost.";
-                        String title = "Flox";
-                        int res = JOptionPane.showConfirmDialog(window, msg, title, 
-                                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-                        if (res == JOptionPane.YES_OPTION) {
+                        if (window.canDocumentBeClosed()) {
                             window.dispose();
                         }
                     }
                 });
             }
         });
+    }
+
+    private static void loadTestData(MainWindow window) {
+        //window.testOffsetting();
+        //window.openXMLFile("/Users/jennyb/Dropbox/Flow Maps/Data/Flox Data/_Swiss_migration/swiss_flows_and_nodes.xml");
+        //window.openXMLFile("/Users/jennyb/Desktop/CH Flows no arrows 5.xml");
+        //window.openXMLFile("/Users/jennyb/Desktop/Geneva.xml");
+        //window.layout("Test Layout");
     }
 }

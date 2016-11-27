@@ -326,9 +326,11 @@ public class Flow implements Comparable<Flow> {
      *
      * @param obstacle obstacle
      * @param model data model
+     * @param minObstacleDistPx minimum empty space between flow and obstacles
+     * (in pixels)
      * @return
      */
-    protected boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model) {
+    protected boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model, int minObstacleDistPx) {
         double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
 
         // flow width in world coordinates
@@ -337,7 +339,7 @@ public class Flow implements Comparable<Flow> {
         // obstacle radius is in world coordinates
         // add minimum obstacle distance
         double obstacleRadiusWorld = obstacle.r
-                + model.getMinObstacleDistPx() / model.getReferenceMapScale();
+                + minObstacleDistPx / model.getReferenceMapScale();
 
         // the minimum distance between the obstacle center and the flow axis
         double minDist = (strokeWidthWorld / 2) + obstacleRadiusWorld;
@@ -493,6 +495,44 @@ public class Flow implements Comparable<Flow> {
      */
     public Point getBaseLineMidPoint() {
         return new Point((endPt.x + startPt.x) / 2, (endPt.y + startPt.y) / 2);
+    }
+
+    /**
+     * Computes the square distance between a passed point and the point between start
+     * and end points.
+     *
+     * @param x x point
+     * @param y y point
+     * @return distance between base line mid point and x/y
+     */
+    public double getSquareDistanceToBaseLineMidPoint(double x, double y) {
+        double midX = (endPt.x + startPt.x) / 2d;
+        double midY = (endPt.y + startPt.y) / 2d;
+        double dx = x - midX;
+        double dy = y - midY;
+        return dx * dx + dy * dy;
+    }
+
+    /**
+     * Projects a point onto the base line and returns the projected length
+     * relative to the mid point of the base line. The base line connects start
+     * and end points.
+     *
+     * @param x x point
+     * @param y y point
+     * @return length of vector between the base line mid point and x/y
+     */
+    public double scalarProjectionOnBaseline(double x, double y) {
+        double midX = (endPt.x + startPt.x) / 2d;
+        double midY = (endPt.y + startPt.y) / 2d;
+        // vector A from mid point to passed point
+        double ax = x - midX;
+        double ay = y - midY;
+        // vector B from mid point to end point
+        double bx = endPt.x - midX;
+        double by = endPt.y - midY;
+        // scalar product of A and B, divided by length of B
+        return (ax * bx + ay * by) / Math.sqrt(bx * bx + by * by);
     }
 
     /**
@@ -1281,44 +1321,44 @@ public class Flow implements Comparable<Flow> {
         return point.distance(x, y);
     }
 
-    public static void main(String[] args) {
-        double h = 0.0000001;
-
-        //Flow flow = new Flow(new Point(0,0), 0.5, 2, new Point(1, 0), 1);
-        Flow flow = new Flow(new Point(146.7, -0.04), 145.524, 6.855, new Point(151.97, -1.734), 1);
-
-        Flow flow2 = new Flow(new Point(144, 0), 144, 12, new Point(154, 0), 1);
-
-        for (int i = 0; i <= 20; i++) {
-            double t = i / 20d;
-            Point point = flow2.pointOnCurve(t);
-            double x = point.x;
-            double y = point.y;
-            double fp = flow.fp(t, x, y);
-            System.out.println("\nexact first derivative  \t" + fp);
-            fp = (flow.f(t + h, x, y) - flow.f(t - h, x, y)) / (2 * h);
-            System.out.println("approx first derivative \t" + fp);
-
-            double fpp = flow.fpp(t, x, y);
-            System.out.println("exact second derivative \t" + fpp);
-            fpp = (flow.f(t + h, x, y) - 2 * flow.f(t, x, y) + flow.f(t - h, x, y)) / (h * h);
-            System.out.println("approx second derivative \t" + fpp);
-
-            System.out.println("closest t               \t" + flow.closestTNewtonRaphson(t, x, y));
-
-            Point point1 = flow.closestPointOnCurve(t, new Point(x, y));
-            Point point2 = flow.closestPointOnCurve(new Point(x, y));
-            System.out.println("distance exact - Newton \t" + point1.distance(point2));
-        }
-
-    }
-
+// FIXME   
+//    public static void main(String[] args) {
+//        double h = 0.0000001;
+//
+//        //Flow flow = new Flow(new Point(0,0), 0.5, 2, new Point(1, 0), 1);
+//        Flow flow = new Flow(new Point(146.7, -0.04), 145.524, 6.855, new Point(151.97, -1.734), 1);
+//
+//        Flow flow2 = new Flow(new Point(144, 0), 144, 12, new Point(154, 0), 1);
+//
+//        for (int i = 0; i <= 20; i++) {
+//            double t = i / 20d;
+//            Point point = flow2.pointOnCurve(t);
+//            double x = point.x;
+//            double y = point.y;
+//            double fp = flow.fp(t, x, y);
+//            System.out.println("\nexact first derivative  \t" + fp);
+//            fp = (flow.f(t + h, x, y) - flow.f(t - h, x, y)) / (2 * h);
+//            System.out.println("approx first derivative \t" + fp);
+//
+//            double fpp = flow.fpp(t, x, y);
+//            System.out.println("exact second derivative \t" + fpp);
+//            fpp = (flow.f(t + h, x, y) - 2 * flow.f(t, x, y) + flow.f(t - h, x, y)) / (h * h);
+//            System.out.println("approx second derivative \t" + fpp);
+//
+//            System.out.println("closest t               \t" + flow.closestTNewtonRaphson(t, x, y));
+//
+//            Point point1 = flow.closestPointOnCurve(t, new Point(x, y));
+//            Point point2 = flow.closestPointOnCurve(new Point(x, y));
+//            System.out.println("distance exact - Newton \t" + point1.distance(point2));
+//        }
+//
+//    }
     private double closestTNewtonRaphson(double t, double x, double y) {
         final int MAX_ITER = 5;
         final double EPS = 0.0001;
-        
+
         double dT = Double.MAX_VALUE;
-        int iterationCounter = 0;        
+        int iterationCounter = 0;
 
         // Newton-Raphson with first and second derivative to find minimum
         do {

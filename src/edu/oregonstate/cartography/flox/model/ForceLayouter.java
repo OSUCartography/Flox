@@ -1,8 +1,10 @@
 package edu.oregonstate.cartography.flox.model;
 
+import static edu.oregonstate.cartography.flox.model.Model.ARROWHEAD_WEIGHT_FOR_INTERSECTION_INDEX;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -140,17 +142,21 @@ public class ForceLayouter {
             List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
 
             // get a list of sorted flows that intersect obstacles
-            ArrayList<Flow> sortedOverlappingFlows = getFlowsOverlappingObstacles(obstacles, true);
-            // sortedOverlappingFlows.sort(Collections.reverseOrder());
-            // sort by numbers of intersections in decreasing order
-            sortedOverlappingFlows.sort(new Comparator<Flow>() {
+            ArrayList<Flow> sortedOverlappingFlows = getFlowsOverlappingObstacles(
+                    obstacles);
+            // sort by decreasing intersection index, which assigns a smaller weight to arrowheads than nodes.
+            sortedOverlappingFlows.sort(Collections.reverseOrder(
+                    new Comparator<Flow>() {
                 @Override
                 public int compare(Flow f1, Flow f2) {
-                    int nbrIntersectingObstacles1 = countIntersectingObstacles(f1, obstacles, true);
-                    int nbrIntersectingObstacles2 = countIntersectingObstacles(f2, obstacles, true);
-                    return Integer.compare(nbrIntersectingObstacles2, nbrIntersectingObstacles1);
+                    int minObstacleDistPx = model.getMinObstacleDistPx();
+                    double nbrIntersectingObstacles1 = intersectionIndex(
+                            f1, obstacles, minObstacleDistPx, ARROWHEAD_WEIGHT_FOR_INTERSECTION_INDEX);
+                    double nbrIntersectingObstacles2 = intersectionIndex(
+                            f2, obstacles, minObstacleDistPx, ARROWHEAD_WEIGHT_FOR_INTERSECTION_INDEX);
+                    return Double.compare(nbrIntersectingObstacles1, nbrIntersectingObstacles2);
                 }
-            });
+            }));
 
             int nbrOverlaps = sortedOverlappingFlows.size();
 
@@ -716,70 +722,88 @@ public class ForceLayouter {
     }
 
     /**
+     * Tests whether a flow overlaps an obstacle.
+     *
+     * @param flow the flow to test
+     * @param obstacle obstacle to test against
+     * @param testArrowheadObstacles flag to indicate whether arrowhead
+     * obstacles are considered
+     * @param minObstaclesDistPx minimum empty space between the flow and
+     * obstacles (in pixels)
+     * @return true if the flow overlaps a node
+     */
+    private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle,
+            int minObstaclesDistPx) {
+
+        // ignore obstacles that are start or end nodes of the flow
+        if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
+            return false;
+        }
+
+        // ignore arrowhead attached to this flow
+        if (model.isDrawArrowheads() && flow == obstacle.flow) {
+            return false;
+        }
+
+        // ignore arrowheads that are attached to this flow's start or end node
+        if (obstacle.isArrowObstacle()) {
+            if (obstacle.flow.getStartPt() == flow.getStartPt()
+                    || obstacle.flow.getStartPt() == flow.getEndPt()
+                    || obstacle.flow.getEndPt() == flow.getStartPt()
+                    || obstacle.flow.getEndPt() == flow.getEndPt()) {
+                return false;
+            }
+        }
+
+        return flow.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle,
+                model, minObstaclesDistPx);
+    }
+
+    /**
      * Tests whether a flow overlaps any obstacle.
      *
      * @param flow the flow to test
      * @param obstacles circular obstacles
      * @param testArrowheadObstacles flag to indicate whether arrowhead
      * obstacles are considered
+     * @param minObstaclesDistPx minimum empty space between the flow and
+     * obstacles (in pixels)
      * @return true if the flow overlaps a node
      */
     private boolean flowIntersectsObstacles(Flow flow, List<Obstacle> obstacles,
-            boolean testArrowheadObstacles) {
+            int minObstacleDistPx) {
         for (Obstacle obstacle : obstacles) {
-
-            // ignore arrowhead obstacles if requested
-            if (!testArrowheadObstacles && obstacle.isArrowObstacle()) {
-                // continue;
-            }
-
-            // ignore obstacles that are start or end nodes of the flow
-            if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
-                continue;
-            }
-
-            // ignore arrowhead attached to this flow
-            if (model.isDrawArrowheads() && flow == obstacle.flow) {
-                continue;
-            }
-
-            // ignore arrowheads that are attached to the start or end node of the flow
-            if (obstacle.isArrowObstacle()) {
-                if (obstacle.flow.getEndPt() == flow.getStartPt()
-                        || obstacle.flow.getEndPt() == flow.getEndPt()) {
-                    continue;
-                }
-            }
-
-            if (flow.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model)) {
+            if (flowIntersectsObstacle(flow, obstacle, minObstacleDistPx)) {
                 return true;
             }
         }
         return false;
     }
 
-    private int countIntersectingObstacles(Flow flow, List<Obstacle> obstacles,
-            boolean testArrowheadObstacles) {
-        int nbrIntersections = 0;
+    /**
+     * Returns the number of overlaps between a flow and a list of obstacles.
+     *
+     * @param flow the flow to test
+     * @param obstacles obstacles to test against
+     * @param minObstacleDistPx minimum empty space between the flow and
+     * obstacles (in pixels)
+     * @return true if the flow overlaps a node
+     */
+    public int countIntersectingObstacles(Flow flow, List<Obstacle> obstacles,
+            int minObstacleDistPx) {
+        return (int)Math.round(intersectionIndex(flow, obstacles, minObstacleDistPx, 1d));
+    }
+    
+    public double intersectionIndex(Flow flow, List<Obstacle> obstacles,
+            int minObstacleDistPx, double arrowheadWeight) {
+        double nbrIntersections = 0;
         for (Obstacle obstacle : obstacles) {
-
-            // ignore arrowhead obstacles if requested
-            if (!testArrowheadObstacles && obstacle.isArrowObstacle()) {
-                // continue;
-            }
-
-            // ignore obstacles that are start or end nodes of the flow
-            if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
-                continue;
-            }
-
-            // ignore arrowhead attached to this flow
-            if (model.isDrawArrowheads() && flow == obstacle.flow) {
-                continue;
-            }
-
-            if (flow.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model)) {
-                ++nbrIntersections;
+            if (flowIntersectsObstacle(flow, obstacle, minObstacleDistPx)) {
+                if (obstacle.isArrowObstacle()) {
+                    nbrIntersections += arrowheadWeight;
+                } else {
+                    ++nbrIntersections;
+                }
             }
         }
         return nbrIntersections;
@@ -793,7 +817,7 @@ public class ForceLayouter {
     public ArrayList<Flow> getFlowsOverlappingObstacles() {
         model.invalidateCachedValues();
         List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
-        return getFlowsOverlappingObstacles(obstacles, true);
+        return getFlowsOverlappingObstacles(obstacles);
     }
 
     public List<Obstacle> getObstacles() {
@@ -862,15 +886,14 @@ public class ForceLayouter {
      * Returns a list of all flows that intersect a list of passed obstacles.
      *
      * @param obstacles a list of obstacles
-     * @return a list of flows overlapping any of the passed obstacles
      */
-    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles,
-            boolean testArrowheadObstacles) {
+    private ArrayList<Flow> getFlowsOverlappingObstacles(List<Obstacle> obstacles) {
         ArrayList<Flow> flowsArray = new ArrayList();
         Iterator<Flow> flowIterator = model.flowIterator();
         while (flowIterator.hasNext()) {
             Flow flow = flowIterator.next();
-            if (flowIntersectsObstacles(flow, obstacles, testArrowheadObstacles)) {
+            if (flowIntersectsObstacles(flow, obstacles,
+                    model.getMinObstacleDistPx())) {
                 flowsArray.add(flow);
             }
         }
@@ -893,8 +916,8 @@ public class ForceLayouter {
         // distance to obstacles. Increase to accelerate computations.
         // minObstacleDistPx can be zero. We require a distance of at least 3 
         // pixel to move along the spiral.
-        double minObstacleDistPx = Math.max(model.getMinObstacleDistPx(), 3);
-        double dist = minObstacleDistPx / model.getReferenceMapScale();
+        int minObstacleDistPx = model.getMinObstacleDistPx();
+        double dist = Math.max(minObstacleDistPx, 3) / model.getReferenceMapScale();
 
         double originalX = flow.cPtX();
         double originalY = flow.cPtY();
@@ -931,29 +954,21 @@ public class ForceLayouter {
             }
             flow.setCtrlPt(cPtX, cPtY);
 
-            if (flowIntersectsObstacles(flow, obstacles, true) == false) {
+            if (flowIntersectsObstacles(flow, obstacles, minObstacleDistPx) == false) {
                 // found a new position for the control point that does not 
                 // result in an overlap with any obstacle
                 return true;
             }
-
-            if (flowIntersectsObstacles(flow, obstacles, false) == false) {
-                // found a new position for the control point that does not 
-                // result in an overlap with a node obstacle
-                return true;
-            }
-
         } // move along the spiral until the entire range box is covered
         while (spiralR * spiralR < maxSpiralRadiusSquare);
 
         // search for position that results in smallest number of overlaps
-        int minNbrOverlaps = Integer.MAX_VALUE;
+        double minNbrOverlaps = Double.MAX_VALUE;
         double minNbrOverlapsX = originalX;
         double minNbrOverlapsY = originalY;
-        // FIXME instead of spiral proceed in grid pattern along axes of range box
+        // FIXME instead of spiral mvt, proceed in grid pattern along axes of range box
         angleRad = Math.PI;
         double distToBasePointSquare = Double.MAX_VALUE;
-        Point basePoint = flow.getBaseLineMidPoint();
         do {
             // radius of spiral for the current angle.
             // The distance between two windings is dist.
@@ -970,7 +985,8 @@ public class ForceLayouter {
                 continue;
             }
             flow.setCtrlPt(cPtX, cPtY);
-            int nbrOverlaps = countIntersectingObstacles(flow, obstacles, true);
+            double nbrOverlaps = intersectionIndex(flow, obstacles,
+                    minObstacleDistPx, 0d); // ignore intersecting arrowheads
             if (nbrOverlaps < minNbrOverlaps) {
                 minNbrOverlapsX = cPtX;
                 minNbrOverlapsY = cPtY;
@@ -978,11 +994,22 @@ public class ForceLayouter {
             } else if (nbrOverlaps == minNbrOverlaps) {
                 // test whether this position with the same number of overlaps 
                 // is closer to the base point
-                double dsq = basePoint.distanceSquare(cPtX, cPtY);
+                // option with Eucledian distance
+                //double dsq = basePoint.distanceSquare(cPtX, cPtY);
+
+                // option with Manhattan distance with axes aligned to base line
+                // FIXME it is not clear whether Manhattan distance is any better. Results with US commodity flows are identical for both distances.
+                double p1 = flow.scalarProjectionOnBaseline(cPtX, cPtY);
+                double dSqr = flow.getSquareDistanceToBaseLineMidPoint(cPtX, cPtY);
+                double p2 = Math.sqrt(dSqr - p1 * p1);
+                double dsq = p1 + p2;
+
                 if (dsq < distToBasePointSquare) {
                     minNbrOverlapsX = cPtX;
                     minNbrOverlapsY = cPtY;
                     distToBasePointSquare = dsq;
+
+//                    FIXME also do with only nodes (no arrowheads)
                 }
             }
         } // move along the spiral until the entire range box is covered

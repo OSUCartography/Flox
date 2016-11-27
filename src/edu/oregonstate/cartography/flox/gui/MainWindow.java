@@ -164,9 +164,10 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }
-    
+
     /**
      * Ask the user whether changes to the document should be saved.
+     *
      * @return True if the document window can be closed, false otherwise.
      */
     public boolean canDocumentBeClosed() {
@@ -184,10 +185,10 @@ public class MainWindow extends javax.swing.JFrame {
         }
         return false;
     }
-    
+
     private void setWindowModified(boolean modified) {
         if (Sys.isMacOSX()) {
-            getRootPane( ).putClientProperty( "Window.documentModified", modified );
+            getRootPane().putClientProperty("Window.documentModified", modified);
         }
     }
 
@@ -669,11 +670,11 @@ public class MainWindow extends javax.swing.JFrame {
         canvasColorButton = new edu.oregonstate.cartography.flox.gui.ColorButton();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
-        importFlowsMenuItem = new javax.swing.JMenuItem();
-        openPointsAndFlowsMenuItem = new javax.swing.JMenuItem();
-        jSeparator14 = new javax.swing.JPopupMenu.Separator();
         openSettingsMenuItem = new javax.swing.JMenuItem();
         saveSettingsMenuItem = new javax.swing.JMenuItem();
+        jSeparator14 = new javax.swing.JPopupMenu.Separator();
+        importFlowsMenuItem = new javax.swing.JMenuItem();
+        openPointsAndFlowsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator3 = new javax.swing.JPopupMenu.Separator();
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
@@ -737,6 +738,7 @@ public class MainWindow extends javax.swing.JFrame {
         moveFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showObstaclesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         moveSelectedAwayFromObstaclesMenuItem = new javax.swing.JMenuItem();
+        numberOfObstacleIntersectionsMenuItem = new javax.swing.JMenuItem();
         jSeparator12 = new javax.swing.JPopupMenu.Separator();
         enforceCanvasCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator13 = new javax.swing.JPopupMenu.Separator();
@@ -2435,25 +2437,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         fileMenu.setText("File");
 
-        importFlowsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        importFlowsMenuItem.setText("Open CSV File with Flows…");
-        importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                importFlowsMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(importFlowsMenuItem);
-
-        openPointsAndFlowsMenuItem.setText("Open 2 CSV Files with Nodes and Flows…");
-        openPointsAndFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openPointsAndFlowsMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(openPointsAndFlowsMenuItem);
-        fileMenu.add(jSeparator14);
-
-        openSettingsMenuItem.setText("Open XML Project…");
+        openSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        openSettingsMenuItem.setText("Open Project…");
         openSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openSettingsMenuItemActionPerformed(evt);
@@ -2461,13 +2446,31 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(openSettingsMenuItem);
 
-        saveSettingsMenuItem.setText("Save XML Project…");
+        saveSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        saveSettingsMenuItem.setText("Save Project…");
         saveSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveSettingsMenuItemActionPerformed(evt);
             }
         });
         fileMenu.add(saveSettingsMenuItem);
+        fileMenu.add(jSeparator14);
+
+        importFlowsMenuItem.setText("Import CSV File with Flows…");
+        importFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(importFlowsMenuItem);
+
+        openPointsAndFlowsMenuItem.setText("Import 2 CSV Files with Nodes and Flows…");
+        openPointsAndFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openPointsAndFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(openPointsAndFlowsMenuItem);
         fileMenu.add(jSeparator3);
 
         exportSVGMenuItem.setText("Export SVG…");
@@ -2596,7 +2599,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(deselectAllMenuItem);
 
-        deselectNodesMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         deselectNodesMenuItem.setText("Deselect Nodes");
         deselectNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2605,7 +2607,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(deselectNodesMenuItem);
 
-        deselectFlowsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         deselectFlowsMenuItem.setText("Deselect Flows");
         deselectFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2845,7 +2846,7 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu.setText("Debug");
 
         moveFlowsCheckBoxMenuItem.setSelected(true);
-        moveFlowsCheckBoxMenuItem.setText("Move Flows Overlapping Nodes");
+        moveFlowsCheckBoxMenuItem.setText("Move Flows Away from Obstacles");
         moveFlowsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 moveFlowsCheckBoxMenuItemActionPerformed(evt);
@@ -2868,6 +2869,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(moveSelectedAwayFromObstaclesMenuItem);
+
+        numberOfObstacleIntersectionsMenuItem.setText("Number of Intersections with Obstacles");
+        numberOfObstacleIntersectionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                numberOfObstacleIntersectionsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(numberOfObstacleIntersectionsMenuItem);
         debugMenu.add(jSeparator12);
 
         enforceCanvasCheckBoxMenuItem.setSelected(true);
@@ -3091,7 +3100,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         }
     }
-    
+
     public boolean saveXMLFile() {
         try {
             // ask user for file
@@ -3103,7 +3112,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
             File file = new File(filePath);
             model.marshal(file.getAbsolutePath());
-            
+
             setWindowModified(false);
         } catch (Throwable ex) {
             showFloxErrorDialog("Could not save project to XML file.", ex);
@@ -4510,15 +4519,32 @@ public class MainWindow extends javax.swing.JFrame {
     private void moveSelectedAwayFromObstaclesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveSelectedAwayFromObstaclesMenuItemActionPerformed
         ArrayList<Flow> flows = model.getSelectedFlows();
         if (flows.isEmpty()) {
+            ErrorDialog.showErrorDialog("Select at least one flow.");
             return;
         }
         ForceLayouter layouter = new ForceLayouter(model);
         List<Obstacle> obstacles = layouter.getObstacles();
         layouter.moveFlowsAwayFromObstacles(obstacles, flows, 1);
-        
+
         mapComponent.refreshMap();
         addUndo("Move Flow Away From Obstacles");
     }//GEN-LAST:event_moveSelectedAwayFromObstaclesMenuItemActionPerformed
+
+    private void numberOfObstacleIntersectionsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_numberOfObstacleIntersectionsMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        if (flows.size() != 1) {
+            ErrorDialog.showErrorDialog("Select one flow.");
+            return;
+        }
+        ForceLayouter layouter = new ForceLayouter(model);
+        List<Obstacle> obstacles = layouter.getObstacles();
+        int minDist = model.getMinObstacleDistPx();
+        int n = layouter.countIntersectingObstacles(flows.get(0), obstacles, minDist);
+        double intersectionIndex = layouter.intersectionIndex(flows.get(0), 
+                obstacles, minDist, Model.ARROWHEAD_WEIGHT_FOR_INTERSECTION_INDEX);
+        JOptionPane.showMessageDialog(this, "Number of intersecting obstacles: "
+                + n + "\nIntersection index: " + intersectionIndex);
+    }//GEN-LAST:event_numberOfObstacleIntersectionsMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4715,6 +4741,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider nodeWeightSlider;
     private javax.swing.JPanel nodesContentPanel;
     private javax.swing.JPanel nodesPanel;
+    private javax.swing.JMenuItem numberOfObstacleIntersectionsMenuItem;
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openSettingsMenuItem;
     private javax.swing.JMenuItem openShapefileMenuItem;

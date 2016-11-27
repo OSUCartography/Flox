@@ -65,6 +65,8 @@ public class Model {
      */
     public static final int DEFAULT_NODE_RADIUS_PX = 10;
 
+    public static final double ARROWHEAD_WEIGHT_FOR_INTERSECTION_INDEX = 1d / 3d;
+    
     /**
      * Density of points along flows.
      */

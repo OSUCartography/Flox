@@ -172,18 +172,18 @@ public class FlowPair extends Flow {
      * @return
      */
     @Override
-    public boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model) {
+    public boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model, int minObstacleDistPx) {
         
         // to accelerate this test, first test with the combined flow curve before creating offset flows, which is expensive
-        if (super.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model) == false) {
+        if (super.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model, minObstacleDistPx) == false) {
             return false;
         }
         
         Flow flow1 = cachedClippedCurve1IncludingArrow(model);
-        boolean intersection = flow1.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model);
+        boolean intersection = flow1.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model, minObstacleDistPx);
         if (intersection == false) {
             Flow flow2 = cachedClippedCurve2IncludingArrow(model);
-            intersection = flow2.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model);
+            intersection = flow2.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model, minObstacleDistPx);
         }
         return intersection;
     }

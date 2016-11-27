@@ -211,7 +211,7 @@ public final class Point {
         double dy = this.y - y;
         return dx * dx + dy * dy;
     }
-    
+   
     /**
      * Create a new point between this and a passed point. The value of the new
      * point is the mean of the value of this and the value of the passed point.
