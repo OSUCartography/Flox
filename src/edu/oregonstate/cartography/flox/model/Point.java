@@ -187,7 +187,8 @@ public final class Point {
         double dy = this.y - y;
         return Math.sqrt(dx * dx + dy * dy);
     }
- /**
+
+    /**
      * Square distance to another point.
      *
      * @param p another point.
@@ -198,8 +199,8 @@ public final class Point {
         double dy = y - p.y;
         return dx * dx + dy * dy;
     }
-    
-     /**
+
+    /**
      * Square distance to another point.
      *
      * @param x x coordinate of another point.
@@ -211,7 +212,7 @@ public final class Point {
         double dy = this.y - y;
         return dx * dx + dy * dy;
     }
-   
+
     /**
      * Create a new point between this and a passed point. The value of the new
      * point is the mean of the value of this and the value of the passed point.

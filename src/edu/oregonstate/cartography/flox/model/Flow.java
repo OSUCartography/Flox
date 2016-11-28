@@ -10,6 +10,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -498,8 +499,8 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Computes the square distance between a passed point and the point between start
-     * and end points.
+     * Computes the square distance between a passed point and the point between
+     * start and end points.
      *
      * @param x x point
      * @param y y point
@@ -1387,6 +1388,16 @@ public class Flow implements Comparable<Flow> {
         return t;
     }
 
+    /**
+     * Returns the point on this curve that is closest to a passed point.
+     * Returns an approximate solution using Newton-Raphson root finding if
+     * possible.
+     *
+     * @param t an estimate of the t parameter of the location of the closest
+     * point on the curve.
+     * @param pt search shortest distance to this point
+     * @return the closest point on this curve
+     */
     private Point closestPointOnCurve(double t, Point pt) {
         t = closestTNewtonRaphson(t, pt.x, pt.y);
         if (t == -1d) {
@@ -1406,6 +1417,21 @@ public class Flow implements Comparable<Flow> {
         GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
                 cPtX, cPtY, endPt.x, endPt.y, 0.001, xy);
         return new Point(xy[0], xy[1]);
+    }
+
+    public boolean isClose(Flow flow, double minDist, int nbrPointsToTest) {
+        double minDistSqr = minDist * minDist;
+        Flow flow1 = this;
+        Flow flow2 = flow;
+        for (int i = 0; i < nbrPointsToTest; i++) {
+            double t = i / (nbrPointsToTest - 1d);
+            Point pt = flow1.pointOnCurve(t);
+            double dSqr = flow2.distanceSq(pt.x, pt.y, 0.001); // FIXME
+            if (dSqr < minDistSqr) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1712,4 +1738,71 @@ public class Flow implements Comparable<Flow> {
         return approximateStartAreaClipRadius;
     }
 
+    /**
+     * Compute intersections with another quadratic Bézier flow.
+     *
+     * Based on code by Kevin Lindsey,
+     * http://www.kevlindev.com/geometry/2D/intersections/index.htm
+     *
+     * @param flow other flow
+     * @return array with intersection Points or null if no intersection point
+     * exists.
+     */
+    public Point[] intersections(Flow flow) {
+
+        final double TOLERANCE = 1e-4;
+
+        if (getBoundingBox().intersects(flow.getBoundingBox()) == false) {
+            return null;
+        }
+
+        ArrayList<Point> result = new ArrayList<>(4);
+
+        double c12x = startPt.x - 2d * cPtX + endPt.x;
+        double c12y = startPt.y - 2d * cPtY + endPt.y;
+        double c11x = 2d * (cPtX - startPt.x);
+        double c11y = 2d * (cPtY - startPt.y);
+        double c10x = startPt.x;
+        double c10y = startPt.y;
+        double c22x = flow.startPt.x - 2d * flow.cPtX + flow.endPt.x;
+        double c22y = flow.startPt.y - 2d * flow.cPtY + flow.endPt.y;
+        double c21x = 2d * (flow.cPtX - flow.startPt.x);
+        double c21y = 2d * (flow.cPtY - flow.startPt.y);
+        double c20x = flow.startPt.x;
+        double c20y = flow.startPt.y;
+
+        double a = c12x * c11y - c11x * c12y;
+        double b = c22x * c11y - c11x * c22y;
+        double c = c21x * c11y - c11x * c21y;
+        double d = c11x * (c10y - c20y) + c11y * (-c10x + c20x);
+        double e = c22x * c12y - c12x * c22y;
+        double f = c21x * c12y - c12x * c21y;
+        double g = c12x * (c10y - c20y) + c12y * (-c10x + c20x);
+        Polynomial poly = new Polynomial(-e * e, -2 * e * f, a * b - f * f - 2 * e * g, a * c - 2 * f * g, a * d - g * g);
+        double[] roots = poly.getRoots();
+        for (int i = 0; i < roots.length; i++) {
+            double s = roots[i];
+            if (0 <= s && s <= 1) {
+                double[] xRoots = new Polynomial(-c12x, -c11x, -c10x + c20x + s * c21x + s * s * c22x).getRoots();
+                double[] yRoots = new Polynomial(-c12y, -c11y, -c10y + c20y + s * c21y + s * s * c22y).getRoots();
+                if (xRoots.length > 0 && yRoots.length > 0) {
+                    checkRoots:
+                    for (int j = 0; j < xRoots.length; j++) {
+                        double xRoot = xRoots[j];
+                        if (0 <= xRoot && xRoot <= 1) {
+                            for (int k = 0; k < yRoots.length; k++) {
+                                if (Math.abs(xRoot - yRoots[k]) < TOLERANCE) {
+                                    double x = c22x * s * s + (c21x * s + c20x);
+                                    double y = c22y * s * s + (c21y * s + c20y);
+                                    result.add(new Point(x, y));
+                                    break checkRoots;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result.toArray(new Point[result.size()]);
+    }
 }

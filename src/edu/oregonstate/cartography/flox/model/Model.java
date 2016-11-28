@@ -733,6 +733,15 @@ public class Model {
     public void addFlow(Flow flow) {
         graph.addFlow(flow);
     }
+    
+    /**
+     * Add an unconnected node.
+     * 
+     * @param point the node to add.
+     */
+    public void addNode(Point point) {
+        graph.addNode(point);
+    }
 
     /**
      * Selects all nodes that are not connected to any other node. Does not
