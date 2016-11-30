@@ -849,7 +849,7 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="nameMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Set Name&#x2026;"/>
+                <Property name="text" type="java.lang.String" value="Set Project Name&#x2026;"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nameMenuItemActionPerformed"/>
@@ -1190,6 +1190,14 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="markFlowFlowIntersectionsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="touchPercentageMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Touch Percentage"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="touchPercentageMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>

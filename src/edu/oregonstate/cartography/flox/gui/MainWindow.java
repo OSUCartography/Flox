@@ -763,6 +763,7 @@ public class MainWindow extends javax.swing.JFrame {
         testCurveShorteningMenuItem = new javax.swing.JMenuItem();
         flowsTouchingMenuItem = new javax.swing.JMenuItem();
         markFlowFlowIntersectionsMenuItem = new javax.swing.JMenuItem();
+        touchPercentageMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
@@ -2719,7 +2720,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapMenu.add(referenceMapScaleMenuItem);
         mapMenu.add(jSeparator16);
 
-        nameMenuItem.setText("Set Name…");
+        nameMenuItem.setText("Set Project Name…");
         nameMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 nameMenuItemActionPerformed(evt);
@@ -3018,6 +3019,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(markFlowFlowIntersectionsMenuItem);
+
+        touchPercentageMenuItem.setText("Touch Percentage");
+        touchPercentageMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                touchPercentageMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(touchPercentageMenuItem);
 
         menuBar.add(debugMenu);
         //debugMenu.setVisible(false);
@@ -4516,7 +4525,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
 
     private void nameMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameMenuItemActionPerformed
-        String name = (String) JOptionPane.showInputDialog(this, "Name", "Flox",
+        String name = (String) JOptionPane.showInputDialog(this, "Project name", "Flox",
                 JOptionPane.PLAIN_MESSAGE, null, null, model.getName());
         if (name != null) {
             model.setName(name);
@@ -4599,6 +4608,25 @@ public class MainWindow extends javax.swing.JFrame {
         }
         mapComponent.refreshMap();
     }//GEN-LAST:event_markFlowFlowIntersectionsMenuItemActionPerformed
+
+    private void touchPercentageMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_touchPercentageMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        if (flows.size() != 2) {
+            ErrorDialog.showErrorDialog("Select two flows.");
+            return;
+        }
+        int minObstacleDistPx = model.getMinObstacleDistPx();
+        Flow flow1 = flows.get(0);
+        flow1 = model.clipFlow(flow1, false, true);
+        double flow1WidthPx = model.getFlowWidthPx(flow1);
+        Flow flow2 = flows.get(1);
+        flow2 = model.clipFlow(flow2, false, true);
+        double flow2WidthPx = model.getFlowWidthPx(flow2);
+        double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
+        double minDist = minDistPx / model.getReferenceMapScale();
+        double similarity = flow1.touchPercentage(flow2, minDist, 20);
+        JOptionPane.showMessageDialog(this, "Similarity: " + Math.round(similarity * 100) + "%");
+    }//GEN-LAST:event_touchPercentageMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4856,6 +4884,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem testCurveOffsettingMenuItem;
     private javax.swing.JMenuItem testCurveShorteningMenuItem;
     private javax.swing.JMenuItem totalFlowsMenuItem;
+    private javax.swing.JMenuItem touchPercentageMenuItem;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
     private javax.swing.JLabel vallueLabel;

@@ -10,7 +10,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -1419,19 +1418,54 @@ public class Flow implements Comparable<Flow> {
         return new Point(xy[0], xy[1]);
     }
 
+    /**
+     * Returns whether this flow is closer than a minimum distance to another
+     * flow. This is an approximate test, which might miss some locations.
+     *
+     * @param flow flow to test with
+     * @param minDist if the smallest distance between this flow and the passed
+     * flow is smaller than minDist, the two flows are considered close.
+     * @param nbrPointsToTest test this many locations along the curve (used to
+     * compute curve parameter t)
+     * @return true if this curve is close to the passed flow, false otherwise.
+     */
     public boolean isClose(Flow flow, double minDist, int nbrPointsToTest) {
         double minDistSqr = minDist * minDist;
-        Flow flow1 = this;
-        Flow flow2 = flow;
         for (int i = 0; i < nbrPointsToTest; i++) {
             double t = i / (nbrPointsToTest - 1d);
-            Point pt = flow1.pointOnCurve(t);
-            double dSqr = flow2.distanceSq(pt.x, pt.y, 0.001); // FIXME
+            Point pt = pointOnCurve(t);
+            double dSqr = flow.distanceSq(pt.x, pt.y, 0.001); // FIXME
             if (dSqr < minDistSqr) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Compute an index between 0 and 1 that indicates how close this flow is to
+     * another flow. 0 indicates the flows are not touching. 1 indicates this
+     * flow touches the other flow along the entire length of this flow.
+     *
+     * @param flow the other flow
+     * @param minDist if a point on this flow is closer than minDist to the
+     * other flow, the point is considered to touch the other flow.
+     * @param nbrPointsToTest test this many locations along the curve (used to
+     * compute curve parameter t)
+     * @return a value between 0 and 1.
+     */
+    public double touchPercentage(Flow flow, double minDist, int nbrPointsToTest) {
+        int closePoints = 0;
+        double minDistSqr = minDist * minDist;
+        for (int i = 0; i < nbrPointsToTest; i++) {
+            double t = i / (nbrPointsToTest - 1d);
+            Point pt = pointOnCurve(t);
+            double dSqr = flow.distanceSq(pt.x, pt.y, 0.001); // FIXME
+            if (dSqr < minDistSqr) {
+                ++closePoints;
+            }
+        }
+        return ((double) closePoints) / nbrPointsToTest;
     }
 
     /**
@@ -1792,8 +1826,8 @@ public class Flow implements Comparable<Flow> {
                         if (0 <= xRoot && xRoot <= 1) {
                             for (int k = 0; k < yRoots.length; k++) {
                                 if (Math.abs(xRoot - yRoots[k]) < TOLERANCE) {
-                                    double x = c22x * s * s + (c21x * s + c20x);
-                                    double y = c22y * s * s + (c21y * s + c20y);
+                                    double x = c22x * s * s + c21x * s + c20x;
+                                    double y = c22y * s * s + c21y * s + c20y;
                                     result.add(new Point(x, y));
                                     break checkRoots;
                                 }

@@ -65,8 +65,25 @@ public class Model {
      */
     public static final int DEFAULT_NODE_RADIUS_PX = 10;
 
+    /**
+     * when computing an index for quantifying how many obstacles a flow is
+     * overlapping, the weight for node obstacles is 1, and the weight for
+     * arrowhead obstacles is ARROWHEAD_WEIGHT_FOR_INTERSECTION_INDEX
+     */
     public static final double ARROWHEAD_WEIGHT_FOR_INTERSECTION_INDEX = 1d / 3d;
-    
+
+    /**
+     * threshold for accepting similarity percentage: two flows with higher a
+     * value are considered similar.
+     */
+    public static final double MAX_TOUCH_PERCENTAGE = 0.1;
+
+    /**
+     * the minimum increment in pixels when searching for a control point
+     * position that minimizes overlaps
+     */
+    public static final int MIN_SEARCH_INCREMENT_PX = 3;
+
     /**
      * Density of points along flows.
      */
@@ -496,7 +513,6 @@ public class Model {
      */
     public Model() {
 
-                
 //        Flow flow1 = new Flow();
 //        flow1.setStartPt(new Point(728859.0206, 231293.5056));
 //        flow1.setEndPt(new Point(766109.7894, 172163.3169));
@@ -515,7 +531,6 @@ public class Model {
 //            Point pt2 = flow2.pointOnCurve(t);
 //            System.out.println(t + ", " + pt1.distance(pt2));
 //        }
-
 //        Flow flow = new Flow(new Point(0,0), 0.5, 0.5, new Point(1, 0), 1);
 //        long startNano = System.nanoTime();
 //        double dummy = 0;
@@ -733,10 +748,10 @@ public class Model {
     public void addFlow(Flow flow) {
         graph.addFlow(flow);
     }
-    
+
     /**
      * Add an unconnected node.
-     * 
+     *
      * @param point the node to add.
      */
     public void addNode(Point point) {

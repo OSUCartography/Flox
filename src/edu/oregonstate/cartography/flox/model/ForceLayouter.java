@@ -791,9 +791,9 @@ public class ForceLayouter {
      */
     public int countIntersectingObstacles(Flow flow, List<Obstacle> obstacles,
             int minObstacleDistPx) {
-        return (int)Math.round(intersectionIndex(flow, obstacles, minObstacleDistPx, 1d));
+        return (int) Math.round(intersectionIndex(flow, obstacles, minObstacleDistPx, 1d));
     }
-    
+
     public double intersectionIndex(Flow flow, List<Obstacle> obstacles,
             int minObstacleDistPx, double arrowheadWeight) {
         double nbrIntersections = 0;
@@ -901,24 +901,80 @@ public class ForceLayouter {
     }
 
     /**
+     * Compute spacing of sample points in world coordinates. The spacing
+     * between candidate control points is equal to the minimum distance to
+     * obstacles. Increase to accelerate computations. minObstacleDistPx can be
+     * zero. We require a distance of at least 3 pixels to move along the
+     * spiral.
+     *
+     * @return search increment in world coordinates
+     */
+    private double searchIncrement() {
+        int minObstacleDistPx = model.getMinObstacleDistPx();
+        double refScale = model.getReferenceMapScale();
+        return Math.max(minObstacleDistPx, Model.MIN_SEARCH_INCREMENT_PX) / refScale;
+    }
+
+    /**
      * Moves the control point location such that the flow does not overlap any
-     * obstacle. If no position can be found, the control point is not changed.
-     * Tests control point locations placed along an Archimedean spiral centered
-     * on the current control point location.
+     * obstacle. The control point is changed. First tests control point
+     * locations placed along an Archimedean spiral centered on the current
+     * control point location. Then searches a suitable position inside the
+     * range box.
      *
      * @param flow flow to change. Nothing is changed if the flow is locked.
      * @param obstacles obstacles to avoid
-     * @return true if a new position was found, false otherwise.
      */
-    private boolean moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
-        // compute spacing of sample points in world coordinates
-        // The spacing between candidate control points is equal to the minimum
-        // distance to obstacles. Increase to accelerate computations.
-        // minObstacleDistPx can be zero. We require a distance of at least 3 
-        // pixel to move along the spiral.
-        int minObstacleDistPx = model.getMinObstacleDistPx();
-        double dist = Math.max(minObstacleDistPx, 3) / model.getReferenceMapScale();
+    private void moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
 
+        boolean foundPosition;
+        // search for position inside range box that results in no overlaps
+        int minObstacleDistPx = model.getMinObstacleDistPx();
+        while (true) {
+            foundPosition = findControlPointWithoutOverlapsInsideRangeBox(
+                    flow, obstacles, minObstacleDistPx);
+            if (foundPosition || minObstacleDistPx == 0) {
+                break;
+            }
+            // half minimum distance between flow and obstacles
+            minObstacleDistPx /= 2;
+        }
+
+        // search for position inside range box that results in smallest number of overlaps
+        if (foundPosition == false) {
+            minObstacleDistPx = model.getMinObstacleDistPx();
+            ArrayList<Point> cPts = new ArrayList<>();
+            while (true) {
+                double overlaps = findControlPointWithMinimumOverlapsInsideRangeBox(
+                        flow, obstacles, minObstacleDistPx);
+                cPts.add(new Point(flow.cPtX(), flow.cPtY(), overlaps));
+                if (minObstacleDistPx == 0) {
+                    break;
+                }
+                minObstacleDistPx /= 2;
+                if (minObstacleDistPx == 1) {
+                    // ignore 1-pixel distance to accelerate computations
+                    minObstacleDistPx = 0;
+                }
+            }
+            
+            // find control point resulting in smallest amount of overlaps
+            int minOverlapsIndex = cPts.indexOf(Collections.min(cPts, new Comparator<Point>() {
+                @Override
+                public int compare(Point o1, Point o2) {
+                    return Double.compare(o1.getValue(), o2.getValue());
+                }
+            }));
+            Point cPt = cPts.get(minOverlapsIndex);
+            flow.setCtrlPt(cPt.x, cPt.y);
+        }
+        
+    }
+
+    private boolean findControlPointWithoutOverlapsInsideRangeBox(Flow flow,
+            List<Obstacle> obstacles, int minObstacleDistPx) {
+
+        double searchIncrement = searchIncrement();
         double originalX = flow.cPtX();
         double originalY = flow.cPtY();
         double angleRad = Math.PI;
@@ -937,8 +993,8 @@ public class ForceLayouter {
         double spiralR;
         do {
             // radius of spiral for the current angle.
-            // The distance between two windings is dist.
-            spiralR = dist * angleRad / Math.PI / 2;
+            // The distance between two windings is searchIncrement.
+            spiralR = searchIncrement * angleRad / Math.PI / 2;
 
             // new control point location
             double dx = Math.cos(angleRad) * spiralR;
@@ -946,58 +1002,104 @@ public class ForceLayouter {
             double cPtX = dx + originalX;
             double cPtY = dy + originalY;
             // increment rotation angle, such that the next point on the spiral 
-            // has an approximate distance of dist to the current point
-            angleRad += dist / spiralR;
+            // has an approximate distance of searchIncrement to the current point
+            angleRad += searchIncrement / spiralR;
 
             if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY) == false) {
                 continue;
             }
             flow.setCtrlPt(cPtX, cPtY);
 
+            // test whether new geometry is close to a locked flow
+            boolean onlyTestWithLockedFlows = true;
+            double touchPercentage = largestTouchPercentage(flow, onlyTestWithLockedFlows);
+            if (touchPercentage > Model.MAX_TOUCH_PERCENTAGE) {
+                continue;
+            }
+
             if (flowIntersectsObstacles(flow, obstacles, minObstacleDistPx) == false) {
                 // found a new position for the control point that does not 
-                // result in an overlap with any obstacle
+                // result in an overlap with any obstacle and is not too close 
+                // to any other locked flow
                 return true;
             }
         } // move along the spiral until the entire range box is covered
         while (spiralR * spiralR < maxSpiralRadiusSquare);
 
+        // Could not find good new position. Revert to original control point.
+        flow.setCtrlPt(originalX, originalY);
+        return false;
+    }
+
+    /**
+     * Moves control point to location that results in the smallest amount of
+     * overlaps. The amount of overlaps is determined by the number of
+     * overlapped obstacles and the closeness to other locked flows.
+     *
+     * @param flow flow
+     * @param obstacles obstacles
+     * @param minObstacleDistPx minimum distance between flow and obstacles
+     * @return a quantification of the amount of overlaps. 0 means no overlaps,
+     * larger numbers mean more overlaps.
+     */
+    private double findControlPointWithMinimumOverlapsInsideRangeBox(Flow flow,
+            List<Obstacle> obstacles, int minObstacleDistPx) {
+
+        double searchIncrement = searchIncrement();
+        double originalX = flow.cPtX();
+        double originalY = flow.cPtY();
+        double angleRad = Math.PI;
+        RangeboxEnforcer rangeBoxEnforcer = new RangeboxEnforcer(model);
+
         // search for position that results in smallest number of overlaps
-        double minNbrOverlaps = Double.MAX_VALUE;
+        double minIntersectionIndex = Double.MAX_VALUE;
         double minNbrOverlapsX = originalX;
         double minNbrOverlapsY = originalY;
+
         // FIXME instead of spiral mvt, proceed in grid pattern along axes of range box
-        angleRad = Math.PI;
         double distToBasePointSquare = Double.MAX_VALUE;
+        Point[] rangeBox = rangeBoxEnforcer.computeRangebox(flow);
+        double maxSpiralRadiusSquare = rangeBoxEnforcer.longestDistanceSqToCorner(
+                rangeBox, originalX, originalY);
+        double spiralR;
         do {
             // radius of spiral for the current angle.
-            // The distance between two windings is dist.
-            spiralR = dist * angleRad / Math.PI / 2;
+            // The distance between two windings is searchIncrement.
+            spiralR = searchIncrement * angleRad / Math.PI / 2;
 
             // new control point location
             double cPtX = Math.cos(angleRad) * spiralR + originalX;
             double cPtY = Math.sin(angleRad) * spiralR + originalY;
             // increment rotation angle, such that the next point on the spiral 
-            // has an approximate distance of dist to the current point
-            angleRad += dist / spiralR;
+            // has an approximate distance of searchIncrement to the current point
+            angleRad += searchIncrement / spiralR;
 
             if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY) == false) {
                 continue;
             }
             flow.setCtrlPt(cPtX, cPtY);
-            double nbrOverlaps = intersectionIndex(flow, obstacles,
+
+            // test whether new geometry is close to a locked flow
+            boolean onlyTestWithLockedFlows = true;
+            double largestTouchPercentage = largestTouchPercentage(flow, onlyTestWithLockedFlows);
+            double touchW = 1 + largestTouchPercentage;
+
+            double intersectionIndex = intersectionIndex(flow, obstacles,
                     minObstacleDistPx, 0d); // ignore intersecting arrowheads
-            if (nbrOverlaps < minNbrOverlaps) {
+            intersectionIndex *= touchW;
+            if (intersectionIndex < minIntersectionIndex) {
                 minNbrOverlapsX = cPtX;
                 minNbrOverlapsY = cPtY;
-                minNbrOverlaps = nbrOverlaps;
-            } else if (nbrOverlaps == minNbrOverlaps) {
-                // test whether this position with the same number of overlaps 
+                minIntersectionIndex = intersectionIndex;
+            } else if (intersectionIndex == minIntersectionIndex) {
+                // test whether this position with the same amount of overlaps 
                 // is closer to the base point
+                
                 // option with Eucledian distance
                 //double dsq = basePoint.distanceSquare(cPtX, cPtY);
 
-                // option with Manhattan distance with axes aligned to base line
+                // option with Manhattan distance with axes aligned to base line.
+                // The Manhatten distance should result in more symmetric flows.
                 // FIXME it is not clear whether Manhattan distance is any better. Results with US commodity flows are identical for both distances.
                 double p1 = flow.scalarProjectionOnBaseline(cPtX, cPtY);
                 double dSqr = flow.getSquareDistanceToBaseLineMidPoint(cPtX, cPtY);
@@ -1008,17 +1110,57 @@ public class ForceLayouter {
                     minNbrOverlapsX = cPtX;
                     minNbrOverlapsY = cPtY;
                     distToBasePointSquare = dsq;
-
-//                    FIXME also do with only nodes (no arrowheads)
+//                  FIXME also do with only nodes (no arrowheads)
                 }
             }
         } // move along the spiral until the entire range box is covered
         while (spiralR * spiralR < maxSpiralRadiusSquare);
 
-        System.out.println(minNbrOverlaps);
         flow.setCtrlPt(minNbrOverlapsX, minNbrOverlapsY);
 
-        return false;
+        return minIntersectionIndex;
+    }
+
+    /**
+     * Computes the "touch percentage" of this flow with all other flows and
+     * returns the largest value found. The "touch percentage" is between 0 and
+     * 1. 0 0 indicates the flows are not touching. 1 indicates this flow
+     * touches another flow along the entire length of this flow.
+     *
+     * @param flow flow to compute touch percentage for
+     * @param onlyTestWithLockedFlows If true, the touch percentage will only be
+     * computed for the passed flow and any other flow that is locked.
+     * @return largest found touch percentage, between 0 and 1.
+     */
+    private double largestTouchPercentage(Flow flow, boolean onlyTestWithLockedFlows) {
+
+        int minObstacleDistPx = model.getMinObstacleDistPx();
+        Flow flow1 = model.clipFlow(flow, false, true);
+        double flow1WidthPx = model.getFlowWidthPx(flow1);
+        double referenceMapScale = model.getReferenceMapScale();
+
+        double maxTouchPercentage = 0;
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow2 = iterator.next();
+            if (flow == flow2) {
+                continue;
+            }
+
+            if (onlyTestWithLockedFlows && flow2.isLocked()) {
+                continue;
+            }
+
+            flow2 = model.clipFlow(flow2, false, true);
+            double flow2WidthPx = model.getFlowWidthPx(flow2);
+            double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
+            double minDist = minDistPx / referenceMapScale;
+            int nbrPointsToTest = 10; // FIXME
+            double touchPercentage = flow.touchPercentage(flow2, minDist, nbrPointsToTest);
+            maxTouchPercentage = Math.max(touchPercentage, maxTouchPercentage);
+        }
+
+        return maxTouchPercentage;
     }
 
     /**
