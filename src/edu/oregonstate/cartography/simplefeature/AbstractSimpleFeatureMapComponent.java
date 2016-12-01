@@ -65,7 +65,7 @@ public abstract class AbstractSimpleFeatureMapComponent extends JComponent {
      * A formatter for displaying coordinates.
      */
     private CoordinateFormatter coordinateFormatter = 
-            new CoordinateFormatter("###,##0.00", "###,##0", 1);
+            new CoordinateFormatter("###,##0.#", "###,##0", 1);
     
     /**
      * The MapEventHandler is responsible for treating all key and mouse events

@@ -6,6 +6,7 @@
 
 package edu.oregonstate.cartography.flox.gui;
 
+import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.map.MapToolMouseMotionListener;
 import edu.oregonstate.cartography.map.MeasureToolListener;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
@@ -24,9 +25,22 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
     private static final DecimalFormat angleFormatter =
             new DecimalFormat("###,##0.0");
     
+    private Model model;
+    
     /** Creates new form CoordinateInfoPanel */
     public CoordinateInfoPanel() {
         initComponents();
+    }
+    
+    public void setModel(Model model) {
+        this.model = model;
+    }
+    
+    public void setCoordinatesVisible(boolean visible) {
+        xCoordLabel.setVisible(visible);
+        yCoordLabel.setVisible(visible);
+        xTextLabel.setVisible(visible);
+        yTextLabel.setVisible(visible);
     }
     
     /** This method is called from within the constructor to
@@ -126,12 +140,16 @@ public class CoordinateInfoPanel extends javax.swing.JPanel
         this.angleLabel.setText("-");
     }
     
+    @Override
     public void distanceChanged(double distance, double angle,
             AbstractSimpleFeatureMapComponent mapComponent) {
         
         // distance
+        if (model != null) {
+            distance *= model.getReferenceMapScale();
+        }
         CoordinateFormatter coordFormatter = mapComponent.getCoordinateFormatter();
-        this.distLabel.setText(coordFormatter.format(distance));
+        this.distLabel.setText(coordFormatter.format(distance) + "px");
         
         // angle
         double azimuth = -Math.toDegrees(angle) + 90.;

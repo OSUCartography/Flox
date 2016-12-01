@@ -119,6 +119,8 @@ public class MainWindow extends javax.swing.JFrame {
             throw new IllegalStateException(ex);
         }
 
+        coordinateInfoPanel.setCoordinatesVisible(false);
+        
         arrowToggleButton.doClick();
     }
 
@@ -214,6 +216,8 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.setModel(model);
         mapComponent.refreshMap();
 
+        coordinateInfoPanel.setModel(model);
+        
         // switch to default tool. This updates the GUI and installs a new map 
         // tool that has a reference to the new model.
         arrowToggleButton.doClick();
