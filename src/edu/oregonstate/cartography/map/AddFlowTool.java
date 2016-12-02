@@ -173,7 +173,7 @@ public class AddFlowTool extends DoubleBufferedTool {
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
 
             // draw the clipped flow section in gray
-            boolean clipWithAreas = model.isClipFlowEnds() || model.isClipFlowStarts();
+            boolean clipWithAreas = model.isClipFlowsWithEndAreas() || model.isClipFlowsWithStartAreas();
             if (clipWithAreas) {
                 GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
                 g2d.setColor(Color.GRAY);
@@ -181,7 +181,7 @@ public class AddFlowTool extends DoubleBufferedTool {
             }
 
             // draw clipped flow in black
-            flow = model.clipFlow(flow, false, false);
+            flow = model.clipFlow(flow, false, false, false);
             GeneralPath flowPath = flow.toGeneralPath(map.getScale(), map.getWest(), map.getNorth());
             g2d.setColor(Color.BLACK);
             g2d.draw(flowPath);

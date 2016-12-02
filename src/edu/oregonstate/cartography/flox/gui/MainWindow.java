@@ -301,8 +301,8 @@ public class MainWindow extends javax.swing.JFrame {
 
             // clipping
             boolean hasFlowsAndClipAreas = model.hasClipAreas() && model.getNbrFlows() > 0;
-            boolean clipStart = model.isClipFlowStarts();
-            boolean clipEnd = model.isClipFlowEnds();
+            boolean clipStart = model.isClipFlowsWithStartAreas();
+            boolean clipEnd = model.isClipFlowsWithEndAreas();
 
             clipWithStartAreasCheckBox.setSelected(clipStart);
             clipWithEndAreasCheckBox.setSelected(clipEnd);
@@ -3648,7 +3648,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void clipWithEndAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithEndAreasCheckBoxActionPerformed
         if (updatingGUI == false && model != null) {
-            model.setClipFlowEnds(clipWithEndAreasCheckBox.isSelected());
+            model.setClipFlowsWithEndAreas(clipWithEndAreasCheckBox.isSelected());
             layout("Clip with End Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -3714,12 +3714,12 @@ public class MainWindow extends javax.swing.JFrame {
         if (clipWithStartAreasCheckBox.isSelected()) {
             model.updateStartClipAreas();
         }
-        model.setClipFlowStarts(clipWithStartAreasCheckBox.isSelected());
+        model.setClipFlowsWithStartAreas(clipWithStartAreasCheckBox.isSelected());
 
         if (clipWithEndAreasCheckBox.isSelected()) {
             model.updateEndClipAreas();
         }
-        model.setClipFlowEnds(clipWithEndAreasCheckBox.isSelected());
+        model.setClipFlowsWithEndAreas(clipWithEndAreasCheckBox.isSelected());
 
         writeModelToGUI();
     }
@@ -3779,7 +3779,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void clipWithStartAreasCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clipWithStartAreasCheckBoxActionPerformed
         if (updatingGUI == false && model != null) {
-            model.setClipFlowStarts(clipWithStartAreasCheckBox.isSelected());
+            model.setClipFlowsWithStartAreas(clipWithStartAreasCheckBox.isSelected());
             layout("Clip with Start Areas");
             mapComponent.refreshMap();
             writeModelToGUI();
@@ -4585,10 +4585,10 @@ public class MainWindow extends javax.swing.JFrame {
         }
         int minObstacleDistPx = model.getMinObstacleDistPx();
         Flow flow1 = flows.get(0);
-        flow1 = model.clipFlow(flow1, false, true);
+        flow1 = model.clipFlowForComputations(flow1);
         double flow1WidthPx = model.getFlowWidthPx(flow1);
         Flow flow2 = flows.get(1);
-        flow2 = model.clipFlow(flow2, false, true);
+        flow2 = model.clipFlowForComputations(flow2);
         double flow2WidthPx = model.getFlowWidthPx(flow2);
         double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
         double minDist = minDistPx / model.getReferenceMapScale();
@@ -4603,9 +4603,9 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
         Flow flow1 = flows.get(0);
-        flow1 = model.clipFlow(flow1, false, true);
+        flow1 = model.clipFlowForComputations(flow1);
         Flow flow2 = flows.get(1);
-        flow2 = model.clipFlow(flow2, false, true);
+        flow2 = model.clipFlowForComputations(flow2);
         Point[] intersections = flow1.intersections(flow2);
         for (Point intersection : intersections) {
             model.addNode(intersection);
@@ -4621,15 +4621,16 @@ public class MainWindow extends javax.swing.JFrame {
         }
         int minObstacleDistPx = model.getMinObstacleDistPx();
         Flow flow1 = flows.get(0);
-        flow1 = model.clipFlow(flow1, false, true);
+        flow1 = model.clipFlowForComputations(flow1);
         double flow1WidthPx = model.getFlowWidthPx(flow1);
         Flow flow2 = flows.get(1);
-        flow2 = model.clipFlow(flow2, false, true);
+        flow2 = model.clipFlowForComputations(flow2);
         double flow2WidthPx = model.getFlowWidthPx(flow2);
         double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
         double minDist = minDistPx / model.getReferenceMapScale();
-        double similarity = flow1.touchPercentage(flow2, minDist, 20);
-        JOptionPane.showMessageDialog(this, "Similarity: " + Math.round(similarity * 100) + "%");
+        double touchPercentage = flow1.touchPercentage(flow2, minDist, 20);
+        JOptionPane.showMessageDialog(this, "Touch percentage: " 
+                + Math.round(touchPercentage * 100) + "%");
     }//GEN-LAST:event_touchPercentageMenuItemActionPerformed
 
     /**

@@ -76,6 +76,9 @@ public class Flow implements Comparable<Flow> {
      */
     private double value;
 
+    // FIXME make private
+    public double endClippingToAvoidOverlaps = 0;
+
     /**
      * clip area for the start of the flow.
      */
@@ -312,7 +315,7 @@ public class Flow implements Comparable<Flow> {
 
     public Flow cachedClippedCurveIncludingArrow(Model model) {
         if (cachedClippedCurveIncludingArrow == null) {
-            cachedClippedCurveIncludingArrow = model.clipFlow(this, false, true);
+            cachedClippedCurveIncludingArrow = model.clipFlowForComputations(this);
         }
         return cachedClippedCurveIncludingArrow;
     }
@@ -1742,20 +1745,77 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Computes geometry of arrow heads
+     * Computes the geometry of an arrowhead and returns the geometry as a new
+     * Arrow.
      *
      * @param model model
-     * @param endClipRadius the tip of the arrow is placed at this distance from
-     * the end of the flow
+     * @param arrowTipClipRadius the tip of the arrow is placed at this distance
+     * from the end of the flow
      * @return a new Arrow instance
      */
-    public Arrow getArrow(Model model, double endClipRadius) {
-        return new Arrow(model, this, endClipRadius);
+    protected Arrow getArrow(Model model, double arrowTipClipRadius) {
+        return new Arrow(model, this, arrowTipClipRadius);
     }
 
+    /**
+     * Computes and returns the geometry of an arrowhead.
+     *
+     * @param model model
+     * @return a new Arrow instance
+     */
     public Arrow getArrow(Model model) {
-        double endClipRadius = model.endClipRadius(this, false, null, true);
-        return new Arrow(model, this, endClipRadius);
+        double arrowTipClipRadius = model.endClipRadius(this,
+                /* clipArrrowhead */ false,
+                /* lineString */ null,
+                /* clipEndNode */ true,
+                /* adjustLengthToReduceOverlaps */ true);
+        return getArrow(model, arrowTipClipRadius);
+    }
+
+    /**
+     * Adjust the length of the flow to reduce overlaps of this flow and its
+     * arrowhead with other lines and arrowheads.
+     *
+     * FIXME currently only adjusts the end of the flow
+     *
+     * @param model
+     */
+    public void adjustLengthToReduceOverlaps(Model model) {
+
+        final double RAD_INC = 5d; // FIXME 5d
+
+        double arrowTipClipRadius = model.endClipRadius(this, false, null, true, false);
+        
+        double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
+        double endNodeRadius = endNodeRadiusPx / model.getReferenceMapScale();
+        for (int i = 0; i < 10; i++) { // FIXME 10
+            endClippingToAvoidOverlaps = i * RAD_INC / model.getReferenceMapScale();
+
+            // FIXME only consider arrowhead when arrowheads are displayed!
+            
+            // shorten the flow
+            double radius = arrowTipClipRadius + endClippingToAvoidOverlaps;
+            // FIXME make sure clip radius is not too large
+            Arrow arrow = getArrow(model, radius);
+            if (model.arrowOverlapsAnyFlow(arrow) == false
+                    && model.arrowOverlapsAnyArrow(arrow, this) == false) {
+                break;
+            }
+
+            // elongate the flow
+            endClippingToAvoidOverlaps = -endClippingToAvoidOverlaps;
+            radius = arrowTipClipRadius + endClippingToAvoidOverlaps;
+            // make sure clip radius is not too small
+            if (radius >= endNodeRadius) {
+                arrow = getArrow(model, radius);
+                if (model.arrowOverlapsAnyFlow(arrow) == false
+                        && model.arrowOverlapsAnyArrow(arrow, this) == false) {
+                    break;
+                }
+            } else {
+                endClippingToAvoidOverlaps = 0;
+            }
+        }
     }
 
     /**

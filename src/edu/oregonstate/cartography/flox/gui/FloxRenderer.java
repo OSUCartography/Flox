@@ -282,6 +282,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         g2d.setColor(highlightSelected && flow.isSelected()
                 ? SELECTION_COLOR : model.getFlowColor(flow));
 
+        flow.adjustLengthToReduceOverlaps(model);
         // draw the arrow head
         if (model.isDrawArrowheads()) {
             Arrow arrow = flow.getArrow(model);
@@ -291,7 +292,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         }
 
         // draw flow line
-        Flow clippedFlow = model.clipFlow(flow, true, false);
+        Flow clippedFlow = model.clipFlowForRendering(flow);
         GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
         double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
         drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
@@ -307,7 +308,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
             if (flow.isLocked()) {
-                Flow clippedFlow = model.clipFlow(flow, false, true);
+                Flow clippedFlow = model.clipFlowForComputations(flow);
                 Point pt = clippedFlow.pointOnCurve(0.5);
                 int iconX = (int) Math.round(xToPx(pt.x)) - LOCK_ICON_RADIUS;
                 int iconY = (int) Math.round(yToPx(pt.y)) - LOCK_ICON_RADIUS;
@@ -559,7 +560,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Iterator<Flow> iter = model.flowIterator();
         while (iter.hasNext()) {
             Flow flow = iter.next();
-            Flow clippedFlow = model.clipFlow(flow, false, true);
+            Flow clippedFlow = model.clipFlowForComputations(flow);
             ArrayList<Point> points = clippedFlow.regularIntervals(segmentLength);
             Color fillColor = highlightSelected && flow.isSelected() ? Color.PINK : SELECTION_COLOR;
             for (Point point : points) {

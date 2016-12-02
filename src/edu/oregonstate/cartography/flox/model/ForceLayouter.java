@@ -860,17 +860,21 @@ public class ForceLayouter {
                 Arrow arrow;
                 if (flow instanceof FlowPair) {
                     FlowPair flowPair = (FlowPair) flow;
+                    
+                    // create obstacle for arrowhead of first flow
                     arrow = flowPair.cachedOffsetFlow1(model).getArrow(model);
                     if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
                         Obstacle obstacle = new Obstacle(arrow.getTipPt(),
                                 arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
                         obstacles.add(obstacle);
                     }
+                    // create obstacle for arrowhead of second flow below
                     arrow = flowPair.cachedOffsetFlow2(model).getArrow(model);
                 } else {
                     arrow = flow.getArrow(model);
                 }
 
+                // create obstacle for arrowhead 
                 if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
                     Obstacle obstacle = new Obstacle(arrow.getTipPt(),
                             arrow.getCorner1Pt(), arrow.getCorner2Pt(), flow);
@@ -1135,7 +1139,7 @@ public class ForceLayouter {
     private double largestTouchPercentage(Flow flow, boolean onlyTestWithLockedFlows) {
 
         int minObstacleDistPx = model.getMinObstacleDistPx();
-        Flow flow1 = model.clipFlow(flow, false, true);
+        Flow flow1 = model.clipFlowForComputations(flow);
         double flow1WidthPx = model.getFlowWidthPx(flow1);
         double referenceMapScale = model.getReferenceMapScale();
 
@@ -1151,7 +1155,7 @@ public class ForceLayouter {
                 continue;
             }
 
-            flow2 = model.clipFlow(flow2, false, true);
+            flow2 = model.clipFlowForComputations(flow2);
             double flow2WidthPx = model.getFlowWidthPx(flow2);
             double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
             double minDist = minDistPx / referenceMapScale;

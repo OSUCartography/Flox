@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.flox.model;
 
-import java.util.ArrayList;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -151,7 +150,7 @@ public class FlowPair extends Flow {
     public Flow cachedClippedCurve1IncludingArrow(Model model) {
         if (cachedClippedCurve1IncludingArrow == null) {
             Flow f1 = cachedOffsetFlow1(model);
-            cachedClippedCurve1IncludingArrow = model.clipFlow(f1, false, true);
+            cachedClippedCurve1IncludingArrow = model.clipFlowForComputations(f1);
         }
         return cachedClippedCurve1IncludingArrow;
     }
@@ -159,7 +158,7 @@ public class FlowPair extends Flow {
     public Flow cachedClippedCurve2IncludingArrow(Model model) {
         if (cachedClippedCurve2IncludingArrow == null) {
             Flow f2 = cachedOffsetFlow2(model);
-            cachedClippedCurve2IncludingArrow = model.clipFlow(f2, false, true);
+            cachedClippedCurve2IncludingArrow = model.clipFlowForComputations(f2);
         }
         return cachedClippedCurve2IncludingArrow;
     }

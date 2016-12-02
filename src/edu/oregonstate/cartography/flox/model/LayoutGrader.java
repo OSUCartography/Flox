@@ -32,7 +32,7 @@ public class LayoutGrader {
         double segmentLength = model.segmentLength();
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = model.clipFlow(iterator.next(), false, true);
+            Flow flow = model.clipFlowForComputations(iterator.next());
             LinearGeometryBuilder lineBuilder = new LinearGeometryBuilder(geometryFactory);
             ArrayList<Point> flowPoints = flow.regularIntervals(segmentLength);           
             for (Point point : flowPoints) {

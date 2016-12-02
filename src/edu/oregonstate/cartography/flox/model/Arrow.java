@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.model;
 
+import static edu.oregonstate.cartography.flox.model.Circle.TOL;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 
 /**
@@ -14,18 +15,18 @@ public final class Arrow {
     /**
      * The length of the arrowhead.
      */
-    private double arrowLength;
+    private final double arrowLength;
 
     /**
      * The width of the arrowhead.
      */
-    private double arrowWidth;
+    private final double arrowWidth;
 
     /**
      * The position of the arrowheads corners relative to the base of the
      * arrowhead.
      */
-    private double arrowCornerPosition;
+    private final double arrowCornerPosition;
 
     /**
      * The flow that is passed in at instantiation.
@@ -73,10 +74,9 @@ public final class Arrow {
      */
     public Arrow(Model model, Flow flow, double endClipRadius) {
         this.flow = flow;
-    
+
         // stroke width in world coordinates of the flow based on its value.
         double flowStrokeWidth = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
-        
 
         // Gets the ratio of the flows stroke width to it's value. This ratio
         // is the same for all drawn flows.
@@ -153,7 +153,7 @@ public final class Arrow {
         // Get the orientation of the line connecting the base of the arrow to the
         // endPoint of the flow.
         double arrowheadOrientation = GeometryUtils.orientation(basePt, flow.getEndPt());
-        
+
         // Rotate and translate all the points that make up the shape of the Arrow, using
         // the Arrow's base point as the pivot.
         tipPt.transform(basePt.x, basePt.y, arrowheadOrientation);
@@ -161,7 +161,7 @@ public final class Arrow {
         corner2Pt.transform(basePt.x, basePt.y, arrowheadOrientation);
         corner1cPt.transform(basePt.x, basePt.y, arrowheadOrientation);
         corner2cPt.transform(basePt.x, basePt.y, arrowheadOrientation);
-        
+
         // For thick flows there is a small gap between the end of the clipped
         // line and the arrow base. This is due to the fact that the line cap 
         // and the base line of the arrow are aligned diffrently. The clipRadius
@@ -172,13 +172,69 @@ public final class Arrow {
         double lineOrientation = GeometryUtils.orientation(cPt, getBasePt());
         double dAlpha = GeometryUtils.angleDif(lineOrientation, arrowheadOrientation);
         double dRadius = Math.abs(Math.tan(dAlpha) * flowStrokeWidth / 2);
-        
+
         // Additionally reduce the clipping radius by 0.5 pixel to prevent a
-        // rendering artiface that shows a small white line between end of the flow 
+        // rendering artifact that shows a small white line between end of the flow 
         // line and the arrowhead. This seems to be an antialiaising bug in Java2D.
         double tol = 0.5 / model.getReferenceMapScale();
-        
+
         clipRadius -= Math.max(tol, dRadius);
+    }
+
+    /**
+     * Tests whether this Arrow overlaps with another Arrow. The two arrows are
+     * treated as triangles consisting of the tip point and the two corner
+     * points.
+     *
+     * @param arrow arrow to test with
+     * @return true if there is an overlap, false otherwise.
+     */
+    public boolean isOverlappingArrow(Arrow arrow) {
+        return GeometryUtils.trianglesOverlap(tipPt.x, tipPt.y,
+                corner1Pt.x, corner1Pt.y,
+                corner2Pt.x, corner2Pt.y,
+                arrow.tipPt.x, arrow.tipPt.y,
+                arrow.corner1Pt.x, arrow.corner1Pt.y,
+                arrow.corner2Pt.x, arrow.corner2Pt.y);
+    }
+
+    /**
+     * Tests whether this Arrow overlaps with a Flow. The arrow is treated as a
+     * triangle consisting of the tip point and the two corner points. The flow
+     * width is taken into account.
+     *
+     * @param flow flow to test with
+     * @param flowWidth width of the flow in world coordinates
+     * @return true if there is an overlap, false otherwise.
+     */
+    public boolean isOverlappingFlow(Flow flow, double flowWidth) {
+        // FIXME add test with bounding boxes?
+
+        // FIXME abuse Bezier-Bezier intersection code. use Bezier-line intersection test instead.
+        Flow cheesyTrickFlow1 = new Flow(tipPt, corner1Pt, 1);
+        Flow cheesyTrickFlow2 = new Flow(tipPt, corner2Pt, 1);
+        cheesyTrickFlow1.offsetCtrlPt(100, 100);
+        cheesyTrickFlow2.offsetCtrlPt(100, 100);
+        
+        // test whether the flow intersects the triangle formed by the arrow
+        Point[] intersections = cheesyTrickFlow1.intersections(flow);
+        if (intersections != null && intersections.length > 0) {
+            return true;
+        }
+        intersections = cheesyTrickFlow2.intersections(flow);
+        if (intersections != null && intersections.length > 0) {
+            return true;
+        }
+
+        // the center line of the flow does not intersect the arrow triangle,
+        // but it may still overlay parts of the arrow. So test whether any 
+        // triangle vertices overlap the flow band.
+        double minDist = flowWidth / 2d;
+        double minDistSqr = minDist * minDist;
+        // FIXME distanceSq should exclude start and end points
+        return flow.distanceSq(tipPt.x, tipPt.y, TOL) < minDistSqr
+                || flow.distanceSq(corner1Pt.x, corner1Pt.y, TOL) < minDistSqr
+                || flow.distanceSq(corner2Pt.x, corner2Pt.y, TOL) < minDistSqr;
     }
 
     /**
@@ -189,7 +245,7 @@ public final class Arrow {
     public double getLength() {
         return arrowLength;
     }
-    
+
     /**
      * Returns the arrow width.
      *
@@ -249,6 +305,14 @@ public final class Arrow {
      */
     public double getClipRadius() {
         return clipRadius;
+    }
+
+    /**
+     *
+     * @return flow for this arrow
+     */
+    public Flow getFlow() {
+        return flow;
     }
 
 }

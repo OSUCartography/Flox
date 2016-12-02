@@ -91,7 +91,7 @@ public class SVGFlowExporter extends SVGExporter {
     }
 
     private Element flowToDOMElement(Flow flow, Document document) {
-        flow = model.clipFlow(flow, true, false);
+        flow = model.clipFlowForRendering(flow);
         Element flowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
         flowElement.setAttribute("id", Double.toString(flow.getValue()));
         flowElement.setAttribute("d", flowToPath(flow));

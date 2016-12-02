@@ -232,7 +232,7 @@ public class Polynomial {
                     t2 = 0;
                 }
                 t2 = 2 * Math.sqrt(t2);
-                double t1 = 3 * c3 * c3 / 4 - 2 * c2; // missing var declaration in original code
+                double t1 = 3 * c3 * c3 / 4 - 2 * c2;
                 boolean case1 = t1 + t2 >= Polynomial.TOLERANCE;
                 boolean case2 = t1 - t2 >= Polynomial.TOLERANCE;
                 int n = 0;
