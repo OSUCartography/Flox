@@ -444,7 +444,7 @@ public class GeometryUtils {
 
         double x = xy[0];
         double y = xy[1];
-        
+
         if (collinear(p0x, p0y, p1x, p1y, p2x, p2y, tol)) {
             return getDistanceToLineSegmentSquare(x, y, p0x, p0y, p2x, p2y);
         }
@@ -697,6 +697,85 @@ public class GeometryUtils {
     public static double rectDistSq(Rectangle2D r1, Rectangle2D r2) {
         return rectDistSq(r1.getMinX(), r1.getMinY(), r1.getMaxX(), r1.getMaxY(),
                 r2.getMinX(), r2.getMinY(), r2.getMaxX(), r2.getMaxY());
+    }
+
+    private static double sign(double p1x, double p1y, double p2x, double p2y, double p3x, double p3y) {
+        return (p1x - p3x) * (p2y - p3y) - (p2x - p3x) * (p1y - p3y);
+    }
+
+    /**
+     * Test whether a point is inside a triangle.
+     *
+     * http://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
+     *
+     * @param ptx point to test x
+     * @param pty point to test y
+     * @param v1x vertex 1 x
+     * @param v1y vertex 1 y
+     * @param v2x vertex 2 x
+     * @param v2y vertex 2 y
+     * @param v3x vertex 3 x
+     * @param v3y vertex 3 y
+     * @return true if ptx/pty is inside the triangle defined by the three
+     * vertices, false otherwise.
+     */
+    public static boolean pointInTriangle(double ptx, double pty,
+            double v1x, double v1y,
+            double v2x, double v2y,
+            double v3x, double v3y) {
+
+        boolean b1 = sign(ptx, pty, v1x, v1y, v2x, v2y) < 0d;
+        boolean b2 = sign(ptx, pty, v2x, v2y, v3x, v3y) < 0d;
+        if (b1 != b2) {
+            return false;
+        }
+        boolean b3 = sign(ptx, pty, v3x, v3y, v1x, v1y) < 0d;
+        return b2 == b3;
+    }
+
+    /**
+     * Returns true if any vertex of one triangle is inside another triangle. 
+     *
+     * @param t1x1 triangle 1 point 1 x
+     * @param t1y1 triangle 1 point 1 y
+     * @param t1x2 triangle 1 point 2 x
+     * @param t1y2 triangle 1 point 2 y
+     * @param t1x3 triangle 1 point 3 x
+     * @param t1y3 triangle 1 point 3 y
+     * @param t2x1 triangle 2 point 1 x
+     * @param t2y1 triangle 2 point 1 y
+     * @param t2x2 triangle 2 point 2 x
+     * @param t2y2 triangle 2 point 2 y
+     * @param t2x3 triangle 2 point 3 x
+     * @param t2y3 triangle 2 point 3 y
+     * @return true if a vertex of triangle 1 is inside triangle 2 or vice versa
+     */
+    public static boolean trianglesOverlap(double t1x1, double t1y1,
+            double t1x2, double t1y2,
+            double t1x3, double t1y3,
+            double t2x1, double t2y1,
+            double t2x2, double t2y2,
+            double t2x3, double t2y3) {
+        
+        // test whether any point of triangle 1 is inside triangle 2
+        if (pointInTriangle(t1x1, t1y1, t2x1, t2y1, t2x2, t2y2, t2x3, t2y3)) {
+            return true;
+        }
+        if (pointInTriangle(t1x2, t1y2, t2x1, t2y1, t2x2, t2y2, t2x3, t2y3)) {
+            return true;
+        }
+        if (pointInTriangle(t1x3, t1y3, t2x1, t2y1, t2x2, t2y2, t2x3, t2y3)) {
+            return true;
+        }
+        
+        // test whether any point of triangle 2 is inside triangle 1
+        if (pointInTriangle(t2x1, t2y1, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3)) {
+            return true;
+        }
+        if (pointInTriangle(t2x2, t2y2, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3)) {
+            return true;
+        }
+        return pointInTriangle(t2x3, t2y3, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3);
     }
 
 }
