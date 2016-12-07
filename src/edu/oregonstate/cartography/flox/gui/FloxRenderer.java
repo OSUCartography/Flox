@@ -150,6 +150,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             drawClipAreas(drawStartClipAreas, drawEndClipAreas);
         }
 
+        if (drawFlows && highlightSelected) {
+            drawFlowCenterLines();
+        }
+
         if (drawLocks) {
             drawLockIcons(model);
         }
@@ -260,29 +264,45 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
         double s = scale / model.getReferenceMapScale();
 
+        // FIXME this should not be necessary here
+        {
+            Iterator<Flow> iterator = model.sortedFlowIteratorForDrawing(false);
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                // FIXME
+                flow.endClippingToAvoidOverlaps = 0;
+                flow.startClippingToAvoidOverlaps = 0;
+            }
+        }
+
         // Iterate through the flows
         Iterator<Flow> iterator = model.sortedFlowIteratorForDrawing(false);
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
+
+            // FIXME this should be done by the model after layouting the flows
+            // should be done for flows ordered by length: longest are moved first
+            flow.adjustEndLengthToReduceOverlaps(model);
+            flow.adjustStartLengthToReduceOverlaps(model);
+
             drawFlow(flow, highlightSelected, s);
         }
     }
 
     /**
      * Draws one flow. Not for FlowPairs.
-     * 
+     *
      * @param flow flow to draw
      * @param highlightSelected If true, selected flows are drawn with
      * SELECTION_COLOR.
-     * @param s current scale factor of the map 
+     * @param s current scale factor of the map
      */
     private void drawFlow(Flow flow, boolean highlightSelected, double s) {
         assert (flow instanceof FlowPair == false);
-        
+
         g2d.setColor(highlightSelected && flow.isSelected()
                 ? SELECTION_COLOR : model.getFlowColor(flow));
 
-        flow.adjustLengthToReduceOverlaps(model);
         // draw the arrow head
         if (model.isDrawArrowheads()) {
             Arrow arrow = flow.getArrow(model);
@@ -295,7 +315,20 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         Flow clippedFlow = model.clipFlowForRendering(flow);
         GeneralPath flowPath = clippedFlow.toGeneralPath(scale, west, north);
         double flowStrokeWidth = model.getFlowWidthPx(flow) * s;
-        drawFlowLine(g2d, flow, flowPath, flowStrokeWidth, highlightSelected);
+        drawFlowLine(g2d, flow, flowPath, flowStrokeWidth);
+    }
+
+    private void drawFlowCenterLines() {
+        g2d.setStroke(new BasicStroke(1f));
+        g2d.setColor(Color.GRAY);
+
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow.isSelected()) {
+                g2d.draw(flow.toGeneralPath(scale, west, north));
+            }
+        }
     }
 
     /**
@@ -372,11 +405,9 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * @param flow the flow to draw.
      * @param flowPath the geometry of the flow to draw.
      * @param flowStrokeWidth the width of the flow in pixels.
-     * @param highlightSelected If true and the flow is selected, it is drawn
-     * with SELECTION_COLOR.
      */
     private void drawFlowLine(Graphics2D g2d, Flow flow, GeneralPath flowPath,
-            double flowStrokeWidth, boolean highlightSelected) {
+            double flowStrokeWidth) {
 
         if (model.isDrawInlineArrows()) {
             // draw lines with inline arrows
@@ -389,8 +420,6 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             mask2D.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            mask2D.setColor(highlightSelected && flow.isSelected()
-                    ? SELECTION_COLOR : model.getFlowColor(flow));
             mask2D.draw(flowPath);
 
             // draw to alpha channel to make inner flow area transparent

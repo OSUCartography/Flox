@@ -213,8 +213,10 @@ public final class Arrow {
         // FIXME abuse Bezier-Bezier intersection code. use Bezier-line intersection test instead.
         Flow cheesyTrickFlow1 = new Flow(tipPt, corner1Pt, 1);
         Flow cheesyTrickFlow2 = new Flow(tipPt, corner2Pt, 1);
-        cheesyTrickFlow1.offsetCtrlPt(100, 100);
-        cheesyTrickFlow2.offsetCtrlPt(100, 100);
+        Flow cheesyTrickFlow3 = new Flow(corner1Pt, corner2Pt, 1);
+        cheesyTrickFlow1.offsetCtrlPt(1, 1);
+        cheesyTrickFlow2.offsetCtrlPt(1, 1);
+        cheesyTrickFlow3.offsetCtrlPt(1, 1);
         
         // test whether the flow intersects the triangle formed by the arrow
         Point[] intersections = cheesyTrickFlow1.intersections(flow);
@@ -222,6 +224,11 @@ public final class Arrow {
             return true;
         }
         intersections = cheesyTrickFlow2.intersections(flow);
+        if (intersections != null && intersections.length > 0) {
+            return true;
+        }
+        
+        intersections = cheesyTrickFlow3.intersections(flow);
         if (intersections != null && intersections.length > 0) {
             return true;
         }

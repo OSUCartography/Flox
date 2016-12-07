@@ -2241,28 +2241,8 @@ public class Model {
 //            lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
 //        }
 
-        // clipping radius for start node
-        double startNodeClipR = 0;
-
-        // clip the start if there must be a gap between the start of 
-        // the flow line and the start node symbol.
-        // distance between start of flow and start node
-        if (forceClipNodes || flowDistanceFromStartPointPx > 0) {
-            // Compute the radius of the start node (add half stroke width)
-            double startNodeRadiusPx = getNodeStrokeWidthPx() / 2 + getNodeRadiusPx(flow.getStartPt());
-            startNodeClipR = (flowDistanceFromStartPointPx + startNodeRadiusPx) / getReferenceMapScale();
-        }
-
-        // clipping radius for start mask area
-        double startMaskClipR = 0;
-        if (clipFlowsWithStartAreas) {
-            startMaskClipR = flow.getApproximateStartAreaClipRadius();
-            // FIXME make both variants available
-            // startMaskClipR = maskClippingRadius(lineString, true);
-        }
-
-        // start and end clipping radius
-        double startR = Math.max(startNodeClipR, startMaskClipR);
+        double startR = startClipRadius(flow,
+                forceClipNodes, adjustLengthToReduceOverlaps);
         double endR = endClipRadius(flow, clipArrowhead, lineString,
                 forceClipNodes, adjustLengthToReduceOverlaps);
 
@@ -2282,6 +2262,48 @@ public class Model {
     }
 
     /**
+     * Computes distance between the start of flow and the center of the start
+     * node.
+     *
+     * @param flow
+     * @param forceClipNodes
+     * @param adjustLengthToReduceOverlaps
+     * @return
+     */
+    public double startClipRadius(Flow flow, boolean forceClipNodes,
+            boolean adjustLengthToReduceOverlaps) {
+
+        // clipping radius for start node
+        double startNodeClipRadius = 0;
+
+        // clip the start if there must be a gap between the start of 
+        // the flow line and the start node symbol
+        // or if the start must be clipped to avoid overlaps
+        if (forceClipNodes
+                || flowDistanceFromStartPointPx > 0
+                || (adjustLengthToReduceOverlaps && flow.startClippingToAvoidOverlaps != 0d)) {
+            // Compute the radius of the start node (add half stroke width)
+            double startNodeRadiusPx = getNodeStrokeWidthPx() / 2 + getNodeRadiusPx(flow.getStartPt());
+            startNodeClipRadius = (flowDistanceFromStartPointPx + startNodeRadiusPx) / getReferenceMapScale();
+        }
+
+        // clipping radius for start mask area
+        double startMaskClipR = 0;
+        if (clipFlowsWithStartAreas) {
+            startMaskClipR = flow.getApproximateStartAreaClipRadius();
+            // FIXME make both variants available
+            // startMaskClipR = maskClippingRadius(lineString, true);
+        }
+
+        startNodeClipRadius = Math.max(startNodeClipRadius, startMaskClipR);
+        if (adjustLengthToReduceOverlaps) {
+            startNodeClipRadius += flow.startClippingToAvoidOverlaps;
+        }
+
+        return startNodeClipRadius;
+    }
+
+    /**
      * Computes clipping radius around the end node of a flow. The clipping
      * radius can include the arrowhead, the end node radius, a gap between the
      * end of the line (or the tip of the arrowhead) and the end node, the end
@@ -2296,6 +2318,8 @@ public class Model {
      * @param clipEndNode if true, the returned circle radius includes the end
      * node. The end node and a gap to the end node are also included when there
      * is a gap greater than 0.
+     * @param adjustLengthToReduceOverlaps if true, the length is adjusted to
+     * reduce overlaps with other flows and arrowheads
      * @return radius of circle around end node
      */
     public double endClipRadius(Flow flow, boolean clipArrowhead,
@@ -2602,9 +2626,9 @@ public class Model {
 
     /**
      * Test whether an Arrow overlaps any of the flows in this model.
-     * 
+     *
      * @param arrow Arrow to test
-     * @return 
+     * @return
      */
     public boolean arrowOverlapsAnyFlow(Arrow arrow) {
         Iterator<Flow> iterator = flowIterator();
@@ -2613,6 +2637,8 @@ public class Model {
             if (arrow.getFlow() == flow) {
                 continue;
             }
+            
+            flow = clipFlow(flow, true, true, true);
             double flowWidth = getFlowWidthPx(flow) / getReferenceMapScale();
             if (arrow.isOverlappingFlow(flow, flowWidth)) {
                 return true;
@@ -2635,15 +2661,17 @@ public class Model {
         return false;
     }
 
-    public void adjustFlowLengthsToReduceOverlaps() {
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            flow.adjustLengthToReduceOverlaps(this);
-            //update caches?
-        }
-
-        // FIXME
-        // TODO
-    }
+    // FIXME not currently used
+//    public void adjustFlowLengthsToReduceOverlaps() {
+//        Iterator<Flow> iterator = flowIterator();
+//        while (iterator.hasNext()) {
+//            Flow flow = iterator.next();
+//            flow.adjustEndLengthToReduceOverlaps(this);
+//            flow.adjustStartLengthToReduceOverlaps(this);
+//            //update caches?
+//        }
+//
+//        // FIXME
+//        // TODO
+//    }
 }
