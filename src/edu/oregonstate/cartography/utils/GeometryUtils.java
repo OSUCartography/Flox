@@ -382,6 +382,8 @@ public class GeometryUtils {
     /**
      * Find roots in cubic equation of the form x^3 + a·x^2 + b·x + c = 0 From
      * http://www.pouet.net/topic.php?which=9119&page=1
+     * 
+     * FIXME Polynomial class does not seem to use Math.acos and is possibly faster
      *
      * @param a
      * @param b
@@ -734,7 +736,7 @@ public class GeometryUtils {
     }
 
     /**
-     * Returns true if any vertex of one triangle is inside another triangle. 
+     * Returns true if any vertex of one triangle is inside another triangle.
      *
      * @param t1x1 triangle 1 point 1 x
      * @param t1y1 triangle 1 point 1 y
@@ -756,7 +758,7 @@ public class GeometryUtils {
             double t2x1, double t2y1,
             double t2x2, double t2y2,
             double t2x3, double t2y3) {
-        
+
         // test whether any point of triangle 1 is inside triangle 2
         if (pointInTriangle(t1x1, t1y1, t2x1, t2y1, t2x2, t2y2, t2x3, t2y3)) {
             return true;
@@ -767,7 +769,7 @@ public class GeometryUtils {
         if (pointInTriangle(t1x3, t1y3, t2x1, t2y1, t2x2, t2y2, t2x3, t2y3)) {
             return true;
         }
-        
+
         // test whether any point of triangle 2 is inside triangle 1
         if (pointInTriangle(t2x1, t2y1, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3)) {
             return true;
@@ -778,4 +780,38 @@ public class GeometryUtils {
         return pointInTriangle(t2x3, t2y3, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3);
     }
 
+    /**
+     * Test whether a circle and a ray intersect.
+     *
+     * From Eberly, 2D Game Engine Design, 2nd edition, section 15.4.2, p. 700.
+     *
+     * @param cx circle center x
+     * @param cy circle center y
+     * @param r circle radius
+     * @param px ray origin x
+     * @param py ray origin y
+     * @param dx ray x direction
+     * @param dy ray y direction
+     * @return
+     */
+    public static boolean circleAndRayIntersect(double cx, double cy, double r,
+            double px, double py, double dx, double dy) {
+
+        double deltaX = px - cx;
+        double deltaY = py - cy;
+        double a0 = (deltaX * deltaX + deltaY * deltaY) - r * r;
+        if (a0 <= 0d) {
+            // ray origin is inside or on the sphere
+            return true;
+        }
+
+        double a1 = dx * deltaX + dy * deltaY;
+        if (a1 >= 0d) {
+            // ray is directed away from the sphere
+            return false;
+        }
+
+        double discr = a1 * a1 - a0;
+        return discr >= 0d;
+    }
 }

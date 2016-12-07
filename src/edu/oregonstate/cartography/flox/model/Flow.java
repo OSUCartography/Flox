@@ -789,6 +789,45 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
+     * Test whether the tangent at parameter t intersects the start or the end
+     * node.
+     *
+     * @param t curve parameter t between 0 and 1
+     * @param r radius of start or end node in world coordinates
+     * @param endNode if true, test with the end node; if false, test with the
+     * start node.
+     * @return True if the tangent and the circle around the start or end node
+     * with radius r intersect; false otherwise.
+     */
+    public boolean isTangentDirectedTowardsNode(double t, double r, boolean endNode) {
+        assert (t >= 0d && t <= 1d);
+
+        // point on curve at paramter t
+        double w3 = t * t;
+        double _1_t = 1 - t;
+        double w2 = 2 * _1_t * t;
+        double w1 = _1_t * _1_t;
+        double px = startPt.x * w1 + cPtX * w2 + endPt.x * w3;
+        double py = startPt.y * w1 + cPtY * w2 + endPt.y * w3;
+
+        // first derivative: direction of tangent vector at parameter t
+        double dx = _1_t * (cPtX - startPt.x) + t * (endPt.x - cPtX);
+        double dy = _1_t * (cPtY - startPt.y) + t * (endPt.y - cPtY);
+        double l = Math.sqrt(dx * dx + dy * dy);
+        dx /= l;
+        dy /= l;
+
+        // invert tangent if testing with start node
+        if (endNode == false) {
+            dx = -dx;
+            dy = -dy;
+        }
+
+        Point n = endNode ? getEndPt() : getStartPt();
+        return GeometryUtils.circleAndRayIntersect(n.x, n.y, r, px, py, dx, dy);
+    }
+
+    /**
      * Offsets this flow in parallel to the line.
      *
      * @param offset offset distance
@@ -1035,9 +1074,9 @@ public class Flow implements Comparable<Flow> {
      * @return Location on curve.
      */
     public Point pointOnCurve(double t) {
-        //assert (t >= 0d && t <= 1d);
+        //assert (t >= 0d && t <= 1d); // FIXME
         if (Double.isFinite(t) == false) {
-            System.out.println(t);
+            System.out.println(t); // FIXME
             assert (t >= 0d && t <= 1d);
         }
         double w3 = t * t;
@@ -1046,7 +1085,7 @@ public class Flow implements Comparable<Flow> {
         double w1 = _1_t * _1_t;
         double x = startPt.x * w1 + cPtX * w2 + endPt.x * w3;
         double y = startPt.y * w1 + cPtY * w2 + endPt.y * w3;
-        return new Point(x, y);
+        return new Point(x, y, t);
     }
 
     /**
@@ -1789,15 +1828,27 @@ public class Flow implements Comparable<Flow> {
                 /* clipEndNode */ true,
                 /* adjustLengthToReduceOverlaps */ false);
 
+        double flowWidthPx = model.getFlowWidthPx(this);
+        double flowWidth = flowWidthPx / model.getReferenceMapScale();
+
         double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
         double endNodeRadius = endNodeRadiusPx / model.getReferenceMapScale();
-        for (int i = 0; i <= 10; i++) { // FIXME 10
+        for (int i = 0; i <= 100; i++) { // FIXME 50
             endClippingToAvoidOverlaps = i * RAD_INC / model.getReferenceMapScale();
 
             // FIXME only consider arrowhead when arrowheads are displayed!
             // shorten the flow
             double radius = arrowTipClipRadius + endClippingToAvoidOverlaps;
+
             // FIXME make sure clip radius is not too large
+            // make sure the arrow is pointing at the node circle
+            // use a node circle that is at least as large as the flow width
+            double nodeRadius = Math.max(flowWidth / 2d, radius);
+            double t = getIntersectionTWithCircleAroundEndPoint(nodeRadius);
+            if (isTangentDirectedTowardsNode(t, endNodeRadius, true) == false) {
+                break; // FIXME elongation might still find a solution
+            }
+
             Arrow arrow = getArrow(model, radius);
             if (model.arrowOverlapsAnyFlow(arrow) == false
                     && model.arrowOverlapsAnyArrow(arrow, this) == false) {
@@ -1863,6 +1914,10 @@ public class Flow implements Comparable<Flow> {
         final double MAX_SHORTENING = RAD_INC * 10; // FIXME 10
 
         double thisWidthPx = model.getFlowWidthPx(this);
+        double thisWidth = thisWidthPx / model.getReferenceMapScale();
+
+        double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
+        double startNodeRadius = startNodeRadiusPx / model.getReferenceMapScale();
 
         for (int i = 0; i <= 10; i++) { // FIXME 10
             startClippingToAvoidOverlaps = i * RAD_INC;
@@ -1874,7 +1929,16 @@ public class Flow implements Comparable<Flow> {
 
             // FIXME make sure clip radii are not too large
             // if (radius < ...
-            Flow clippedFlow = clipRelativeToStartPoint(startR, endR);
+            // make sure the tail of the flow is pointing towards the start node
+            // FIXME make sure there is no other node between the start of the 
+            // flow and the start node (the tail would point at the wrong node)
+            double nodeRadius = Math.max(thisWidth / 2d, startNodeRadius);
+            double t = getIntersectionTWithCircleAroundStartPoint(startR);
+            if (isTangentDirectedTowardsNode(t, nodeRadius, false) == false) {
+                break; // FIXME elongation might still find a solution
+            }
+
+            Flow flowStartSection = clipRelativeToStartPoint(startR, endR);
 
             boolean overlapping = false;
             Iterator<Flow> iterator = model.flowIterator();
@@ -1886,7 +1950,7 @@ public class Flow implements Comparable<Flow> {
 
                 // clip flow to visible extent
                 // also clip the arrowhead as arrowheads are tested separately for overlaps
-                flow = model.clipFlow(flow,
+                Flow clippedFlow = model.clipFlow(flow,
                         /* clipArrowhead */ true,
                         /* forceClipNodes */ true,
                         /* adjustLengthToReduceOverlaps */ true);
@@ -1896,12 +1960,12 @@ public class Flow implements Comparable<Flow> {
                 double flowWidth = flowWidthPx / model.getReferenceMapScale();
                 double minDistPx = /*minObstacleDistPx + */ (thisWidthPx + flowWidthPx) / 2; // FIXME
                 double minDist = minDistPx / model.getReferenceMapScale();
-                overlapping = clippedFlow.isClose(flow, minDist, 20);
+                overlapping = flowStartSection.isClose(clippedFlow, minDist, 20);
 
                 // test for flow-arrowhead overlaps
                 if (overlapping == false) {
                     Arrow arrow = flow.getArrow(model);
-                    overlapping = arrow.isOverlappingFlow(clippedFlow, flowWidth);
+                    overlapping = arrow.isOverlappingFlow(flowStartSection, flowWidth);
                 }
 
                 // found an overlapping flow or arrowhead. Shorten flow more and 
