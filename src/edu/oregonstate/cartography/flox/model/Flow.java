@@ -1465,6 +1465,8 @@ public class Flow implements Comparable<Flow> {
      * Returns whether this flow is closer than a minimum distance to another
      * flow. This is an approximate test, which might miss some locations.
      *
+     * FIXME Problem with start and end of flows, because the flows have each a width
+     * 
      * @param flow flow to test with
      * @param minDist if the smallest distance between this flow and the passed
      * flow is smaller than minDist, the two flows are considered close.
@@ -1895,50 +1897,53 @@ public class Flow implements Comparable<Flow> {
 
         return clippedFlow;
     }
-
+    
     /**
-     * Adjust the start of the flow to reduce overlaps of this flow with other
+     * Shortens the start of the flow to reduce overlaps of this flow with other
      * lines and arrowheads.
      *
-     * Algorithm: a continuously shorter section around the start point of this
-     * flow is tested for overlaps. As soon as there is no overlap, the current
-     * length is retained.
-     *
-     * FIXME The flow is only shortened, but not elongated.
+     * Algorithm: the flow line is cut in salami slices, starting at the end of
+     * the flow. Each slice is tested for overlaps. If a slice does not overlap
+     * any other flow or arrowhead, the beginning of the slice is the new start
+     * clipping value. length is retained.
      *
      * @param model the Model with all Flows
      */
     public void adjustStartLengthToReduceOverlaps(Model model) {
 
-        final double RAD_INC = 5d / model.getReferenceMapScale(); // FIXME 5d
-        final double MAX_SHORTENING = RAD_INC * 10; // FIXME 10
+        final int RAD_INC_PX = 5;
+        final double RAD_INC = RAD_INC_PX / model.getReferenceMapScale(); // FIXME 5d
 
+        int minObstacleDistPx = model.getMinObstacleDistPx();
         double thisWidthPx = model.getFlowWidthPx(this);
         double thisWidth = thisWidthPx / model.getReferenceMapScale();
 
         double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
         double startNodeRadius = startNodeRadiusPx / model.getReferenceMapScale();
 
-        for (int i = 0; i <= 10; i++) { // FIXME 10
+        double nodeRadius = Math.max(thisWidth / 2d, startNodeRadius);
+
+        for (int i = 0; i <= 50; i++) { // FIXME 10
             startClippingToAvoidOverlaps = i * RAD_INC;
 
-            // clip the flow to the current start radius and the maximum start radius
-            double startR = model.startClipRadius(this, true, false);
-            double endR = startR + MAX_SHORTENING;
-            startR += startClippingToAvoidOverlaps;
+            // clip a small slice of the flow to create a salami slice
+            double startR = model.startClipRadius(this,
+                    /* forceClipNodes */ true,
+                    /* adjustLengthToReduceOverlaps */ false)
+                    + startClippingToAvoidOverlaps;
+            double endR = startR + RAD_INC;
 
             // FIXME make sure clip radii are not too large
             // if (radius < ...
             // make sure the tail of the flow is pointing towards the start node
             // FIXME make sure there is no other node between the start of the 
             // flow and the start node (the tail would point at the wrong node)
-            double nodeRadius = Math.max(thisWidth / 2d, startNodeRadius);
             double t = getIntersectionTWithCircleAroundStartPoint(startR);
             if (isTangentDirectedTowardsNode(t, nodeRadius, false) == false) {
-                break; // FIXME elongation might still find a solution
+                break;
             }
 
-            Flow flowStartSection = clipRelativeToStartPoint(startR, endR);
+            Flow salamiSlice = clipRelativeToStartPoint(startR, endR);
 
             boolean overlapping = false;
             Iterator<Flow> iterator = model.flowIterator();
@@ -1948,7 +1953,7 @@ public class Flow implements Comparable<Flow> {
                     continue;
                 }
 
-                // clip flow to visible extent
+                // clip other flow to visible extent
                 // also clip the arrowhead as arrowheads are tested separately for overlaps
                 Flow clippedFlow = model.clipFlow(flow,
                         /* clipArrowhead */ true,
@@ -1958,18 +1963,17 @@ public class Flow implements Comparable<Flow> {
                 // test for flow-flow overlaps
                 double flowWidthPx = model.getFlowWidthPx(flow);
                 double flowWidth = flowWidthPx / model.getReferenceMapScale();
-                double minDistPx = /*minObstacleDistPx + */ (thisWidthPx + flowWidthPx) / 2; // FIXME
+                double minDistPx = minObstacleDistPx + (thisWidthPx + flowWidthPx) / 2;
                 double minDist = minDistPx / model.getReferenceMapScale();
-                overlapping = flowStartSection.isClose(clippedFlow, minDist, 20);
+                overlapping = salamiSlice.isClose(clippedFlow, minDist, RAD_INC_PX);
 
                 // test for flow-arrowhead overlaps
                 if (overlapping == false) {
                     Arrow arrow = flow.getArrow(model);
-                    overlapping = arrow.isOverlappingFlow(flowStartSection, flowWidth);
+                    overlapping = arrow.isOverlappingFlow(salamiSlice, flowWidth);
                 }
 
-                // found an overlapping flow or arrowhead. Shorten flow more and 
-                // see whether the shortened flow still overlaps
+                // found an overlapping flow or arrowhead. Test next salami slice.
                 if (overlapping) {
                     break;
                 }
@@ -1978,14 +1982,7 @@ public class Flow implements Comparable<Flow> {
             if (overlapping == false) {
                 return;
             }
-
-            // FIXME
-            // elongate the flow
         }
-
-        // Could not find a value for startClippingToAvoidOverlaps that does not
-        // result in a flow withoug overlaps. Reset startClippingToAvoidOverlaps.
-        startClippingToAvoidOverlaps = 0;
     }
 
     /**
