@@ -282,8 +282,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             // FIXME this should be done by the model after layouting the flows
             // should be done for flows ordered by length: longest are moved first
-            flow.adjustEndLengthToReduceOverlaps(model);
-            flow.adjustStartLengthToReduceOverlaps(model);
+            flow.adjustEndShorteningToAvoidOverlaps(model);
+            flow.adjustStartShorteningToAvoidOverlaps(model);
 
             drawFlow(flow, highlightSelected, s);
         }

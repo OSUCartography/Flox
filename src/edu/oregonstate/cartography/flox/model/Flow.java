@@ -1864,19 +1864,26 @@ public class Flow implements Comparable<Flow> {
         return clippedFlow;
     }
 
+    /**
+     * Cuts this flow with two circles both centered on the end point.
+     *
+     * @param r1 smaller circle radius
+     * @param r2 greater circler radius
+     * @return a new Flow
+     */
     public Flow clipAroundEndNode(double r1, double r2) {
         Flow clippedFlow = this;
 
         // cut off the end piece
         double endT = clippedFlow.getIntersectionTWithCircleAroundEndPoint(r2);
         if (endT < 1) {
-            clippedFlow = split(endT)[0];
+            clippedFlow = split(endT)[1];
         }
 
         // cut off the start piece
         double startT = clippedFlow.getIntersectionTWithCircleAroundEndPoint(r1);
         if (startT > 0) {
-            clippedFlow = clippedFlow.split(startT)[1];
+            clippedFlow = clippedFlow.split(startT)[0];
         }
 
         return clippedFlow;
@@ -1888,7 +1895,7 @@ public class Flow implements Comparable<Flow> {
      *
      * @param model
      */
-    public void adjustEndLengthToReduceOverlaps(Model model) {
+    public void adjustEndShorteningToAvoidOverlaps(Model model) {
 
         final int RAD_INC_PX = 5; // FIXME 5
         final double radiusIncrement = RAD_INC_PX / model.getReferenceMapScale();
@@ -1914,7 +1921,7 @@ public class Flow implements Comparable<Flow> {
             double nodeRadius = Math.max(flowWidth / 2d, clipRadius);
             double t = getIntersectionTWithCircleAroundEndPoint(nodeRadius);
             if (isTangentDirectedTowardsEndNode(t, endNodeRadius) == false) {
-                startShorteningToAvoidOverlaps = 0;
+                endShorteningToAvoidOverlaps = 0;
                 break;
             }
 
@@ -1966,7 +1973,7 @@ public class Flow implements Comparable<Flow> {
      *
      * @param model the Model with all Flows
      */
-    public void adjustStartLengthToReduceOverlaps(Model model) {
+    public void adjustStartShorteningToAvoidOverlaps(Model model) {
 
         final int RAD_INC_PX = 5;
         final double RAD_INC = RAD_INC_PX / model.getReferenceMapScale(); // FIXME 5d
