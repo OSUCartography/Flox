@@ -270,8 +270,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
                 // FIXME
-                flow.endClippingToAvoidOverlaps = 0;
-                flow.startClippingToAvoidOverlaps = 0;
+                flow.endShorteningToAvoidOverlaps = 0;
+                flow.startShorteningToAvoidOverlaps = 0;
             }
         }
 
