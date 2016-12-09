@@ -363,6 +363,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
         double t = 0.5;
 
         // location on flow line
+        flow = model.clipFlowForComputations(flow);
         Point pt = flow.pointOnCurve(t);
         double x = xToPx(pt.x);
         double y = yToPx(pt.y);
@@ -418,6 +419,8 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             Graphics2D mask2D = (Graphics2D) mask.getGraphics();
             enableHighQualityRenderingHints(mask2D, true);
 
+            mask2D.setColor(flow.isSelected()
+                ? SELECTION_COLOR : model.getFlowColor(flow));
             mask2D.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             mask2D.draw(flowPath);
@@ -431,15 +434,11 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             mask2D.dispose();
             g2d.drawRenderedImage(mask, null);
         } else {
-            // will draw plain arrows elsewhere
+            // draw plain arrowheads
             g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             g2d.draw(flowPath);
         }
-
-        // uncomment to test parallel lines
-        // double offset = flow.getBaselineLength() / 10;
-        // g2d.draw(flow.toGeneralPath(scale, west, north, offset));
     }
 
     /**
