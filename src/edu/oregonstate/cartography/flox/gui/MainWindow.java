@@ -120,7 +120,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
 
         coordinateInfoPanel.setCoordinatesVisible(false);
-        
+
         arrowToggleButton.doClick();
     }
 
@@ -217,7 +217,7 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
 
         coordinateInfoPanel.setModel(model);
-        
+
         // switch to default tool. This updates the GUI and installs a new map 
         // tool that has a reference to the new model.
         arrowToggleButton.doClick();
@@ -299,6 +299,12 @@ public class MainWindow extends javax.swing.JFrame {
 
             angularDistributionSlider.setValue((int) (model.getAngularDistributionWeight() * 20));
 
+            // overlaps
+            shortenFlowsCheckBox.setSelected(model.isShortenFlowsToReduceOverlaps());
+            maxShorteningFormattedTextField.setValue(model.getMaxShorteningPx());
+            minFlowLengthFormattedTextField.setValue(model.getMinFlowLengthPx());
+            updateShorteningGUIEnabledState();
+                    
             // clipping
             boolean hasFlowsAndClipAreas = model.hasClipAreas() && model.getNbrFlows() > 0;
             boolean clipStart = model.isClipFlowsWithStartAreas();
@@ -345,6 +351,15 @@ public class MainWindow extends javax.swing.JFrame {
         arrowCornerPositionSlider.setEnabled(enable);
         arrowLengthRatioSlider.setEnabled(enable);
         arrowSizeRatioSlider.setEnabled(enable);
+    }
+    
+    private void updateShorteningGUIEnabledState() {
+        maxShorteningLabel.setEnabled(shortenFlowsCheckBox.isSelected());
+            maxShorteningFormattedTextField.setEnabled(shortenFlowsCheckBox.isSelected());
+            maxShorteningPixelLabel.setEnabled(shortenFlowsCheckBox.isSelected());
+            minFlowLengthLabel.setEnabled(model.isShortenFlowsToReduceOverlaps());
+            minFlowLengthFormattedTextField.setEnabled(model.isShortenFlowsToReduceOverlaps());
+            minFlowLengthPixelLabel.setEnabled(model.isShortenFlowsToReduceOverlaps());
     }
 
     private void updateLayerList() {
@@ -593,6 +608,7 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPanel jPanel6 = new TransparentMacPanel();
         javax.swing.JLabel jLabel47 = new javax.swing.JLabel();
         parallelFlowsGapSpinner = new javax.swing.JSpinner();
+        javax.swing.JLabel jLabel7 = new javax.swing.JLabel();
         javax.swing.JSeparator jSeparator33 = new javax.swing.JSeparator();
         javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
         longestFlowStiffnessSlider = new javax.swing.JSlider();
@@ -615,9 +631,19 @@ public class MainWindow extends javax.swing.JFrame {
         endDistanceSpinner = new javax.swing.JSpinner();
         javax.swing.JLabel jLabel29 = new javax.swing.JLabel();
         startDistanceSpinner = new javax.swing.JSpinner();
-        javax.swing.JSeparator jSeparator23 = new javax.swing.JSeparator();
+        overlapsPanel = new TransparentMacPanel();
+        overlapsContentPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel32 = new javax.swing.JLabel();
         minDistToObstaclesSpinner = new javax.swing.JSpinner();
+        javax.swing.JSeparator jSeparator23 = new javax.swing.JSeparator();
+        shortenFlowsCheckBox = new javax.swing.JCheckBox();
+        maxShorteningLabel = new javax.swing.JLabel();
+        maxShorteningFormattedTextField = new javax.swing.JFormattedTextField();
+        javax.swing.JLabel jLabel13 = new javax.swing.JLabel();
+        maxShorteningPixelLabel = new javax.swing.JLabel();
+        minFlowLengthLabel = new javax.swing.JLabel();
+        minFlowLengthFormattedTextField = new javax.swing.JFormattedTextField();
+        minFlowLengthPixelLabel = new javax.swing.JLabel();
         javax.swing.JPanel arrowHeadsPanel = new TransparentMacPanel();
         javax.swing.JPanel arrowHeadsControlPanel = new TransparentMacPanel();
         addArrowsCheckbox = new javax.swing.JCheckBox();
@@ -1248,7 +1274,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         rightPanel.setLayout(new java.awt.BorderLayout());
 
-        controlsTabbedPane.setPreferredSize(new java.awt.Dimension(350, 800));
+        controlsTabbedPane.setPreferredSize(new java.awt.Dimension(370, 800));
 
         flowsPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 10, 10, 10));
         flowsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
@@ -1519,7 +1545,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
         flowsContentPanel.add(parallelFlowsCheckBox, gridBagConstraints);
 
-        jLabel47.setText("Paralles Distance");
+        jLabel47.setText("Parallels Distance");
         jLabel47.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 20, 0, 0));
         jPanel6.add(jLabel47);
 
@@ -1531,6 +1557,9 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         jPanel6.add(parallelFlowsGapSpinner);
+
+        jLabel7.setText("Pixels");
+        jPanel6.add(jLabel7);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1667,7 +1696,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         flowsPanel.add(flowsContentPanel);
 
-        controlsTabbedPane.addTab("Flows", flowsPanel);
+        controlsTabbedPane.addTab("Flow", flowsPanel);
 
         nodesPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
 
@@ -1822,21 +1851,23 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         nodesContentPanel.add(startDistanceSpinner, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
-        nodesContentPanel.add(jSeparator23, gridBagConstraints);
+
+        nodesPanel.add(nodesContentPanel);
+
+        controlsTabbedPane.addTab("Node", nodesPanel);
+
+        overlapsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+
+        overlapsContentPanel.setPreferredSize(new java.awt.Dimension(503, 176));
+        overlapsContentPanel.setLayout(new java.awt.GridBagLayout());
 
         jLabel32.setText("Minimum Distance to Flows");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        nodesContentPanel.add(jLabel32, gridBagConstraints);
+        overlapsContentPanel.add(jLabel32, gridBagConstraints);
 
         minDistToObstaclesSpinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         minDistToObstaclesSpinner.setPreferredSize(new java.awt.Dimension(55, 28));
@@ -1846,16 +1877,115 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 10;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-        nodesContentPanel.add(minDistToObstaclesSpinner, gridBagConstraints);
+        overlapsContentPanel.add(minDistToObstaclesSpinner, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
+        overlapsContentPanel.add(jSeparator23, gridBagConstraints);
 
-        nodesPanel.add(nodesContentPanel);
+        shortenFlowsCheckBox.setText("Shorten Flows to Reduce Overlaps");
+        shortenFlowsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                shortenFlowsCheckBoxActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 9, 0);
+        overlapsContentPanel.add(shortenFlowsCheckBox, gridBagConstraints);
 
-        controlsTabbedPane.addTab("Nodes", nodesPanel);
+        maxShorteningLabel.setText("Maximum Shortening");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
+        overlapsContentPanel.add(maxShorteningLabel, gridBagConstraints);
+
+        maxShorteningFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
+        {
+            javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(java.text.NumberFormat.getIntegerInstance());
+            nf.setMinimum(new Integer(0));
+            maxShorteningFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(nf));
+        }
+        maxShorteningFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                maxShorteningFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        overlapsContentPanel.add(maxShorteningFormattedTextField, gridBagConstraints);
+
+        jLabel13.setText("Pixel");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
+        overlapsContentPanel.add(jLabel13, gridBagConstraints);
+
+        maxShorteningPixelLabel.setText("Pixel");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
+        overlapsContentPanel.add(maxShorteningPixelLabel, gridBagConstraints);
+
+        minFlowLengthLabel.setText("Minimum Flow Length");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
+        overlapsContentPanel.add(minFlowLengthLabel, gridBagConstraints);
+
+        minFlowLengthFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
+        {
+            javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(java.text.NumberFormat.getIntegerInstance());
+            nf.setMinimum(new Integer(0));
+            minFlowLengthFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(nf));
+        }
+        minFlowLengthFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                minFlowLengthFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        overlapsContentPanel.add(minFlowLengthFormattedTextField, gridBagConstraints);
+
+        minFlowLengthPixelLabel.setText("Pixel");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
+        overlapsContentPanel.add(minFlowLengthPixelLabel, gridBagConstraints);
+
+        overlapsPanel.add(overlapsContentPanel);
+
+        controlsTabbedPane.addTab("Overlap", overlapsPanel);
 
         arrowHeadsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
 
@@ -2042,7 +2172,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
-        controlsTabbedPane.addTab("Arrows", arrowHeadsPanel);
+        controlsTabbedPane.addTab("Arrow", arrowHeadsPanel);
 
         clipAreaPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
 
@@ -2247,7 +2377,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         clipAreaPanel.add(clipAreaControlPanel);
 
-        controlsTabbedPane.addTab("Clipping", clipAreaPanel);
+        controlsTabbedPane.addTab("Clip", clipAreaPanel);
 
         mapPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
 
@@ -2436,7 +2566,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         controlsTabbedPane.addTab("Map", mapPanel);
 
-        rightPanel.add(controlsTabbedPane, java.awt.BorderLayout.NORTH);
+        rightPanel.add(controlsTabbedPane, java.awt.BorderLayout.PAGE_START);
+        controlsTabbedPane.getAccessibleContext().setAccessibleName("Flow");
 
         getContentPane().add(rightPanel, java.awt.BorderLayout.EAST);
 
@@ -4569,7 +4700,7 @@ public class MainWindow extends javax.swing.JFrame {
         List<Obstacle> obstacles = layouter.getObstacles();
         int minDist = model.getMinObstacleDistPx();
         int n = layouter.countIntersectingObstacles(flows.get(0), obstacles, minDist);
-        double intersectionIndex = layouter.intersectionIndex(flows.get(0), 
+        double intersectionIndex = layouter.intersectionIndex(flows.get(0),
                 obstacles, minDist, Model.ARROWHEAD_WEIGHT_FOR_INTERSECTION_INDEX);
         JOptionPane.showMessageDialog(this, "Number of intersecting obstacles: "
                 + n + "\nIntersection index: " + intersectionIndex);
@@ -4627,9 +4758,40 @@ public class MainWindow extends javax.swing.JFrame {
         double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
         double minDist = minDistPx / model.getReferenceMapScale();
         double touchPercentage = flow1.touchPercentage(flow2, minDist, 20);
-        JOptionPane.showMessageDialog(this, "Touch percentage: " 
+        JOptionPane.showMessageDialog(this, "Touch percentage: "
                 + Math.round(touchPercentage * 100) + "%");
     }//GEN-LAST:event_touchPercentageMenuItemActionPerformed
+
+    private void shortenFlowsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shortenFlowsCheckBoxActionPerformed
+        if (updatingGUI == false && model != null) {
+            model.setShortenFlowsToReduceOverlaps(shortenFlowsCheckBox.isSelected());
+            mapComponent.refreshMap();
+            addUndo("Shorten Flows");
+            updateShorteningGUIEnabledState();
+        }
+    }//GEN-LAST:event_shortenFlowsCheckBoxActionPerformed
+
+    private void maxShorteningFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maxShorteningFormattedTextFieldPropertyChange
+        if (updatingGUI == false && model != null) {
+            if ("value".equals(evt.getPropertyName())) {
+                int i = (Integer)(maxShorteningFormattedTextField.getValue());
+                model.setMaxShorteningPx(i);
+                mapComponent.refreshMap();
+                addUndo("Maximum Flow Shortening");
+            }
+        }
+    }//GEN-LAST:event_maxShorteningFormattedTextFieldPropertyChange
+
+    private void minFlowLengthFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_minFlowLengthFormattedTextFieldPropertyChange
+        if (updatingGUI == false && model != null) {
+            if ("value".equals(evt.getPropertyName())) {
+                int i = (Integer)(minFlowLengthFormattedTextField.getValue());
+                model.setMinFlowLengthPx(i);
+                mapComponent.refreshMap();
+                addUndo("Minimum Flow Length");
+            }
+        }
+    }//GEN-LAST:event_minFlowLengthFormattedTextFieldPropertyChange
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4758,12 +4920,18 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.ButtonGroup mapToolsButtonGroup;
     private javax.swing.JMenuItem markFlowFlowIntersectionsMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton maxColorButton;
+    private javax.swing.JFormattedTextField maxShorteningFormattedTextField;
+    private javax.swing.JLabel maxShorteningLabel;
+    private javax.swing.JLabel maxShorteningPixelLabel;
     private javax.swing.JSlider maximumFlowWidthSlider;
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem mergeNodesMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton minColorButton;
     private javax.swing.JSpinner minDistToObstaclesSpinner;
+    private javax.swing.JFormattedTextField minFlowLengthFormattedTextField;
+    private javax.swing.JLabel minFlowLengthLabel;
+    private javax.swing.JLabel minFlowLengthPixelLabel;
     private javax.swing.JCheckBoxMenuItem moveFlowsCheckBoxMenuItem;
     private javax.swing.JMenuItem moveSelectedAwayFromObstaclesMenuItem;
     private javax.swing.JMenuItem nameMenuItem;
@@ -4776,6 +4944,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem openPointsAndFlowsMenuItem;
     private javax.swing.JMenuItem openSettingsMenuItem;
     private javax.swing.JMenuItem openShapefileMenuItem;
+    private javax.swing.JPanel overlapsContentPanel;
+    private javax.swing.JPanel overlapsPanel;
     private javax.swing.JCheckBox parallelFlowsCheckBox;
     private javax.swing.JSpinner parallelFlowsGapSpinner;
     private javax.swing.JSlider peripheralStiffnessSlider;
@@ -4809,6 +4979,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem selectUnconnectedNodesMenuItem;
     private javax.swing.JFormattedTextField selectValueFormattedTextField;
     private javax.swing.JDialog selectionDialog;
+    private javax.swing.JCheckBox shortenFlowsCheckBox;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JCheckBoxMenuItem showComputationSettingsCheckBoxMenuItem;

@@ -282,8 +282,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
 
             // FIXME this should be done by the model after layouting the flows
             // should be done for flows ordered by length: longest are moved first
-            flow.adjustEndShorteningToAvoidOverlaps(model);
-            flow.adjustStartShorteningToAvoidOverlaps(model);
+            if (model.isShortenFlowsToReduceOverlaps() && model.getMaxShorteningPx() > 0) {
+                flow.adjustEndShorteningToAvoidOverlaps(model);
+                flow.adjustStartShorteningToAvoidOverlaps(model);
+            }
 
             drawFlow(flow, highlightSelected, s);
         }
@@ -420,7 +422,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             enableHighQualityRenderingHints(mask2D, true);
 
             mask2D.setColor(flow.isSelected()
-                ? SELECTION_COLOR : model.getFlowColor(flow));
+                    ? SELECTION_COLOR : model.getFlowColor(flow));
             mask2D.setStroke(new BasicStroke((float) flowStrokeWidth,
                     BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
             mask2D.draw(flowPath);

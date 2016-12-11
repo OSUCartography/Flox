@@ -498,6 +498,11 @@ public class Model {
     private int minObstacleDistPx = 5;
 
     /**
+     * flow starts and ends of flows can be shortened if they overlap other flows
+     */
+    private boolean shortenFlowsToReduceOverlaps = true;
+    
+    /**
      * minimum length of flows when shortening flows to minimize overlaps
      */
     private int minFlowLengthPx = 10;
@@ -2757,6 +2762,20 @@ public class Model {
         return false;
     }
 
+    /**
+     * @return the shortenFlowsToReduceOverlaps
+     */
+    public boolean isShortenFlowsToReduceOverlaps() {
+        return shortenFlowsToReduceOverlaps;
+    }
+
+    /**
+     * @param shortenFlowsToReduceOverlaps the shortenFlowsToReduceOverlaps to set
+     */
+    public void setShortenFlowsToReduceOverlaps(boolean shortenFlowsToReduceOverlaps) {
+        this.shortenFlowsToReduceOverlaps = shortenFlowsToReduceOverlaps;
+    }
+    
     /**
      * Returns the minimum length of flows when shortening flows to minimize
      * overlaps.
