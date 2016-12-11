@@ -472,10 +472,10 @@ public class Model {
     private Geometry clipAreas;
 
     @XmlJavaTypeAdapter(GeometrySerializer.class)
-    private Geometry clipAreasEndBuffered;
+    private Geometry clipAreasEndBuffered; // FIXME not used?
 
     @XmlJavaTypeAdapter(GeometrySerializer.class)
-    private Geometry clipAreasStartBuffered;
+    private Geometry clipAreasStartBuffered; // FIXME not used?
 
     /**
      * Buffer width for start clip areas in pixels.
@@ -496,6 +496,16 @@ public class Model {
      * Minimum distance of flows from obstacles in pixels.
      */
     private int minObstacleDistPx = 5;
+
+    /**
+     * minimum length of flows when shortening flows to minimize overlaps
+     */
+    private int minFlowLengthPx = 10;
+
+    /**
+     * the maximum length of shortening applied to the starts and ends of flows
+     */
+    private int maxShorteningPx = 100;
 
     /**
      * A map with a set of symbolized layers.
@@ -2412,12 +2422,15 @@ public class Model {
     private boolean isSliceOverlappingFlowsOrArrowheads(Flow flow,
             double r1, double r2, boolean aroundEndNode) {
 
+        assert (r2 > 1);
+
         // compute difference of radii in pixels. Sample each pixel for overlaps.
         int nbrSamplings = (int) Math.round((r2 - r1) * referenceMapScale);
+        nbrSamplings = Math.min(1, nbrSamplings);
 
         double thisWidthPx = getFlowWidthPx(flow);
-        Flow slice = aroundEndNode ? 
-                flow.clipAroundEndNode(r1, r2) : flow.clipAroundStartNode(r1, r2);
+        Flow slice = aroundEndNode
+                ? flow.clipAroundEndNode(r1, r2) : flow.clipAroundStartNode(r1, r2);
 
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
@@ -2448,7 +2461,7 @@ public class Model {
                 return true;
             }
         }
-        
+
         // no overlap found
         return false;
     }
@@ -2744,17 +2757,43 @@ public class Model {
         return false;
     }
 
-    // FIXME not currently used
-//    public void adjustFlowLengthsToReduceOverlaps() {
-//        Iterator<Flow> iterator = flowIterator();
-//        while (iterator.hasNext()) {
-//            Flow flow = iterator.next();
-//            flow.adjustEndLengthToReduceOverlaps(this);
-//            flow.adjustStartLengthToReduceOverlaps(this);
-//            //update caches?
-//        }
-//
-//        // FIXME
-//        // TODO
-//    }
+    /**
+     * Returns the minimum length of flows when shortening flows to minimize
+     * overlaps.
+     *
+     * @return the length in pixels
+     */
+    public int getMinFlowLengthPx() {
+        return minFlowLengthPx;
+    }
+
+    /**
+     * Set the minimum length of flows when shortening flows to minimize
+     * overlaps.
+     *
+     * @param minFlowLengthPx the length in pixels
+     */
+    public void setMinFlowLengthPx(int minFlowLengthPx) {
+        this.minFlowLengthPx = minFlowLengthPx;
+    }
+
+    /**
+     * Returns the maximum length of shortening applied to the starts and ends
+     * of flows.
+     *
+     * @return the maximum length in pixels
+     */
+    public int getMaxShorteningPx() {
+        return maxShorteningPx;
+    }
+
+    /**
+     * Sets the maximum length of shortening applied to the starts and ends of
+     * flows.
+     *
+     * @param maxShorteningPx the maximum length in pixels
+     */
+    public void setMaxShorteningPx(int maxShorteningPx) {
+        this.maxShorteningPx = maxShorteningPx;
+    }
 }

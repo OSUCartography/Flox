@@ -156,6 +156,7 @@ public final class Arrow {
 
         // Rotate and translate all the points that make up the shape of the Arrow, using
         // the Arrow's base point as the pivot.
+        // FIXME inefficient trigonometry
         tipPt.transform(basePt.x, basePt.y, arrowheadOrientation);
         corner1Pt.transform(basePt.x, basePt.y, arrowheadOrientation);
         corner2Pt.transform(basePt.x, basePt.y, arrowheadOrientation);

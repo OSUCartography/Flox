@@ -83,6 +83,7 @@ public final class Graph {
             flowSum += v;
             ++flowCounter;
 
+            // FIXME should compare with squared length
             double l = flow.getBaselineLength();
             if (l > maxFlowLength) {
                 maxFlowLength = l;
