@@ -4771,6 +4771,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void shortenFlowsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shortenFlowsCheckBoxActionPerformed
         if (updatingGUI == false && model != null) {
             model.setShortenFlowsToReduceOverlaps(shortenFlowsCheckBox.isSelected());
+            model.shortenFlowsToReduceOverlaps();
             mapComponent.refreshMap();
             addUndo("Shorten Flows");
             updateShorteningGUIEnabledState();
@@ -4782,6 +4783,7 @@ public class MainWindow extends javax.swing.JFrame {
             if ("value".equals(evt.getPropertyName())) {
                 double v = (Double)(maxShorteningFormattedTextField.getValue());
                 model.setMaxShorteningPx(v);
+                model.shortenFlowsToReduceOverlaps();
                 mapComponent.refreshMap();
                 addUndo("Maximum Flow Shortening");
             }
@@ -4793,6 +4795,7 @@ public class MainWindow extends javax.swing.JFrame {
             if ("value".equals(evt.getPropertyName())) {
                 double v = (Double)(minFlowLengthFormattedTextField.getValue());
                 model.setMinFlowLengthPx(v);
+                model.shortenFlowsToReduceOverlaps();
                 mapComponent.refreshMap();
                 addUndo("Minimum Flow Length");
             }

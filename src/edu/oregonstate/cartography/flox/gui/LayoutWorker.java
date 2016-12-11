@@ -81,6 +81,8 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
             setProgress((int) Math.round(progress));
         }
         
+        layouter.getModel().shortenFlowsToReduceOverlaps();
+        
         // reset lock flags to initial values
         layouter.getModel().applyLocks(initialLocks);
     }

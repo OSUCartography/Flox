@@ -261,32 +261,10 @@ public class FloxRenderer extends SimpleFeatureRenderer {
      * SELECTION_COLOR.
      */
     private void drawFlows(boolean highlightSelected) {
-
         double s = scale / model.getReferenceMapScale();
-
-        // FIXME this should not be necessary here
-        {
-            Iterator<Flow> iterator = model.sortedFlowIteratorForDrawing(false);
-            while (iterator.hasNext()) {
-                Flow flow = iterator.next();
-                // FIXME
-                flow.endShorteningToAvoidOverlaps = 0;
-                flow.startShorteningToAvoidOverlaps = 0;
-            }
-        }
-
-        // Iterate through the flows
         Iterator<Flow> iterator = model.sortedFlowIteratorForDrawing(false);
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-
-            // FIXME this should be done by the model after layouting the flows
-            // should be done for flows ordered by length: longest are moved first
-            if (model.isShortenFlowsToReduceOverlaps() && model.getMaxShorteningPx() > 0d) {
-                flow.adjustEndShorteningToAvoidOverlaps(model);
-                flow.adjustStartShorteningToAvoidOverlaps(model);
-            }
-
             drawFlow(flow, highlightSelected, s);
         }
     }

@@ -76,9 +76,17 @@ public class Flow implements Comparable<Flow> {
      */
     private double value;
 
-    // FIXME make private
-    public double endShorteningToAvoidOverlaps = 0;
-    public double startShorteningToAvoidOverlaps = 0;
+    /**
+     * shorten end of flow by this distance (a radius around the end node) to
+     * reduce overlaps with other flows and arrowheads
+     */
+    private double endShorteningToAvoidOverlaps = 0;
+
+    /**
+     * shorten start of flow by this distance (a radius around the start node)
+     * to reduce overlaps with other flows and arrowheads
+     */
+    private double startShorteningToAvoidOverlaps = 0;
 
     /**
      * clip area for the start of the flow.
@@ -500,7 +508,7 @@ public class Flow implements Comparable<Flow> {
     public boolean isLongerThan(double minLength) {
         return getBaselineLengthSquare() > minLength * minLength;
     }
-   
+
     /**
      * Returns the orientation angle of the line connecting the start point and
      * the end point
@@ -1522,15 +1530,15 @@ public class Flow implements Comparable<Flow> {
      */
     public boolean isClose(Flow flow, double minDist, int nbrPointsToTest) {
         assert (nbrPointsToTest > 0);
-        
+
         double minDistSqr = minDist * minDist;
-         
+
         if (nbrPointsToTest == 1) {
             // one single sampling point, sample at t = 0.5
             Point pt = pointOnCurve(0.5);
             return flow.distanceSq(pt.x, pt.y, 0.001) < minDistSqr; // FIXME 0.001
         }
-       
+
         for (int i = 0; i < nbrPointsToTest; i++) {
             double t = i / (nbrPointsToTest - 1d);
             Point pt = pointOnCurve(t);
@@ -1539,7 +1547,7 @@ public class Flow implements Comparable<Flow> {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -1928,7 +1936,7 @@ public class Flow implements Comparable<Flow> {
      */
     public void adjustEndShorteningToAvoidOverlaps(Model model) {
         final int RAD_INC_PX = 1;
-        
+
         final double referenceMapScale = model.getReferenceMapScale();
         final double radiusIncrement = RAD_INC_PX / referenceMapScale;
         double minFlowLength = model.getMinFlowLengthPx() / referenceMapScale;
@@ -1936,14 +1944,14 @@ public class Flow implements Comparable<Flow> {
         double flowWidth = flowWidthPx / referenceMapScale;
         double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
         double endNodeRadius = endNodeRadiusPx / referenceMapScale;
-        
+
         double flowEndRadius = model.endClipRadius(this,
                 /* clipArrowhead */ false,
                 /* lineString */ null,
                 /* clipEndNode */ true,
                 /* adjustLengthToReduceOverlaps */ false);
 
-        int nbrIterations = (int)(model.getMaxShorteningPx() / RAD_INC_PX) + 1;
+        int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX) + 1;
         for (int i = 0; i <= nbrIterations; i++) {
             endShorteningToAvoidOverlaps = i * radiusIncrement;
 
@@ -1975,11 +1983,11 @@ public class Flow implements Comparable<Flow> {
                 endShorteningToAvoidOverlaps = 0;
                 break;
             }
-            
+
             // when arrowheads are drawn, make sure the arrowhead with the
             // current value of endShorteningToAvoidOverlaps does not overlap 
             // any other flow or arrowhead
-            if (model.isDrawArrowheads()) {                
+            if (model.isDrawArrowheads()) {
                 if (model.arrowOverlapsAnyFlow(arrow) == false
                         && model.arrowOverlapsAnyArrow(arrow, this) == false) {
                     break;
@@ -2025,9 +2033,9 @@ public class Flow implements Comparable<Flow> {
      */
     public void adjustStartShorteningToAvoidOverlaps(Model model) {
         final double RAD_INC_PX = 1;
-                
+
         final double referenceMapScale = model.getReferenceMapScale();
-        final double radiusIncrement = RAD_INC_PX / referenceMapScale;      
+        final double radiusIncrement = RAD_INC_PX / referenceMapScale;
         double minFlowLength = model.getMinFlowLengthPx() / referenceMapScale;
         double thisWidthPx = model.getFlowWidthPx(this);
         double thisWidth = thisWidthPx / referenceMapScale;
@@ -2036,7 +2044,7 @@ public class Flow implements Comparable<Flow> {
 
         double nodeRadius = Math.max(thisWidth / 2d, startNodeRadius);
 
-        int nbrIterations = (int)(model.getMaxShorteningPx() / RAD_INC_PX) + 1;
+        int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX) + 1;
         for (int i = 0; i <= nbrIterations; i++) {
             startShorteningToAvoidOverlaps = i * radiusIncrement;
 
@@ -2057,7 +2065,7 @@ public class Flow implements Comparable<Flow> {
                 startShorteningToAvoidOverlaps = 0;
                 break;
             }
-            
+
             // make sure the flow is long enough by clipping to the flow trunc without the arrowhead.
             // If adjustStartShorteningToAvoidOverlaps() is called before
             // adjustEndShorteningToAvoidOverlaps(), then startShorteningToAvoidOverlaps field
@@ -2072,7 +2080,7 @@ public class Flow implements Comparable<Flow> {
                 startShorteningToAvoidOverlaps = 0;
                 break;
             }
-            
+
             if (model.isStartSliceOverlappingFlowsOrArrowheads(this, startR, endR) == false) {
                 break;
             }
@@ -2159,5 +2167,35 @@ public class Flow implements Comparable<Flow> {
             }
         }
         return result.toArray(new Point[result.size()]);
+    }
+
+    /**
+     * @return the endShorteningToAvoidOverlaps
+     */
+    public double getEndShorteningToAvoidOverlaps() {
+        return endShorteningToAvoidOverlaps;
+    }
+
+    /**
+     * @param endShorteningToAvoidOverlaps the endShorteningToAvoidOverlaps to
+     * set
+     */
+    public void setEndShorteningToAvoidOverlaps(double endShorteningToAvoidOverlaps) {
+        this.endShorteningToAvoidOverlaps = endShorteningToAvoidOverlaps;
+    }
+
+    /**
+     * @return the startShorteningToAvoidOverlaps
+     */
+    public double getStartShorteningToAvoidOverlaps() {
+        return startShorteningToAvoidOverlaps;
+    }
+
+    /**
+     * @param startShorteningToAvoidOverlaps the startShorteningToAvoidOverlaps
+     * to set
+     */
+    public void setStartShorteningToAvoidOverlaps(double startShorteningToAvoidOverlaps) {
+        this.startShorteningToAvoidOverlaps = startShorteningToAvoidOverlaps;
     }
 }

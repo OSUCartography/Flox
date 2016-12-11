@@ -498,10 +498,11 @@ public class Model {
     private int minObstacleDistPx = 5;
 
     /**
-     * flow starts and ends of flows can be shortened if they overlap other flows
+     * flow starts and ends of flows can be shortened if they overlap other
+     * flows
      */
     private boolean shortenFlowsToReduceOverlaps = true;
-    
+
     /**
      * minimum length of flows when shortening flows to minimize overlaps
      */
@@ -2296,7 +2297,7 @@ public class Model {
         // or if the start must be clipped to avoid overlaps
         if (forceClipNodes
                 || flowDistanceFromStartPointPx > 0
-                || (adjustLengthToReduceOverlaps && flow.startShorteningToAvoidOverlaps != 0d)) {
+                || (adjustLengthToReduceOverlaps && flow.getStartShorteningToAvoidOverlaps() != 0d)) {
             // Compute the radius of the start node (add half stroke width)
             double startNodeRadiusPx = getNodeStrokeWidthPx() / 2 + getNodeRadiusPx(flow.getStartPt());
             startNodeClipRadius = (flowDistanceFromStartPointPx + startNodeRadiusPx) / getReferenceMapScale();
@@ -2312,7 +2313,7 @@ public class Model {
 
         startNodeClipRadius = Math.max(startNodeClipRadius, startMaskClipR);
         if (adjustLengthToReduceOverlaps) {
-            startNodeClipRadius += flow.startShorteningToAvoidOverlaps;
+            startNodeClipRadius += flow.getStartShorteningToAvoidOverlaps();
         }
 
         return startNodeClipRadius;
@@ -2365,7 +2366,7 @@ public class Model {
         }
 
         if (adjustLengthToReduceOverlaps) {
-            endNodeClipRadius += flow.endShorteningToAvoidOverlaps;
+            endNodeClipRadius += flow.getEndShorteningToAvoidOverlaps();
         }
 
         // clipping radius for end mask area
@@ -2770,12 +2771,13 @@ public class Model {
     }
 
     /**
-     * @param shortenFlowsToReduceOverlaps the shortenFlowsToReduceOverlaps to set
+     * @param shortenFlowsToReduceOverlaps the shortenFlowsToReduceOverlaps to
+     * set
      */
     public void setShortenFlowsToReduceOverlaps(boolean shortenFlowsToReduceOverlaps) {
         this.shortenFlowsToReduceOverlaps = shortenFlowsToReduceOverlaps;
     }
-    
+
     /**
      * Returns the minimum length of flows when shortening flows to minimize
      * overlaps.
@@ -2814,5 +2816,26 @@ public class Model {
      */
     public void setMaxShorteningPx(double maxShorteningPx) {
         this.maxShorteningPx = maxShorteningPx;
+    }
+
+    public void shortenFlowsToReduceOverlaps() {
+        Iterator<Flow> iterator = flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            // FIXME make private and use setter
+            flow.setEndShorteningToAvoidOverlaps(0);
+            flow.setStartShorteningToAvoidOverlaps(0);
+        }
+
+        // FIXME should be done for flows sorted by length: longest are shortened first
+        // better yet: sort by the maximum lengths that the flows can be shortened by
+        if (isShortenFlowsToReduceOverlaps() && getMaxShorteningPx() > 0d) {
+            iterator = sortedFlowIteratorForDrawing(false);
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                flow.adjustEndShorteningToAvoidOverlaps(this);
+                flow.adjustStartShorteningToAvoidOverlaps(this);
+            }
+        }
     }
 }
