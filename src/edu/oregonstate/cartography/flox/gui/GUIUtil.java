@@ -10,6 +10,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import javax.swing.JComponent;
+import javax.swing.JSlider;
 
 /**
  *
@@ -27,6 +28,7 @@ public class GUIUtil {
     /**
      * Returns the front most Frame. If possible, the Frame that currently has
      * the focus and is visible is returned.
+     *
      * @return The frontmost Frame or null if no Frame can be found.
      */
     public static Frame getFrontMostFrame() {
@@ -64,6 +66,7 @@ public class GUIUtil {
     /**
      * Returns the preferred dimensions of a component, using the current height
      * and a custom width.
+     *
      * @param component The component providing the preferred height.
      * @param width The preferred width.
      * @return The preferred dimension.
@@ -72,6 +75,7 @@ public class GUIUtil {
         Dimension dim = component.getPreferredSize();
         return new Dimension(width, dim.height);
     }
+
     public static void setPreferredWidth(JComponent component, int width) {
         component.setPreferredSize(getPreferredSize(component, width));
     }
@@ -80,5 +84,25 @@ public class GUIUtil {
         Dimension dim = component.getMinimumSize();
         dim = new Dimension(minWidth, dim.height);
         component.setMinimumSize(dim);
+    }
+
+    /**
+     * Adds a string to each major tick label of a slider. Useful to append
+     * percentage signs.
+     *
+     * @param slider the slider
+     * @param extension the extension to append.
+     */
+    public static void extendSliderLabels(JSlider slider, String extension) {
+        java.util.Hashtable labels = slider.createStandardLabels(slider.getMajorTickSpacing());
+        java.util.Enumeration e = labels.elements();
+        while (e.hasMoreElements()) {
+            javax.swing.JComponent comp = (javax.swing.JComponent) e.nextElement();
+            if (comp instanceof javax.swing.JLabel) {
+                javax.swing.JLabel label = (javax.swing.JLabel) (comp);
+                label.setText(label.getText() + extension);
+            }
+        }
+        slider.setLabelTable(labels);
     }
 }

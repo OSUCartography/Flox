@@ -399,7 +399,7 @@ public class Model {
      * between the the shortest arrow and the arrow being drawn is multiplied by
      * this and subtracted from the arrow length.
      */
-    private double arrowLengthRatio = 0.0;
+    private double arrowLengthRatio = 0.25;
 
     /**
      * Determines the gap (in pixels) between a flow's end node and the end of
@@ -505,12 +505,12 @@ public class Model {
     /**
      * minimum length of flows when shortening flows to minimize overlaps
      */
-    private int minFlowLengthPx = 10;
+    private double minFlowLengthPx = 10;
 
     /**
      * the maximum length of shortening applied to the starts and ends of flows
      */
-    private int maxShorteningPx = 100;
+    private double maxShorteningPx = 100;
 
     /**
      * A map with a set of symbolized layers.
@@ -2782,7 +2782,7 @@ public class Model {
      *
      * @return the length in pixels
      */
-    public int getMinFlowLengthPx() {
+    public double getMinFlowLengthPx() {
         return minFlowLengthPx;
     }
 
@@ -2792,7 +2792,7 @@ public class Model {
      *
      * @param minFlowLengthPx the length in pixels
      */
-    public void setMinFlowLengthPx(int minFlowLengthPx) {
+    public void setMinFlowLengthPx(double minFlowLengthPx) {
         this.minFlowLengthPx = minFlowLengthPx;
     }
 
@@ -2802,7 +2802,7 @@ public class Model {
      *
      * @return the maximum length in pixels
      */
-    public int getMaxShorteningPx() {
+    public double getMaxShorteningPx() {
         return maxShorteningPx;
     }
 
@@ -2812,7 +2812,7 @@ public class Model {
      *
      * @param maxShorteningPx the maximum length in pixels
      */
-    public void setMaxShorteningPx(int maxShorteningPx) {
+    public void setMaxShorteningPx(double maxShorteningPx) {
         this.maxShorteningPx = maxShorteningPx;
     }
 }

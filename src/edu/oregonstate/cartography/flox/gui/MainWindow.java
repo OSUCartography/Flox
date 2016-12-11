@@ -651,16 +651,16 @@ public class MainWindow extends javax.swing.JFrame {
         arrowheadLengthSlider = new javax.swing.JSlider();
         jLabel15 = new javax.swing.JLabel();
         arrowheadWidthSlider = new javax.swing.JSlider();
+        jLabel19 = new javax.swing.JLabel();
+        arrowSizeRatioSlider = new javax.swing.JSlider();
+        jLabel30 = new javax.swing.JLabel();
+        arrowLengthRatioSlider = new javax.swing.JSlider();
         jLabel16 = new javax.swing.JLabel();
         arrowEdgeCtrlLengthSlider = new javax.swing.JSlider();
         jLabel17 = new javax.swing.JLabel();
         arrowEdgeCtrlWidthSlider = new javax.swing.JSlider();
         jLabel18 = new javax.swing.JLabel();
         arrowCornerPositionSlider = new javax.swing.JSlider();
-        jLabel19 = new javax.swing.JLabel();
-        arrowSizeRatioSlider = new javax.swing.JSlider();
-        jLabel30 = new javax.swing.JLabel();
-        arrowLengthRatioSlider = new javax.swing.JSlider();
         javax.swing.JPanel clipAreaPanel = new TransparentMacPanel();
         javax.swing.JPanel clipAreaControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel20 = new javax.swing.JLabel();
@@ -1916,8 +1916,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         maxShorteningFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
         {
-            javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(java.text.NumberFormat.getIntegerInstance());
-            nf.setMinimum(new Integer(0));
+            javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(java.text.NumberFormat.getNumberInstance());
+            nf.setMinimum(0d);
             maxShorteningFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(nf));
         }
         maxShorteningFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
@@ -1959,8 +1959,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         minFlowLengthFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
         {
-            javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(java.text.NumberFormat.getIntegerInstance());
-            nf.setMinimum(new Integer(0));
+            javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(java.text.NumberFormat.getNumberInstance());
+            nf.setMinimum(0d);
             minFlowLengthFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(nf));
         }
         minFlowLengthFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
@@ -2014,6 +2014,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowheadLengthSlider.setPaintLabels(true);
         arrowheadLengthSlider.setPaintTicks(true);
         arrowheadLengthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        GUIUtil.extendSliderLabels(arrowheadLengthSlider, "%");
         arrowheadLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowheadLengthSliderStateChanged(evt);
@@ -2038,6 +2039,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowheadWidthSlider.setPaintLabels(true);
         arrowheadWidthSlider.setPaintTicks(true);
         arrowheadWidthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        GUIUtil.extendSliderLabels(arrowheadWidthSlider, "%");
         arrowheadWidthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowheadWidthSliderStateChanged(evt);
@@ -2049,10 +2051,60 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
         arrowHeadsControlPanel.add(arrowheadWidthSlider, gridBagConstraints);
 
-        jLabel16.setText("Pointedness");
+        jLabel19.setText("Enlarge Small Arrowheads");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+        arrowHeadsControlPanel.add(jLabel19, gridBagConstraints);
+
+        arrowSizeRatioSlider.setMajorTickSpacing(25);
+        arrowSizeRatioSlider.setPaintLabels(true);
+        arrowSizeRatioSlider.setPaintTicks(true);
+        arrowSizeRatioSlider.setValue(0);
+        arrowSizeRatioSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        GUIUtil.extendSliderLabels(arrowSizeRatioSlider, "%");
+        arrowSizeRatioSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                arrowSizeRatioSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
+        arrowHeadsControlPanel.add(arrowSizeRatioSlider, gridBagConstraints);
+
+        jLabel30.setText("Shorten Large Arrowheads");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+        arrowHeadsControlPanel.add(jLabel30, gridBagConstraints);
+
+        arrowLengthRatioSlider.setMajorTickSpacing(25);
+        arrowLengthRatioSlider.setPaintLabels(true);
+        arrowLengthRatioSlider.setPaintTicks(true);
+        arrowLengthRatioSlider.setPreferredSize(new java.awt.Dimension(190, 43));
+        GUIUtil.extendSliderLabels(arrowLengthRatioSlider, "%");
+        arrowLengthRatioSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                arrowLengthRatioSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
+        arrowHeadsControlPanel.add(arrowLengthRatioSlider, gridBagConstraints);
+
+        jLabel16.setText("Pointedness");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel16, gridBagConstraints);
@@ -2061,6 +2113,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowEdgeCtrlLengthSlider.setPaintLabels(true);
         arrowEdgeCtrlLengthSlider.setPaintTicks(true);
         arrowEdgeCtrlLengthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        GUIUtil.extendSliderLabels(arrowEdgeCtrlLengthSlider, "%");
         arrowEdgeCtrlLengthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowEdgeCtrlLengthSliderStateChanged(evt);
@@ -2068,14 +2121,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridy = 11;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
         arrowHeadsControlPanel.add(arrowEdgeCtrlLengthSlider, gridBagConstraints);
 
         jLabel17.setText("Bulkiness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridy = 12;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel17, gridBagConstraints);
@@ -2085,6 +2138,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowEdgeCtrlWidthSlider.setPaintLabels(true);
         arrowEdgeCtrlWidthSlider.setPaintTicks(true);
         arrowEdgeCtrlWidthSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        GUIUtil.extendSliderLabels(arrowEdgeCtrlWidthSlider, "%");
         arrowEdgeCtrlWidthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowEdgeCtrlWidthSliderStateChanged(evt);
@@ -2092,14 +2146,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
         arrowHeadsControlPanel.add(arrowEdgeCtrlWidthSlider, gridBagConstraints);
 
         jLabel18.setText("Wing Angle");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel18, gridBagConstraints);
@@ -2111,6 +2165,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowCornerPositionSlider.setPaintLabels(true);
         arrowCornerPositionSlider.setPaintTicks(true);
         arrowCornerPositionSlider.setPreferredSize(new java.awt.Dimension(240, 43));
+        GUIUtil.extendSliderLabels(arrowCornerPositionSlider, "%");
         arrowCornerPositionSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 arrowCornerPositionSliderStateChanged(evt);
@@ -2118,57 +2173,9 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
         arrowHeadsControlPanel.add(arrowCornerPositionSlider, gridBagConstraints);
-
-        jLabel19.setText("Width Ratio");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-        arrowHeadsControlPanel.add(jLabel19, gridBagConstraints);
-
-        arrowSizeRatioSlider.setMajorTickSpacing(10);
-        arrowSizeRatioSlider.setPaintLabels(true);
-        arrowSizeRatioSlider.setPaintTicks(true);
-        arrowSizeRatioSlider.setValue(0);
-        arrowSizeRatioSlider.setPreferredSize(new java.awt.Dimension(240, 43));
-        arrowSizeRatioSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                arrowSizeRatioSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
-        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
-        arrowHeadsControlPanel.add(arrowSizeRatioSlider, gridBagConstraints);
-
-        jLabel30.setText("Length Ratio");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-        arrowHeadsControlPanel.add(jLabel30, gridBagConstraints);
-
-        arrowLengthRatioSlider.setMajorTickSpacing(10);
-        arrowLengthRatioSlider.setPaintLabels(true);
-        arrowLengthRatioSlider.setPaintTicks(true);
-        arrowLengthRatioSlider.setPreferredSize(new java.awt.Dimension(190, 43));
-        arrowLengthRatioSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                arrowLengthRatioSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
-        arrowHeadsControlPanel.add(arrowLengthRatioSlider, gridBagConstraints);
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
@@ -4005,7 +4012,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
         model.straightenFlows(true);
         model.setLockOfSelectedFlows(true);
-        addUndo("Straighten Flows");
+        addUndo("Straighten and Lock Flows");
         mapComponent.refreshMap();
     }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
 
@@ -4027,7 +4034,6 @@ public class MainWindow extends javax.swing.JFrame {
         addUndo("Lock");
         lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
         mapComponent.refreshMap();
-
     }//GEN-LAST:event_lockMenuItemActionPerformed
 
     private void deselectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectAllMenuItemActionPerformed
@@ -4774,8 +4780,8 @@ public class MainWindow extends javax.swing.JFrame {
     private void maxShorteningFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maxShorteningFormattedTextFieldPropertyChange
         if (updatingGUI == false && model != null) {
             if ("value".equals(evt.getPropertyName())) {
-                int i = (Integer)(maxShorteningFormattedTextField.getValue());
-                model.setMaxShorteningPx(i);
+                double v = (Double)(maxShorteningFormattedTextField.getValue());
+                model.setMaxShorteningPx(v);
                 mapComponent.refreshMap();
                 addUndo("Maximum Flow Shortening");
             }
@@ -4785,8 +4791,8 @@ public class MainWindow extends javax.swing.JFrame {
     private void minFlowLengthFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_minFlowLengthFormattedTextFieldPropertyChange
         if (updatingGUI == false && model != null) {
             if ("value".equals(evt.getPropertyName())) {
-                int i = (Integer)(minFlowLengthFormattedTextField.getValue());
-                model.setMinFlowLengthPx(i);
+                double v = (Double)(minFlowLengthFormattedTextField.getValue());
+                model.setMinFlowLengthPx(v);
                 mapComponent.refreshMap();
                 addUndo("Minimum Flow Length");
             }
