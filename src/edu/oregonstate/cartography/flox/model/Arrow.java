@@ -156,12 +156,19 @@ public final class Arrow {
 
         // Rotate and translate all the points that make up the shape of the Arrow, using
         // the Arrow's base point as the pivot.
-        // FIXME inefficient trigonometry
-        tipPt.transform(basePt.x, basePt.y, arrowheadOrientation);
-        corner1Pt.transform(basePt.x, basePt.y, arrowheadOrientation);
-        corner2Pt.transform(basePt.x, basePt.y, arrowheadOrientation);
-        corner1cPt.transform(basePt.x, basePt.y, arrowheadOrientation);
-        corner2cPt.transform(basePt.x, basePt.y, arrowheadOrientation);
+        double dx = flow.getEndPt().x - basePt.x;
+        double dy = flow.getEndPt().y - basePt.y;
+        // dot product for computing cosine of rotation angle
+        double l = Math.sqrt(dx * dx + dy * dy);
+        double cos = dx / l;
+        // cross product for computing sine of rotation angle
+        double sin = dy / l;
+
+        tipPt.transform(basePt.x, basePt.y, sin, cos);
+        corner1Pt.transform(basePt.x, basePt.y, sin, cos);
+        corner2Pt.transform(basePt.x, basePt.y, sin, cos);
+        corner1cPt.transform(basePt.x, basePt.y, sin, cos);
+        corner2cPt.transform(basePt.x, basePt.y, sin, cos);
 
         // For thick flows there is a small gap between the end of the clipped
         // line and the arrow base. This is due to the fact that the line cap 
@@ -218,7 +225,7 @@ public final class Arrow {
         cheesyTrickFlow1.offsetCtrlPt(1, 1);
         cheesyTrickFlow2.offsetCtrlPt(1, 1);
         cheesyTrickFlow3.offsetCtrlPt(1, 1);
-        
+
         // test whether the flow intersects the triangle formed by the arrow
         Point[] intersections = cheesyTrickFlow1.intersections(flow);
         if (intersections != null && intersections.length > 0) {
@@ -228,7 +235,7 @@ public final class Arrow {
         if (intersections != null && intersections.length > 0) {
             return true;
         }
-        
+
         intersections = cheesyTrickFlow3.intersections(flow);
         if (intersections != null && intersections.length > 0) {
             return true;

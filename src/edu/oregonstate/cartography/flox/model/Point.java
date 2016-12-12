@@ -80,12 +80,13 @@ public final class Point {
     }
 
     /**
-     * Rotate and translate
+     * Rotate and translate. Rotation is applied first, then the point is
+     * translated.
      *
      * @param dx horizontal translation
      * @param dy vertical translation
      * @param angle Rotation angle in radians. Positive numbers will rotate
-     * counter- clockwise, negative numbers will rotate clockwise.
+     * counter-clockwise, negative numbers will rotate clockwise.
      */
     public void transform(double dx, double dy, double angle) {
         assert (Double.isFinite(dx));
@@ -94,6 +95,26 @@ public final class Point {
 
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
+        double newX = x * cos - y * sin + dx;
+        y = x * sin + y * cos + dy;
+        x = newX;
+    }
+
+    /**
+     * Rotate and translate. Rotation is applied first, then the point is
+     * translated.
+     *
+     * @param dx horizontal translation
+     * @param dy vertical translation
+     * @param sin sin of rotation angle
+     * @param cos cos of rotation angle
+     */
+    public void transform(double dx, double dy, double sin, double cos) {
+        assert (Double.isFinite(dx));
+        assert (Double.isFinite(dy));
+        assert (sin <= 1 && sin >= -1);
+        assert (cos <= 1 && cos >= -1);
+
         double newX = x * cos - y * sin + dx;
         y = x * sin + y * cos + dy;
         x = newX;
