@@ -4,9 +4,11 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 import org.jgrapht.graph.DirectedMultigraph;
 
 /**
@@ -294,6 +296,18 @@ public final class Graph {
      */
     public Iterator<Flow> flowIterator() {
         return graph.edgeSet().iterator();
+    }
+
+    /**
+     * Returns an iterator for the flows sorted by a provided Comparator
+     *
+     * @param comparator the comparator
+     * @return iterator for sorted flows
+     */
+    public Iterator<Flow> flowIterator(Comparator<Flow> comparator) {
+        TreeSet<Flow> treeSet = new TreeSet<>(comparator);
+        treeSet.addAll(graph.edgeSet());
+        return treeSet.iterator();
     }
 
     /**

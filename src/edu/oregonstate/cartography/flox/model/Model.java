@@ -22,6 +22,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -1232,8 +1234,8 @@ public class Model {
     }
 
     /**
-     * Returns an iterator for all sorted flows. Each FlowPair is converted to
-     * two regular Flows.
+     * Returns an iterator for all flows sorted by line width. Each FlowPair is
+     * converted to two regular Flows.
      *
      * @param increasing increasing or decreasing sort order
      * @return iterator for sorted flows
@@ -1242,7 +1244,30 @@ public class Model {
         return graph.getSortedFlowsForDrawing(this, increasing).iterator();
     }
 
-    // FIXME remove?
+    /**
+     * An iterator for all flows sorted by the length of the base line, that is,
+     * the line connecting start node and end node.
+     *
+     * @param increasing if true flows are sorted by increasing base line
+     * length.
+     * @return the iterator
+     */
+    public Iterator<Flow> flowIteratorSortedByBaseLineLength(boolean increasing) {
+        Comparator<Flow> comparator = new Comparator<Flow>() {
+            @Override
+            public int compare(Flow f1, Flow f2) {
+                double l1 = f1.getBaselineLengthSquare();
+                double l2 = f2.getBaselineLengthSquare();
+                return Double.compare(l1, l2);
+            }
+        };
+
+        if (increasing == false) {
+            comparator = Collections.reverseOrder(comparator);
+        }
+        return graph.flowIterator(comparator);
+    }
+
     public ArrayList<Flow> getFlows() {
         return graph.getFlows();
     }
@@ -2822,15 +2847,14 @@ public class Model {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            // FIXME make private and use setter
             flow.setEndShorteningToAvoidOverlaps(0);
             flow.setStartShorteningToAvoidOverlaps(0);
         }
 
-        // FIXME should be done for flows sorted by length: longest are shortened first
-        // better yet: sort by the maximum lengths that the flows can be shortened by
+        // flows are sorted by the length of their base lines.
+        // The longest flows are shortened first.
         if (isShortenFlowsToReduceOverlaps() && getMaxShorteningPx() > 0d) {
-            iterator = sortedFlowIteratorForDrawing(false);
+            iterator = flowIteratorSortedByBaseLineLength(false);
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
                 flow.adjustEndShorteningToAvoidOverlaps(this);
