@@ -21,20 +21,23 @@ public class FlowPair extends Flow {
      */
     private final double value2;
 
+    private double endShorteningToAvoidOverlaps2 = 0;
+    private double startShorteningToAvoidOverlaps2 = 0;
+
     private Flow cachedClippedCurve1IncludingArrow;
     private Flow cachedClippedCurve2IncludingArrow;
     private Flow cachedOffsetFlow1;
     private Flow cachedOffsetFlow2;
 
     /**
-     * Constructor without parameters for JAXB.
+     * Constructor without parameters for JAXB only.
      */
     private FlowPair() {
         value2 = 0;
     }
 
     /**
-     * Constructor
+     * Create a new FlowPair.
      *
      * @param flow1 flow connected to same start and end nodes as flow2, but in
      * opposite direction to flow2. flow1 cannot be locked.
@@ -67,7 +70,8 @@ public class FlowPair extends Flow {
         super(new Point(flowPair.getStartPt()),
                 flowPair.cPtX(), flowPair.cPtY(),
                 new Point(flowPair.getEndPt()),
-                flowPair.getValue1());
+                flowPair.getValue1(),
+                flowPair.id);
 
         shallowCopyClipAreas(flowPair, this);
         setSelected(flowPair.isSelected());
@@ -76,7 +80,8 @@ public class FlowPair extends Flow {
     }
 
     /**
-     * Returns a copy of this FlowPair. The id of the new flow is unique.
+     * Returns a copy of this FlowPair. The id of the new FlowPair is identical
+     * to the id of this FlowPair.
      *
      * @return a copy
      */
@@ -146,7 +151,7 @@ public class FlowPair extends Flow {
         }
         return cachedOffsetFlow2;
     }
-    
+
     public Flow cachedClippedCurve1IncludingArrow(Model model) {
         if (cachedClippedCurve1IncludingArrow == null) {
             Flow f1 = cachedOffsetFlow1(model);
@@ -172,12 +177,12 @@ public class FlowPair extends Flow {
      */
     @Override
     public boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model, int minObstacleDistPx) {
-        
+
         // to accelerate this test, first test with the combined flow curve before creating offset flows, which is expensive
         if (super.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model, minObstacleDistPx) == false) {
             return false;
         }
-        
+
         Flow flow1 = cachedClippedCurve1IncludingArrow(model);
         boolean intersection = flow1.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle, model, minObstacleDistPx);
         if (intersection == false) {
@@ -186,7 +191,7 @@ public class FlowPair extends Flow {
         }
         return intersection;
     }
-    
+
     /**
      * Tests whether this FlowPair intersects with another Flow. This is an
      * approximate test.
@@ -313,7 +318,86 @@ public class FlowPair extends Flow {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
         flow.reverseFlow(model);
+        flow.endShorteningToAvoidOverlaps = endShorteningToAvoidOverlaps2;
+        flow.startShorteningToAvoidOverlaps = startShorteningToAvoidOverlaps2;
         return flow;
     }
 
+    @Override
+    public void adjustEndShorteningToAvoidOverlaps(Model model) {
+        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        flow1.adjustEndShorteningToAvoidOverlaps(model);
+        endShorteningToAvoidOverlaps = flow1.getEndShorteningToAvoidOverlaps();
+
+        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        flow2.adjustEndShorteningToAvoidOverlaps(model);
+        endShorteningToAvoidOverlaps2 = flow2.getEndShorteningToAvoidOverlaps();
+    }
+
+    @Override
+    public void adjustStartShorteningToAvoidOverlaps(Model model) {
+        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        flow1.adjustStartShorteningToAvoidOverlaps(model);
+        startShorteningToAvoidOverlaps = flow1.getStartShorteningToAvoidOverlaps();
+
+        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        flow2.adjustStartShorteningToAvoidOverlaps(model);
+        startShorteningToAvoidOverlaps2 = flow2.getStartShorteningToAvoidOverlaps();
+    }
+
+    @Override
+    public void resetShortenings() {
+        super.resetShortenings();
+        endShorteningToAvoidOverlaps2 = 0;
+        startShorteningToAvoidOverlaps2 = 0;
+    }
+
+    /**
+     * Tests whether this Flow overlaps with an arrow. The arrow is treated as a
+     * triangle consisting of the tip point and the two corner points. The flow
+     * width is taken into account.
+     *
+     * @param arrow arrow to test with
+     * @return true if there is an overlap, false otherwise.
+     */
+    @Override
+    public boolean isOverlappingArrow(Arrow arrow, Model model) {
+        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        if (flow1.isOverlappingArrow(arrow, model)) {
+            return true;
+        }
+
+        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        return flow2.isOverlappingArrow(arrow, model);
+    }
+
+    /**
+     * Tests whether a passed Arrow overlaps with any of the two Arrows of this
+     * Flow.
+     *
+     * The two arrows are treated as triangles consisting of the tip point and
+     * the two corner points.
+     *
+     * @param arrow arrow to test with
+     * @param model the Model with all flows
+     * @return true if there is an overlap, false otherwise.
+     */
+    @Override
+    public boolean isArrowOverlappingArrow(Arrow arrow, Model model) {
+        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        if (flow1.isArrowOverlappingArrow(arrow, model)) {
+            return true;
+        }
+
+        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        return flow2.isArrowOverlappingArrow(arrow, model);
+    }
+
+    @Override
+    public void update(Flow flow) {
+        super.update(flow);
+        FlowPair flowPair = (FlowPair)flow;
+        endShorteningToAvoidOverlaps2 = flowPair.endShorteningToAvoidOverlaps2;
+        startShorteningToAvoidOverlaps2 = flowPair.startShorteningToAvoidOverlaps2;
+    }
 }

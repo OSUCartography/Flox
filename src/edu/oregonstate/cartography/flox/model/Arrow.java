@@ -190,69 +190,6 @@ public final class Arrow {
     }
 
     /**
-     * Tests whether this Arrow overlaps with another Arrow. The two arrows are
-     * treated as triangles consisting of the tip point and the two corner
-     * points.
-     *
-     * @param arrow arrow to test with
-     * @return true if there is an overlap, false otherwise.
-     */
-    public boolean isOverlappingArrow(Arrow arrow) {
-        return GeometryUtils.trianglesOverlap(tipPt.x, tipPt.y,
-                corner1Pt.x, corner1Pt.y,
-                corner2Pt.x, corner2Pt.y,
-                arrow.tipPt.x, arrow.tipPt.y,
-                arrow.corner1Pt.x, arrow.corner1Pt.y,
-                arrow.corner2Pt.x, arrow.corner2Pt.y);
-    }
-
-    /**
-     * Tests whether this Arrow overlaps with a Flow. The arrow is treated as a
-     * triangle consisting of the tip point and the two corner points. The flow
-     * width is taken into account.
-     *
-     * @param flow flow to test with
-     * @param flowWidth width of the flow in world coordinates
-     * @return true if there is an overlap, false otherwise.
-     */
-    public boolean isOverlappingFlow(Flow flow, double flowWidth) {
-        // FIXME add test with bounding boxes?
-
-        // FIXME abuse Bezier-Bezier intersection code. use Bezier-line intersection test instead.
-        Flow cheesyTrickFlow1 = new Flow(tipPt, corner1Pt, 1);
-        Flow cheesyTrickFlow2 = new Flow(tipPt, corner2Pt, 1);
-        Flow cheesyTrickFlow3 = new Flow(corner1Pt, corner2Pt, 1);
-        cheesyTrickFlow1.offsetCtrlPt(1, 1);
-        cheesyTrickFlow2.offsetCtrlPt(1, 1);
-        cheesyTrickFlow3.offsetCtrlPt(1, 1);
-
-        // test whether the flow intersects the triangle formed by the arrow
-        Point[] intersections = cheesyTrickFlow1.intersections(flow);
-        if (intersections != null && intersections.length > 0) {
-            return true;
-        }
-        intersections = cheesyTrickFlow2.intersections(flow);
-        if (intersections != null && intersections.length > 0) {
-            return true;
-        }
-
-        intersections = cheesyTrickFlow3.intersections(flow);
-        if (intersections != null && intersections.length > 0) {
-            return true;
-        }
-
-        // the center line of the flow does not intersect the arrow triangle,
-        // but it may still overlay parts of the arrow. So test whether any 
-        // triangle vertices overlap the flow band.
-        double minDist = flowWidth / 2d;
-        double minDistSqr = minDist * minDist;
-        // FIXME distanceSq should exclude start and end points
-        return flow.distanceSq(tipPt.x, tipPt.y, TOL) < minDistSqr
-                || flow.distanceSq(corner1Pt.x, corner1Pt.y, TOL) < minDistSqr
-                || flow.distanceSq(corner2Pt.x, corner2Pt.y, TOL) < minDistSqr;
-    }
-
-    /**
      * Returns the arrow length.
      *
      * @return the length

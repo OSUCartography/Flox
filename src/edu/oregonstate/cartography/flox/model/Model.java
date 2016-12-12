@@ -661,18 +661,14 @@ public class Model {
 
     /**
      * Change control point location of a flow.
-     *
-     * @param id identifier of the flow in the graph
-     * @param x horizontal coordinate of control point
-     * @param y vertical coordinate of control point
      */
-    public void replaceControlPoint(long id, double x, double y) {
+    public void updateFlow(Flow flow) {
         // FIXME inefficient iteration, should use hash map
         Iterator<Flow> iter = graph.flowIterator();
         while (iter.hasNext()) {
-            Flow flow = iter.next();
-            if (flow.id == id) {
-                flow.setCtrlPt(x, y);
+            Flow destinationFlow = iter.next();
+            if (destinationFlow.id == flow.id) {
+                destinationFlow.update(flow);               
                 break;
             }
         }
@@ -1246,7 +1242,8 @@ public class Model {
 
     /**
      * An iterator for all flows sorted by the length of the base line, that is,
-     * the line connecting start node and end node.
+     * the line connecting start node and end node. FlowPairs are not converted
+     * to individual Flows.
      *
      * @param increasing if true flows are sorted by increasing base line
      * length.
@@ -2466,7 +2463,7 @@ public class Model {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow2 = iterator.next();
-            if (flow2 == flow) {
+            if (flow2.id == flow.id) {
                 continue;
             }
 
@@ -2479,16 +2476,17 @@ public class Model {
 
             // test for flow-flow overlaps
             double flowWidthPx = getFlowWidthPx(flow2);
-            double flowWidth = flowWidthPx / referenceMapScale;
             double minDistPx = minObstacleDistPx + (thisWidthPx + flowWidthPx) / 2;
             double minDist = minDistPx / referenceMapScale;
+            
+            // FIXME for FlowPair
             if (slice.isClose(flow2Clipped, minDist, nbrSamplings)) {
                 return true;
             }
 
             // test for flow-arrowhead overlaps
             Arrow arrow = flow2.getArrow(this);
-            if (arrow.isOverlappingFlow(slice, flowWidth)) {
+            if (slice.isOverlappingArrow(arrow, this)) {
                 return true;
             }
         }
@@ -2761,13 +2759,12 @@ public class Model {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (arrow.getFlow() == flow) {
+            if (arrow.getFlow().id == flow.id) {
                 continue;
             }
 
             flow = clipFlow(flow, true, true, true);
-            double flowWidth = getFlowWidthPx(flow) / getReferenceMapScale();
-            if (arrow.isOverlappingFlow(flow, flowWidth)) {
+            if (flow.isOverlappingArrow(arrow, this)) {
                 return true;
             }
         }
@@ -2778,10 +2775,11 @@ public class Model {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (flowWithArrow == flow) {
+            if (flowWithArrow.id == flow.id) {
                 continue;
             }
-            if (arrow.isOverlappingArrow(flow.getArrow(this))) {
+            
+            if (flow.isArrowOverlappingArrow(arrow, this)) {
                 return true;
             }
         }
@@ -2843,12 +2841,15 @@ public class Model {
         this.maxShorteningPx = maxShorteningPx;
     }
 
+    /**
+     * Shorten all flows to reduce overlaps with other flows and arrowheads.
+     */
     public void shortenFlowsToReduceOverlaps() {
+
+        // reset shortening values
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            flow.setEndShorteningToAvoidOverlaps(0);
-            flow.setStartShorteningToAvoidOverlaps(0);
+            iterator.next().resetShortenings();
         }
 
         // flows are sorted by the length of their base lines.
@@ -2859,6 +2860,7 @@ public class Model {
                 Flow flow = iterator.next();
                 flow.adjustEndShorteningToAvoidOverlaps(this);
                 flow.adjustStartShorteningToAvoidOverlaps(this);
+                System.out.println();
             }
         }
     }

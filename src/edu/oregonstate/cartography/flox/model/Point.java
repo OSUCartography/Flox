@@ -112,9 +112,7 @@ public final class Point {
     public void transform(double dx, double dy, double sin, double cos) {
         assert (Double.isFinite(dx));
         assert (Double.isFinite(dy));
-        assert (sin <= 1 && sin >= -1);
-        assert (cos <= 1 && cos >= -1);
-
+        
         double newX = x * cos - y * sin + dx;
         y = x * sin + y * cos + dy;
         x = newX;

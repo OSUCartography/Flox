@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKTWriter;
+import static edu.oregonstate.cartography.flox.model.Circle.TOL;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import edu.oregonstate.cartography.utils.JTSUtils;
 import java.awt.geom.GeneralPath;
@@ -80,13 +81,13 @@ public class Flow implements Comparable<Flow> {
      * shorten end of flow by this distance (a radius around the end node) to
      * reduce overlaps with other flows and arrowheads
      */
-    private double endShorteningToAvoidOverlaps = 0;
+    protected double endShorteningToAvoidOverlaps = 0;
 
     /**
      * shorten start of flow by this distance (a radius around the start node)
      * to reduce overlaps with other flows and arrowheads
      */
-    private double startShorteningToAvoidOverlaps = 0;
+    protected double startShorteningToAvoidOverlaps = 0;
 
     /**
      * clip area for the start of the flow.
@@ -134,15 +135,16 @@ public class Flow implements Comparable<Flow> {
     private Flow cachedClippedCurveIncludingArrow;
 
     /**
-     * Construct a Flow from 3 points.
+     * Construct a Flow from 3 points. Uses the passed id.
      *
      * @param startPt start point
      * @param ctrlX control point x
      * @param ctrlY control point y
      * @param endPt end point
      * @param value flow value
+     * @param id id of the new Flow
      */
-    public Flow(Point startPt, double ctrlX, double ctrlY, Point endPt, double value) {
+    public Flow(Point startPt, double ctrlX, double ctrlY, Point endPt, double value, long id) {
         assert (startPt != null);
         assert (endPt != null);
         assert (Double.isFinite(value));
@@ -156,7 +158,20 @@ public class Flow implements Comparable<Flow> {
         this.cPtY = ctrlY;
         this.endPt = endPt;
         this.value = value;
-        this.id = createID();
+        this.id = id;
+    }
+
+    /**
+     * Construct a Flow from 3 points.
+     *
+     * @param startPt start point
+     * @param ctrlX control point x
+     * @param ctrlY control point y
+     * @param endPt end point
+     * @param value flow value
+     */
+    public Flow(Point startPt, double ctrlX, double ctrlY, Point endPt, double value) {
+        this(startPt, ctrlX, ctrlY, endPt, value, createID());
     }
 
     /**
@@ -180,8 +195,8 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Copy constructor. Creates deep copies of points. Creates shallow copies
-     * of clip areas.
+     * Copy constructor. The new Flow has the same id as the passed Flow.
+     * Creates deep copies of points. Creates shallow copies of clip areas.
      *
      * @param flow Flow to copy
      */
@@ -189,15 +204,19 @@ public class Flow implements Comparable<Flow> {
         this(new Point(flow.startPt),
                 flow.cPtX, flow.cPtY,
                 new Point(flow.endPt),
-                flow.value);
+                flow.value,
+                flow.id);
         shallowCopyClipAreas(flow, this);
         selected = flow.selected;
         locked = flow.locked;
+        endShorteningToAvoidOverlaps = flow.getEndShorteningToAvoidOverlaps();
+        startShorteningToAvoidOverlaps = flow.getStartShorteningToAvoidOverlaps();
     }
 
     /**
-     * Returns a copy of this Flow. The id of the new flow is unique. Creates
-     * deep copies of points. Creates shallow copies of clip areas.
+     * Returns a copy of this Flow. The id of the new Flow is identical to the
+     * id of this Flow. Creates deep copies of points. Creates shallow copies of
+     * clip areas.
      *
      * @return a copy
      */
@@ -592,6 +611,12 @@ public class Flow implements Comparable<Flow> {
         double tempR = approximateStartAreaClipRadius;
         approximateStartAreaClipRadius = approximateEndAreaClipRadius;
         approximateEndAreaClipRadius = tempR;
+
+        // swap shortening values
+        // these values should be recomputed
+        double temp = endShorteningToAvoidOverlaps;
+        startShorteningToAvoidOverlaps = endShorteningToAvoidOverlaps;
+        endShorteningToAvoidOverlaps = temp;
     }
 
     /**
@@ -2170,18 +2195,86 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
+     * Tests whether this Flow overlaps with an arrow. The arrow is treated as a
+     * triangle consisting of the tip point and the two corner points. The flow
+     * width is taken into account.
+     *
+     * @param arrow arrow to test with
+     * @param model model
+     * @return true if there is an overlap, false otherwise.
+     */
+    public boolean isOverlappingArrow(Arrow arrow, Model model) {
+        // FIXME add test with bounding boxes?
+
+        // FIXME abuse Bezier-Bezier intersection code. use Bezier-line intersection test instead.
+        Flow cheesyTrickFlow1 = new Flow(arrow.getTipPt(), arrow.getCorner1Pt(), 1);
+        Flow cheesyTrickFlow2 = new Flow(arrow.getTipPt(), arrow.getCorner2Pt(), 1);
+        Flow cheesyTrickFlow3 = new Flow(arrow.getCorner1Pt(), arrow.getCorner2Pt(), 1);
+        cheesyTrickFlow1.offsetCtrlPt(1, 1);
+        cheesyTrickFlow2.offsetCtrlPt(1, 1);
+        cheesyTrickFlow3.offsetCtrlPt(1, 1);
+
+        // test whether the flow intersects the triangle formed by the arrow
+        Point[] intersections = cheesyTrickFlow1.intersections(this);
+        if (intersections != null && intersections.length > 0) {
+            return true;
+        }
+        intersections = cheesyTrickFlow2.intersections(this);
+        if (intersections != null && intersections.length > 0) {
+            return true;
+        }
+
+        intersections = cheesyTrickFlow3.intersections(this);
+        if (intersections != null && intersections.length > 0) {
+            return true;
+        }
+
+        // the center line of the flow does not intersect the arrow triangle,
+        // but it may still overlay parts of the arrow. So test whether any 
+        // triangle vertices overlap the flow band.
+        double flowWidthPx = model.getFlowWidthPx(this);
+        double flowWidth = flowWidthPx / model.getReferenceMapScale();
+        double minDist = flowWidth / 2d;
+        double minDistSqr = minDist * minDist;
+        // FIXME distanceSq should exclude start and end points
+        return distanceSq(arrow.getTipPt().x, arrow.getTipPt().y, TOL) < minDistSqr
+                || distanceSq(arrow.getCorner1Pt().x, arrow.getCorner1Pt().y, TOL) < minDistSqr
+                || distanceSq(arrow.getCorner2Pt().x, arrow.getCorner2Pt().y, TOL) < minDistSqr;
+    }
+
+    /**
+     * Tests whether a passed Arrow overlaps with the Arrow of this Flow.
+     *
+     * The two arrows are treated as triangles consisting of the tip point and
+     * the two corner points.
+     *
+     * @param arrow arrow to test with
+     * @param model the Model with all flows
+     * @return true if there is an overlap, false otherwise.
+     */
+    public boolean isArrowOverlappingArrow(Arrow arrow, Model model) {
+        Point tipPt1 = arrow.getTipPt();
+        Point corner1Pt1 = arrow.getCorner1Pt();
+        Point corner2Pt1 = arrow.getCorner2Pt();
+
+        Arrow thisArrow = getArrow(model);
+        Point tipPt2 = thisArrow.getTipPt();
+        Point corner1Pt2 = thisArrow.getCorner1Pt();
+        Point corner2Pt2 = thisArrow.getCorner2Pt();
+
+        return GeometryUtils.trianglesOverlap(tipPt1.x, tipPt1.y,
+                corner1Pt1.x, corner1Pt1.y,
+                corner2Pt1.x, corner2Pt1.y,
+                tipPt2.x, tipPt2.y,
+                corner1Pt2.x, corner1Pt2.y,
+                corner2Pt2.x, corner2Pt2.y);
+    }
+
+    /**
      * @return the endShorteningToAvoidOverlaps
      */
     public double getEndShorteningToAvoidOverlaps() {
         return endShorteningToAvoidOverlaps;
-    }
-
-    /**
-     * @param endShorteningToAvoidOverlaps the endShorteningToAvoidOverlaps to
-     * set
-     */
-    public void setEndShorteningToAvoidOverlaps(double endShorteningToAvoidOverlaps) {
-        this.endShorteningToAvoidOverlaps = endShorteningToAvoidOverlaps;
     }
 
     /**
@@ -2191,11 +2284,14 @@ public class Flow implements Comparable<Flow> {
         return startShorteningToAvoidOverlaps;
     }
 
-    /**
-     * @param startShorteningToAvoidOverlaps the startShorteningToAvoidOverlaps
-     * to set
-     */
-    public void setStartShorteningToAvoidOverlaps(double startShorteningToAvoidOverlaps) {
-        this.startShorteningToAvoidOverlaps = startShorteningToAvoidOverlaps;
+    public void resetShortenings() {
+        endShorteningToAvoidOverlaps = 0;
+        startShorteningToAvoidOverlaps = 0;
+    }
+    
+    public void update(Flow flow) {
+        setCtrlPt(flow.cPtX(), flow.cPtY());
+        endShorteningToAvoidOverlaps = flow.endShorteningToAvoidOverlaps;
+        startShorteningToAvoidOverlaps = flow.startShorteningToAvoidOverlaps;
     }
 }

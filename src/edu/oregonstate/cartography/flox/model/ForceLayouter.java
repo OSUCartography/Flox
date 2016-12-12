@@ -80,8 +80,7 @@ public class ForceLayouter {
     public void applyChangesToModel(Model destinationModel) {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            destinationModel.replaceControlPoint(flow.id, flow.cPtX(), flow.cPtY());
+            destinationModel.updateFlow(iterator.next());
         }
     }
 
