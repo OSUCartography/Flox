@@ -4012,7 +4012,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void straightenFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_straightenFlowsMenuItemActionPerformed
         model.straightenFlows(true);
         model.setLockOfSelectedFlows(true);
-        addUndo("Straighten and Lock Flows");
+        layout("Straighten and Lock Flows"); // Cancel and restart layout computation thay may be currently running. 
         mapComponent.refreshMap();
     }//GEN-LAST:event_straightenFlowsMenuItemActionPerformed
 
@@ -4024,14 +4024,14 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void unlockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlockMenuItemActionPerformed
         model.setLockOfSelectedFlows(false);
-        mapComponent.layout("Unlock");
+        layout("Unlock");
         lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif")));
         mapComponent.refreshMap();
     }//GEN-LAST:event_unlockMenuItemActionPerformed
 
     private void lockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockMenuItemActionPerformed
         model.setLockOfSelectedFlows(true);
-        addUndo("Lock");
+        layout("Lock"); // Cancel and restart layout computation thay may be currently running. 
         lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Locked16x16.gif")));
         mapComponent.refreshMap();
     }//GEN-LAST:event_lockMenuItemActionPerformed
