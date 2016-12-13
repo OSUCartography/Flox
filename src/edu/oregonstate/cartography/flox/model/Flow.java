@@ -2195,6 +2195,84 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
+     * Test whether a line segment intersects with this flow line.
+     *
+     * Based on code by Kevin Lindsey,
+     * http://www.kevlindev.com/geometry/2D/intersections/index.htm
+     * https://github.com/thelonious/js-intersections
+     *
+     * @param a1 start point of line segment
+     * @param a2 end point of line segment
+     * @return true if the line segment intersects this flow, false otherwise.
+     */
+    public boolean isIntersectingLineSegment(Point a1, Point a2) {
+        // used to determine if point is on line segment
+        double minX = Math.min(a1.x, a2.x);
+        double minY = Math.min(a1.y, a2.y);
+        double maxX = Math.max(a1.x, a2.x);
+        double maxY = Math.max(a1.y, a2.y);
+
+        // coefficients of quadratic
+        double c2x = startPt.x - 2d * cPtX + endPt.x;
+        double c2y = startPt.y - 2d * cPtY + endPt.y;
+        double c1x = 2d * (cPtX - startPt.x);
+        double c1y = 2d * (cPtY - startPt.y);
+        double c0x = startPt.x;
+        double c0y = startPt.y;
+
+        // Convert line to normal form: ax + by + c = 0
+        // Find normal to line: negative inverse of original line's slope
+        double nx = a1.y - a2.y;
+        double ny = a2.x - a1.x;
+
+        // Determine new c coefficient fr normal form of line
+        double cl = a1.x * a2.y - a2.x * a1.y;
+
+        // Transform cubic coefficients to line's coordinate system and find roots
+        // of cubic
+        double[] roots = new Polynomial(nx * c2x + ny * c2y,
+                nx * c1x + ny * c1y,
+                nx * c0x + ny * c0y + cl).getRoots();
+
+        // Any roots in closed interval [0,1] are intersections on Bezier, but
+        // might not be on the line segment.
+        // Find intersections and calculate point coordinates
+        for (int i = 0; i < roots.length; i++) {
+            double t = roots[i];
+            if (0 <= t && t <= 1) {
+                // We're within the Bezier curve
+                // Find point on Bezier
+                double p4x = startPt.x + (cPtX - startPt.x) * t;
+                double p4y = startPt.y + (cPtY - startPt.y) * t;
+                double p5x = cPtX + (endPt.x - cPtX) * t;
+                double p5y = cPtY + (endPt.y - cPtY) * t;
+                double p6x = p4x + (p5x - p4x) * t;
+                double p6y = p4y + (p5y - p4y) * t;
+
+                // See if point is on line segment
+                // Had to make special cases for vertical and horizontal lines due
+                // to slight errors in calculation of p6
+                if (p6x >= minX && p6y >= minY && p6x <= maxX && p6y <= maxY) {
+                    // p6 is intersection point
+                    return true;
+                } else if (a1.x == a2.x) {
+                    if (minY <= p6y && p6y <= maxY) {
+                        // p6 is intersection point
+                        return true;
+                    }
+                } else if (a1.y == a2.y) {
+                    if (minX <= p6x && p6x <= maxX) {
+                        // p6 is intersection point
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Tests whether this Flow overlaps with an arrow. The arrow is treated as a
      * triangle consisting of the tip point and the two corner points. The flow
      * width is taken into account.
@@ -2206,29 +2284,13 @@ public class Flow implements Comparable<Flow> {
     public boolean isOverlappingArrow(Arrow arrow, Model model) {
         // FIXME add test with bounding boxes?
 
-        // FIXME abuse Bezier-Bezier intersection code. use Bezier-line intersection test instead.
-        Flow cheesyTrickFlow1 = new Flow(arrow.getTipPt(), arrow.getCorner1Pt(), 1);
-        Flow cheesyTrickFlow2 = new Flow(arrow.getTipPt(), arrow.getCorner2Pt(), 1);
-        Flow cheesyTrickFlow3 = new Flow(arrow.getCorner1Pt(), arrow.getCorner2Pt(), 1);
-        cheesyTrickFlow1.offsetCtrlPt(1, 1);
-        cheesyTrickFlow2.offsetCtrlPt(1, 1);
-        cheesyTrickFlow3.offsetCtrlPt(1, 1);
-
-        // test whether the flow intersects the triangle formed by the arrow
-        Point[] intersections = cheesyTrickFlow1.intersections(this);
-        if (intersections != null && intersections.length > 0) {
+        // test whether the flow intersects the triangle formed by the arrow corners
+        if (isIntersectingLineSegment(arrow.getTipPt(), arrow.getCorner1Pt())
+                || isIntersectingLineSegment(arrow.getTipPt(), arrow.getCorner2Pt())
+                || isIntersectingLineSegment(arrow.getCorner1Pt(), arrow.getCorner2Pt())) {
             return true;
         }
-        intersections = cheesyTrickFlow2.intersections(this);
-        if (intersections != null && intersections.length > 0) {
-            return true;
-        }
-
-        intersections = cheesyTrickFlow3.intersections(this);
-        if (intersections != null && intersections.length > 0) {
-            return true;
-        }
-
+        
         // the center line of the flow does not intersect the arrow triangle,
         // but it may still overlay parts of the arrow. So test whether any 
         // triangle vertices overlap the flow band.
@@ -2288,7 +2350,7 @@ public class Flow implements Comparable<Flow> {
         endShorteningToAvoidOverlaps = 0;
         startShorteningToAvoidOverlaps = 0;
     }
-    
+
     public void update(Flow flow) {
         setCtrlPt(flow.cPtX(), flow.cPtY());
         endShorteningToAvoidOverlaps = flow.endShorteningToAvoidOverlaps;
