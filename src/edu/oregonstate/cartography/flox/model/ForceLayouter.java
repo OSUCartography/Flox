@@ -920,13 +920,14 @@ public class ForceLayouter {
     }
 
     /**
-     * Moves the control point location such that the flow does not overlap any
-     * obstacle. The control point is changed. First tests control point
-     * locations placed along an Archimedean spiral centered on the current
-     * control point location. Then searches a suitable position inside the
-     * range box.
+     * Moves the control point location of one flow such that the flow does not
+     * overlap any obstacle. The control point of the passed flow is changed.
      *
-     * @param flow flow to change. Nothing is changed if the flow is locked.
+     * First tests control point locations placed along an Archimedean spiral
+     * centered on the current control point location. Then searches a suitable
+     * position inside the range box.
+     *
+     * @param flow flow to change
      * @param obstacles obstacles to avoid
      */
     private void moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
@@ -1143,7 +1144,7 @@ public class ForceLayouter {
         double referenceMapScale = model.getReferenceMapScale();
 
         Rectangle2D.Double boundingBox1 = flow1.getBoundingBox();
-        
+
         double maxTouchPercentage = 0;
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
@@ -1163,7 +1164,7 @@ public class ForceLayouter {
             flow2 = model.clipFlowForComputations(flow2);
 
             // test with distance between bounding boxes
-            Rectangle2D.Double boundingBox2 = flow2.getBoundingBox();           
+            Rectangle2D.Double boundingBox2 = flow2.getBoundingBox();
             double bbDistSqr = GeometryUtils.rectDistSq(boundingBox1, boundingBox2);
             if (bbDistSqr < minDist * minDist) {
                 int nbrPointsToTest = 10; // FIXME                
@@ -1197,21 +1198,7 @@ public class ForceLayouter {
             if (isCancelled()) {
                 return 0;
             }
-        }/*
-        for (Flow flow : flows) {
-            if (!flow.isLocked()) {
-                moveFlowAwayFromObstacles(flow, obstacles);
-                // lock the flow no matter whether it was moved or not
-                flow.setLocked(true);
-                if (++nbrMovedFlows == nbrFlowsToMove) {
-                    break;
-                }
-            }
-
-            if (isCancelled()) {
-                return 0;
-            }
-        }*/
+        }
 
         // return initial number of flows overlapping obstacles
         return flows.size() - nbrMovedFlows;

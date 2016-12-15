@@ -124,18 +124,13 @@ public class MainWindow extends javax.swing.JFrame {
         arrowToggleButton.doClick();
     }
 
-    public void openComputationPalette() {
-        computationPalette.pack();
-
-        // position palette in top-right corner of the MapComponent.
-        Dimension dlgDim = computationPalette.getPreferredSize();
-        java.awt.Point mapTopLeft = mapComponent.getLocationOnScreen();
-        int x = mapTopLeft.x + mapComponent.getWidth() - (int) dlgDim.getWidth() - 5;
-        int y = mapTopLeft.y + +5;
-        computationPalette.setLocation(x, y);
-        computationPalette.setVisible(true);
-
-        this.requestFocus();
+    public void openComputationPalette() {       
+        JOptionPane.showMessageDialog(
+                this,
+                computationSettingsPanel,
+                "Computation Settings",
+                JOptionPane.PLAIN_MESSAGE,
+                null);
     }
 
     /**
@@ -533,15 +528,11 @@ public class MainWindow extends javax.swing.JFrame {
         selectFlowsFileButton = new javax.swing.JButton();
         importPanelOKButton = new javax.swing.JButton();
         importPanelCancelButton = new javax.swing.JButton();
-        computationPalette = new JDialog(this);
-        javax.swing.JPanel jPanel1 = new javax.swing.JPanel();
+        computationSettingsPanel = new javax.swing.JPanel();
         jLabel37 = new javax.swing.JLabel();
         accuracyComboBox = new javax.swing.JComboBox<>();
-        showLineSegmentsToggleButton = new javax.swing.JToggleButton();
         iterationsSpinner = new javax.swing.JSpinner();
         jLabel38 = new javax.swing.JLabel();
-        javax.swing.JPanel progressBarPanel = new javax.swing.JPanel();
-        progressBar = new javax.swing.JProgressBar();
         debugDialog = new JDialog(this);
         javax.swing.JPanel jPanel5 = new javax.swing.JPanel();
         exponentSlider = new javax.swing.JSlider();
@@ -560,8 +551,14 @@ public class MainWindow extends javax.swing.JFrame {
         selectValueFormattedTextField = new javax.swing.JFormattedTextField();
         selectButton = new javax.swing.JButton();
         selectInfoLabel = new javax.swing.JLabel();
+        unusedCoordinatesPanel = new javax.swing.JPanel();
+        jLabel12 = new javax.swing.JLabel();
+        xFormattedTextField = new javax.swing.JFormattedTextField();
+        jLabel25 = new javax.swing.JLabel();
+        yFormattedTextField = new javax.swing.JFormattedTextField();
+        mapContentPanel = new javax.swing.JPanel();
         javax.swing.JToolBar jToolBar1 = new javax.swing.JToolBar();
-        jPanel2 = new javax.swing.JPanel();
+        javax.swing.JPanel toolBarContentPanel = new javax.swing.JPanel();
         arrowToggleButton = new javax.swing.JToggleButton();
         addFlowToggleButton = new javax.swing.JToggleButton();
         zoomInToggleButton = new javax.swing.JToggleButton();
@@ -570,13 +567,11 @@ public class MainWindow extends javax.swing.JFrame {
         distanceToggleButton = new javax.swing.JToggleButton();
         lockUnlockButton = new javax.swing.JButton();
         showAllButton = new javax.swing.JButton();
-        coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
+        computationSettingsButton = new javax.swing.JButton();
+        progressBar = new javax.swing.JProgressBar();
         vallueLabel = new javax.swing.JLabel();
         valueFormattedTextField = new javax.swing.JFormattedTextField();
-        jLabel12 = new javax.swing.JLabel();
-        xFormattedTextField = new javax.swing.JFormattedTextField();
-        jLabel25 = new javax.swing.JLabel();
-        yFormattedTextField = new javax.swing.JFormattedTextField();
+        coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
         mapComponent = new edu.oregonstate.cartography.flox.gui.FloxMapComponent();
         javax.swing.JPanel rightPanel = new javax.swing.JPanel();
         controlsTabbedPane = new javax.swing.JTabbedPane();
@@ -744,6 +739,7 @@ public class MainWindow extends javax.swing.JFrame {
         removeAllLayersMenuItem = new javax.swing.JMenuItem();
         removeSelectedLayerMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator19 = new javax.swing.JPopupMenu.Separator();
+        computationSettingsMenuItem = new javax.swing.JMenuItem();
         referenceMapScaleMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator16 = new javax.swing.JPopupMenu.Separator();
         nameMenuItem = new javax.swing.JMenuItem();
@@ -757,8 +753,6 @@ public class MainWindow extends javax.swing.JFrame {
         viewZoomOutMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator20 = new javax.swing.JPopupMenu.Separator();
         showLockStateCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        javax.swing.JPopupMenu.Separator jSeparator15 = new javax.swing.JPopupMenu.Separator();
-        showComputationSettingsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator34 = new javax.swing.JPopupMenu.Separator();
         showDebugCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         infoMenu = new javax.swing.JMenu();
@@ -783,6 +777,7 @@ public class MainWindow extends javax.swing.JFrame {
         printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator17 = new javax.swing.JPopupMenu.Separator();
         inlineArrowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        showLineSegmentsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator21 = new javax.swing.JPopupMenu.Separator();
         constrainControlPointsToRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -869,12 +864,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
 
-        computationPalette.setTitle("Computation");
-        computationPalette.setResizable(false);
-        computationPalette.setType(java.awt.Window.Type.UTILITY);
-        computationPalette.getContentPane().setLayout(new java.awt.GridBagLayout());
-
-        jPanel1.setLayout(new java.awt.GridBagLayout());
+        computationSettingsPanel.setLayout(new java.awt.GridBagLayout());
 
         jLabel37.setText("Accuracy");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -882,7 +872,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-        jPanel1.add(jLabel37, gridBagConstraints);
+        computationSettingsPanel.add(jLabel37, gridBagConstraints);
 
         accuracyComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Low (Fast)", "Medium", "High (Slow)" }));
         accuracyComboBox.setSelectedIndex(1);
@@ -896,23 +886,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        jPanel1.add(accuracyComboBox, gridBagConstraints);
-
-        showLineSegmentsToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ClosedEyeball16x16 copy.gif"))); // NOI18N
-        showLineSegmentsToggleButton.setBorderPainted(false);
-        showLineSegmentsToggleButton.setPreferredSize(new java.awt.Dimension(20, 20));
-        showLineSegmentsToggleButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Eyeball16x16.gif"))); // NOI18N
-        showLineSegmentsToggleButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showLineSegmentsToggleButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
-        jPanel1.add(showLineSegmentsToggleButton, gridBagConstraints);
+        computationSettingsPanel.add(accuracyComboBox, gridBagConstraints);
 
         iterationsSpinner.setModel(new javax.swing.SpinnerNumberModel(100, 5, 500, 10));
         iterationsSpinner.setPreferredSize(new java.awt.Dimension(70, 28));
@@ -925,7 +899,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        jPanel1.add(iterationsSpinner, gridBagConstraints);
+        computationSettingsPanel.add(iterationsSpinner, gridBagConstraints);
 
         jLabel38.setText("Iterations");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -933,30 +907,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
-        jPanel1.add(jLabel38, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-        computationPalette.getContentPane().add(jPanel1, gridBagConstraints);
-
-        progressBarPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 5, 10));
-        progressBarPanel.setLayout(new java.awt.GridBagLayout());
-
-        progressBar.setEnabled(false);
-        progressBar.setPreferredSize(new java.awt.Dimension(220, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.insets = new java.awt.Insets(4, 0, 4, 0);
-        progressBarPanel.add(progressBar, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
-        computationPalette.getContentPane().add(progressBarPanel, gridBagConstraints);
+        computationSettingsPanel.add(jLabel38, gridBagConstraints);
 
         debugDialog.setTitle("Debug Options");
         debugDialog.setType(java.awt.Window.Type.UTILITY);
@@ -1106,8 +1057,39 @@ public class MainWindow extends javax.swing.JFrame {
 
         selectionDialog.getContentPane().add(selectionPanel);
 
+        jLabel12.setText("X:");
+        unusedCoordinatesPanel.add(jLabel12);
+
+        xFormattedTextField.setToolTipText("Node X Position");
+        xFormattedTextField.setEnabled(false);
+        xFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
+        xFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        xFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                xyFormattedTextFieldPropertyChanged(evt);
+            }
+        });
+        unusedCoordinatesPanel.add(xFormattedTextField);
+
+        jLabel25.setText("Y:");
+        unusedCoordinatesPanel.add(jLabel25);
+
+        yFormattedTextField.setToolTipText("Node Y Position");
+        yFormattedTextField.setEnabled(false);
+        yFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
+        yFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
+        yFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                xyFormattedTextFieldPropertyChanged(evt);
+            }
+        });
+        unusedCoordinatesPanel.add(yFormattedTextField);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
+        mapContentPanel.setLayout(new java.awt.BorderLayout());
+
+        jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
 
         mapToolsButtonGroup.add(arrowToggleButton);
@@ -1122,7 +1104,7 @@ public class MainWindow extends javax.swing.JFrame {
                 arrowToggleButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(arrowToggleButton);
+        toolBarContentPanel.add(arrowToggleButton);
 
         mapToolsButtonGroup.add(addFlowToggleButton);
         addFlowToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/SetPoint16x16.gif"))); // NOI18N
@@ -1133,7 +1115,7 @@ public class MainWindow extends javax.swing.JFrame {
                 addFlowToggleButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(addFlowToggleButton);
+        toolBarContentPanel.add(addFlowToggleButton);
 
         mapToolsButtonGroup.add(zoomInToggleButton);
         zoomInToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ZoomIn16x16.gif"))); // NOI18N
@@ -1147,7 +1129,7 @@ public class MainWindow extends javax.swing.JFrame {
                 zoomInToggleButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(zoomInToggleButton);
+        toolBarContentPanel.add(zoomInToggleButton);
 
         mapToolsButtonGroup.add(zoomOutToggleButton);
         zoomOutToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ZoomOut16x16.gif"))); // NOI18N
@@ -1161,7 +1143,7 @@ public class MainWindow extends javax.swing.JFrame {
                 zoomOutToggleButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(zoomOutToggleButton);
+        toolBarContentPanel.add(zoomOutToggleButton);
 
         mapToolsButtonGroup.add(handToggleButton);
         handToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Hand16x16.gif"))); // NOI18N
@@ -1175,7 +1157,7 @@ public class MainWindow extends javax.swing.JFrame {
                 handToggleButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(handToggleButton);
+        toolBarContentPanel.add(handToggleButton);
 
         mapToolsButtonGroup.add(distanceToggleButton);
         distanceToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Ruler16x16.gif"))); // NOI18N
@@ -1189,21 +1171,20 @@ public class MainWindow extends javax.swing.JFrame {
                 distanceToggleButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(distanceToggleButton);
+        toolBarContentPanel.add(distanceToggleButton);
 
         lockUnlockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Unlocked16x16.gif"))); // NOI18N
         lockUnlockButton.setToolTipText("Lock/Unlock Flows");
-        lockUnlockButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        lockUnlockButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 30, 0, 30));
         lockUnlockButton.setBorderPainted(false);
         lockUnlockButton.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/LockDisabled16x16.gif"))); // NOI18N
         lockUnlockButton.setEnabled(false);
-        lockUnlockButton.setPreferredSize(new java.awt.Dimension(24, 24));
         lockUnlockButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lockUnlockButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(lockUnlockButton);
+        toolBarContentPanel.add(lockUnlockButton);
 
         showAllButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/ShowAll20x14.png"))); // NOI18N
         showAllButton.setToolTipText("Show All");
@@ -1218,15 +1199,26 @@ public class MainWindow extends javax.swing.JFrame {
                 showAllButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(showAllButton);
+        toolBarContentPanel.add(showAllButton);
 
-        coordinateInfoPanel.setToolTipText("Cursor Coordinates and Measured Distance and Angle");
-        jPanel2.add(coordinateInfoPanel);
+        computationSettingsButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Action2.png"))); // NOI18N
+        computationSettingsButton.setToolTipText("Computation Settings");
+        computationSettingsButton.setBorderPainted(false);
+        computationSettingsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                computationSettingsButtonActionPerformed(evt);
+            }
+        });
+        toolBarContentPanel.add(computationSettingsButton);
+
+        progressBar.setToolTipText("Layout Progress");
+        progressBar.setEnabled(false);
+        toolBarContentPanel.add(progressBar);
 
         vallueLabel.setFont(vallueLabel.getFont().deriveFont(vallueLabel.getFont().getSize()-2f));
         vallueLabel.setText("Value:");
-        vallueLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 20, 0, 0));
-        jPanel2.add(vallueLabel);
+        vallueLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        toolBarContentPanel.add(vallueLabel);
 
         valueFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.######"))));
         valueFormattedTextField.setToolTipText("Flow or Node Value");
@@ -1238,40 +1230,17 @@ public class MainWindow extends javax.swing.JFrame {
                 valueFormattedTextFieldPropertyChange(evt);
             }
         });
-        jPanel2.add(valueFormattedTextField);
+        toolBarContentPanel.add(valueFormattedTextField);
 
-        jLabel12.setText("X:");
-        jPanel2.add(jLabel12);
+        coordinateInfoPanel.setToolTipText("Cursor Coordinates and Measured Distance and Angle");
+        toolBarContentPanel.add(coordinateInfoPanel);
 
-        xFormattedTextField.setToolTipText("Node X Position");
-        xFormattedTextField.setEnabled(false);
-        xFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
-        xFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
-        xFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                xyFormattedTextFieldPropertyChanged(evt);
-            }
-        });
-        jPanel2.add(xFormattedTextField);
+        jToolBar1.add(toolBarContentPanel);
 
-        jLabel25.setText("Y:");
-        jPanel2.add(jLabel25);
+        mapContentPanel.add(jToolBar1, java.awt.BorderLayout.NORTH);
+        mapContentPanel.add(mapComponent, java.awt.BorderLayout.CENTER);
 
-        yFormattedTextField.setToolTipText("Node Y Position");
-        yFormattedTextField.setEnabled(false);
-        yFormattedTextField.setFont(new java.awt.Font("Lucida Grande", 0, 11)); // NOI18N
-        yFormattedTextField.setPreferredSize(new java.awt.Dimension(100, 28));
-        yFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                xyFormattedTextFieldPropertyChanged(evt);
-            }
-        });
-        jPanel2.add(yFormattedTextField);
-
-        jToolBar1.add(jPanel2);
-
-        getContentPane().add(jToolBar1, java.awt.BorderLayout.NORTH);
-        getContentPane().add(mapComponent, java.awt.BorderLayout.CENTER);
+        getContentPane().add(mapContentPanel, java.awt.BorderLayout.CENTER);
 
         rightPanel.setLayout(new java.awt.BorderLayout());
 
@@ -2852,6 +2821,14 @@ public class MainWindow extends javax.swing.JFrame {
         mapMenu.add(removeSelectedLayerMenuItem);
         mapMenu.add(jSeparator19);
 
+        computationSettingsMenuItem.setText("Computation Settings…");
+        computationSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                computationSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        mapMenu.add(computationSettingsMenuItem);
+
         referenceMapScaleMenuItem.setText("Set Reference Map Scale…");
         referenceMapScaleMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2872,15 +2849,6 @@ public class MainWindow extends javax.swing.JFrame {
         menuBar.add(mapMenu);
 
         viewMenu.setText("View");
-        viewMenu.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                viewMenuMenuSelected(evt);
-            }
-            public void menuDeselected(javax.swing.event.MenuEvent evt) {
-            }
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
-            }
-        });
 
         showAllMenuItem.setText("Show All");
         showAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2944,16 +2912,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         viewMenu.add(showLockStateCheckBoxMenuItem);
-        viewMenu.add(jSeparator15);
-
-        showComputationSettingsCheckBoxMenuItem.setSelected(true);
-        showComputationSettingsCheckBoxMenuItem.setText("Show Computation Palette");
-        showComputationSettingsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showComputationSettingsCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        viewMenu.add(showComputationSettingsCheckBoxMenuItem);
         viewMenu.add(jSeparator34);
 
         showDebugCheckBoxMenuItem.setText("Show Debug Menu");
@@ -3100,6 +3058,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(inlineArrowsCheckBoxMenuItem);
+
+        showLineSegmentsCheckBoxMenuItem.setText("Show Line Segments");
+        showLineSegmentsCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showLineSegmentsCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(showLineSegmentsCheckBoxMenuItem);
         debugMenu.add(jSeparator21);
 
         constrainControlPointsToRangeBoxCheckBoxMenuItem.setText("Constrain Control Points to Range Boxes");
@@ -4244,11 +4210,6 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_selectUnconnectedNodesMenuItemActionPerformed
 
-    private void showLineSegmentsToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showLineSegmentsToggleButtonActionPerformed
-        mapComponent.setDrawLineSegments(showLineSegmentsToggleButton.isSelected());
-        mapComponent.refreshMap();
-    }//GEN-LAST:event_showLineSegmentsToggleButtonActionPerformed
-
     private void accuracyComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_accuracyComboBoxItemStateChanged
 
         if (evt.getStateChange() == ItemEvent.SELECTED) {
@@ -4266,7 +4227,7 @@ public class MainWindow extends javax.swing.JFrame {
                     layout("Medium Accuracy");
                     break;
             }
-            if (showLineSegmentsToggleButton.isSelected()) {
+            if (showLineSegmentsCheckBoxMenuItem.isSelected()) {
                 mapComponent.refreshMap();
             }
         }
@@ -4278,17 +4239,6 @@ public class MainWindow extends javax.swing.JFrame {
         model.setNbrIterations(iterations);
         layout("Number of Iterations");
     }//GEN-LAST:event_iterationsSpinnerStateChanged
-
-    private void showComputationSettingsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showComputationSettingsCheckBoxMenuItemActionPerformed
-        computationPalette.setVisible(showComputationSettingsCheckBoxMenuItem.isSelected());
-        if (showComputationSettingsCheckBoxMenuItem.isSelected()) {
-            openComputationPalette();
-        }
-    }//GEN-LAST:event_showComputationSettingsCheckBoxMenuItemActionPerformed
-
-    private void viewMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_viewMenuMenuSelected
-        showComputationSettingsCheckBoxMenuItem.setSelected(computationPalette.isVisible());
-    }//GEN-LAST:event_viewMenuMenuSelected
 
     private void showDebugCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showDebugCheckBoxMenuItemActionPerformed
         debugMenu.setVisible(showDebugCheckBoxMenuItem.isSelected());
@@ -4825,6 +4775,19 @@ public class MainWindow extends javax.swing.JFrame {
                 + Math.round(touchPercentage * 100) + "%");
     }//GEN-LAST:event_largestTouchPercentageMenuItemActionPerformed
 
+    private void showLineSegmentsCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showLineSegmentsCheckBoxMenuItemActionPerformed
+        mapComponent.setDrawLineSegments(showLineSegmentsCheckBoxMenuItem.isSelected());
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_showLineSegmentsCheckBoxMenuItemActionPerformed
+
+    private void computationSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_computationSettingsMenuItemActionPerformed
+        openComputationPalette();
+    }//GEN-LAST:event_computationSettingsMenuItemActionPerformed
+
+    private void computationSettingsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_computationSettingsButtonActionPerformed
+        openComputationPalette();
+    }//GEN-LAST:event_computationSettingsButtonActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4887,7 +4850,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JCheckBox clipWithEndAreasCheckBox;
     private javax.swing.JCheckBox clipWithStartAreasCheckBox;
-    private javax.swing.JDialog computationPalette;
+    private javax.swing.JButton computationSettingsButton;
+    private javax.swing.JMenuItem computationSettingsMenuItem;
+    private javax.swing.JPanel computationSettingsPanel;
     private javax.swing.JCheckBoxMenuItem constrainControlPointsToRangeBoxCheckBoxMenuItem;
     private javax.swing.JTabbedPane controlsTabbedPane;
     private edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel coordinateInfoPanel;
@@ -4938,7 +4903,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator18;
     private javax.swing.JMenuItem largestTouchPercentageMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton layerFillColorButton;
@@ -4949,6 +4913,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;
     private edu.oregonstate.cartography.flox.gui.FloxMapComponent mapComponent;
+    private javax.swing.JPanel mapContentPanel;
     private javax.swing.JMenu mapMenu;
     private javax.swing.ButtonGroup mapToolsButtonGroup;
     private javax.swing.JMenuItem markFlowFlowIntersectionsMenuItem;
@@ -5015,10 +4980,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBox shortenFlowsCheckBox;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
-    private javax.swing.JCheckBoxMenuItem showComputationSettingsCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showDebugCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showFlowsCheckBoxMenuItem;
-    private javax.swing.JToggleButton showLineSegmentsToggleButton;
+    private javax.swing.JCheckBoxMenuItem showLineSegmentsCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showLockStateCheckBoxMenuItem;
     private javax.swing.JToggleButton showNodesToggleButton;
     private javax.swing.JCheckBoxMenuItem showObstaclesCheckBoxMenuItem;
@@ -5035,6 +4999,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem touchPercentageMenuItem;
     private javax.swing.JMenuItem undoMenuItem;
     private javax.swing.JMenuItem unlockMenuItem;
+    private javax.swing.JPanel unusedCoordinatesPanel;
     private javax.swing.JLabel vallueLabel;
     private javax.swing.JFormattedTextField valueFormattedTextField;
     private javax.swing.JToggleButton viewCanvasToggleButton;
