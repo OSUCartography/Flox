@@ -78,7 +78,7 @@ public class Model {
      * threshold for accepting similarity percentage: two flows with higher a
      * value are considered similar.
      */
-    public static final double MAX_TOUCH_PERCENTAGE = 0.1;
+    public static final double MAX_TOUCH_PERCENTAGE = 0.05;
 
     /**
      * the minimum increment in pixels when searching for a control point

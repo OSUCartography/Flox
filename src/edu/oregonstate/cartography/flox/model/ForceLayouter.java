@@ -860,7 +860,7 @@ public class ForceLayouter {
                 Arrow arrow;
                 if (flow instanceof FlowPair) {
                     FlowPair flowPair = (FlowPair) flow;
-                    
+
                     // create obstacle for arrowhead of first flow
                     arrow = flowPair.cachedOffsetFlow1(model).getArrow(model);
                     if (arrow.getLength() > Circle.TOL && arrow.getWidth() > Circle.TOL) {
@@ -961,7 +961,7 @@ public class ForceLayouter {
                     minObstacleDistPx = 0;
                 }
             }
-            
+
             // find control point resulting in smallest amount of overlaps
             int minOverlapsIndex = cPts.indexOf(Collections.min(cPts, new Comparator<Point>() {
                 @Override
@@ -972,7 +972,7 @@ public class ForceLayouter {
             Point cPt = cPts.get(minOverlapsIndex);
             flow.setCtrlPt(cPt.x, cPt.y);
         }
-        
+
     }
 
     private boolean findControlPointWithoutOverlapsInsideRangeBox(Flow flow,
@@ -1098,10 +1098,9 @@ public class ForceLayouter {
             } else if (intersectionIndex == minIntersectionIndex) {
                 // test whether this position with the same amount of overlaps 
                 // is closer to the base point
-                
+
                 // option with Eucledian distance
                 //double dsq = basePoint.distanceSquare(cPtX, cPtY);
-
                 // option with Manhattan distance with axes aligned to base line.
                 // The Manhatten distance should result in more symmetric flows.
                 // FIXME it is not clear whether Manhattan distance is any better. Results with US commodity flows are identical for both distances.
@@ -1136,13 +1135,15 @@ public class ForceLayouter {
      * computed for the passed flow and any other flow that is locked.
      * @return largest found touch percentage, between 0 and 1.
      */
-    private double largestTouchPercentage(Flow flow, boolean onlyTestWithLockedFlows) {
+    public double largestTouchPercentage(Flow flow, boolean onlyTestWithLockedFlows) {
 
         int minObstacleDistPx = model.getMinObstacleDistPx();
         Flow flow1 = model.clipFlowForComputations(flow);
         double flow1WidthPx = model.getFlowWidthPx(flow1);
         double referenceMapScale = model.getReferenceMapScale();
 
+        Rectangle2D.Double boundingBox1 = flow1.getBoundingBox();
+        
         double maxTouchPercentage = 0;
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
@@ -1151,17 +1152,24 @@ public class ForceLayouter {
                 continue;
             }
 
-            if (onlyTestWithLockedFlows && flow2.isLocked()) {
+            if (onlyTestWithLockedFlows && flow2.isLocked() == false) {
                 continue;
             }
 
-            flow2 = model.clipFlowForComputations(flow2);
             double flow2WidthPx = model.getFlowWidthPx(flow2);
             double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
             double minDist = minDistPx / referenceMapScale;
-            int nbrPointsToTest = 10; // FIXME
-            double touchPercentage = flow.touchPercentage(flow2, minDist, nbrPointsToTest);
-            maxTouchPercentage = Math.max(touchPercentage, maxTouchPercentage);
+
+            flow2 = model.clipFlowForComputations(flow2);
+
+            // test with distance between bounding boxes
+            Rectangle2D.Double boundingBox2 = flow2.getBoundingBox();           
+            double bbDistSqr = GeometryUtils.rectDistSq(boundingBox1, boundingBox2);
+            if (bbDistSqr < minDist * minDist) {
+                int nbrPointsToTest = 10; // FIXME                
+                double touchPercentage = flow.touchPercentage(flow2, minDist, nbrPointsToTest);
+                maxTouchPercentage = Math.max(touchPercentage, maxTouchPercentage);
+            }
         }
 
         return maxTouchPercentage;

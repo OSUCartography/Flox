@@ -795,6 +795,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowsTouchingMenuItem = new javax.swing.JMenuItem();
         markFlowFlowIntersectionsMenuItem = new javax.swing.JMenuItem();
         touchPercentageMenuItem = new javax.swing.JMenuItem();
+        largestTouchPercentageMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
@@ -3168,6 +3169,14 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(touchPercentageMenuItem);
 
+        largestTouchPercentageMenuItem.setText("Largest Touch Percentage");
+        largestTouchPercentageMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                largestTouchPercentageMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(largestTouchPercentageMenuItem);
+
         menuBar.add(debugMenu);
         //debugMenu.setVisible(false);
 
@@ -4669,6 +4678,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (name != null) {
             model.setName(name);
             setTitle(name);
+            addUndo("Project Name");
         }
     }//GEN-LAST:event_nameMenuItemActionPerformed
 
@@ -4802,6 +4812,19 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_minFlowLengthFormattedTextFieldPropertyChange
 
+    private void largestTouchPercentageMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_largestTouchPercentageMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        if (flows.size() != 1) {
+            ErrorDialog.showErrorDialog("Select one flow.");
+            return;
+        }
+        
+        ForceLayouter layouter = new ForceLayouter(model);
+        double touchPercentage =  layouter.largestTouchPercentage(flows.get(0), false);
+        JOptionPane.showMessageDialog(this, "Largest Touch percentage: "
+                + Math.round(touchPercentage * 100) + "%");
+    }//GEN-LAST:event_largestTouchPercentageMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4917,6 +4940,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel38;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu.Separator jSeparator18;
+    private javax.swing.JMenuItem largestTouchPercentageMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton layerFillColorButton;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
