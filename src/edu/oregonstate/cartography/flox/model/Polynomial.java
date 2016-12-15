@@ -1,6 +1,7 @@
 package edu.oregonstate.cartography.flox.model;
 
 import java.util.Arrays;
+import net.jafama.FastMath;
 
 /**
  * Original JavaScript by Kevin Lindsey:
@@ -11,6 +12,7 @@ import java.util.Arrays;
  */
 public class Polynomial {
 
+    private static final double SQRT3 = Math.sqrt(3d);
     private static final double TOLERANCE = 1e-6;
     private static final double[] EMPTY_ARRAY = new double[]{};
 
@@ -121,7 +123,7 @@ public class Polynomial {
         }
         return EMPTY_ARRAY;
     }
-
+    
     private double[] getCubicRoots() {
         assert (getDegree() == 3);
 
@@ -135,40 +137,25 @@ public class Polynomial {
         double discrim = b * b / 4 + a * a * a / 27;
         double halfB = b / 2;
         
+        if ( Math.abs(discrim) <= Polynomial.TOLERANCE ) {
+            discrim = 0;
+        }
+        
         if (discrim > 0) {
             double e = Math.sqrt(discrim);
-            double tmp;
-            double root;
-            tmp = -halfB + e;
-            if (tmp >= 0) {
-                root = Math.pow(tmp, 1d / 3);
-            } else {
-                root = -Math.pow(-tmp, 1d / 3);
-            }
-            tmp = -halfB - e;
-            if (tmp >= 0) {
-                root += Math.pow(tmp, 1d / 3);
-            } else {
-                root -= Math.pow(-tmp, 1d / 3);
-            }
+            double root = FastMath.cbrt(-halfB + e) + FastMath.cbrt(-halfB - e);
             return new double[]{root - offset};
         } else if (discrim < 0) {
             double distance = Math.sqrt(-a / 3);
-            double angle = Math.atan2(Math.sqrt(-discrim), -halfB) / 3;
-            double cos = Math.cos(angle);
-            double sin = Math.sin(angle);
-            double sqrt3 = Math.sqrt(3);
+            double angle = FastMath.atan2(Math.sqrt(-discrim), -halfB) / 3;
+            double cos = FastMath.cos(angle);
+            double sin = FastMath.sin(angle);
             double r1 = 2 * distance * cos - offset;
-            double r2 = -distance * (cos + sqrt3 * sin) - offset;
-            double r3 = -distance * (cos - sqrt3 * sin) - offset;
+            double r2 = -distance * (cos + SQRT3 * sin) - offset;
+            double r3 = -distance * (cos - SQRT3 * sin) - offset;
             return new double[]{r1, r2, r3};
         } else {
-            double tmp;
-            if (halfB >= 0) {
-                tmp = -Math.pow(halfB, 1d / 3);
-            } else {
-                tmp = Math.pow(-halfB, 1d / 3);
-            }
+            double tmp = FastMath.cbrt(halfB);
             return new double[]{2 * tmp - offset, -tmp - offset};
         }
     }

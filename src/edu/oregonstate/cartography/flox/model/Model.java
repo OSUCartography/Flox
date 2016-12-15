@@ -2860,7 +2860,6 @@ public class Model {
                 Flow flow = iterator.next();
                 flow.adjustEndShorteningToAvoidOverlaps(this);
                 flow.adjustStartShorteningToAvoidOverlaps(this);
-                System.out.println();
             }
         }
     }

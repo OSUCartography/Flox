@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import net.jafama.FastMath;
 
 /**
  * ForceLayouter contains the algorithms that compute the total force that each
@@ -379,13 +380,13 @@ public class ForceLayouter {
         double dx = basePt.x - flow.cPtX();
         double dy = basePt.y - flow.cPtY();
         double l = Math.sqrt(dx * dx + dy * dy);
-        double alpha = Math.atan2(dy, dx);
+        double alpha = FastMath.atan2(dy, dx);
         double baseLineAzimuth = flow.getBaselineOrientation();
         double diffToBaseNormal = Math.PI / 2 - baseLineAzimuth + alpha;
-        double torsionF = Math.sin(diffToBaseNormal) * l;
+        double torsionF = FastMath.sin(diffToBaseNormal) * l;
         double antiTorsionW = model.getAntiTorsionWeight();
-        double torsionFx = Math.cos(baseLineAzimuth) * torsionF * antiTorsionW;
-        double torsionFy = Math.sin(baseLineAzimuth) * torsionF * antiTorsionW;
+        double torsionFx = FastMath.cos(baseLineAzimuth) * torsionF * antiTorsionW;
+        double torsionFy = FastMath.sin(baseLineAzimuth) * torsionF * antiTorsionW;
         return new Force(torsionFx, torsionFy);
     }
 
@@ -605,7 +606,7 @@ public class ForceLayouter {
     private double angularW(double angleDiff) {
         //FIXME hard-coded parameter
         final double K = 4;
-        double w = Math.exp(-K * angleDiff * angleDiff);
+        double w = FastMath.exp(-K * angleDiff * angleDiff);
         return angleDiff < 0 ? -w : w;
     }
 
@@ -1000,8 +1001,8 @@ public class ForceLayouter {
             spiralR = searchIncrement * angleRad / Math.PI / 2;
 
             // new control point location
-            double dx = Math.cos(angleRad) * spiralR;
-            double dy = Math.sin(angleRad) * spiralR;
+            double dx = FastMath.cos(angleRad) * spiralR;
+            double dy = FastMath.sin(angleRad) * spiralR;
             double cPtX = dx + originalX;
             double cPtY = dy + originalY;
             // increment rotation angle, such that the next point on the spiral 
@@ -1071,8 +1072,8 @@ public class ForceLayouter {
             spiralR = searchIncrement * angleRad / Math.PI / 2;
 
             // new control point location
-            double cPtX = Math.cos(angleRad) * spiralR + originalX;
-            double cPtY = Math.sin(angleRad) * spiralR + originalY;
+            double cPtX = FastMath.cos(angleRad) * spiralR + originalX;
+            double cPtY = FastMath.sin(angleRad) * spiralR + originalY;
             // increment rotation angle, such that the next point on the spiral 
             // has an approximate distance of searchIncrement to the current point
             angleRad += searchIncrement / spiralR;

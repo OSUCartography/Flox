@@ -59,48 +59,6 @@ public final class Point {
     }
 
     /**
-     * Rotates this point by the provided angle around an origin point and
-     * returns the rotated point. The position of this point is not changed.
-     *
-     * @param origin Pivot around which the point will be rotated
-     * @param angle Rotation angle in radians. Positive numbers will rotate
-     * counter- clockwise, negative numbers will rotate clockwise.
-     * @return
-     */
-    public Point rotatePoint(Point origin, double angle) {
-        assert (Double.isFinite(angle));
-
-        double tempX = x - origin.x;
-        double tempY = y - origin.y;
-        double cos = Math.cos(angle);
-        double sin = Math.sin(angle);
-        double newX = tempX * cos - tempY * sin;
-        double newY = tempX * sin + tempY * cos;
-        return new Point(newX + origin.x, newY + origin.y);
-    }
-
-    /**
-     * Rotate and translate. Rotation is applied first, then the point is
-     * translated.
-     *
-     * @param dx horizontal translation
-     * @param dy vertical translation
-     * @param angle Rotation angle in radians. Positive numbers will rotate
-     * counter-clockwise, negative numbers will rotate clockwise.
-     */
-    public void transform(double dx, double dy, double angle) {
-        assert (Double.isFinite(dx));
-        assert (Double.isFinite(dy));
-        assert (Double.isFinite(angle));
-
-        double cos = Math.cos(angle);
-        double sin = Math.sin(angle);
-        double newX = x * cos - y * sin + dx;
-        y = x * sin + y * cos + dy;
-        x = newX;
-    }
-
-    /**
      * Rotate and translate. Rotation is applied first, then the point is
      * translated.
      *
@@ -110,9 +68,6 @@ public final class Point {
      * @param cos cos of rotation angle
      */
     public void transform(double dx, double dy, double sin, double cos) {
-        assert (Double.isFinite(dx));
-        assert (Double.isFinite(dy));
-        
         double newX = x * cos - y * sin + dx;
         y = x * sin + y * cos + dy;
         x = newX;

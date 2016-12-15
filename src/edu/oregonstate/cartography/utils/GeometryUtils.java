@@ -6,6 +6,8 @@ import net.jafama.FastMath;
 
 public class GeometryUtils {
 
+    private static final double SQRT3 = Math.sqrt(3d);
+    
     /**
      *
      * This method returns true if two line segments intersect. Point 1 and
@@ -189,7 +191,7 @@ public class GeometryUtils {
     public static double orientation(Point startPt, Point endPt) {
         final double dx = endPt.x - startPt.x;
         final double dy = endPt.y - startPt.y;
-        return Math.atan2(dy, dx);
+        return FastMath.atan2(dy, dx);
     }
 
     /**
@@ -207,7 +209,7 @@ public class GeometryUtils {
     public static double getDistanceToLine(double x, double y,
             double x0, double y0, double x1, double y1) {
         double distToLine = (Math.abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0))
-                / (Math.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)))));
+                / (FastMath.sqrt(((x1 - x0) * (x1 - x0)) + ((y1 - y0) * (y1 - y0)))));
         return Double.isNaN(distToLine) ? 0 : distToLine;
     }
 
@@ -254,7 +256,7 @@ public class GeometryUtils {
 
         double dx = x - xx;
         double dy = y - yy;
-        return Math.sqrt(dx * dx + dy * dy);
+        return FastMath.sqrt(dx * dx + dy * dy);
     }
 
     /**
@@ -372,47 +374,41 @@ public class GeometryUtils {
         return Math.abs((y1 - y2) * (x1 - x3) - (y1 - y3) * (x1 - x2)) < tol;
     }
 
-    private static double cuberoot(double x) {
-        if (x < 0.0f) {
-            return -Math.pow(-x, 1.0 / 3.0);
-        }
-        return Math.pow(x, 1.0 / 3.0);
-    }
-
     /**
-     * Find roots in cubic equation of the form x^3 + a·x^2 + b·x + c = 0 From
-     * http://www.pouet.net/topic.php?which=9119&page=1
-     * 
-     * FIXME Polynomial class does not seem to use Math.acos and is possibly faster
+     * Find roots in cubic equation of the form x^3 + a·x^2 + b·x + c = 0
      *
      * @param a
      * @param b
      * @param c
-     * @param r Array that will receive solutions.
-     * @return The number of solutions.
      */
-    private static int solveCubic(double a, double b, double c, double[] r) {
-        double p = b - a * a / 3.0;
-        double q = a * (2.0 * a * a - 9.0 * b) / 27.0 + c;
-        double p3 = p * p * p;
-        double d = q * q + 4.0 * p3 / 27.0;
-        double offset = -a / 3.0;
-        if (d >= 0) { // Single solution
-            double z = FastMath.sqrt(d);
-            double u = (-q + z) / 2.0;
-            double v = (-q - z) / 2.0;
-            u = cuberoot(u);
-            v = cuberoot(v);
-            r[0] = offset + u + v;
-            return 1;
+    private static double[] solveCubic(double c2, double c1, double c0) {
+        double a = (3d * c1 - c2 * c2) / 3d;
+        double b = (2d * c2 * c2 * c2 - 9d * c1 * c2 + 27d * c0) / 27d;
+        double offset = c2 / 3d;
+        double discrim = b * b / 4d + a * a * a / 27d;
+        double halfB = b / 2d;
+
+        if (Math.abs(discrim) <= 1e-6) {
+            discrim = 0d;
         }
-        double u = FastMath.sqrt(-p / 3);
-        double v = FastMath.acos(-FastMath.sqrt(-27.0 / p3) * q / 2.0) / 3.0;
-        double m = FastMath.cos(v), n = FastMath.sin(v) * FastMath.sqrt(3.0);
-        r[0] = offset + u * (m + m);
-        r[1] = offset - u * (n + m);
-        r[2] = offset + u * (n - m);
-        return 3;
+
+        if (discrim > 0d) {
+            double e = FastMath.sqrt(discrim);
+            double root = FastMath.cbrt(-halfB + e) + FastMath.cbrt(-halfB - e);
+            return new double[]{root - offset};
+        } else if (discrim < 0d) {
+            double distance = FastMath.sqrt(-a / 3d);
+            double angle = FastMath.atan2(FastMath.sqrt(-discrim), -halfB) / 3d;
+            double cos = FastMath.cos(angle);
+            double sin = FastMath.sin(angle);
+            double r1 = 2d * distance * cos - offset;
+            double r2 = -distance * (cos + SQRT3 * sin) - offset;
+            double r3 = -distance * (cos - SQRT3 * sin) - offset;
+            return new double[]{r1, r2, r3};
+        } else {
+            double tmp = FastMath.cbrt(halfB);
+            return new double[]{2d * tmp - offset, -tmp - offset};
+        }
     }
 
     /**
@@ -468,27 +464,25 @@ public class GeometryUtils {
             xy[1] = p2y;
         }
 
-        double ax = p0x - 2.0 * p1x + p2x;
-        double ay = p0y - 2.0 * p1y + p2y;
-        double bx = 2.0 * (p1x - p0x);
-        double by = 2.0 * (p1y - p0y);
+        double ax = p0x - 2d * p1x + p2x;
+        double ay = p0y - 2d * p1y + p2y;
+        double bx = 2d * (p1x - p0x);
+        double by = 2d * (p1y - p0y);
         double cx = p0x;
         double cy = p0y;
 
-        double k3 = 2.0 * (ax * ax + ay * ay);
-        double k2 = 3.0 * (ax * bx + ay * by);
-        double k1 = bx * bx + by * by + 2.0 * ((cx - x) * ax + (cy - y) * ay);
+        double k3 = 2d * (ax * ax + ay * ay);
+        double k2 = 3d * (ax * bx + ay * by);
+        double k1 = bx * bx + by * by + 2d * ((cx - x) * ax + (cy - y) * ay);
         double k0 = (cx - x) * bx + (cy - y) * by;
 
-        // FIXME allocating this array each time might not be efficient
-        double res[] = new double[3];
-        int n = solveCubic(k2 / k3, k1 / k3, k0 / k3, res);
-        for (int i = 0; i < n; i++) {
+        double res[] = solveCubic(k2 / k3, k1 / k3, k0 / k3);
+        for (int i = 0; i < res.length; i++) {
             double t = res[i];
-            if (t >= 0.0 && t <= 1.0) {
-                double _1_t = 1.0 - t;
+            if (t >= 0d && t <= 1d) {
+                double _1_t = 1d - t;
                 double w0 = _1_t * _1_t;
-                double w1 = 2.0 * t * _1_t;
+                double w1 = 2d * t * _1_t;
                 double w2 = t * t;
                 // point on Bézier curve
                 double posx = w0 * p0x + w1 * p1x + w2 * p2x;
@@ -544,27 +538,25 @@ public class GeometryUtils {
         double d2sq = dx2 * dx2 + dy2 * dy2;
         double minDistSq = Math.min(d0sq, d2sq);
 
-        double ax = p0x - 2.0 * p1x + p2x;
-        double ay = p0y - 2.0 * p1y + p2y;
-        double bx = 2.0 * (p1x - p0x);
-        double by = 2.0 * (p1y - p0y);
+        double ax = p0x - 2d * p1x + p2x;
+        double ay = p0y - 2d * p1y + p2y;
+        double bx = 2d * (p1x - p0x);
+        double by = 2d * (p1y - p0y);
         double cx = p0x;
         double cy = p0y;
 
-        double k3 = 2.0 * (ax * ax + ay * ay);
-        double k2 = 3.0 * (ax * bx + ay * by);
-        double k1 = bx * bx + by * by + 2.0 * ((cx - x) * ax + (cy - y) * ay);
+        double k3 = 2d * (ax * ax + ay * ay);
+        double k2 = 3d * (ax * bx + ay * by);
+        double k1 = bx * bx + by * by + 2d * ((cx - x) * ax + (cy - y) * ay);
         double k0 = (cx - x) * bx + (cy - y) * by;
 
-        // FIXME allocating this array each time might not be efficient
-        double res[] = new double[3];
-        int n = solveCubic(k2 / k3, k1 / k3, k0 / k3, res);
-        for (int i = 0; i < n; i++) {
+        double res[] = solveCubic(k2 / k3, k1 / k3, k0 / k3);
+        for (int i = 0; i < res.length; i++) {
             double t = res[i];
             if (t >= 0.0 && t <= 1.0) {
                 double _1_t = 1.0 - t;
                 double w0 = _1_t * _1_t;
-                double w1 = 2.0 * t * _1_t;
+                double w1 = 2d * t * _1_t;
                 double w2 = t * t;
                 // point on Bézier curve
                 double posx = w0 * p0x + w1 * p1x + w2 * p2x;
@@ -603,7 +595,7 @@ public class GeometryUtils {
             double tol,
             double[] xy) {
         double dSq = getDistanceToQuadraticBezierCurveSq(p0x, p0y, p1x, p1y, p2x, p2y, tol, xy);
-        return Math.sqrt(dSq);
+        return FastMath.sqrt(dSq);
     }
 
     /**
@@ -619,7 +611,7 @@ public class GeometryUtils {
         // scale, bias and saturate x to 0..1 range
         x = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
         // evaluate polynomial
-        return x * x * (3 - 2 * x);
+        return x * x * (3d - 2d * x);
 
         // alternative smootherstep
         // return x * x * x * (x * (x * 6 - 15) + 10);

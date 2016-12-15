@@ -2,6 +2,7 @@ package edu.oregonstate.cartography.flox.model;
 
 import static edu.oregonstate.cartography.flox.model.Circle.TOL;
 import edu.oregonstate.cartography.utils.GeometryUtils;
+import net.jafama.FastMath;
 
 /**
  * The Arrow class contains algorithms for finding the shape, location, and
@@ -179,7 +180,7 @@ public final class Arrow {
         Point cPt = new Point(f.cPtX(), f.cPtY());
         double lineOrientation = GeometryUtils.orientation(cPt, getBasePt());
         double dAlpha = GeometryUtils.angleDif(lineOrientation, arrowheadOrientation);
-        double dRadius = Math.abs(Math.tan(dAlpha) * flowStrokeWidth / 2);
+        double dRadius = Math.abs(FastMath.tan(dAlpha) * flowStrokeWidth / 2);
 
         // Additionally reduce the clipping radius by 0.5 pixel to prevent a
         // rendering artifact that shows a small white line between end of the flow 

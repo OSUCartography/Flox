@@ -15,6 +15,7 @@ import java.util.Iterator;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import net.jafama.FastMath;
 
 /**
  * A flow based on a quadratic Bézier curve.
@@ -537,7 +538,7 @@ public class Flow implements Comparable<Flow> {
     public double getBaselineOrientation() {
         final double dx = endPt.x - startPt.x;
         final double dy = endPt.y - startPt.y;
-        return Math.atan2(dy, dx);
+        return FastMath.atan2(dy, dx);
     }
 
     /**
@@ -1083,7 +1084,7 @@ public class Flow implements Comparable<Flow> {
                 double dirX1 = ptOnOffsetCurve1.x - ptOnOriginalCurve1.x;
                 double dirY1 = ptOnOffsetCurve1.y - ptOnOriginalCurve1.y;
                 double dCtrl1 = Math.sqrt(dirX1 * dirX1 + dirY1 * dirY1);
-                if (dCtrl1 > 0) {
+                if (dCtrl1 > 0) { // FIXME test not needed
                     dirX1 /= dCtrl1;
                     dirY1 /= dCtrl1;
                     moveX += dirX1 * gapW1;
@@ -1615,7 +1616,7 @@ public class Flow implements Comparable<Flow> {
         return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
                 cPtX, cPtY, endPt.x, endPt.y, tol, x, y);
     }
-
+    
     /**
      * The length of the line connecting the start point and the control point.
      *
@@ -1675,7 +1676,7 @@ public class Flow implements Comparable<Flow> {
     public double startToCtrlAngle() {
         double dx = cPtX - startPt.x;
         double dy = cPtY - startPt.y;
-        return Math.atan2(dy, dx);
+        return FastMath.atan2(dy, dx);
     }
 
     /**
@@ -1687,7 +1688,7 @@ public class Flow implements Comparable<Flow> {
     public double endToCtrlAngle() {
         double dx = cPtX - endPt.x;
         double dy = cPtY - endPt.y;
-        return Math.atan2(dy, dx);
+        return FastMath.atan2(dy, dx);
     }
 
     /**
