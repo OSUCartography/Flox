@@ -4693,7 +4693,7 @@ public class MainWindow extends javax.swing.JFrame {
         double flow2WidthPx = model.getFlowWidthPx(flow2);
         double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
         double minDist = minDistPx / model.getReferenceMapScale();
-        boolean touching = flow1.isClose(flow2, minDist, 20);
+        boolean touching = flow1.isClose(flow2, minDist, 20, model.getReferenceMapScale());
         JOptionPane.showMessageDialog(this, "Flows are " + (touching ? "" : "NOT") + " touching or too close.");
     }//GEN-LAST:event_flowsTouchingMenuItemActionPerformed
 

@@ -389,7 +389,7 @@ public class Flow implements Comparable<Flow> {
 
         // Check the shortest distance between the obstacle and the flow. If it's 
         // less than the minimum distance, then the flow intersects the obstacle. 
-        double shortestDistSquare = distanceSq(obstacle.x, obstacle.y, tol);
+        double shortestDistSquare = distanceSquare(obstacle.x, obstacle.y, tol);
         return shortestDistSquare < minDist * minDist;
     }
 
@@ -1541,35 +1541,74 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
+     * Tests whether a point is to the left of the butt cap line. This is the
+     * line that is normal to the start or the end point of the flow.
+     *
+     * @param x point x
+     * @param y point y
+     * @return true if beyond butt caps, false otherwise
+     */
+    private boolean beyondButtCaps(double x, double y) {
+        // test whether x/y is to the left of the start butt cap line
+        // compute unnormalized normal nx/ny at start (t = 0)
+        double dx = cPtX - startPt.x;
+        double dy = cPtY - startPt.y;
+        double nx = -dy;
+        double ny = dx;
+        // startPt and startPt + nx/ny define a line along the butt cap
+        // test whether the point is on the left of this line (when viewing from start point along normal)
+        // this is a simplified version of:
+        // leftOfButtCapLine = GeometryUtils.isOnLeftSide(x, y, startX, startY, startX + nx, startY + ny);
+        if (nx * (y - startPt.y) - ny * (x - startPt.x) > 0d) {
+            return true;
+        }
+
+        // test whether x/y is to the left of the end butt cap line
+        // compute unnormalized normal nx/ny at end (t = 0)
+        dx = cPtX - endPt.x;
+        dy = cPtY - endPt.y;
+        nx = -dy;
+        ny = dx;
+        return nx * (y - endPt.y) - ny * (x - endPt.x) > 0d;
+    }
+
+    /**
      * Returns whether this flow is closer than a minimum distance to another
      * flow. This is an approximate test, which might miss some locations.
      *
-     * FIXME Problem with start and end of flows, because the flows have each a
-     * width
+     * FIXME needs to be overridden by FlowPair
      *
      * @param flow flow to test with
      * @param minDist if the smallest distance between this flow and the passed
      * flow is smaller than minDist, the two flows are considered close.
      * @param nbrPointsToTest test this many locations along the curve (used to
      * compute curve parameter t). Must be greater than 0.
+     * @param referenceMapScale scale factor between pixels and world
+     * coordinates
      * @return true if this curve is close to the passed flow, false otherwise.
      */
-    public boolean isClose(Flow flow, double minDist, int nbrPointsToTest) {
+    public boolean isClose(Flow flow, double minDist, int nbrPointsToTest, double referenceMapScale) {
         assert (nbrPointsToTest > 0);
 
         double minDistSqr = minDist * minDist;
+        double colinearTolerance = 0.2 / referenceMapScale;
 
         if (nbrPointsToTest == 1) {
             // one single sampling point, sample at t = 0.5
             Point pt = pointOnCurve(0.5);
-            return flow.distanceSq(pt.x, pt.y, 0.001) < minDistSqr; // FIXME 0.001
+            if (beyondButtCaps(pt.x, pt.y)) {
+                return false;
+            }
+            return flow.distanceSquare(pt.x, pt.y, colinearTolerance) < minDistSqr;
         }
 
         for (int i = 0; i < nbrPointsToTest; i++) {
             double t = i / (nbrPointsToTest - 1d);
             Point pt = pointOnCurve(t);
-            double dSqr = flow.distanceSq(pt.x, pt.y, 0.001); // FIXME 0.001
-            if (dSqr < minDistSqr) {
+            if (beyondButtCaps(pt.x, pt.y)) {
+                continue;
+            }
+            if (flow.distanceSquare(pt.x, pt.y, colinearTolerance) < minDistSqr) {
                 return true;
             }
         }
@@ -1595,7 +1634,7 @@ public class Flow implements Comparable<Flow> {
         for (int i = 0; i < nbrPointsToTest; i++) {
             double t = i / (nbrPointsToTest - 1d);
             Point pt = pointOnCurve(t);
-            double dSqr = flow.distanceSq(pt.x, pt.y, 0.001); // FIXME
+            double dSqr = flow.distanceSquare(pt.x, pt.y, 0.001); // FIXME
             if (dSqr < minDistSqr) {
                 ++closePoints;
             }
@@ -1612,7 +1651,7 @@ public class Flow implements Comparable<Flow> {
      * @param tol Tolerance to test whether points are collinear.
      * @return the distance
      */
-    public double distanceSq(double x, double y, double tol) {
+    public double distanceSquare(double x, double y, double tol) {
         return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
                 cPtX, cPtY, endPt.x, endPt.y, tol, x, y);
     }
@@ -2335,9 +2374,9 @@ public class Flow implements Comparable<Flow> {
         double minDist = flowWidth / 2d;
         double minDistSqr = minDist * minDist;
         // FIXME distanceSq should exclude start and end points
-        return distanceSq(arrow.getTipPt().x, arrow.getTipPt().y, TOL) < minDistSqr
-                || distanceSq(arrow.getCorner1Pt().x, arrow.getCorner1Pt().y, TOL) < minDistSqr
-                || distanceSq(arrow.getCorner2Pt().x, arrow.getCorner2Pt().y, TOL) < minDistSqr;
+        return distanceSquare(arrow.getTipPt().x, arrow.getTipPt().y, TOL) < minDistSqr
+                || distanceSquare(arrow.getCorner1Pt().x, arrow.getCorner1Pt().y, TOL) < minDistSqr
+                || distanceSquare(arrow.getCorner2Pt().x, arrow.getCorner2Pt().y, TOL) < minDistSqr;
     }
 
     /**
@@ -2457,10 +2496,10 @@ public class Flow implements Comparable<Flow> {
                 return true;
             }
         }
-        
+
         // Get the distance of the clicked point to the flow.
         double colinearTol = 0.2 /* px */ / model.getReferenceMapScale();
-        double distanceSqWorld = clipppedFlow.distanceSq(x, y, colinearTol);
+        double distanceSqWorld = clipppedFlow.distanceSquare(x, y, colinearTol);
         return distanceSqWorld <= maxDist * maxDist;
     }
 }

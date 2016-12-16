@@ -2378,7 +2378,10 @@ public class Model {
 
             // get clip radius including arrowhead
             endNodeClipRadius = arrow.getClipRadius();
-        } else if (clipEndNode || getFlowDistanceFromEndPointPixel() > 0 || isDrawArrowheads()) {
+        } else if (clipEndNode 
+                || getFlowDistanceFromEndPointPixel() > 0 
+                || isDrawArrowheads()
+                || (adjustLengthToReduceOverlaps && flow.getEndShorteningToAvoidOverlaps() > 0)) {
             // clip the end if there must be a gap between the end of the 
             // flow line and the end node symbol.
             double gapDistanceToEndNodesPx = getFlowDistanceFromEndPointPixel();
@@ -2479,8 +2482,8 @@ public class Model {
             double minDistPx = minObstacleDistPx + (thisWidthPx + flowWidthPx) / 2;
             double minDist = minDistPx / referenceMapScale;
             
-            // FIXME for FlowPair
-            if (slice.isClose(flow2Clipped, minDist, nbrSamplings)) {
+            // FIXME override by FlowPair and overload for FlowPair
+            if (slice.isClose(flow2Clipped, minDist, nbrSamplings, referenceMapScale)) {
                 return true;
             }
 
