@@ -44,6 +44,16 @@ public final class Obstacle extends Circle {
     }
 
     /**
+     * Returns whether this obstacle is the arrowhead for the passed flow.
+     *
+     * @param flow flow with an arrowhead
+     * @return true if this is an obstacle for the passed flow, false otherwise.
+     */
+    public boolean isArrowObstacleForFlow(Flow flow) {
+        return this.flow != null && this.flow == flow;
+    }
+
+    /**
      * Construct an obstacle from three points that are on the obstacle circle.
      *
      * @param p1 point 1 on obstacle circle

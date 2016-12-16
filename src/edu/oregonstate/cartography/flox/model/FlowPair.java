@@ -351,7 +351,7 @@ public class FlowPair extends Flow {
         endShorteningToAvoidOverlaps2 = 0;
         startShorteningToAvoidOverlaps2 = 0;
     }
-
+    
     /**
      * Tests whether this Flow overlaps with an arrow. The arrow is treated as a
      * triangle consisting of the tip point and the two corner points. The flow

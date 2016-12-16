@@ -90,22 +90,25 @@ public class ForceLayouter {
      * sibling flows, moving nodes from obstacles, and constraining control
      * points to range boxes.
      *
-     * @param i current iteration, between 0 and ForceLayouter.NBR_ITERATIONS
+     * @param iteration current iteration, between 0 and
+     * model.getNbrIterations() - 1
      * @param iterBeforeMovingFlowsOffObstacles number of remaining iterations
      * until flows are moved away from obstacles
      * @param canvas control points are to be constrained to this rectangle
      * @return number of remaining iterations until flows are moved away from
      * obstacles
      */
-    public int layoutIteration(int i, int iterBeforeMovingFlowsOffObstacles,
+    public int layoutIteration(int iteration, int iterBeforeMovingFlowsOffObstacles,
             Rectangle2D canvas) {
+        
+        System.out.println(1 + iteration + "/" + model.getNbrIterations());
 
         model.invalidateCachedValues();
 
         RangeboxEnforcer enforcer = new RangeboxEnforcer(model);
 
         // compute one iteration of forces with a linearly decreasing weight
-        double weight = 1d - (double) i / model.getNbrIterations();
+        double weight = 1d - (double) iteration / model.getNbrIterations();
         computeForces(weight, canvas);
 
         // try moving flows that intersect and are connected to the same node
@@ -114,6 +117,8 @@ public class ForceLayouter {
             if (isCancelled()) {
                 return 0;
             }
+            
+            System.out.println("# intersecting pairs: " + pairs.size());
 
             for (Model.IntersectingFlowPair pair : pairs) {
                 if (isCancelled()) {
@@ -136,7 +141,7 @@ public class ForceLayouter {
 
         // move flows away from obstacles. Moved flows will be locked.
         if (model.isMoveFlowsOverlappingObstacles() && iterBeforeMovingFlowsOffObstacles == 0) {
-            int remainingIterations = model.getNbrIterations() - i - 1;
+            int remainingIterations = model.getNbrIterations() - iteration - 1;
 
             // nodes and arrowheads are obstacles
             List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
@@ -159,7 +164,8 @@ public class ForceLayouter {
             }));
 
             int nbrOverlaps = sortedOverlappingFlows.size();
-
+            System.out.println("# flows overlapping obstacles: " + nbrOverlaps);
+            
             // Compute the number of flows to move. Default is 1, but this might 
             // have to be larger when there are more overlapping flows than 
             // remaining iterations.
@@ -177,7 +183,7 @@ public class ForceLayouter {
             if (nbrRemainingOverlaps > 0) {
                 // division by empirical factor = 2 to increase the 
                 // number of iterations at the end of calculations
-                iterBeforeMovingFlowsOffObstacles = (model.getNbrIterations() - i) / (nbrRemainingOverlaps + 1) / 2;
+                iterBeforeMovingFlowsOffObstacles = (model.getNbrIterations() - iteration) / (nbrRemainingOverlaps + 1) / 2;
             } else {
                 // There are no flows left hat overlap obstacles. Future
                 // iterations may again create overlaps. So check after
@@ -390,24 +396,6 @@ public class ForceLayouter {
         return new Force(torsionFx, torsionFy);
     }
 
-    private static boolean isEven(int i) {
-        return (i % 2) == 0;
-    }
-
-    private static double pow(double a, int exp) {
-        if (exp == 0) {
-            return 1;
-        }
-        if (exp == 1) {
-            return a;
-        }
-        if (isEven(exp)) {
-            return pow(a * a, exp / 2); //even a=(a^2)^exp/2
-        } else {
-            return a * pow(a * a, exp / 2); //odd  a=a*(a^2)^exp/2
-        }
-    }
-
     /**
      * Returns a2 raised to the next geometric power. Example: a2^6 returns
      * a2^8. Note 1: a2 is the squared value: a2= a^2 Note 2: exp is clamped to
@@ -534,9 +522,7 @@ public class ForceLayouter {
             if (d == 0) {
                 continue;
             }
-            // TODO this could use a different method designed for nodes in
-            // order to get a different distance weight.
-            double idw = 1d / pow(d, distWeightExponent);
+            double idw = 1d / FastMath.powFast(d, distWeightExponent);
             fxTotal += dx * idw;
             fyTotal += dy * idw;
             wTotal += idw;
@@ -722,44 +708,6 @@ public class ForceLayouter {
     }
 
     /**
-     * Tests whether a flow overlaps an obstacle.
-     *
-     * @param flow the flow to test
-     * @param obstacle obstacle to test against
-     * @param testArrowheadObstacles flag to indicate whether arrowhead
-     * obstacles are considered
-     * @param minObstaclesDistPx minimum empty space between the flow and
-     * obstacles (in pixels)
-     * @return true if the flow overlaps a node
-     */
-    private boolean flowIntersectsObstacle(Flow flow, Obstacle obstacle,
-            int minObstaclesDistPx) {
-
-        // ignore obstacles that are start or end nodes of the flow
-        if (obstacle.node == flow.getStartPt() || obstacle.node == flow.getEndPt()) {
-            return false;
-        }
-
-        // ignore arrowhead attached to this flow
-        if (model.isDrawArrowheads() && flow == obstacle.flow) {
-            return false;
-        }
-
-        // ignore arrowheads that are attached to this flow's start or end node
-        if (obstacle.isArrowObstacle()) {
-            if (obstacle.flow.getStartPt() == flow.getStartPt()
-                    || obstacle.flow.getStartPt() == flow.getEndPt()
-                    || obstacle.flow.getEndPt() == flow.getStartPt()
-                    || obstacle.flow.getEndPt() == flow.getEndPt()) {
-                return false;
-            }
-        }
-
-        return flow.cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle,
-                model, minObstaclesDistPx);
-    }
-
-    /**
      * Tests whether a flow overlaps any obstacle.
      *
      * @param flow the flow to test
@@ -773,7 +721,7 @@ public class ForceLayouter {
     private boolean flowIntersectsObstacles(Flow flow, List<Obstacle> obstacles,
             int minObstacleDistPx) {
         for (Obstacle obstacle : obstacles) {
-            if (flowIntersectsObstacle(flow, obstacle, minObstacleDistPx)) {
+            if (flow.isOverlappingObstacle(obstacle, model, minObstacleDistPx)) {
                 return true;
             }
         }
@@ -798,7 +746,7 @@ public class ForceLayouter {
             int minObstacleDistPx, double arrowheadWeight) {
         double nbrIntersections = 0;
         for (Obstacle obstacle : obstacles) {
-            if (flowIntersectsObstacle(flow, obstacle, minObstacleDistPx)) {
+            if (flow.isOverlappingObstacle(obstacle, model, minObstacleDistPx)) {
                 if (obstacle.isArrowObstacle()) {
                     nbrIntersections += arrowheadWeight;
                 } else {
@@ -920,25 +868,32 @@ public class ForceLayouter {
     }
 
     /**
-     * Moves the control point location of one flow such that the flow does not
-     * overlap any obstacle. The control point of the passed flow is changed.
+     * Moves the control point location of one flow such that the flow does
+     * overlap a minimum of obstacles. The control point of the passed flow is
+     * changed.
      *
      * First tests control point locations placed along an Archimedean spiral
-     * centered on the current control point location. Then searches a suitable
-     * position inside the range box.
+     * centered on the current control point location. If no position can be
+     * found without overlaps, a position resulting in a minimum of overlaps is
+     * searched inside the range box.
+     *
+     * If possible flows keep a distance of model.getMinObstacleDistPx() to
+     * obstacles. If this is not possible, this distance is reduced.
      *
      * @param flow flow to change
      * @param obstacles obstacles to avoid
      */
     private void moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
 
-        boolean foundPosition;
         // search for position inside range box that results in no overlaps
         int minObstacleDistPx = model.getMinObstacleDistPx();
         while (true) {
-            foundPosition = findControlPointWithoutOverlapsInsideRangeBox(
+            boolean foundPosition = findControlPointWithoutOverlapsInsideRangeBox(
                     flow, obstacles, minObstacleDistPx);
-            if (foundPosition || minObstacleDistPx == 0) {
+            if (foundPosition) {
+                return;
+            }
+            if (minObstacleDistPx == 0) {
                 break;
             }
             // half minimum distance between flow and obstacles
@@ -946,36 +901,43 @@ public class ForceLayouter {
         }
 
         // search for position inside range box that results in smallest number of overlaps
-        if (foundPosition == false) {
-            minObstacleDistPx = model.getMinObstacleDistPx();
-            ArrayList<Point> cPts = new ArrayList<>();
-            while (true) {
-                double overlaps = findControlPointWithMinimumOverlapsInsideRangeBox(
-                        flow, obstacles, minObstacleDistPx);
-                cPts.add(new Point(flow.cPtX(), flow.cPtY(), overlaps));
-                if (minObstacleDistPx == 0) {
-                    break;
-                }
-                minObstacleDistPx /= 2;
-                if (minObstacleDistPx == 1) {
-                    // ignore 1-pixel distance to accelerate computations
-                    minObstacleDistPx = 0;
-                }
+        minObstacleDistPx = model.getMinObstacleDistPx();
+        ArrayList<Point> candidateControlPoints = new ArrayList<>();
+        while (true) {
+            double overlaps = findControlPointWithMinimumOverlapsInsideRangeBox(
+                    flow, obstacles, minObstacleDistPx);
+            // store control point coordinates and number of overlaps in array
+            candidateControlPoints.add(new Point(flow.cPtX(), flow.cPtY(), overlaps));
+            if (minObstacleDistPx == 0) {
+                break;
             }
-
-            // find control point resulting in smallest amount of overlaps
-            int minOverlapsIndex = cPts.indexOf(Collections.min(cPts, new Comparator<Point>() {
-                @Override
-                public int compare(Point o1, Point o2) {
-                    return Double.compare(o1.getValue(), o2.getValue());
-                }
-            }));
-            Point cPt = cPts.get(minOverlapsIndex);
-            flow.setCtrlPt(cPt.x, cPt.y);
+            minObstacleDistPx /= 2;
+            if (minObstacleDistPx == 1) {
+                // ignore 1-pixel distance to accelerate computations
+                minObstacleDistPx = 0;
+            }
         }
-
+        // find control point with smallest amount of overlaps in array
+        int minOverlapsIndex = 0;
+        double minOverlaps = candidateControlPoints.get(0).getValue();
+        for (int i = 1; i < candidateControlPoints.size(); i++) {
+            double v = candidateControlPoints.get(i).getValue();
+            if (v < minOverlaps) {
+                minOverlaps = v;
+                minOverlapsIndex = i;
+            }
+        }
+        Point cPt = candidateControlPoints.get(minOverlapsIndex);
+        flow.setCtrlPt(cPt.x, cPt.y);
     }
 
+    /**
+     *
+     * @param flow
+     * @param obstacles
+     * @param minObstacleDistPx
+     * @return
+     */
     private boolean findControlPointWithoutOverlapsInsideRangeBox(Flow flow,
             List<Obstacle> obstacles, int minObstacleDistPx) {
 
@@ -1180,15 +1142,16 @@ public class ForceLayouter {
      * Move control points of flows overlapping obstacles
      *
      * @param obstacles obstacles to avoid
-     * @param flows flows overlapping an obstacle that are to be moved
+     * @param overlappingFlows flows overlapping an obstacle that are to be
+     * moved
      * @param nbrFlowsToMove stop when this many flows have been moved
      * @return number of remaining flows that overlap an obstacle
      */
     public int moveFlowsAwayFromObstacles(List<Obstacle> obstacles,
-            ArrayList<Flow> flows, int nbrFlowsToMove) {
+            ArrayList<Flow> overlappingFlows, int nbrFlowsToMove) {
         int nbrMovedFlows = 0;
-        for (int i = 0; i < Math.min(flows.size(), nbrFlowsToMove); i++) {
-            Flow flow = flows.get(i);
+        for (int i = 0; i < Math.min(overlappingFlows.size(), nbrFlowsToMove); i++) {
+            Flow flow = overlappingFlows.get(i);
             if (!flow.isLocked()) {
                 moveFlowAwayFromObstacles(flow, obstacles);
                 // lock the flow no matter whether it was moved or not
@@ -1201,7 +1164,7 @@ public class ForceLayouter {
         }
 
         // return initial number of flows overlapping obstacles
-        return flows.size() - nbrMovedFlows;
+        return overlappingFlows.size() - nbrMovedFlows;
     }
 
     /**

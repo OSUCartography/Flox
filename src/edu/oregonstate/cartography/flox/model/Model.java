@@ -2842,20 +2842,25 @@ public class Model {
     }
 
     /**
-     * Shorten all flows to reduce overlaps with other flows and arrowheads.
+     * Set start and end shortenings of flows to 0.
      */
-    public void shortenFlowsToReduceOverlaps() {
-
-        // reset shortening values
+    public void resetFlowShortenings() {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             iterator.next().resetShortenings();
         }
+    }
+    /**
+     * Shorten all flows to reduce overlaps with other flows and arrowheads.
+     */
+    public void shortenFlowsToReduceOverlaps() {
 
+        resetFlowShortenings();
+        
         // flows are sorted by the length of their base lines.
         // The longest flows are shortened first.
         if (isShortenFlowsToReduceOverlaps() && getMaxShorteningPx() > 0d) {
-            iterator = flowIteratorSortedByBaseLineLength(false);
+            Iterator<Flow> iterator = flowIteratorSortedByBaseLineLength(false);
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();
                 flow.adjustEndShorteningToAvoidOverlaps(this);

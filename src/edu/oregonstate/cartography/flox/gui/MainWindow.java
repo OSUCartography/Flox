@@ -25,7 +25,6 @@ import edu.oregonstate.cartography.map.ZoomOutTool;
 import edu.oregonstate.cartography.simplefeature.ShapeGeometryImporter;
 import edu.oregonstate.cartography.utils.FileUtils;
 import edu.oregonstate.cartography.utils.Sys;
-import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -4837,17 +4836,19 @@ public class MainWindow extends javax.swing.JFrame {
 
         cancelLayout();
 
-        if (model.getFlowRangeboxHeight() > 0) {
-            progressBar.setEnabled(true);
-
-            Model modelCopy = model.copy();
-            modelCopy.straightenFlows(false);
-            ForceLayouter layouter = new ForceLayouter(modelCopy);
-            layoutWorker = new LayoutWorker(layouter, progressBar, mapComponent);
-            layoutWorker.execute();
-        } else {
+        if (model.getFlowRangeboxHeight() == 0) {
             model.straightenFlows(false);
+            return;
         }
+        
+        progressBar.setEnabled(true);
+
+        Model modelCopy = model.copy();
+        modelCopy.straightenFlows(false);
+        modelCopy.resetFlowShortenings();
+        ForceLayouter layouter = new ForceLayouter(modelCopy);
+        layoutWorker = new LayoutWorker(layouter, progressBar, mapComponent);
+        layoutWorker.execute();
     }
 
 

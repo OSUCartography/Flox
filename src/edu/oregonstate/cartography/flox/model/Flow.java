@@ -1616,7 +1616,7 @@ public class Flow implements Comparable<Flow> {
         return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
                 cPtX, cPtY, endPt.x, endPt.y, tol, x, y);
     }
-    
+
     /**
      * The length of the line connecting the start point and the control point.
      *
@@ -2274,6 +2274,42 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
+     * Tests whether this flow overlaps an obstacle.
+     *
+     * @param obstacle obstacle to test against
+     * obstacles are considered
+     * @param model model with all flows
+     * @param minObstaclesDistPx minimum empty space between the flow and
+     * obstacles (in pixels)
+     * @return true if the flow overlaps a node
+     */
+    public boolean isOverlappingObstacle(Obstacle obstacle, Model model, int minObstaclesDistPx) {
+
+        // ignore obstacles that are start or end nodes of the flow
+        if (obstacle.node == getStartPt() || obstacle.node == getEndPt()) {
+            return false;
+        }
+
+        // ignore arrowhead attached to this flow
+        if (model.isDrawArrowheads() && obstacle.isArrowObstacleForFlow(this)) {
+            return false;
+        }
+
+        // ignore arrowheads that are attached to this flow's start or end node
+        if (obstacle.isArrowObstacle()) {
+            if (obstacle.flow.getStartPt() == getStartPt()
+                    || obstacle.flow.getStartPt() == getEndPt()
+                    || obstacle.flow.getEndPt() == getStartPt()
+                    || obstacle.flow.getEndPt() == getEndPt()) {
+                return false;
+            }
+        }
+
+        return cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle,
+                model, minObstaclesDistPx);
+    }
+    
+    /**
      * Tests whether this Flow overlaps with an arrow. The arrow is treated as a
      * triangle consisting of the tip point and the two corner points. The flow
      * width is taken into account.
@@ -2291,7 +2327,7 @@ public class Flow implements Comparable<Flow> {
                 || isIntersectingLineSegment(arrow.getCorner1Pt(), arrow.getCorner2Pt())) {
             return true;
         }
-        
+
         // the center line of the flow does not intersect the arrow triangle,
         // but it may still overlay parts of the arrow. So test whether any 
         // triangle vertices overlap the flow band.
