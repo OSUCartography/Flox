@@ -854,12 +854,14 @@ public class GeometryUtils {
         }
         return false;
     }
-    
+
     /**
      * Intersection test for line segment and circle.
      *
      * Returns true if one or both points of the line segment are inside the
      * circle or if the line segment intersects the circle.
+     *
+     * https://www.openprocessing.org/sketch/65771
      *
      * @param circleX circle center x
      * @param circleY circle center y
@@ -902,4 +904,26 @@ public class GeometryUtils {
         }
         return false;
     }
+
+    /**
+     * Returns true if a point is on the left of a line and false if the point
+     * is on right side of the line or on the line. Left is defined as "standing
+     * on x0/y0 and looking at x1/y1".
+     *
+     * @param x test point x
+     * @param y test point y
+     * @param x0 x point 1 on line
+     * @param y0 y point 1 on line
+     * @param x1 x point 2 on line
+     * @param y1 y point 2 on line
+     * @return true if x/y is on the left of the line and false if the point is
+     * on right side of the line or on the line.
+     */
+    public static boolean isOnLeftSide(double x, double y,
+            double x0, double y0,
+            double x1, double y1) {
+        assert ((x0 == x1 && y0 == y1) == false);
+        return (x1 - x0) * (y - y0) - (y1 - y0) * (x - x0) > 0d;
+    }
+
 }

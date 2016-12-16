@@ -2405,36 +2405,62 @@ public class Flow implements Comparable<Flow> {
      */
     public boolean hit(double x, double y, double tolerance, Model model) {
         // test with flow line without arrowhead
-        Flow clipppedFlow = model.clipFlowForRendering(this);
+        Flow clipppedFlow = model.clipFlow(this, true, true, true);
 
         // flow width
         double flowWidth = model.getFlowWidthPx(this) / model.getReferenceMapScale();
 
-        // Add half the width to tol, scaled to the map scale
+        // maximum distance between center line of flow and point x/y
         double maxDist = tolerance + flowWidth / 2;
 
         // Add padding to the bounding box in the amount of tolerance
         Rectangle2D flowBB = getBoundingBox();
         flowBB.add(flowBB.getMinX() - maxDist, flowBB.getMinY() - maxDist);
         flowBB.add(flowBB.getMaxX() + maxDist, flowBB.getMaxY() + maxDist);
-
         if (flowBB.contains(x, y) == false) {
             return false;
         }
 
-        // Get the distance of the click to the flow.
-        double distanceSqWorld = clipppedFlow.distanceSq(x, y, 0.000001);
-        boolean hit = distanceSqWorld <= maxDist * maxDist;
-        if (hit == true) {
-            return hit;
+        // test whether x/y is to the left of the start butt cap line
+        // compute unnormalized normal nx/ny at start (t = 0)
+        double startX = clipppedFlow.getStartPt().x;
+        double startY = clipppedFlow.getStartPt().y;
+        double dx = clipppedFlow.cPtX - startX;
+        double dy = clipppedFlow.cPtY - startY;
+        double nx = -dy;
+        double ny = dx;
+        // startPt and startPt + nx/ny define a line along the butt cap
+        // test whether the point is on the left of this line (when viewing from start point along normal)
+        // this is a simplified version of:
+        // leftOfButtCapLine = GeometryUtils.isOnLeftSide(x, y, startX, startY, startX + nx, startY + ny);
+        boolean leftOfStartButtCapLine = nx * (y - startY) - ny * (x - startX) > 0d;
+        if (leftOfStartButtCapLine) {
+            return false;
         }
 
-        // test hit with arrowhead
-        if (model.isDrawArrowheads()) {
+        // test whether x/y is to the left of the end butt cap line
+        if (model.isDrawArrowheads() == false) {
+            double endX = clipppedFlow.getEndPt().x;
+            double endY = clipppedFlow.getEndPt().y;
+            dx = clipppedFlow.cPtX - endX;
+            dy = clipppedFlow.cPtY - endY;
+            nx = -dy;
+            ny = dx;
+            boolean leftOfEndButtCapLine = nx * (y - endY) - ny * (x - endX) > 0d;
+            if (leftOfEndButtCapLine) {
+                return false;
+            }
+        } else {
+            // test with arrowhead
             Arrow arrow = getArrow(model);
-            return arrow.hit(x, y);
+            if (arrow.hit(x, y)) {
+                return true;
+            }
         }
         
-        return false;
+        // Get the distance of the clicked point to the flow.
+        double colinearTol = 0.2 /* px */ / model.getReferenceMapScale();
+        double distanceSqWorld = clipppedFlow.distanceSq(x, y, colinearTol);
+        return distanceSqWorld <= maxDist * maxDist;
     }
 }
