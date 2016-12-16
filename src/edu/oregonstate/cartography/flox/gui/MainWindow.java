@@ -124,7 +124,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowToggleButton.doClick();
     }
 
-    public void openComputationPalette() {       
+    public void openComputationPalette() {
         JOptionPane.showMessageDialog(
                 this,
                 computationSettingsPanel,
@@ -299,7 +299,7 @@ public class MainWindow extends javax.swing.JFrame {
             maxShorteningFormattedTextField.setValue(model.getMaxShorteningPx());
             minFlowLengthFormattedTextField.setValue(model.getMinFlowLengthPx());
             updateShorteningGUIEnabledState();
-                    
+
             // clipping
             boolean hasFlowsAndClipAreas = model.hasClipAreas() && model.getNbrFlows() > 0;
             boolean clipStart = model.isClipFlowsWithStartAreas();
@@ -347,14 +347,14 @@ public class MainWindow extends javax.swing.JFrame {
         arrowLengthRatioSlider.setEnabled(enable);
         arrowSizeRatioSlider.setEnabled(enable);
     }
-    
+
     private void updateShorteningGUIEnabledState() {
         maxShorteningLabel.setEnabled(shortenFlowsCheckBox.isSelected());
-            maxShorteningFormattedTextField.setEnabled(shortenFlowsCheckBox.isSelected());
-            maxShorteningPixelLabel.setEnabled(shortenFlowsCheckBox.isSelected());
-            minFlowLengthLabel.setEnabled(model.isShortenFlowsToReduceOverlaps());
-            minFlowLengthFormattedTextField.setEnabled(model.isShortenFlowsToReduceOverlaps());
-            minFlowLengthPixelLabel.setEnabled(model.isShortenFlowsToReduceOverlaps());
+        maxShorteningFormattedTextField.setEnabled(shortenFlowsCheckBox.isSelected());
+        maxShorteningPixelLabel.setEnabled(shortenFlowsCheckBox.isSelected());
+        minFlowLengthLabel.setEnabled(model.isShortenFlowsToReduceOverlaps());
+        minFlowLengthFormattedTextField.setEnabled(model.isShortenFlowsToReduceOverlaps());
+        minFlowLengthPixelLabel.setEnabled(model.isShortenFlowsToReduceOverlaps());
     }
 
     private void updateLayerList() {
@@ -567,8 +567,8 @@ public class MainWindow extends javax.swing.JFrame {
         distanceToggleButton = new javax.swing.JToggleButton();
         lockUnlockButton = new javax.swing.JButton();
         showAllButton = new javax.swing.JButton();
-        computationSettingsButton = new javax.swing.JButton();
         progressBar = new javax.swing.JProgressBar();
+        computationSettingsButton = new javax.swing.JButton();
         vallueLabel = new javax.swing.JLabel();
         valueFormattedTextField = new javax.swing.JFormattedTextField();
         coordinateInfoPanel = new edu.oregonstate.cartography.flox.gui.CoordinateInfoPanel();
@@ -774,15 +774,15 @@ public class MainWindow extends javax.swing.JFrame {
         resolveIntersectingSiblingsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator7 = new javax.swing.JPopupMenu.Separator();
         recomputeMenuItem = new javax.swing.JMenuItem();
-        printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
+        cancelLayoutMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator17 = new javax.swing.JPopupMenu.Separator();
         inlineArrowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showLineSegmentsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
+        showOptionsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator21 = new javax.swing.JPopupMenu.Separator();
         constrainControlPointsToRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        javax.swing.JPopupMenu.Separator jSeparator22 = new javax.swing.JPopupMenu.Separator();
-        showOptionsMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator31 = new javax.swing.JPopupMenu.Separator();
         testCurveOffsettingMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator32 = new javax.swing.JPopupMenu.Separator();
@@ -1201,6 +1201,10 @@ public class MainWindow extends javax.swing.JFrame {
         });
         toolBarContentPanel.add(showAllButton);
 
+        progressBar.setToolTipText("Layout Progress");
+        progressBar.setEnabled(false);
+        toolBarContentPanel.add(progressBar);
+
         computationSettingsButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/Action2.png"))); // NOI18N
         computationSettingsButton.setToolTipText("Computation Settings");
         computationSettingsButton.setBorderPainted(false);
@@ -1210,10 +1214,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         toolBarContentPanel.add(computationSettingsButton);
-
-        progressBar.setToolTipText("Layout Progress");
-        progressBar.setEnabled(false);
-        toolBarContentPanel.add(progressBar);
 
         vallueLabel.setFont(vallueLabel.getFont().deriveFont(vallueLabel.getFont().getSize()-2f));
         vallueLabel.setText("Value:");
@@ -3034,7 +3034,7 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu.add(jSeparator7);
 
         recomputeMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        recomputeMenuItem.setText("Recompute");
+        recomputeMenuItem.setText("Recompute Layout");
         recomputeMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 recomputeMenuItemActionPerformed(evt);
@@ -3042,13 +3042,13 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(recomputeMenuItem);
 
-        printFlowsToConsoleMenuItem.setText("Print Flows to Console");
-        printFlowsToConsoleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        cancelLayoutMenuItem.setText("Cancel Layout Computation");
+        cancelLayoutMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                printFlowsToConsoleMenuItemActionPerformed(evt);
+                cancelLayoutMenuItemActionPerformed(evt);
             }
         });
-        debugMenu.add(printFlowsToConsoleMenuItem);
+        debugMenu.add(cancelLayoutMenuItem);
         debugMenu.add(jSeparator17);
 
         inlineArrowsCheckBoxMenuItem.setText("Draw Inline Arrows");
@@ -3066,6 +3066,22 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showLineSegmentsCheckBoxMenuItem);
+
+        printFlowsToConsoleMenuItem.setText("Print Flows to Console");
+        printFlowsToConsoleMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                printFlowsToConsoleMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(printFlowsToConsoleMenuItem);
+
+        showOptionsMenuItem.setText("Show Options...");
+        showOptionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showOptionsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(showOptionsMenuItem);
         debugMenu.add(jSeparator21);
 
         constrainControlPointsToRangeBoxCheckBoxMenuItem.setText("Constrain Control Points to Range Boxes");
@@ -3083,15 +3099,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showRangeBoxCheckBoxMenuItem);
-        debugMenu.add(jSeparator22);
-
-        showOptionsMenuItem.setText("Show Options...");
-        showOptionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showOptionsMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(showOptionsMenuItem);
         debugMenu.add(jSeparator31);
 
         testCurveOffsettingMenuItem.setText("Test Curve Offsetting");
@@ -4741,7 +4748,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void maxShorteningFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maxShorteningFormattedTextFieldPropertyChange
         if (updatingGUI == false && model != null) {
             if ("value".equals(evt.getPropertyName())) {
-                double v = (Double)(maxShorteningFormattedTextField.getValue());
+                double v = (Double) (maxShorteningFormattedTextField.getValue());
                 model.setMaxShorteningPx(v);
                 model.shortenFlowsToReduceOverlaps();
                 mapComponent.refreshMap();
@@ -4753,7 +4760,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void minFlowLengthFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_minFlowLengthFormattedTextFieldPropertyChange
         if (updatingGUI == false && model != null) {
             if ("value".equals(evt.getPropertyName())) {
-                double v = (Double)(minFlowLengthFormattedTextField.getValue());
+                double v = (Double) (minFlowLengthFormattedTextField.getValue());
                 model.setMinFlowLengthPx(v);
                 model.shortenFlowsToReduceOverlaps();
                 mapComponent.refreshMap();
@@ -4768,9 +4775,9 @@ public class MainWindow extends javax.swing.JFrame {
             ErrorDialog.showErrorDialog("Select one flow.");
             return;
         }
-        
+
         ForceLayouter layouter = new ForceLayouter(model);
-        double touchPercentage =  layouter.largestTouchPercentage(flows.get(0), false);
+        double touchPercentage = layouter.largestTouchPercentage(flows.get(0), false);
         JOptionPane.showMessageDialog(this, "Largest Touch percentage: "
                 + Math.round(touchPercentage * 100) + "%");
     }//GEN-LAST:event_largestTouchPercentageMenuItemActionPerformed
@@ -4788,6 +4795,10 @@ public class MainWindow extends javax.swing.JFrame {
         openComputationPalette();
     }//GEN-LAST:event_computationSettingsButtonActionPerformed
 
+    private void cancelLayoutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelLayoutMenuItemActionPerformed
+        cancelLayout();
+    }//GEN-LAST:event_cancelLayoutMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4799,6 +4810,18 @@ public class MainWindow extends javax.swing.JFrame {
         return (name == null || name.isEmpty()) ? "Flows" : name;
     }
 
+    private void cancelLayout() {
+        if (layoutWorker != null && !layoutWorker.isDone()) {
+            layoutWorker.cancel(false);
+        }
+    }
+
+    /**
+     * Cancel possibly running layout thread and start a new thread for
+     * computing a new flow layout.
+     *
+     * @param undoString string to display in Undo/Redo menu
+     */
     public void layout(String undoString) {
         if (updatingGUI) {
             return;
@@ -4812,9 +4835,7 @@ public class MainWindow extends javax.swing.JFrame {
             return;
         }
 
-        if (layoutWorker != null && !layoutWorker.isDone()) {
-            layoutWorker.cancel(false);
-        }
+        cancelLayout();
 
         if (model.getFlowRangeboxHeight() > 0) {
             progressBar.setEnabled(true);
@@ -4846,6 +4867,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadLengthSlider;
     private javax.swing.JSlider arrowheadWidthSlider;
+    private javax.swing.JMenuItem cancelLayoutMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton canvasColorButton;
     private javax.swing.JSlider canvasSizeSlider;
     private javax.swing.JCheckBox clipWithEndAreasCheckBox;

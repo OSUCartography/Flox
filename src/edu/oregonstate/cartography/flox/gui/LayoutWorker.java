@@ -32,12 +32,12 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
         this.mapComponent = mapComponent;
 
         this.layouter.setProcessMonitor(this);
-        
+
         this.addPropertyChangeListener(new PropertyChangeListener() {
 
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                if ("progress".equals(evt.getPropertyName())) {
+                if ("progress".equals(evt.getPropertyName()) && isCancelled() == false) {
                     progressBar.setValue((Integer) evt.getNewValue());
                 }
             }
@@ -50,7 +50,7 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
      */
     private void layout() {
         final int nbrIterations = layouter.getModel().getNbrIterations();
-        
+
         // After 10% of all iterations the first flow is moved away from
         // obstacles like arrowheads and unconnected nodes. This gives flows
         // a chance to stabilize before the first one is moved.
@@ -58,33 +58,37 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
 
         // store initial lock flags of all flows
         boolean[] initialLocks = layouter.getModel().getLocks();
-        
+
         if (isCancelled()) {
             return;
         }
-        
+
         Rectangle2D canvas = layouter.getModel().getCanvas();
+        long startTime = System.nanoTime();
         for (int i = 0; i < nbrIterations; i++) {
             if (isCancelled()) {
                 break;
             }
-            //long startTime = System.nanoTime();    
 
-            iterBeforeMovingFlows = layouter.layoutIteration(i, 
+            iterBeforeMovingFlows = layouter.layoutIteration(i,
                     iterBeforeMovingFlows, canvas);
-            
-            //long estimatedTime = System.nanoTime() - startTime;
-            //System.out.format("%d %.3f seconds\n", i, estimatedTime / 1000d / 1000d / 1000d);
-            
+
             // update progress indicator
             double progress = 100d * i / nbrIterations;
             setProgress((int) Math.round(progress));
         }
         
-        layouter.getModel().shortenFlowsToReduceOverlaps();
-        
-        // reset lock flags to initial values
-        layouter.getModel().applyLocks(initialLocks);
+        if (isCancelled() == false) {
+            long estimatedTime = System.nanoTime() - startTime;
+            System.out.format("%.3f seconds\n", estimatedTime / 1000d / 1000d / 1000d);
+        }
+
+        if (isCancelled() == false) {
+            layouter.getModel().shortenFlowsToReduceOverlaps();
+
+            // reset lock flags to initial values
+            layouter.getModel().applyLocks(initialLocks);
+        }
     }
 
     @Override
@@ -105,9 +109,9 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
                 layouter.applyChangesToModel(mapComponent.getModel());
                 mapComponent.eraseBufferImage();
                 mapComponent.repaint();
-                progressBar.setValue(0);
-                progressBar.setEnabled(false);
             }
+            progressBar.setValue(0);
+            progressBar.setEnabled(false);
         } catch (Throwable t) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, t);
             String title = "Flox Error";

@@ -1131,18 +1131,18 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())" type="code"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Recompute"/>
+                <Property name="text" type="java.lang.String" value="Recompute Layout"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="recomputeMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="printFlowsToConsoleMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="cancelLayoutMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Print Flows to Console"/>
+                <Property name="text" type="java.lang.String" value="Cancel Layout Computation"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="printFlowsToConsoleMenuItemActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cancelLayoutMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator17">
@@ -1167,6 +1167,22 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showLineSegmentsCheckBoxMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="printFlowsToConsoleMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Print Flows to Console"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="printFlowsToConsoleMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="showOptionsMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Show Options..."/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showOptionsMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator21">
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
@@ -1187,20 +1203,6 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showRangeBoxCheckBoxMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator22">
-              <AuxValues>
-                <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
-                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
-              </AuxValues>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="showOptionsMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Show Options..."/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showOptionsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator31">
@@ -1484,6 +1486,12 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="showAllButtonActionPerformed"/>
                   </Events>
                 </Component>
+                <Component class="javax.swing.JProgressBar" name="progressBar">
+                  <Properties>
+                    <Property name="toolTipText" type="java.lang.String" value="Layout Progress"/>
+                    <Property name="enabled" type="boolean" value="false"/>
+                  </Properties>
+                </Component>
                 <Component class="javax.swing.JButton" name="computationSettingsButton">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
@@ -1495,12 +1503,6 @@
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="computationSettingsButtonActionPerformed"/>
                   </Events>
-                </Component>
-                <Component class="javax.swing.JProgressBar" name="progressBar">
-                  <Properties>
-                    <Property name="toolTipText" type="java.lang.String" value="Layout Progress"/>
-                    <Property name="enabled" type="boolean" value="false"/>
-                  </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="vallueLabel">
                   <Properties>
