@@ -1,6 +1,5 @@
 package edu.oregonstate.cartography.flox.model;
 
-import static edu.oregonstate.cartography.flox.model.Circle.TOL;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import net.jafama.FastMath;
 
@@ -266,6 +265,22 @@ public final class Arrow {
      */
     public Flow getFlow() {
         return flow;
+    }
+
+    /**
+     * Test whether the passed point is inside the triangle defined by the tip
+     * and the two corner points. The test is not correct when the triangle is
+     * not triangular.
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    public boolean hit(double x, double y) {
+        return GeometryUtils.pointInTriangle(x, y,
+                tipPt.x, tipPt.y,
+                corner1Pt.x, corner1Pt.y,
+                corner2Pt.x, corner2Pt.y);
     }
 
 }

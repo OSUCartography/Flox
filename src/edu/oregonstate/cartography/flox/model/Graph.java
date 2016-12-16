@@ -151,7 +151,6 @@ public final class Graph {
      * @param flow flow to add. Start and end nodes may be changed.
      */
     private void addFlowNoCacheUpdate(Flow flow) {
-        assert (hasFlowWithID(flow.id) == false);
 
         // replace start and end node of flow if they are already in the graph
         Point startPoint = findNodeInGraph(flow.getStartPt());

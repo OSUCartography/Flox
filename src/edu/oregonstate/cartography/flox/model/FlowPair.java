@@ -400,4 +400,26 @@ public class FlowPair extends Flow {
         endShorteningToAvoidOverlaps2 = flowPair.endShorteningToAvoidOverlaps2;
         startShorteningToAvoidOverlaps2 = flowPair.startShorteningToAvoidOverlaps2;
     }
+    
+    /**
+     * Returns whether the passed point is on this flow line (without the
+     * arrowhead)
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param tolerance the point x/y can miss the flow line by this much and
+     * will still be considered on the line.
+     * @param model model with all flows
+     * @return true if the flow line is hit, false otherwise.
+     */
+    @Override
+    public boolean hit(double x, double y, double tolerance, Model model) {
+        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        if (flow1.hit(x, y, tolerance, model)) {
+            return true;
+        }
+
+        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        return flow2.hit(x, y, tolerance, model);
+    }
 }

@@ -2276,8 +2276,7 @@ public class Flow implements Comparable<Flow> {
     /**
      * Tests whether this flow overlaps an obstacle.
      *
-     * @param obstacle obstacle to test against
-     * obstacles are considered
+     * @param obstacle obstacle to test against obstacles are considered
      * @param model model with all flows
      * @param minObstaclesDistPx minimum empty space between the flow and
      * obstacles (in pixels)
@@ -2308,7 +2307,7 @@ public class Flow implements Comparable<Flow> {
         return cachedClippedCurveIncludingArrowIntersectsObstacle(obstacle,
                 model, minObstaclesDistPx);
     }
-    
+
     /**
      * Tests whether this Flow overlaps with an arrow. The arrow is treated as a
      * triangle consisting of the tip point and the two corner points. The flow
@@ -2392,5 +2391,50 @@ public class Flow implements Comparable<Flow> {
         setCtrlPt(flow.cPtX(), flow.cPtY());
         endShorteningToAvoidOverlaps = flow.endShorteningToAvoidOverlaps;
         startShorteningToAvoidOverlaps = flow.startShorteningToAvoidOverlaps;
+    }
+
+    /**
+     * Returns whether the passed point hits this flow line or the arrowhead.
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param tolerance the point x/y can miss the flow line by this much and
+     * will still be considered on the line.
+     * @param model model with all flows
+     * @return true if the flow line is hit, false otherwise.
+     */
+    public boolean hit(double x, double y, double tolerance, Model model) {
+        // test with flow line without arrowhead
+        Flow clipppedFlow = model.clipFlowForRendering(this);
+
+        // flow width
+        double flowWidth = model.getFlowWidthPx(this) / model.getReferenceMapScale();
+
+        // Add half the width to tol, scaled to the map scale
+        double maxDist = tolerance + flowWidth / 2;
+
+        // Add padding to the bounding box in the amount of tolerance
+        Rectangle2D flowBB = getBoundingBox();
+        flowBB.add(flowBB.getMinX() - maxDist, flowBB.getMinY() - maxDist);
+        flowBB.add(flowBB.getMaxX() + maxDist, flowBB.getMaxY() + maxDist);
+
+        if (flowBB.contains(x, y) == false) {
+            return false;
+        }
+
+        // Get the distance of the click to the flow.
+        double distanceSqWorld = clipppedFlow.distanceSq(x, y, 0.000001);
+        boolean hit = distanceSqWorld <= maxDist * maxDist;
+        if (hit == true) {
+            return hit;
+        }
+
+        // test hit with arrowhead
+        if (model.isDrawArrowheads()) {
+            Arrow arrow = getArrow(model);
+            return arrow.hit(x, y);
+        }
+        
+        return false;
     }
 }

@@ -7,6 +7,8 @@ package edu.oregonstate.cartography.map;
 
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.flox.gui.FloxRenderer;
+import edu.oregonstate.cartography.flox.gui.MainWindow;
+import edu.oregonstate.cartography.flox.model.Arrow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
@@ -41,7 +43,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     public SelectionTool(AbstractSimpleFeatureMapComponent mapComponent) {
         super(mapComponent);
-       
+
         this.model = ((FloxMapComponent) mapComponent).getModel();
     }
 
@@ -59,9 +61,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         if (rect != null) {
             selectByRectangle(rect, evt.isShiftDown());
-            ((FloxMapComponent)mapComponent).getMainWindow().updateValueField();
-            ((FloxMapComponent)mapComponent).getMainWindow().updateCoordinateFields();
-            ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
+            ((FloxMapComponent) mapComponent).getMainWindow().updateValueField();
+            ((FloxMapComponent) mapComponent).getMainWindow().updateCoordinateFields();
+            ((FloxMapComponent) mapComponent).getMainWindow().updateLockUnlockButtonIcon();
         }
 
         if (model.isControlPtSelected()) {
@@ -90,14 +92,14 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         double tolWorldCoord = FloxRenderer.LOCK_ICON_RADIUS / mapComponent.getScale();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
-            if (flow.isLocked() && flow.getBoundingBox().contains(point)) {               
+            if (flow.isLocked() && flow.getBoundingBox().contains(point)) {
                 Flow clippedFlow = model.clipFlowForComputations(flow);
                 Point lockCenter = clippedFlow.pointOnCurve(0.5);
                 double dist = lockCenter.distance(point.x, point.y);
                 if (dist < tolWorldCoord) {
                     flow.setLocked(false);
                     mapComponent.refreshMap();
-                    ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
+                    ((FloxMapComponent) mapComponent).getMainWindow().updateLockUnlockButtonIcon();
                     // compute new flow layout
                     ((FloxMapComponent) mapComponent).layout("Unlock");
                     return;
@@ -112,7 +114,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         while (iterator.hasNext()) {
             iterator.next().setControlPointSelected(false);
         }
-        
+
         mapComponent.refreshMap();
     }
 
@@ -126,9 +128,10 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     @Override
     public void mouseDown(Point2D.Double point, MouseEvent evt) {
         selectByPoint(point, evt.isShiftDown(), SelectionTool.CLICK_PIXEL_TOLERANCE);
-        ((FloxMapComponent)mapComponent).getMainWindow().updateValueField();
-        ((FloxMapComponent)mapComponent).getMainWindow().updateCoordinateFields();
-        ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
+        MainWindow window = ((FloxMapComponent) mapComponent).getMainWindow();
+        window.updateValueField();
+        window.updateCoordinateFields();
+        window.updateLockUnlockButtonIcon();
     }
 
     public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
@@ -180,11 +183,9 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         // needed because flows are deselected by the initial click.
                     }
                 } else // flow bb does not intersect rect
-                {
-                    if (shiftDown == false) {
+                 if (shiftDown == false) {
                         flow.setSelected(false);
                     }
-                }
             }
         }
 
@@ -223,7 +224,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         // See if the event point is near the control point.
                         double cPtx = flow.cPtX();
                         double cPty = flow.cPtY();
-                        
+
                         if (((mapComponent.xToPx(cPtx) >= mapComponent.xToPx(point.x) - 5)
                                 && (mapComponent.xToPx(cPtx) <= mapComponent.xToPx(point.x) + 5))
                                 && ((mapComponent.yToPx(cPty) >= mapComponent.yToPx(point.y) - 5)
@@ -231,7 +232,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             flow.setControlPointSelected(true);
                             // Lock the flow
                             flow.setLocked(true);
-                            ((FloxMapComponent)mapComponent).getMainWindow().updateLockUnlockButtonIcon();
+                            ((FloxMapComponent) mapComponent).getMainWindow().updateLockUnlockButtonIcon();
                             controlPtGotSelected = true;
                             mapComponent.refreshMap();
                             // A control point was selected, so exit the method to 
@@ -277,15 +278,13 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 nodeGotSelected = true;
             }
         } else // No nodes were clicked.
-        {
-            if (!shiftDown) {
+         if (!shiftDown) {
                 // Shift is not held down.
                 // Deselect all nodes.
                 for (Point node : nodes) {
                     node.setSelected(false);
                 }
             }
-        }
 
         // SELECT FLOWS
         if (((FloxMapComponent) mapComponent).isDrawFlows()) {
@@ -296,39 +295,16 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             // to be selected, scaled to the current map scale.
             double toleranceWorld = pixelTolerance / mapComponent.getScale();
 
-            double[] xy = new double[2];
-            double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
-
             while (flows.hasNext()) {
                 Flow flow = flows.next();
-                Flow clipppedFlow = model.clipFlow(flow, false, false, true);
-
-                // flow width
-                double flowWidthWorld = model.getFlowWidthPx(flow) / model.getReferenceMapScale();
-
-                // Add half the width to tol, scaled to the map scale
-                double maxDistWorld = toleranceWorld + flowWidthWorld / 2;
-
-                // Add a little padding to the bounding box in the amount of tol
-                Rectangle2D flowBB = clipppedFlow.getBoundingBox();
-                flowBB.add(flowBB.getMinX() - maxDistWorld, flowBB.getMinY() - maxDistWorld);
-                flowBB.add(flowBB.getMaxX() + maxDistWorld, flowBB.getMaxY() + maxDistWorld);
-
-                if (flowBB.contains(point)) {
-                    // Get the distance of the click to the flow.
-                    double distanceSqWorld = clipppedFlow.distanceSq(point.x, point.y, tol);
-                    // If that distance is less than the tolerance, select it.
-                    if (distanceSqWorld <= maxDistWorld * maxDistWorld && !nodeGotSelected) {
-                        if (shiftDown) {
-                            flow.setSelected(!flow.isSelected());
-                        } else {
-                            flow.setSelected(true);
-                        }
-                        flowGotSelected = true;
-                    } else if (shiftDown == false) {
-                        flow.setSelected(false);
+                boolean hit = flow.hit(point.x, point.y, toleranceWorld, model);
+                if (hit) {
+                    if (shiftDown) {
+                        flow.setSelected(!flow.isSelected());
+                    } else {
+                        flow.setSelected(true);
                     }
-
+                    flowGotSelected = true;
                 } else if (shiftDown == false) {
                     flow.setSelected(false);
                 }
@@ -345,7 +321,8 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     }
 
     @Override
-    public boolean adjustCursor(Point2D.Double point) {
+    public boolean adjustCursor(Point2D.Double point
+    ) {
         this.setDefaultCursor();
         return true;
     }
