@@ -2502,8 +2502,18 @@ public class Model {
      * @return radius in pixels
      */
     public double getNodeRadiusPx(Point node) {
+        return Math.sqrt(getNodeRadiusSqrPx(node));
+    }
+    
+    /**
+     * Returns the square value of a node's radius in pixels at the reference scale.
+     *
+     * @param node
+     * @return squared radius in 'square pixels'
+     */
+    public double getNodeRadiusSqrPx(Point node) {
         double area = Math.abs(node.getValue() * getNodeSizeScaleFactor());
-        return Math.sqrt(area / Math.PI);
+        return area / Math.PI;
     }
 
     /**

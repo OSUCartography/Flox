@@ -13,6 +13,7 @@ import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
 import edu.oregonstate.cartography.simplefeature.AbstractSimpleFeatureMapComponent;
+import edu.oregonstate.cartography.utils.GeometryUtils;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -61,19 +62,19 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         if (rect != null) {
             selectByRectangle(rect, evt.isShiftDown());
-            ((FloxMapComponent) mapComponent).getMainWindow().updateValueField();
-            ((FloxMapComponent) mapComponent).getMainWindow().updateCoordinateFields();
-            ((FloxMapComponent) mapComponent).getMainWindow().updateLockUnlockButtonIcon();
+            MainWindow window = ((FloxMapComponent) mapComponent).getMainWindow();
+            window.updateValueField();
+            window.updateCoordinateFields();
+            window.updateLockUnlockButtonIcon();
         }
 
-        if (model.isControlPtSelected()) {
-            // deselect all control points
-            Iterator<Flow> iterator = model.flowIterator();
-            while (iterator.hasNext()) {
-                iterator.next().setControlPointSelected(false);
-            }
-            mapComponent.refreshMap();
+        // deselect all control points
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            iterator.next().setControlPointSelected(false);
         }
+
+        mapComponent.refreshMap();
 
         setDefaultCursor();
     }
@@ -134,7 +135,26 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         window.updateLockUnlockButtonIcon();
     }
 
-    public boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
+    private boolean rectangleSelectsNode(Rectangle2D.Double rect, Point node) {
+        // test whether the circle center is inside the rectangle
+        if (rect.contains(node.x, node.y)) {
+            return true;
+        }
+
+        // test whether any rectangle side intersects the circle or has a point inside the circle
+        double s = model.getReferenceMapScale();
+        double rsqr = model.getNodeRadiusSqrPx(node) / (s * s);
+        return GeometryUtils.lineIntersectsCircleRadSqr(node.x, node.y, rsqr,
+                rect.x, rect.y, rect.x + rect.width, rect.y)
+                || GeometryUtils.lineIntersectsCircleRadSqr(node.x, node.y, rsqr,
+                        rect.x, rect.y + rect.height, rect.x + rect.width, rect.y + rect.height)
+                || GeometryUtils.lineIntersectsCircleRadSqr(node.x, node.y, rsqr,
+                        rect.x + rect.width, rect.y, rect.x + rect.width, rect.y + rect.height)
+                || GeometryUtils.lineIntersectsCircleRadSqr(node.x, node.y, rsqr,
+                        rect.x, rect.y, rect.x, rect.y + rect.height);
+    }
+
+    private boolean selectByRectangle(Rectangle2D.Double rect, boolean shiftDown) {
 
         // Select nodes
         boolean nodeGotSelected = false;
@@ -142,11 +162,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             Iterator<Point> nodes = model.nodeIterator();
             while (nodes.hasNext()) {
                 Point pt = nodes.next();
-
-                if (((mapComponent.xToPx(pt.x) >= mapComponent.xToPx(rect.getMinX()) - 10)
-                        && (mapComponent.xToPx(pt.x) <= mapComponent.xToPx(rect.getMaxX()) + 10))
-                        && ((mapComponent.yToPx(pt.y) >= mapComponent.yToPx(rect.getMaxY()) - 10)
-                        && (mapComponent.yToPx(pt.y) <= mapComponent.yToPx(rect.getMinY()) + 10))) {
+                if (rectangleSelectsNode(rect, pt)) {
                     pt.setSelected(true);
                     nodeGotSelected = true;
                 } else if (shiftDown == false) {

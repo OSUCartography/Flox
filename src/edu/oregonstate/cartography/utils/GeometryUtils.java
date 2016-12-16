@@ -7,7 +7,7 @@ import net.jafama.FastMath;
 public class GeometryUtils {
 
     private static final double SQRT3 = Math.sqrt(3d);
-    
+
     /**
      *
      * This method returns true if two line segments intersect. Point 1 and
@@ -805,5 +805,101 @@ public class GeometryUtils {
 
         double discr = a1 * a1 - a0;
         return discr >= 0d;
+    }
+
+    /**
+     * Intersection test for line segment and circle.
+     *
+     * Returns true if one or both points of the line segment are inside the
+     * circle or if the line segment intersects the circle.
+     *
+     * @param circleX circle center x
+     * @param circleY circle center y
+     * @param r radius
+     * @param x0 line start x
+     * @param y0 line start y
+     * @param x1 line end x
+     * @param y1 line end y
+     * @return true if one or both points of the line segment are inside the
+     * circle or if the line segment intersects the circle.
+     */
+    public static boolean lineIntersectsCircle(double circleX, double circleY, double r,
+            double x0, double y0, double x1, double y1) {
+
+        // Translate everything so that line segment start point to (0, 0)
+        double a = x1 - x0; // Line segment end point horizontal coordinate
+        double b = y1 - y0; // Line segment end point vertical coordinate
+        double c = circleX - x0; // Circle center horizontal coordinate
+        double d = circleY - y0; // Circle center vertical coordinate
+        double aa_bb = a * a + b * b;
+        double da_cb = d * a - c * b;
+        double ca_db = c * a + d * b;
+        double a_c = a - c;
+        double b_d = b - d;
+        if (da_cb * da_cb <= r * r * aa_bb) {
+            // Collision is possible
+            if (c * c + d * d <= r * r) {
+                // Line segment start point is inside the circle
+                return true;
+            }
+            if (a_c * a_c + b_d * b_d <= r * r) {
+                // Line segment end point is inside the circle
+                return true;
+            }
+            if (ca_db >= 0 && ca_db <= aa_bb) {
+                // Middle section only
+                return true;
+            }
+
+        }
+        return false;
+    }
+    
+    /**
+     * Intersection test for line segment and circle.
+     *
+     * Returns true if one or both points of the line segment are inside the
+     * circle or if the line segment intersects the circle.
+     *
+     * @param circleX circle center x
+     * @param circleY circle center y
+     * @param rsqr radius squared
+     * @param x0 line start x
+     * @param y0 line start y
+     * @param x1 line end x
+     * @param y1 line end y
+     * @return true if one or both points of the line segment are inside the
+     * circle or if the line segment intersects the circle.
+     */
+    public static boolean lineIntersectsCircleRadSqr(double circleX, double circleY, double rsqr,
+            double x0, double y0, double x1, double y1) {
+
+        // Translate everything so that line segment start point to (0, 0)
+        double a = x1 - x0; // Line segment end point horizontal coordinate
+        double b = y1 - y0; // Line segment end point vertical coordinate
+        double c = circleX - x0; // Circle center horizontal coordinate
+        double d = circleY - y0; // Circle center vertical coordinate
+        double aa_bb = a * a + b * b;
+        double da_cb = d * a - c * b;
+        double ca_db = c * a + d * b;
+        double a_c = a - c;
+        double b_d = b - d;
+        if (da_cb * da_cb <= rsqr * aa_bb) {
+            // Collision is possible
+            if (c * c + d * d <= rsqr) {
+                // Line segment start point is inside the circle
+                return true;
+            }
+            if (a_c * a_c + b_d * b_d <= rsqr) {
+                // Line segment end point is inside the circle
+                return true;
+            }
+            if (ca_db >= 0 && ca_db <= aa_bb) {
+                // Middle section only
+                return true;
+            }
+
+        }
+        return false;
     }
 }
