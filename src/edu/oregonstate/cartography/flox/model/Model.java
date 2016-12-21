@@ -516,6 +516,12 @@ public class Model {
     private double maxShorteningPx = 100;
 
     /**
+     * a candidate position for shortening the start or the end of a flow must
+     * be followed by a section of the flow of this length without overlaps
+     */
+    public final int consecutivePixelsWithoutOverlapToShortenFlow = 3;
+
+    /**
      * A map with a set of symbolized layers.
      */
     private final Map map = new Map();
@@ -2412,94 +2418,6 @@ public class Model {
 
         // end clipping radius
         return Math.max(endNodeClipRadius, endMaskClipRadius);
-    }
-
-    /**
-     * Returns whether a slice of the flow overlaps any other flow or arrowhead.
-     * The slice is defined by two radii around the end node.
-     *
-     * @param flow the Flow to slice
-     * @param r1 smaller radius
-     * @param r2 greater radius
-     * @return true if the slice is overlapping any flows or arrowheads
-     */
-    public boolean isEndSliceOverlappingFlowsOrArrowheads(Flow flow,
-            double r1, double r2) {
-        return isSliceOverlappingFlowsOrArrowheads(flow, r1, r2, /* aroundEndNode */ true);
-    }
-
-    /**
-     * Returns whether a slice of the flow overlaps any other flow or arrowhead.
-     * The slice is defined by two radii around the start node.
-     *
-     * @param flow the Flow to slice
-     * @param r1 smaller radius
-     * @param r2 greater radius
-     * @return true if the slice is overlapping any flows or arrowheads
-     */
-    public boolean isStartSliceOverlappingFlowsOrArrowheads(Flow flow,
-            double r1, double r2) {
-        return isSliceOverlappingFlowsOrArrowheads(flow, r1, r2, /* aroundEndNode */ false);
-    }
-
-    /**
-     * Returns whether a slice of the flow overlaps any other flow or arrowhead.
-     * The slice is defined by two radii around the start node or the end node.
-     *
-     * @param flow the Flow to slice
-     * @param r1 smaller radius
-     * @param r2 greater radius
-     * @param aroundEndNode if true, radii are centered on end node to clip
-     * flows; otherwise they are centered on the start node.
-     * @return true if the slice is overlapping any flows or arrowheads
-     */
-    private boolean isSliceOverlappingFlowsOrArrowheads(Flow flow,
-            double r1, double r2, boolean aroundEndNode) {
-
-        assert (r2 > 1);
-
-        // compute difference of radii in pixels. Sample each pixel for overlaps.
-        int nbrSamplings = (int) Math.round((r2 - r1) * referenceMapScale);
-        nbrSamplings = Math.min(1, nbrSamplings);
-
-        double thisWidthPx = getFlowWidthPx(flow);
-        Flow slice = aroundEndNode
-                ? flow.clipAroundEndNode(r1, r2)
-                : flow.clipAroundStartNode(r1, r2);
-
-        Iterator<Flow> iterator = flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow2 = iterator.next();
-            if (flow2.id == flow.id) {
-                continue;
-            }
-
-            // clip other flow to visible extent
-            // also clip the arrowhead as arrowheads are tested below for overlaps
-            Flow flow2Clipped = clipFlow(flow2,
-                    /* clipArrowhead */ true,
-                    /* forceClipNodes */ true,
-                    /* adjustLengthToReduceOverlaps */ true);
-
-            // test for flow-flow overlaps
-            double flowWidthPx = getFlowWidthPx(flow2);
-            double minDistPx = minObstacleDistPx + (thisWidthPx + flowWidthPx) / 2;
-            double minDist = minDistPx / referenceMapScale;
-
-            // FIXME override by FlowPair and overload for FlowPair
-            if (slice.isClose(flow2Clipped, minDist, nbrSamplings, this)) {
-                return true;
-            }
-
-            // test for flow-arrowhead overlaps
-            Arrow arrow = flow2.getArrow(this);
-            if (slice.isOverlappingArrow(arrow, this)) {
-                return true;
-            }
-        }
-
-        // no overlap found
-        return false;
     }
 
     /**

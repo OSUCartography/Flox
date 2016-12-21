@@ -2120,6 +2120,29 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
+     * Search through last n elements of array and test whether any of the
+     * values is true, indicating an overlap.
+     *
+     * @param candidates array to test
+     * @param n number of array elements to test
+     * @return true if at least one of the last n elements of candidates is
+     * true.
+     */
+    private boolean lastPositionsOverlap(ArrayList<Boolean> candidates, int n) {
+        if (candidates.size() < n) {
+            return true;
+        }
+        for (int i = 1; i <= n; i++) {
+            boolean foundOverlap = candidates.get(candidates.size() - i);
+            if (foundOverlap) {
+                return true;
+            }
+        }
+        // no overlap found in last n array elements
+        return false;
+    }
+
+    /**
      * Adjust the end of this Flow to reduce overlaps of this Flow and its Arrow
      * with other lines and arrowheads.
      *
@@ -2131,36 +2154,39 @@ public class Flow implements Comparable<Flow> {
         final double referenceMapScale = model.getReferenceMapScale();
         final double radiusIncrement = RAD_INC_PX / referenceMapScale;
         double minFlowLength = model.getMinFlowLengthPx() / referenceMapScale;
-        double flowWidthPx = model.getFlowWidthPx(this);
-        double flowWidth = flowWidthPx / referenceMapScale;
+        double thisWidthPx = model.getFlowWidthPx(this);
+        double thisWidth = thisWidthPx / referenceMapScale;
         double endNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getEndPt());
         double endNodeRadius = endNodeRadiusPx / referenceMapScale;
 
-        double flowEndRadius = model.endClipRadius(this,
+        // Node radius for testing whether the flow end points at the end node.
+        // Make sure the circle is as large as the width of the flow.
+        double visualNodeRadius = Math.max(thisWidth / 2d, endNodeRadius);
+
+        double endR = model.endClipRadius(this,
                 /* clipArrowhead */ false,
                 /* lineString */ null,
                 /* clipEndNode */ true,
                 /* adjustLengthToReduceOverlaps */ false);
 
-        int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX) + 1;
+        int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX);
+        ArrayList<Boolean> candidates = new ArrayList<>(nbrIterations);
         for (int i = 0; i <= nbrIterations; i++) {
             endShorteningToAvoidOverlaps = i * radiusIncrement;
-            double clipRadius = flowEndRadius + endShorteningToAvoidOverlaps;
+            double clipRadius = endR + endShorteningToAvoidOverlaps;
 
             // FIXME make sure clip radius is not too large
             // ...
-            // make sure the arrow is pointing at the end node circle
-            // use a node circle that is at least as large as the flow width
-            double nodeRadius = Math.max(flowWidth / 2d, clipRadius);
-            double t = getIntersectionTWithCircleAroundEndPoint(nodeRadius);
-            if (isTangentDirectedTowardsEndNode(t, endNodeRadius) == false) {
-                endShorteningToAvoidOverlaps = 0;
+            // make sure the arrow (or end of line) is pointing at the end node circle
+            double t = getIntersectionTWithCircleAroundEndPoint(endR + endShorteningToAvoidOverlaps);
+            if (isTangentDirectedTowardsEndNode(t, visualNodeRadius) == false) {
+                endShorteningToAvoidOverlaps = 0; // unlike the start of flows, do not shorten end of flows
                 break;
             }
 
             // make sure flow trunk (flow without arrowhead) is long enough
             if (isFlowTrunkLongerThan(minFlowLength, model) == false) {
-                startShorteningToAvoidOverlaps = 0;
+                endShorteningToAvoidOverlaps = 0; // unlike the start of flows, do not shorten end of flows
                 break;
             }
 
@@ -2174,41 +2200,25 @@ public class Flow implements Comparable<Flow> {
                     break;
                 }
             } else {
-                // when arrowheads are not drawn, clip a thin slice off the end 
-                // of the flow and test whether the slice overlaps another flow or arrowhead
-                double r2 = clipRadius + radiusIncrement;
-                // FIXME make sure clip radii are not too large
-                // if (radius < ...
-                if (model.isEndSliceOverlappingFlowsOrArrowheads(this, clipRadius, r2) == false) {
+                // when arrowheads are not drawn, test whether the current end
+                // of the flow overlaps any other flow
+                candidates.add(isOverlappingAnyFlowAtPoint(t, model));
+
+                // if the n last tests did not find any overlap, we have a good value 
+                // for endShorteningToAvoidOverlaps.
+                int n = model.consecutivePixelsWithoutOverlapToShortenFlow;
+                if (lastPositionsOverlap(candidates, n) == false) {
+                    // no overlap found with last n tests. Return the first of the n values.
+                    endShorteningToAvoidOverlaps = (candidates.size() - n) * radiusIncrement;
                     break;
                 }
             }
-
-//            // elongate the flow
-//            endShorteningToAvoidOverlaps = -endShorteningToAvoidOverlaps;
-//            clipRadius = flowEndRadius + endShorteningToAvoidOverlaps;
-//            // make sure clip radius is not too small
-//            // FIXME this can result in a flow with zero length and an arrowhead
-//            if (clipRadius >= endNodeRadius) {
-//                Arrow arrow = getArrow(model, clipRadius);
-//                if (model.arrowOverlapsAnyFlow(arrow) == false
-//                        && model.arrowOverlapsAnyArrow(arrow, this) == false) {
-//                    break;
-//                }
-//            } else {
-//                endShorteningToAvoidOverlaps = 0;
-//            }
         }
     }
 
     /**
      * Shortens the start of the flow to reduce overlaps of this flow with other
      * lines and arrowheads.
-     *
-     * Algorithm: the flow line is cut in salami slices, starting at the end of
-     * the flow. Each slice is tested for overlaps. If a slice does not overlap
-     * any other flow or arrowhead, the beginning of the slice is the new start
-     * clipping value. length is retained.
      *
      * @param model the Model with all Flows
      */
@@ -2223,46 +2233,41 @@ public class Flow implements Comparable<Flow> {
         double startNodeRadiusPx = model.getNodeStrokeWidthPx() / 2 + model.getNodeRadiusPx(getStartPt());
         double startNodeRadius = startNodeRadiusPx / referenceMapScale;
 
-        double nodeRadius = Math.max(thisWidth / 2d, startNodeRadius);
+        // Node radius for testing whether the flow start points at the start node.
+        // Make sure the circle is as large as the width of the flow.
+        double visualNodeRadius = Math.max(thisWidth / 2d, startNodeRadius);
         double startR = model.startClipRadius(this,
                 /* forceClipNodes */ true,
                 /* adjustLengthToReduceOverlaps */ false);
 
-        ArrayList<Boolean> candidates = new ArrayList<>();
-
         int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX);
+        ArrayList<Boolean> candidates = new ArrayList<>(nbrIterations);
         for (int i = 0; i <= nbrIterations; i++) {
             startShorteningToAvoidOverlaps = i * radiusIncrement;
 
             // make sure the tail of the flow is pointing towards the start node
             double t = getIntersectionTWithCircleAroundStartPoint(startR + startShorteningToAvoidOverlaps);
-            if (isTangentDirectedTowardsStartNode(t, nodeRadius) == false) {
-                startShorteningToAvoidOverlaps = 0;
+            if (isTangentDirectedTowardsStartNode(t, visualNodeRadius) == false) {
+                startShorteningToAvoidOverlaps = Math.max(0, (i - 1) * radiusIncrement);
                 break;
             }
 
             // make sure the flow trunk (flow without arrowhead) is long enough
             if (isFlowTrunkLongerThan(minFlowLength, model) == false) {
-                startShorteningToAvoidOverlaps = 0;
+                startShorteningToAvoidOverlaps = Math.max(0, (i - 1) * radiusIncrement);
                 break;
             }
 
+            // test whether the current start of the flow overlaps any other flow
             candidates.add(isOverlappingAnyFlowAtPoint(t, model));
 
-            // if last n elements are false, we have found a good value for startShorteningToAvoidOverlaps
-            int n = 5;
-            if (candidates.size() >= n) {
-                boolean foundOverlap = false;
-                for (int j = 0; j < n; j++) {
-                    foundOverlap = candidates.get(candidates.size() - 1 - j);
-                    if (foundOverlap) {
-                        break;
-                    }
-                }
-                if (foundOverlap == false) {
-                    startShorteningToAvoidOverlaps = (candidates.size() - n) * radiusIncrement;
-                    break;
-                }
+            // if the n last tests did not find any overlap, we have a good value 
+            // for startShorteningToAvoidOverlaps.
+            int n = model.consecutivePixelsWithoutOverlapToShortenFlow;
+            if (lastPositionsOverlap(candidates, n) == false) {
+                // no overlap found with last n tests. Return the first of the n values.
+                startShorteningToAvoidOverlaps = (candidates.size() - n) * radiusIncrement;
+                break;
             }
         }
     }
