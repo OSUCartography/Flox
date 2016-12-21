@@ -78,7 +78,7 @@ public class Model {
      * threshold for accepting similarity percentage: two flows with higher a
      * value are considered similar.
      */
-    public static final double MAX_TOUCH_PERCENTAGE = 0.05;
+    public static final double MAX_TOUCH_PERCENTAGE = 0.1;
 
     /**
      * the minimum increment in pixels when searching for a control point
@@ -661,6 +661,8 @@ public class Model {
 
     /**
      * Change control point location of a flow.
+     *
+     * @param flow flow with new information
      */
     public void updateFlow(Flow flow) {
         // FIXME inefficient iteration, should use hash map
@@ -668,7 +670,8 @@ public class Model {
         while (iter.hasNext()) {
             Flow destinationFlow = iter.next();
             if (destinationFlow.id == flow.id) {
-                destinationFlow.update(flow);               
+                destinationFlow.update(flow);
+                destinationFlow.setSelected(flow.isSelected()); // FIXME remove, only for testing
                 break;
             }
         }
@@ -2378,8 +2381,8 @@ public class Model {
 
             // get clip radius including arrowhead
             endNodeClipRadius = arrow.getClipRadius();
-        } else if (clipEndNode 
-                || getFlowDistanceFromEndPointPixel() > 0 
+        } else if (clipEndNode
+                || getFlowDistanceFromEndPointPixel() > 0
                 || isDrawArrowheads()
                 || (adjustLengthToReduceOverlaps && flow.getEndShorteningToAvoidOverlaps() > 0)) {
             // clip the end if there must be a gap between the end of the 
@@ -2422,7 +2425,7 @@ public class Model {
      */
     public boolean isEndSliceOverlappingFlowsOrArrowheads(Flow flow,
             double r1, double r2) {
-        return isSliceOverlappingFlowsOrArrowheads(flow, r1, r2, true);
+        return isSliceOverlappingFlowsOrArrowheads(flow, r1, r2, /* aroundEndNode */ true);
     }
 
     /**
@@ -2436,7 +2439,7 @@ public class Model {
      */
     public boolean isStartSliceOverlappingFlowsOrArrowheads(Flow flow,
             double r1, double r2) {
-        return isSliceOverlappingFlowsOrArrowheads(flow, r1, r2, false);
+        return isSliceOverlappingFlowsOrArrowheads(flow, r1, r2, /* aroundEndNode */ false);
     }
 
     /**
@@ -2461,7 +2464,8 @@ public class Model {
 
         double thisWidthPx = getFlowWidthPx(flow);
         Flow slice = aroundEndNode
-                ? flow.clipAroundEndNode(r1, r2) : flow.clipAroundStartNode(r1, r2);
+                ? flow.clipAroundEndNode(r1, r2)
+                : flow.clipAroundStartNode(r1, r2);
 
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
@@ -2481,9 +2485,9 @@ public class Model {
             double flowWidthPx = getFlowWidthPx(flow2);
             double minDistPx = minObstacleDistPx + (thisWidthPx + flowWidthPx) / 2;
             double minDist = minDistPx / referenceMapScale;
-            
+
             // FIXME override by FlowPair and overload for FlowPair
-            if (slice.isClose(flow2Clipped, minDist, nbrSamplings, referenceMapScale)) {
+            if (slice.isClose(flow2Clipped, minDist, nbrSamplings, this)) {
                 return true;
             }
 
@@ -2507,9 +2511,10 @@ public class Model {
     public double getNodeRadiusPx(Point node) {
         return Math.sqrt(getNodeRadiusSqrPx(node));
     }
-    
+
     /**
-     * Returns the square value of a node's radius in pixels at the reference scale.
+     * Returns the square value of a node's radius in pixels at the reference
+     * scale.
      *
      * @param node
      * @return squared radius in 'square pixels'
@@ -2791,7 +2796,7 @@ public class Model {
             if (flowWithArrow.id == flow.id) {
                 continue;
             }
-            
+
             if (flow.isArrowOverlappingArrow(arrow, this)) {
                 return true;
             }
@@ -2863,16 +2868,17 @@ public class Model {
             iterator.next().resetShortenings();
         }
     }
+
     /**
      * Shorten all flows to reduce overlaps with other flows and arrowheads.
      */
     public void shortenFlowsToReduceOverlaps() {
-
         resetFlowShortenings();
-        
-        // flows are sorted by the length of their base lines.
-        // The longest flows are shortened first.
+
         if (isShortenFlowsToReduceOverlaps() && getMaxShorteningPx() > 0d) {
+
+            // flows are sorted by the length of their base lines.
+            // The longest flows are shortened first.
             Iterator<Flow> iterator = flowIteratorSortedByBaseLineLength(false);
             while (iterator.hasNext()) {
                 Flow flow = iterator.next();

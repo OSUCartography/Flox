@@ -80,12 +80,17 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
         
         if (isCancelled() == false) {
             long estimatedTime = System.nanoTime() - startTime;
-            System.out.format("%.3f seconds\n", estimatedTime / 1000d / 1000d / 1000d);
+            System.out.format("Layout: %.3f seconds\n", estimatedTime / 1000d / 1000d / 1000d);
         }
 
         if (isCancelled() == false) {
+            layouter.symmetrizeFlows();
+            
+            startTime = System.nanoTime();
             layouter.getModel().shortenFlowsToReduceOverlaps();
-
+            long estimatedTime = System.nanoTime() - startTime;
+            System.out.format("Shortening: %.3f seconds\n", estimatedTime / 1000d / 1000d / 1000d);
+            
             // reset lock flags to initial values
             layouter.getModel().applyLocks(initialLocks);
         }

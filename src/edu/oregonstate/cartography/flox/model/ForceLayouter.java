@@ -100,7 +100,7 @@ public class ForceLayouter {
      */
     public int layoutIteration(int iteration, int iterBeforeMovingFlowsOffObstacles,
             Rectangle2D canvas) {
-        
+
         System.out.println(1 + iteration + "/" + model.getNbrIterations());
 
         model.invalidateCachedValues();
@@ -117,7 +117,7 @@ public class ForceLayouter {
             if (isCancelled()) {
                 return 0;
             }
-            
+
             System.out.println("# intersecting pairs: " + pairs.size());
 
             for (Model.IntersectingFlowPair pair : pairs) {
@@ -165,7 +165,7 @@ public class ForceLayouter {
 
             int nbrOverlaps = sortedOverlappingFlows.size();
             System.out.println("# flows overlapping obstacles: " + nbrOverlaps);
-            
+
             // Compute the number of flows to move. Default is 1, but this might 
             // have to be larger when there are more overlapping flows than 
             // remaining iterations.
@@ -972,22 +972,9 @@ public class ForceLayouter {
             // has an approximate distance of searchIncrement to the current point
             angleRad += searchIncrement / spiralR;
 
-            if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY) == false) {
-                continue;
-            }
-            flow.setCtrlPt(cPtX, cPtY);
-
-            // test whether new geometry is close to a locked flow
-            boolean onlyTestWithLockedFlows = true;
-            double touchPercentage = largestTouchPercentage(flow, onlyTestWithLockedFlows);
-            if (touchPercentage > Model.MAX_TOUCH_PERCENTAGE) {
-                continue;
-            }
-
-            if (flowIntersectsObstacles(flow, obstacles, minObstacleDistPx) == false) {
-                // found a new position for the control point that does not 
-                // result in an overlap with any obstacle and is not too close 
-                // to any other locked flow
+            /// test whether new control point position is within rangebox and 
+            // does not result in a flow that is too close ot other flows or obstacles
+            if (assignControlPointPositionIfAcceptable(flow, cPtX, cPtY, rangeBoxEnforcer, obstacles, minObstacleDistPx, true)) {
                 return true;
             }
         } // move along the spiral until the entire range box is covered
@@ -996,6 +983,53 @@ public class ForceLayouter {
         // Could not find good new position. Revert to original control point.
         flow.setCtrlPt(originalX, originalY);
         return false;
+    }
+
+    /**
+     * Replaces the control point position with a new position if the new
+     * position does not result in a flow that is too close to other flows,
+     * intersects obstacles, or has the control point outside the range box.
+     *
+     * @param flow Flow to change
+     * @param cPtX new control point position x
+     * @param cPtY new control point position y
+     * @param rangeBoxEnforcer range box that must contain the control point
+     * @param obstacles obstacles to avoid
+     * @param minObstacleDistPx minimum distance to obstacles in pixels
+     * @param onlyTestWithLockedFlows if true, only flows that are locked are
+     * considered when testing whether the new control point position results in
+     * a flow that is too close to other (locked) flows.
+     * @return
+     */
+    private boolean assignControlPointPositionIfAcceptable(Flow flow,
+            double cPtX, double cPtY,
+            RangeboxEnforcer rangeBoxEnforcer,
+            List<Obstacle> obstacles,
+            int minObstacleDistPx,
+            boolean onlyTestWithLockedFlows) {
+
+        double originalX = flow.cPtX();
+        double originalY = flow.cPtY();
+        if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY) == false) {
+            return false;
+        }
+
+        flow.setCtrlPt(cPtX, cPtY);
+
+        // test whether new control point position is too close to another flow
+        double touchPercentage = largestTouchPercentage(flow, onlyTestWithLockedFlows);
+        if (touchPercentage > Model.MAX_TOUCH_PERCENTAGE) {
+            flow.setCtrlPt(originalX, originalY);
+            return false;
+        }
+
+        // test whether new control point position results in a flow intersecting obstacles
+        if (flowIntersectsObstacles(flow, obstacles, minObstacleDistPx)) {
+            flow.setCtrlPt(originalX, originalY);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -1067,7 +1101,7 @@ public class ForceLayouter {
                 // option with Manhattan distance with axes aligned to base line.
                 // The Manhatten distance should result in more symmetric flows.
                 // FIXME it is not clear whether Manhattan distance is any better. Results with US commodity flows are identical for both distances.
-                double p1 = flow.scalarProjectionOnBaseline(cPtX, cPtY);
+                double p1 = flow.scalarProjectionOnBaselineRelativeToMidPoint(cPtX, cPtY);
                 double dSqr = flow.getSquareDistanceToBaseLineMidPoint(cPtX, cPtY);
                 double p2 = Math.sqrt(dSqr - p1 * p1);
                 double dsq = p1 + p2;
@@ -1090,8 +1124,8 @@ public class ForceLayouter {
     /**
      * Computes the "touch percentage" of this flow with all other flows and
      * returns the largest value found. The "touch percentage" is between 0 and
-     * 1. 0 0 indicates the flows are not touching. 1 indicates this flow
-     * touches another flow along the entire length of this flow.
+     * 1. A value of 0 indicates that the flows are not touching. 1 indicates
+     * this flow touches another flow along the entire length of this flow.
      *
      * @param flow flow to compute touch percentage for
      * @param onlyTestWithLockedFlows If true, the touch percentage will only be
@@ -1129,7 +1163,7 @@ public class ForceLayouter {
             Rectangle2D.Double boundingBox2 = flow2.getBoundingBox();
             double bbDistSqr = GeometryUtils.rectDistSq(boundingBox1, boundingBox2);
             if (bbDistSqr < minDist * minDist) {
-                int nbrPointsToTest = 10; // FIXME                
+                int nbrPointsToTest = 10; // FIXME hard-coded parameter Model.MAX_TOUCH_PERCENTAGE should depend on this parameter
                 double touchPercentage = flow.touchPercentage(flow2, minDist, nbrPointsToTest);
                 maxTouchPercentage = Math.max(touchPercentage, maxTouchPercentage);
             }
@@ -1176,6 +1210,77 @@ public class ForceLayouter {
 
     private boolean isCancelled() {
         return (processMonitor == null) ? false : processMonitor.isCancelled();
+    }
+
+    /**
+     * Makes skewed flows more symmetric and makes flows with long arrowheads
+     * more straight.
+     */
+    public void symmetrizeFlows() {
+        // nodes and arrowheads are obstacles
+        List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
+
+        RangeboxEnforcer rangeboxEnforcer = new RangeboxEnforcer(model);
+        Iterator<Flow> flowIterator = model.flowIterator();
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
+            if (flow.isLocked()) {
+                continue;
+            }
+            symmetrizeFlow(flow, obstacles, rangeboxEnforcer);
+        }
+    }
+
+    /**
+     * Makes a skewed flow more symmetric, and makes a flow with a long
+     * arrowhead more straight.
+     *
+     * @param flow flow
+     * @param obstacles obstacles to avoid
+     * @param rangeboxEnforcer to make the control point stay within the range
+     * box
+     */
+    public void symmetrizeFlow(Flow flow, List<Obstacle> obstacles,
+            RangeboxEnforcer rangeboxEnforcer) {
+
+        Flow clippedFlow = model.clipFlow(flow, false, true, true);
+
+        // Test whether control point is far away from the perpendicular 
+        // axis on the base line passing through the point between the start
+        // and the end point.
+        // project control point onto base line
+        double cPtX = flow.cPtX();
+        double cPtY = flow.cPtY();
+        double startPtMidPtDist = clippedFlow.scalarProjectionOnBaseline(cPtX, cPtY);
+        double l = clippedFlow.getBaselineLength();
+        double endPtMidPtDist = l - startPtMidPtDist;
+        double ratio = Math.min(startPtMidPtDist, endPtMidPtDist) / l;
+        if (ratio < 0.3) { // FIXME hard-coded parameter
+            Point cPt = clippedFlow.getSymmetricControlPoint();
+            // try a few positions between the symmetrical point and the original point
+            for (int i = 5; i > 0; i--) { // FIXME hard-coded parameter
+                double w = i / 5d;
+                double x = w * cPt.x + (1d - w) * cPtX;
+                double y = w * cPt.y + (1d - w) * cPtY;
+                if (assignControlPointPositionIfAcceptable(flow, x, y,
+                        rangeboxEnforcer, obstacles, model.getMinObstacleDistPx(), false)) {
+                    break;
+                }
+            }
+        }
+
+        // try straightening flows where the arrowhead is longer than the flow trunk
+        if (model.isDrawArrowheads()) {
+            Arrow arrow = flow.getArrow(model);
+            if (flow.isFlowTrunkLongerThan(arrow.getLength(), model) == false) {
+                double mx = (clippedFlow.getStartPt().x + clippedFlow.getEndPt().x) / 2d;
+                double my = (clippedFlow.getStartPt().y + clippedFlow.getEndPt().y) / 2d;
+                if (assignControlPointPositionIfAcceptable(flow, mx, my,
+                        rangeboxEnforcer, obstacles, model.getMinObstacleDistPx(), false)) {
+
+                }
+            }
+        }
     }
 
 }

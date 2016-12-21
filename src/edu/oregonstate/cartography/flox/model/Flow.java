@@ -520,13 +520,20 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Returns whether the flow is longer than a minimum length.
+     * Returns whether the trunk of the flow is longer than a minimum length.
+     * The trunk is the visible piece of the flow without the arrowhead.
+     *
+     * This is an approximation. Instead of computing the Bezier curve length,
+     * the distance between the start point and the end point of the trunk are
+     * used.
      *
      * @param minLength the minimum length
+     * @param model model with all flows
      * @return true if this flow is longer than the passed minLength
      */
-    public boolean isLongerThan(double minLength) {
-        return getBaselineLengthSquare() > minLength * minLength;
+    public boolean isFlowTrunkLongerThan(double minLength, Model model) {
+        Flow flowTrunc = model.clipFlow(this, true, true, true);
+        return flowTrunc.getBaselineLengthSquare() > minLength * minLength;
     }
 
     /**
@@ -575,7 +582,7 @@ public class Flow implements Comparable<Flow> {
      * @param y y point
      * @return length of vector between the base line mid point and x/y
      */
-    public double scalarProjectionOnBaseline(double x, double y) {
+    public double scalarProjectionOnBaselineRelativeToMidPoint(double x, double y) {
         double midX = (endPt.x + startPt.x) / 2d;
         double midY = (endPt.y + startPt.y) / 2d;
         // vector A from mid point to passed point
@@ -585,6 +592,26 @@ public class Flow implements Comparable<Flow> {
         double bx = endPt.x - midX;
         double by = endPt.y - midY;
         // scalar product of A and B, divided by length of B
+        return (ax * bx + ay * by) / Math.sqrt(bx * bx + by * by);
+    }
+
+    /**
+     * Projects a point onto the base line and returns the distance between the
+     * start point and the projected point. The base line connects start and end
+     * points.
+     *
+     * @param x x point
+     * @param y y point
+     * @return length of vector between the base line mid point and x/y
+     */
+    public double scalarProjectionOnBaseline(double x, double y) {
+        // vector A from start point to passed point
+        double ax = x - startPt.x;
+        double ay = y - startPt.y;
+        // vector B from start point to end point
+        double bx = endPt.x - startPt.x;
+        double by = endPt.y - startPt.y;
+        // scalar product of A and B, divided by length of the base line
         return (ax * bx + ay * by) / Math.sqrt(bx * bx + by * by);
     }
 
@@ -798,6 +825,32 @@ public class Flow implements Comparable<Flow> {
         cPtX = x;
         cPtY = y;
         invalidateCachedValues();
+    }
+
+    public Point getSymmetricControlPoint() {
+        // mid point between start and end points
+        double mx = (endPt.x + startPt.x) / 2d;
+        double my = (endPt.y + startPt.y) / 2d;
+
+        //  normal vector on base line with length 1
+        double dx = endPt.x - startPt.x;
+        double dy = endPt.y - startPt.y;
+        double nx = -dy;
+        double ny = dx;
+        double l = Math.sqrt(nx * nx + ny * ny);
+        nx /= l;
+        ny /= l;
+
+        // vertical distance of control point to base line (using cross product)
+        double startToCtrlX = cPtX - startPt.x;
+        double startToCtrlY = cPtY - startPt.y;
+        double a2 = (dx * startToCtrlY - dy * startToCtrlX) / l;
+
+        // place control point at same vertical distance on a line perpendicular 
+        // to the base line passing through the mid point.
+        double x = mx + a2 * nx;
+        double y = my + a2 * ny;
+        return new Point(x, y);
     }
 
     public void offsetCtrlPt(double dx, double dy) {
@@ -1583,15 +1636,13 @@ public class Flow implements Comparable<Flow> {
      * flow is smaller than minDist, the two flows are considered close.
      * @param nbrPointsToTest test this many locations along the curve (used to
      * compute curve parameter t). Must be greater than 0.
-     * @param referenceMapScale scale factor between pixels and world
-     * coordinates
      * @return true if this curve is close to the passed flow, false otherwise.
      */
-    public boolean isClose(Flow flow, double minDist, int nbrPointsToTest, double referenceMapScale) {
+    public boolean isClose(Flow flow, double minDist, int nbrPointsToTest, Model model) {
         assert (nbrPointsToTest > 0);
 
         double minDistSqr = minDist * minDist;
-        double colinearTolerance = 0.2 / referenceMapScale;
+        double colinearTolerance = 0.2 / model.getReferenceMapScale();
 
         if (nbrPointsToTest == 1) {
             // one single sampling point, sample at t = 0.5
@@ -1609,6 +1660,81 @@ public class Flow implements Comparable<Flow> {
                 continue;
             }
             if (flow.distanceSquare(pt.x, pt.y, colinearTolerance) < minDistSqr) {
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
+    /**
+     * Test whether a perpendicular cross section of this flow at parameter t
+     * (between 0 and 1) overlaps with any other flow or their arrowheads. Takes
+     * the width of flows and arrowheads into account.
+     *
+     * @param t location of the cross section
+     * @param model model with all flows
+     * @return true if there is an overlap with another flow, false otherwise.
+     */
+    public boolean isOverlappingAnyFlowAtPoint(double t, Model model) {
+        Point p = pointOnCurve(t);
+        double[] n = getNormal(t);
+        double tangentX = n[1];
+        double tangentY = -n[0];
+        double refScale = model.getReferenceMapScale();
+        double halfWidth = model.getFlowWidthPx(this) / refScale / 2;
+        double p1x = p.x + n[0] * halfWidth;
+        double p1y = p.y + n[1] * halfWidth;
+        double p2x = p.x - n[0] * halfWidth;
+        double p2y = p.y - n[1] * halfWidth;
+        double tol = 0.2 / refScale;
+
+        Iterator<Flow> iterator = model.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow == this) {
+                continue;
+            }
+
+            Flow clippedFlow = model.clipFlow(flow, true, true, true);
+
+            // FIXME test with bounding boxes first
+            // ...
+            double hw = model.getFlowWidthPx(clippedFlow) / refScale / 2d;
+            if (clippedFlow.isIntersectingLineSegment(
+                    p1x + hw * tangentX, p1y + hw * tangentY,
+                    p2x + hw * tangentX, p2y + hw * tangentY)) {
+                return true;
+            }
+            if (clippedFlow.isIntersectingLineSegment(
+                    p1x - hw * tangentX, p1y - hw * tangentY,
+                    p2x - hw * tangentX, p2y - hw * tangentY)) {
+                return true;
+            }
+            if (clippedFlow.isIntersectingLineSegment(
+                    p2x + hw * tangentX, p2y + hw * tangentY,
+                    p2x - hw * tangentX, p2y - hw * tangentY)) {
+                return true;
+            }
+            if (clippedFlow.isIntersectingLineSegment(
+                    p1x - hw * tangentX, p1y - hw * tangentY,
+                    p1x + hw * tangentX, p1y + hw * tangentY)) {
+                return true;
+            }
+
+            // test whether the start point or the end point of the cross section
+            // overlap the flow
+            double hwSqr = hw * hw;
+            if (clippedFlow.distanceSquare(p1x, p1y, tol) < hwSqr) {
+                return true;
+            }
+            if (clippedFlow.distanceSquare(p2x, p2y, tol) < hwSqr) {
+                return true;
+            }
+
+            // test with arrowhead
+            if (flow.getArrow(model).lineSegmentOverlaps(p1x, p1y, p2x, p2y)) {
                 return true;
             }
         }
@@ -2019,10 +2145,10 @@ public class Flow implements Comparable<Flow> {
         int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX) + 1;
         for (int i = 0; i <= nbrIterations; i++) {
             endShorteningToAvoidOverlaps = i * radiusIncrement;
-
             double clipRadius = flowEndRadius + endShorteningToAvoidOverlaps;
 
             // FIXME make sure clip radius is not too large
+            // ...
             // make sure the arrow is pointing at the end node circle
             // use a node circle that is at least as large as the flow width
             double nodeRadius = Math.max(flowWidth / 2d, clipRadius);
@@ -2032,20 +2158,9 @@ public class Flow implements Comparable<Flow> {
                 break;
             }
 
-            // make sure the flow is long enough by clipping to the flow trunc without the arrowhead.
-            // If adjustEndShorteningToAvoidOverlaps() is called before
-            // adjustStartShorteningToAvoidOverlaps(), then the startShorteningToAvoidOverlaps field
-            // will be 0 and the trunc will start at the start node.
-            // FIXME needs to be tested
-            Flow flowTrunc = model.clipFlow(this, true, true, true);
-            double minL = minFlowLength;
-            Arrow arrow = null;
-            if (model.isDrawArrowheads()) {
-                arrow = getArrow(model, clipRadius);
-                minL += arrow.getLength();
-            }
-            if (flowTrunc.isLongerThan(minL) == false) {
-                endShorteningToAvoidOverlaps = 0;
+            // make sure flow trunk (flow without arrowhead) is long enough
+            if (isFlowTrunkLongerThan(minFlowLength, model) == false) {
+                startShorteningToAvoidOverlaps = 0;
                 break;
             }
 
@@ -2053,6 +2168,7 @@ public class Flow implements Comparable<Flow> {
             // current value of endShorteningToAvoidOverlaps does not overlap 
             // any other flow or arrowhead
             if (model.isDrawArrowheads()) {
+                Arrow arrow = getArrow(model, clipRadius);
                 if (model.arrowOverlapsAnyFlow(arrow) == false
                         && model.arrowOverlapsAnyArrow(arrow, this) == false) {
                     break;
@@ -2108,46 +2224,45 @@ public class Flow implements Comparable<Flow> {
         double startNodeRadius = startNodeRadiusPx / referenceMapScale;
 
         double nodeRadius = Math.max(thisWidth / 2d, startNodeRadius);
+        double startR = model.startClipRadius(this,
+                /* forceClipNodes */ true,
+                /* adjustLengthToReduceOverlaps */ false);
 
-        int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX) + 1;
+        ArrayList<Boolean> candidates = new ArrayList<>();
+
+        int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX);
         for (int i = 0; i <= nbrIterations; i++) {
             startShorteningToAvoidOverlaps = i * radiusIncrement;
 
-            // clip a small slice off the flow
-            double startR = model.startClipRadius(this,
-                    /* forceClipNodes */ true,
-                    /* adjustLengthToReduceOverlaps */ false)
-                    + startShorteningToAvoidOverlaps;
-            double endR = startR + radiusIncrement;
-
-            // FIXME make sure clip radii are not too large
-            // if (radius < ...
             // make sure the tail of the flow is pointing towards the start node
-            // FIXME make sure there is no other node between the start of the 
-            // flow and the start node (the tail would point at the wrong node)
-            double t = getIntersectionTWithCircleAroundStartPoint(startR);
+            double t = getIntersectionTWithCircleAroundStartPoint(startR + startShorteningToAvoidOverlaps);
             if (isTangentDirectedTowardsStartNode(t, nodeRadius) == false) {
                 startShorteningToAvoidOverlaps = 0;
                 break;
             }
 
-            // make sure the flow is long enough by clipping to the flow trunc without the arrowhead.
-            // If adjustStartShorteningToAvoidOverlaps() is called before
-            // adjustEndShorteningToAvoidOverlaps(), then startShorteningToAvoidOverlaps field
-            // will be 0 and the trunc will end at the end node.
-            // FIXME needs to be tested
-            Flow flowTrunc = model.clipFlow(this, true, true, true);
-            double minL = minFlowLength;
-            if (model.isDrawArrowheads()) {
-                minL += getArrow(model).getLength();
-            }
-            if (flowTrunc.isLongerThan(minL) == false) {
+            // make sure the flow trunk (flow without arrowhead) is long enough
+            if (isFlowTrunkLongerThan(minFlowLength, model) == false) {
                 startShorteningToAvoidOverlaps = 0;
                 break;
             }
 
-            if (model.isStartSliceOverlappingFlowsOrArrowheads(this, startR, endR) == false) {
-                break;
+            candidates.add(isOverlappingAnyFlowAtPoint(t, model));
+
+            // if last n elements are false, we have found a good value for startShorteningToAvoidOverlaps
+            int n = 5;
+            if (candidates.size() >= n) {
+                boolean foundOverlap = false;
+                for (int j = 0; j < n; j++) {
+                    foundOverlap = candidates.get(candidates.size() - 1 - j);
+                    if (foundOverlap) {
+                        break;
+                    }
+                }
+                if (foundOverlap == false) {
+                    startShorteningToAvoidOverlaps = (candidates.size() - n) * radiusIncrement;
+                    break;
+                }
             }
         }
     }
@@ -2246,11 +2361,28 @@ public class Flow implements Comparable<Flow> {
      * @return true if the line segment intersects this flow, false otherwise.
      */
     public boolean isIntersectingLineSegment(Point a1, Point a2) {
+        return isIntersectingLineSegment(a1.x, a1.y, a2.x, a2.y);
+    }
+
+    /**
+     * Test whether a line segment intersects with this flow line.
+     *
+     * Based on code by Kevin Lindsey,
+     * http://www.kevlindev.com/geometry/2D/intersections/index.htm
+     * https://github.com/thelonious/js-intersections
+     *
+     * @param x1 x start point of line segment
+     * @param y1 y start point of line segment
+     * @param x2 x end point of line segment
+     * @param y2 y end point of line segment
+     * @return true if the line segment intersects this flow, false otherwise.
+     */
+    public boolean isIntersectingLineSegment(double x1, double y1, double x2, double y2) {
         // used to determine if point is on line segment
-        double minX = Math.min(a1.x, a2.x);
-        double minY = Math.min(a1.y, a2.y);
-        double maxX = Math.max(a1.x, a2.x);
-        double maxY = Math.max(a1.y, a2.y);
+        double minX = Math.min(x1, x2);
+        double minY = Math.min(y1, y2);
+        double maxX = Math.max(x1, x2);
+        double maxY = Math.max(y1, y2);
 
         // coefficients of quadratic
         double c2x = startPt.x - 2d * cPtX + endPt.x;
@@ -2262,11 +2394,11 @@ public class Flow implements Comparable<Flow> {
 
         // Convert line to normal form: ax + by + c = 0
         // Find normal to line: negative inverse of original line's slope
-        double nx = a1.y - a2.y;
-        double ny = a2.x - a1.x;
+        double nx = y1 - y2;
+        double ny = x2 - x1;
 
         // Determine new c coefficient fr normal form of line
-        double cl = a1.x * a2.y - a2.x * a1.y;
+        double cl = x1 * y2 - x2 * y1;
 
         // Transform cubic coefficients to line's coordinate system and find roots
         // of cubic
@@ -2295,12 +2427,12 @@ public class Flow implements Comparable<Flow> {
                 if (p6x >= minX && p6y >= minY && p6x <= maxX && p6y <= maxY) {
                     // p6 is intersection point
                     return true;
-                } else if (a1.x == a2.x) {
+                } else if (x1 == x2) {
                     if (minY <= p6y && p6y <= maxY) {
                         // p6 is intersection point
                         return true;
                     }
-                } else if (a1.y == a2.y) {
+                } else if (y1 == y2) {
                     if (minX <= p6x && p6x <= maxX) {
                         // p6 is intersection point
                         return true;
@@ -2433,7 +2565,7 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Returns whether the passed point hits this flow line or the arrowhead.
+     * Test whether the passed point hits this flow line or the arrowhead.
      *
      * @param x x coordinate
      * @param y y coordinate
@@ -2443,9 +2575,6 @@ public class Flow implements Comparable<Flow> {
      * @return true if the flow line is hit, false otherwise.
      */
     public boolean hit(double x, double y, double tolerance, Model model) {
-        // test with flow line without arrowhead
-        Flow clipppedFlow = model.clipFlow(this, true, true, true);
-
         // flow width
         double flowWidth = model.getFlowWidthPx(this) / model.getReferenceMapScale();
 
@@ -2459,6 +2588,9 @@ public class Flow implements Comparable<Flow> {
         if (flowBB.contains(x, y) == false) {
             return false;
         }
+
+        // test with flow line without arrowhead
+        Flow clipppedFlow = model.clipFlow(this, true, true, true);
 
         // test whether x/y is to the left of the start butt cap line
         // compute unnormalized normal nx/ny at start (t = 0)

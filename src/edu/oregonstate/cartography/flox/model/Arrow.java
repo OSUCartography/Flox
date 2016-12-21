@@ -283,4 +283,33 @@ public final class Arrow {
                 corner2Pt.x, corner2Pt.y);
     }
 
+    /**
+     * Test whether a line segment overlaps the arrowhead.
+     * 
+     * @param x1 x start point
+     * @param y1 y start point
+     * @param x2 x end point
+     * @param y2 y end point
+     * @return true if the line segments overlaps, false otherwise.
+     */
+    public boolean lineSegmentOverlaps(double x1, double y1, double x2, double y2) {
+        if (GeometryUtils.linesIntersect(x1, y1, x2, y2,
+                tipPt.x, tipPt.y, corner1Pt.x, corner1Pt.y)) {
+            return true;
+        }
+        if (GeometryUtils.linesIntersect(x1, y1, x2, y2,
+                tipPt.x, tipPt.y, corner2Pt.x, corner2Pt.y)) {
+            return true;
+        }
+        if (GeometryUtils.pointInTriangle(x1, y1,
+                tipPt.x, tipPt.y,
+                corner1Pt.x, corner1Pt.y,
+                corner2Pt.x, corner2Pt.y)) {
+            return true;
+        }
+        return GeometryUtils.pointInTriangle(x2, y2,
+                tipPt.x, tipPt.y,
+                corner1Pt.x, corner1Pt.y,
+                corner2Pt.x, corner2Pt.y);
+    }
 }

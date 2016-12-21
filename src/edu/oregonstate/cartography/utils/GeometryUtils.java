@@ -771,7 +771,7 @@ public class GeometryUtils {
         }
         return pointInTriangle(t2x3, t2y3, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3);
     }
-
+    
     /**
      * Test whether a circle and a ray intersect.
      *

@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.Polygon;
+import edu.oregonstate.cartography.flox.model.Arrow;
 import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
@@ -14,6 +15,7 @@ import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Model.FlowNodeDensity;
 import edu.oregonstate.cartography.flox.model.Obstacle;
 import edu.oregonstate.cartography.flox.model.Point;
+import edu.oregonstate.cartography.flox.model.RangeboxEnforcer;
 import edu.oregonstate.cartography.flox.model.SVGFlowExporter;
 import edu.oregonstate.cartography.flox.model.VectorSymbol;
 import edu.oregonstate.cartography.map.AddFlowTool;
@@ -790,6 +792,11 @@ public class MainWindow extends javax.swing.JFrame {
         markFlowFlowIntersectionsMenuItem = new javax.swing.JMenuItem();
         touchPercentageMenuItem = new javax.swing.JMenuItem();
         largestTouchPercentageMenuItem = new javax.swing.JMenuItem();
+        jSeparator15 = new javax.swing.JPopupMenu.Separator();
+        symmetrizeFlowsMenuItem = new javax.swing.JMenuItem();
+        symmetrizeSelectedFlowMenuItem = new javax.swing.JMenuItem();
+        jSeparator22 = new javax.swing.JPopupMenu.Separator();
+        selectFlowWithShortTrunksMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
@@ -3148,6 +3155,32 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(largestTouchPercentageMenuItem);
+        debugMenu.add(jSeparator15);
+
+        symmetrizeFlowsMenuItem.setText("Symmetrize All Flows");
+        symmetrizeFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                symmetrizeFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(symmetrizeFlowsMenuItem);
+
+        symmetrizeSelectedFlowMenuItem.setText("Symmetrize Selected Flow");
+        symmetrizeSelectedFlowMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                symmetrizeSelectedFlowMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(symmetrizeSelectedFlowMenuItem);
+        debugMenu.add(jSeparator22);
+
+        selectFlowWithShortTrunksMenuItem.setText("Select Flows with Trunk Shorter Than Arrowhead");
+        selectFlowWithShortTrunksMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectFlowWithShortTrunksMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(selectFlowWithShortTrunksMenuItem);
 
         menuBar.add(debugMenu);
         //debugMenu.setVisible(false);
@@ -4097,7 +4130,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_moveFlowsCheckBoxMenuItemActionPerformed
 
     private void recomputeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recomputeMenuItemActionPerformed
-        layout(null);
+        layout("Recompute");
     }//GEN-LAST:event_recomputeMenuItemActionPerformed
 
     private void arrowLengthRatioSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_arrowLengthRatioSliderStateChanged
@@ -4639,8 +4672,8 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_nameMenuItemActionPerformed
 
     private void testCurveShorteningMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testCurveShorteningMenuItemActionPerformed
+        model.shortenFlowsToReduceOverlaps();
         mapComponent.refreshMap();
-        addUndo("Shorten Flows");
     }//GEN-LAST:event_testCurveShorteningMenuItemActionPerformed
 
     private void showLockStateCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showLockStateCheckBoxMenuItemActionPerformed
@@ -4693,7 +4726,7 @@ public class MainWindow extends javax.swing.JFrame {
         double flow2WidthPx = model.getFlowWidthPx(flow2);
         double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
         double minDist = minDistPx / model.getReferenceMapScale();
-        boolean touching = flow1.isClose(flow2, minDist, 20, model.getReferenceMapScale());
+        boolean touching = flow1.isClose(flow2, minDist, 20, model);
         JOptionPane.showMessageDialog(this, "Flows are " + (touching ? "" : "NOT") + " touching or too close.");
     }//GEN-LAST:event_flowsTouchingMenuItemActionPerformed
 
@@ -4798,6 +4831,37 @@ public class MainWindow extends javax.swing.JFrame {
         cancelLayout();
     }//GEN-LAST:event_cancelLayoutMenuItemActionPerformed
 
+    private void symmetrizeFlowsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_symmetrizeFlowsMenuItemActionPerformed
+        new ForceLayouter(model).symmetrizeFlows();
+        mapComponent.refreshMap();
+        addUndo("Symmetrize Flows");
+    }//GEN-LAST:event_symmetrizeFlowsMenuItemActionPerformed
+
+    private void selectFlowWithShortTrunksMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectFlowWithShortTrunksMenuItemActionPerformed
+        Iterator<Flow> flowIterator = model.flowIterator();
+        while (flowIterator.hasNext()) {
+            Flow flow = flowIterator.next();
+            Arrow arrow = flow.getArrow(model);
+            if (flow.isFlowTrunkLongerThan(arrow.getLength(), model) == false) {
+                flow.setSelected(true);
+            }
+        }
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_selectFlowWithShortTrunksMenuItemActionPerformed
+
+    private void symmetrizeSelectedFlowMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_symmetrizeSelectedFlowMenuItemActionPerformed
+        ArrayList<Flow> flows = model.getSelectedFlows();
+        if (flows.size() != 1) {
+            ErrorDialog.showErrorDialog("Select one flow.");
+            return;
+        }
+        ForceLayouter layouter = new ForceLayouter(model);
+        List<Obstacle> obstacles = layouter.getObstacles();
+        RangeboxEnforcer rangeboxEnforcer = new RangeboxEnforcer(model);
+        layouter.symmetrizeFlow(flows.get(0), obstacles, rangeboxEnforcer);
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_symmetrizeSelectedFlowMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4840,7 +4904,7 @@ public class MainWindow extends javax.swing.JFrame {
             model.straightenFlows(false);
             return;
         }
-        
+
         progressBar.setEnabled(true);
 
         Model modelCopy = model.copy();
@@ -4926,7 +4990,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
+    private javax.swing.JPopupMenu.Separator jSeparator15;
     private javax.swing.JPopupMenu.Separator jSeparator18;
+    private javax.swing.JPopupMenu.Separator jSeparator22;
     private javax.swing.JMenuItem largestTouchPercentageMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton layerFillColorButton;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
@@ -4989,6 +5055,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem selectByValueCheckBoxMenuItem;
     private javax.swing.JButton selectEndClipAreaButton;
     private javax.swing.JComboBox<String> selectFlowNodeComboBox;
+    private javax.swing.JMenuItem selectFlowWithShortTrunksMenuItem;
     private javax.swing.JButton selectFlowsFileButton;
     private javax.swing.JMenuItem selectFlowsMenuItem;
     private javax.swing.JLabel selectInfoLabel;
@@ -5016,6 +5083,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSpinner startDistanceSpinner;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
+    private javax.swing.JMenuItem symmetrizeFlowsMenuItem;
+    private javax.swing.JMenuItem symmetrizeSelectedFlowMenuItem;
     private javax.swing.JMenuItem testCurveOffsettingMenuItem;
     private javax.swing.JMenuItem testCurveShorteningMenuItem;
     private javax.swing.JMenuItem totalFlowsMenuItem;
