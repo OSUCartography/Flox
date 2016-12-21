@@ -2698,8 +2698,7 @@ public class Model {
             if (arrow.getFlow().id == flow.id) {
                 continue;
             }
-
-            flow = clipFlow(flow, true, true, true);
+            
             if (flow.isOverlappingArrow(arrow, this)) {
                 return true;
             }

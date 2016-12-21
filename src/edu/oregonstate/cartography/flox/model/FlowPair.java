@@ -289,8 +289,14 @@ public class FlowPair extends Flow {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
         flow.reverseFlow(model);
+        flow.startShorteningToAvoidOverlaps = startShorteningToAvoidOverlaps2;
+        flow.endShorteningToAvoidOverlaps = endShorteningToAvoidOverlaps2;
         flow.offsetFlow(offset(model, false), model, quality);
         return flow;
+    }
+    
+    public Flow[] createOffsetFlows(Model model, Flow.FlowOffsettingQuality quality) {
+        return new Flow[]{createOffsetFlow1(model, quality), createOffsetFlow2(model, quality)};
     }
 
     /**
@@ -328,10 +334,13 @@ public class FlowPair extends Flow {
         Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
         flow1.adjustEndShorteningToAvoidOverlaps(model);
         endShorteningToAvoidOverlaps = flow1.getEndShorteningToAvoidOverlaps();
-
+        // FIXME shorten end of flow 1 if the arrowhead of flow 2 overlaps flow 1
+        // ...
         Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
         flow2.adjustEndShorteningToAvoidOverlaps(model);
         endShorteningToAvoidOverlaps2 = flow2.getEndShorteningToAvoidOverlaps();
+        // FIXME shorten end of flow 2 if the arrowhead of flow 1 overlaps flow 2
+        // ...
     }
 
     @Override

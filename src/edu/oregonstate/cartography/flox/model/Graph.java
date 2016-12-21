@@ -252,6 +252,7 @@ public final class Graph {
         return target;
     }
 
+    // FIXME not used. This dynamic search should replace Flow.idCounter
     private boolean hasFlowWithID(long id) {
         Iterator<Flow> iter = graph.edgeSet().iterator();
         while (iter.hasNext()) {

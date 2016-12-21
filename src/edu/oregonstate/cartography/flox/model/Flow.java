@@ -1672,6 +1672,8 @@ public class Flow implements Comparable<Flow> {
      * Test whether a perpendicular cross section of this flow at parameter t
      * (between 0 and 1) overlaps with any other flow or their arrowheads. Takes
      * the width of flows and arrowheads into account.
+     * 
+     * FIXME move to Model?
      *
      * @param t location of the cross section
      * @param model model with all flows
@@ -1692,50 +1694,61 @@ public class Flow implements Comparable<Flow> {
 
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            if (flow == this) {
-                continue;
-            }
 
-            Flow clippedFlow = model.clipFlow(flow, true, true, true);
-
-            // FIXME test with bounding boxes first
-            // ...
-            double hw = model.getFlowWidthPx(clippedFlow) / refScale / 2d;
-            if (clippedFlow.isIntersectingLineSegment(
-                    p1x + hw * tangentX, p1y + hw * tangentY,
-                    p2x + hw * tangentX, p2y + hw * tangentY)) {
-                return true;
+            Flow[] flows;
+            {
+                Flow flow = iterator.next();
+                if (flow.id == id) {
+                    continue;
+                }
+                
+                // FIXME test with bounding boxes first
+                // ...
+                if (flow instanceof FlowPair) {
+                    FlowPair flowPair = (FlowPair) flow;
+                    flows = flowPair.createOffsetFlows(model, FlowOffsettingQuality.HIGH);
+                } else {
+                    flows = new Flow[]{flow};
+                }
             }
-            if (clippedFlow.isIntersectingLineSegment(
-                    p1x - hw * tangentX, p1y - hw * tangentY,
-                    p2x - hw * tangentX, p2y - hw * tangentY)) {
-                return true;
-            }
-            if (clippedFlow.isIntersectingLineSegment(
-                    p2x + hw * tangentX, p2y + hw * tangentY,
-                    p2x - hw * tangentX, p2y - hw * tangentY)) {
-                return true;
-            }
-            if (clippedFlow.isIntersectingLineSegment(
-                    p1x - hw * tangentX, p1y - hw * tangentY,
-                    p1x + hw * tangentX, p1y + hw * tangentY)) {
-                return true;
-            }
-
-            // test whether the start point or the end point of the cross section
-            // overlap the flow
-            double hwSqr = hw * hw;
-            if (clippedFlow.distanceSquare(p1x, p1y, tol) < hwSqr) {
-                return true;
-            }
-            if (clippedFlow.distanceSquare(p2x, p2y, tol) < hwSqr) {
-                return true;
-            }
-
-            // test with arrowhead
-            if (flow.getArrow(model).lineSegmentOverlaps(p1x, p1y, p2x, p2y)) {
-                return true;
+            
+            for (Flow flow : flows) {
+                Flow clippedFlow = model.clipFlow(flow, true, true, true);
+               
+                double hw = model.getFlowWidthPx(clippedFlow) / refScale / 2d;
+                if (clippedFlow.isIntersectingLineSegment(
+                        p1x + hw * tangentX, p1y + hw * tangentY,
+                        p2x + hw * tangentX, p2y + hw * tangentY)) {
+                    return true;
+                }
+                if (clippedFlow.isIntersectingLineSegment(
+                        p1x - hw * tangentX, p1y - hw * tangentY,
+                        p2x - hw * tangentX, p2y - hw * tangentY)) {
+                    return true;
+                }
+                if (clippedFlow.isIntersectingLineSegment(
+                        p2x + hw * tangentX, p2y + hw * tangentY,
+                        p2x - hw * tangentX, p2y - hw * tangentY)) {
+                    return true;
+                }
+                if (clippedFlow.isIntersectingLineSegment(
+                        p1x - hw * tangentX, p1y - hw * tangentY,
+                        p1x + hw * tangentX, p1y + hw * tangentY)) {
+                    return true;
+                }
+                // test whether the start point or the end point of the cross section
+                // overlap the flow
+                double hwSqr = hw * hw;
+                if (clippedFlow.distanceSquare(p1x, p1y, tol) < hwSqr) {
+                    return true;
+                }
+                if (clippedFlow.distanceSquare(p2x, p2y, tol) < hwSqr) {
+                    return true;
+                }
+                // test with arrowhead
+                if (flow.getArrow(model).lineSegmentOverlaps(p1x, p1y, p2x, p2y)) {
+                    return true;
+                }
             }
         }
 
@@ -1760,6 +1773,7 @@ public class Flow implements Comparable<Flow> {
         for (int i = 0; i < nbrPointsToTest; i++) {
             double t = i / (nbrPointsToTest - 1d);
             Point pt = pointOnCurve(t);
+            // FIXME double tol = 0.2 / model.getReferenceMapScale();
             double dSqr = flow.distanceSquare(pt.x, pt.y, 0.001); // FIXME
             if (dSqr < minDistSqr) {
                 ++closePoints;
@@ -2189,6 +2203,9 @@ public class Flow implements Comparable<Flow> {
                 endShorteningToAvoidOverlaps = 0; // unlike the start of flows, do not shorten end of flows
                 break;
             }
+            if (i == 24) {
+                System.out.println(24);
+            }
 
             // when arrowheads are drawn, make sure the arrowhead with the
             // current value of endShorteningToAvoidOverlaps does not overlap 
@@ -2496,10 +2513,12 @@ public class Flow implements Comparable<Flow> {
     public boolean isOverlappingArrow(Arrow arrow, Model model) {
         // FIXME add test with bounding boxes?
 
+        Flow clippedFlow = model.clipFlow(this, true, true, true);
+        
         // test whether the flow intersects the triangle formed by the arrow corners
-        if (isIntersectingLineSegment(arrow.getTipPt(), arrow.getCorner1Pt())
-                || isIntersectingLineSegment(arrow.getTipPt(), arrow.getCorner2Pt())
-                || isIntersectingLineSegment(arrow.getCorner1Pt(), arrow.getCorner2Pt())) {
+        if (clippedFlow.isIntersectingLineSegment(arrow.getTipPt(), arrow.getCorner1Pt())
+                || clippedFlow.isIntersectingLineSegment(arrow.getTipPt(), arrow.getCorner2Pt())
+                || clippedFlow.isIntersectingLineSegment(arrow.getCorner1Pt(), arrow.getCorner2Pt())) {
             return true;
         }
 
@@ -2510,10 +2529,11 @@ public class Flow implements Comparable<Flow> {
         double flowWidth = flowWidthPx / model.getReferenceMapScale();
         double minDist = flowWidth / 2d;
         double minDistSqr = minDist * minDist;
+        double colinearTol = 0.2 /* px */ / model.getReferenceMapScale();
         // FIXME distanceSq should exclude start and end points
-        return distanceSquare(arrow.getTipPt().x, arrow.getTipPt().y, TOL) < minDistSqr
-                || distanceSquare(arrow.getCorner1Pt().x, arrow.getCorner1Pt().y, TOL) < minDistSqr
-                || distanceSquare(arrow.getCorner2Pt().x, arrow.getCorner2Pt().y, TOL) < minDistSqr;
+        return clippedFlow.distanceSquare(arrow.getTipPt().x, arrow.getTipPt().y, colinearTol) < minDistSqr
+                || clippedFlow.distanceSquare(arrow.getCorner1Pt().x, arrow.getCorner1Pt().y, colinearTol) < minDistSqr
+                || clippedFlow.distanceSquare(arrow.getCorner2Pt().x, arrow.getCorner2Pt().y, colinearTol) < minDistSqr;
     }
 
     /**
