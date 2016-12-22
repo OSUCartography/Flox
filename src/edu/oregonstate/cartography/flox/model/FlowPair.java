@@ -288,7 +288,7 @@ public class FlowPair extends Flow {
     public Flow createOffsetFlow2(Model model, Flow.FlowOffsettingQuality quality) {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
-        flow.reverseFlow(model);
+        flow.reverseFlow();
         flow.startShorteningToAvoidOverlaps = startShorteningToAvoidOverlaps2;
         flow.endShorteningToAvoidOverlaps = endShorteningToAvoidOverlaps2;
         flow.offsetFlow(offset(model, false), model, quality);
@@ -317,13 +317,12 @@ public class FlowPair extends Flow {
      * this FlowPair. The returned flow is not offset from the center line of
      * this flow.
      *
-     * @param model data model
      * @return a new flow
      */
-    public Flow createFlow2(Model model) {
+    public Flow createFlow2() {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
-        flow.reverseFlow(model);
+        flow.reverseFlow();
         flow.endShorteningToAvoidOverlaps = endShorteningToAvoidOverlaps2;
         flow.startShorteningToAvoidOverlaps = startShorteningToAvoidOverlaps2;
         return flow;
@@ -331,16 +330,16 @@ public class FlowPair extends Flow {
 
     @Override
     public void adjustEndShorteningToAvoidOverlaps(Model model) {
+        if (isSelected()) {
+            System.out.println("selected");
+        }
         Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
         flow1.adjustEndShorteningToAvoidOverlaps(model);
         endShorteningToAvoidOverlaps = flow1.getEndShorteningToAvoidOverlaps();
-        // FIXME shorten end of flow 1 if the arrowhead of flow 2 overlaps flow 1
-        // ...
+        
         Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
         flow2.adjustEndShorteningToAvoidOverlaps(model);
         endShorteningToAvoidOverlaps2 = flow2.getEndShorteningToAvoidOverlaps();
-        // FIXME shorten end of flow 2 if the arrowhead of flow 1 overlaps flow 2
-        // ...
     }
 
     @Override
@@ -348,10 +347,13 @@ public class FlowPair extends Flow {
         Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
         flow1.adjustStartShorteningToAvoidOverlaps(model);
         startShorteningToAvoidOverlaps = flow1.getStartShorteningToAvoidOverlaps();
-
+        // FIXME shorten start of flow 1 if the arrowhead of flow 2 overlaps flow 1
+        // ...
         Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
         flow2.adjustStartShorteningToAvoidOverlaps(model);
         startShorteningToAvoidOverlaps2 = flow2.getStartShorteningToAvoidOverlaps();
+        // FIXME shorten start of flow 2 if the arrowhead of flow 1 overlaps flow 2
+        // ...
     }
 
     @Override

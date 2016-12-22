@@ -389,6 +389,7 @@ public class Flow implements Comparable<Flow> {
 
         // Check the shortest distance between the obstacle and the flow. If it's 
         // less than the minimum distance, then the flow intersects the obstacle. 
+        // FIXME test for beyondButtCaps ?
         double shortestDistSquare = distanceSquare(obstacle.x, obstacle.y, tol);
         return shortestDistSquare < minDist * minDist;
     }
@@ -618,9 +619,8 @@ public class Flow implements Comparable<Flow> {
     /**
      * Inverse start and end point.
      *
-     * @param model model (used for finding start and end clipping areas)
      */
-    public void reverseFlow(Model model) {
+    public void reverseFlow() {
         Point tempPt = startPt;
         startPt = endPt;
         endPt = tempPt;
@@ -960,7 +960,8 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Offsets this flow in parallel to the line.
+     * Offsets this flow in parallel to the line. This changes the start, end
+     * and control point locations.
      *
      * @param offset offset distance
      * @param model data model
@@ -1407,6 +1408,20 @@ public class Flow implements Comparable<Flow> {
                 cPtX, cPtY, endPt.x, endPt.y, tol, xy);
     }
 
+    /**
+     * Computes the square of the shortest distance between a point and any
+     * point on this quadratic Bézier curve.
+     *
+     * @param x point x
+     * @param y point y
+     * @param tol Tolerance to test whether points are collinear.
+     * @return the distance
+     */
+    public double distanceSquare(double x, double y, double tol) {
+        return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
+                cPtX, cPtY, endPt.x, endPt.y, tol, x, y);
+    }
+
     private double fp(double t, double x, double y) {
         // return (f(t + h, x, y) - f(t - h, x, y)) / (2 * h);
 
@@ -1594,14 +1609,13 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Tests whether a point is to the left of the butt cap line. This is the
-     * line that is normal to the start or the end point of the flow.
+     * Test whether x/y is beyond the start butt cap line.
      *
      * @param x point x
      * @param y point y
-     * @return true if beyond butt caps, false otherwise
+     * @return true if beyond start butt cap, false otherwise
      */
-    private boolean beyondButtCaps(double x, double y) {
+    private boolean beyondStartButtCap(double x, double y) {
         // test whether x/y is to the left of the start butt cap line
         // compute unnormalized normal nx/ny at start (t = 0)
         double dx = cPtX - startPt.x;
@@ -1612,17 +1626,37 @@ public class Flow implements Comparable<Flow> {
         // test whether the point is on the left of this line (when viewing from start point along normal)
         // this is a simplified version of:
         // leftOfButtCapLine = GeometryUtils.isOnLeftSide(x, y, startX, startY, startX + nx, startY + ny);
-        if (nx * (y - startPt.y) - ny * (x - startPt.x) > 0d) {
-            return true;
-        }
+        return nx * (y - startPt.y) - ny * (x - startPt.x) > 0d;
+    }
 
-        // test whether x/y is to the left of the end butt cap line
+    /**
+     * Test whether x/y is beyond the end butt cap line.
+     *
+     * @param x point x
+     * @param y point y
+     * @return true if beyond end butt cap, false otherwise
+     */
+    private boolean beyondEndButtCap(double x, double y) {
         // compute unnormalized normal nx/ny at end (t = 0)
-        dx = cPtX - endPt.x;
-        dy = cPtY - endPt.y;
-        nx = -dy;
-        ny = dx;
+        double dx = cPtX - endPt.x;
+        double dy = cPtY - endPt.y;
+        double nx = -dy;
+        double ny = dx;
+        // endPt and endPt + nx/ny define a line along the end butt cap
+        // test whether the point is on the left of this line (when viewing from end point along normal)
         return nx * (y - endPt.y) - ny * (x - endPt.x) > 0d;
+    }
+
+    /**
+     * Tests whether a point is beyond the start or end butt cap lines. These
+     * are the lines that terminate the flow bands.
+     *
+     * @param x point x
+     * @param y point y
+     * @return true if beyond butt caps, false otherwise
+     */
+    private boolean beyondButtCaps(double x, double y) {
+        return beyondStartButtCap(x, y) || beyondEndButtCap(x, y);
     }
 
     /**
@@ -1672,7 +1706,7 @@ public class Flow implements Comparable<Flow> {
      * Test whether a perpendicular cross section of this flow at parameter t
      * (between 0 and 1) overlaps with any other flow or their arrowheads. Takes
      * the width of flows and arrowheads into account.
-     * 
+     *
      * FIXME move to Model?
      *
      * @param t location of the cross section
@@ -1701,7 +1735,7 @@ public class Flow implements Comparable<Flow> {
                 if (flow.id == id) {
                     continue;
                 }
-                
+
                 // FIXME test with bounding boxes first
                 // ...
                 if (flow instanceof FlowPair) {
@@ -1711,10 +1745,10 @@ public class Flow implements Comparable<Flow> {
                     flows = new Flow[]{flow};
                 }
             }
-            
+
             for (Flow flow : flows) {
                 Flow clippedFlow = model.clipFlow(flow, true, true, true);
-               
+
                 double hw = model.getFlowWidthPx(clippedFlow) / refScale / 2d;
                 if (clippedFlow.isIntersectingLineSegment(
                         p1x + hw * tangentX, p1y + hw * tangentY,
@@ -1739,9 +1773,11 @@ public class Flow implements Comparable<Flow> {
                 // test whether the start point or the end point of the cross section
                 // overlap the flow
                 double hwSqr = hw * hw;
+                // FIXME test for beyondButtCaps ?
                 if (clippedFlow.distanceSquare(p1x, p1y, tol) < hwSqr) {
                     return true;
                 }
+                // FIXME test for beyondButtCaps ?
                 if (clippedFlow.distanceSquare(p2x, p2y, tol) < hwSqr) {
                     return true;
                 }
@@ -1780,20 +1816,6 @@ public class Flow implements Comparable<Flow> {
             }
         }
         return ((double) closePoints) / nbrPointsToTest;
-    }
-
-    /**
-     * Computes the square of the shortest distance between a point and any
-     * point on this quadratic Bézier curve.
-     *
-     * @param x point x
-     * @param y point y
-     * @param tol Tolerance to test whether points are collinear.
-     * @return the distance
-     */
-    public double distanceSquare(double x, double y, double tol) {
-        return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
-                cPtX, cPtY, endPt.x, endPt.y, tol, x, y);
     }
 
     /**
@@ -2203,9 +2225,6 @@ public class Flow implements Comparable<Flow> {
                 endShorteningToAvoidOverlaps = 0; // unlike the start of flows, do not shorten end of flows
                 break;
             }
-            if (i == 24) {
-                System.out.println(24);
-            }
 
             // when arrowheads are drawn, make sure the arrowhead with the
             // current value of endShorteningToAvoidOverlaps does not overlap 
@@ -2513,8 +2532,11 @@ public class Flow implements Comparable<Flow> {
     public boolean isOverlappingArrow(Arrow arrow, Model model) {
         // FIXME add test with bounding boxes?
 
-        Flow clippedFlow = model.clipFlow(this, true, true, true);
-        
+        Flow clippedFlow = model.clipFlow(this, 
+                /* clipArrowhead */ true, 
+                /* forceClipNodes */ true, 
+                /* adjustLengthToReduceOverlaps */ true);
+
         // test whether the flow intersects the triangle formed by the arrow corners
         if (clippedFlow.isIntersectingLineSegment(arrow.getTipPt(), arrow.getCorner1Pt())
                 || clippedFlow.isIntersectingLineSegment(arrow.getTipPt(), arrow.getCorner2Pt())
@@ -2530,10 +2552,25 @@ public class Flow implements Comparable<Flow> {
         double minDist = flowWidth / 2d;
         double minDistSqr = minDist * minDist;
         double colinearTol = 0.2 /* px */ / model.getReferenceMapScale();
-        // FIXME distanceSq should exclude start and end points
-        return clippedFlow.distanceSquare(arrow.getTipPt().x, arrow.getTipPt().y, colinearTol) < minDistSqr
-                || clippedFlow.distanceSquare(arrow.getCorner1Pt().x, arrow.getCorner1Pt().y, colinearTol) < minDistSqr
-                || clippedFlow.distanceSquare(arrow.getCorner2Pt().x, arrow.getCorner2Pt().y, colinearTol) < minDistSqr;
+
+        double x = arrow.getTipPt().x;
+        double y = arrow.getTipPt().y;
+        if (clippedFlow.beyondStartButtCap(x, y) == false
+                && clippedFlow.distanceSquare(x, y, colinearTol) < minDistSqr) {
+            return true;
+        }
+
+        x = arrow.getCorner1Pt().x;
+        y = arrow.getCorner1Pt().y;
+        if (clippedFlow.beyondStartButtCap(x, y) == false
+                && clippedFlow.distanceSquare(x, y, colinearTol) < minDistSqr) {
+            return true;
+        }
+
+        x = arrow.getCorner2Pt().x;
+        y = arrow.getCorner2Pt().y;
+        return (clippedFlow.beyondStartButtCap(x, y) == false
+                && clippedFlow.distanceSquare(x, y, colinearTol) < minDistSqr);
     }
 
     /**
@@ -2635,6 +2672,7 @@ public class Flow implements Comparable<Flow> {
         }
 
         // test whether x/y is to the left of the end butt cap line
+        // FIXME use beyondButtCaps(pt.x, pt.y) instead?
         if (model.isDrawArrowheads() == false) {
             double endX = clipppedFlow.getEndPt().x;
             double endY = clipppedFlow.getEndPt().y;
@@ -2654,7 +2692,7 @@ public class Flow implements Comparable<Flow> {
             }
         }
 
-        // Get the distance of the clicked point to the flow.
+        // Get the distance of the point to the flow.
         double colinearTol = 0.2 /* px */ / model.getReferenceMapScale();
         double distanceSqWorld = clipppedFlow.distanceSquare(x, y, colinearTol);
         return distanceSqWorld <= maxDist * maxDist;

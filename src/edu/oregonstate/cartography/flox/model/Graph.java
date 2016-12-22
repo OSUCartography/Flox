@@ -595,7 +595,7 @@ public final class Graph {
         if (bidirectionalFlowsParallel) {
             toBidirectionalFlows();
         } else {
-            toUnidirectionalFlows(model);
+            toUnidirectionalFlows();
         }
     }
 
@@ -637,9 +637,8 @@ public final class Graph {
     /**
      * Replaces instances of FlowPair with two Flow instances.
      *
-     * @param model data model
      */
-    public void toUnidirectionalFlows(Model model) {
+    public void toUnidirectionalFlows() {
         ArrayList<Flow> flowsToAdd = new ArrayList<>();
         ArrayList<FlowPair> flowsToRemove = new ArrayList<>();
         Iterator<Flow> iterator = flowIterator();
@@ -649,7 +648,7 @@ public final class Graph {
                 FlowPair biFlow = (FlowPair) flow;
                 flowsToRemove.add(biFlow);
                 flowsToAdd.add(biFlow.createFlow1());
-                flowsToAdd.add(biFlow.createFlow2(model));
+                flowsToAdd.add(biFlow.createFlow2());
             }
         }
 

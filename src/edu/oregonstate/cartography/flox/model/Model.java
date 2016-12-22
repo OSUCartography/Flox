@@ -949,7 +949,7 @@ public class Model {
         ArrayList<Flow> flows = getSelectedFlows();
         for (Flow flow : flows) {
             graph.removeFlow(flow);
-            flow.reverseFlow(this);
+            flow.reverseFlow();
             graph.addFlow(flow);
         }
     }
