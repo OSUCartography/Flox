@@ -81,7 +81,7 @@ public class ForceLayouter {
     public void applyChangesToModel(Model destinationModel) {
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
-            destinationModel.updateFlow(iterator.next());
+            destinationModel.updateControlPointAndShortening(iterator.next());
         }
     }
 
@@ -1269,10 +1269,10 @@ public class ForceLayouter {
             }
         }
 
+        // FIXME the following is not really adding much
         // try straightening flows where the arrowhead is longer than the flow trunk
         if (model.isDrawArrowheads()) {
-            Arrow arrow = flow.getArrow(model);
-            if (flow.isFlowTrunkLongerThan(arrow.getLength(), model) == false) {
+            if (flow.flowTrunkToFlowRatio(model) < 0.8) { // FIXME hard-coded parameter
                 double mx = (clippedFlow.getStartPt().x + clippedFlow.getEndPt().x) / 2d;
                 double my = (clippedFlow.getStartPt().y + clippedFlow.getEndPt().y) / 2d;
                 if (assignControlPointPositionIfAcceptable(flow, mx, my,

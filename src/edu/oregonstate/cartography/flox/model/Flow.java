@@ -533,8 +533,32 @@ public class Flow implements Comparable<Flow> {
      * @return true if this flow is longer than the passed minLength
      */
     public boolean isFlowTrunkLongerThan(double minLength, Model model) {
-        Flow flowTrunc = model.clipFlow(this, true, true, true);
-        return flowTrunc.getBaselineLengthSquare() > minLength * minLength;
+        Flow flowTrunk = model.clipFlow(this, true, true, true);
+        return flowTrunk.getBaselineLengthSquare() > minLength * minLength;
+    }
+
+    /**
+     * Returns the ratio between the length of the base line of flow trunk (that
+     * is, the flow without the arrowhead) and the length of the visible flow
+     * including the arrowhead.
+     *
+     * @param model model
+     * @return ratio between 0 (there is no trunk or the flow has a length of 0)
+     * to 1 (there is no arrowhead).
+     */
+    public double flowTrunkToFlowRatio(Model model) {
+        if (model.isDrawArrowheads() == false) {
+            return 1d;
+        } else {
+            Flow flowTrunk = model.clipFlow(this, true, true, true);
+            double l1 = flowTrunk.getBaselineLength();
+            Flow clippedFlowWithArrowhead = model.clipFlow(this, false, true, true);
+            double l2 = clippedFlowWithArrowhead.getBaselineLength();
+            if (l2 == 0) {
+                return 0;
+            }
+            return l1 / l2;
+        }
     }
 
     /**
@@ -827,6 +851,14 @@ public class Flow implements Comparable<Flow> {
         invalidateCachedValues();
     }
 
+    /**
+     * Returns a control point location that results in perfectly symmetric
+     * flow. The perpendicular distance to the line connecting start and end
+     * point is identical to the distance of this flow.
+     *
+     * @return a point with the control point location resulting in a symmetric
+     * flow
+     */
     public Point getSymmetricControlPoint() {
         // mid point between start and end points
         double mx = (endPt.x + startPt.x) / 2d;
@@ -853,6 +885,12 @@ public class Flow implements Comparable<Flow> {
         return new Point(x, y);
     }
 
+    /**
+     * Move control point.
+     *
+     * @param dx horizontal offset
+     * @param dy vertical offset
+     */
     public void offsetCtrlPt(double dx, double dy) {
         cPtX += dx;
         cPtY += dy;
@@ -1660,49 +1698,6 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Returns whether this flow is closer than a minimum distance to another
-     * flow. This is an approximate test, which might miss some locations.
-     *
-     * FIXME needs to be overridden by FlowPair
-     *
-     * @param flow flow to test with
-     * @param minDist if the smallest distance between this flow and the passed
-     * flow is smaller than minDist, the two flows are considered close.
-     * @param nbrPointsToTest test this many locations along the curve (used to
-     * compute curve parameter t). Must be greater than 0.
-     * @return true if this curve is close to the passed flow, false otherwise.
-     */
-    public boolean isClose(Flow flow, double minDist, int nbrPointsToTest, Model model) {
-        assert (nbrPointsToTest > 0);
-
-        double minDistSqr = minDist * minDist;
-        double colinearTolerance = 0.2 / model.getReferenceMapScale();
-
-        if (nbrPointsToTest == 1) {
-            // one single sampling point, sample at t = 0.5
-            Point pt = pointOnCurve(0.5);
-            if (beyondButtCaps(pt.x, pt.y)) {
-                return false;
-            }
-            return flow.distanceSquare(pt.x, pt.y, colinearTolerance) < minDistSqr;
-        }
-
-        for (int i = 0; i < nbrPointsToTest; i++) {
-            double t = i / (nbrPointsToTest - 1d);
-            Point pt = pointOnCurve(t);
-            if (beyondButtCaps(pt.x, pt.y)) {
-                continue;
-            }
-            if (flow.distanceSquare(pt.x, pt.y, colinearTolerance) < minDistSqr) {
-                return true;
-            }
-
-        }
-
-        return false;
-    }
-
-    /**
      * Test whether a perpendicular cross section of this flow at parameter t
      * (between 0 and 1) overlaps with any other flow or their arrowheads. Takes
      * the width of flows and arrowheads into account.
@@ -1795,6 +1790,8 @@ public class Flow implements Comparable<Flow> {
      * Compute an index between 0 and 1 that indicates how close this flow is to
      * another flow. 0 indicates the flows are not touching. 1 indicates this
      * flow touches the other flow along the entire length of this flow.
+     *
+     * FIXME override in FlowPair
      *
      * @param flow the other flow
      * @param minDist if a point on this flow is closer than minDist to the
@@ -2532,9 +2529,9 @@ public class Flow implements Comparable<Flow> {
     public boolean isOverlappingArrow(Arrow arrow, Model model) {
         // FIXME add test with bounding boxes?
 
-        Flow clippedFlow = model.clipFlow(this, 
-                /* clipArrowhead */ true, 
-                /* forceClipNodes */ true, 
+        Flow clippedFlow = model.clipFlow(this,
+                /* clipArrowhead */ true,
+                /* forceClipNodes */ true,
                 /* adjustLengthToReduceOverlaps */ true);
 
         // test whether the flow intersects the triangle formed by the arrow corners
@@ -2620,7 +2617,13 @@ public class Flow implements Comparable<Flow> {
         startShorteningToAvoidOverlaps = 0;
     }
 
-    public void update(Flow flow) {
+    /**
+     * Copy control point location and shortening values from the passed Flow to
+     * this Flow.
+     *
+     * @param flow flow to copy from
+     */
+    public void updateControlPointAndShortening(Flow flow) {
         setCtrlPt(flow.cPtX(), flow.cPtY());
         endShorteningToAvoidOverlaps = flow.endShorteningToAvoidOverlaps;
         startShorteningToAvoidOverlaps = flow.startShorteningToAvoidOverlaps;

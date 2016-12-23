@@ -294,7 +294,7 @@ public class FlowPair extends Flow {
         flow.offsetFlow(offset(model, false), model, quality);
         return flow;
     }
-    
+
     public Flow[] createOffsetFlows(Model model, Flow.FlowOffsettingQuality quality) {
         return new Flow[]{createOffsetFlow1(model, quality), createOffsetFlow2(model, quality)};
     }
@@ -336,7 +336,7 @@ public class FlowPair extends Flow {
         Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
         flow1.adjustEndShorteningToAvoidOverlaps(model);
         endShorteningToAvoidOverlaps = flow1.getEndShorteningToAvoidOverlaps();
-        
+
         Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
         flow2.adjustEndShorteningToAvoidOverlaps(model);
         endShorteningToAvoidOverlaps2 = flow2.getEndShorteningToAvoidOverlaps();
@@ -362,7 +362,7 @@ public class FlowPair extends Flow {
         endShorteningToAvoidOverlaps2 = 0;
         startShorteningToAvoidOverlaps2 = 0;
     }
-    
+
     /**
      * Tests whether this Flow overlaps with an arrow. The arrow is treated as a
      * triangle consisting of the tip point and the two corner points. The flow
@@ -405,13 +405,13 @@ public class FlowPair extends Flow {
     }
 
     @Override
-    public void update(Flow flow) {
-        super.update(flow);
-        FlowPair flowPair = (FlowPair)flow;
+    public void updateControlPointAndShortening(Flow flow) {
+        super.updateControlPointAndShortening(flow);
+        FlowPair flowPair = (FlowPair) flow;
         endShorteningToAvoidOverlaps2 = flowPair.endShorteningToAvoidOverlaps2;
         startShorteningToAvoidOverlaps2 = flowPair.startShorteningToAvoidOverlaps2;
     }
-    
+
     /**
      * Returns whether the passed point is on this flow line (without the
      * arrowhead)
@@ -433,4 +433,67 @@ public class FlowPair extends Flow {
         Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
         return flow2.hit(x, y, tolerance, model);
     }
+
+    /**
+     * Returns the ratio between the length of the base line of flow trunk (that
+     * is, the flow without the arrowhead) and the length of the visible flow
+     * including the arrowhead.
+     *
+     * Returns the larger of the two ratios for the two parallel flows.
+     *
+     * @param model model
+     * @return ratio between 0 (there is no trunk or the flow has a length of 0)
+     * to 1 (there is no arrowhead).
+     */
+    @Override
+    public double flowTrunkToFlowRatio(Model model) {
+        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        double r1 = flow1.flowTrunkToFlowRatio(model);
+        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        double r2 = flow2.flowTrunkToFlowRatio(model);
+        return Math.max(r1, r2);
+    }
+
+    @Override
+    public void offsetFlow(double offset, Model model, FlowOffsettingQuality quality) {
+        throw new UnsupportedOperationException();
+    }
+
+    // FIXME 
+//    @Override
+//    public Flow[] split(double t) {
+//        throw new UnsupportedOperationException();
+//    }
+
+    @Override
+    protected Arrow getArrow(Model model, double arrowTipClipRadius) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Flow clipAroundStartNode(double r1, double r2) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Flow clipAroundEndNode(double r1, double r2) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public Point[] intersections(Flow flow) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public boolean isIntersectingLineSegment(double x1, double y1, double x2, double y2) {
+        throw new UnsupportedOperationException();
+    }
+    
+    // FIXME
+//    @Override
+//    public boolean isOverlappingObstacle(Obstacle obstacle, Model model, int minObstaclesDistPx) {
+//        throw new UnsupportedOperationException();
+//    }   
+    
 }

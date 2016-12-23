@@ -788,7 +788,6 @@ public class MainWindow extends javax.swing.JFrame {
         testCurveOffsettingMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator32 = new javax.swing.JPopupMenu.Separator();
         testCurveShorteningMenuItem = new javax.swing.JMenuItem();
-        flowsTouchingMenuItem = new javax.swing.JMenuItem();
         markFlowFlowIntersectionsMenuItem = new javax.swing.JMenuItem();
         touchPercentageMenuItem = new javax.swing.JMenuItem();
         largestTouchPercentageMenuItem = new javax.swing.JMenuItem();
@@ -3124,14 +3123,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         debugMenu.add(testCurveShorteningMenuItem);
 
-        flowsTouchingMenuItem.setText("Are Flows Touching or too Close?");
-        flowsTouchingMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                flowsTouchingMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(flowsTouchingMenuItem);
-
         markFlowFlowIntersectionsMenuItem.setText("Mark Flow-Flow Intersections");
         markFlowFlowIntersectionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -4711,25 +4702,6 @@ public class MainWindow extends javax.swing.JFrame {
                 + n + "\nIntersection index: " + intersectionIndex);
     }//GEN-LAST:event_numberOfObstacleIntersectionsMenuItemActionPerformed
 
-    private void flowsTouchingMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowsTouchingMenuItemActionPerformed
-        ArrayList<Flow> flows = model.getSelectedFlows();
-        if (flows.size() != 2) {
-            ErrorDialog.showErrorDialog("Select two flows.");
-            return;
-        }
-        int minObstacleDistPx = model.getMinObstacleDistPx();
-        Flow flow1 = flows.get(0);
-        flow1 = model.clipFlowForComputations(flow1);
-        double flow1WidthPx = model.getFlowWidthPx(flow1);
-        Flow flow2 = flows.get(1);
-        flow2 = model.clipFlowForComputations(flow2);
-        double flow2WidthPx = model.getFlowWidthPx(flow2);
-        double minDistPx = minObstacleDistPx + (flow1WidthPx + flow2WidthPx) / 2;
-        double minDist = minDistPx / model.getReferenceMapScale();
-        boolean touching = flow1.isClose(flow2, minDist, 20, model);
-        JOptionPane.showMessageDialog(this, "Flows are " + (touching ? "" : "NOT") + " touching or too close.");
-    }//GEN-LAST:event_flowsTouchingMenuItemActionPerformed
-
     private void markFlowFlowIntersectionsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_markFlowFlowIntersectionsMenuItemActionPerformed
         ArrayList<Flow> flows = model.getSelectedFlows();
         if (flows.size() != 2) {
@@ -4965,7 +4937,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JPopupMenu flowWidthOptionsPopupMenu;
     private javax.swing.JLabel flowsFilePathLabel;
-    private javax.swing.JMenuItem flowsTouchingMenuItem;
     private ika.gui.MenuToggleButton flowsWidthOptionsButton;
     private javax.swing.JMenuItem floxReportMenuItem;
     private javax.swing.JToggleButton handToggleButton;

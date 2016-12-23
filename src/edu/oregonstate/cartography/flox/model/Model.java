@@ -670,14 +670,13 @@ public class Model {
      *
      * @param flow flow with new information
      */
-    public void updateFlow(Flow flow) {
+    public void updateControlPointAndShortening(Flow flow) {
         // FIXME inefficient iteration, should use hash map
         Iterator<Flow> iter = graph.flowIterator();
         while (iter.hasNext()) {
             Flow destinationFlow = iter.next();
             if (destinationFlow.id == flow.id) {
-                destinationFlow.update(flow);
-                destinationFlow.setSelected(flow.isSelected()); // FIXME remove, only for testing
+                destinationFlow.updateControlPointAndShortening(flow);
                 break;
             }
         }

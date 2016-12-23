@@ -751,6 +751,9 @@ public class GeometryUtils {
             double t2x2, double t2y2,
             double t2x3, double t2y3) {
 
+        // FIXME test with bounding boxes first
+        // ...
+        
         // test whether any point of triangle 1 is inside triangle 2
         if (pointInTriangle(t1x1, t1y1, t2x1, t2y1, t2x2, t2y2, t2x3, t2y3)) {
             return true;
@@ -769,7 +772,29 @@ public class GeometryUtils {
         if (pointInTriangle(t2x2, t2y2, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3)) {
             return true;
         }
-        return pointInTriangle(t2x3, t2y3, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3);
+        if (pointInTriangle(t2x3, t2y3, t1x1, t1y1, t1x2, t1y2, t1x3, t1y3)) {
+            return true;
+        }
+        
+        // test whether two sides of the first triangle intersect with any side of the second triangle
+        // first side
+        if (linesIntersect(t1x1, t1y1, t1x2, t1y2, t2x1, t2y1, t2x2, t2y2)) {
+            return true;
+        }
+        if (linesIntersect(t1x1, t1y1, t1x2, t1y2, t2x2, t2y2, t2x3, t2y3)) {
+            return true;
+        }
+        if (linesIntersect(t1x1, t1y1, t1x2, t1y2, t2x3, t2y3, t2x1, t2y1)) {
+            return true;
+        }
+        // second side
+        if (linesIntersect(t1x1, t1y1, t1x3, t1y3, t2x1, t2y1, t2x2, t2y2)) {
+            return true;
+        }
+        if (linesIntersect(t1x1, t1y1, t1x3, t1y3, t2x2, t2y2, t2x3, t2y3)) {
+            return true;
+        }
+        return linesIntersect(t1x1, t1y1, t1x3, t1y3, t2x3, t2y3, t2x1, t2y1);
     }
     
     /**
