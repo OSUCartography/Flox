@@ -74,7 +74,7 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
                     iterBeforeMovingFlows, canvas);
 
             // update progress indicator
-            double progress = 100d * i / nbrIterations;
+            double progress = 100d * (i + 1d) / nbrIterations;
             setProgress((int) Math.round(progress));
         }
         

@@ -21,7 +21,14 @@ public class FlowPair extends Flow {
      */
     private final double value2;
 
+    /**
+     * shortening for end of second flow of this pair.
+     */
     private double endShorteningToAvoidOverlaps2 = 0;
+    
+    /**
+     * shortening for start of second flow of this pair.
+     */
     private double startShorteningToAvoidOverlaps2 = 0;
 
     private Flow cachedClippedCurve1IncludingArrow;
@@ -257,7 +264,7 @@ public class FlowPair extends Flow {
             return (totalWidth - width2) / 2 / model.getReferenceMapScale();
         }
     }
-
+    
     /**
      * Returns a new instance of the Flow class that can be used to draw the
      * first of the two flows of this FlowPair. The returned flow is offset from
@@ -293,10 +300,6 @@ public class FlowPair extends Flow {
         flow.endShorteningToAvoidOverlaps = endShorteningToAvoidOverlaps2;
         flow.offsetFlow(offset(model, false), model, quality);
         return flow;
-    }
-
-    public Flow[] createOffsetFlows(Model model, Flow.FlowOffsettingQuality quality) {
-        return new Flow[]{createOffsetFlow1(model, quality), createOffsetFlow2(model, quality)};
     }
 
     /**
@@ -381,7 +384,7 @@ public class FlowPair extends Flow {
         Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
         return flow2.isOverlappingArrow(arrow, model);
     }
-
+    
     /**
      * Tests whether a passed Arrow overlaps with any of the two Arrows of this
      * Flow.
@@ -464,7 +467,7 @@ public class FlowPair extends Flow {
 //    public Flow[] split(double t) {
 //        throw new UnsupportedOperationException();
 //    }
-
+   
     @Override
     protected Arrow getArrow(Model model, double arrowTipClipRadius) {
         throw new UnsupportedOperationException();
@@ -489,6 +492,12 @@ public class FlowPair extends Flow {
     public boolean isIntersectingLineSegment(double x1, double y1, double x2, double y2) {
         throw new UnsupportedOperationException();
     }
+    
+    @Override
+    public boolean isOverlappingAnyFlowAtPoint(double t, Model model) {
+        throw new UnsupportedOperationException();
+    }
+
     
     // FIXME
 //    @Override

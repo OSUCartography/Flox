@@ -146,10 +146,10 @@ public class ForceLayouter {
             // nodes and arrowheads are obstacles
             List<Obstacle> obstacles = getObstaclesFromCachedCurves(model);
 
-            // get a list of sorted flows that intersect obstacles
+            // get a list of flows that intersect obstacles
             ArrayList<Flow> sortedOverlappingFlows = getFlowsOverlappingObstacles(
                     obstacles);
-            // sort by decreasing intersection index, which assigns a smaller weight to arrowheads than nodes.
+            // sort flows by decreasing intersection index, which assigns a smaller weight to arrowheads than nodes.
             sortedOverlappingFlows.sort(Collections.reverseOrder(
                     new Comparator<Flow>() {
                 @Override

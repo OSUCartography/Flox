@@ -1702,28 +1702,43 @@ public class Flow implements Comparable<Flow> {
      * (between 0 and 1) overlaps with any other flow or their arrowheads. Takes
      * the width of flows and arrowheads into account.
      *
-     * FIXME move to Model?
+     * For each other flow, constructs a rectangle where the central axis is the
+     * perpendicular cross section on this flow at t. The line width of this
+     * flow defines the height of the rectangle. The width of the rectangle is
+     * equal to the width of the other flow line . Then tests whether any side
+     * of the rectangle intersects with the central line of the other flow. This
+     * method effectively replaces an intersection test between a line and a
+     * flow band (i.e. a Bezier curve with a line width) with an intersection
+     * test between a rectangle and a Bezier curve with 0 width.
      *
      * @param t location of the cross section
      * @param model model with all flows
      * @return true if there is an overlap with another flow, false otherwise.
      */
     public boolean isOverlappingAnyFlowAtPoint(double t, Model model) {
+        // normal vector and tangent vector at t
         Point p = pointOnCurve(t);
         double[] n = getNormal(t);
         double tangentX = n[1];
         double tangentY = -n[0];
+
         double refScale = model.getReferenceMapScale();
         double halfWidth = model.getFlowWidthPx(this) / refScale / 2;
+        // start point of cross section
         double p1x = p.x + n[0] * halfWidth;
         double p1y = p.y + n[1] * halfWidth;
+        // end point of cross section
         double p2x = p.x - n[0] * halfWidth;
         double p2y = p.y - n[1] * halfWidth;
+        // tolerance to test for straight flow line, convert from px to world
         double tol = 0.2 / refScale;
 
         Iterator<Flow> iterator = model.flowIterator();
         while (iterator.hasNext()) {
 
+            // Build an array with 1 (for Flow instance) or 2 (for FlowPair 
+            // instance) flows. A properly object-oriented solution would 
+            // override Flow.isIntersectingLineSegment().
             Flow[] flows;
             {
                 Flow flow = iterator.next();
@@ -1733,9 +1748,12 @@ public class Flow implements Comparable<Flow> {
 
                 // FIXME test with bounding boxes first
                 // ...
-                if (flow instanceof FlowPair) {
+                // 
+                if (flow instanceof FlowPair) {                    
                     FlowPair flowPair = (FlowPair) flow;
-                    flows = flowPair.createOffsetFlows(model, FlowOffsettingQuality.HIGH);
+                    flows = new Flow[] {
+                        flowPair.createOffsetFlow1(model, FlowOffsettingQuality.HIGH), 
+                        flowPair.createOffsetFlow2(model, FlowOffsettingQuality.HIGH)};
                 } else {
                     flows = new Flow[]{flow};
                 }
@@ -1744,39 +1762,48 @@ public class Flow implements Comparable<Flow> {
             for (Flow flow : flows) {
                 Flow clippedFlow = model.clipFlow(flow, true, true, true);
 
+                // half line width of other flow
                 double hw = model.getFlowWidthPx(clippedFlow) / refScale / 2d;
+
+                // test intersection between flow line and right side of rectangle
                 if (clippedFlow.isIntersectingLineSegment(
                         p1x + hw * tangentX, p1y + hw * tangentY,
                         p2x + hw * tangentX, p2y + hw * tangentY)) {
                     return true;
                 }
+
+                // test intersection between flow line and left side of rectangle
                 if (clippedFlow.isIntersectingLineSegment(
                         p1x - hw * tangentX, p1y - hw * tangentY,
                         p2x - hw * tangentX, p2y - hw * tangentY)) {
                     return true;
                 }
+                // test intersection between flow line and bottom side of rectangle
                 if (clippedFlow.isIntersectingLineSegment(
                         p2x + hw * tangentX, p2y + hw * tangentY,
                         p2x - hw * tangentX, p2y - hw * tangentY)) {
                     return true;
                 }
+
+                // test intersection between flow line and top side of rectangle
                 if (clippedFlow.isIntersectingLineSegment(
                         p1x - hw * tangentX, p1y - hw * tangentY,
                         p1x + hw * tangentX, p1y + hw * tangentY)) {
                     return true;
                 }
-                // test whether the start point or the end point of the cross section
-                // overlap the flow
+
                 double hwSqr = hw * hw;
-                // FIXME test for beyondButtCaps ?
-                if (clippedFlow.distanceSquare(p1x, p1y, tol) < hwSqr) {
+                // No rectangle-flow inersection found. Now test whether the start 
+                // point or the end point of the cross section overlap the flow
+                if (clippedFlow.beyondButtCaps(p1x, p1y) == false 
+                        && clippedFlow.distanceSquare(p1x, p1y, tol) < hwSqr) {
                     return true;
                 }
-                // FIXME test for beyondButtCaps ?
-                if (clippedFlow.distanceSquare(p2x, p2y, tol) < hwSqr) {
+                if (clippedFlow.beyondButtCaps(p2x, p2y) == false 
+                        && clippedFlow.distanceSquare(p2x, p2y, tol) < hwSqr) {
                     return true;
                 }
-                // test with arrowhead
+                // test for overlaps with arrowhead
                 if (flow.getArrow(model).lineSegmentOverlaps(p1x, p1y, p2x, p2y)) {
                     return true;
                 }
@@ -2256,6 +2283,11 @@ public class Flow implements Comparable<Flow> {
      * @param model the Model with all Flows
      */
     public void adjustStartShorteningToAvoidOverlaps(Model model) {
+
+        if (getValue() == 29663) {
+            System.out.println("problem");
+        }
+
         final double RAD_INC_PX = 1;
 
         final double referenceMapScale = model.getReferenceMapScale();

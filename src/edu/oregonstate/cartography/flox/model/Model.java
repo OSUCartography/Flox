@@ -2697,7 +2697,7 @@ public class Model {
             if (arrow.getFlow().id == flow.id) {
                 continue;
             }
-            
+
             if (flow.isOverlappingArrow(arrow, this)) {
                 return true;
             }
@@ -2776,7 +2776,7 @@ public class Model {
     }
 
     /**
-     * Set start and end shortenings of flows to 0.
+     * Set start and end shortening of flows to 0.
      */
     public void resetFlowShortenings() {
         Iterator<Flow> iterator = flowIterator();
@@ -2793,13 +2793,17 @@ public class Model {
 
         if (isShortenFlowsToReduceOverlaps() && getMaxShorteningPx() > 0d) {
 
-            // flows are sorted by the length of their base lines.
-            // The longest flows are shortened first.
-            Iterator<Flow> iterator = flowIteratorSortedByBaseLineLength(false);
-            while (iterator.hasNext()) {
-                Flow flow = iterator.next();
-                flow.adjustEndShorteningToAvoidOverlaps(this);
-                flow.adjustStartShorteningToAvoidOverlaps(this);
+            // run flow shortinening twice. FIXME More often would be better
+            for (int i = 0; i < 2; i++) {
+
+                // flows are sorted by the length of their base lines.
+                // The longest flows are shortened first.
+                Iterator<Flow> iterator = flowIteratorSortedByBaseLineLength(false);
+                while (iterator.hasNext()) {
+                    Flow flow = iterator.next();
+                    flow.adjustEndShorteningToAvoidOverlaps(this);
+                    flow.adjustStartShorteningToAvoidOverlaps(this);
+                }
             }
         }
     }
