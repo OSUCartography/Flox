@@ -25,7 +25,7 @@ public class FlowPair extends Flow {
      * shortening for end of second flow of this pair.
      */
     private double endShorteningToAvoidOverlaps2 = 0;
-    
+
     /**
      * shortening for start of second flow of this pair.
      */
@@ -264,7 +264,7 @@ public class FlowPair extends Flow {
             return (totalWidth - width2) / 2 / model.getReferenceMapScale();
         }
     }
-    
+
     /**
      * Returns a new instance of the Flow class that can be used to draw the
      * first of the two flows of this FlowPair. The returned flow is offset from
@@ -333,30 +333,12 @@ public class FlowPair extends Flow {
 
     @Override
     public void adjustEndShorteningToAvoidOverlaps(Model model) {
-        if (isSelected()) {
-            System.out.println("selected");
-        }
-        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
-        flow1.adjustEndShorteningToAvoidOverlaps(model);
-        endShorteningToAvoidOverlaps = flow1.getEndShorteningToAvoidOverlaps();
-
-        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
-        flow2.adjustEndShorteningToAvoidOverlaps(model);
-        endShorteningToAvoidOverlaps2 = flow2.getEndShorteningToAvoidOverlaps();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void adjustStartShorteningToAvoidOverlaps(Model model) {
-        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
-        flow1.adjustStartShorteningToAvoidOverlaps(model);
-        startShorteningToAvoidOverlaps = flow1.getStartShorteningToAvoidOverlaps();
-        // FIXME shorten start of flow 1 if the arrowhead of flow 2 overlaps flow 1
-        // ...
-        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
-        flow2.adjustStartShorteningToAvoidOverlaps(model);
-        startShorteningToAvoidOverlaps2 = flow2.getStartShorteningToAvoidOverlaps();
-        // FIXME shorten start of flow 2 if the arrowhead of flow 1 overlaps flow 2
-        // ...
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -384,7 +366,7 @@ public class FlowPair extends Flow {
         Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
         return flow2.isOverlappingArrow(arrow, model);
     }
-    
+
     /**
      * Tests whether a passed Arrow overlaps with any of the two Arrows of this
      * Flow.
@@ -407,12 +389,25 @@ public class FlowPair extends Flow {
         return flow2.isArrowOverlappingArrow(arrow, model);
     }
 
+    /**
+     * Copy shortening values from the passed Flow to this Flow.
+     *
+     * @param flow flow to copy from
+     */
     @Override
-    public void updateControlPointAndShortening(Flow flow) {
-        super.updateControlPointAndShortening(flow);
-        FlowPair flowPair = (FlowPair) flow;
-        endShorteningToAvoidOverlaps2 = flowPair.endShorteningToAvoidOverlaps2;
-        startShorteningToAvoidOverlaps2 = flowPair.startShorteningToAvoidOverlaps2;
+    public void updateShortening(Flow flow) {
+        super.updateShortening(flow);
+        if (flow instanceof FlowPair) {
+            FlowPair flowPair = (FlowPair) flow;
+            endShorteningToAvoidOverlaps2 = flowPair.endShorteningToAvoidOverlaps2;
+            startShorteningToAvoidOverlaps2 = flowPair.startShorteningToAvoidOverlaps2;
+        }
+    }
+
+    public void updateShorteningFlow2(double startShorteningToAvoidOverlaps2, 
+            double endShorteningToAvoidOverlaps2) {
+        this.endShorteningToAvoidOverlaps2 = endShorteningToAvoidOverlaps2;
+        this.startShorteningToAvoidOverlaps2 = startShorteningToAvoidOverlaps2;
     }
 
     /**
@@ -467,7 +462,7 @@ public class FlowPair extends Flow {
 //    public Flow[] split(double t) {
 //        throw new UnsupportedOperationException();
 //    }
-   
+    
     @Override
     protected Arrow getArrow(Model model, double arrowTipClipRadius) {
         throw new UnsupportedOperationException();
@@ -482,27 +477,25 @@ public class FlowPair extends Flow {
     public Flow clipAroundEndNode(double r1, double r2) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public Point[] intersections(Flow flow) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public boolean isIntersectingLineSegment(double x1, double y1, double x2, double y2) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public boolean isOverlappingAnyFlowAtPoint(double t, Model model) {
         throw new UnsupportedOperationException();
     }
 
-    
     // FIXME
 //    @Override
 //    public boolean isOverlappingObstacle(Obstacle obstacle, Model model, int minObstaclesDistPx) {
 //        throw new UnsupportedOperationException();
 //    }   
-    
 }

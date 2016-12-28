@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -676,7 +677,8 @@ public class Model {
         while (iter.hasNext()) {
             Flow destinationFlow = iter.next();
             if (destinationFlow.id == flow.id) {
-                destinationFlow.updateControlPointAndShortening(flow);
+                destinationFlow.updateControlPoint(flow);
+                destinationFlow.updateShortening(flow);
                 break;
             }
         }
@@ -2786,9 +2788,82 @@ public class Model {
     }
 
     /**
+     * Helper class for shortenFlowsToReduceOverlaps().
+     */
+    private class TaggedFlowPair {
+
+        protected FlowPair flowPair;
+        protected boolean first; // true if key in HashMap is for the first of the two flows in the FlowPair
+
+        protected TaggedFlowPair(FlowPair flowPair, boolean first) {
+            this.flowPair = flowPair;
+            this.first = first;
+        }
+    }
+
+    /**
      * Shorten all flows to reduce overlaps with other flows and arrowheads.
+     *
+     * Offsetting flows of FlowPairs is expensive. Therefore, offset flows only
+     * once and store offset flows and their corresponding FlowPairs in a hash
+     * map. To do so, creates a copy of this Model that has each FlowPair
+     * replaced by two offset Flow instances. The start and end shortening are
+     * computed with the simple Flows, and the shortening values are then
+     * transferred to the FlowPairs in this original Model.
      */
     public void shortenFlowsToReduceOverlaps() {
+
+        Model modelCopy = copy();
+
+        // references to Flows in the original model that are not FlowPairs
+        ArrayList<Flow> simpleFlows = new ArrayList<>();
+
+        // map each new Flow in the copy to the FlowPair in this model
+        HashMap<Flow, TaggedFlowPair> hashMap = new HashMap<>();
+
+        // for each FlowPair in the original Model create two offset Flows
+        Iterator<Flow> iterator = this.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow instanceof FlowPair) {
+                FlowPair biFlow = (FlowPair) flow;
+                Flow offsetFlow1 = biFlow.createOffsetFlow1(this, Flow.FlowOffsettingQuality.HIGH);
+                Flow offsetFlow2 = biFlow.createOffsetFlow2(this, Flow.FlowOffsettingQuality.HIGH);
+                hashMap.put(offsetFlow1, new TaggedFlowPair(biFlow, true));
+                hashMap.put(offsetFlow2, new TaggedFlowPair(biFlow, false));
+            } else {
+                simpleFlows.add(flow);
+            }
+        }
+
+        // reset the graph of the copy and add the new Flows and the simple Flows
+        modelCopy.graph = new Graph();
+        modelCopy.graph.addFlows(hashMap.keySet());
+        modelCopy.graph.addFlows(simpleFlows);
+
+        // shorten Flows in copy
+        modelCopy.shortenFlowsToReduceOverlapsNoFlowPairs();
+
+        // Transfer start and end shortenings of Flows in copy model to FlowPairs 
+        // in original model. Values of Flows that are not linked to a FlowPair don't need
+        // to be copied, as this original model already contains them.
+        for (java.util.Map.Entry<Flow, TaggedFlowPair> entry : hashMap.entrySet()) {
+            Flow flow = entry.getKey();
+            TaggedFlowPair taggedFlowPair = entry.getValue();
+            if (taggedFlowPair.first) {
+                taggedFlowPair.flowPair.updateShortening(flow);
+            } else {
+                taggedFlowPair.flowPair.updateShorteningFlow2(
+                        flow.getStartShorteningToAvoidOverlaps(),
+                        flow.getEndShorteningToAvoidOverlaps());
+            }
+        }
+    }
+
+    /**
+     * Shorten all flows to reduce overlaps with other flows and arrowheads.
+     */
+    private void shortenFlowsToReduceOverlapsNoFlowPairs() {
         resetFlowShortenings();
 
         if (isShortenFlowsToReduceOverlaps() && getMaxShorteningPx() > 0d) {

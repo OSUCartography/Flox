@@ -1749,11 +1749,11 @@ public class Flow implements Comparable<Flow> {
                 // FIXME test with bounding boxes first
                 // ...
                 // 
-                if (flow instanceof FlowPair) {                    
+                if (flow instanceof FlowPair) {
                     FlowPair flowPair = (FlowPair) flow;
-                    flows = new Flow[] {
-                        flowPair.createOffsetFlow1(model, FlowOffsettingQuality.HIGH), 
-                        flowPair.createOffsetFlow2(model, FlowOffsettingQuality.HIGH)};
+                    flows = new Flow[]{
+                        flowPair.cachedOffsetFlow1(model), //flowPair.createOffsetFlow1(model, FlowOffsettingQuality.HIGH), 
+                        flowPair.cachedOffsetFlow2(model)}; // flowPair.createOffsetFlow2(model, FlowOffsettingQuality.HIGH)};
                 } else {
                     flows = new Flow[]{flow};
                 }
@@ -1795,11 +1795,11 @@ public class Flow implements Comparable<Flow> {
                 double hwSqr = hw * hw;
                 // No rectangle-flow inersection found. Now test whether the start 
                 // point or the end point of the cross section overlap the flow
-                if (clippedFlow.beyondButtCaps(p1x, p1y) == false 
+                if (clippedFlow.beyondButtCaps(p1x, p1y) == false
                         && clippedFlow.distanceSquare(p1x, p1y, tol) < hwSqr) {
                     return true;
                 }
-                if (clippedFlow.beyondButtCaps(p2x, p2y) == false 
+                if (clippedFlow.beyondButtCaps(p2x, p2y) == false
                         && clippedFlow.distanceSquare(p2x, p2y, tol) < hwSqr) {
                     return true;
                 }
@@ -2650,13 +2650,20 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Copy control point location and shortening values from the passed Flow to
-     * this Flow.
+     * Copy control point location from the passed Flow to this Flow.
      *
      * @param flow flow to copy from
      */
-    public void updateControlPointAndShortening(Flow flow) {
+    public void updateControlPoint(Flow flow) {
         setCtrlPt(flow.cPtX(), flow.cPtY());
+    }
+
+    /**
+     * Copy shortening values from the passed Flow to this Flow.
+     *
+     * @param flow flow to copy from
+     */
+    public void updateShortening(Flow flow) {
         endShorteningToAvoidOverlaps = flow.endShorteningToAvoidOverlaps;
         startShorteningToAvoidOverlaps = flow.startShorteningToAvoidOverlaps;
     }
