@@ -2788,16 +2788,56 @@ public class Model {
     }
 
     /**
-     * Helper class for shortenFlowsToReduceOverlaps().
+     * Helper class that links the first Flow of a FlowPair with the FlowPair.
+     * For temporary use during computations only.
      */
-    private class TaggedFlowPair {
+    public class Flow1 extends Flow {
 
-        protected FlowPair flowPair;
-        protected boolean first; // true if key in HashMap is for the first of the two flows in the FlowPair
+        private final FlowPair flowPair;
 
-        protected TaggedFlowPair(FlowPair flowPair, boolean first) {
+        public Flow1(FlowPair flowPair, Flow flow) {
+            super(flow);
             this.flowPair = flowPair;
-            this.first = first;
+        }
+
+        @Override
+        public void adjustEndShorteningToAvoidOverlaps(Model model) {
+            super.adjustEndShorteningToAvoidOverlaps(model);
+            flowPair.updateShortening(this);
+        }
+
+        @Override
+        public void adjustStartShorteningToAvoidOverlaps(Model model) {
+            super.adjustStartShorteningToAvoidOverlaps(model);
+            flowPair.updateShortening(this);
+        }
+    }
+
+    /**
+     * Helper class that links the second Flow of a FlowPair with the FlowPair.
+     * For temporary use during computations only.
+     */
+    public class Flow2 extends Flow {
+
+        private final FlowPair flowPair;
+
+        public Flow2(FlowPair flowPair, Flow flow) {
+            super(flow);
+            this.flowPair = flowPair;
+        }
+
+        @Override
+        public void adjustEndShorteningToAvoidOverlaps(Model model) {
+            super.adjustEndShorteningToAvoidOverlaps(model);
+            flowPair.updateShorteningFlow2(getStartShorteningToAvoidOverlaps(),
+                    getEndShorteningToAvoidOverlaps());
+        }
+
+        @Override
+        public void adjustStartShorteningToAvoidOverlaps(Model model) {
+            super.adjustStartShorteningToAvoidOverlaps(model);
+            flowPair.updateShorteningFlow2(getStartShorteningToAvoidOverlaps(),
+                    getEndShorteningToAvoidOverlaps());
         }
     }
 
@@ -2815,13 +2855,8 @@ public class Model {
 
         Model modelCopy = copy();
 
-        // references to Flows in the original model that are not FlowPairs
-        ArrayList<Flow> simpleFlows = new ArrayList<>();
-
-        // map each new Flow in the copy to the FlowPair in this model
-        HashMap<Flow, TaggedFlowPair> hashMap = new HashMap<>();
-
         // for each FlowPair in the original Model create two offset Flows
+        ArrayList<Flow> flows = new ArrayList<>();
         Iterator<Flow> iterator = this.flowIterator();
         while (iterator.hasNext()) {
             Flow flow = iterator.next();
@@ -2829,35 +2864,23 @@ public class Model {
                 FlowPair biFlow = (FlowPair) flow;
                 Flow offsetFlow1 = biFlow.createOffsetFlow1(this, Flow.FlowOffsettingQuality.HIGH);
                 Flow offsetFlow2 = biFlow.createOffsetFlow2(this, Flow.FlowOffsettingQuality.HIGH);
-                hashMap.put(offsetFlow1, new TaggedFlowPair(biFlow, true));
-                hashMap.put(offsetFlow2, new TaggedFlowPair(biFlow, false));
+                flows.add(new Flow1(biFlow, offsetFlow1));
+                flows.add(new Flow2(biFlow, offsetFlow2));
             } else {
-                simpleFlows.add(flow);
+                flows.add(flow);
             }
         }
 
-        // reset the graph of the copy and add the new Flows and the simple Flows
+        // reset the graph of the copy model
         modelCopy.graph = new Graph();
-        modelCopy.graph.addFlows(hashMap.keySet());
-        modelCopy.graph.addFlows(simpleFlows);
+        modelCopy.graph.addFlows(flows);
 
-        // shorten Flows in copy
+        // shorten Flows of the copy model
         modelCopy.shortenFlowsToReduceOverlapsNoFlowPairs();
 
-        // Transfer start and end shortenings of Flows in copy model to FlowPairs 
-        // in original model. Values of Flows that are not linked to a FlowPair don't need
-        // to be copied, as this original model already contains them.
-        for (java.util.Map.Entry<Flow, TaggedFlowPair> entry : hashMap.entrySet()) {
-            Flow flow = entry.getKey();
-            TaggedFlowPair taggedFlowPair = entry.getValue();
-            if (taggedFlowPair.first) {
-                taggedFlowPair.flowPair.updateShortening(flow);
-            } else {
-                taggedFlowPair.flowPair.updateShorteningFlow2(
-                        flow.getStartShorteningToAvoidOverlaps(),
-                        flow.getEndShorteningToAvoidOverlaps());
-            }
-        }
+        // Flow1 and Flow2 pass their shortening to their parent FlowPair,
+        // so there is no need to copy shortening values from instances of 
+        // Flow1 and Flow2 the copy model to FlowPairs in the original model.
     }
 
     /**
