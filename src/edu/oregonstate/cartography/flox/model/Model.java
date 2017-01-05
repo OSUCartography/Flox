@@ -2853,6 +2853,12 @@ public class Model {
      */
     public void shortenFlowsToReduceOverlaps() {
 
+        if (isShortenFlowsToReduceOverlaps() == false 
+                || getMaxShorteningPx() <= 0d) {
+            return;
+        }
+
+        // copy of this model, which will only contain single flows, no FlowPairs
         Model modelCopy = copy();
 
         // for each FlowPair in the original Model create two offset Flows
@@ -2875,34 +2881,26 @@ public class Model {
         modelCopy.graph = new Graph();
         modelCopy.graph.addFlows(flows);
 
-        // shorten Flows of the copy model
-        modelCopy.shortenFlowsToReduceOverlapsNoFlowPairs();
+        // shorten all flows to reduce overlaps with other flows and arrowheads.
+        modelCopy.resetFlowShortenings();
+
+        // run flow shortinening n times.
+        // FIXME
+        final int n = 4;
+        for (int i = 0; i < n; i++) {
+            // flows are sorted by the length of their base lines.
+            // The longest flows are shortened first.
+            iterator = modelCopy.flowIteratorSortedByBaseLineLength(false);
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                flow.adjustEndShorteningToAvoidOverlaps(modelCopy);
+                flow.adjustStartShorteningToAvoidOverlaps(modelCopy);
+            }
+        }
 
         // Flow1 and Flow2 pass their shortening to their parent FlowPair,
         // so there is no need to copy shortening values from instances of 
-        // Flow1 and Flow2 the copy model to FlowPairs in the original model.
+        // Flow1 and Flow2 in the copy model to FlowPairs in the original model.
     }
 
-    /**
-     * Shorten all flows to reduce overlaps with other flows and arrowheads.
-     */
-    private void shortenFlowsToReduceOverlapsNoFlowPairs() {
-        resetFlowShortenings();
-
-        if (isShortenFlowsToReduceOverlaps() && getMaxShorteningPx() > 0d) {
-
-            // run flow shortinening twice. FIXME More often would be better
-            for (int i = 0; i < 2; i++) {
-
-                // flows are sorted by the length of their base lines.
-                // The longest flows are shortened first.
-                Iterator<Flow> iterator = flowIteratorSortedByBaseLineLength(false);
-                while (iterator.hasNext()) {
-                    Flow flow = iterator.next();
-                    flow.adjustEndShorteningToAvoidOverlaps(this);
-                    flow.adjustStartShorteningToAvoidOverlaps(this);
-                }
-            }
-        }
-    }
 }
