@@ -842,6 +842,28 @@ public class Model {
         }
         return n;
     }
+    
+    /**
+     * Selects all unselected flows and deselects all selected flows.
+     */
+    public void invertFlowSelection() {
+        Iterator<Flow> iter = flowIterator();
+        while (iter.hasNext()) {
+            Flow flow = iter.next();
+            flow.setSelected(!flow.isSelected());
+        }
+    }
+    
+    /**
+     * Selects all unselected nodes and deselects all selected nodes.
+     */
+    public void invertNodeSelection() {
+        Iterator<Point> iter = nodeIterator();
+        while (iter.hasNext()) {
+            Point node = iter.next();
+            node.setSelected(!node.isSelected());
+        }
+    }
 
     /**
      * Returns the number of nodes that are not connected to any other node.
@@ -2918,9 +2940,9 @@ public class Model {
         modelCopy.graph = new Graph();
         modelCopy.graph.addFlows(flows);
 
-        // shorten all flows to reduce overlaps with other flows and arrowheads.
         modelCopy.resetFlowShortenings();
 
+        // shorten all flows to reduce overlaps with other flows and arrowheads.
         // run flow shortening n times.
         // FIXME
         final int n = 3;

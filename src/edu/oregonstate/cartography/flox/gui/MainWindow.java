@@ -716,17 +716,19 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator jSeparator8 = new javax.swing.JPopupMenu.Separator();
         deleteMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator27 = new javax.swing.JPopupMenu.Separator();
+        selectAllMenuItem = new javax.swing.JMenuItem();
+        deselectAllMenuItem = new javax.swing.JMenuItem();
         selectByValueCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         jSeparator18 = new javax.swing.JPopupMenu.Separator();
-        selectAllMenuItem = new javax.swing.JMenuItem();
-        selectNodesMenuItem = new javax.swing.JMenuItem();
-        selectUnconnectedNodesMenuItem = new javax.swing.JMenuItem();
         selectFlowsMenuItem = new javax.swing.JMenuItem();
+        deselectFlowsMenuItem = new javax.swing.JMenuItem();
+        invertFlowSelectionMenuItem = new javax.swing.JMenuItem();
         selectOverlappingFlowsInfoMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator28 = new javax.swing.JPopupMenu.Separator();
-        deselectAllMenuItem = new javax.swing.JMenuItem();
+        selectNodesMenuItem = new javax.swing.JMenuItem();
         deselectNodesMenuItem = new javax.swing.JMenuItem();
-        deselectFlowsMenuItem = new javax.swing.JMenuItem();
+        invertNodeSelectionMenuItem = new javax.swing.JMenuItem();
+        selectUnconnectedNodesMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator10 = new javax.swing.JPopupMenu.Separator();
         lockMenuItem = new javax.swing.JMenuItem();
         unlockMenuItem = new javax.swing.JMenuItem();
@@ -2690,15 +2692,6 @@ public class MainWindow extends javax.swing.JFrame {
         editMenu.add(deleteMenuItem);
         editMenu.add(jSeparator27);
 
-        selectByValueCheckBoxMenuItem.setText("Select by Value…");
-        selectByValueCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectByValueCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(selectByValueCheckBoxMenuItem);
-        editMenu.add(jSeparator18);
-
         selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         selectAllMenuItem.setText("Select All");
         selectAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2707,39 +2700,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(selectAllMenuItem);
-
-        selectNodesMenuItem.setText("Select All Nodes");
-        selectNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectNodesMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(selectNodesMenuItem);
-
-        selectUnconnectedNodesMenuItem.setText("Select Unconnected Nodes");
-        selectUnconnectedNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectUnconnectedNodesMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(selectUnconnectedNodesMenuItem);
-
-        selectFlowsMenuItem.setText("Select All Flows");
-        selectFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectFlowsMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(selectFlowsMenuItem);
-
-        selectOverlappingFlowsInfoMenuItem.setText("Select Flows Overlapping Obstacles");
-        selectOverlappingFlowsInfoMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectOverlappingFlowsInfoMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(selectOverlappingFlowsInfoMenuItem);
-        editMenu.add(jSeparator28);
 
         deselectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         deselectAllMenuItem.setText("Deselect All");
@@ -2750,13 +2710,22 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(deselectAllMenuItem);
 
-        deselectNodesMenuItem.setText("Deselect Nodes");
-        deselectNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        selectByValueCheckBoxMenuItem.setText("Select by Value…");
+        selectByValueCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deselectNodesMenuItemActionPerformed(evt);
+                selectByValueCheckBoxMenuItemActionPerformed(evt);
             }
         });
-        editMenu.add(deselectNodesMenuItem);
+        editMenu.add(selectByValueCheckBoxMenuItem);
+        editMenu.add(jSeparator18);
+
+        selectFlowsMenuItem.setText("Select All Flows");
+        selectFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectFlowsMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectFlowsMenuItem);
 
         deselectFlowsMenuItem.setText("Deselect Flows");
         deselectFlowsMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -2765,6 +2734,55 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         editMenu.add(deselectFlowsMenuItem);
+
+        invertFlowSelectionMenuItem.setText("Invert Flow Selection");
+        invertFlowSelectionMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                invertFlowSelectionMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(invertFlowSelectionMenuItem);
+
+        selectOverlappingFlowsInfoMenuItem.setText("Select Flows Overlapping Obstacles");
+        selectOverlappingFlowsInfoMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectOverlappingFlowsInfoMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectOverlappingFlowsInfoMenuItem);
+        editMenu.add(jSeparator28);
+
+        selectNodesMenuItem.setText("Select All Nodes");
+        selectNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectNodesMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectNodesMenuItem);
+
+        deselectNodesMenuItem.setText("Deselect Nodes");
+        deselectNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deselectNodesMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(deselectNodesMenuItem);
+
+        invertNodeSelectionMenuItem.setText("Invert Node Selection");
+        invertNodeSelectionMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                invertNodeSelectionMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(invertNodeSelectionMenuItem);
+
+        selectUnconnectedNodesMenuItem.setText("Select Unconnected Nodes");
+        selectUnconnectedNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectUnconnectedNodesMenuItemActionPerformed(evt);
+            }
+        });
+        editMenu.add(selectUnconnectedNodesMenuItem);
         editMenu.add(jSeparator10);
 
         lockMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -4867,6 +4885,22 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_symmetrizeSelectedFlowMenuItemActionPerformed
 
+    private void invertFlowSelectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invertFlowSelectionMenuItemActionPerformed
+        model.invertFlowSelection();
+        updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_invertFlowSelectionMenuItemActionPerformed
+
+    private void invertNodeSelectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invertNodeSelectionMenuItemActionPerformed
+         model.invertNodeSelection();
+        updateLockUnlockButtonIcon();
+        updateValueField();
+        updateCoordinateFields();
+        mapComponent.refreshMap();
+    }//GEN-LAST:event_invertNodeSelectionMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -4984,6 +5018,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem infoMenuItem;
     private javax.swing.JCheckBoxMenuItem inlineArrowsCheckBoxMenuItem;
+    private javax.swing.JMenuItem invertFlowSelectionMenuItem;
+    private javax.swing.JMenuItem invertNodeSelectionMenuItem;
     private javax.swing.JMenuItem isIntersectingSiblingMenuItem;
     private javax.swing.JSpinner iterationsSpinner;
     private javax.swing.JLabel jLabel10;
