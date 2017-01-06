@@ -2906,6 +2906,40 @@ public class Model {
         // so there is no need to copy shortening values from instances of 
         // Flow1 and Flow2 in the copy model to FlowPairs in the original model.
         //
+        // shorten FlowPairs
+        double overlapPercentage = 0.15;
+        double t = (1d - overlapPercentage) / 2d;
+
+        iterator = modelCopy.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow instanceof Flow1) {
+                Flow1 flow1 = (Flow1) flow;
+                double startR1 = startClipRadius(flow1,
+                        /* forceClipNodes */ true,
+                        /* adjustLengthToReduceOverlaps */ false);
+                double startT1 = flow1.getIntersectionTWithCircleAroundStartPoint(startR1);
+                Point startPt1 = flow1.pointOnCurve(startT1);
+                Point clipPt1 = flow1.pointOnCurve(t);
+                double r1 = startPt1.distance(clipPt1);
+                r1 = Math.max(r1, flow1.startShorteningToAvoidOverlaps);
+                flow1.startShorteningToAvoidOverlaps = r1;
+                flow1.flowPair.startShorteningToAvoidOverlaps = r1;
+
+                Flow2 flow2 = flow1.flow2;
+                double startR2 = startClipRadius(flow2,
+                        /* forceClipNodes */ true,
+                        /* adjustLengthToReduceOverlaps */ false);
+                double startT2 = flow2.getIntersectionTWithCircleAroundStartPoint(startR2);
+                Point startPt2 = flow2.pointOnCurve(startT2);
+                Point clipPt2 = flow2.pointOnCurve(t);
+                double r2 = startPt2.distance(clipPt2);
+                r2 = Math.max(r2, flow2.startShorteningToAvoidOverlaps);
+                flow2.startShorteningToAvoidOverlaps = r2;
+                flow2.flowPair.startShorteningToAvoidOverlaps2 = r2;
+            }
+        }
+
         // make sure arrowheads of FlowPairs do not overlap their peer flow
         iterator = modelCopy.flowIterator();
         while (iterator.hasNext()) {
@@ -2928,16 +2962,15 @@ public class Model {
                     flow1.flowPair.startShorteningToAvoidOverlaps = r;
                     // FIXME
                     // optional additional white space 
-                    
+
                     // FIXME
 //                    // make sure the flow trunk (flow without arrowhead) is long enough
 //                    if (isFlowTrunkLongerThan(minFlowLength, model) == false) {
 //                        startShorteningToAvoidOverlaps = Math.max(0, (i - 1) * radiusIncrement);
 //                        break;
 //                    }
-
                 }
-                
+
                 if (flow2.isOverlappingArrow(arrow1, this)) {
                     double startR2 = startClipRadius(flow2,
                             /* forceClipNodes */ true,
@@ -2949,10 +2982,9 @@ public class Model {
                     r = Math.max(r, flow2.startShorteningToAvoidOverlaps);
                     flow2.startShorteningToAvoidOverlaps = r;
                     flow2.flowPair.startShorteningToAvoidOverlaps2 = r;
-                    
+
                     // FIXME
                     // optional additional white space 
-                    
                     // FIXME
 //                    // make sure the flow trunk (flow without arrowhead) is long enough
 //                    if (isFlowTrunkLongerThan(minFlowLength, model) == false) {
