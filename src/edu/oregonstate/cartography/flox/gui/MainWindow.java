@@ -727,7 +727,6 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator jSeparator28 = new javax.swing.JPopupMenu.Separator();
         selectNodesMenuItem = new javax.swing.JMenuItem();
         deselectNodesMenuItem = new javax.swing.JMenuItem();
-        invertNodeSelectionMenuItem = new javax.swing.JMenuItem();
         selectUnconnectedNodesMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator10 = new javax.swing.JPopupMenu.Separator();
         lockMenuItem = new javax.swing.JMenuItem();
@@ -786,6 +785,7 @@ public class MainWindow extends javax.swing.JFrame {
         showLineSegmentsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
         showOptionsMenuItem = new javax.swing.JMenuItem();
+        showCoordinatesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator21 = new javax.swing.JPopupMenu.Separator();
         constrainControlPointsToRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -801,6 +801,7 @@ public class MainWindow extends javax.swing.JFrame {
         symmetrizeSelectedFlowMenuItem = new javax.swing.JMenuItem();
         jSeparator22 = new javax.swing.JPopupMenu.Separator();
         selectFlowWithShortTrunksMenuItem = new javax.swing.JMenuItem();
+        invertNodeSelectionMenuItem = new javax.swing.JMenuItem();
 
         importPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         importPanel.setLayout(new java.awt.GridBagLayout());
@@ -2768,14 +2769,6 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(deselectNodesMenuItem);
 
-        invertNodeSelectionMenuItem.setText("Invert Node Selection");
-        invertNodeSelectionMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                invertNodeSelectionMenuItemActionPerformed(evt);
-            }
-        });
-        editMenu.add(invertNodeSelectionMenuItem);
-
         selectUnconnectedNodesMenuItem.setText("Select Unconnected Nodes");
         selectUnconnectedNodesMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3138,6 +3131,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showOptionsMenuItem);
+
+        showCoordinatesCheckBoxMenuItem.setText("Show Coordinates");
+        showCoordinatesCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showCoordinatesCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(showCoordinatesCheckBoxMenuItem);
         debugMenu.add(jSeparator21);
 
         constrainControlPointsToRangeBoxCheckBoxMenuItem.setText("Constrain Control Points to Range Boxes");
@@ -3223,6 +3224,14 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(selectFlowWithShortTrunksMenuItem);
+
+        invertNodeSelectionMenuItem.setText("Invert Node Selection");
+        invertNodeSelectionMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                invertNodeSelectionMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(invertNodeSelectionMenuItem);
 
         menuBar.add(debugMenu);
         //debugMenu.setVisible(false);
@@ -4901,6 +4910,10 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
     }//GEN-LAST:event_invertNodeSelectionMenuItemActionPerformed
 
+    private void showCoordinatesCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showCoordinatesCheckBoxMenuItemActionPerformed
+        coordinateInfoPanel.setCoordinatesVisible(showCoordinatesCheckBoxMenuItem.isSelected());
+    }//GEN-LAST:event_showCoordinatesCheckBoxMenuItemActionPerformed
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -5117,6 +5130,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem shortenFlowsToReduceOverlapsMenuItem;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
+    private javax.swing.JCheckBoxMenuItem showCoordinatesCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showDebugCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showFlowsCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem showLineSegmentsCheckBoxMenuItem;
