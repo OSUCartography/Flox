@@ -627,6 +627,9 @@ public class MainWindow extends javax.swing.JFrame {
         endDistanceSpinner = new javax.swing.JSpinner();
         javax.swing.JLabel jLabel29 = new javax.swing.JLabel();
         startDistanceSpinner = new javax.swing.JSpinner();
+        javax.swing.JLabel jLabel26 = new javax.swing.JLabel();
+        jLabel27 = new javax.swing.JLabel();
+        jLabel28 = new javax.swing.JLabel();
         overlapsPanel = new TransparentMacPanel();
         overlapsContentPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel32 = new javax.swing.JLabel();
@@ -1681,7 +1684,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridwidth = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
         nodesContentPanel.add(maxNodeRadiusLabel, gridBagConstraints);
@@ -1700,6 +1703,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 20, 3, 4);
         nodesContentPanel.add(maximumNodeSizeSlider, gridBagConstraints);
@@ -1726,6 +1730,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         nodesContentPanel.add(jLabel36, gridBagConstraints);
 
         nodeStrokeColorButton.setColorChooserTitle("Nodes Stroke Color");
@@ -1761,6 +1766,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         nodesContentPanel.add(jLabel31, gridBagConstraints);
 
         nodeFillColorButton.setColorChooserTitle("Nodes Fill Color");
@@ -1777,17 +1783,19 @@ public class MainWindow extends javax.swing.JFrame {
         nodesContentPanel.add(nodeFillColorButton, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
-        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         nodesContentPanel.add(jSeparator29, gridBagConstraints);
 
-        jLabel14.setText("End Trim");
+        jLabel14.setText("Flow Ends");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         nodesContentPanel.add(jLabel14, gridBagConstraints);
 
         endDistanceSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, null, 1.0d));
@@ -1798,19 +1806,19 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         nodesContentPanel.add(endDistanceSpinner, gridBagConstraints);
 
-        jLabel29.setText("Start Trim");
-        jLabel29.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 20, 0, 0));
+        jLabel29.setText("Flow Starts");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
         nodesContentPanel.add(jLabel29, gridBagConstraints);
 
         startDistanceSpinner.setModel(new javax.swing.SpinnerNumberModel(0.0d, 0.0d, null, 1.0d));
@@ -1821,11 +1829,36 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 8;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         nodesContentPanel.add(startDistanceSpinner, gridBagConstraints);
+
+        jLabel26.setText("Gaps Between Flows and Nodes");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        nodesContentPanel.add(jLabel26, gridBagConstraints);
+
+        jLabel27.setText("Pixel");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        nodesContentPanel.add(jLabel27, gridBagConstraints);
+
+        jLabel28.setText("Pixel");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        nodesContentPanel.add(jLabel28, gridBagConstraints);
 
         nodesPanel.add(nodesContentPanel);
 
@@ -4961,6 +4994,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel37;
