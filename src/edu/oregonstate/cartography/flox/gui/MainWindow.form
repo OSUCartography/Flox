@@ -1225,12 +1225,12 @@
                 <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
               </AuxValues>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="testCurveShorteningMenuItem">
+            <MenuItem class="javax.swing.JMenuItem" name="shortenFlowsToReduceOverlapsMenuItem">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Test Curve Shortening"/>
+                <Property name="text" type="java.lang.String" value="Shorten Flows to Reduce Overlaps"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="testCurveShorteningMenuItemActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="shortenFlowsToReduceOverlapsMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="markFlowFlowIntersectionsMenuItem">

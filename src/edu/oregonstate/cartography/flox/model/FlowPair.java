@@ -29,7 +29,7 @@ public class FlowPair extends Flow {
     /**
      * shortening for start of second flow of this pair.
      */
-    private double startShorteningToAvoidOverlaps2 = 0;
+    protected double startShorteningToAvoidOverlaps2 = 0;
 
     private Flow cachedClippedCurve1IncludingArrow;
     private Flow cachedClippedCurve2IncludingArrow;
@@ -332,18 +332,8 @@ public class FlowPair extends Flow {
     }
 
     @Override
-    public void adjustEndShorteningToAvoidOverlaps(Model model) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void adjustStartShorteningToAvoidOverlaps(Model model) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void resetShortenings() {
-        super.resetShortenings();
+    public void resetShortening() {
+        super.resetShortening();
         endShorteningToAvoidOverlaps2 = 0;
         startShorteningToAvoidOverlaps2 = 0;
     }
@@ -404,7 +394,7 @@ public class FlowPair extends Flow {
         }
     }
 
-    public void updateShorteningFlow2(double startShorteningToAvoidOverlaps2, 
+    public void updateShorteningFlow2(double startShorteningToAvoidOverlaps2,
             double endShorteningToAvoidOverlaps2) {
         this.endShorteningToAvoidOverlaps2 = endShorteningToAvoidOverlaps2;
         this.startShorteningToAvoidOverlaps2 = startShorteningToAvoidOverlaps2;
@@ -451,6 +441,16 @@ public class FlowPair extends Flow {
         double r2 = flow2.flowTrunkToFlowRatio(model);
         return Math.max(r1, r2);
     }
+    
+    @Override
+    public void adjustEndShorteningToAvoidOverlaps(Model model) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void adjustStartShorteningToAvoidOverlaps(Model model) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public void offsetFlow(double offset, Model model, FlowOffsettingQuality quality) {
@@ -462,7 +462,6 @@ public class FlowPair extends Flow {
 //    public Flow[] split(double t) {
 //        throw new UnsupportedOperationException();
 //    }
-    
     @Override
     protected Arrow getArrow(Model model, double arrowTipClipRadius) {
         throw new UnsupportedOperationException();

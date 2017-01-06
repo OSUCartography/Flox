@@ -2230,7 +2230,11 @@ public class Flow implements Comparable<Flow> {
                 /* adjustLengthToReduceOverlaps */ false);
 
         int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX);
-        ArrayList<Boolean> candidates = new ArrayList<>(nbrIterations);
+        ArrayList<Boolean> candidates = null;
+        if (model.isDrawArrowheads() == false) {
+            candidates = new ArrayList<>(nbrIterations);
+        }
+        
         for (int i = 0; i <= nbrIterations; i++) {
             endShorteningToAvoidOverlaps = i * radiusIncrement;
             double clipRadius = endR + endShorteningToAvoidOverlaps;
@@ -2283,10 +2287,6 @@ public class Flow implements Comparable<Flow> {
      * @param model the Model with all Flows
      */
     public void adjustStartShorteningToAvoidOverlaps(Model model) {
-
-        if (getValue() == 29663) {
-            System.out.println("problem");
-        }
 
         final double RAD_INC_PX = 1;
 
@@ -2644,7 +2644,7 @@ public class Flow implements Comparable<Flow> {
         return startShorteningToAvoidOverlaps;
     }
 
-    public void resetShortenings() {
+    public void resetShortening() {
         endShorteningToAvoidOverlaps = 0;
         startShorteningToAvoidOverlaps = 0;
     }

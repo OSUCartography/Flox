@@ -2783,7 +2783,7 @@ public class Model {
     public void resetFlowShortenings() {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
-            iterator.next().resetShortenings();
+            iterator.next().resetShortening();
         }
     }
 
@@ -2793,11 +2793,13 @@ public class Model {
      */
     public class Flow1 extends Flow {
 
-        private final FlowPair flowPair;
+        public final FlowPair flowPair;
+        public final Flow2 flow2;
 
-        public Flow1(FlowPair flowPair, Flow flow) {
+        public Flow1(FlowPair flowPair, Flow flow, Flow2 flow2) {
             super(flow);
             this.flowPair = flowPair;
+            this.flow2 = flow2;
         }
 
         @Override
@@ -2853,7 +2855,7 @@ public class Model {
      */
     public void shortenFlowsToReduceOverlaps() {
 
-        if (isShortenFlowsToReduceOverlaps() == false 
+        if (isShortenFlowsToReduceOverlaps() == false
                 || getMaxShorteningPx() <= 0d) {
             return;
         }
@@ -2870,8 +2872,10 @@ public class Model {
                 FlowPair biFlow = (FlowPair) flow;
                 Flow offsetFlow1 = biFlow.createOffsetFlow1(this, Flow.FlowOffsettingQuality.HIGH);
                 Flow offsetFlow2 = biFlow.createOffsetFlow2(this, Flow.FlowOffsettingQuality.HIGH);
-                flows.add(new Flow1(biFlow, offsetFlow1));
-                flows.add(new Flow2(biFlow, offsetFlow2));
+                Flow2 flow2 = new Flow2(biFlow, offsetFlow2);
+                Flow1 flow1 = new Flow1(biFlow, offsetFlow1, flow2);
+                flows.add(flow1);
+                flows.add(flow2);
             } else {
                 flows.add(flow);
             }
@@ -2884,9 +2888,9 @@ public class Model {
         // shorten all flows to reduce overlaps with other flows and arrowheads.
         modelCopy.resetFlowShortenings();
 
-        // run flow shortinening n times.
+        // run flow shortening n times.
         // FIXME
-        final int n = 4;
+        final int n = 3;
         for (int i = 0; i < n; i++) {
             // flows are sorted by the length of their base lines.
             // The longest flows are shortened first.
@@ -2901,6 +2905,58 @@ public class Model {
         // Flow1 and Flow2 pass their shortening to their parent FlowPair,
         // so there is no need to copy shortening values from instances of 
         // Flow1 and Flow2 in the copy model to FlowPairs in the original model.
+        //
+        // make sure arrowheads of FlowPairs do not overlap their peer flow
+        iterator = modelCopy.flowIterator();
+        while (iterator.hasNext()) {
+            Flow flow = iterator.next();
+            if (flow instanceof Flow1) {
+                Flow1 flow1 = (Flow1) flow;
+                Flow2 flow2 = flow1.flow2;
+                Arrow arrow1 = flow1.getArrow(this);
+                Arrow arrow2 = flow2.getArrow(this);
+                if (flow1.isOverlappingArrow(arrow2, this)) {
+                    double startR1 = startClipRadius(flow1,
+                            /* forceClipNodes */ true,
+                            /* adjustLengthToReduceOverlaps */ false);
+                    double startT1 = flow1.getIntersectionTWithCircleAroundStartPoint(startR1);
+                    Point startPt1 = flow1.pointOnCurve(startT1);
+                    Point arrowPt1 = arrow2.getCorner2Pt();
+                    double r = startPt1.distance(arrowPt1);
+                    r = Math.max(r, flow1.startShorteningToAvoidOverlaps);
+                    flow1.startShorteningToAvoidOverlaps = r;
+                    flow1.flowPair.startShorteningToAvoidOverlaps = r;
+                    
+                    // FIXME
+//                    // make sure the flow trunk (flow without arrowhead) is long enough
+//                    if (isFlowTrunkLongerThan(minFlowLength, model) == false) {
+//                        startShorteningToAvoidOverlaps = Math.max(0, (i - 1) * radiusIncrement);
+//                        break;
+//                    }
+
+                }
+                
+                if (flow2.isOverlappingArrow(arrow1, this)) {
+                    double startR2 = startClipRadius(flow2,
+                            /* forceClipNodes */ true,
+                            /* adjustLengthToReduceOverlaps */ false);
+                    double startT2 = flow2.getIntersectionTWithCircleAroundStartPoint(startR2);
+                    Point startPt2 = flow2.pointOnCurve(startT2);
+                    Point arrowPt2 = arrow1.getCorner2Pt();
+                    double r = startPt2.distance(arrowPt2);
+                    r = Math.max(r, flow2.startShorteningToAvoidOverlaps);
+                    flow2.startShorteningToAvoidOverlaps = r;
+                    flow2.flowPair.startShorteningToAvoidOverlaps2 = r;
+                    
+                    // FIXME
+//                    // make sure the flow trunk (flow without arrowhead) is long enough
+//                    if (isFlowTrunkLongerThan(minFlowLength, model) == false) {
+//                        startShorteningToAvoidOverlaps = Math.max(0, (i - 1) * radiusIncrement);
+//                        break;
+//                    }
+                }
+            }
+        }
     }
 
 }

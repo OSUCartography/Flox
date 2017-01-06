@@ -787,7 +787,7 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JPopupMenu.Separator jSeparator31 = new javax.swing.JPopupMenu.Separator();
         testCurveOffsettingMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator32 = new javax.swing.JPopupMenu.Separator();
-        testCurveShorteningMenuItem = new javax.swing.JMenuItem();
+        shortenFlowsToReduceOverlapsMenuItem = new javax.swing.JMenuItem();
         markFlowFlowIntersectionsMenuItem = new javax.swing.JMenuItem();
         touchPercentageMenuItem = new javax.swing.JMenuItem();
         largestTouchPercentageMenuItem = new javax.swing.JMenuItem();
@@ -3115,13 +3115,13 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu.add(testCurveOffsettingMenuItem);
         debugMenu.add(jSeparator32);
 
-        testCurveShorteningMenuItem.setText("Test Curve Shortening");
-        testCurveShorteningMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        shortenFlowsToReduceOverlapsMenuItem.setText("Shorten Flows to Reduce Overlaps");
+        shortenFlowsToReduceOverlapsMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                testCurveShorteningMenuItemActionPerformed(evt);
+                shortenFlowsToReduceOverlapsMenuItemActionPerformed(evt);
             }
         });
-        debugMenu.add(testCurveShorteningMenuItem);
+        debugMenu.add(shortenFlowsToReduceOverlapsMenuItem);
 
         markFlowFlowIntersectionsMenuItem.setText("Mark Flow-Flow Intersections");
         markFlowFlowIntersectionsMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -4662,10 +4662,10 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_nameMenuItemActionPerformed
 
-    private void testCurveShorteningMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testCurveShorteningMenuItemActionPerformed
+    private void shortenFlowsToReduceOverlapsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shortenFlowsToReduceOverlapsMenuItemActionPerformed
         model.shortenFlowsToReduceOverlaps();
         mapComponent.refreshMap();
-    }//GEN-LAST:event_testCurveShorteningMenuItemActionPerformed
+    }//GEN-LAST:event_shortenFlowsToReduceOverlapsMenuItemActionPerformed
 
     private void showLockStateCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showLockStateCheckBoxMenuItemActionPerformed
         mapComponent.setDrawLockIcons(showLockStateCheckBoxMenuItem.isSelected());
@@ -4865,8 +4865,12 @@ public class MainWindow extends javax.swing.JFrame {
             addUndo(undoString);
         }
 
-        // If there are less than two flows, exit the method.
+        // If there are is only one flow, make it streight and adjust its 
+        // shortening (if it is a FlowPair arrowheads could overlap peer flows)
         if (model.getNbrFlows() <= 1) {
+            model.straightenFlows(false);
+            model.shortenFlowsToReduceOverlaps();
+            mapComponent.refreshMap();
             return;
         }
 
@@ -5039,6 +5043,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField selectValueFormattedTextField;
     private javax.swing.JDialog selectionDialog;
     private javax.swing.JCheckBox shortenFlowsCheckBox;
+    private javax.swing.JMenuItem shortenFlowsToReduceOverlapsMenuItem;
     private javax.swing.JButton showAllButton;
     private javax.swing.JMenuItem showAllMenuItem;
     private javax.swing.JCheckBoxMenuItem showDebugCheckBoxMenuItem;
@@ -5057,7 +5062,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem symmetrizeFlowsMenuItem;
     private javax.swing.JMenuItem symmetrizeSelectedFlowMenuItem;
     private javax.swing.JMenuItem testCurveOffsettingMenuItem;
-    private javax.swing.JMenuItem testCurveShorteningMenuItem;
     private javax.swing.JMenuItem totalFlowsMenuItem;
     private javax.swing.JMenuItem touchPercentageMenuItem;
     private javax.swing.JMenuItem undoMenuItem;
