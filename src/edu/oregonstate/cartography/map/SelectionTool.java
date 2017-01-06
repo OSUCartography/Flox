@@ -8,7 +8,6 @@ package edu.oregonstate.cartography.map;
 import edu.oregonstate.cartography.flox.gui.FloxMapComponent;
 import edu.oregonstate.cartography.flox.gui.FloxRenderer;
 import edu.oregonstate.cartography.flox.gui.MainWindow;
-import edu.oregonstate.cartography.flox.model.Arrow;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.Model;
 import edu.oregonstate.cartography.flox.model.Point;
@@ -90,20 +89,22 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
 
         // detect click on lock icon and unlock clicked flow
         Iterator<Flow> iterator = model.flowIterator();
-        double tolWorldCoord = FloxRenderer.LOCK_ICON_RADIUS / mapComponent.getScale();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            if (flow.isLocked() && flow.getBoundingBox().contains(point)) {
-                Flow clippedFlow = model.clipFlowForComputations(flow);
-                Point lockCenter = clippedFlow.pointOnCurve(0.5);
-                double dist = lockCenter.distance(point.x, point.y);
-                if (dist < tolWorldCoord) {
-                    flow.setLocked(false);
-                    mapComponent.refreshMap();
-                    ((FloxMapComponent) mapComponent).getMainWindow().updateLockUnlockButtonIcon();
-                    // compute new flow layout
-                    ((FloxMapComponent) mapComponent).layout("Unlock");
-                    return;
+        if (((FloxMapComponent) mapComponent).isDrawLockIcons()) {
+            double tolWorldCoord = FloxRenderer.LOCK_ICON_RADIUS / mapComponent.getScale();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                if (flow.isLocked() && flow.getBoundingBox().contains(point)) {
+                    Flow clippedFlow = model.clipFlowForComputations(flow);
+                    Point lockCenter = clippedFlow.pointOnCurve(0.5);
+                    double dist = lockCenter.distance(point.x, point.y);
+                    if (dist < tolWorldCoord) {
+                        flow.setLocked(false);
+                        mapComponent.refreshMap();
+                        ((FloxMapComponent) mapComponent).getMainWindow().updateLockUnlockButtonIcon();
+                        // compute new flow layout
+                        ((FloxMapComponent) mapComponent).layout("Unlock");
+                        return;
+                    }
                 }
             }
         }
@@ -199,9 +200,11 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                         // needed because flows are deselected by the initial click.
                     }
                 } else // flow bb does not intersect rect
-                 if (shiftDown == false) {
+                {
+                    if (shiftDown == false) {
                         flow.setSelected(false);
                     }
+                }
             }
         }
 
@@ -294,13 +297,15 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                 nodeGotSelected = true;
             }
         } else // No nodes were clicked.
-         if (!shiftDown) {
+        {
+            if (!shiftDown) {
                 // Shift is not held down.
                 // Deselect all nodes.
                 for (Point node : nodes) {
                     node.setSelected(false);
                 }
             }
+        }
 
         // SELECT FLOWS
         if (((FloxMapComponent) mapComponent).isDrawFlows()) {
