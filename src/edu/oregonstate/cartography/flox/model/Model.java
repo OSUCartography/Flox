@@ -2926,6 +2926,8 @@ public class Model {
                     r = Math.max(r, flow1.startShorteningToAvoidOverlaps);
                     flow1.startShorteningToAvoidOverlaps = r;
                     flow1.flowPair.startShorteningToAvoidOverlaps = r;
+                    // FIXME
+                    // optional additional white space 
                     
                     // FIXME
 //                    // make sure the flow trunk (flow without arrowhead) is long enough
@@ -2947,6 +2949,9 @@ public class Model {
                     r = Math.max(r, flow2.startShorteningToAvoidOverlaps);
                     flow2.startShorteningToAvoidOverlaps = r;
                     flow2.flowPair.startShorteningToAvoidOverlaps2 = r;
+                    
+                    // FIXME
+                    // optional additional white space 
                     
                     // FIXME
 //                    // make sure the flow trunk (flow without arrowhead) is long enough
