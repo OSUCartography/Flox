@@ -2262,8 +2262,14 @@ public class Model {
     /**
      * Returns a flow with clipped start and end segments. Clipping takes node
      * dimensions, required distances to start and end points, and masking areas
-     * into account. If nothing is clipped, the passed flow is returned
-     * unaltered.
+     * into account.
+     *
+     * When a FlowPair is passed, a new Flow is returned. If a Flow instance is
+     * passed, a new Flow is returned if the start and/or the end of the flow
+     * was clipped.
+     *
+     * When a FlowPair is passed, the shorter of the two radii around the start
+     * node and the end node is returned.
      *
      * @param flow flow to clip
      * @param clipArrowhead if true, the flow line is clipped to make space for
@@ -2289,11 +2295,33 @@ public class Model {
 //            lineString = JTSUtils.pointsToLineString(flow.regularIntervals(segmentLength()));
 //        }
 
-        double startR = startClipRadius(flow,
-                forceClipNodes, adjustLengthToReduceOverlaps);
-        double endR = endClipRadius(flow, clipArrowhead, lineString,
-                forceClipNodes, adjustLengthToReduceOverlaps);
+        // compute clipping radii around start and end nodes
+        double startR, endR;
+        if (flow instanceof FlowPair) {
+            FlowPair flowPair = (FlowPair) flow;
+            Flow flow1 = flowPair.createFlow1();
+            Flow flow2 = flowPair.createFlow2();
+            double startR1 = startClipRadius(flow1,
+                    forceClipNodes, adjustLengthToReduceOverlaps);
+            double endR1 = endClipRadius(flow1, clipArrowhead, lineString,
+                    forceClipNodes, adjustLengthToReduceOverlaps);
+            double startR2 = startClipRadius(flow2,
+                    forceClipNodes, adjustLengthToReduceOverlaps);
+            double endR2 = endClipRadius(flow2, clipArrowhead, lineString,
+                    forceClipNodes, adjustLengthToReduceOverlaps);
+            // shorter of the two radii connected to the start node
+            startR = Math.min(startR1, endR2);
+            // shorter of the two radii connected to the end node
+            endR = Math.min(endR1, startR2);
 
+            // create new Flow to replace the FlowPair
+            flow = new Flow(flowPair);
+        } else {
+            startR = startClipRadius(flow,
+                    forceClipNodes, adjustLengthToReduceOverlaps);
+            endR = endClipRadius(flow, clipArrowhead, lineString,
+                    forceClipNodes, adjustLengthToReduceOverlaps);
+        }
         // cut off the end piece
         double endT = flow.getIntersectionTWithCircleAroundEndPoint(endR);
         if (endT < 1) {
@@ -2320,6 +2348,8 @@ public class Model {
      */
     public double startClipRadius(Flow flow, boolean forceClipNodes,
             boolean adjustLengthToReduceOverlaps) {
+
+        assert (flow instanceof FlowPair == false);
 
         // clipping radius for start node
         double startNodeClipRadius = 0;
@@ -2372,6 +2402,8 @@ public class Model {
      */
     public double endClipRadius(Flow flow, boolean clipArrowhead,
             LineString lineString, boolean clipEndNode, boolean adjustLengthToReduceOverlaps) {
+        assert (flow instanceof FlowPair == false);
+
         // clipping radius for end node
         double endNodeClipRadius = 0;
         if (clipArrowhead && isDrawArrowheads()) {
@@ -2784,6 +2816,7 @@ public class Model {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             iterator.next().resetShortening();
+
         }
     }
 
@@ -2906,7 +2939,7 @@ public class Model {
         // so there is no need to copy shortening values from instances of 
         // Flow1 and Flow2 in the copy model to FlowPairs in the original model.
         //
-        // shorten FlowPairs
+        // shorten parallel flows of FlowPairs
         double overlapPercentage = 0.15;
         double t = (1d - overlapPercentage) / 2d;
 

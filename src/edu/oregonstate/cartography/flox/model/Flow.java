@@ -342,7 +342,7 @@ public class Flow implements Comparable<Flow> {
         return cachedPolyline;
     }
 
-    public Flow cachedClippedCurveIncludingArrow(Model model) {
+    private Flow cachedClippedCurveIncludingArrow(Model model) {
         if (cachedClippedCurveIncludingArrow == null) {
             cachedClippedCurveIncludingArrow = model.clipFlowForComputations(this);
         }
@@ -1983,9 +1983,9 @@ public class Flow implements Comparable<Flow> {
      * the start and end points. There are always at least two points returned.
      *
      * @param intervalLength target interval length. The actual length will vary
-     * to create an entire number of intervals.
-     * @return list of points, including copies of the start and end points of
-     * this flow
+     * to create a round number of intervals.
+     * @return list of points. The first point and the last point are close to
+     * the start and end points of this flow.
      */
     public ArrayList<Point> regularIntervals(double intervalLength) {
         assert (intervalLength > 0);
@@ -2234,7 +2234,7 @@ public class Flow implements Comparable<Flow> {
         if (model.isDrawArrowheads() == false) {
             candidates = new ArrayList<>(nbrIterations);
         }
-        
+
         for (int i = 0; i <= nbrIterations; i++) {
             endShorteningToAvoidOverlaps = i * radiusIncrement;
             double clipRadius = endR + endShorteningToAvoidOverlaps;
