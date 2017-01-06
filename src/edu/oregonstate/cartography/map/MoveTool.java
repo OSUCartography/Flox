@@ -140,9 +140,12 @@ public class MoveTool extends DoubleBufferedTool implements CombinableTool {
      * Updates the location of selected features to the current location of the
      * drag event.
      *
+     * @param point current location
      */
     public void updateLocation(Point2D.Double point) {
         Model model = ((FloxMapComponent) mapComponent).getModel();
+        
+        // FIXME this is not efficient
         if (model.isControlPtSelected()) {
             // If a control point is selected, move only the control point.
             Iterator<Flow> iterator = model.flowIterator();

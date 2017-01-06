@@ -420,8 +420,7 @@ public class FloxRenderer extends SimpleFeatureRenderer {
             g2d.drawRenderedImage(mask, null);
         } else {
             // draw plain arrowheads
-            g2d.setStroke(new BasicStroke((float) flowStrokeWidth,
-                    BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            g2d.setStroke(new BasicStroke((float) flowStrokeWidth, model.getFlowCapsStyle(), BasicStroke.JOIN_MITER));
             g2d.draw(flowPath);
         }
     }

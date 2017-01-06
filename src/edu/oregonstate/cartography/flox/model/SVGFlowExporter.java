@@ -96,7 +96,8 @@ public class SVGFlowExporter extends SVGExporter {
         flowElement.setAttribute("id", Double.toString(flow.getValue()));
         flowElement.setAttribute("d", flowToPath(flow));
         double flowWidth = model.getFlowWidthPx(flow);
-        setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null);
+        boolean roundCaps = model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_ROUND;
+        setVectorStyle(flowElement, model.getFlowColor(flow), flowWidth, null, roundCaps);
         return flowElement;
     }
 
@@ -116,7 +117,7 @@ public class SVGFlowExporter extends SVGExporter {
         rect.setAttribute("width", df.format(canvasWidth));
         rect.setAttribute("height", df.format(canvasHeight));
         rect.setAttribute("id", "Canvas");
-        setVectorStyle(rect, null, 0, model.getBackgroundColor());
+        setVectorStyle(rect, null, 0, model.getBackgroundColor(), false);
         svgRootElement.appendChild(rect);
 
         // map layers
@@ -131,7 +132,7 @@ public class SVGFlowExporter extends SVGExporter {
                     ? layer.getVectorSymbol().getFillColor() : null;
             Color strokeColor = symbol.isStroked()
                     ? layer.getVectorSymbol().getStrokeColor() : null;
-            setVectorStyle(g, strokeColor, 1, fillColor);
+            setVectorStyle(g, strokeColor, 1, fillColor, false);
         }
 
         // flows
@@ -149,7 +150,7 @@ public class SVGFlowExporter extends SVGExporter {
                 Element arrowElement = (Element) document.createElementNS(SVGNAMESPACE, "path");
                 Arrow arrow = flow.getArrow(model);
                 arrowElement.setAttribute("d", arrowToPath(arrow));
-                setVectorStyle(arrowElement, null, 0, model.getFlowColor(flow));
+                setVectorStyle(arrowElement, null, 0, model.getFlowColor(flow), false);
                 flowsGroup.appendChild(arrowElement);
             }
 
@@ -169,7 +170,7 @@ public class SVGFlowExporter extends SVGExporter {
             circleElement.setAttribute("r", df.format(model.getNodeRadiusPx(node)));
             double strokeWidth = model.getNodeStrokeWidthPx();
             setVectorStyle(circleElement, model.getNodeStrokeColor(),
-                    strokeWidth, model.getNodeFillColor());
+                    strokeWidth, model.getNodeFillColor(), false);
             nodesGroup.appendChild(circleElement);
         }
     }

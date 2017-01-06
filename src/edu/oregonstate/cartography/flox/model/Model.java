@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import edu.oregonstate.cartography.utils.ColorUtils;
 import edu.oregonstate.cartography.utils.GeometryUtils;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -422,6 +422,8 @@ public class Model {
      * value.
      */
     private double maxFlowStrokeWidthPx = 20;
+
+    private int flowCapsStyle = BasicStroke.CAP_BUTT;
 
     /**
      * Distance between parallel flows in pixels.
@@ -842,7 +844,7 @@ public class Model {
         }
         return n;
     }
-    
+
     /**
      * Selects all unselected flows and deselects all selected flows.
      */
@@ -853,7 +855,7 @@ public class Model {
             flow.setSelected(!flow.isSelected());
         }
     }
-    
+
     /**
      * Selects all unselected nodes and deselects all selected nodes.
      */
@@ -2064,6 +2066,20 @@ public class Model {
     }
 
     /**
+     * @return the flowCapsStyle
+     */
+    public int getFlowCapsStyle() {
+        return flowCapsStyle;
+    }
+
+    /**
+     * @param flowCapsStyle the flowCapsStyle to set
+     */
+    public void setFlowCapsStyle(int flowCapsStyle) {
+        this.flowCapsStyle = flowCapsStyle;
+    }
+
+    /**
      * Maximizes maxFlowStrokeWidthPixel such that no flow is wider than the
      * diameter of its connected nodes.
      *
@@ -2261,10 +2277,23 @@ public class Model {
      * @return clipped flow
      */
     public Flow clipFlowForRendering(Flow flow) {
-        return clipFlow(flow,
+        Flow clippedFlow = clipFlow(flow,
                 /* clipArrowhead */ true,
                 /* forceClipNodes */ false,
                 /* adjustLengthToReduceOverlaps */ true);
+
+        // Round line caps extend the line by half the line width. Clip the flow
+        // by this distance.
+        if (flowCapsStyle == BasicStroke.CAP_ROUND) {
+            double flowStrokeWidthPx = getFlowWidthPx(clippedFlow);
+            double r = flowStrokeWidthPx / getReferenceMapScale() / 2d;
+            double startT = clippedFlow.getIntersectionTWithCircleAroundStartPoint(r);
+            if (startT > 0) {
+                clippedFlow = clippedFlow.split(startT)[1];
+            }
+        }
+
+        return clippedFlow;
     }
 
     /**
@@ -2737,7 +2766,7 @@ public class Model {
      * two parallel flows.
      */
     public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel) {
-        graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel, this);
+        graph.setBidirectionalFlowsParallel(bidirectionalFlowsParallel);
     }
 
     /**
@@ -2910,11 +2939,10 @@ public class Model {
      */
     public void shortenFlowsToReduceOverlaps() {
 
-        if (isShortenFlowsToReduceOverlaps() == false
-                || getMaxShorteningPx() <= 0d) {
-            return;
-        }
-
+//        if (isShortenFlowsToReduceOverlaps() == false
+//                || getMaxShorteningPx() <= 0d) {
+//            return;
+//        }
         // copy of this model, which will only contain single flows, no FlowPairs
         Model modelCopy = copy();
 
@@ -2962,7 +2990,7 @@ public class Model {
         // Flow1 and Flow2 in the copy model to FlowPairs in the original model.
         //
         // shorten parallel flows of FlowPairs
-        double overlapPercentage = 0.15;
+        double overlapPercentage = 0.2;
         double t = (1d - overlapPercentage) / 2d;
 
         iterator = modelCopy.flowIterator();

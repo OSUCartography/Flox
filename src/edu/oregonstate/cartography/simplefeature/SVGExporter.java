@@ -260,7 +260,7 @@ public class SVGExporter {
         if (g == null) {
             return null;
         }
-        setVectorStyle(g, Color.BLACK, 1, null);
+        setVectorStyle(g, Color.BLACK, 1, null, false);
         parent.appendChild(g);
 
         final int nbrObj = collection.getNumGeometries();
@@ -411,9 +411,10 @@ public class SVGExporter {
      * @param strokeColor The color for lines. If null, no stroke is drawn.
      * @param strokeWidth The width of lines.
      * @param fillColor The fill color.
+     * @param roundCap if true a round line cap is used, otherwise the default butt cap
      */
     protected void setVectorStyle(Element element,
-            Color strokeColor, double strokeWidth, Color fillColor) {
+            Color strokeColor, double strokeWidth, Color fillColor, boolean roundCap) {
 
         assert (element != null);
 
@@ -431,7 +432,12 @@ public class SVGExporter {
             strokeWidth = Double.max(0, strokeWidth);
             element.setAttribute("stroke-width", df.format(strokeWidth));
         }
-
+        
+        // line cap
+        if (roundCap){
+            element.setAttribute("stroke-linecap", "round");
+        }
+        
         // fill color
         String fillColorStr;
         if (fillColor == null) {

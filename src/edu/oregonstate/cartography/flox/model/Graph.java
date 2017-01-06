@@ -583,10 +583,8 @@ public final class Graph {
      *
      * @param bidirectionalFlowsParallel if true, opposing flows are shown as
      * two parallel flows.
-     * @param model data model
      */
-    public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel,
-            Model model) {
+    public void setBidirectionalFlowsParallel(boolean bidirectionalFlowsParallel) {
         if (this.bidirectionalFlowsParallel == bidirectionalFlowsParallel) {
             return;
         }

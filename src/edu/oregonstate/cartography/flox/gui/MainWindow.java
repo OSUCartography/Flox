@@ -557,6 +557,7 @@ public class MainWindow extends javax.swing.JFrame {
         xFormattedTextField = new javax.swing.JFormattedTextField();
         jLabel25 = new javax.swing.JLabel();
         yFormattedTextField = new javax.swing.JFormattedTextField();
+        capsButtonGroup = new javax.swing.ButtonGroup();
         mapContentPanel = new javax.swing.JPanel();
         javax.swing.JToolBar jToolBar1 = new javax.swing.JToolBar();
         javax.swing.JPanel toolBarContentPanel = new javax.swing.JPanel();
@@ -786,6 +787,9 @@ public class MainWindow extends javax.swing.JFrame {
         printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
         showOptionsMenuItem = new javax.swing.JMenuItem();
         showCoordinatesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator24 = new javax.swing.JPopupMenu.Separator();
+        lineCapsButtCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        lineCapsRoundCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator21 = new javax.swing.JPopupMenu.Separator();
         constrainControlPointsToRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -1332,7 +1336,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowsContentPanel.add(flowColorsPanel, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
@@ -1341,7 +1345,7 @@ public class MainWindow extends javax.swing.JFrame {
         maximumCurvatureLabel.setText("Maximum Curvature");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1350,7 +1354,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel33.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/curvature1.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
         flowsContentPanel.add(jLabel33, gridBagConstraints);
@@ -1379,7 +1383,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1388,7 +1392,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel41.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/curvature2.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 9;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
         flowsContentPanel.add(jLabel41, gridBagConstraints);
@@ -1396,7 +1400,7 @@ public class MainWindow extends javax.swing.JFrame {
         angularDistributionLabel.setText("Angular Distribution");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridy = 12;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(12, 0, 3, 0);
@@ -1405,7 +1409,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel45.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/angular1.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
         flowsContentPanel.add(jLabel45, gridBagConstraints);
@@ -1435,7 +1439,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1444,7 +1448,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel44.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/angular2.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridy = 13;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
         flowsContentPanel.add(jLabel44, gridBagConstraints);
@@ -1452,7 +1456,7 @@ public class MainWindow extends javax.swing.JFrame {
         symmetryLabel.setText("Symmetry");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 10;
+        gridBagConstraints.gridy = 14;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(12, 0, 3, 0);
@@ -1461,7 +1465,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel42.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/asymmetric.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 4);
         flowsContentPanel.add(jLabel42, gridBagConstraints);
@@ -1491,7 +1495,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1500,13 +1504,13 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel43.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/symmetric.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 11;
+        gridBagConstraints.gridy = 15;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
         flowsContentPanel.add(jLabel43, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 12;
+        gridBagConstraints.gridy = 16;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
@@ -1520,7 +1524,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 13;
+        gridBagConstraints.gridy = 17;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
@@ -1544,12 +1548,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 14;
+        gridBagConstraints.gridy = 18;
         gridBagConstraints.gridwidth = 4;
         flowsContentPanel.add(jPanel6, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 16;
+        gridBagConstraints.gridy = 20;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
@@ -1558,7 +1562,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel3.setText("Long Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 17;
+        gridBagConstraints.gridy = 21;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1589,7 +1593,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 18;
+        gridBagConstraints.gridy = 22;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1598,7 +1602,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel5.setText("Short Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridy = 23;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1629,7 +1633,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridy = 24;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1638,7 +1642,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel8.setText("Peripheral Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
+        gridBagConstraints.gridy = 25;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1669,7 +1673,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 22;
+        gridBagConstraints.gridy = 26;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -3139,6 +3143,26 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showCoordinatesCheckBoxMenuItem);
+        debugMenu.add(jSeparator24);
+
+        capsButtonGroup.add(lineCapsButtCheckBoxMenuItem);
+        lineCapsButtCheckBoxMenuItem.setSelected(true);
+        lineCapsButtCheckBoxMenuItem.setText("Line Caps Butt");
+        lineCapsButtCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lineCapsButtCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(lineCapsButtCheckBoxMenuItem);
+
+        capsButtonGroup.add(lineCapsRoundCheckBoxMenuItem);
+        lineCapsRoundCheckBoxMenuItem.setText("Line Caps Round");
+        lineCapsRoundCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lineCapsRoundCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        debugMenu.add(lineCapsRoundCheckBoxMenuItem);
         debugMenu.add(jSeparator21);
 
         constrainControlPointsToRangeBoxCheckBoxMenuItem.setText("Constrain Control Points to Range Boxes");
@@ -4903,7 +4927,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_invertFlowSelectionMenuItemActionPerformed
 
     private void invertNodeSelectionMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invertNodeSelectionMenuItemActionPerformed
-         model.invertNodeSelection();
+        model.invertNodeSelection();
         updateLockUnlockButtonIcon();
         updateValueField();
         updateCoordinateFields();
@@ -4913,6 +4937,22 @@ public class MainWindow extends javax.swing.JFrame {
     private void showCoordinatesCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showCoordinatesCheckBoxMenuItemActionPerformed
         coordinateInfoPanel.setCoordinatesVisible(showCoordinatesCheckBoxMenuItem.isSelected());
     }//GEN-LAST:event_showCoordinatesCheckBoxMenuItemActionPerformed
+
+    private void lineCapsButtCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lineCapsButtCheckBoxMenuItemActionPerformed
+        if (lineCapsButtCheckBoxMenuItem.isSelected()) {
+            model.setFlowCapsStyle(java.awt.BasicStroke.CAP_BUTT);
+            mapComponent.refreshMap();
+            //layout("Butt Caps");
+        }
+    }//GEN-LAST:event_lineCapsButtCheckBoxMenuItemActionPerformed
+
+    private void lineCapsRoundCheckBoxMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lineCapsRoundCheckBoxMenuItemActionPerformed
+        if (lineCapsRoundCheckBoxMenuItem.isSelected()) {
+            model.setFlowCapsStyle(java.awt.BasicStroke.CAP_ROUND);
+            mapComponent.refreshMap();
+            //layout("Round Caps");
+        }
+    }//GEN-LAST:event_lineCapsRoundCheckBoxMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -4991,6 +5031,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem cancelLayoutMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton canvasColorButton;
     private javax.swing.JSlider canvasSizeSlider;
+    private javax.swing.ButtonGroup capsButtonGroup;
     private javax.swing.JCheckBox clipWithEndAreasCheckBox;
     private javax.swing.JCheckBox clipWithStartAreasCheckBox;
     private javax.swing.JButton computationSettingsButton;
@@ -5052,11 +5093,14 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator15;
     private javax.swing.JPopupMenu.Separator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator22;
+    private javax.swing.JPopupMenu.Separator jSeparator24;
     private javax.swing.JMenuItem largestTouchPercentageMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton layerFillColorButton;
     private edu.oregonstate.cartography.flox.gui.DraggableList layerList;
     private javax.swing.JScrollPane layerListScrollPane;
     private edu.oregonstate.cartography.flox.gui.ColorButton layerStrokeColorButton;
+    private javax.swing.JCheckBoxMenuItem lineCapsButtCheckBoxMenuItem;
+    private javax.swing.JCheckBoxMenuItem lineCapsRoundCheckBoxMenuItem;
     private javax.swing.JMenuItem lockMenuItem;
     private javax.swing.JButton lockUnlockButton;
     private javax.swing.JSlider longestFlowStiffnessSlider;
