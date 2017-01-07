@@ -250,6 +250,7 @@ public class MainWindow extends javax.swing.JFrame {
             maximumFlowWidthSlider.setValue((int) Math.round(model.getMaxFlowStrokeWidthPixel()));
             maximumFlowWidthFormattedTextField.setValue(model.getMaxFlowStrokeWidthPixel());
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
+            maximumNodeSizeFormattedTextField.setValue(model.getMaxNodeSizePx());
             minColorButton.setColor(model.getMinFlowColor());
             maxColorButton.setColor(model.getMaxFlowColor());
             minColorButton.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
@@ -646,6 +647,7 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JLabel jLabel26 = new javax.swing.JLabel();
         jLabel27 = new javax.swing.JLabel();
         jLabel28 = new javax.swing.JLabel();
+        maximumNodeSizeFormattedTextField = new javax.swing.JFormattedTextField();
         overlapsPanel = new TransparentMacPanel();
         overlapsContentPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel32 = new javax.swing.JLabel();
@@ -1840,8 +1842,9 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
         nodesContentPanel.add(maxNodeRadiusLabel, gridBagConstraints);
 
-        maximumNodeSizeSlider.setMajorTickSpacing(20);
-        maximumNodeSizeSlider.setMinorTickSpacing(10);
+        maximumNodeSizeSlider.setMajorTickSpacing(10);
+        maximumNodeSizeSlider.setMaximum(50);
+        maximumNodeSizeSlider.setMinorTickSpacing(5);
         maximumNodeSizeSlider.setPaintLabels(true);
         maximumNodeSizeSlider.setPaintTicks(true);
         maximumNodeSizeSlider.setPreferredSize(new java.awt.Dimension(220, 52));
@@ -1853,7 +1856,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 20, 3, 4);
@@ -1870,10 +1873,8 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 4;
         nodesContentPanel.add(showNodesToggleButton, gridBagConstraints);
 
         jLabel36.setText("Stroke");
@@ -1935,7 +1936,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 6;
-        gridBagConstraints.gridwidth = 5;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         nodesContentPanel.add(jSeparator29, gridBagConstraints);
@@ -2010,6 +2011,25 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         nodesContentPanel.add(jLabel28, gridBagConstraints);
+
+        maximumNodeSizeFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
+        {
+            javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.##"));
+            nf.setMinimum(0d);
+            nf.setMaximum(500d);
+            maximumNodeSizeFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(nf));
+        }
+        maximumNodeSizeFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                maximumNodeSizeFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        nodesContentPanel.add(maximumNodeSizeFormattedTextField, gridBagConstraints);
 
         nodesPanel.add(nodesContentPanel);
 
@@ -4132,6 +4152,7 @@ public class MainWindow extends javax.swing.JFrame {
         if (updatingGUI == false && model != null) {
             model.setMaxNodeSizePx(maximumNodeSizeSlider.getValue());
             mapComponent.refreshMap();
+            maximumNodeSizeFormattedTextField.setValue(maximumNodeSizeSlider.getValue());
             if (!maximumNodeSizeSlider.getValueIsAdjusting()) {
                 layout("Node Size");
             }
@@ -5040,6 +5061,21 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_maximumFlowWidthFormattedTextFieldPropertyChange
 
+    private void maximumNodeSizeFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maximumNodeSizeFormattedTextFieldPropertyChange
+        if (updatingGUI == false && "value".equals(evt.getPropertyName())) {
+            double v = ((Number) maximumNodeSizeFormattedTextField.getValue()).doubleValue();
+            try {
+                updatingGUI = true;
+                maximumNodeSizeSlider.setValue((int) Math.round(v));
+                model.setMaxNodeSizePx(v);
+                mapComponent.refreshMap();
+            } finally {
+                updatingGUI = false;
+                layout("Node Size");
+            }
+        }
+    }//GEN-LAST:event_maximumNodeSizeFormattedTextFieldPropertyChange
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -5204,6 +5240,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel maxShorteningPixelLabel;
     private javax.swing.JFormattedTextField maximumFlowWidthFormattedTextField;
     private javax.swing.JSlider maximumFlowWidthSlider;
+    private javax.swing.JFormattedTextField maximumNodeSizeFormattedTextField;
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem mergeNodesMenuItem;
