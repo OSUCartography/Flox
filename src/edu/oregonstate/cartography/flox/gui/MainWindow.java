@@ -256,7 +256,9 @@ public class MainWindow extends javax.swing.JFrame {
             parallelFlowsCheckBox.setSelected(model.isBidirectionalFlowsParallel());
             parallelFlowsGapSpinner.setValue(model.getParallelFlowsGapPx());
             parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
-
+            lineCapsButtCheckBoxMenuItem.setSelected(model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_BUTT);
+            lineCapsRoundCheckBoxMenuItem.setSelected(model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_ROUND);
+            
             // nodes
             nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
             nodeStrokeColorButton.setColor(model.getNodeStrokeColor());
@@ -541,6 +543,9 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JLabel jLabel6 = new javax.swing.JLabel();
         nodeWeightSlider = new javax.swing.JSlider();
         flowWidthOptionsPopupMenu = new javax.swing.JPopupMenu();
+        lineCapsButtCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        lineCapsRoundCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+        jSeparator24 = new javax.swing.JPopupMenu.Separator();
         adjustFlowWidthMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator9 = new javax.swing.JPopupMenu.Separator();
         showFlowsCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -787,9 +792,6 @@ public class MainWindow extends javax.swing.JFrame {
         printFlowsToConsoleMenuItem = new javax.swing.JMenuItem();
         showOptionsMenuItem = new javax.swing.JMenuItem();
         showCoordinatesCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        jSeparator24 = new javax.swing.JPopupMenu.Separator();
-        lineCapsButtCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        lineCapsRoundCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator21 = new javax.swing.JPopupMenu.Separator();
         constrainControlPointsToRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
         showRangeBoxCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
@@ -1005,6 +1007,26 @@ public class MainWindow extends javax.swing.JFrame {
 
         flowWidthOptionsPopupMenu.setLightWeightPopupEnabled(false);
 
+        capsButtonGroup.add(lineCapsButtCheckBoxMenuItem);
+        lineCapsButtCheckBoxMenuItem.setSelected(true);
+        lineCapsButtCheckBoxMenuItem.setText("Line Caps Butt");
+        lineCapsButtCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lineCapsButtCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        flowWidthOptionsPopupMenu.add(lineCapsButtCheckBoxMenuItem);
+
+        capsButtonGroup.add(lineCapsRoundCheckBoxMenuItem);
+        lineCapsRoundCheckBoxMenuItem.setText("Line Caps Round");
+        lineCapsRoundCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lineCapsRoundCheckBoxMenuItemActionPerformed(evt);
+            }
+        });
+        flowWidthOptionsPopupMenu.add(lineCapsRoundCheckBoxMenuItem);
+        flowWidthOptionsPopupMenu.add(jSeparator24);
+
         adjustFlowWidthMenuItem.setText("Adjust Maximum Width to Node Size");
         adjustFlowWidthMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1025,7 +1047,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         selectionDialog.setTitle("Select by Value");
         selectionDialog.setResizable(false);
-        selectionDialog.getContentPane().setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 15, 15));
+        selectionDialog.getContentPane().setLayout(new java.awt.FlowLayout(1, 15, 15));
 
         selectionPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1101,6 +1123,7 @@ public class MainWindow extends javax.swing.JFrame {
         unusedCoordinatesPanel.add(yFormattedTextField);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        getContentPane().setLayout(new java.awt.BorderLayout());
 
         mapContentPanel.setLayout(new java.awt.BorderLayout());
 
@@ -1262,7 +1285,7 @@ public class MainWindow extends javax.swing.JFrame {
         controlsTabbedPane.setPreferredSize(new java.awt.Dimension(370, 800));
 
         flowsPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 10, 10, 10));
-        flowsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+        flowsPanel.setLayout(new java.awt.FlowLayout(1, 5, 12));
 
         flowsContentPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1304,7 +1327,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
         flowsContentPanel.add(flowsWidthOptionsButton, gridBagConstraints);
 
-        flowColorsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 4, 0));
+        flowColorsPanel.setLayout(new java.awt.FlowLayout(1, 4, 0));
 
         smallestFlowColorLabel.setText("Smallest");
         flowColorsPanel.add(smallestFlowColorLabel);
@@ -1683,7 +1706,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         controlsTabbedPane.addTab("Flow", flowsPanel);
 
-        nodesPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+        nodesPanel.setLayout(new java.awt.FlowLayout(1, 5, 12));
 
         nodesContentPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -1871,7 +1894,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         controlsTabbedPane.addTab("Node", nodesPanel);
 
-        overlapsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+        overlapsPanel.setLayout(new java.awt.FlowLayout(1, 5, 12));
 
         overlapsContentPanel.setPreferredSize(new java.awt.Dimension(503, 176));
         overlapsContentPanel.setLayout(new java.awt.GridBagLayout());
@@ -2002,7 +2025,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         controlsTabbedPane.addTab("Overlap", overlapsPanel);
 
-        arrowHeadsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+        arrowHeadsPanel.setLayout(new java.awt.FlowLayout(1, 5, 12));
 
         arrowHeadsControlPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -2196,7 +2219,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         controlsTabbedPane.addTab("Arrow", arrowHeadsPanel);
 
-        clipAreaPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+        clipAreaPanel.setLayout(new java.awt.FlowLayout(1, 5, 12));
 
         clipAreaControlPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -2401,7 +2424,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         controlsTabbedPane.addTab("Clip", clipAreaPanel);
 
-        mapPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
+        mapPanel.setLayout(new java.awt.FlowLayout(1, 5, 12));
 
         mapControlPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -3143,26 +3166,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         debugMenu.add(showCoordinatesCheckBoxMenuItem);
-        debugMenu.add(jSeparator24);
-
-        capsButtonGroup.add(lineCapsButtCheckBoxMenuItem);
-        lineCapsButtCheckBoxMenuItem.setSelected(true);
-        lineCapsButtCheckBoxMenuItem.setText("Line Caps Butt");
-        lineCapsButtCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lineCapsButtCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(lineCapsButtCheckBoxMenuItem);
-
-        capsButtonGroup.add(lineCapsRoundCheckBoxMenuItem);
-        lineCapsRoundCheckBoxMenuItem.setText("Line Caps Round");
-        lineCapsRoundCheckBoxMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lineCapsRoundCheckBoxMenuItemActionPerformed(evt);
-            }
-        });
-        debugMenu.add(lineCapsRoundCheckBoxMenuItem);
         debugMenu.add(jSeparator21);
 
         constrainControlPointsToRangeBoxCheckBoxMenuItem.setText("Constrain Control Points to Range Boxes");
