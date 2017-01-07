@@ -248,6 +248,7 @@ public class MainWindow extends javax.swing.JFrame {
             startDistanceSpinner.setValue(model.getFlowDistanceFromStartPointPixel());
             endDistanceSpinner.setValue(model.getFlowDistanceFromEndPointPixel());
             maximumFlowWidthSlider.setValue((int) Math.round(model.getMaxFlowStrokeWidthPixel()));
+            maximumFlowWidthFormattedTextField.setValue(model.getMaxFlowStrokeWidthPixel());
             maximumNodeSizeSlider.setValue((int) model.getMaxNodeSizePx());
             minColorButton.setColor(model.getMinFlowColor());
             maxColorButton.setColor(model.getMaxFlowColor());
@@ -258,7 +259,7 @@ public class MainWindow extends javax.swing.JFrame {
             parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
             lineCapsButtCheckBoxMenuItem.setSelected(model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_BUTT);
             lineCapsRoundCheckBoxMenuItem.setSelected(model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_ROUND);
-            
+
             // nodes
             nodeStrokeSpinner.setValue(model.getNodeStrokeWidthPx());
             nodeStrokeColorButton.setColor(model.getNodeStrokeColor());
@@ -626,6 +627,7 @@ public class MainWindow extends javax.swing.JFrame {
         zeroLengthStiffnessSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel8 = new javax.swing.JLabel();
         peripheralStiffnessSlider = new javax.swing.JSlider();
+        maximumFlowWidthFormattedTextField = new javax.swing.JFormattedTextField();
         javax.swing.JPanel nodesPanel = new TransparentMacPanel();
         javax.swing.JPanel nodesContentPanel = new TransparentMacPanel();
         javax.swing.JLabel maxNodeRadiusLabel = new javax.swing.JLabel();
@@ -668,7 +670,7 @@ public class MainWindow extends javax.swing.JFrame {
         arrowSizeRatioSlider = new javax.swing.JSlider();
         jLabel30 = new javax.swing.JLabel();
         arrowLengthRatioSlider = new javax.swing.JSlider();
-        jButton1 = new javax.swing.JButton();
+        arrowheadShapeOptionsButton = new javax.swing.JButton();
         javax.swing.JPanel clipAreaPanel = new TransparentMacPanel();
         javax.swing.JPanel clipAreaControlPanel = new TransparentMacPanel();
         javax.swing.JLabel jLabel20 = new javax.swing.JLabel();
@@ -1387,17 +1389,18 @@ public class MainWindow extends javax.swing.JFrame {
 
         flowsContentPanel.setLayout(new java.awt.GridBagLayout());
 
-        maxFlowWidthLabel.setText("Maximum Width");
+        maxFlowWidthLabel.setText("Width of Largest Flow");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 3, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
         flowsContentPanel.add(maxFlowWidthLabel, gridBagConstraints);
 
-        maximumFlowWidthSlider.setMajorTickSpacing(20);
-        maximumFlowWidthSlider.setMinorTickSpacing(10);
+        maximumFlowWidthSlider.setMajorTickSpacing(10);
+        maximumFlowWidthSlider.setMaximum(50);
+        maximumFlowWidthSlider.setMinorTickSpacing(5);
         maximumFlowWidthSlider.setPaintLabels(true);
         maximumFlowWidthSlider.setPaintTicks(true);
         maximumFlowWidthSlider.setPreferredSize(new java.awt.Dimension(190, 37));
@@ -1421,7 +1424,8 @@ public class MainWindow extends javax.swing.JFrame {
         flowsWidthOptionsButton.setPopupMenu(flowWidthOptionsPopupMenu);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
         flowsContentPanel.add(flowsWidthOptionsButton, gridBagConstraints);
 
@@ -1453,7 +1457,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.gridwidth = 3;
         flowsContentPanel.add(flowColorsPanel, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1469,7 +1473,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 8;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
         flowsContentPanel.add(maximumCurvatureLabel, gridBagConstraints);
 
         jLabel33.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/curvature1.png"))); // NOI18N
@@ -1524,7 +1528,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 12;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(12, 0, 3, 0);
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 6, 0);
         flowsContentPanel.add(angularDistributionLabel, gridBagConstraints);
 
         jLabel45.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/angular1.png"))); // NOI18N
@@ -1580,7 +1584,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 14;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(12, 0, 3, 0);
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 6, 0);
         flowsContentPanel.add(symmetryLabel, gridBagConstraints);
 
         jLabel42.setIcon(new javax.swing.ImageIcon(getClass().getResource("/edu/oregonstate/cartography/icons/asymmetric.png"))); // NOI18N
@@ -1799,6 +1803,25 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
         flowsContentPanel.add(peripheralStiffnessSlider, gridBagConstraints);
+
+        maximumFlowWidthFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
+        {
+            javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.##"));
+            nf.setMinimum(0d);
+            nf.setMaximum(500d);
+            maximumFlowWidthFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(nf));
+        }
+        maximumFlowWidthFormattedTextField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                maximumFlowWidthFormattedTextFieldPropertyChange(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        flowsContentPanel.add(maximumFlowWidthFormattedTextField, gridBagConstraints);
 
         flowsPanel.add(flowsContentPanel);
 
@@ -2135,7 +2158,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 4, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
         arrowHeadsControlPanel.add(addArrowsCheckbox, gridBagConstraints);
 
         jLabel10.setText("Length");
@@ -2167,7 +2190,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(14, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel15, gridBagConstraints);
 
         arrowheadWidthSlider.setMajorTickSpacing(50);
@@ -2192,7 +2215,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(14, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel19, gridBagConstraints);
 
         arrowSizeRatioSlider.setMajorTickSpacing(25);
@@ -2217,7 +2240,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 7;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(14, 0, 0, 0);
         arrowHeadsControlPanel.add(jLabel30, gridBagConstraints);
 
         arrowLengthRatioSlider.setMajorTickSpacing(25);
@@ -2237,17 +2260,17 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
         arrowHeadsControlPanel.add(arrowLengthRatioSlider, gridBagConstraints);
 
-        jButton1.setText("Shape Options…");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        arrowheadShapeOptionsButton.setText("Shape Options…");
+        arrowheadShapeOptionsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                arrowheadShapeOptionsButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 16;
         gridBagConstraints.insets = new java.awt.Insets(20, 0, 0, 0);
-        arrowHeadsControlPanel.add(jButton1, gridBagConstraints);
+        arrowHeadsControlPanel.add(arrowheadShapeOptionsButton, gridBagConstraints);
 
         arrowHeadsPanel.add(arrowHeadsControlPanel);
 
@@ -4095,8 +4118,10 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void maximumFlowWidthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maximumFlowWidthSliderStateChanged
         if (updatingGUI == false && model != null) {
-            model.setMaxFlowStrokeWidthPixel(maximumFlowWidthSlider.getValue());
+            int v = maximumFlowWidthSlider.getValue();
+            model.setMaxFlowStrokeWidthPixel(v);
             mapComponent.refreshMap();
+            maximumFlowWidthFormattedTextField.setValue(v);
             if (!maximumFlowWidthSlider.getValueIsAdjusting()) {
                 layout("Flow Width");
             }
@@ -4991,14 +5016,29 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_lineCapsRoundCheckBoxMenuItemActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void arrowheadShapeOptionsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowheadShapeOptionsButtonActionPerformed
         JOptionPane.showMessageDialog(
                 this,
                 arrowheadsShapeOptionsPanel,
                 "Arrowheads Shape",
                 JOptionPane.PLAIN_MESSAGE,
                 null);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_arrowheadShapeOptionsButtonActionPerformed
+
+    private void maximumFlowWidthFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maximumFlowWidthFormattedTextFieldPropertyChange
+        if (updatingGUI == false && "value".equals(evt.getPropertyName())) {
+            double v = ((Number) maximumFlowWidthFormattedTextField.getValue()).doubleValue();
+            try {
+                updatingGUI = true;
+                maximumFlowWidthSlider.setValue((int) Math.round(v));
+                model.setMaxFlowStrokeWidthPixel(v);
+                mapComponent.refreshMap();
+            } finally {
+                updatingGUI = false;
+                layout("Flow Width");
+            }
+        }
+    }//GEN-LAST:event_maximumFlowWidthFormattedTextFieldPropertyChange
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -5073,6 +5113,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSlider arrowSizeRatioSlider;
     private javax.swing.JToggleButton arrowToggleButton;
     private javax.swing.JSlider arrowheadLengthSlider;
+    private javax.swing.JButton arrowheadShapeOptionsButton;
     private javax.swing.JSlider arrowheadWidthSlider;
     private javax.swing.JPanel arrowheadsShapeOptionsPanel;
     private javax.swing.JMenuItem cancelLayoutMenuItem;
@@ -5123,7 +5164,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem invertNodeSelectionMenuItem;
     private javax.swing.JMenuItem isIntersectingSiblingMenuItem;
     private javax.swing.JSpinner iterationsSpinner;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel15;
@@ -5162,6 +5202,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField maxShorteningFormattedTextField;
     private javax.swing.JLabel maxShorteningLabel;
     private javax.swing.JLabel maxShorteningPixelLabel;
+    private javax.swing.JFormattedTextField maximumFlowWidthFormattedTextField;
     private javax.swing.JSlider maximumFlowWidthSlider;
     private javax.swing.JSlider maximumNodeSizeSlider;
     private javax.swing.JMenuBar menuBar;
