@@ -431,6 +431,11 @@ public class Model {
     private double parallelFlowsGapPx = 4;
 
     /**
+     * Percentage of parallel flows drawn between 0 and 1
+     */
+    private double parallelFlowsOverlap = 1;
+
+    /**
      * Radius of largest node in pixels.
      */
     private double maxNodeSizePx = 30;
@@ -2748,6 +2753,21 @@ public class Model {
     }
 
     /**
+     * @return the parallelFlowsOverlap
+     */
+    public double getParallelFlowsOverlap() {
+        return parallelFlowsOverlap;
+    }
+
+    /**
+     * @param parallelFlowsOverlap the parallelFlowsOverlap to set
+     */
+    public void setParallelFlowsOverlap(double parallelFlowsOverlap) {
+        assert (parallelFlowsOverlap >= 0d && parallelFlowsOverlap <= 1d);
+        this.parallelFlowsOverlap = parallelFlowsOverlap;
+    }
+
+    /**
      * Returns whether opposing flows between the same start point and end point
      * are to be shown as two parallel flows.
      *
@@ -2967,7 +2987,6 @@ public class Model {
         // reset the graph of the copy model
         modelCopy.graph = new Graph();
         modelCopy.graph.addFlows(flows);
-
         modelCopy.resetFlowShortenings();
 
         // shorten all flows to reduce overlaps with other flows and arrowheads.
@@ -2990,36 +3009,37 @@ public class Model {
         // Flow1 and Flow2 in the copy model to FlowPairs in the original model.
         //
         // shorten parallel flows of FlowPairs
-        double overlapPercentage = 0.2;
-        double t = (1d - overlapPercentage) / 2d;
+        if (parallelFlowsOverlap < 1d) {
+            double t = (1d - parallelFlowsOverlap) / 2d;
 
-        iterator = modelCopy.flowIterator();
-        while (iterator.hasNext()) {
-            Flow flow = iterator.next();
-            if (flow instanceof Flow1) {
-                Flow1 flow1 = (Flow1) flow;
-                double startR1 = startClipRadius(flow1,
-                        /* forceClipNodes */ true,
-                        /* adjustLengthToReduceOverlaps */ false);
-                double startT1 = flow1.getIntersectionTWithCircleAroundStartPoint(startR1);
-                Point startPt1 = flow1.pointOnCurve(startT1);
-                Point clipPt1 = flow1.pointOnCurve(t);
-                double r1 = startPt1.distance(clipPt1);
-                r1 = Math.max(r1, flow1.startShorteningToAvoidOverlaps);
-                flow1.startShorteningToAvoidOverlaps = r1;
-                flow1.flowPair.startShorteningToAvoidOverlaps = r1;
+            iterator = modelCopy.flowIterator();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                if (flow instanceof Flow1) {
+                    Flow1 flow1 = (Flow1) flow;
+                    double startR1 = startClipRadius(flow1,
+                            /* forceClipNodes */ true,
+                            /* adjustLengthToReduceOverlaps */ false);
+                    double startT1 = flow1.getIntersectionTWithCircleAroundStartPoint(startR1);
+                    Point startPt1 = flow1.pointOnCurve(startT1);
+                    Point clipPt1 = flow1.pointOnCurve(t);
+                    double r1 = startPt1.distance(clipPt1);
+                    r1 = Math.max(r1, flow1.startShorteningToAvoidOverlaps);
+                    flow1.startShorteningToAvoidOverlaps = r1;
+                    flow1.flowPair.startShorteningToAvoidOverlaps = r1;
 
-                Flow2 flow2 = flow1.flow2;
-                double startR2 = startClipRadius(flow2,
-                        /* forceClipNodes */ true,
-                        /* adjustLengthToReduceOverlaps */ false);
-                double startT2 = flow2.getIntersectionTWithCircleAroundStartPoint(startR2);
-                Point startPt2 = flow2.pointOnCurve(startT2);
-                Point clipPt2 = flow2.pointOnCurve(t);
-                double r2 = startPt2.distance(clipPt2);
-                r2 = Math.max(r2, flow2.startShorteningToAvoidOverlaps);
-                flow2.startShorteningToAvoidOverlaps = r2;
-                flow2.flowPair.startShorteningToAvoidOverlaps2 = r2;
+                    Flow2 flow2 = flow1.flow2;
+                    double startR2 = startClipRadius(flow2,
+                            /* forceClipNodes */ true,
+                            /* adjustLengthToReduceOverlaps */ false);
+                    double startT2 = flow2.getIntersectionTWithCircleAroundStartPoint(startR2);
+                    Point startPt2 = flow2.pointOnCurve(startT2);
+                    Point clipPt2 = flow2.pointOnCurve(t);
+                    double r2 = startPt2.distance(clipPt2);
+                    r2 = Math.max(r2, flow2.startShorteningToAvoidOverlaps);
+                    flow2.startShorteningToAvoidOverlaps = r2;
+                    flow2.flowPair.startShorteningToAvoidOverlaps2 = r2;
+                }
             }
         }
 

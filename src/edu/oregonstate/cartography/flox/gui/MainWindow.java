@@ -258,6 +258,7 @@ public class MainWindow extends javax.swing.JFrame {
             parallelFlowsCheckBox.setSelected(model.isBidirectionalFlowsParallel());
             parallelFlowsGapSpinner.setValue(model.getParallelFlowsGapPx());
             parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
+            parallelFlowsOverlapSlider.setValue((int) Math.round(model.getParallelFlowsOverlap() * 100));
             lineCapsButtCheckBoxMenuItem.setSelected(model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_BUTT);
             lineCapsRoundCheckBoxMenuItem.setSelected(model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_ROUND);
 
@@ -629,6 +630,8 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JLabel jLabel8 = new javax.swing.JLabel();
         peripheralStiffnessSlider = new javax.swing.JSlider();
         maximumFlowWidthFormattedTextField = new javax.swing.JFormattedTextField();
+        parallelFlowsOverlapSlider = new javax.swing.JSlider();
+        javax.swing.JLabel jLabel48 = new javax.swing.JLabel();
         javax.swing.JPanel nodesPanel = new TransparentMacPanel();
         javax.swing.JPanel nodesContentPanel = new TransparentMacPanel();
         javax.swing.JLabel maxNodeRadiusLabel = new javax.swing.JLabel();
@@ -1384,7 +1387,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         rightPanel.setLayout(new java.awt.BorderLayout());
 
-        controlsTabbedPane.setPreferredSize(new java.awt.Dimension(370, 800));
+        controlsTabbedPane.setPreferredSize(new java.awt.Dimension(370, 1000));
 
         flowsPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 10, 10, 10));
         flowsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 12));
@@ -1680,7 +1683,7 @@ public class MainWindow extends javax.swing.JFrame {
         flowsContentPanel.add(jPanel6, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridy = 22;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
@@ -1689,7 +1692,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel3.setText("Long Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 21;
+        gridBagConstraints.gridy = 23;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1720,7 +1723,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 22;
+        gridBagConstraints.gridy = 24;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1729,7 +1732,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel5.setText("Short Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 23;
+        gridBagConstraints.gridy = 25;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1760,7 +1763,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 24;
+        gridBagConstraints.gridy = 26;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1769,7 +1772,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel8.setText("Peripheral Flows Stiffness");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 25;
+        gridBagConstraints.gridy = 27;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
@@ -1800,7 +1803,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 26;
+        gridBagConstraints.gridy = 28;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
@@ -1824,6 +1827,44 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         flowsContentPanel.add(maximumFlowWidthFormattedTextField, gridBagConstraints);
+
+        parallelFlowsOverlapSlider.setMajorTickSpacing(25);
+        parallelFlowsOverlapSlider.setMinorTickSpacing(5);
+        parallelFlowsOverlapSlider.setPaintLabels(true);
+        parallelFlowsOverlapSlider.setPaintTicks(true);
+        parallelFlowsOverlapSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = parallelFlowsOverlapSlider.createStandardLabels(flowRangeboxSizeSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            parallelFlowsOverlapSlider.setLabelTable(labels);
+        }
+        parallelFlowsOverlapSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                parallelFlowsOverlapSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 20;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        flowsContentPanel.add(parallelFlowsOverlapSlider, gridBagConstraints);
+
+        jLabel48.setText("Parallel Flows Length");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 19;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 6, 0);
+        flowsContentPanel.add(jLabel48, gridBagConstraints);
 
         flowsPanel.add(flowsContentPanel);
 
@@ -1856,7 +1897,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 20, 3, 4);
@@ -1873,7 +1914,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 4;
         nodesContentPanel.add(showNodesToggleButton, gridBagConstraints);
 
@@ -2001,7 +2042,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 9;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         nodesContentPanel.add(jLabel27, gridBagConstraints);
 
         jLabel28.setText("Pixel");
@@ -2009,7 +2050,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 8;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         nodesContentPanel.add(jLabel28, gridBagConstraints);
 
         maximumNodeSizeFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
@@ -2025,7 +2066,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
@@ -5076,6 +5117,15 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_maximumNodeSizeFormattedTextFieldPropertyChange
 
+    private void parallelFlowsOverlapSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_parallelFlowsOverlapSliderStateChanged
+        if (parallelFlowsOverlapSlider.getValueIsAdjusting() == false) {
+            model.setParallelFlowsOverlap(parallelFlowsOverlapSlider.getValue() / 100d);
+            model.shortenFlowsToReduceOverlaps();
+            mapComponent.refreshMap();
+            layout("Parallel Flows Overlap");
+        }
+    }//GEN-LAST:event_parallelFlowsOverlapSliderStateChanged
+
     /**
      * Returns a string that can be used for a file name when exporting to a
      * file.
@@ -5265,6 +5315,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel overlapsPanel;
     private javax.swing.JCheckBox parallelFlowsCheckBox;
     private javax.swing.JSpinner parallelFlowsGapSpinner;
+    private javax.swing.JSlider parallelFlowsOverlapSlider;
     private javax.swing.JSlider peripheralStiffnessSlider;
     private javax.swing.JLabel pointsFilePathLabel;
     private javax.swing.JMenuItem printFlowsToConsoleMenuItem;

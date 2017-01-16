@@ -4,7 +4,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollectionIterator;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKTWriter;
-import static edu.oregonstate.cartography.flox.model.Circle.TOL;
 import edu.oregonstate.cartography.utils.GeometryUtils;
 import edu.oregonstate.cartography.utils.JTSUtils;
 import java.awt.geom.GeneralPath;
@@ -16,6 +15,14 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import net.jafama.FastMath;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.univariate.BrentOptimizer;
+import org.apache.commons.math3.optim.univariate.SearchInterval;
+import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
+import org.apache.commons.math3.optim.univariate.UnivariateOptimizer;
+import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 
 /**
  * A flow based on a quadratic Bézier curve.
@@ -29,12 +36,93 @@ import net.jafama.FastMath;
 
 public class Flow implements Comparable<Flow> {
 
+     public static void main(String[] args) {
+//        double s = 1;
+//        double x = 5;
+//        double y = 5;
+//        Flow f = new Flow(new Point(0, 0), 4, 3, new Point(10, 1), 1);
+        
+        
+        double s = 3.27243073330165E-4;
+//        double x = -1.243017509E7;
+//        double y = 4073798.185;
+//        Flow f = new Flow(new Point(-1.3267775305208415E7, 4280863.048312819), -1.0455248565283395E7, 3711098.014898037, new Point(-9120574.0692501, 3304490.196125049), 1);
+
+//        double d = f.distanceSquare(x, y);
+//        System.out.println("dist2   " + Math.sqrt(d));
+//        System.out.println("dist2px " + Math.sqrt(d) * s);
+
+        //-8918796.054080188
+        //        5283641.773541634
+        double x = -9215986.57;
+        double y = 4911267.234;
+        Flow f = new Flow(new Point(-8660839.584, 4995462.189), -8927413.159855744, 5267980.063701738, new Point(-1.106156559E7, 3707818.275), 1);
+        //Flow f = new Flow(new Point(-8660839.584, 4995462.189), -9653007, 4981406, new Point(-1.106156559E7, 3707818.275), 1);
+        
+        System.out.println("measured distance: 3.255 px");
+        System.out.println("\n************************\n");
+        
+        //double s = 3.27243073330165E-4;
+        
+        double d = f.distanceSquare(x, y);
+        //System.out.println(d);
+        System.out.println("Newton-Raphson");
+        System.out.println("dist    " + Math.sqrt(d));
+        System.out.println("dist px " + Math.sqrt(d) * s);
+
+        double closestT = f.closestTApproximation(x, y);
+        double t = f.closestTBrent(x, y, closestT).getPoint();
+        System.out.println("\n************************\n");
+        System.out.println("Brent - Apache Commons Math");
+        System.out.println("t       " + t);
+        d = Math.sqrt(f.closestTBrent(x, y, closestT).getValue());
+        System.out.println("dist    " + d);
+        System.out.println("dist px " + d * s);
+        
+        System.out.println("\n************************\n");
+        System.out.println("High precision Brent - Apache Commons Math");
+        double interval = 1d / N;
+        closestT = f.closestTApproximation(x, y);
+
+        UnivariateFunction fct = new UnivariateFunction() {
+            @Override
+            public double value(double d) {
+                return f.distanceSquare(x, y, d);
+            }
+        };
+
+        double EPS = 0.00000001;
+        UnivariateOptimizer optimizer = new BrentOptimizer(1e-10, EPS);
+
+        UnivariatePointValuePair pair = optimizer.optimize(new MaxEval(200),
+                new UnivariateObjectiveFunction(fct),
+                GoalType.MINIMIZE,
+                new SearchInterval(closestT - interval, closestT + interval, closestT));
+
+        t = pair.getPoint();
+        System.out.println("t       " + t);
+        d = Math.sqrt(f.closestTBrent(x, y, closestT).getValue());
+        System.out.println("dist    " + d);
+        System.out.println("dist px " + d * s);
+        //System.out.println(optimizer.getEvaluations());
+    }
+     
+    // FIXME
+    public static long newton = 0;
+    public static long brent = 0;
+
     private static long idCounter = 0;
 
     // FIXME this does not guarantee a unique ID when flows are loaded from an XML file
     protected static long createID() {
         return idCounter++;
     }
+
+    /**
+     * Number of initial flow line subdivisions to find approximate t 100 is
+     * reliable and fast
+     */
+    private final static int N = 100;
 
     public enum FlowOffsettingQuality {
         LOW(3),
@@ -354,16 +442,16 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Returns true if this flow intersects with an obstacle.
+     * Test for intersection of this flow with an obstacle.
      *
      * @param obstacle obstacle
      * @param model data model
      * @param minObstacleDistPx minimum empty space between flow and obstacles
      * (in pixels)
-     * @return
+     * @return true if there is an intersection, false otherwise.
      */
-    protected boolean cachedClippedCurveIncludingArrowIntersectsObstacle(Obstacle obstacle, Model model, int minObstacleDistPx) {
-        double tol = 1d / model.getReferenceMapScale(); // 1 pixel in world coordinates
+    protected boolean cachedClippedCurveIncludingArrowIntersectsObstacle(
+            Obstacle obstacle, Model model, int minObstacleDistPx) {
 
         // flow width in world coordinates
         double strokeWidthWorld = model.getFlowWidthPx(this) / model.getReferenceMapScale();
@@ -373,8 +461,13 @@ public class Flow implements Comparable<Flow> {
         double obstacleRadiusWorld = obstacle.r
                 + minObstacleDistPx / model.getReferenceMapScale();
 
-        // the minimum distance between the obstacle center and the flow axis
-        double minDist = (strokeWidthWorld / 2) + obstacleRadiusWorld;
+        // minimum distance is the obstacle radius
+        double minDist = obstacleRadiusWorld;
+
+        // for nodes, add half stroke width
+        if (obstacle.isArrowObstacle() == false) {
+            minDist += (strokeWidthWorld / 2);
+        }
 
         // test with flow bounding box
         // extend bounding box by minDist.
@@ -390,8 +483,7 @@ public class Flow implements Comparable<Flow> {
         // Check the shortest distance between the obstacle and the flow. If it's 
         // less than the minimum distance, then the flow intersects the obstacle. 
         // FIXME test for beyondButtCaps ?
-        double shortestDistSquare = distanceSquare(obstacle.x, obstacle.y, tol);
-        return shortestDistSquare < minDist * minDist;
+        return isPointCloserThan(obstacle.x, obstacle.y, minDist);
     }
 
     /**
@@ -1241,15 +1333,10 @@ public class Flow implements Comparable<Flow> {
     /**
      * Returns the location on the Bézier curve at parameter value t.
      *
-     * @param t Parameter [0..1]
-     * @return Location on curve.
+     * @param t parameter should be between 0 and 1, but this is not enforced.
+     * @return location on curve.
      */
     public Point pointOnCurve(double t) {
-        //assert (t >= 0d && t <= 1d); // FIXME
-        if (Double.isFinite(t) == false) {
-            System.out.println(t); // FIXME
-            assert (t >= 0d && t <= 1d);
-        }
         double w3 = t * t;
         double _1_t = 1 - t;
         double w2 = 2 * _1_t * t;
@@ -1432,36 +1519,145 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Computes the shortest distance between a point and any point on this
-     * quadratic Bézier curve. <STRONG>Attention: xy parameter is
-     * changed.</STRONG>
+     * Returns the square value of the distance between a point at x/y and a
+     * point on this curve at curve parameter t.
      *
-     * @param xy Point x and y on input; the closest point on the curve on
-     * output.
-     * @param tol Tolerance to test whether points are collinear.
-     * @return The distance.
+     * This is a more efficient form of pointOnCurve(t).distanceSquare(x, y);
+     *
+     * @param t curve parameter. Should be between 0 and 1, but no check is
+     * made.
+     * @param x point x
+     * @param y point y
+     * @return square value of distance between the point x/y and the point at
+     * parameter t on the curve.
      */
-    public double distance(double[] xy, double tol) {
-        return GeometryUtils.getDistanceToQuadraticBezierCurve(startPt.x, startPt.y,
-                cPtX, cPtY, endPt.x, endPt.y, tol, xy);
+    public double distanceSquare(double x, double y, double t) {
+        double w3 = t * t;
+        double _1_t = 1 - t;
+        double w2 = 2 * _1_t * t;
+        double w1 = _1_t * _1_t;
+        double ptX = startPt.x * w1 + cPtX * w2 + endPt.x * w3;
+        double ptY = startPt.y * w1 + cPtY * w2 + endPt.y * w3;
+        double dx = x - ptX;
+        double dy = y - ptY;
+        return dx * dx + dy * dy;
     }
 
     /**
-     * Computes the square of the shortest distance between a point and any
-     * point on this quadratic Bézier curve.
+     * Returns the shortest distance between the point x/y and this curve.
+     * Stores the closest point in the passed xy array.
+     *
+     * @param xy point x/y. The closest point on this curve is stored in this
+     * parameter.
+     * @return the shortest distance
+     */
+    public double distanceSquare(double[] xy) {
+
+        double x = xy[0];
+        double y = xy[1];
+
+        if (beyondStartButtCap(x, y)) {
+            double dx = x - startPt.x;
+            double dy = y - startPt.y;
+            xy[0] = startPt.x;
+            xy[1] = startPt.y;
+            return dx * dx + dy * dy;
+        }
+
+        if (beyondEndButtCap(x, y)) {
+            double dx = x - endPt.x;
+            double dy = y - endPt.y;
+            xy[0] = endPt.x;
+            xy[1] = endPt.y;
+            return dx * dx + dy * dy;
+        }
+
+        double t = closestT(x, y);
+
+        // compute point on curve
+        double w3 = t * t;
+        double _1_t = 1 - t;
+        double w2 = 2 * _1_t * t;
+        double w1 = _1_t * _1_t;
+        double ptX = startPt.x * w1 + cPtX * w2 + endPt.x * w3;
+        double ptY = startPt.y * w1 + cPtY * w2 + endPt.y * w3;
+        xy[0] = ptX;
+        xy[1] = ptY;
+
+        // distance between xy and point on curve
+        double dx = x - ptX;
+        double dy = y - ptY;
+        return dx * dx + dy * dy;
+    }
+
+    /**
+     * Returns the shortest distance between the point x/y and this curve.
      *
      * @param x point x
      * @param y point y
-     * @param tol Tolerance to test whether points are collinear.
-     * @return the distance
+     * @return the shortest distance
      */
-    public double distanceSquare(double x, double y, double tol) {
-        return GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
-                cPtX, cPtY, endPt.x, endPt.y, tol, x, y);
+    public double distanceSquare(double x, double y) {
+
+        if (beyondStartButtCap(x, y)) {
+            double dx = x - startPt.x;
+            double dy = y - startPt.y;
+            return dx * dx + dy * dy;
+        }
+
+        if (beyondEndButtCap(x, y)) {
+            double dx = x - endPt.x;
+            double dy = y - endPt.y;
+            return dx * dx + dy * dy;
+        }
+
+        return distanceSquare(x, y, closestT(x, y));
     }
 
-    private double fp(double t, double x, double y) {
-        // return (f(t + h, x, y) - f(t - h, x, y)) / (2 * h);
+    /**
+     * Tests whether a point x/y is closer to the center line of this flow than
+     * a specified minimum distance.
+     *
+     * @param x point x
+     * @param y point y
+     * @param minDist the minimum distance.
+     * @return True if this point x/y is closer than the minimum distance, false
+     * otherwise.
+     */
+    public boolean isPointCloserThan(double x, double y, double minDist) {
+        double minDistSq = minDist * minDist;
+
+        // x/y must be within the buffered triangle. The buffer distance is minDist.
+        // Test whether x/y is within the triangle formed by start, control and end points.
+        // If outside, test whether x/y is closer than minDist to any of the 
+        // three sides of this triangle.
+        if (GeometryUtils.pointInTriangle(x, y, startPt.x, startPt.y, cPtX, cPtY, endPt.x, endPt.y)
+                || GeometryUtils.getDistanceToLineSegmentSquare(x, y, startPt.x, startPt.y, cPtX, cPtY) < minDistSq
+                || GeometryUtils.getDistanceToLineSegmentSquare(x, y, startPt.x, startPt.y, endPt.x, endPt.y) < minDistSq
+                || GeometryUtils.getDistanceToLineSegmentSquare(x, y, endPt.x, endPt.y, cPtX, cPtY) < minDistSq) {
+
+            return distanceSquare(x, y) < minDistSq;
+        }
+
+        // x/y is outside of buffered triangle
+        return false;
+    }
+    
+    /**
+     * First order derivative of squared distance between point x/y and the
+     * point on the curve at parameter t. This is for Newton optimization with
+     * closestTNewton().
+     *
+     *
+     * @param x point x
+     * @param y point y
+     * @param t t parameter
+     * @return first derivate of squared distance between x/y and point on curve
+     * at parameter t
+     */
+    private double fp(double x, double y, double t) {
+//        double h = 0.0001;
+//        return (distanceSquare(x, y, t + h) - distanceSquare(x, y, t - h)) / (2 * h);
 
         // with square of distance
         // http://www.wolframalpha.com
@@ -1481,13 +1677,11 @@ public class Flow implements Comparable<Flow> {
         /*
         (4 ((-1 + t) x1 + x2 - 2 t x2 + t x3) (-x + (-1 + t)^2 x1 + t (2 x2 - 2 t x2 + t x3)) + 
    4 ((-1 + t) y1 + y2 - 2 t y2 + t y3) (-y + (-1 + t)^2 y1 + 
-      t (2 y2 - 2 t y2 + t y3)))/(2 \[Sqrt]((x - (-1 + t)^2 x1 + 
-        t (2 (-1 + t) x2 - t x3))^2 + (y - (-1 + t)^2 y1 + 
-        t (2 (-1 + t) y2 - t y3))^2))
+      t (2 y2 - 2 t y2 + t y3)))/(2 \[Sqrt]((x - (-1 + t)^2 x1 + t (2 (-1 + t) x2 - t x3))^2 + (y - (-1 + t)^2 y1 + t (2 (-1 + t) y2 - t y3))^2))
          */
         // FIXME reduce number of operation
-        double kx = (x - (-1 + t) * (-1 + t) * x1 + t * (2 * (-1 + t) * x2 - t * x3));
-        double ky = (y - (-1 + t) * (-1 + t) * y1 + t * (2 * (-1 + t) * 2 - t * y3));
+        double kx = x - (-1 + t) * (-1 + t) * x1 + t * (2 * (-1 + t) * x2 - t * x3);
+        double ky = y - (-1 + t) * (-1 + t) * y1 + t * (2 * (-1 + t) * y2 - t * y3);
 
         return (4 * ((-1 + t) * x1 + x2 - 2 * t * x2 + t * x3) * (-x + (-1 + t) * (-1 + t) * x1
                 + t * (2 * x2 - 2 * t * x2 + t * x3))
@@ -1496,9 +1690,21 @@ public class Flow implements Comparable<Flow> {
                 / (2 * Math.sqrt((kx * kx + ky * ky)));
     }
 
-    private double fpp(double t, double x, double y) {
-        // return (f(t + h, x, y) - 2 * f(t, x, y) + f(t - h, x, y)) / (h * h);
-
+    /**
+     * Second order derivative of distance between point x/y and the point on
+     * the curve at parameter t. This is for Newton optimization with
+     * closestTNewton().
+     *
+     * @param x point x
+     * @param y point y
+     * @param t t parameter
+     * @return second derivate of squared distance between x/y and point on
+     * curve at parameter t
+     */
+    private double fpp(double x, double y, double t) {
+//        double h = 0.0001;
+//        return (distanceSquare(x, y, t + h) - 2 * distanceSquare(x, y, t) + distanceSquare(x, y, t - h)) / (h * h);
+//
         // with square of distance
 //        double kx = (2 * x1 * (1 - t) - 2 * x2 * (1 - t) + 2 * x2 * t - 2 * x3 * t);
 //        double ky = (2 * y1 * (1 - t) - 2 * y2 * (1 - t) + 2 * y2 * t - 2 * y3 * t);
@@ -1528,7 +1734,7 @@ public class Flow implements Comparable<Flow> {
         double x3 = endPt.x;
         double y3 = endPt.y;
 
-        // FIXME reduce number of operation
+        // FIXME reduce number of operations
         double kx1 = (x + (-1 + t) * (x1 - t * x1 + 2 * t * x2) - t * t * x3);
         double ky1 = (y + (-1 + t) * (y1 - t * y1 + 2 * t * y2) - t * t * y3);
         double kx2 = ((-1 + t) * x1 + x2 - 2 * t * x2 + t * x3);
@@ -1541,84 +1747,138 @@ public class Flow implements Comparable<Flow> {
 
         return (8 * (kx1 * kx1 + ky1 * ky1) * (2 * kx2 * kx2 + (x1 - 2 * x2 + x3) * (-x + (-1 + t) * (-1 + t) * x1 + t * (2 * x2 - 2 * t * x2 + t * x3))
                 + 2 * ky2 * ky2 + (y1 - 2 * y2 + y3) * (-y + (-1 + t) * (-1 + t) * y1
-                + t * (2 * y2 - 2 * t * y2 + t * y3))) - k * k) / (4 * Math.pow(kx3 * kx3 + ky3 * ky3, 3. / 2)); // FIXME replace pow(x, 1.5) with x * sqrt(x)
+                + t * (2 * y2 - 2 * t * y2 + t * y3))) - k * k) / (4 * FastMath.pow(kx3 * kx3 + ky3 * ky3, 3. / 2)); // FIXME replace pow(x, 1.5) with x * sqrt(x)
     }
 
-    private double f(double t, double x, double y) {
-        Point point = pointOnCurve(t);
-        return point.distance(x, y);
-    }
+    /**
+     * Computes t parameter for point on this curve that is closest to x/y using
+     * the Newton optimization method that requires first and second
+     * derivatives. This method should not be called directly. Call closestT()
+     * instead.
+     *
+     * @param t approximate t parameter for point on curve
+     * @param x point x
+     * @param y point y
+     * @return t parameter between 0 and 1, or -1 if the parameter cannot be
+     * found with the Newton method.
+     */
+    private double closestTNewton(double x, double y, double t) {
+        assert (t >= 0d && t <= 1d);
 
-// FIXME   
-//    public static void main(String[] args) {
-//        double h = 0.0000001;
-//
-//        //Flow flow = new Flow(new Point(0,0), 0.5, 2, new Point(1, 0), 1);
-//        Flow flow = new Flow(new Point(146.7, -0.04), 145.524, 6.855, new Point(151.97, -1.734), 1);
-//
-//        Flow flow2 = new Flow(new Point(144, 0), 144, 12, new Point(154, 0), 1);
-//
-//        for (int i = 0; i <= 20; i++) {
-//            double t = i / 20d;
-//            Point point = flow2.pointOnCurve(t);
-//            double x = point.x;
-//            double y = point.y;
-//            double fp = flow.fp(t, x, y);
-//            System.out.println("\nexact first derivative  \t" + fp);
-//            fp = (flow.f(t + h, x, y) - flow.f(t - h, x, y)) / (2 * h);
-//            System.out.println("approx first derivative \t" + fp);
-//
-//            double fpp = flow.fpp(t, x, y);
-//            System.out.println("exact second derivative \t" + fpp);
-//            fpp = (flow.f(t + h, x, y) - 2 * flow.f(t, x, y) + flow.f(t - h, x, y)) / (h * h);
-//            System.out.println("approx second derivative \t" + fpp);
-//
-//            System.out.println("closest t               \t" + flow.closestTNewtonRaphson(t, x, y));
-//
-//            Point point1 = flow.closestPointOnCurve(t, new Point(x, y));
-//            Point point2 = flow.closestPointOnCurve(new Point(x, y));
-//            System.out.println("distance exact - Newton \t" + point1.distance(point2));
-//        }
-//
-//    }
-    private double closestTNewtonRaphson(double t, double x, double y) {
-        final int MAX_ITER = 5;
+        final int MAX_ITER = 10;
         final double EPS = 0.0001;
 
-        double dT = Double.MAX_VALUE;
-        int iterationCounter = 0;
-
-        // Newton-Raphson with first and second derivative to find minimum
-        do {
-            double fpp = fpp(t, x, y);
-            if (fpp == 0d) {
-                // found stationary point, which is the minimum
-                return (t < 0d || t > 1d) ? -1d : t;
-            }
-
-            double fp = fp(t, x, y);
+        double dT = 1d;
+        for (int i = 0; Math.abs(dT) > EPS && i < MAX_ITER; i++) {
+            double fp = fp(x, y, t); // first derivative
+            double fpp = fpp(x, y, t); // second derivative
             double dT_ = fp / fpp;
-            if (Math.abs(dT_) > Math.abs(dT)) {
+            if (Math.abs(dT_) > dT) {
+                // If the second order derivative is smaller than 0 the step 
+                // size will increase and the minimum will likely be missed. Must use 
+                // a method that does not use second order derivatives in this 
+                // case. This also catches cases where the second order derivative
+                // is 0 or close to zero.
                 return -1d;
             }
-            dT = dT_;
-            t -= dT;
-            if (++iterationCounter == MAX_ITER) {
-                return -1d;
-            }
-        } while (Math.abs(dT) > EPS);
-
-        if (t < 0d || t > 1d) {
-            return -1d;
+            t -= dT = dT_;
         }
+        newton++;
+        return Math.min(1d, Math.max(0d, t));
+    }
 
-        return t;
+    /**
+     * Computes t parameter for point on this curve that is closest to x/y using
+     * Brent's optimization method. This method should not be called directly.
+     * Call closestT() instead.
+     *
+     * Brent's method for finding the minimum distance is implemented in the
+     * Apache Commons Math library. This method is robust but slower than
+     * Newton's.
+     *
+     * @param x point x
+     * @param y point y
+     * @param t approximate t
+     * @return t parameter between 0 and 1, and distance at t
+     */
+    private UnivariatePointValuePair closestTBrent(double x, double y, double t) {
+        // absolute tolerance for t parameter
+        double ABS = 0.0001;
+        // relative tolerance for t parameter
+        double REL = 1e-10;
+
+        // distance between two t values
+        double interval = 1d / N;
+
+        UnivariateFunction fct = new UnivariateFunction() {
+            @Override
+            public double value(double d) {
+                return distanceSquare(x, y, d);
+            }
+        };
+        UnivariateOptimizer optimizer = new BrentOptimizer(REL, ABS);
+        UnivariatePointValuePair pair = optimizer.optimize(new MaxEval(50),
+                new UnivariateObjectiveFunction(fct),
+                GoalType.MINIMIZE,
+                new SearchInterval(t - interval, t + interval, t));
+        brent++;
+        return pair;
+    }
+
+    /**
+     * Computes t parameter for the point on this curve that is closest to x/y.
+     * Uses faster Newton method if possible, otherwise uses Brent's method.
+     *
+     * @param x point x
+     * @param y point y
+     * @param t approximate t
+     * @return t parameter between 0 and 1
+     */
+    private double closestT(double x, double y, double t) {
+        double tNewton = closestTNewton(x, y, t);
+        if (tNewton != -1d) {
+            return tNewton;
+        }
+        return closestTBrent(x, y, t).getPoint();
+    }
+
+    /**
+     * Computes t parameter for the point on this curve that is closest to x/y.
+     * Uses faster Newton method if possible, otherwise uses Brent's method.
+     *
+     * @param x point x
+     * @param y point y
+     * @return t parameter between 0 and 1
+     */
+    private double closestT(double x, double y) {
+        double approximateT = closestTApproximation(x, y);
+        return closestT(x, y, approximateT);
+    }
+
+    /**
+     * Returns the t parameter of a point on this curve that is close to x/y.
+     * Important: This is not the closest point, but only an approximation.
+     *
+     * @param x point x
+     * @param y point y
+     * @return approximate t
+     */
+    private double closestTApproximation(double x, double y) {
+        double closestT = 0;
+        double minDistSqr = distanceSquare(x, y, closestT);
+        for (int i = 1; i < N; i++) {
+            double t = i / (N - 1d);
+            double distSqr = distanceSquare(x, y, t);
+            if (distSqr < minDistSqr) {
+                minDistSqr = distSqr;
+                closestT = t;
+            }
+        }
+        return closestT;
     }
 
     /**
      * Returns the point on this curve that is closest to a passed point.
-     * Returns an approximate solution using Newton-Raphson root finding if
-     * possible.
      *
      * @param t an estimate of the t parameter of the location of the closest
      * point on the curve.
@@ -1626,26 +1886,9 @@ public class Flow implements Comparable<Flow> {
      * @return the closest point on this curve
      */
     private Point closestPointOnCurve(double t, Point pt) {
-        t = closestTNewtonRaphson(t, pt.x, pt.y);
-        if (t == -1d) {
-            return closestPointOnCurve(pt);
-        }
-        return pointOnCurve(t);
+        return pointOnCurve(closestT(pt.x, pt.y, t));
     }
-
-    /**
-     * FIXME duplicate of distance method
-     *
-     * @param pt
-     * @return
-     */
-    private Point closestPointOnCurve(Point pt) {
-        double[] xy = new double[]{pt.x, pt.y};
-        GeometryUtils.getDistanceToQuadraticBezierCurveSq(startPt.x, startPt.y,
-                cPtX, cPtY, endPt.x, endPt.y, 0.001, xy);
-        return new Point(xy[0], xy[1]);
-    }
-
+    
     /**
      * Test whether x/y is beyond the start butt cap line.
      *
@@ -1792,15 +2035,14 @@ public class Flow implements Comparable<Flow> {
                     return true;
                 }
 
-                double hwSqr = hw * hw;
                 // No rectangle-flow inersection found. Now test whether the start 
                 // point or the end point of the cross section overlap the flow
                 if (clippedFlow.beyondButtCaps(p1x, p1y) == false
-                        && clippedFlow.distanceSquare(p1x, p1y, tol) < hwSqr) {
+                        && clippedFlow.isPointCloserThan(p1x, p1y, hw)) {
                     return true;
                 }
                 if (clippedFlow.beyondButtCaps(p2x, p2y) == false
-                        && clippedFlow.distanceSquare(p2x, p2y, tol) < hwSqr) {
+                        && clippedFlow.isPointCloserThan(p2x, p2y, hw)) {
                     return true;
                 }
                 // test for overlaps with arrowhead
@@ -1829,13 +2071,10 @@ public class Flow implements Comparable<Flow> {
      */
     public double touchPercentage(Flow flow, double minDist, int nbrPointsToTest) {
         int closePoints = 0;
-        double minDistSqr = minDist * minDist;
         for (int i = 0; i < nbrPointsToTest; i++) {
             double t = i / (nbrPointsToTest - 1d);
             Point pt = pointOnCurve(t);
-            // FIXME double tol = 0.2 / model.getReferenceMapScale();
-            double dSqr = flow.distanceSquare(pt.x, pt.y, 0.001); // FIXME
-            if (dSqr < minDistSqr) {
+            if (flow.isPointCloserThan(pt.x, pt.y, minDist)) {
                 ++closePoints;
             }
         }
@@ -2525,6 +2764,9 @@ public class Flow implements Comparable<Flow> {
      */
     public boolean isOverlappingObstacle(Obstacle obstacle, Model model, int minObstaclesDistPx) {
 
+//        if (getValue() == 18943 && obstacle.node != null && obstacle.node.getValue() == 369675) {
+//            System.out.println("problem");
+//        }
         // ignore obstacles that are start or end nodes of the flow
         if (obstacle.node == getStartPt() || obstacle.node == getEndPt()) {
             return false;
@@ -2579,27 +2821,25 @@ public class Flow implements Comparable<Flow> {
         double flowWidthPx = model.getFlowWidthPx(this);
         double flowWidth = flowWidthPx / model.getReferenceMapScale();
         double minDist = flowWidth / 2d;
-        double minDistSqr = minDist * minDist;
-        double colinearTol = 0.2 /* px */ / model.getReferenceMapScale();
 
         double x = arrow.getTipPt().x;
         double y = arrow.getTipPt().y;
         if (clippedFlow.beyondStartButtCap(x, y) == false
-                && clippedFlow.distanceSquare(x, y, colinearTol) < minDistSqr) {
+                && clippedFlow.isPointCloserThan(x, y, minDist)) {
             return true;
         }
 
         x = arrow.getCorner1Pt().x;
         y = arrow.getCorner1Pt().y;
         if (clippedFlow.beyondStartButtCap(x, y) == false
-                && clippedFlow.distanceSquare(x, y, colinearTol) < minDistSqr) {
+                && clippedFlow.isPointCloserThan(x, y, minDist)) {
             return true;
         }
 
         x = arrow.getCorner2Pt().x;
         y = arrow.getCorner2Pt().y;
         return (clippedFlow.beyondStartButtCap(x, y) == false
-                && clippedFlow.distanceSquare(x, y, colinearTol) < minDistSqr);
+                && clippedFlow.isPointCloserThan(x, y, minDist));
     }
 
     /**
@@ -2696,34 +2936,14 @@ public class Flow implements Comparable<Flow> {
         // test with flow line without arrowhead
         Flow clipppedFlow = model.clipFlow(this, true, true, true);
 
-        // test whether x/y is to the left of the start butt cap line
-        // compute unnormalized normal nx/ny at start (t = 0)
-        double startX = clipppedFlow.getStartPt().x;
-        double startY = clipppedFlow.getStartPt().y;
-        double dx = clipppedFlow.cPtX - startX;
-        double dy = clipppedFlow.cPtY - startY;
-        double nx = -dy;
-        double ny = dx;
-        // startPt and startPt + nx/ny define a line along the butt cap
-        // test whether the point is on the left of this line (when viewing from start point along normal)
-        // this is a simplified version of:
-        // leftOfButtCapLine = GeometryUtils.isOnLeftSide(x, y, startX, startY, startX + nx, startY + ny);
-        boolean leftOfStartButtCapLine = nx * (y - startY) - ny * (x - startX) > 0d;
-        if (leftOfStartButtCapLine) {
+        // test whether x/y is to the left of the start butt cap line.
+        if (clipppedFlow.beyondStartButtCap(x, y)) {
             return false;
         }
 
-        // test whether x/y is to the left of the end butt cap line
-        // FIXME use beyondButtCaps(pt.x, pt.y) instead?
+        // test whether x/y is to the left of the end butt cap line if there is no arrowhead
         if (model.isDrawArrowheads() == false) {
-            double endX = clipppedFlow.getEndPt().x;
-            double endY = clipppedFlow.getEndPt().y;
-            dx = clipppedFlow.cPtX - endX;
-            dy = clipppedFlow.cPtY - endY;
-            nx = -dy;
-            ny = dx;
-            boolean leftOfEndButtCapLine = nx * (y - endY) - ny * (x - endX) > 0d;
-            if (leftOfEndButtCapLine) {
+            if (clipppedFlow.beyondEndButtCap(x, y)) {
                 return false;
             }
         } else {
@@ -2734,9 +2954,6 @@ public class Flow implements Comparable<Flow> {
             }
         }
 
-        // Get the distance of the point to the flow.
-        double colinearTol = 0.2 /* px */ / model.getReferenceMapScale();
-        double distanceSqWorld = clipppedFlow.distanceSquare(x, y, colinearTol);
-        return distanceSqWorld <= maxDist * maxDist;
+        return clipppedFlow.isPointCloserThan(x, y, maxDist);
     }
 }

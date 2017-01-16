@@ -1,5 +1,6 @@
 package edu.oregonstate.cartography.flox.gui;
 
+import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.ForceLayouter;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
@@ -93,6 +94,9 @@ class LayoutWorker extends SwingWorker<Void, Void> implements ProcessMonitor {
             
             // reset lock flags to initial values
             layouter.getModel().applyLocks(initialLocks);
+            
+            System.out.println("Newton " + Flow.newton + " " + 100d * Flow.newton / (Flow.newton + Flow.brent));
+            System.out.println("Brent " + Flow.brent + " " + 100d * Flow.brent / (Flow.newton + Flow.brent));
         }
     }
 

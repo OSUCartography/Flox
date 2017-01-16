@@ -494,7 +494,6 @@ public class ForceLayouter {
 
         double nodeWeight = model.getNodesWeight();
         int distWeightExponent = model.getDistanceWeightExponent();
-        double tol = 1 / model.getReferenceMapScale(); // 1 pixel in world coordinates
         double[] xy = new double[2];
         double wTotal = 0;
         double fxTotal = 0;
@@ -513,7 +512,7 @@ public class ForceLayouter {
             // find nearest point on target flow
             xy[0] = node.x;
             xy[1] = node.y;
-            double d = flow.distance(xy, tol);
+            double d = Math.sqrt(flow.distanceSquare(xy));
             double dx = (xy[0] - node.x);
             double dy = (xy[1] - node.y);
 
@@ -522,6 +521,8 @@ public class ForceLayouter {
             if (d == 0) {
                 continue;
             }
+            
+            // FIXME no need to compute sqrt of distanceSquare: should use the fact that pow of a power is power * power.
             double idw = 1d / FastMath.powFast(d, distWeightExponent);
             fxTotal += dx * idw;
             fyTotal += dy * idw;
@@ -742,6 +743,18 @@ public class ForceLayouter {
         return (int) Math.round(intersectionIndex(flow, obstacles, minObstacleDistPx, 1d));
     }
 
+    /**
+     * Computes an index quantifying the number of intersections of a flow with
+     * obstacles. The index is a weighted sum of intersections. Node obstacles
+     * have a weight of 1. The arrowheadWeight parameter sets the weight of
+     * arrowheads.
+     *
+     * @param flow flow to compute the intersection index for
+     * @param obstacles obstacles
+     * @param minObstacleDistPx the minimum distance between the flow and the obstacles (in pixel)
+     * @param arrowheadWeight the weight for arrowheads
+     * @return the index larger or equal to 0. 0 indicates no intersection.
+     */
     public double intersectionIndex(Flow flow, List<Obstacle> obstacles,
             int minObstacleDistPx, double arrowheadWeight) {
         double nbrIntersections = 0;
@@ -870,7 +883,7 @@ public class ForceLayouter {
     /**
      * Moves the control point location of one flow such that the flow does
      * overlap a minimum of obstacles. The control point of the passed flow is
-     * changed.
+     * changed if possible.
      *
      * First tests control point locations placed along an Archimedean spiral
      * centered on the current control point location. If no position can be
@@ -886,22 +899,14 @@ public class ForceLayouter {
     private void moveFlowAwayFromObstacles(Flow flow, List<Obstacle> obstacles) {
 
         // search for position inside range box that results in no overlaps
-        int minObstacleDistPx = model.getMinObstacleDistPx();
-        while (true) {
-            boolean foundPosition = findControlPointWithoutOverlapsInsideRangeBox(
-                    flow, obstacles, minObstacleDistPx);
-            if (foundPosition) {
-                return;
-            }
-            if (minObstacleDistPx == 0) {
-                break;
-            }
-            // half minimum distance between flow and obstacles
-            minObstacleDistPx /= 2;
+        boolean foundPosition = findControlPointWithoutOverlapsInsideRangeBoxWithFlexibleMinDistance(flow, obstacles);
+        if (foundPosition) {
+            return;
         }
 
-        // search for position inside range box that results in smallest number of overlaps
-        minObstacleDistPx = model.getMinObstacleDistPx();
+        // search for candidate positions inside the range box
+        // store a measure for the number of overlaps in an array
+        int minObstacleDistPx = model.getMinObstacleDistPx();
         ArrayList<Point> candidateControlPoints = new ArrayList<>();
         while (true) {
             double overlaps = findControlPointWithMinimumOverlapsInsideRangeBox(
@@ -932,10 +937,44 @@ public class ForceLayouter {
     }
 
     /**
+     * Searches for position inside range box such that the flow does overlap a
+     * any obstacles. If no position can be found that is at least
+     * model.getMinObstacleDistPx() pixels away from all obstacles, a loop
+     * divides the minimum distance by 2 until the distance is 0 or a position
+     * without overlaps can be found.
      *
-     * @param flow
-     * @param obstacles
-     * @param minObstacleDistPx
+     * @param flow The control point of this flow is changed if possible.
+     * @param obstacles obstacles to avoid
+     * @return true if a the control point position of flow has been changed.
+     */
+    private boolean findControlPointWithoutOverlapsInsideRangeBoxWithFlexibleMinDistance(Flow flow, List<Obstacle> obstacles) {
+        // 
+        int minObstacleDistPx = model.getMinObstacleDistPx();
+        while (true) {
+            boolean foundPosition = findControlPointWithoutOverlapsInsideRangeBox(
+                    flow, obstacles, minObstacleDistPx);
+            if (foundPosition) {
+                return true;
+            }
+            if (minObstacleDistPx == 0) {
+                return false;
+            }
+            // half minimum distance between flow and obstacles
+            minObstacleDistPx /= 2;
+        }
+    }
+
+    /**
+     * Moves the control point location of one flow such that the flow does not
+     * overlap any obstacles. The control point of the passed flow is changed if
+     * possible.
+     *
+     * Tests control point locations placed along an Archimedean spiral centered
+     * on the current control point location.
+     *
+     * @param flow flow to change
+     * @param obstacles obstacles to avoid
+     * @param minObstacleDistPx minimum distance between the flow and obstacles
      * @return
      */
     private boolean findControlPointWithoutOverlapsInsideRangeBox(Flow flow,
@@ -971,6 +1010,9 @@ public class ForceLayouter {
             // increment rotation angle, such that the next point on the spiral 
             // has an approximate distance of searchIncrement to the current point
             angleRad += searchIncrement / spiralR;
+//            if (flow.getValue() == 18943 && angleRad > 171.4024262947769) {
+//                System.out.println("problem");
+//            }
 
             /// test whether new control point position is within rangebox and 
             // does not result in a flow that is too close ot other flows or obstacles
@@ -1080,11 +1122,16 @@ public class ForceLayouter {
             }
             flow.setCtrlPt(cPtX, cPtY);
 
-            // test whether new geometry is close to a locked flow
+            // Compute the largest "touch percentage" of this flow with all 
+            // other locked flows. The "touch percentage" is between 0 and 1. A
+            // value of 0 indicates the flow is not touching any other. A value 
+            // of 1 indicates this flow touches another flow along the entire 
+            // length of this flow.
             boolean onlyTestWithLockedFlows = true;
             double largestTouchPercentage = largestTouchPercentage(flow, onlyTestWithLockedFlows);
             double touchW = 1 + largestTouchPercentage;
 
+            // number of intersections of this flow with obstacles (ignoring arrowhead obstacles)
             double intersectionIndex = intersectionIndex(flow, obstacles,
                     minObstacleDistPx, 0d); // ignore intersecting arrowheads
             intersectionIndex *= touchW;
@@ -1118,6 +1165,9 @@ public class ForceLayouter {
 
         flow.setCtrlPt(minNbrOverlapsX, minNbrOverlapsY);
 
+        if (flow.getValue() == 18943) {
+            System.out.println("problem");
+        }
         return minIntersectionIndex;
     }
 
