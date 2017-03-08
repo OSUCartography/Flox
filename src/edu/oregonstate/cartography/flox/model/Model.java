@@ -674,9 +674,10 @@ public class Model {
     }
 
     /**
-     * Change control point location of a flow.
+     * Copy control point location and shortening of flows from the passed flow
+     * to the flow in this model that has the same ID as the passed flow.
      *
-     * @param flow flow with new information
+     * @param flow flow with new information and ID to search for in this model.
      */
     public void updateControlPointAndShortening(Flow flow) {
         // FIXME inefficient iteration, should use hash map
@@ -2071,6 +2072,8 @@ public class Model {
     }
 
     /**
+     * Returns the cap style for rendering flow lines.
+     *
      * @return the flowCapsStyle
      */
     public int getFlowCapsStyle() {
@@ -2078,9 +2081,19 @@ public class Model {
     }
 
     /**
-     * @param flowCapsStyle the flowCapsStyle to set
+     * Set cap style for rendering flow lines.
+     *
+     * Must be BasicStroke.CAP_BUTT or BasicStroke.CAP_ROUND. Note:
+     * BasicStroke.CAP_SQUARE is not currently supported for hit testing by
+     * Flow.hit().
+     *
+     * @param flowCapsStyle must be BasicStroke.CAP_BUTT or
+     * BasicStroke.CAP_ROUND
+     *
      */
     public void setFlowCapsStyle(int flowCapsStyle) {
+        assert (flowCapsStyle == BasicStroke.CAP_BUTT
+                || flowCapsStyle == BasicStroke.CAP_ROUND);
         this.flowCapsStyle = flowCapsStyle;
     }
 
@@ -2292,9 +2305,19 @@ public class Model {
         if (flowCapsStyle == BasicStroke.CAP_ROUND) {
             double flowStrokeWidthPx = getFlowWidthPx(clippedFlow);
             double r = flowStrokeWidthPx / getReferenceMapScale() / 2d;
+
+            // clip start of flow by radius of round end cap
             double startT = clippedFlow.getIntersectionTWithCircleAroundStartPoint(r);
-            if (startT > 0) {
+            if (startT > 0d) {
                 clippedFlow = clippedFlow.split(startT)[1];
+            }
+
+            // clip end of flow if there is now arrowhead but a round end cap
+            if (isDrawArrowheads() == false) {
+                double endT = clippedFlow.getIntersectionTWithCircleAroundEndPoint(r);
+                if (endT < 1d) {
+                    clippedFlow = clippedFlow.split(endT)[0];
+                }
             }
         }
 
@@ -2973,8 +2996,8 @@ public class Model {
             Flow flow = iterator.next();
             if (flow instanceof FlowPair) {
                 FlowPair biFlow = (FlowPair) flow;
-                Flow offsetFlow1 = biFlow.createOffsetFlow1(this, Flow.FlowOffsettingQuality.HIGH);
-                Flow offsetFlow2 = biFlow.createOffsetFlow2(this, Flow.FlowOffsettingQuality.HIGH);
+                Flow offsetFlow1 = biFlow.createOffsetFlow1(this, Flow.FlowOffsetting.HIGH_QUALITY);
+                Flow offsetFlow2 = biFlow.createOffsetFlow2(this, Flow.FlowOffsetting.HIGH_QUALITY);
                 Flow2 flow2 = new Flow2(biFlow, offsetFlow2);
                 Flow1 flow1 = new Flow1(biFlow, offsetFlow1, flow2);
                 flows.add(flow1);

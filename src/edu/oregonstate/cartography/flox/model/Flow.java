@@ -36,13 +36,12 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 
 public class Flow implements Comparable<Flow> {
 
-     public static void main(String[] args) {
+    public static void main(String[] args) {
 //        double s = 1;
 //        double x = 5;
 //        double y = 5;
 //        Flow f = new Flow(new Point(0, 0), 4, 3, new Point(10, 1), 1);
-        
-        
+
         double s = 3.27243073330165E-4;
 //        double x = -1.243017509E7;
 //        double y = 4073798.185;
@@ -51,19 +50,17 @@ public class Flow implements Comparable<Flow> {
 //        double d = f.distanceSquare(x, y);
 //        System.out.println("dist2   " + Math.sqrt(d));
 //        System.out.println("dist2px " + Math.sqrt(d) * s);
-
         //-8918796.054080188
         //        5283641.773541634
         double x = -9215986.57;
         double y = 4911267.234;
         Flow f = new Flow(new Point(-8660839.584, 4995462.189), -8927413.159855744, 5267980.063701738, new Point(-1.106156559E7, 3707818.275), 1);
         //Flow f = new Flow(new Point(-8660839.584, 4995462.189), -9653007, 4981406, new Point(-1.106156559E7, 3707818.275), 1);
-        
+
         System.out.println("measured distance: 3.255 px");
         System.out.println("\n************************\n");
-        
+
         //double s = 3.27243073330165E-4;
-        
         double d = f.distanceSquare(x, y);
         //System.out.println(d);
         System.out.println("Newton-Raphson");
@@ -78,7 +75,7 @@ public class Flow implements Comparable<Flow> {
         d = Math.sqrt(f.closestTBrent(x, y, closestT).getValue());
         System.out.println("dist    " + d);
         System.out.println("dist px " + d * s);
-        
+
         System.out.println("\n************************\n");
         System.out.println("High precision Brent - Apache Commons Math");
         double interval = 1d / N;
@@ -87,7 +84,7 @@ public class Flow implements Comparable<Flow> {
         UnivariateFunction fct = new UnivariateFunction() {
             @Override
             public double value(double d) {
-                return f.distanceSquare(x, y, d);
+                return f.distanceSquareToPointOnCurve(x, y, d);
             }
         };
 
@@ -106,8 +103,8 @@ public class Flow implements Comparable<Flow> {
         System.out.println("dist px " + d * s);
         //System.out.println(optimizer.getEvaluations());
     }
-     
-    // FIXME
+
+    // FIXME temporary testing
     public static long newton = 0;
     public static long brent = 0;
 
@@ -119,18 +116,38 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Number of initial flow line subdivisions to find approximate t 100 is
+     * Number of initial flow line subdivisions to find approximate t. 100 is
      * reliable and fast
      */
     private final static int N = 100;
 
-    public enum FlowOffsettingQuality {
-        LOW(3),
-        HIGH(10);
+    public enum FlowOffsetting {
+        LOW_QUALITY(3),
+        HIGH_QUALITY(10);
 
+        /**
+         * When creating a parallel flow, this is the number of samples taken
+         * along the curve for computing distances
+         */
+        private static final int NBR_SAMPLES = 20;
+
+        /**
+         * When creating a parallel flow, this is a heuristic weight for
+         * distances measured from the offset curve.
+         */
+        private static final double W1 = 0.8;
+        /**
+         * When creating a parallel flow, this is a heuristic weight for
+         * distances measured from the original curve.
+         */
+        private static final double W2 = 1d - W1;
+
+        /**
+         * Number of iterations to find control point position for offset flow.
+         */
         public final int iterations;
 
-        FlowOffsettingQuality(int iterations) {
+        FlowOffsetting(int iterations) {
             this.iterations = iterations;
         }
     }
@@ -1093,25 +1110,17 @@ public class Flow implements Comparable<Flow> {
      * Offsets this flow in parallel to the line. This changes the start, end
      * and control point locations.
      *
-     * @param offset offset distance
+     * @param offset offset distance. A positive distance places the offset flow
+     * to the left of this flow when viewed from start to end.
      * @param model data model
      * @param quality
      */
-    public void offsetFlow(double offset, Model model, FlowOffsettingQuality quality) {
+    public void offsetFlow(double offset, Model model, FlowOffsetting quality) {
+        assert (Double.isFinite(offset));
+
         if (offset == 0d) {
             return;
         }
-
-        // number of iterations
-        final int nbrIterations = quality.iterations;
-        // number of samples along the curves for computing distances
-        final int nbrTSamples = 20;
-        // heuristic weight for moving along the offset curve
-        final double w1 = 0.8;
-        // heuristic weight for moving along the original curve
-        final double w2 = 1 - w1;
-
-        assert (Double.isFinite(offset));
 
         // coordinates of offset flow
         double startX, startY, ctrlPtX, ctrlPtY, endX, endY;
@@ -1173,117 +1182,44 @@ public class Flow implements Comparable<Flow> {
         // improve the control point position such that the distance between the
         // original curve and the offset curve are approximately constant along 
         // the two curves
-//        Point[] offsetPts = new Point[nbrTSamples];
-//        Point[] originalPts = new Point[nbrTSamples];
-        for (int i = 0; i < nbrIterations; i++) {
+        for (int i = 0; i < quality.iterations; i++) {
             Flow offsetFlow = new Flow(new Point(startX, startY),
                     ctrlPtX, ctrlPtY,
                     new Point(endX, endY), 1d);
             double moveX = 0;
             double moveY = 0;
-
-            /*    
-            // compute points along the two curves
-            for (int j = 0; j < nbrTSamples; j++) {
-                double t = (j + 0.5) * (1. / nbrTSamples);
-                offsetPts[j] = offsetFlow.pointOnCurve(t);
-                originalPts[j] = pointOnCurve(t);
-            }
-            
-            // move along the offset curve and for each point find the closest 
-            // point on the original curve
-            for (int offsetID = 0; offsetID < nbrTSamples; offsetID++) {
-                double minDistSqr = Double.MAX_VALUE;
-                Point offsetPt = offsetPts[offsetID];
-                int closestOriginalID = 0;
-                for (int originalID = 0; originalID < nbrTSamples; originalID++) {
-                    Point originalPt = originalPts[originalID];
-                    double distSqr = offsetPt.distanceSqr(originalPt);
-                    if (distSqr < minDistSqr) {
-                        closestOriginalID = originalID;
-                        minDistSqr = distSqr;
-                    }
-                }
-
-                // compute direction and length of displacement force for closest point
-                double dirX = offsetPt.x - originalPts[closestOriginalID].x;
-                double dirY = offsetPt.y - originalPts[closestOriginalID].y;
-                double curveDistance = Math.sqrt(dirX * dirX + dirY * dirY);
-                double gap = Math.abs(offset) - curveDistance;
-                double gapW1 = gap * w1;
-                if (curveDistance != 0d) {
-                    dirX /= curveDistance;
-                    dirY /= curveDistance;
-                    moveX += dirX * gapW1;
-                    moveY += dirY * gapW1;
-                }
-            }
-
-            // move along the original curve and for each point find the closest 
-            // point on the offset curve
-            for (int originalID = 0; originalID < nbrTSamples; originalID++) {
-                double minDistSqr = Double.MAX_VALUE;
-                Point originalPt = originalPts[originalID];
-                int closestOffsetID = 0;
-                for (int offsetID = 0; offsetID < nbrTSamples; offsetID++) {
-                    Point offsetPt = offsetPts[offsetID];
-                    double distSqr = offsetPt.distanceSqr(originalPt);
-                    if (distSqr < minDistSqr) {
-                        closestOffsetID = offsetID;
-                        minDistSqr = distSqr;
-                    }
-                }
-                
-                // compute direction and length of displacement force for closest point
-                double dirX = originalPt.x - offsetPts[closestOffsetID].x;
-                double dirY = originalPt.y - offsetPts[closestOffsetID].y;
-                double curveDistance = Math.sqrt(dirX * dirX + dirY * dirY);
-                double gap = Math.abs(offset) - curveDistance;
-                double gapW2 = gap * w2;
-                if (curveDistance > 0) {
-                    dirX /= curveDistance;
-                    dirY /= curveDistance;
-                    moveX -= dirX * gapW2;
-                    moveY -= dirY * gapW2;
-                }
-            }
-             */
-            // an alternative method that computes exact distances FIXME compare speed
-            for (int j = 0; j < nbrTSamples; j++) {
-                double t = (j + 0.5) * (1. / nbrTSamples);
+            for (int j = 0; j < FlowOffsetting.NBR_SAMPLES; j++) {
+                double t = (j + 0.5) * (1d / FlowOffsetting.NBR_SAMPLES);
 
                 // Move along the offset curve and find closest points on the original curve.
                 // This results in a curve without excessive curvature, but 
                 // the offset curve is too distant from the original curve where 
                 // the original curve is strongly bent
                 Point ptOnOffsetCurve1 = offsetFlow.pointOnCurve(t);
-                //Point ptOnOriginalCurve1 = closestPointOnCurve(ptOnOffsetCurve1);
                 Point ptOnOriginalCurve1 = closestPointOnCurve(t, ptOnOffsetCurve1);
-                //Point ptOnOriginalCurve1 = closestPointOnCurve(ptOnOffsetCurve1);
                 double curveDistance1 = ptOnOffsetCurve1.distance(ptOnOriginalCurve1);
                 double gap1 = Math.abs(offset) - curveDistance1;
-                double gapW1 = gap1 * w1;
+                double gapW1 = gap1 * FlowOffsetting.W1;
 
                 // direction of control point movement
                 double dirX1 = ptOnOffsetCurve1.x - ptOnOriginalCurve1.x;
                 double dirY1 = ptOnOffsetCurve1.y - ptOnOriginalCurve1.y;
                 double dCtrl1 = Math.sqrt(dirX1 * dirX1 + dirY1 * dirY1);
-                if (dCtrl1 > 0) { // FIXME test not needed
+                if (dCtrl1 > 0d) {
                     dirX1 /= dCtrl1;
                     dirY1 /= dCtrl1;
                     moveX += dirX1 * gapW1;
                     moveY += dirY1 * gapW1;
                 }
 
-                // Move along the offset curve and find closest points on the original curve.
+                // Move along the original curve and find closest points on the offset curve.
                 // This results in a curve with approximately correct distance to the original curve,
                 // but curves tend to by curvy where the original curve is strongly bent
                 Point ptOnOriginalCurve2 = pointOnCurve(t);
                 Point ptOnOffsetCurve2 = offsetFlow.closestPointOnCurve(t, ptOnOriginalCurve2);
-                //Point ptOnOffsetCurve2 = offsetFlow.closestPointOnCurve(ptOnOriginalCurve2);
                 double curveDistance2 = ptOnOffsetCurve2.distance(ptOnOriginalCurve2);
                 double gap2 = Math.abs(offset) - curveDistance2;
-                double gapW2 = gap2 * w2;
+                double gapW2 = gap2 * FlowOffsetting.W2;
 
                 // direction of control point movement
                 double dirX2 = ptOnOffsetCurve2.x - ptOnOriginalCurve2.x;
@@ -1296,9 +1232,10 @@ public class Flow implements Comparable<Flow> {
                     moveY += dirY2 * gapW2;
                 }
             }
+
             // move control point
-            moveX /= nbrTSamples;
-            moveY /= nbrTSamples;
+            moveX /= FlowOffsetting.NBR_SAMPLES;
+            moveY /= FlowOffsetting.NBR_SAMPLES;
             ctrlPtX += moveX;
             ctrlPtY += moveY;
         }
@@ -1524,14 +1461,14 @@ public class Flow implements Comparable<Flow> {
      *
      * This is a more efficient form of pointOnCurve(t).distanceSquare(x, y);
      *
-     * @param t curve parameter. Should be between 0 and 1, but no check is
-     * made.
      * @param x point x
      * @param y point y
+     * @param t curve parameter. Should be between 0 and 1, but no check is
+     * made to enforce t is inside this range.
      * @return square value of distance between the point x/y and the point at
      * parameter t on the curve.
      */
-    public double distanceSquare(double x, double y, double t) {
+    public double distanceSquareToPointOnCurve(double x, double y, double t) {
         double w3 = t * t;
         double _1_t = 1 - t;
         double w2 = 2 * _1_t * t;
@@ -1544,34 +1481,17 @@ public class Flow implements Comparable<Flow> {
     }
 
     /**
-     * Returns the shortest distance between the point x/y and this curve.
-     * Stores the closest point in the passed xy array.
+     * Returns the square of the shortest distance between the point x/y and
+     * this curve. Stores the closest point on this curve in the passed xy
+     * array.
      *
-     * @param xy point x/y. The closest point on this curve is stored in this
-     * parameter.
-     * @return the shortest distance
+     * @param xy on input: point x/y to search closest point on curve for; on
+     * output: the closest point on this curve.
+     * @return the square of the shortest distance
      */
     public double distanceSquare(double[] xy) {
-
         double x = xy[0];
         double y = xy[1];
-
-        if (beyondStartButtCap(x, y)) {
-            double dx = x - startPt.x;
-            double dy = y - startPt.y;
-            xy[0] = startPt.x;
-            xy[1] = startPt.y;
-            return dx * dx + dy * dy;
-        }
-
-        if (beyondEndButtCap(x, y)) {
-            double dx = x - endPt.x;
-            double dy = y - endPt.y;
-            xy[0] = endPt.x;
-            xy[1] = endPt.y;
-            return dx * dx + dy * dy;
-        }
-
         double t = closestT(x, y);
 
         // compute point on curve
@@ -1598,20 +1518,8 @@ public class Flow implements Comparable<Flow> {
      * @return the shortest distance
      */
     public double distanceSquare(double x, double y) {
-
-        if (beyondStartButtCap(x, y)) {
-            double dx = x - startPt.x;
-            double dy = y - startPt.y;
-            return dx * dx + dy * dy;
-        }
-
-        if (beyondEndButtCap(x, y)) {
-            double dx = x - endPt.x;
-            double dy = y - endPt.y;
-            return dx * dx + dy * dy;
-        }
-
-        return distanceSquare(x, y, closestT(x, y));
+        double t = closestT(x, y);
+        return distanceSquareToPointOnCurve(x, y, t);
     }
 
     /**
@@ -1627,7 +1535,7 @@ public class Flow implements Comparable<Flow> {
     public boolean isPointCloserThan(double x, double y, double minDist) {
         double minDistSq = minDist * minDist;
 
-        // x/y must be within the buffered triangle. The buffer distance is minDist.
+        // x/y must be within a buffered triangle. The buffer distance is minDist.
         // Test whether x/y is within the triangle formed by start, control and end points.
         // If outside, test whether x/y is closer than minDist to any of the 
         // three sides of this triangle.
@@ -1642,7 +1550,7 @@ public class Flow implements Comparable<Flow> {
         // x/y is outside of buffered triangle
         return false;
     }
-    
+
     /**
      * First order derivative of squared distance between point x/y and the
      * point on the curve at parameter t. This is for Newton optimization with
@@ -1813,7 +1721,7 @@ public class Flow implements Comparable<Flow> {
         UnivariateFunction fct = new UnivariateFunction() {
             @Override
             public double value(double d) {
-                return distanceSquare(x, y, d);
+                return distanceSquareToPointOnCurve(x, y, d);
             }
         };
         UnivariateOptimizer optimizer = new BrentOptimizer(REL, ABS);
@@ -1865,10 +1773,10 @@ public class Flow implements Comparable<Flow> {
      */
     private double closestTApproximation(double x, double y) {
         double closestT = 0;
-        double minDistSqr = distanceSquare(x, y, closestT);
+        double minDistSqr = distanceSquareToPointOnCurve(x, y, closestT);
         for (int i = 1; i < N; i++) {
             double t = i / (N - 1d);
-            double distSqr = distanceSquare(x, y, t);
+            double distSqr = distanceSquareToPointOnCurve(x, y, t);
             if (distSqr < minDistSqr) {
                 minDistSqr = distSqr;
                 closestT = t;
@@ -1888,56 +1796,82 @@ public class Flow implements Comparable<Flow> {
     private Point closestPointOnCurve(double t, Point pt) {
         return pointOnCurve(closestT(pt.x, pt.y, t));
     }
-    
+
     /**
-     * Test whether x/y is beyond the start butt cap line.
+     * Test whether x/y is inside a band that starts at the start of the flow,
+     * has a specified width, is oriented along the start slope of the flow, and
+     * points away from the flow. The band can be thought of as a start cap
+     * rectangle with infinite length.
      *
      * @param x point x
      * @param y point y
-     * @return true if beyond start butt cap, false otherwise
+     * @param halfFlowWidth half width of flow in world units
+     * @return true if x/y is inside the band, false otherwise
      */
-    private boolean beyondStartButtCap(double x, double y) {
+    private boolean inStartCapBand(double x, double y, double halfFlowWidth) {
         // test whether x/y is to the left of the start butt cap line
         // compute unnormalized normal nx/ny at start (t = 0)
-        double dx = cPtX - startPt.x;
-        double dy = cPtY - startPt.y;
-        double nx = -dy;
-        double ny = dx;
+        double nx = -(cPtY - startPt.y);
+        double ny = cPtX - startPt.x;
+        double dx = x - startPt.x;
+        double dy = y - startPt.y;
+
         // startPt and startPt + nx/ny define a line along the butt cap
         // test whether the point is on the left of this line (when viewing from start point along normal)
         // this is a simplified version of:
         // leftOfButtCapLine = GeometryUtils.isOnLeftSide(x, y, startX, startY, startX + nx, startY + ny);
-        return nx * (y - startPt.y) - ny * (x - startPt.x) > 0d;
+        boolean leftOfButtCapLine = nx * dy - ny * dx > 0d;
+        if (leftOfButtCapLine) {
+            // compute length of orthogonal projection of x/y onto butt cap line
+            // and compare to the line width.            
+            double nL = Math.sqrt(nx * nx + ny * ny);
+            double projectedDist = Math.abs(dx * nx + dy * ny) / nL;
+            return projectedDist < halfFlowWidth;
+        }
+        return false;
     }
 
     /**
-     * Test whether x/y is beyond the end butt cap line.
+     * Test whether x/y is inside a band that starts at the end of the flow, has
+     * a specified width, is oriented along the end slope of the flow, and
+     * points away from the flow. The band can be thought of as an end cap
+     * rectangle with infinite length.
      *
      * @param x point x
      * @param y point y
-     * @return true if beyond end butt cap, false otherwise
+     * @param halfFlowWidth half width of flow in world units
+     * @return true if x/y is inside the band, false otherwise
      */
-    private boolean beyondEndButtCap(double x, double y) {
+    private boolean inEndCapBand(double x, double y, double halfFlowWidth) {
         // compute unnormalized normal nx/ny at end (t = 0)
-        double dx = cPtX - endPt.x;
-        double dy = cPtY - endPt.y;
-        double nx = -dy;
-        double ny = dx;
-        // endPt and endPt + nx/ny define a line along the end butt cap
+        double nx = -(cPtY - endPt.y);
+        double ny = cPtX - endPt.x;
+        double dx = x - endPt.x;
+        double dy = y - endPt.y;
+
+        // endPt and nx/ny define a line along the end butt cap
         // test whether the point is on the left of this line (when viewing from end point along normal)
-        return nx * (y - endPt.y) - ny * (x - endPt.x) > 0d;
+        boolean leftOfButtCapLine = nx * dy - ny * dx > 0d;
+        if (leftOfButtCapLine) {
+            // compute length of orthogonal projection of x/y onto butt cap line
+            // and compare to the line width.            
+            double nL = Math.sqrt(nx * nx + ny * ny);
+            double projectedDist = Math.abs(dx * nx + dy * ny) / nL;
+            return projectedDist < halfFlowWidth;
+        }
+        return false;
     }
 
     /**
-     * Tests whether a point is beyond the start or end butt cap lines. These
-     * are the lines that terminate the flow bands.
+     * Tests whether a point is inside the start or end cap bands.
      *
      * @param x point x
      * @param y point y
-     * @return true if beyond butt caps, false otherwise
+     * @param halfFlowWidth half width of flow in world units
+     * @return true if x/y is inside bands, false otherwise
      */
-    private boolean beyondButtCaps(double x, double y) {
-        return beyondStartButtCap(x, y) || beyondEndButtCap(x, y);
+    private boolean inCapBands(double x, double y, double halfFlowWidth) {
+        return inStartCapBand(x, y, halfFlowWidth) || inEndCapBand(x, y, halfFlowWidth);
     }
 
     /**
@@ -2037,11 +1971,11 @@ public class Flow implements Comparable<Flow> {
 
                 // No rectangle-flow inersection found. Now test whether the start 
                 // point or the end point of the cross section overlap the flow
-                if (clippedFlow.beyondButtCaps(p1x, p1y) == false
+                if (clippedFlow.inCapBands(p1x, p1y, hw) == false
                         && clippedFlow.isPointCloserThan(p1x, p1y, hw)) {
                     return true;
                 }
-                if (clippedFlow.beyondButtCaps(p2x, p2y) == false
+                if (clippedFlow.inCapBands(p2x, p2y, hw) == false
                         && clippedFlow.isPointCloserThan(p2x, p2y, hw)) {
                     return true;
                 }
@@ -2470,7 +2404,8 @@ public class Flow implements Comparable<Flow> {
 
         int nbrIterations = (int) (model.getMaxShorteningPx() / RAD_INC_PX);
         ArrayList<Boolean> candidates = null;
-        if (model.isDrawArrowheads() == false) {
+        final boolean drawArrowheads = model.isDrawArrowheads();
+        if (drawArrowheads == false) {
             candidates = new ArrayList<>(nbrIterations);
         }
 
@@ -2496,23 +2431,23 @@ public class Flow implements Comparable<Flow> {
             // when arrowheads are drawn, make sure the arrowhead with the
             // current value of endShorteningToAvoidOverlaps does not overlap 
             // any other flow or arrowhead
-            if (model.isDrawArrowheads()) {
-                Arrow arrow = getArrow(model, clipRadius);
-                if (model.arrowOverlapsAnyFlow(arrow) == false
-                        && model.arrowOverlapsAnyArrow(arrow, this) == false) {
-                    break;
-                }
-            } else {
+            if (drawArrowheads == false) {
                 // when arrowheads are not drawn, test whether the current end
                 // of the flow overlaps any other flow
                 candidates.add(isOverlappingAnyFlowAtPoint(t, model));
-
+                
                 // if the n last tests did not find any overlap, we have a good value 
                 // for endShorteningToAvoidOverlaps.
                 int n = model.consecutivePixelsWithoutOverlapToShortenFlow;
                 if (lastPositionsOverlap(candidates, n) == false) {
                     // no overlap found with last n tests. Return the first of the n values.
                     endShorteningToAvoidOverlaps = (candidates.size() - n) * radiusIncrement;
+                    break;
+                }
+            } else {
+                Arrow arrow = getArrow(model, clipRadius);
+                if (model.arrowOverlapsAnyFlow(arrow) == false
+                        && model.arrowOverlapsAnyArrow(arrow, this) == false) {
                     break;
                 }
             }
@@ -2706,7 +2641,7 @@ public class Flow implements Comparable<Flow> {
         double nx = y1 - y2;
         double ny = x2 - x1;
 
-        // Determine new c coefficient fr normal form of line
+        // Determine new c coefficient for normal form of line
         double cl = x1 * y2 - x2 * y1;
 
         // Transform cubic coefficients to line's coordinate system and find roots
@@ -2763,10 +2698,6 @@ public class Flow implements Comparable<Flow> {
      * @return true if the flow overlaps a node
      */
     public boolean isOverlappingObstacle(Obstacle obstacle, Model model, int minObstaclesDistPx) {
-
-//        if (getValue() == 18943 && obstacle.node != null && obstacle.node.getValue() == 369675) {
-//            System.out.println("problem");
-//        }
         // ignore obstacles that are start or end nodes of the flow
         if (obstacle.node == getStartPt() || obstacle.node == getEndPt()) {
             return false;
@@ -2824,21 +2755,21 @@ public class Flow implements Comparable<Flow> {
 
         double x = arrow.getTipPt().x;
         double y = arrow.getTipPt().y;
-        if (clippedFlow.beyondStartButtCap(x, y) == false
+        if (clippedFlow.inStartCapBand(x, y, flowWidth) == false
                 && clippedFlow.isPointCloserThan(x, y, minDist)) {
             return true;
         }
 
         x = arrow.getCorner1Pt().x;
         y = arrow.getCorner1Pt().y;
-        if (clippedFlow.beyondStartButtCap(x, y) == false
+        if (clippedFlow.inStartCapBand(x, y, flowWidth) == false
                 && clippedFlow.isPointCloserThan(x, y, minDist)) {
             return true;
         }
 
         x = arrow.getCorner2Pt().x;
         y = arrow.getCorner2Pt().y;
-        return (clippedFlow.beyondStartButtCap(x, y) == false
+        return (clippedFlow.inStartCapBand(x, y, flowWidth) == false
                 && clippedFlow.isPointCloserThan(x, y, minDist));
     }
 
@@ -2916,10 +2847,11 @@ public class Flow implements Comparable<Flow> {
      * @param tolerance the point x/y can miss the flow line by this much and
      * will still be considered on the line.
      * @param model model with all flows
+     * @param clipNodes if true nodes are clipped off this flow before hit
+     * testing
      * @return true if the flow line is hit, false otherwise.
      */
-    public boolean hit(double x, double y, double tolerance, Model model) {
-        // flow width
+    public boolean hit(double x, double y, double tolerance, Model model, boolean clipNodes) {
         double flowWidth = model.getFlowWidthPx(this) / model.getReferenceMapScale();
 
         // maximum distance between center line of flow and point x/y
@@ -2934,23 +2866,28 @@ public class Flow implements Comparable<Flow> {
         }
 
         // test with flow line without arrowhead
-        Flow clipppedFlow = model.clipFlow(this, true, true, true);
+        Flow clipppedFlow = model.clipFlow(this,
+                /* clipArrowhead */ true,
+                /* forceClipNodes */ clipNodes,
+                /* adjustLengthToReduceOverlaps*/ true);
 
-        // test whether x/y is to the left of the start butt cap line.
-        if (clipppedFlow.beyondStartButtCap(x, y)) {
+        // test whether x/y is inside the start cap band
+        if (clipppedFlow.inStartCapBand(x, y, maxDist)) {
+            // could compute the scalar rejection (the complement to the orthogonal projection) and compare to tolerance parameter
             return false;
         }
 
         // test whether x/y is to the left of the end butt cap line if there is no arrowhead
-        if (model.isDrawArrowheads() == false) {
-            if (clipppedFlow.beyondEndButtCap(x, y)) {
-                return false;
-            }
-        } else {
+        if (model.isDrawArrowheads()) {
             // test with arrowhead
             Arrow arrow = getArrow(model);
             if (arrow.hit(x, y)) {
                 return true;
+            }
+        } else {
+            if (clipppedFlow.inEndCapBand(x, y, maxDist)) {
+                // could compute the scalar rejection (the complement to the orthogonal projection) and compare to tolerance parameter
+                return false;
             }
         }
 

@@ -222,12 +222,14 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
      */
     private boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
 
+        FloxMapComponent floxMap = (FloxMapComponent) mapComponent;
+        
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
 
         // Select Control Point
-        if (((FloxMapComponent) mapComponent).isDrawFlows()) {
+        if (floxMap.isDrawFlows()) {
             if (model.isFlowSelected()) {
                 // Iterate througth the flows, checking to see if it is selected.
                 Iterator<Flow> iterator = model.flowIterator();
@@ -251,7 +253,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
                             flow.setControlPointSelected(true);
                             // Lock the flow
                             flow.setLocked(true);
-                            ((FloxMapComponent) mapComponent).getMainWindow().updateLockUnlockButtonIcon();
+                            floxMap.getMainWindow().updateLockUnlockButtonIcon();
                             controlPtGotSelected = true;
                             mapComponent.refreshMap();
                             // A control point was selected, so exit the method to 
@@ -266,11 +268,12 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         }
 
         // SELECT NODES
-        // Get clicked nodes
         ArrayList<Point> nodes = model.getNodes();
         int tolPx = SelectionTool.CLICK_PIXEL_TOLERANCE;
-        FloxMapComponent map = (FloxMapComponent) mapComponent;
-        Point clickedNode = map.getClickedNode(nodes, point, tolPx);
+        Point clickedNode = null;
+        if (floxMap.isDrawNodes()) {
+            floxMap.getClickedNode(nodes, point, tolPx);
+        }
 
         // If a node was clicked, select it. If it was already selected,
         // deselect it if shift is held down. Deselect all other nodes unless
@@ -308,17 +311,16 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         }
 
         // SELECT FLOWS
-        if (((FloxMapComponent) mapComponent).isDrawFlows()) {
-
-            Iterator<Flow> flows = model.flowIterator();
-
+        if (floxMap.isDrawFlows()) {
             // The distance tolerance the click needs to be within the flow in order
             // to be selected, scaled to the current map scale.
-            double toleranceWorld = pixelTolerance / mapComponent.getScale();
-
+            double tolWorld = pixelTolerance / mapComponent.getScale();
+            
+            Iterator<Flow> flows = model.flowIterator();
             while (flows.hasNext()) {
                 Flow flow = flows.next();
-                boolean hit = flow.hit(point.x, point.y, toleranceWorld, model);
+                boolean clipNodes = floxMap.isDrawNodes();
+                boolean hit = flow.hit(point.x, point.y, tolWorld, model, clipNodes);
                 if (hit) {
                     if (shiftDown) {
                         flow.setSelected(!flow.isSelected());

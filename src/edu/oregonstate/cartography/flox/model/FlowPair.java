@@ -147,14 +147,14 @@ public class FlowPair extends Flow {
 
     public Flow cachedOffsetFlow1(Model model) {
         if (cachedOffsetFlow1 == null) {
-            cachedOffsetFlow1 = createOffsetFlow1(model, Flow.FlowOffsettingQuality.LOW);
+            cachedOffsetFlow1 = createOffsetFlow1(model, Flow.FlowOffsetting.LOW_QUALITY);
         }
         return cachedOffsetFlow1;
     }
 
     public Flow cachedOffsetFlow2(Model model) {
         if (cachedOffsetFlow2 == null) {
-            cachedOffsetFlow2 = createOffsetFlow2(model, Flow.FlowOffsettingQuality.LOW);
+            cachedOffsetFlow2 = createOffsetFlow2(model, Flow.FlowOffsetting.LOW_QUALITY);
         }
         return cachedOffsetFlow2;
     }
@@ -273,9 +273,10 @@ public class FlowPair extends Flow {
      * have been moved to create a nice parallel line.</STRONG>
      *
      * @param model data model
+     * @param quality quality setting for offsetting flow.
      * @return a new flow
      */
-    public Flow createOffsetFlow1(Model model, Flow.FlowOffsettingQuality quality) {
+    public Flow createOffsetFlow1(Model model, Flow.FlowOffsetting quality) {
         Flow flow = new Flow(this);
         flow.setValue(getValue1());
         flow.offsetFlow(offset(model, true), model, quality);
@@ -290,9 +291,10 @@ public class FlowPair extends Flow {
      * have been moved to create a nice parallel line.</STRONG>
      *
      * @param model data model
+     * @param quality quality setting for offsetting flow.
      * @return a new flow
      */
-    public Flow createOffsetFlow2(Model model, Flow.FlowOffsettingQuality quality) {
+    public Flow createOffsetFlow2(Model model, Flow.FlowOffsetting quality) {
         Flow flow = new Flow(this);
         flow.setValue(getValue2());
         flow.reverseFlow();
@@ -348,12 +350,12 @@ public class FlowPair extends Flow {
      */
     @Override
     public boolean isOverlappingArrow(Arrow arrow, Model model) {
-        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        Flow flow1 = createOffsetFlow1(model, FlowOffsetting.HIGH_QUALITY);
         if (flow1.isOverlappingArrow(arrow, model)) {
             return true;
         }
 
-        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        Flow flow2 = createOffsetFlow2(model, FlowOffsetting.HIGH_QUALITY);
         return flow2.isOverlappingArrow(arrow, model);
     }
 
@@ -370,12 +372,12 @@ public class FlowPair extends Flow {
      */
     @Override
     public boolean isArrowOverlappingArrow(Arrow arrow, Model model) {
-        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        Flow flow1 = createOffsetFlow1(model, FlowOffsetting.HIGH_QUALITY);
         if (flow1.isArrowOverlappingArrow(arrow, model)) {
             return true;
         }
 
-        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        Flow flow2 = createOffsetFlow2(model, FlowOffsetting.HIGH_QUALITY);
         return flow2.isArrowOverlappingArrow(arrow, model);
     }
 
@@ -401,25 +403,26 @@ public class FlowPair extends Flow {
     }
 
     /**
-     * Returns whether the passed point is on this flow line (without the
-     * arrowhead)
+     * Test whether the passed point hits this flow line or the arrowhead.
      *
      * @param x x coordinate
      * @param y y coordinate
      * @param tolerance the point x/y can miss the flow line by this much and
      * will still be considered on the line.
      * @param model model with all flows
+     * @param clipNodes if true nodes are clipped off this flow before hit
+     * testing
      * @return true if the flow line is hit, false otherwise.
      */
     @Override
-    public boolean hit(double x, double y, double tolerance, Model model) {
-        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
-        if (flow1.hit(x, y, tolerance, model)) {
+    public boolean hit(double x, double y, double tolerance, Model model, boolean clipNodes) {
+        Flow flow1 = createOffsetFlow1(model, FlowOffsetting.HIGH_QUALITY);
+        if (flow1.hit(x, y, tolerance, model, clipNodes)) {
             return true;
         }
 
-        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
-        return flow2.hit(x, y, tolerance, model);
+        Flow flow2 = createOffsetFlow2(model, FlowOffsetting.HIGH_QUALITY);
+        return flow2.hit(x, y, tolerance, model, clipNodes);
     }
 
     /**
@@ -435,9 +438,9 @@ public class FlowPair extends Flow {
      */
     @Override
     public double flowTrunkToFlowRatio(Model model) {
-        Flow flow1 = createOffsetFlow1(model, FlowOffsettingQuality.HIGH);
+        Flow flow1 = createOffsetFlow1(model, FlowOffsetting.HIGH_QUALITY);
         double r1 = flow1.flowTrunkToFlowRatio(model);
-        Flow flow2 = createOffsetFlow2(model, FlowOffsettingQuality.HIGH);
+        Flow flow2 = createOffsetFlow2(model, FlowOffsetting.HIGH_QUALITY);
         double r2 = flow2.flowTrunkToFlowRatio(model);
         return Math.max(r1, r2);
     }
@@ -453,7 +456,7 @@ public class FlowPair extends Flow {
     }
 
     @Override
-    public void offsetFlow(double offset, Model model, FlowOffsettingQuality quality) {
+    public void offsetFlow(double offset, Model model, FlowOffsetting quality) {
         throw new UnsupportedOperationException();
     }
 
