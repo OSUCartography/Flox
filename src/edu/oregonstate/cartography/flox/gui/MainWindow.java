@@ -4838,11 +4838,13 @@ public class MainWindow extends javax.swing.JFrame {
                 }
                 Flow offsetFlow = flows.get(i).copyFlow();
                 offsetFlow.setSelected(false);
-                offsetFlow.offsetFlow(flowOffset * j, model, Flow.FlowOffsettingQuality.HIGH);
+                offsetFlow.offsetFlow(flowOffset * j, model, Flow.FlowOffsetting.HIGH_QUALITY);
                 offsetFlow.setLocked(true);
                 model.addFlow(offsetFlow);
             }
         }
+
+        addUndo("Test Flow Offsetting");
     }//GEN-LAST:event_testCurveOffsettingMenuItemActionPerformed
 
     private void parallelFlowsGapSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_parallelFlowsGapSpinnerStateChanged
@@ -5088,6 +5090,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_arrowheadShapeOptionsButtonActionPerformed
 
     private void maximumFlowWidthFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maximumFlowWidthFormattedTextFieldPropertyChange
+        boolean initialUpdatingGUI = updatingGUI;
         if (updatingGUI == false && "value".equals(evt.getPropertyName())) {
             double v = ((Number) maximumFlowWidthFormattedTextField.getValue()).doubleValue();
             try {
@@ -5096,13 +5099,18 @@ public class MainWindow extends javax.swing.JFrame {
                 model.setMaxFlowStrokeWidthPixel(v);
                 mapComponent.refreshMap();
             } finally {
-                updatingGUI = false;
-                layout("Flow Width");
+                updatingGUI = initialUpdatingGUI;
+                // do not compute layout while user is dragging the slider (and 
+                // this text field is updated to reflect the slider value)
+                if (maximumFlowWidthSlider.getValueIsAdjusting() == false) {
+                    layout("Flow Width");
+                }
             }
         }
     }//GEN-LAST:event_maximumFlowWidthFormattedTextFieldPropertyChange
 
     private void maximumNodeSizeFormattedTextFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maximumNodeSizeFormattedTextFieldPropertyChange
+        boolean initialUpdatingGUI = updatingGUI;
         if (updatingGUI == false && "value".equals(evt.getPropertyName())) {
             double v = ((Number) maximumNodeSizeFormattedTextField.getValue()).doubleValue();
             try {
@@ -5111,8 +5119,12 @@ public class MainWindow extends javax.swing.JFrame {
                 model.setMaxNodeSizePx(v);
                 mapComponent.refreshMap();
             } finally {
-                updatingGUI = false;
-                layout("Node Size");
+                updatingGUI = initialUpdatingGUI;
+                // do not compute layout while user is dragging the slider (and 
+                // this text field is updated to reflect the slider value)
+                if (maximumNodeSizeSlider.getValueIsAdjusting() == false) {
+                    layout("Node Size");
+                }
             }
         }
     }//GEN-LAST:event_maximumNodeSizeFormattedTextFieldPropertyChange
@@ -5157,8 +5169,8 @@ public class MainWindow extends javax.swing.JFrame {
             addUndo(undoString);
         }
 
-        // If there are is only one flow, make it streight and adjust its 
-        // shortening (if it is a FlowPair arrowheads could overlap peer flows)
+        // If there are is only one flow, make it straight and adjust its 
+        // shortening (if it is a FlowPair, arrowheads could overlap peer flows)
         if (model.getNbrFlows() <= 1) {
             model.straightenFlows(false);
             model.shortenFlowsToReduceOverlaps();
