@@ -223,45 +223,42 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
     private boolean selectByPoint(Point2D.Double point, boolean shiftDown, int pixelTolerance) {
 
         FloxMapComponent floxMap = (FloxMapComponent) mapComponent;
-        
+
         boolean nodeGotSelected = false;
         boolean flowGotSelected = false;
         boolean controlPtGotSelected = false;
 
         // Select Control Point
         if (floxMap.isDrawFlows()) {
-            if (model.isFlowSelected()) {
-                // Iterate througth the flows, checking to see if it is selected.
-                Iterator<Flow> iterator = model.flowIterator();
-                while (iterator.hasNext()) {
-                    Flow flow = iterator.next();
-                    if (flow.isSelected()) {
-                        // If a control point already got selected, exit the loop
-                        if (controlPtGotSelected) {
-                            flow.setControlPointSelected(false);
-                            continue;
-                        }
+            Iterator<Flow> iterator = model.flowIterator();
+            while (iterator.hasNext()) {
+                Flow flow = iterator.next();
+                if (flow.isSelected()) {
+                    // If a control point already got selected, exit the loop
+                    if (controlPtGotSelected) {
+                        flow.setControlPointSelected(false);
+                        continue;
+                    }
 
-                        // See if the event point is near the control point.
-                        double cPtx = flow.cPtX();
-                        double cPty = flow.cPtY();
+                    // See if the event point is near the control point.
+                    double cPtx = flow.cPtX();
+                    double cPty = flow.cPtY();
 
-                        if (((mapComponent.xToPx(cPtx) >= mapComponent.xToPx(point.x) - 5)
-                                && (mapComponent.xToPx(cPtx) <= mapComponent.xToPx(point.x) + 5))
-                                && ((mapComponent.yToPx(cPty) >= mapComponent.yToPx(point.y) - 5)
-                                && (mapComponent.yToPx(cPty) <= mapComponent.yToPx(point.y) + 5))) {
-                            flow.setControlPointSelected(true);
-                            // Lock the flow
-                            flow.setLocked(true);
-                            floxMap.getMainWindow().updateLockUnlockButtonIcon();
-                            controlPtGotSelected = true;
-                            mapComponent.refreshMap();
-                            // A control point was selected, so exit the method to 
-                            // avoid deselecting flows
-                            return true;
-                        } else {
-                            flow.setControlPointSelected(false);
-                        }
+                    if (((mapComponent.xToPx(cPtx) >= mapComponent.xToPx(point.x) - 5)
+                            && (mapComponent.xToPx(cPtx) <= mapComponent.xToPx(point.x) + 5))
+                            && ((mapComponent.yToPx(cPty) >= mapComponent.yToPx(point.y) - 5)
+                            && (mapComponent.yToPx(cPty) <= mapComponent.yToPx(point.y) + 5))) {
+                        flow.setControlPointSelected(true);
+                        // Lock the flow
+                        flow.setLocked(true);
+                        floxMap.getMainWindow().updateLockUnlockButtonIcon();
+                        controlPtGotSelected = true;
+                        mapComponent.refreshMap();
+                        // A control point was selected, so exit the method to 
+                        // avoid deselecting flows
+                        return true;
+                    } else {
+                        flow.setControlPointSelected(false);
                     }
                 }
             }
@@ -272,7 +269,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
         int tolPx = SelectionTool.CLICK_PIXEL_TOLERANCE;
         Point clickedNode = null;
         if (floxMap.isDrawNodes()) {
-            floxMap.getClickedNode(nodes, point, tolPx);
+            clickedNode = floxMap.getClickedNode(nodes, point, tolPx);
         }
 
         // If a node was clicked, select it. If it was already selected,
@@ -315,7 +312,7 @@ public class SelectionTool extends RectangleTool implements CombinableTool {
             // The distance tolerance the click needs to be within the flow in order
             // to be selected, scaled to the current map scale.
             double tolWorld = pixelTolerance / mapComponent.getScale();
-            
+
             Iterator<Flow> flows = model.flowIterator();
             while (flows.hasNext()) {
                 Flow flow = flows.next();
