@@ -1010,9 +1010,6 @@ public class ForceLayouter {
             // increment rotation angle, such that the next point on the spiral 
             // has an approximate distance of searchIncrement to the current point
             angleRad += searchIncrement / spiralR;
-//            if (flow.getValue() == 18943 && angleRad > 171.4024262947769) {
-//                System.out.println("problem");
-//            }
 
             /// test whether new control point position is within rangebox and 
             // does not result in a flow that is too close ot other flows or obstacles
@@ -1105,6 +1102,14 @@ public class ForceLayouter {
         double maxSpiralRadiusSquare = rangeBoxEnforcer.longestDistanceSqToCorner(
                 rangeBox, originalX, originalY);
         double spiralR;
+        
+        ArrayList<Obstacle> nodeObstacles = new ArrayList<>();
+        for (Obstacle obstacle : obstacles) {
+            if (obstacle.isNode()) {
+                nodeObstacles.add(obstacle);
+            }
+        }
+        
         do {
             // radius of spiral for the current angle.
             // The distance between two windings is searchIncrement.
@@ -1119,6 +1124,11 @@ public class ForceLayouter {
 
             if (rangeBoxEnforcer.isPointInRangebox(flow, cPtX, cPtY) == false) {
                 continue;
+            }
+            
+            if (flowIntersectsObstacles(flow, nodeObstacles, minObstacleDistPx)) {
+                continue;
+                
             }
             flow.setCtrlPt(cPtX, cPtY);
 
@@ -1165,9 +1175,6 @@ public class ForceLayouter {
 
         flow.setCtrlPt(minNbrOverlapsX, minNbrOverlapsY);
 
-        if (flow.getValue() == 18943) {
-            System.out.println("problem");
-        }
         return minIntersectionIndex;
     }
 

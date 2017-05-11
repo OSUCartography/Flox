@@ -47,7 +47,6 @@ public class Flox {
                 window.setLocation((int) screen.getMinX(), (int) screen.getMinY());
                 window.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
                 window.setVisible(true);
-                window.openComputationPalette();
                 loadTestData(window);
 
                 window.addWindowListener(new WindowAdapter() {
@@ -66,7 +65,10 @@ public class Flox {
         //window.testOffsetting();
         //window.openXMLFile("/Users/jennyb/Dropbox/Flow Maps/Data/Flox Data/_Swiss_migration/swiss_flows_and_nodes.xml");
         //window.openXMLFile("/Users/jennyb/Desktop/CH Flows no arrows 5.xml");
-        //window.openXMLFile("/Users/jennyb/Desktop/Geneva.xml");
+        //window.openXMLFile("/Users/jennyb/Desktop/US total flows.xml");
+        //window.openXMLFile("/Users/jennyb/Desktop/US commodities.xml");
         //window.layout("Test Layout");
+        //window.openXMLFile("/Users/jennyb/Desktop/2 parallel flows.xml");
+        //window.openXMLFile("/Users/jennyb/Desktop/problem 2.xml");
     }
 }

@@ -44,6 +44,15 @@ public final class Obstacle extends Circle {
     }
 
     /**
+     * Returns whether this obstacle is a node.
+     *
+     * @return true if a node.
+     */
+    public boolean isNode() {
+        return node != null;
+    }
+    
+    /**
      * Returns whether this obstacle is the arrowhead for the passed flow.
      *
      * @param flow flow with an arrowhead

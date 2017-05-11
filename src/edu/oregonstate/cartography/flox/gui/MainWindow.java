@@ -2889,7 +2889,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         editMenu.add(invertFlowSelectionMenuItem);
 
-        selectOverlappingFlowsInfoMenuItem.setText("Select Flows Overlapping Obstacles");
+        selectOverlappingFlowsInfoMenuItem.setText("Select Flows Overlapping Nodes");
         selectOverlappingFlowsInfoMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectOverlappingFlowsInfoMenuItemActionPerformed(evt);
