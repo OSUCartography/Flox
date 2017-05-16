@@ -262,7 +262,7 @@ public class ForceLayouter {
             Force angularDistForce = angularDistForces.get(i);
             flow.offsetCtrlPt(weight * f.fx, weight * f.fy);
             dx += angularDistWeight * angularDistForce.fx;
-            dx += angularDistWeight * angularDistForce.fy;
+            dy += angularDistWeight * angularDistForce.fy;
 
             // move control point
             flow.offsetCtrlPt(dx, dy);
