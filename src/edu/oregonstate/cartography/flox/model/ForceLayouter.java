@@ -1247,13 +1247,14 @@ public class ForceLayouter {
                 moveFlowAwayFromObstacles(flow, obstacles);
                 // lock the flow no matter whether it was moved or not
                 flow.setLocked(true);
+                nbrMovedFlows += 1;
             }
 
             if (isCancelled()) {
                 return 0;
             }
         }
-
+        
         // return initial number of flows overlapping obstacles
         return overlappingFlows.size() - nbrMovedFlows;
     }
