@@ -2,6 +2,7 @@ package edu.oregonstate.cartography.flox.model;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -13,44 +14,58 @@ public class CSVFlowExporter {
     private CSVFlowExporter() {
     }
 
-    public static String exportToString(Iterator flows) {
+    public static String exportToString(Iterator flowsToExport) {
         StringBuilder str = new StringBuilder();
 
         // Get a flow iterator
-        while (flows.hasNext()) {
-            Flow flow = (Flow) flows.next();
-
-            str.append(flow.getStartPt().x);
-            str.append(",");
-            str.append(flow.getStartPt().y);
-            str.append(",");
-
-            str.append(flow.getEndPt().x);
-            str.append(",");
-            str.append(flow.getEndPt().y);
-            str.append(",");
-
-            str.append(flow.getValue());
-            str.append(",");
+        while (flowsToExport.hasNext()) {
             
-            str.append(flow.getStartPt().getValue());
-            str.append(",");
+            ArrayList<Flow> flows = new ArrayList<>();
+            Flow f = (Flow) flowsToExport.next();
             
-            str.append(flow.getEndPt().getValue());
-            str.append(",");
-            
-            str.append(flow.cPtX());
-            str.append(",");
-            str.append(flow.cPtY());
-            str.append(",");
-
-            if (flow.isLocked()) {
-                str.append(1);
+            if (f instanceof FlowPair) {
+                FlowPair biFlow = (FlowPair) f;
+                flows.add(biFlow.createFlow1());
+                flows.add(biFlow.createFlow2());
             } else {
-                str.append(0);
+                flows.add(f);
             }
+            
+            for (Flow flow : flows) {
+                str.append(flow.getStartPt().x);
+                str.append(",");
+                str.append(flow.getStartPt().y);
+                str.append(",");
 
-            str.append("\n");
+                str.append(flow.getEndPt().x);
+                str.append(",");
+                str.append(flow.getEndPt().y);
+                str.append(",");
+
+                str.append(flow.getValue());
+                str.append(",");
+
+                str.append(flow.getStartPt().getValue());
+                str.append(",");
+
+                str.append(flow.getEndPt().getValue());
+                str.append(",");
+
+                str.append(flow.cPtX());
+                str.append(",");
+                str.append(flow.cPtY());
+                str.append(",");
+
+                if (flow.isLocked()) {
+                    str.append(1);
+                } else {
+                    str.append(0);
+                }
+
+                str.append("\n");
+            }
+            
+                
         }
 
         return str.toString();
