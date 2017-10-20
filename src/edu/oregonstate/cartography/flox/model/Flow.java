@@ -37,36 +37,37 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 public class Flow implements Comparable<Flow> {
 
     public static void main(String[] args) {
-//        double s = 1;
-//        double x = 5;
-//        double y = 5;
-//        Flow f = new Flow(new Point(0, 0), 4, 3, new Point(10, 1), 1);
 
+        // scale factor to convert to measured pixel values
         double s = 3.27243073330165E-4;
-//        double x = -1.243017509E7;
-//        double y = 4073798.185;
-//        Flow f = new Flow(new Point(-1.3267775305208415E7, 4280863.048312819), -1.0455248565283395E7, 3711098.014898037, new Point(-9120574.0692501, 3304490.196125049), 1);
 
-//        double d = f.distanceSquare(x, y);
-//        System.out.println("dist2   " + Math.sqrt(d));
-//        System.out.println("dist2px " + Math.sqrt(d) * s);
-        //-8918796.054080188
-        //        5283641.773541634
+        // compute distance to this point
         double x = -9215986.57;
         double y = 4911267.234;
-        Flow f = new Flow(new Point(-8660839.584, 4995462.189), -8927413.159855744, 5267980.063701738, new Point(-1.106156559E7, 3707818.275), 1);
-        //Flow f = new Flow(new Point(-8660839.584, 4995462.189), -9653007, 4981406, new Point(-1.106156559E7, 3707818.275), 1);
 
+        // this is a flow geometry that causes numerical instability with the Newton-Raphson method
+        Flow f = new Flow(new Point(-8660839.584, 4995462.189), -8927413.159855744, 5267980.063701738, new Point(-1.106156559E7, 3707818.275), 1);
+
+        // below is a flow geometry that does not cause any problem with the Newton-Raphson method
+        // note that the measured distance is wrong for this geometry, but the 
+        // values returned by the Newton-Rapshon and the computationally more 
+        // expensive Brent method are identical
+        // Flow f = new Flow(new Point(0, 0), 4, 3, new Point(10, 1), 1);
+        
         System.out.println("measured distance: 3.255 px");
         System.out.println("\n************************\n");
 
-        //double s = 3.27243073330165E-4;
-        double d = f.distanceSquare(x, y);
-        //System.out.println(d);
+        // test Newton-Raphson
+        double approximateT = f.closestTApproximation(x, y);
+        double tNewton = f.closestTNewton(x, y, approximateT);
+        double d = f.distanceSquareToPointOnCurve(x, y, tNewton);
         System.out.println("Newton-Raphson");
+        System.out.println(tNewton == - 1 ? "Newton-Raphson is unstable for this flow geometry" : "Newton-Rapshon stable");
         System.out.println("dist    " + Math.sqrt(d));
         System.out.println("dist px " + Math.sqrt(d) * s);
 
+        // test Brent's method
+        // Flox is using this method if Newton-Raphson fails
         double closestT = f.closestTApproximation(x, y);
         double t = f.closestTBrent(x, y, closestT).getPoint();
         System.out.println("\n************************\n");
@@ -76,6 +77,8 @@ public class Flow implements Comparable<Flow> {
         System.out.println("dist    " + d);
         System.out.println("dist px " + d * s);
 
+        // test Brent's method with a high precision implementation
+        // Flox is not using this method
         System.out.println("\n************************\n");
         System.out.println("High precision Brent - Apache Commons Math");
         double interval = 1d / N;
@@ -101,7 +104,6 @@ public class Flow implements Comparable<Flow> {
         d = Math.sqrt(f.closestTBrent(x, y, closestT).getValue());
         System.out.println("dist    " + d);
         System.out.println("dist px " + d * s);
-        //System.out.println(optimizer.getEvaluations());
     }
 
     // FIXME temporary testing
@@ -1463,8 +1465,8 @@ public class Flow implements Comparable<Flow> {
      *
      * @param x point x
      * @param y point y
-     * @param t curve parameter. Should be between 0 and 1, but no check is
-     * made to enforce t is inside this range.
+     * @param t curve parameter. Should be between 0 and 1, but no check is made
+     * to enforce t is inside this range.
      * @return square value of distance between the point x/y and the point at
      * parameter t on the curve.
      */
@@ -2435,7 +2437,7 @@ public class Flow implements Comparable<Flow> {
                 // when arrowheads are not drawn, test whether the current end
                 // of the flow overlaps any other flow
                 candidates.add(isOverlappingAnyFlowAtPoint(t, model));
-                
+
                 // if the n last tests did not find any overlap, we have a good value 
                 // for endShorteningToAvoidOverlaps.
                 int n = model.consecutivePixelsWithoutOverlapToShortenFlow;
