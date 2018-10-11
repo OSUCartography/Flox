@@ -2982,10 +2982,10 @@ public class Model {
      */
     public void shortenFlowsToReduceOverlaps() {
 
-//        if (isShortenFlowsToReduceOverlaps() == false
-//                || getMaxShorteningPx() <= 0d) {
-//            return;
-//        }
+        if (isShortenFlowsToReduceOverlaps() == false
+                || getMaxShorteningPx() <= 0d) {
+            return;
+        }
         // copy of this model, which will only contain single flows, no FlowPairs
         Model modelCopy = copy();
 
