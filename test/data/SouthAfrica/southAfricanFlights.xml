@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model>
+    <useFrictionHack>false</useFrictionHack>
+    <flowNodeDensity>MEDIUM</flowNodeDensity>
+    <graph>13
+9;32.535601394909946;-26.075382539525652;100.0
+2;21.311279725237572;-21.781229173476753;100.0
+4;16.401401323524354;-28.476624521222334;100.0
+7;28.748987195269052;-32.31997437752993;1500.0
+6;26.58330960038672;-33.51574728267969;2600.0
+3;26.522248337676775;-28.711397477100228;1600.0
+1;24.96768754187327;-28.158684667608785;500.0
+0;22.289156234337817;-28.116168297647903;100.0
+11;27.593073386957624;-31.5839097225822;100.0
+10;28.49654624862633;-25.31008788022981;10000.0
+5;19.589441565712516;-33.53770525084899;7500.0
+12;17.272224578953953;-22.33394198296819;100.0
+8;30.9199793363965;-29.73179035616135;6500.0
+4;5;16.642560390750596;-31.86389517548794;100.0;0;null;null
+5;6;23.00685537095909;-34.58712770296633;500.0;0;null;null
+5;7;24.740528968725457;-37.675095032911265;500.0;0;null;null
+8;7;29.831829208507365;-31.023872889684633;500.0;0;null;null
+8;9;32.60306833854515;-28.241488182352846;100.0;0;null;null
+10;8;30.44889678171831;-27.02152015167555;4000.0;0;null;null
+11;7;28.155370400002152;-32.02070017616111;100.0;0;null;null
+11;6;26.94376846711143;-32.55828875195539;100.0;0;null;null
+6;7;27.658515056753192;-32.995414200184186;500.0;0;null;null
+12;5;16.143103495111585;-27.916719354790537;500.0;0;null;null
+12;0;18.828020706163585;-26.031871975685494;100.0;0;null;null
+12;1;21.33286560673476;-24.703689624714592;100.0;0;null;null
+2;10;26.078156541352264;-20.62409720262475;500.0;0;null;null
+9;10;30.72465749240371;-24.766402850321306;300.0;0;null;null
+3;2;25.60327476000929;-23.68057305927662;100.0;0;null;null
+2;1;23.54760712492403;-24.90841029045118;100.0;0;null;null
+3;7;28.103512415407703;-30.2793885986114;100.0;0;null;null
+1;7;27.01584717742943;-30.093816693519443;100.0;0;null;null
+1;3;25.78258908800141;-28.243514112937557;500.0;0;null;null
+0;1;23.698732562955506;-27.977179811179155;100.0;0;null;null
+10;7;28.9327260705295;-28.931072677910688;500.0;0;null;null
+10;6;30.764072670867638;-29.75237616274838;1000.0;0;null;null
+3;10;27.692826590666293;-27.101471742477845;500.0;0;null;null
+3;8;28.85459249573355;-28.60220300464527;100.0;0;null;null
+3;6;26.120066870025884;-31.13893883612914;100.0;0;null;null
+1;6;24.495634354055497;-31.34006538942831;100.0;0;null;null
+5;10;19.742635891793135;-24.977591752492142;3000.0;0;null;null
+5;1;21.203882437373466;-30.160349843701226;250.0;0;null;null
+5;3;22.619714427916733;-30.60697305374796;400.0;0;null;null
+5;8;25.02617313133924;-30.92900886639965;750.0;0;null;null
+5;11;23.612136857422172;-33.1348148851905;100.0;0;null;null
+8;6;30.36649907779157;-33.54180156278097;577.4193548387096;0;null;null
+1;10;26.543151276741177;-26.46713017819061;300.0;0;null;null
+</graph>
+    <nodesWeight>0.1</nodesWeight>
+    <antiTorsionWeight>0.8</antiTorsionWeight>
+    <angularDistributionWeight>0.5</angularDistributionWeight>
+    <peripheralStiffnessFactor>2.13</peripheralStiffnessFactor>
+    <maxFlowLengthSpringConstant>0.03</maxFlowLengthSpringConstant>
+    <minFlowLengthSpringConstant>0.45</minFlowLengthSpringConstant>
+    <distanceWeightExponent>16</distanceWeightExponent>
+    <enforceRangebox>true</enforceRangebox>
+    <flowRangeboxHeight>0.51</flowRangeboxHeight>
+    <enforceCanvasRange>true</enforceCanvasRange>
+    <canvasPadding>0.5</canvasPadding>
+    <FLOW_COLOR>#000000</FLOW_COLOR>
+    <drawArrows>false</drawArrows>
+    <arrowLengthScaleFactor>1.6</arrowLengthScaleFactor>
+    <arrowWidthScaleFactor>0.8</arrowWidthScaleFactor>
+    <arrowEdgeCtrlLength>0.5</arrowEdgeCtrlLength>
+    <arrowEdgeCtrlWidth>0.5</arrowEdgeCtrlWidth>
+    <arrowCornerPosition>0.0</arrowCornerPosition>
+    <arrowSizeRatio>0.1</arrowSizeRatio>
+    <flowDistanceFromEndPointPx>0.0</flowDistanceFromEndPointPx>
+    <maxFlowStrokeWidthPx>44.0</maxFlowStrokeWidthPx>
+    <maxNodeSizePx>24.0</maxNodeSizePx>
+    <scaleLocked>true</scaleLocked>
+    <lockedMapScale>37.949623953436294</lockedMapScale>
+    <clipFlowEnds>false</clipFlowEnds>
+    <clipFlowStarts>false</clipFlowStarts>
+    <startClipAreaBufferDistance>0.0</startClipAreaBufferDistance>
+    <endClipAreaBufferDistance>-2.0</endClipAreaBufferDistance>
+    <moveFlowsOverlappingNodes>false</moveFlowsOverlappingNodes>
+</model>

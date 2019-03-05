@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model>
+    <useFrictionForForcesHack>true</useFrictionForForcesHack>
+    <useFrictionForAngularDistortionHack>true</useFrictionForAngularDistortionHack>
+    <liveDrawing>true</liveDrawing>
+    <flowNodeDensity>MEDIUM</flowNodeDensity>
+    <graph>22
+20;2627281.38;7634503.22;400.0
+13;874042.3478;5633105.457;1850.0
+2;1825499.943;5432759.63;250.0
+18;3228855.117;4456848.058;550.0
+0;2305438.722;5227044.749;250.0
+1;2132093.739;5710521.643;250.0
+4;-327644.3195;4764985.811;1250.0
+5;-39073.07543;6380420.086;6000.0
+17;2259008.653;6489762.922;400.0
+10;626192.9525;6454613.902;1400.0
+14;1665127.02;5702452.479;1000.0
+16;1859839.212;7551817.989;1000.0
+7;-794372.1242;6585404.251;650.0
+15;1284680.246;6920220.949;600.0
+19;-965347.0895;4660261.317;500.0
+21;2596442.416;4444592.847;550.0
+3;1598768.189;6041226.578;250.0
+8;1215755.87;7596939.319;500.0
+6;283868.1524;5784017.102;3250.0
+9;510981.368;6187970.669;1250.0
+11;1254247.345;6361339.236;5000.0
+12;1495094.939;4898669.584;2000.0
+9;10;577250.6351674327;6319978.419617784;500.0;0;null;null
+9;11;878377.0543960072;6287434.790650951;200.0;0;null;null
+9;12;1196353.9072784414;5674660.9703477435;100.0;0;null;null
+13;11;1038208.1688641295;5996316.25279476;1000.0;0;null;null
+13;14;1282537.8440801178;5663759.967498415;100.0;0;null;null
+13;12;1173610.453509196;5253187.750867451;600.0;0;null;null
+11;15;1263320.4216555855;6652819.8193328045;150.0;0;null;null
+11;16;1625028.3497652148;6945105.713670143;100.0;0;null;null
+11;17;1791367.9213110125;6471706.679492047;600.0;0;null;null
+11;18;2633220.007823429;5791295.081474855;600.0;0;null;null
+11;21;2681573.397848809;5913383.885798524;200.0;0;null;null
+11;0;2303736.642725042;6285413.825741306;100.0;0;null;null
+11;1;1749925.777000096;6104722.23230098;100.0;0;null;null
+11;2;1277227.9159677362;5712082.654728103;100.0;0;null;null
+11;3;1418478.8465155228;6179002.605366061;100.0;0;null;null
+11;12;1416346.1951771076;5628770.323196819;900.0;0;null;null
+11;14;1434489.2991444266;6008460.827024003;1000.0;0;null;null
+15;16;1584394.4391205844;7249435.015673199;200.0;0;null;null
+4;5;-303148.014158633;5582448.005415024;600.0;0;null;null
+4;6;-7219.01968980491;5241834.911416989;500.0;0;null;null
+4;11;1131265.3477667614;4893525.434129924;500.0;0;null;null
+4;12;586207.9892124233;4746486.193532218;200.0;0;null;null
+6;9;404751.8915835478;5986436.752589056;600.0;0;null;null
+6;10;206900.4985992328;6251562.693085241;300.0;0;null;null
+6;13;568124.1475596932;5684196.503147773;750.0;0;null;null
+6;11;776092.8855909449;6052398.932383093;1000.0;0;null;null
+6;12;858124.8424866139;5285118.7323913025;750.0;0;null;null
+7;5;-612617.255945519;6563978.747444495;1500.0;0;null;null
+12;14;1638979.6662695394;5289670.048216162;100.0;0;null;null
+10;11;936974.1420055314;6437221.8778784955;900.0;0;null;null
+8;16;1541673.5660012045;7650490.350740385;200.0;0;null;null
+8;15;1246601.763997211;7270934.073648198;100.0;0;null;null
+19;4;-682767.1599525814;4628399.651396436;100.0;0;null;null
+19;6;-445210.963060015;5282036.833570309;200.0;0;null;null
+16;20;2460550.152492295;7792496.089344288;300.0;0;null;null
+5;6;110630.63843371904;6074808.394182434;1250.0;0;null;null
+5;9;236793.68112495937;6281476.5699180085;200.0;0;null;null
+5;10;297535.07880853437;6409231.97281799;500.0;0;null;null
+5;13;405729.50333177426;5994268.1440154575;200.0;0;null;null
+5;11;610437.1868465865;6927573.101085019;1100.0;0;null;null
+5;8;445608.80750311917;7169965.681643489;100.0;0;null;null
+5;15;614005.8822295653;6681422.201410756;100.0;0;null;null
+5;12;6650.810901778925;4897497.601934756;600.0;0;null;null
+5;16;847030.1226237934;7079527.023625468;200.0;0;null;null
+5;21;274377.97454360593;3952194.334953767;200.0;0;null;null
+5;18;3015505.37780774;7765261.744417633;200.0;0;null;null
+</graph>
+    <nodesWeight>9.0</nodesWeight>
+    <antiTorsionWeight>0.8</antiTorsionWeight>
+    <angularDistributionWeight>0.8</angularDistributionWeight>
+    <peripheralStiffnessFactor>2.54</peripheralStiffnessFactor>
+    <maxFlowLengthSpringConstant>0.04</maxFlowLengthSpringConstant>
+    <minFlowLengthSpringConstant>0.52</minFlowLengthSpringConstant>
+    <distanceWeightExponent>4</distanceWeightExponent>
+    <enforceRangebox>true</enforceRangebox>
+    <flowRangeboxHeight>0.31</flowRangeboxHeight>
+    <enforceCanvasRange>true</enforceCanvasRange>
+    <canvasPadding>0.5</canvasPadding>
+    <FLOW_COLOR>#000000</FLOW_COLOR>
+    <drawArrows>false</drawArrows>
+    <drawInlineArrows>false</drawInlineArrows>
+    <arrowLengthScaleFactor>1.6</arrowLengthScaleFactor>
+    <arrowWidthScaleFactor>0.8</arrowWidthScaleFactor>
+    <arrowEdgeCtrlLength>0.5</arrowEdgeCtrlLength>
+    <arrowEdgeCtrlWidth>0.5</arrowEdgeCtrlWidth>
+    <arrowCornerPosition>0.0</arrowCornerPosition>
+    <arrowSizeRatio>0.1</arrowSizeRatio>
+    <arrowLengthRatio>0.0</arrowLengthRatio>
+    <flowDistanceFromEndPointPx>0.0</flowDistanceFromEndPointPx>
+    <flowDistanceFromStartPointPx>0.0</flowDistanceFromStartPointPx>
+    <maxFlowStrokeWidthPx>43.0</maxFlowStrokeWidthPx>
+    <maxNodeSizePx>52.0</maxNodeSizePx>
+    <scaleLocked>true</scaleLocked>
+    <lockedMapScale>2.8846964337336497E-4</lockedMapScale>
+    <clipFlowEnds>false</clipFlowEnds>
+    <clipFlowStarts>false</clipFlowStarts>
+    <startClipAreaBufferDistance>0.0</startClipAreaBufferDistance>
+    <endClipAreaBufferDistance>0.0</endClipAreaBufferDistance>
+    <moveFlowsOverlappingNodes>false</moveFlowsOverlappingNodes>
+    <pointArrowTowardsEndpoint>false</pointArrowTowardsEndpoint>
+</model>
