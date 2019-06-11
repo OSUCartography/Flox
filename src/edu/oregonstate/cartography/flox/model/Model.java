@@ -279,12 +279,12 @@ public class Model {
     /**
      * Weight of angular distribution force.
      */
-    private double angularDistributionWeight = 3.75;
+    private double angularDistributionWeight = 1.0;
 
     /**
      * Stiffness factor for peripheral flows.
      */
-    private double peripheralStiffnessFactor = 2.5;
+    private double peripheralStiffnessFactor = 1.0;
 
     /**
      * spring stiffness of longest flow.
