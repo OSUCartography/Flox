@@ -260,7 +260,6 @@ public class ForceLayouter {
             // distribution forces is wÕ = -weight * weight + weight.    
             double angularDistWeight = weight * (1 - weight);
             Force angularDistForce = angularDistForces.get(i);
-            //flow.offsetCtrlPt(weight * f.fx, weight * f.fy);
             dx += angularDistWeight * angularDistForce.fx;
             dy += angularDistWeight * angularDistForce.fy;
 
