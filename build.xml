@@ -82,8 +82,8 @@
                       identifier="${main.class}"
                       mainclassname="${main.class}"
                       icon="mac/icon.icns"
-                      shortversion="0.1.0"
-                      copyright="© Bernhard Jenny and Daniel Stephen"
+                      shortversion="0.1 beta"
+                      copyright="© Bernhard Jenny and Daniel Stephen, 2015–2019, MIT License"
                       applicationCategory="public.app-category.graphics-design">
             
             <classpath file="${dist.jar}" />
