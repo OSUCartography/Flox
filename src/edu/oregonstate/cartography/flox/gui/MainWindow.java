@@ -255,9 +255,9 @@ public class MainWindow extends javax.swing.JFrame {
             maxColorButton.setColor(model.getMaxFlowColor());
             minColorButton.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
             smallestFlowColorLabel.setEnabled(model.getMinFlowValue() != model.getMaxFlowValue());
-            parallelFlowsCheckBox.setSelected(model.isBidirectionalFlowsParallel());
+            //parallelFlowsCheckBox.setSelected(model.isBidirectionalFlowsParallel());
             parallelFlowsGapSpinner.setValue(model.getParallelFlowsGapPx());
-            parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
+            //parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
             parallelFlowsOverlapSlider.setValue((int) Math.round(model.getParallelFlowsOverlap() * 100));
             lineCapsButtCheckBoxMenuItem.setSelected(model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_BUTT);
             lineCapsRoundCheckBoxMenuItem.setSelected(model.getFlowCapsStyle() == java.awt.BasicStroke.CAP_ROUND);
@@ -588,6 +588,8 @@ public class MainWindow extends javax.swing.JFrame {
         zeroLengthStiffnessSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel8 = new javax.swing.JLabel();
         peripheralStiffnessSlider = new javax.swing.JSlider();
+        jPanel1 = new javax.swing.JPanel();
+        parallelFlowsCheckBox = new javax.swing.JCheckBox();
         mapContentPanel = new javax.swing.JPanel();
         javax.swing.JToolBar jToolBar1 = new javax.swing.JToolBar();
         javax.swing.JPanel toolBarContentPanel = new javax.swing.JPanel();
@@ -631,11 +633,10 @@ public class MainWindow extends javax.swing.JFrame {
         antiTorsionSlider = new javax.swing.JSlider();
         javax.swing.JLabel jLabel43 = new javax.swing.JLabel();
         javax.swing.JSeparator ___separator2 = new javax.swing.JSeparator();
-        parallelFlowsCheckBox = new javax.swing.JCheckBox();
-        javax.swing.JSeparator jSeparator33 = new javax.swing.JSeparator();
         maximumFlowWidthFormattedTextField = new javax.swing.JFormattedTextField();
         parallelFlowsOptionsButton = new javax.swing.JButton();
         stiffnessButton = new javax.swing.JButton();
+        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 20), new java.awt.Dimension(0, 20), new java.awt.Dimension(32767, 20));
         javax.swing.JPanel nodesPanel = new TransparentMacPanel();
         javax.swing.JPanel nodesContentPanel = new TransparentMacPanel();
         javax.swing.JLabel maxNodeRadiusLabel = new javax.swing.JLabel();
@@ -1424,6 +1425,14 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
         stiffnessPanel.add(peripheralStiffnessSlider, gridBagConstraints);
 
+        parallelFlowsCheckBox.setText("Parallel Opposing Flows ");
+        parallelFlowsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                parallelFlowsCheckBoxActionPerformed(evt);
+            }
+        });
+        jPanel1.add(parallelFlowsCheckBox);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
         mapContentPanel.setLayout(new java.awt.BorderLayout());
@@ -1842,27 +1851,6 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         flowsContentPanel.add(___separator2, gridBagConstraints);
 
-        parallelFlowsCheckBox.setText("Parallel Opposing Flows ");
-        parallelFlowsCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                parallelFlowsCheckBoxActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 18;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 6, 0);
-        flowsContentPanel.add(parallelFlowsCheckBox, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 20;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
-        flowsContentPanel.add(jSeparator33, gridBagConstraints);
-
         maximumFlowWidthFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
         {
             javax.swing.text.NumberFormatter nf = new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.##"));
@@ -1882,7 +1870,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         flowsContentPanel.add(maximumFlowWidthFormattedTextField, gridBagConstraints);
 
-        parallelFlowsOptionsButton.setText("Options…");
+        parallelFlowsOptionsButton.setText("Parallel Flows…");
         parallelFlowsOptionsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 parallelFlowsOptionsButtonActionPerformed(evt);
@@ -1891,6 +1879,7 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 19;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowsContentPanel.add(parallelFlowsOptionsButton, gridBagConstraints);
 
         stiffnessButton.setText("Stiffness of Flows…");
@@ -1902,7 +1891,13 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 21;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         flowsContentPanel.add(stiffnessButton, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 20;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        flowsContentPanel.add(filler2, gridBagConstraints);
 
         flowsPanel.add(flowsContentPanel);
 
@@ -4901,13 +4896,6 @@ public class MainWindow extends javax.swing.JFrame {
         layout("Parallel Flows Gap");
     }//GEN-LAST:event_parallelFlowsGapSpinnerStateChanged
 
-    private void parallelFlowsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parallelFlowsCheckBoxActionPerformed
-        model.setBidirectionalFlowsParallel(parallelFlowsCheckBox.isSelected());
-        parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
-        mapComponent.refreshMap();
-        layout("Parallel Opposing Flows");
-    }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
-
     private void nameMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameMenuItemActionPerformed
         String name = (String) JOptionPane.showInputDialog(this, "Project name", "Flox",
                 JOptionPane.PLAIN_MESSAGE, null, null, model.getName());
@@ -5211,14 +5199,25 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void parallelFlowsOptionsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parallelFlowsOptionsButtonActionPerformed
-        JOptionPane.showOptionDialog(null, parallelFlowsOptionsPanel, "Parallel Flows", 
+        JOptionPane.showOptionDialog(null, parallelFlowsOptionsPanel, "Parallel Flows",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
     }//GEN-LAST:event_parallelFlowsOptionsButtonActionPerformed
 
     private void stiffnessButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stiffnessButtonActionPerformed
-        JOptionPane.showOptionDialog(null, stiffnessPanel, "Stiffness of Flows", 
+        JOptionPane.showOptionDialog(null, stiffnessPanel, "Stiffness of Flows",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
     }//GEN-LAST:event_stiffnessButtonActionPerformed
+
+    private void parallelFlowsCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parallelFlowsCheckBoxActionPerformed
+
+        // FIXME
+        // this is buggy: opposite flows always overlap. This check box is therefore
+        // currently hidden 
+        model.setBidirectionalFlowsParallel(parallelFlowsCheckBox.isSelected());
+        parallelFlowsGapSpinner.setEnabled(model.isBidirectionalFlowsParallel());
+        mapComponent.refreshMap();
+        layout("Parallel Opposing Flows");
+    }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -5328,6 +5327,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
     private javax.swing.Box.Filler filler1;
+    private javax.swing.Box.Filler filler2;
     private javax.swing.JSlider flowRangeboxSizeSlider;
     private javax.swing.JPopupMenu flowWidthOptionsPopupMenu;
     private javax.swing.JLabel flowsFilePathLabel;
@@ -5360,6 +5360,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPopupMenu.Separator jSeparator15;
     private javax.swing.JPopupMenu.Separator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator22;

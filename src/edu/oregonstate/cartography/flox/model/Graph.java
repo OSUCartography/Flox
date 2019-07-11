@@ -599,7 +599,7 @@ public final class Graph {
 
     /**
      * Replaces pairs of opposing flows between the same two nodes with a single
-     * FlowPair.
+     * FlowPair. 
      */
     public void toBidirectionalFlows() {
         ArrayList<FlowPair> flowsToAdd = new ArrayList<>();
@@ -607,6 +607,9 @@ public final class Graph {
         Iterator<Flow> iterator = flowIterator();
         while (iterator.hasNext()) {
             Flow flow1 = iterator.next();
+            if (flow1 == null) {
+                break;
+            }
             if (flow1 instanceof FlowPair) {
                 continue;
             }
