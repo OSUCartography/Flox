@@ -3418,7 +3418,7 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu.add(invertNodeSelectionMenuItem);
 
         menuBar.add(debugMenu);
-        //debugMenu.setVisible(false);
+        debugMenu.setVisible(false);
 
         setJMenuBar(menuBar);
 
@@ -4521,7 +4521,7 @@ public class MainWindow extends javax.swing.JFrame {
         debugMenu.setVisible(showDebugCheckBoxMenuItem.isSelected());
         if (showDebugCheckBoxMenuItem.isSelected()) {
             String msg = "<html>The Debug menu contains experimental and unstable"
-                    + "<br>features that are not meant for productive work.</html>";
+                    + "<br>features and development tools that are only useful<br> for developers.</html>";
             String title = "Flox Debug Menu";
             JOptionPane.showMessageDialog(this, msg, title, JOptionPane.INFORMATION_MESSAGE);
         }

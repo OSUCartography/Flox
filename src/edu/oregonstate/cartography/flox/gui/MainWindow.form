@@ -1734,7 +1734,7 @@
             <Property name="text" type="java.lang.String" value="Debug"/>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="//debugMenu.setVisible(false);"/>
+            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="debugMenu.setVisible(false);"/>
           </AuxValues>
           <SubComponents>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="moveFlowsCheckBoxMenuItem">
