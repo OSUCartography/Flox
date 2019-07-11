@@ -731,7 +731,6 @@ public class MainWindow extends javax.swing.JFrame {
         exportImageMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
         exportFlowsCSVMenuItem = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
         undoMenuItem = new javax.swing.JMenuItem();
         redoMenuItem = new javax.swing.JMenuItem();
@@ -2766,6 +2765,15 @@ public class MainWindow extends javax.swing.JFrame {
         getContentPane().add(rightPanel, java.awt.BorderLayout.EAST);
 
         fileMenu.setText("File");
+        fileMenu.addMenuListener(new javax.swing.event.MenuListener() {
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            }
+            public void menuDeselected(javax.swing.event.MenuEvent evt) {
+            }
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                fileMenuMenuSelected(evt);
+            }
+        });
 
         openSettingsMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         openSettingsMenuItem.setText("Open Project…");
@@ -2827,14 +2835,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
         fileMenu.add(exportFlowsCSVMenuItem);
-
-        jMenuItem1.setText("Test");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
-            }
-        });
-        fileMenu.add(jMenuItem1);
 
         menuBar.add(fileMenu);
 
@@ -5167,31 +5167,6 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_parallelFlowsOverlapSliderStateChanged
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-
-        for (int i = 0; i < 10; i++) {
-            try {
-                String pointsFilePath = "/Users/jennyb/Desktop/" + i + "nodes.csv";
-                String flowsFilePath = "/Users/jennyb/Desktop/" + i + "flows.csv";
-                ArrayList<Flow> flows = FlowImporter.readFlows(pointsFilePath, flowsFilePath);
-                String name = FileUtils.getFileNameWithoutExtension(flowsFilePath);
-                setFlows(flows, name);
-
-                Thread.sleep(20 * 1000);
-
-                String outFilePath = "/Users/jennyb/Desktop/" + i + "out.csv";
-
-                CSVFlowExporter.export(outFilePath, model.flowIterator());
-
-            } catch (IOException ex) {
-                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
-
     private void parallelFlowsOptionsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parallelFlowsOptionsButtonActionPerformed
         JOptionPane.showOptionDialog(null, parallelFlowsOptionsPanel, "Parallel Flows",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
@@ -5212,6 +5187,14 @@ public class MainWindow extends javax.swing.JFrame {
         mapComponent.refreshMap();
         layout("Parallel Opposing Flows");
     }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
+
+    private void fileMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_fileMenuMenuSelected
+        boolean hasData = model.getNbrFlows() > 0 || model.getNbrNodes() > 0 
+                || model.getNbrLayers() > 0;
+        exportSVGMenuItem.setEnabled(hasData);
+        exportImageMenuItem.setEnabled(hasData);
+        exportFlowsCSVMenuItem.setEnabled(hasData);        
+    }//GEN-LAST:event_fileMenuMenuSelected
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -5354,7 +5337,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPopupMenu.Separator jSeparator15;
     private javax.swing.JPopupMenu.Separator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator22;
