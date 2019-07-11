@@ -581,6 +581,13 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JLabel jLabel7 = new javax.swing.JLabel();
         parallelFlowsOverlapSlider = new javax.swing.JSlider();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 20), new java.awt.Dimension(0, 20), new java.awt.Dimension(32767, 20));
+        stiffnessPanel = new javax.swing.JPanel();
+        javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
+        longestFlowStiffnessSlider = new javax.swing.JSlider();
+        javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
+        zeroLengthStiffnessSlider = new javax.swing.JSlider();
+        javax.swing.JLabel jLabel8 = new javax.swing.JLabel();
+        peripheralStiffnessSlider = new javax.swing.JSlider();
         mapContentPanel = new javax.swing.JPanel();
         javax.swing.JToolBar jToolBar1 = new javax.swing.JToolBar();
         javax.swing.JPanel toolBarContentPanel = new javax.swing.JPanel();
@@ -626,14 +633,9 @@ public class MainWindow extends javax.swing.JFrame {
         javax.swing.JSeparator ___separator2 = new javax.swing.JSeparator();
         parallelFlowsCheckBox = new javax.swing.JCheckBox();
         javax.swing.JSeparator jSeparator33 = new javax.swing.JSeparator();
-        javax.swing.JLabel jLabel3 = new javax.swing.JLabel();
-        longestFlowStiffnessSlider = new javax.swing.JSlider();
-        javax.swing.JLabel jLabel5 = new javax.swing.JLabel();
-        zeroLengthStiffnessSlider = new javax.swing.JSlider();
-        javax.swing.JLabel jLabel8 = new javax.swing.JLabel();
-        peripheralStiffnessSlider = new javax.swing.JSlider();
         maximumFlowWidthFormattedTextField = new javax.swing.JFormattedTextField();
         parallelFlowsOptionsButton = new javax.swing.JButton();
+        stiffnessButton = new javax.swing.JButton();
         javax.swing.JPanel nodesPanel = new TransparentMacPanel();
         javax.swing.JPanel nodesContentPanel = new TransparentMacPanel();
         javax.swing.JLabel maxNodeRadiusLabel = new javax.swing.JLabel();
@@ -1300,6 +1302,128 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         parallelFlowsOptionsPanel.add(filler1, gridBagConstraints);
 
+        stiffnessPanel.setLayout(new java.awt.GridBagLayout());
+
+        jLabel3.setText("Long Flows Stiffness");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 25;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
+        stiffnessPanel.add(jLabel3, gridBagConstraints);
+
+        longestFlowStiffnessSlider.setMajorTickSpacing(25);
+        longestFlowStiffnessSlider.setMinorTickSpacing(5);
+        longestFlowStiffnessSlider.setPaintLabels(true);
+        longestFlowStiffnessSlider.setPaintTicks(true);
+        longestFlowStiffnessSlider.setValue(0);
+        longestFlowStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = longestFlowStiffnessSlider.createStandardLabels(longestFlowStiffnessSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            longestFlowStiffnessSlider.setLabelTable(labels);
+        }
+        longestFlowStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                longestFlowStiffnessSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 26;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
+        stiffnessPanel.add(longestFlowStiffnessSlider, gridBagConstraints);
+
+        jLabel5.setText("Short Flows Stiffness");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 27;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
+        stiffnessPanel.add(jLabel5, gridBagConstraints);
+
+        zeroLengthStiffnessSlider.setMajorTickSpacing(25);
+        zeroLengthStiffnessSlider.setMinorTickSpacing(5);
+        zeroLengthStiffnessSlider.setPaintLabels(true);
+        zeroLengthStiffnessSlider.setPaintTicks(true);
+        zeroLengthStiffnessSlider.setValue(0);
+        zeroLengthStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = zeroLengthStiffnessSlider.createStandardLabels(zeroLengthStiffnessSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            zeroLengthStiffnessSlider.setLabelTable(labels);
+        }
+        zeroLengthStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                zeroLengthStiffnessSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 28;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
+        stiffnessPanel.add(zeroLengthStiffnessSlider, gridBagConstraints);
+
+        jLabel8.setText("Peripheral Flows Stiffness");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 29;
+        gridBagConstraints.gridwidth = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
+        stiffnessPanel.add(jLabel8, gridBagConstraints);
+
+        peripheralStiffnessSlider.setMajorTickSpacing(25);
+        peripheralStiffnessSlider.setMinorTickSpacing(5);
+        peripheralStiffnessSlider.setPaintLabels(true);
+        peripheralStiffnessSlider.setPaintTicks(true);
+        peripheralStiffnessSlider.setValue(0);
+        peripheralStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
+        {
+            java.util.Hashtable labels = peripheralStiffnessSlider.createStandardLabels(peripheralStiffnessSlider.getMajorTickSpacing());
+            java.util.Enumeration e = labels.elements();
+            while(e.hasMoreElements()) {
+                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
+                if (comp instanceof javax.swing.JLabel) {
+                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
+                    label.setText(label.getText() + "%");
+                }
+            }
+            peripheralStiffnessSlider.setLabelTable(labels);
+        }
+        peripheralStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                peripheralStiffnessSliderStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 30;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
+        stiffnessPanel.add(peripheralStiffnessSlider, gridBagConstraints);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
         mapContentPanel.setLayout(new java.awt.BorderLayout());
@@ -1733,131 +1857,11 @@ public class MainWindow extends javax.swing.JFrame {
         flowsContentPanel.add(parallelFlowsCheckBox, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 24;
+        gridBagConstraints.gridy = 20;
         gridBagConstraints.gridwidth = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 15, 0);
         flowsContentPanel.add(jSeparator33, gridBagConstraints);
-
-        jLabel3.setText("Long Flows Stiffness");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 25;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
-        flowsContentPanel.add(jLabel3, gridBagConstraints);
-
-        longestFlowStiffnessSlider.setMajorTickSpacing(25);
-        longestFlowStiffnessSlider.setMinorTickSpacing(5);
-        longestFlowStiffnessSlider.setPaintLabels(true);
-        longestFlowStiffnessSlider.setPaintTicks(true);
-        longestFlowStiffnessSlider.setValue(0);
-        longestFlowStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
-        {
-            java.util.Hashtable labels = longestFlowStiffnessSlider.createStandardLabels(longestFlowStiffnessSlider.getMajorTickSpacing());
-            java.util.Enumeration e = labels.elements();
-            while(e.hasMoreElements()) {
-                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
-                if (comp instanceof javax.swing.JLabel) {
-                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
-                    label.setText(label.getText() + "%");
-                }
-            }
-            longestFlowStiffnessSlider.setLabelTable(labels);
-        }
-        longestFlowStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                longestFlowStiffnessSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 26;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        flowsContentPanel.add(longestFlowStiffnessSlider, gridBagConstraints);
-
-        jLabel5.setText("Short Flows Stiffness");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 27;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
-        flowsContentPanel.add(jLabel5, gridBagConstraints);
-
-        zeroLengthStiffnessSlider.setMajorTickSpacing(25);
-        zeroLengthStiffnessSlider.setMinorTickSpacing(5);
-        zeroLengthStiffnessSlider.setPaintLabels(true);
-        zeroLengthStiffnessSlider.setPaintTicks(true);
-        zeroLengthStiffnessSlider.setValue(0);
-        zeroLengthStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
-        {
-            java.util.Hashtable labels = zeroLengthStiffnessSlider.createStandardLabels(zeroLengthStiffnessSlider.getMajorTickSpacing());
-            java.util.Enumeration e = labels.elements();
-            while(e.hasMoreElements()) {
-                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
-                if (comp instanceof javax.swing.JLabel) {
-                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
-                    label.setText(label.getText() + "%");
-                }
-            }
-            zeroLengthStiffnessSlider.setLabelTable(labels);
-        }
-        zeroLengthStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                zeroLengthStiffnessSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 28;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        flowsContentPanel.add(zeroLengthStiffnessSlider, gridBagConstraints);
-
-        jLabel8.setText("Peripheral Flows Stiffness");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 29;
-        gridBagConstraints.gridwidth = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.insets = new java.awt.Insets(2, 0, 3, 0);
-        flowsContentPanel.add(jLabel8, gridBagConstraints);
-
-        peripheralStiffnessSlider.setMajorTickSpacing(25);
-        peripheralStiffnessSlider.setMinorTickSpacing(5);
-        peripheralStiffnessSlider.setPaintLabels(true);
-        peripheralStiffnessSlider.setPaintTicks(true);
-        peripheralStiffnessSlider.setValue(0);
-        peripheralStiffnessSlider.setPreferredSize(new java.awt.Dimension(190, 38));
-        {
-            java.util.Hashtable labels = peripheralStiffnessSlider.createStandardLabels(peripheralStiffnessSlider.getMajorTickSpacing());
-            java.util.Enumeration e = labels.elements();
-            while(e.hasMoreElements()) {
-                javax.swing.JComponent comp = (javax.swing.JComponent)e.nextElement();
-                if (comp instanceof javax.swing.JLabel) {
-                    javax.swing.JLabel label = (javax.swing.JLabel)(comp);
-                    label.setText(label.getText() + "%");
-                }
-            }
-            peripheralStiffnessSlider.setLabelTable(labels);
-        }
-        peripheralStiffnessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                peripheralStiffnessSliderStateChanged(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 30;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 12, 0);
-        flowsContentPanel.add(peripheralStiffnessSlider, gridBagConstraints);
 
         maximumFlowWidthFormattedTextField.setPreferredSize(new java.awt.Dimension(50, 28));
         {
@@ -1888,6 +1892,17 @@ public class MainWindow extends javax.swing.JFrame {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 19;
         flowsContentPanel.add(parallelFlowsOptionsButton, gridBagConstraints);
+
+        stiffnessButton.setText("Stiffness of Flows…");
+        stiffnessButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                stiffnessButtonActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 21;
+        flowsContentPanel.add(stiffnessButton, gridBagConstraints);
 
         flowsPanel.add(flowsContentPanel);
 
@@ -5196,9 +5211,14 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void parallelFlowsOptionsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parallelFlowsOptionsButtonActionPerformed
-        JOptionPane.showOptionDialog(null, parallelFlowsOptionsPanel, "Parallel Flows Options", 
+        JOptionPane.showOptionDialog(null, parallelFlowsOptionsPanel, "Parallel Flows", 
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
     }//GEN-LAST:event_parallelFlowsOptionsButtonActionPerformed
+
+    private void stiffnessButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stiffnessButtonActionPerformed
+        JOptionPane.showOptionDialog(null, stiffnessPanel, "Stiffness of Flows", 
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+    }//GEN-LAST:event_stiffnessButtonActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -5442,6 +5462,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel smallestFlowColorLabel;
     private javax.swing.JFormattedTextField startAreasBufferDistanceFormattedTextField;
     private javax.swing.JSpinner startDistanceSpinner;
+    private javax.swing.JButton stiffnessButton;
+    private javax.swing.JPanel stiffnessPanel;
     private javax.swing.JMenuItem straightenFlowsMenuItem;
     private javax.swing.JCheckBox strokeCheckBox;
     private javax.swing.JMenuItem symmetrizeFlowsMenuItem;
