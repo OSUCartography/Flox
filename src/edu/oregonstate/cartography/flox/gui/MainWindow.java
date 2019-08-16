@@ -5,7 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.Polygon;
 import edu.oregonstate.cartography.flox.model.Arrow;
-import edu.oregonstate.cartography.flox.model.CSVFlowExporter;
+import edu.oregonstate.cartography.flox.model.CSV;
 import edu.oregonstate.cartography.flox.model.Flow;
 import edu.oregonstate.cartography.flox.model.FlowImporter;
 import edu.oregonstate.cartography.flox.model.FlowPair;
@@ -34,6 +34,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
@@ -730,7 +731,9 @@ public class MainWindow extends javax.swing.JFrame {
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
-        exportFlowsCSVMenuItem = new javax.swing.JMenuItem();
+        exportQuadraticFlowsCSVMenuItem = new javax.swing.JMenuItem();
+        exportCubicFlowsCSVMenuItem = new javax.swing.JMenuItem();
+        exportNodesCSVMenuItem = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
         undoMenuItem = new javax.swing.JMenuItem();
         redoMenuItem = new javax.swing.JMenuItem();
@@ -2828,13 +2831,29 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(exportImageMenuItem);
         fileMenu.add(jSeparator4);
 
-        exportFlowsCSVMenuItem.setText("Export Flows to CSV File...");
-        exportFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        exportQuadraticFlowsCSVMenuItem.setText("Export Quadratic Bézier Flows to CSV File...");
+        exportQuadraticFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exportFlowsCSVMenuItemActionPerformed(evt);
+                exportQuadraticFlowsCSVMenuItemActionPerformed(evt);
             }
         });
-        fileMenu.add(exportFlowsCSVMenuItem);
+        fileMenu.add(exportQuadraticFlowsCSVMenuItem);
+
+        exportCubicFlowsCSVMenuItem.setText("Export Cubic Bézier Flows to CSV File...");
+        exportCubicFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportCubicFlowsCSVMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(exportCubicFlowsCSVMenuItem);
+
+        exportNodesCSVMenuItem.setText("Export Nodes to CSV File...");
+        exportNodesCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportNodesCSVMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(exportNodesCSVMenuItem);
 
         menuBar.add(fileMenu);
 
@@ -3429,7 +3448,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         OutputStream outputStream = null;
         try {
-            // ask for export file
+            // ask for exportFlowsToCSV file
             String name = getFileName() + ".svg";
             String outFilePath = FileUtils.askFile(this, "SVG File", name, false, "svg");
             if (outFilePath == null) {
@@ -4197,20 +4216,6 @@ public class MainWindow extends javax.swing.JFrame {
         saveXMLFile();
     }//GEN-LAST:event_saveSettingsMenuItemActionPerformed
 
-    private void exportFlowsCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFlowsCSVMenuItemActionPerformed
-        try {
-            // ask for export file
-            String name = getFileName() + ".csv";
-            String outFilePath = FileUtils.askFile(this, "CSV Text File", name, false, "csv");
-            if (outFilePath == null) {
-                // user canceled
-                return;
-            }
-            CSVFlowExporter.export(outFilePath, model.flowIterator());
-        } catch (Throwable ex) {
-            showFloxErrorDialog("Could not export flows to CSV text file.", ex);
-        }
-    }//GEN-LAST:event_exportFlowsCSVMenuItemActionPerformed
 
     private void addFlowToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFlowToggleButtonActionPerformed
         mapComponent.setMapTool(new AddFlowTool(mapComponent, model));
@@ -5189,12 +5194,52 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_parallelFlowsCheckBoxActionPerformed
 
     private void fileMenuMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_fileMenuMenuSelected
-        boolean hasData = model.getNbrFlows() > 0 || model.getNbrNodes() > 0 
+        boolean hasData = model.getNbrFlows() > 0 || model.getNbrNodes() > 0
                 || model.getNbrLayers() > 0;
         exportSVGMenuItem.setEnabled(hasData);
         exportImageMenuItem.setEnabled(hasData);
-        exportFlowsCSVMenuItem.setEnabled(hasData);        
+        exportQuadraticFlowsCSVMenuItem.setEnabled(hasData);
     }//GEN-LAST:event_fileMenuMenuSelected
+
+    /**
+     * Export flows to CSV text file.
+     *
+     * @param bezierType Cubic (2 control points) or quadratic (1 control point)
+     * Bezier curve.
+     */
+    private void exportFlowsToCSV(CSV.BezierType bezierType) {
+        String name = getFileName() + " - flows.csv";
+        String outFilePath = FileUtils.askFile(this, "CSV Text File", name, false, "csv");
+        if (outFilePath == null) {
+            return; // user canceled
+        }
+        try (FileWriter fileWriter = new FileWriter(outFilePath)) {
+            fileWriter.append(CSV.flowsToCSV(model.flowIterator(), bezierType));
+        } catch (Exception ex) {
+            showFloxErrorDialog("Could not export flows to CSV text file.", ex);
+        }
+    }
+
+    private void exportCubicFlowsCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportCubicFlowsCSVMenuItemActionPerformed
+        exportFlowsToCSV(CSV.BezierType.cubic);
+    }//GEN-LAST:event_exportCubicFlowsCSVMenuItemActionPerformed
+
+    private void exportQuadraticFlowsCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportQuadraticFlowsCSVMenuItemActionPerformed
+        exportFlowsToCSV(CSV.BezierType.quadratic);
+    }//GEN-LAST:event_exportQuadraticFlowsCSVMenuItemActionPerformed
+
+    private void exportNodesCSVMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportNodesCSVMenuItemActionPerformed
+        String name = getFileName() + " - nodes.csv";
+        String outFilePath = FileUtils.askFile(this, "CSV Text File", name, false, "csv");
+        if (outFilePath == null) {
+            return; // user canceled
+        }
+        try (FileWriter fileWriter = new FileWriter(outFilePath)) {
+            fileWriter.append(CSV.nodesToCSV(model.nodeIterator()));
+        } catch (Exception ex) {
+            showFloxErrorDialog("Could not export nodes to CSV text file.", ex);
+        }
+    }//GEN-LAST:event_exportNodesCSVMenuItemActionPerformed
 
     /**
      * Returns a string that can be used for a file name when exporting to a
@@ -5298,8 +5343,10 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSpinner endDistanceSpinner;
     private javax.swing.JCheckBoxMenuItem enforceCanvasCheckBoxMenuItem;
     private javax.swing.JSlider exponentSlider;
-    private javax.swing.JMenuItem exportFlowsCSVMenuItem;
+    private javax.swing.JMenuItem exportCubicFlowsCSVMenuItem;
     private javax.swing.JMenuItem exportImageMenuItem;
+    private javax.swing.JMenuItem exportNodesCSVMenuItem;
+    private javax.swing.JMenuItem exportQuadraticFlowsCSVMenuItem;
     private javax.swing.JMenuItem exportSVGMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JCheckBox fillCheckBox;
