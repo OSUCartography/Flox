@@ -1278,30 +1278,39 @@
                 <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
               </AuxValues>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="exportQuadraticFlowsCSVMenuItem">
+            <Menu class="javax.swing.JMenu" name="exportCsvMenu">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Export Quadratic B&#xe9;zier Flows to CSV File..."/>
+                <Property name="text" type="java.lang.String" value="Export CSV Text"/>
               </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportQuadraticFlowsCSVMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="exportCubicFlowsCSVMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Export Cubic B&#xe9;zier Flows to CSV File..."/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportCubicFlowsCSVMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="exportNodesCSVMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Export Nodes to CSV File..."/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportNodesCSVMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
+              <SubComponents>
+                <MenuItem class="javax.swing.JMenuItem" name="exportQuadraticFlowsCSVMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Flows as Quadratic B&#xe9;zier Paths..."/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportQuadraticFlowsCSVMenuItemActionPerformed"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="exportCubicFlowsCSVMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Flows as Cubic B&#xe9;zier Paths..."/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportCubicFlowsCSVMenuItemActionPerformed"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator25">
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="exportNodesCSVMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Nodes..."/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportNodesCSVMenuItemActionPerformed"/>
+                  </Events>
+                </MenuItem>
+              </SubComponents>
+            </Menu>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="editMenu">

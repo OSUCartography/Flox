@@ -731,8 +731,10 @@ public class MainWindow extends javax.swing.JFrame {
         exportSVGMenuItem = new javax.swing.JMenuItem();
         exportImageMenuItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        exportCsvMenu = new javax.swing.JMenu();
         exportQuadraticFlowsCSVMenuItem = new javax.swing.JMenuItem();
         exportCubicFlowsCSVMenuItem = new javax.swing.JMenuItem();
+        jSeparator25 = new javax.swing.JPopupMenu.Separator();
         exportNodesCSVMenuItem = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
         undoMenuItem = new javax.swing.JMenuItem();
@@ -2831,29 +2833,34 @@ public class MainWindow extends javax.swing.JFrame {
         fileMenu.add(exportImageMenuItem);
         fileMenu.add(jSeparator4);
 
-        exportQuadraticFlowsCSVMenuItem.setText("Export Quadratic Bézier Flows to CSV File...");
+        exportCsvMenu.setText("Export CSV Text");
+
+        exportQuadraticFlowsCSVMenuItem.setText("Flows as Quadratic Bézier Paths...");
         exportQuadraticFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exportQuadraticFlowsCSVMenuItemActionPerformed(evt);
             }
         });
-        fileMenu.add(exportQuadraticFlowsCSVMenuItem);
+        exportCsvMenu.add(exportQuadraticFlowsCSVMenuItem);
 
-        exportCubicFlowsCSVMenuItem.setText("Export Cubic Bézier Flows to CSV File...");
+        exportCubicFlowsCSVMenuItem.setText("Flows as Cubic Bézier Paths...");
         exportCubicFlowsCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exportCubicFlowsCSVMenuItemActionPerformed(evt);
             }
         });
-        fileMenu.add(exportCubicFlowsCSVMenuItem);
+        exportCsvMenu.add(exportCubicFlowsCSVMenuItem);
+        exportCsvMenu.add(jSeparator25);
 
-        exportNodesCSVMenuItem.setText("Export Nodes to CSV File...");
+        exportNodesCSVMenuItem.setText("Nodes...");
         exportNodesCSVMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exportNodesCSVMenuItemActionPerformed(evt);
             }
         });
-        fileMenu.add(exportNodesCSVMenuItem);
+        exportCsvMenu.add(exportNodesCSVMenuItem);
+
+        fileMenu.add(exportCsvMenu);
 
         menuBar.add(fileMenu);
 
@@ -5198,7 +5205,7 @@ public class MainWindow extends javax.swing.JFrame {
                 || model.getNbrLayers() > 0;
         exportSVGMenuItem.setEnabled(hasData);
         exportImageMenuItem.setEnabled(hasData);
-        exportQuadraticFlowsCSVMenuItem.setEnabled(hasData);
+        exportCsvMenu.setEnabled(hasData);
     }//GEN-LAST:event_fileMenuMenuSelected
 
     /**
@@ -5343,6 +5350,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JSpinner endDistanceSpinner;
     private javax.swing.JCheckBoxMenuItem enforceCanvasCheckBoxMenuItem;
     private javax.swing.JSlider exponentSlider;
+    private javax.swing.JMenu exportCsvMenu;
     private javax.swing.JMenuItem exportCubicFlowsCSVMenuItem;
     private javax.swing.JMenuItem exportImageMenuItem;
     private javax.swing.JMenuItem exportNodesCSVMenuItem;
@@ -5388,6 +5396,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator18;
     private javax.swing.JPopupMenu.Separator jSeparator22;
     private javax.swing.JPopupMenu.Separator jSeparator24;
+    private javax.swing.JPopupMenu.Separator jSeparator25;
     private javax.swing.JTextArea jTextArea3;
     private javax.swing.JMenuItem largestTouchPercentageMenuItem;
     private edu.oregonstate.cartography.flox.gui.ColorButton layerFillColorButton;

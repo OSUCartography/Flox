@@ -8,24 +8,27 @@ import java.util.Iterator;
  *
  * @author Daniel Stephen and Bernie Jenny
  */
-public class CSV {
+public final class CSV {
 
     public enum BezierType {
         quadratic, cubic
     };
 
+    // Hide default constructor.
     private CSV() {
+        throw new AssertionError();
     }
 
     /**
-     * Write flows to string.
+     * Write flows to CSV string.
      *
-     * @param iterator for flows
+     * @param iterator iterator for flows
      * @param bezierType if quadratic, a single control point for a quadratic
-     * Bezier curve is exporter, if cubic two control points for a cubic Bezier
-     * curve are exported.
+     * Bezier curve is written, if cubic two control points for a cubic Bezier
+     * curve are written.
      * @return CSV string with start point, end point, control point(s), and
-     * flow value.
+     * flow value. Attributes are separated by commas and flows are separated by
+     * newline characters.
      */
     public static String flowsToCSV(Iterator<Flow> iterator, BezierType bezierType) {
         StringBuilder str = new StringBuilder();
@@ -111,7 +114,8 @@ public class CSV {
      * Write nodes to string.
      *
      * @param iterator iterator for nodes
-     * @return CSV string with start coordinates and value.
+     * @return CSV string with start coordinates and value. Attributes are
+     * separated by commas and nodes are separated by newline characters.
      */
     public static String nodesToCSV(Iterator<Point> iterator) {
         StringBuilder str = new StringBuilder();
